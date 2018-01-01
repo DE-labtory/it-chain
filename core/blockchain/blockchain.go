@@ -8,8 +8,8 @@ import (
 type BlockStatus int
 
 const (
-	unconfirmed BlockStatus = 0 + iota //unconfirmed block
-	confirmed
+	blockUnconfirmed BlockStatus = 0 + iota //unconfirmed block
+	blockConfirmed
 )
 
 const(
@@ -18,28 +18,28 @@ const(
 )
 
 
-type ChainHeader struct{
-	chainHeight int 				//height of chain
-	channelName string 				//channel name
-	peerID string 					//owner peer id of chain
+type ChainHeader struct {
+	chainHeight int    //height of chain
+	channelName string //channel name
+	peerID      string //owner peer id of chain
 }
 
-type Block struct{
-	version string 					//version of block
-	previousBlockHash string 		//hash of previous block
+type Block struct {
+	version            string //version of block
+	previousBlockHash  string //hash of previous block
 	merkleTreeRootHash string
-	merkleTree []*Transaction
-	timeStamp time.Time
-	blockHeight int
-	blockStatus BlockStatus
-	createdPeerID string
-	signature []byte				//
+	merkleTree         []*Transaction
+	timeStamp          time.Time
+	blockHeight        int
+	blockStatus        BlockStatus
+	createdPeerID      string
+	signature          []byte
 }
 
-type BlockChain struct{
-	Mux sync.RWMutex				//lock
-	Header *ChainHeader				//chain meta information
-	Blocks []*Block					//list of block
+type BlockChain struct {
+	Mux    sync.RWMutex //lock
+	Header *ChainHeader //chain meta information
+	Blocks []*Block     //list of bloc
 }
 
 func CreateNewBlockChain(channelID string,peerId string) *BlockChain{

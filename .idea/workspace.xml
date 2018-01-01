@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="37525e1d-2ab3-44bf-a241-74d64d22e7c0" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/core/blockchain/blockchain.go" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/core/blockchain/blockchain_test.go" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/core/blockchain/transaction.go" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/main.go" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/core/blockchain/blockchain.go" afterPath="$PROJECT_DIR$/core/blockchain/blockchain.go" />
+      <change beforePath="$PROJECT_DIR$/core/blockchain/transaction.go" afterPath="$PROJECT_DIR$/core/blockchain/transaction.go" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -19,8 +18,8 @@
       <file leaf-file-name="blockchain.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/blockchain/blockchain.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="9" column="7" lean-forward="true" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
+            <state relative-caret-position="434">
+              <caret line="41" column="19" lean-forward="false" selection-start-line="41" selection-start-column="14" selection-end-line="41" selection-end-column="19" />
               <folding>
                 <element signature="e#20#46#0" expanded="true" />
               </folding>
@@ -31,8 +30,8 @@
       <file leaf-file-name="blockchain_test.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/blockchain/blockchain_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+            <state relative-caret-position="105">
+              <caret line="7" column="38" lean-forward="true" selection-start-line="7" selection-start-column="38" selection-end-line="7" selection-end-column="38" />
               <folding>
                 <element signature="e#20#84#0" expanded="true" />
               </folding>
@@ -43,9 +42,11 @@
       <file leaf-file-name="transaction.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/core/blockchain/transaction.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="45">
-              <caret line="3" column="0" lean-forward="true" selection-start-line="2" selection-start-column="26" selection-end-line="3" selection-end-column="0" />
-              <folding />
+            <state relative-caret-position="390">
+              <caret line="26" column="28" lean-forward="true" selection-start-line="26" selection-start-column="28" selection-end-line="26" selection-end-column="28" />
+              <folding>
+                <element signature="e#20#38#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -67,8 +68,8 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/main.go" />
-        <option value="$PROJECT_DIR$/core/blockchain/blockchain.go" />
         <option value="$PROJECT_DIR$/core/blockchain/blockchain_test.go" />
+        <option value="$PROJECT_DIR$/core/blockchain/blockchain.go" />
         <option value="$PROJECT_DIR$/core/blockchain/transaction.go" />
       </list>
     </option>
@@ -105,17 +106,6 @@
             <path>
               <item name="it-chain" type="b2602c69:ProjectViewProjectNode" />
               <item name="it-chain" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="it-chain" type="b2602c69:ProjectViewProjectNode" />
-              <item name="it-chain" type="462c0819:PsiDirectoryNode" />
-              <item name="core" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="it-chain" type="b2602c69:ProjectViewProjectNode" />
-              <item name="it-chain" type="462c0819:PsiDirectoryNode" />
-              <item name="core" type="462c0819:PsiDirectoryNode" />
-              <item name="blockchain" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -187,9 +177,6 @@
     <option name="remove_strategy" value="false" />
   </component>
   <component name="TestHistory">
-    <history-entry file="TestBlockChain_in_blockchain_test_go - 2017.12.31 at 17h 04m 58s.xml">
-      <configuration name="TestBlockChain in blockchain_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
     <history-entry file="TestBlockChain_in_blockchain_test_go - 2017.12.31 at 17h 05m 11s.xml">
       <configuration name="TestBlockChain in blockchain_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
@@ -214,15 +201,17 @@
     <history-entry file="TestCreateNewBlockChainTest_in_blockchain_test_go - 2017.12.31 at 17h 28m 13s.xml">
       <configuration name="TestCreateNewBlockChainTest in blockchain_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
+    <history-entry file="TestCreateNewBlockChainTest_in_blockchain_test_go - 2018.01.01 at 13h 43m 56s.xml">
+      <configuration name="TestCreateNewBlockChainTest in blockchain_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
     <history-entry file="go_test_it-chain_core_blockchain - 2017.12.31 at 17h 25m 46s.xml">
       <configuration name="go test it-chain/core/blockchain" configurationId="GoTestRunConfiguration" />
     </history-entry>
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="840" height="959" extended-state="0" />
-    <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.41666666" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.41666666" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
@@ -262,31 +251,33 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/blockchain/blockchain_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding>
-            <element signature="e#20#84#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/core/blockchain/blockchain.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="7" lean-forward="true" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
+        <state relative-caret-position="434">
+          <caret line="41" column="19" lean-forward="false" selection-start-line="41" selection-start-column="14" selection-end-line="41" selection-end-column="19" />
           <folding>
             <element signature="e#20#46#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/core/blockchain/blockchain_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="7" column="38" lean-forward="true" selection-start-line="7" selection-start-column="38" selection-end-line="7" selection-end-column="38" />
+          <folding>
+            <element signature="e#20#84#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/core/blockchain/transaction.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" column="0" lean-forward="true" selection-start-line="2" selection-start-column="26" selection-end-line="3" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="390">
+          <caret line="26" column="28" lean-forward="true" selection-start-line="26" selection-start-column="28" selection-end-line="26" selection-end-column="28" />
+          <folding>
+            <element signature="e#20#38#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
