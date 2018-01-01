@@ -17,6 +17,8 @@ const(
 	general TransactionType = 0 + iota
 )
 
+
+// transaction의 body를 어떻게 구성할지 아직 미정
 type Transaction struct {
 	invokePeerID string
 	transactionID 	  string
