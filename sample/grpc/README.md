@@ -22,7 +22,7 @@
 
    ​
 
-##Proto 파일 생성
+## Proto 파일 생성
 
 ```
 syntax = "proto3";
