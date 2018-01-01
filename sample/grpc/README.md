@@ -167,7 +167,7 @@ func main() {
 서버 실행
 
 ```
-go run grace.go
+go run grpc.go
 ```
 
 
@@ -183,6 +183,7 @@ go run grpc_client.go
 
 ## 참고 문서
 https://grpc.io/docs/quickstart/go.html
+
 https://developers.google.com/protocol-buffers/docs/gotutorial
 
 
