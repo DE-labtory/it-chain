@@ -1,4 +1,4 @@
-package blockchain
+package service
 
 import (
 	"time"
@@ -28,4 +28,6 @@ type Transaction struct {
 	signature         []byte
 	transactionHash   string
 	timeStamp         time.Time
+	funcName string
+	args map[string]string
 }

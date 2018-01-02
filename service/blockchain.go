@@ -1,4 +1,4 @@
-package blockchain
+package service
 
 import (
 	"sync"
@@ -16,7 +16,6 @@ const(
 	defaultChannelName = "0"
 	defaultPeerId = "0"
 )
-
 
 type ChainHeader struct {
 	chainHeight int    //height of chain
@@ -37,7 +36,7 @@ type Block struct {
 }
 
 type BlockChain struct {
-	Mux    sync.RWMutex //lock
+	sync.RWMutex //lock
 	Header *ChainHeader //chain meta information
 	Blocks []*Block     //list of bloc
 }
