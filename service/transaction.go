@@ -5,29 +5,46 @@ import (
 )
 
 type TransactionStatus int
+type TxDataType string
+type TransactionType int
+type FunctionType string
 
 const (
+
 	transactionUnconfirmed TransactionStatus = 0 + iota //unconfirmed block
 	transactionConfirmed
-)
 
-type TransactionType int
+	invoke TxDataType = "invoke"
+	query TxDataType = "query"
 
-const(
 	general TransactionType = 0 + iota
+
+	write = "write"
+	read = "read"
+	delete = "delete"
 )
 
+type Params struct {
+	paramsType int
+	function   FunctionType
+	args       []string
+}
 
-// transaction의 body를 어떻게 구성할지 아직 미정
+type TxData struct {
+	jsonrpc string
+	method  TxDataType
+	params  Params
+	contractID string
+}
+
 type Transaction struct {
-	invokePeerID string
-	transactionID 	  string
+	invokePeerID      string
+	transactionID     string
 	transactionStatus TransactionStatus
 	transactionType   TransactionType
 	publicKey         []byte
 	signature         []byte
 	transactionHash   string
 	timeStamp         time.Time
-	funcName string
-	args map[string]string
+	txData            TxData
 }
