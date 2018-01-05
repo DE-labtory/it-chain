@@ -145,3 +145,26 @@ func TestDB_Delete_ExistValue(t *testing.T) {
 	os.RemoveAll(path)
 
 }
+
+func TestDB_WriteBatch(t *testing.T) {
+	//when
+	path := "./test_db_path/"
+	db := getDB(path)
+	db.Open()
+
+	//then
+	batch := new(leveldb.Batch)
+	batch.Put([]byte("jun"), []byte("jun"))
+	db.WriteBatch(batch,true)
+
+
+	//result
+	byteValue, err := db.db.Get([]byte("jun"),nil)
+	if err != nil{
+		t.Error("get error!")
+	}
+	assert.Equal(t,string(byteValue),"jun")
+
+	//clean up
+	os.RemoveAll(path)
+}
