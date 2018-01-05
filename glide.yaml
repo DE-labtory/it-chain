@@ -14,3 +14,6 @@ import:
   - leveldb
 - package: github.com/sirupsen/logrus
   version: v1.0.4
+- package: golang.org/x/crypto
+  subpackages:
+  - ssh/terminal

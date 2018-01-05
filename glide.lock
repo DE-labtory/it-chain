@@ -1,5 +1,5 @@
-hash: 762a0205232566ca0594aefe038a82881fbdc54e65bcff7926a38837dfeed00b
-updated: 2018-01-04T16:09:25.645103296+09:00
+hash: 8be802eca8e89a580522ec5f60176e1238e7b3f1d830be4af73ee3ae80ab781c
+updated: 2018-01-04T16:57:19.091951242+09:00
 imports:
 - name: github.com/golang/protobuf
   version: 1e59b77b52bf8e4b449a57e6f79f21226d571845
@@ -34,6 +34,10 @@ imports:
   - leveldb/util
 - name: github.com/urfave/cli
   version: cfb38830724cc34fedffe9a2a29fb54fa9169cd1
+- name: golang.org/x/crypto
+  version: 0fcca4842a8d74bfddc2c96a073bd2a4d2a7a2e8
+  subpackages:
+  - ssh/terminal
 - name: golang.org/x/net
   version: d866cfc389cec985d6fda2859936a575a55a3ab6
   subpackages:
@@ -44,6 +48,11 @@ imports:
   - internal/timeseries
   - lex/httplex
   - trace
+- name: golang.org/x/sys
+  version: 28a7276518d399b9634904daad79e18b44d481bc
+  subpackages:
+  - unix
+  - windows
 - name: golang.org/x/text
   version: e19ae1496984b1c655b8044a65c0300a3c878dd3
   subpackages:
