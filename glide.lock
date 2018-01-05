@@ -1,5 +1,5 @@
-hash: 7903e63ff7d1bdcf5d6ccd923d5ca31e7ecd1610c1c8f65864fb1f0d27e585e5
-updated: 2018-01-01T16:24:17.74579913+09:00
+hash: 762a0205232566ca0594aefe038a82881fbdc54e65bcff7926a38837dfeed00b
+updated: 2018-01-04T16:09:25.645103296+09:00
 imports:
 - name: github.com/golang/protobuf
   version: 1e59b77b52bf8e4b449a57e6f79f21226d571845
@@ -11,8 +11,27 @@ imports:
   - ptypes/any
   - ptypes/duration
   - ptypes/timestamp
+- name: github.com/golang/snappy
+  version: 553a641470496b2327abcac10b36396bd98e45c9
+- name: github.com/sirupsen/logrus
+  version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
 - name: github.com/stretchr/testify
   version: b91bfb9ebec76498946beb6af7c0230c7cc7ba6c
+- name: github.com/syndtr/goleveldb
+  version: 34011bf325bce385408353a30b101fe5e923eb6e
+  subpackages:
+  - leveldb
+  - leveldb/cache
+  - leveldb/comparer
+  - leveldb/errors
+  - leveldb/filter
+  - leveldb/iterator
+  - leveldb/journal
+  - leveldb/memdb
+  - leveldb/opt
+  - leveldb/storage
+  - leveldb/table
+  - leveldb/util
 - name: github.com/urfave/cli
   version: cfb38830724cc34fedffe9a2a29fb54fa9169cd1
 - name: golang.org/x/net
@@ -37,9 +56,10 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: e687fa4e6424368ece6e4fe727cea2c806a0fcb4
+  version: f3955b8e9e244dd4dd4bc4f7b7a23a8445400a76
   subpackages:
   - balancer
+  - balancer/base
   - balancer/roundrobin
   - codes
   - connectivity

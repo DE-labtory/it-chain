@@ -1,4 +1,4 @@
-package service
+package blockchain
 
 import (
 	"github.com/magiconair/properties/assert"
