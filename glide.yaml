@@ -9,3 +9,8 @@ import:
 - package: github.com/golang/protobuf
   subpackages:
   - protoc-gen-go
+- package: github.com/syndtr/goleveldb
+  subpackages:
+  - leveldb
+- package: github.com/sirupsen/logrus
+  version: v1.0.4
