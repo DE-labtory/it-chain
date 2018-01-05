@@ -138,5 +138,17 @@ func (db *DB) Delete(key []byte, sync bool) error {
 	return nil
 }
 
+// WriteBatch writes a batch
+func (db *DB) WriteBatch(batch *leveldb.Batch, sync bool) error {
+	wo := db.writeOptsNoSync
+	if sync {
+		wo = db.writeOptsSync
+	}
+	if err := db.db.Write(batch, wo); err != nil {
+		return err
+	}
+	return nil
+}
+
 
 
