@@ -1,5 +1,5 @@
-hash: 8be802eca8e89a580522ec5f60176e1238e7b3f1d830be4af73ee3ae80ab781c
-updated: 2018-01-04T16:57:19.091951242+09:00
+hash: 6dc29bc7d59b75a966a33fddce60ecc24b78aa8b6a4b8d56d9c38a894fafe922
+updated: 2018-01-05T16:58:56.501963374+09:00
 imports:
 - name: github.com/golang/protobuf
   version: 1e59b77b52bf8e4b449a57e6f79f21226d571845
@@ -15,8 +15,12 @@ imports:
   version: 553a641470496b2327abcac10b36396bd98e45c9
 - name: github.com/sirupsen/logrus
   version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
+- name: github.com/spf13/viper
+  version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: github.com/stretchr/testify
   version: b91bfb9ebec76498946beb6af7c0230c7cc7ba6c
+  subpackages:
+  - assert
 - name: github.com/syndtr/goleveldb
   version: 34011bf325bce385408353a30b101fe5e923eb6e
   subpackages:
@@ -39,7 +43,7 @@ imports:
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
-  version: d866cfc389cec985d6fda2859936a575a55a3ab6
+  version: 42fe2e1c20de1054d3d30f82cc9fb5b41e2e3767
   subpackages:
   - context
   - http2
@@ -49,7 +53,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: 28a7276518d399b9634904daad79e18b44d481bc
+  version: a3f2cbd54cf5dfe3fbaccf76375fdb12f67654c8
   subpackages:
   - unix
   - windows
@@ -91,7 +95,15 @@ imports:
   - tap
   - transport
 testImports:
+- name: github.com/davecgh/go-spew
+  version: ecdeabc65495df2dec95d7c4a4c3e021903035e5
+  subpackages:
+  - spew
 - name: github.com/magiconair/properties
   version: 49d762b9817ba1c2e9d0c69183c2b4a8b8f1d934
   subpackages:
   - assert
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib

@@ -17,3 +17,5 @@ import:
 - package: golang.org/x/crypto
   subpackages:
   - ssh/terminal
+- package: github.com/spf13/viper
+  version: v1.0.0
