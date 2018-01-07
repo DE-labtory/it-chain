@@ -31,7 +31,7 @@ const (
 	opened
 )
 
-var logger =  common.GetLogger("leveldbhelper.go")
+var logger = common.GetLogger("leveldbhelper.go")
 
 type DB struct {
 	levelDBPath     string
@@ -88,7 +88,18 @@ func (db *DB) Open(){
 	db.dbState = opened
 }
 
+func (db *DB) Close(){
+	db.mux.Lock()
+	defer db.mux.Unlock()
 
+	if db.dbState == closed {
+		return
+	}
+	if err := db.db.Close(); err != nil {
+		panic(fmt.Sprintf("Error while trying to close DB: %s", err))
+	}
+	db.dbState = closed
+}
 
 func (db *DB) Get(key []byte) ([]byte, error) {
 
