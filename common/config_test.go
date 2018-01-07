@@ -8,6 +8,10 @@ import (
 	"fmt"
 )
 
+func TestConfig_init_from_file(t *testing.T){
+	assert.Equal(t,"./.leveldb",viper.GetString("database.leveldb.default_path"))
+}
+
 func TestConfigInit(t *testing.T){
 
 	var yamlExample = []byte(`
@@ -22,9 +26,4 @@ import:
 	}
 	v := viper.GetViper()
 	assert.Equal(t,"github.com/urfave/cli",v.GetString("import.package"))
-}
-
-func TestConfig_init_from_file(t *testing.T){
-
-	assert.Equal(t,"./.leveldb",viper.GetString("database.leveldb.default_path"))
 }
