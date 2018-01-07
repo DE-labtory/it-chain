@@ -25,26 +25,26 @@ const (
 )
 
 type Params struct {
-	paramsType int
-	function   FunctionType
-	args       []string
+	ParamsType int
+	Function   FunctionType
+	Args       []string
 }
 
 type TxData struct {
-	jsonrpc string
-	method  TxDataType
-	params  Params
-	contractID string
+	Jsonrpc string
+	Method  TxDataType
+	Params  Params
+	ContractID string
 }
 
 type Transaction struct {
-	invokePeerID      string
-	transactionID     string
-	transactionStatus TransactionStatus
-	transactionType   TransactionType
-	publicKey         []byte
-	signature         []byte
-	transactionHash   string
-	timeStamp         time.Time
-	txData            TxData
+	InvokePeerID      string
+	TransactionID     string
+	TransactionStatus TransactionStatus
+	TransactionType   TransactionType
+	PublicKey         []byte
+	Signature         []byte
+	TransactionHash   string
+	TimeStamp         time.Time
+	TxData            TxData
 }

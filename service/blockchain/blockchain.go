@@ -24,15 +24,15 @@ type ChainHeader struct {
 }
 
 type Block struct {
-	version            string //version of block
-	previousBlockHash  string //hash of previous block
-	merkleTreeRootHash string
-	merkleTree         []*Transaction
-	timeStamp          time.Time
-	blockHeight        int
-	blockStatus        BlockStatus
-	createdPeerID      string
-	signature          []byte
+	Version            string //version of block
+	PreviousBlockHash  string //hash of previous block
+	MerkleTreeRootHash string
+	MerkleTree         []*Transaction
+	TimeStamp          time.Time
+	BlockHeight        int
+	BlockStatus        BlockStatus
+	CreatedPeerID      string
+	Signature          []byte
 }
 
 type BlockChain struct {
