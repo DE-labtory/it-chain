@@ -1,12 +1,12 @@
 package main
 
 import (
-	"it-chain/service"
+	"it-chain/service/blockchain"
 	"fmt"
 )
 
 func main(){
-	var block = service.CreateNewBlockChain("channel1","peer0")
-	block.Blocks = append(block.Blocks, &service.Block{})
+	var block = blockchain.CreateNewBlockChain("channel1","peer0")
+	block.Blocks = append(block.Blocks, &blockchain.Block{})
 	fmt.Print(len(block.Blocks))
 }

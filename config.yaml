@@ -1,0 +1,3 @@
+database:
+  leveldb:
+    default_path: ./.leveldb
