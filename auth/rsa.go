@@ -43,10 +43,14 @@ func (v *rsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpt) 
 
 }
 
-type rsaPublicKey struct {
-	pub *rsa.PublicKey
-}
-
 type rsaPrivateKey struct {
 	priv *rsa.PrivateKey
+}
+
+func (key *rsaPrivateKey) PublicKey() (pub Key, err error) {
+	return &rsaPublicKey{&key.priv.PublicKey}, nil
+}
+
+type rsaPublicKey struct {
+	pub *rsa.PublicKey
 }
