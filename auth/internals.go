@@ -1,5 +1,11 @@
 package auth
 
+import "crypto"
+
+type SignerOpt interface {
+	crypto.SignerOpts
+}
+
 type Signer interface {
 
 	Sign(key Key, digest []byte, opts SignerOpt) (signature []byte, err error)

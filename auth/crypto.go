@@ -1,14 +1,6 @@
 package auth
 
-import (
-	"crypto"
-)
-
 type Key interface {}
-
-type SignerOpt interface {
-	crypto.SignerOpts
-}
 
 type Crypto interface {
 
