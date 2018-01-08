@@ -20,6 +20,7 @@ import (
 	"os"
 	"path"
 	"io"
+	"crypto/sha256"
 )
 
 var logger = GetLogger("util.go")

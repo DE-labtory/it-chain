@@ -13,3 +13,4 @@ func TestCreateNewBlockChainTest(t *testing.T){
 	assert.Equal(t,defaultPeerId,blockChains.Header.peerID)
 	assert.Equal(t,defaultChannelName,blockChains.Header.channelName)
 }
+

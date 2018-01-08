@@ -4,6 +4,7 @@ import (
 	"time"
 	"errors"
 	"math/rand"
+	"sync"
 )
 
 type PeerInfo struct{
@@ -17,9 +18,10 @@ type GossipTable struct{
 	peerList []*PeerInfo
 	updatedTimeStamp time.Time
 	myID string
+	sync.RWMutex
 }
 
-func CreateNewGossipTable(peerInfo *PeerInfo) *GossipTable{
+func CreateNewGossipTable(peerInfo *PeerInfo) (*GossipTable) {
 
 	// 생성할때 넣어주는 peerInfo의 ID가 myID가 된다.
 	gossipTable := &GossipTable{}
@@ -64,8 +66,8 @@ func (gt *GossipTable) UpdateGossipTable(gossipTable GossipTable){
 			}
 		}else{
 			// peer를 새로 추가한다.
-			peer.timeStamp = time.Now()
-			gt.addPeerInfo(peer)
+			updatePeer.timeStamp = time.Now()
+			gt.addPeerInfo(updatePeer)
 		}
 	}
 
