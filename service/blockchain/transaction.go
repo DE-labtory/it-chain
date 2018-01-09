@@ -44,38 +44,29 @@ type Transaction struct {
 	signature         []byte
 	transactionHash   [32]uint8
 	timeStamp         time.Time
-	txData            TxData
+	txData            *TxData
 }
 
-func (tx *Transaction) init(peer_id string, tx_id string, status Status, tx_type TransactionType, key []byte, sign []byte, hash [32]uint8, t time.Time, data *TxData){
-	tx.invokePeerID 		= peer_id
-	tx.transactionID 		= tx_id
-	tx.transactionStatus	= status
-	tx.transactionType		= tx_type
-	tx.publicKey			= key
-	tx.signature			= sign
-	tx.transactionHash		= hash
-	tx.timeStamp			= t
-	tx.txData				= *data
+func CreateNewTransaction(peer_id string, tx_id string, status Status, tx_type TransactionType, key []byte, hash [32]uint8, t time.Time, data *TxData) *Transaction{
+	return &Transaction{invokePeerID:peer_id, transactionID:tx_id, transactionStatus:status, transactionType:tx_type, publicKey:key, transactionHash:hash, timeStamp:t, txData:data}
+}
+
+func MakeHashArg(tx Transaction) []byte{
+	sum := []string{tx.invokePeerID, tx.txData.jsonrpc, string(tx.txData.method), string(tx.txData.params.function), tx.transactionID, tx.timeStamp.String()}
+	for _, str := range tx.txData.params.args{ sum = append(sum, str) }
+	str := strings.Join(sum, ",")
+	return []byte(str)
 }
 
 func (tx *Transaction) GenerateHash() error{
-	sum_string := []string{tx.invokePeerID, tx.txData.jsonrpc, string(tx.txData.method), string(tx.txData.params.function)}
-	for _, str := range tx.txData.params.args{
-		sum_string = append(sum_string, str)
-	}
-	str := strings.Join(sum_string, ",")
-	tx.transactionHash = common.ComputeSHA256([]byte(str))
+	Arg := MakeHashArg(*tx)
+	tx.transactionHash = common.ComputeSHA256(Arg)
 	return nil
 }
 
 func (tx Transaction) GenerateTransactionHash() [32]uint8{
-	sum_string := []string{tx.invokePeerID, tx.txData.jsonrpc, string(tx.txData.method), string(tx.txData.params.function)}
-	for _, str := range tx.txData.params.args{
-		sum_string = append(sum_string, str)
-	}
-	str := strings.Join(sum_string, ",")
-	return common.ComputeSHA256([]byte(str))
+	Arg := MakeHashArg(tx)
+	return common.ComputeSHA256(Arg)
 }
 
 func (tx *Transaction) GetTxHash() [32]uint8{
