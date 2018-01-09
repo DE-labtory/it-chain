@@ -9,10 +9,10 @@ import (
 func Test_Serialize(t *testing.T) {
 	block := &blockchain.Block{}
 
-	serialized, err := Serialize(block)
+	serialized, err := SerializeBlock(block)
 	assert.NoError(t, err)
 
-	deserialized, err := Deserialize(serialized)
+	deserialized, err := DeserializeBlock(serialized)
 	assert.NoError(t, err)
 	assert.Equal(t, block, deserialized)
 }

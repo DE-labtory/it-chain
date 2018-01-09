@@ -22,6 +22,8 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"it-chain/common"
 	"fmt"
+	"github.com/syndtr/goleveldb/leveldb/iterator"
+	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
 type dbState int32
@@ -161,5 +163,6 @@ func (db *DB) WriteBatch(batch *leveldb.Batch, sync bool) error {
 	return nil
 }
 
-
-
+func (db *DB) GetIterator(startKey []byte, endKey []byte) iterator.Iterator {
+	return db.db.NewIterator(&util.Range{Start: startKey, Limit: endKey}, db.readOpts)
+}

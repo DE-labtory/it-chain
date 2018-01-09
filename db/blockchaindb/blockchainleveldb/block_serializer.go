@@ -7,7 +7,7 @@ import (
 	"it-chain/service/blockchain"
 )
 
-func Serialize(block *blockchain.Block) ([]byte, error) {
+func SerializeBlock(block *blockchain.Block) ([]byte, error) {
 	var b bytes.Buffer
 
 	encoder := gob.NewEncoder(&b)
@@ -20,7 +20,7 @@ func Serialize(block *blockchain.Block) ([]byte, error) {
 	return b.Bytes(), err
 }
 
-func Deserialize(serializedBytes []byte) (*blockchain.Block, error) {
+func DeserializeBlock(serializedBytes []byte) (*blockchain.Block, error) {
 	var b bytes.Buffer
 	block := &blockchain.Block{}
 
