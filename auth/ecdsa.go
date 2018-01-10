@@ -74,14 +74,14 @@ func (v *ecdsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpt
 	return valid, nil
 }
 
-type ecdsaPublicKey struct {
-	pub *ecdsa.PublicKey
-}
-
 type ecdsaPrivateKey struct {
 	priv *ecdsa.PrivateKey
 }
 
 func (key *ecdsaPrivateKey) PublicKey() (pub Key, err error) {
 	return &ecdsaPublicKey{&key.priv.PublicKey}, nil
+}
+
+type ecdsaPublicKey struct {
+	pub *ecdsa.PublicKey
 }
