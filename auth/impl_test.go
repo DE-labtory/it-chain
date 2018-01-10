@@ -11,6 +11,7 @@ import (
 
 func TestNew(t *testing.T) {
 
+	// Generate Implementation
 	_, err := New()
 	assert.NoError(t, err)
 
@@ -21,10 +22,14 @@ func TestImpl_RSASign(t *testing.T) {
 	cryp, err := New()
 	assert.NoError(t, err)
 
+	// Generate an RSA Key
 	generatedKey, err := rsa.GenerateKey(rand.Reader, 1024)
 	assert.NoError(t, err)
 
+	// Set private key
 	privateKey := &rsaPrivateKey{generatedKey}
+
+	// Get public key
 	publicKey, err := privateKey.PublicKey()
 
 	rawData := []byte("RSASign Test Data")
