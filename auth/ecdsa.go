@@ -14,11 +14,11 @@ type ecdsaSignature struct {
 
 type ecdsaSigner struct{}
 
-func MarshalECDSASignature(r, s *big.Int) (signature []byte, err error) {
+func marshalECDSASignature(r, s *big.Int) (signature []byte, err error) {
 	return asn1.Marshal(ecdsaSignature{r, s})
 }
 
-func UnMarshalECDSASignature(signature []byte) (*big.Int, *big.Int, error) {
+func unMarshalECDSASignature(signature []byte) (*big.Int, *big.Int, error) {
 	ecdsaSig := new(ecdsaSignature)
 	_, err := asn1.Unmarshal(signature, ecdsaSig)
 	if err != nil {
@@ -42,26 +42,26 @@ func UnMarshalECDSASignature(signature []byte) (*big.Int, *big.Int, error) {
 	return ecdsaSig.R, ecdsaSig.S, nil
 }
 
-func (signer *ecdsaSigner) Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, err error) {
+func (signer *ecdsaSigner) Sign(key Key, digest []byte, opts SignerOpts) ([]byte, error) {
 
 	r, s, err := ecdsa.Sign(rand.Reader, key.(*ecdsaPrivateKey).priv, digest)
 	if err != nil {
 		return nil, err
 	}
 
-	signature, err = MarshalECDSASignature(r, s)
+	signature, err := marshalECDSASignature(r, s)
 	if err != nil {
 		return nil, err
 	}
 
-	return
+	return signature, nil
 }
 
 type ecdsaVerifier struct{}
 
 func (v *ecdsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpts) (bool, error) {
 
-	r, s, err := UnMarshalECDSASignature(signature)
+	r, s, err := unMarshalECDSASignature(signature)
 	if err != nil {
 		return false, err
 	}
