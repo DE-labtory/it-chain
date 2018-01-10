@@ -36,7 +36,7 @@ func TestRsaSigner_Sign(t *testing.T) {
 	sig, err := signer.Sign(privateKey, digest, opts)
 	assert.NoError(t, err)
 
-	err = rsa.VerifyPSS(&privateKey.pri.PublicKey, crypto.SHA256, digest, sig, opts)
+	err = rsa.VerifyPSS(&privateKey.priv.PublicKey, crypto.SHA256, digest, sig, opts)
 	assert.NoError(t, err)
 
 	valid, err := verifier.Verify(publicKey, sig, digest, opts)
