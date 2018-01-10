@@ -16,17 +16,12 @@ type PeerInfo struct {
 
 type GossipTable struct {
 	peerList         []*PeerInfo
-	channel          string
 	updatedTimeStamp time.Time
 	myID             string
 	sync.RWMutex
 }
 
-type GossipTableHandler struct{
-	table map[string]*GossipTable
-}
-
-func CreateNewGossipTable(peerInfo *PeerInfo, channel string) (*GossipTable) {
+func CreateNewGossipTable(peerInfo *PeerInfo) (*GossipTable) {
 
 	// 생성할때 넣어주는 peerInfo의 ID가 myID가 된다.
 	gossipTable := &GossipTable{}
@@ -34,7 +29,6 @@ func CreateNewGossipTable(peerInfo *PeerInfo, channel string) (*GossipTable) {
 	gossipTable.peerList = append(gossipTable.peerList, peerInfo)
 	gossipTable.updatedTimeStamp = time.Now()
 	gossipTable.myID = peerInfo.peerID
-	gossipTable.channel = channel
 	
 	return gossipTable
 }

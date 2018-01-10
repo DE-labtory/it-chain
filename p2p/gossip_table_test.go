@@ -139,6 +139,7 @@ func TestGossipTable_SelectRandomPeerInfo(t *testing.T) {
 	assert.Equal(t,2,len(ipAddresslist))
 }
 
+//todo refactor와 go routine exit action추가 해야함
 func TestGossip_Process(t *testing.T){
 	peerInfo := &PeerInfo{}
 	peerInfo.peerID = "1"

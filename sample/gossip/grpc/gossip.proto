@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package grpc;
+
+// The greeting service definition.
+service Gossip {
+    rpc PushGossip (GossipTable) returns (Empty) {}
+    rpc Ping (Empty) returns (Empty) {}
+    rpc GetGossipTable(Empty) returns (GossipTable) {}
+    rpc PullGossip (Empty) returns (GossipTable) {}
+}
+
+message Empty {}
+
+message GossipTable{
+    string myID = 1;
+    repeated PeerInfo peerInfo = 2;
+}
+
+message PeerInfo{
+    string ipAddress = 1;
+    string peerID = 2;
+    int64 counter = 3;
+}
+
+message PeersInfo{
+
+}
