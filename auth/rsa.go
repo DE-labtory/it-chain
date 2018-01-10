@@ -14,7 +14,7 @@ func (s *rsaSigner) Sign(key Key, digest []byte, opts SignerOpt) (signature []by
 		return nil, errors.New("invalid options")
 	}
 
-	return key.(*rsaPrivateKey).priv.Sign(rand.Reader, digest, opts)
+	return key.(*rsaPrivateKey).pri.Sign(rand.Reader, digest, opts)
 
 }
 
@@ -44,11 +44,11 @@ func (v *rsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpt) 
 }
 
 type rsaPrivateKey struct {
-	priv *rsa.PrivateKey
+	pri *rsa.PrivateKey
 }
 
 func (key *rsaPrivateKey) PublicKey() (pub Key, err error) {
-	return &rsaPublicKey{&key.priv.PublicKey}, nil
+	return &rsaPublicKey{&key.pri.PublicKey}, nil
 }
 
 type rsaPublicKey struct {
