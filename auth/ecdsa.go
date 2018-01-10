@@ -18,7 +18,7 @@ func marshalECDSASignature(r, s *big.Int) (signature []byte, err error) {
 	return asn1.Marshal(ecdsaSignature{r, s})
 }
 
-func unMarshalECDSASignature(signature []byte) (*big.Int, *big.Int, error) {
+func unmarshalECDSASignature(signature []byte) (*big.Int, *big.Int, error) {
 	ecdsaSig := new(ecdsaSignature)
 	_, err := asn1.Unmarshal(signature, ecdsaSig)
 	if err != nil {
@@ -61,7 +61,7 @@ type ecdsaVerifier struct{}
 
 func (v *ecdsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpts) (bool, error) {
 
-	r, s, err := unMarshalECDSASignature(signature)
+	r, s, err := unmarshalECDSASignature(signature)
 	if err != nil {
 		return false, err
 	}
@@ -78,10 +78,10 @@ type ecdsaPublicKey struct {
 	pub *ecdsa.PublicKey
 }
 
-func (key *ecdsaPrivateKey) PublicKey() (pub Key, err error) {
-	return &ecdsaPublicKey{&key.priv.PublicKey}, nil
-}
-
 type ecdsaPrivateKey struct {
 	priv *ecdsa.PrivateKey
+}
+
+func (key *ecdsaPrivateKey) PublicKey() (pub Key, err error) {
+	return &ecdsaPublicKey{&key.priv.PublicKey}, nil
 }
