@@ -7,21 +7,26 @@ import (
 	"sync"
 )
 
-type PeerInfo struct{
+type PeerInfo struct {
 	ipAddress string
-	peerID string
-	counter int
+	peerID    string
+	counter   int
 	timeStamp time.Time
 }
 
-type GossipTable struct{
-	peerList []*PeerInfo
+type GossipTable struct {
+	peerList         []*PeerInfo
+	channel          string
 	updatedTimeStamp time.Time
-	myID string
+	myID             string
 	sync.RWMutex
 }
 
-func CreateNewGossipTable(peerInfo *PeerInfo) (*GossipTable) {
+type GossipTableHandler struct{
+	table map[string]*GossipTable
+}
+
+func CreateNewGossipTable(peerInfo *PeerInfo, channel string) (*GossipTable) {
 
 	// 생성할때 넣어주는 peerInfo의 ID가 myID가 된다.
 	gossipTable := &GossipTable{}
@@ -29,7 +34,8 @@ func CreateNewGossipTable(peerInfo *PeerInfo) (*GossipTable) {
 	gossipTable.peerList = append(gossipTable.peerList, peerInfo)
 	gossipTable.updatedTimeStamp = time.Now()
 	gossipTable.myID = peerInfo.peerID
-
+	gossipTable.channel = channel
+	
 	return gossipTable
 }
 
@@ -115,4 +121,3 @@ func (gt *GossipTable) SelectRandomPeerInfo(percent float64) ([]string,error) {
 
 	return ipAddressList,nil
 }
-

@@ -3,8 +3,6 @@ package blockchain
 import (
 	"sync"
 	"time"
-	"strings"
-	"it-chain/common"
 )
 
 type BlockStatus int
