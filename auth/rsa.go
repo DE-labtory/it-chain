@@ -8,7 +8,7 @@ import (
 
 type rsaSigner struct{}
 
-func (s *rsaSigner) Sign(key Key, digest []byte, opts SignerOpt) (signature []byte, err error) {
+func (s *rsaSigner) Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, err error) {
 
 	if opts == nil {
 		return nil, errors.New("invalid options")
@@ -20,7 +20,7 @@ func (s *rsaSigner) Sign(key Key, digest []byte, opts SignerOpt) (signature []by
 
 type rsaVerifier struct{}
 
-func (v *rsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpt) (valid bool, err error) {
+func (v *rsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error) {
 
 	if opts == nil {
 		return false, errors.New("invalid options")
