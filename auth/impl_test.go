@@ -79,3 +79,7 @@ func TestImpl_RSASign(t *testing.T) {
 	assert.Error(t, err)
 
 }
+
+func TestImpl_ECDSASign(t *testing.T) {
+
+}

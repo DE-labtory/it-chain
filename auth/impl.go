@@ -31,7 +31,7 @@ func New() (Crypto, error) {
 
 }
 
-func (i *impl) Sign(key Key, digest []byte, opts SignerOpt) (signature []byte, err error) {
+func (i *impl) Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, err error) {
 
 	if key == nil {
 		return nil, errors.New("invalid key")
@@ -55,7 +55,7 @@ func (i *impl) Sign(key Key, digest []byte, opts SignerOpt) (signature []byte, e
 
 }
 
-func (i *impl) Verify(key Key, signature, digest []byte, opts SignerOpt) (valid bool, err error) {
+func (i *impl) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error) {
 
 	if key == nil {
 		return false, errors.New("invalid key")
