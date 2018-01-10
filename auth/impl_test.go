@@ -7,6 +7,8 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 )
 
 func TestNew(t *testing.T) {
@@ -42,15 +44,13 @@ func TestImpl_RSASign(t *testing.T) {
 
 	sig, err := cryp.Sign(privateKey, digest, opts)
 	assert.NoError(t, err)
+	assert.NotNil(t, sig)
 
 	// Test RSA Signer
 	_, err = cryp.Sign(nil, digest, opts)
 	assert.Error(t, err)
 
 	_, err = cryp.Sign(publicKey, digest, opts)
-	assert.Error(t, err)
-
-	_, err = cryp.Sign(nil, digest, opts)
 	assert.Error(t, err)
 
 	_, err = cryp.Sign(privateKey, rawData, opts)
@@ -61,6 +61,7 @@ func TestImpl_RSASign(t *testing.T) {
 
 	// Test RSA Verifier
 	valid, err := cryp.Verify(publicKey, sig, digest, opts)
+	assert.NoError(t, err)
 	assert.True(t, valid)
 
 	_, err = cryp.Verify(nil, sig, digest, opts)
@@ -69,17 +70,59 @@ func TestImpl_RSASign(t *testing.T) {
 	_, err = cryp.Verify(privateKey, sig, digest, opts)
 	assert.Error(t, err)
 
-	_, err = cryp.Verify(nil, sig, digest, opts)
+	_, err = cryp.Verify(publicKey, nil, digest, opts)
 	assert.Error(t, err)
 
-	_, err = cryp.Verify(privateKey, nil, digest, opts)
-	assert.Error(t, err)
-
-	_, err = cryp.Verify(privateKey, sig, rawData, opts)
+	_, err = cryp.Verify(publicKey, sig, rawData, opts)
 	assert.Error(t, err)
 
 }
 
 func TestImpl_ECDSASign(t *testing.T) {
+
+	cryp, err := New()
+	assert.NoError(t, err)
+
+	generatedKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	assert.NoError(t, err)
+
+	privateKey := &ecdsaPrivateKey{generatedKey}
+	publicKey, err := privateKey.PublicKey()
+	assert.NoError(t, err)
+
+	rawData := []byte("ECDSA Sign Test")
+
+	hash := sha256.New()
+	hash.Write(rawData)
+	digest := hash.Sum(nil)
+
+	sig, err := cryp.Sign(privateKey, digest, nil)
+	assert.NoError(t, err)
+	assert.NotNil(t, sig)
+
+	// Test RSA Signer
+	_, err = cryp.Sign(nil, digest, nil)
+	assert.Error(t, err)
+
+	_, err = cryp.Sign(publicKey, digest, nil)
+	assert.Error(t, err)
+
+	_, err = cryp.Sign(privateKey, nil, nil)
+	assert.Error(t, err)
+
+	// Test RSA Verifier
+	valid, err := cryp.Verify(publicKey, sig, digest, nil)
+	assert.NoError(t, err)
+	assert.True(t, valid)
+
+	_, err = cryp.Verify(nil, sig, digest, nil)
+	assert.Error(t, err)
+
+	_, err = cryp.Verify(privateKey, sig, digest, nil)
+	assert.Error(t, err)
+
+	_, err = cryp.Verify(publicKey, nil, digest, nil)
+	assert.Error(t, err)
+
 
 }
