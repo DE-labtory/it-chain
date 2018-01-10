@@ -20,6 +20,7 @@ import (
 	"os"
 	"path"
 	"io"
+	"crypto/sha256"
 )
 
 var logger = GetLogger("util.go")
@@ -55,4 +56,10 @@ func DirEmpty(dirPath string) (bool, error) {
 		return true, nil
 	}
 	return false, err
+}
+
+
+func ComputeSHA256(data []byte) (hash [32]uint8) {
+	hash = sha256.Sum256(data)
+	return hash
 }
