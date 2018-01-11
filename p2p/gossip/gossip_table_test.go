@@ -1,4 +1,4 @@
-package p2p
+package gossip
 
 import (
 	"testing"
@@ -16,7 +16,7 @@ func getMyGossipTableAndPeerInfo() (*GossipTable,*PeerInfo){
 	gossipTable := &GossipTable{}
 	gossipTable.peerList = make([]*PeerInfo,0)
 	gossipTable.peerList = append(gossipTable.peerList, peerInfo)
-	gossipTable.updatedTimeStamp = time.Now()
+	gossipTable.timeStamp = time.Now()
 	gossipTable.myID = peerInfo.peerID
 
 	return gossipTable, peerInfo
@@ -29,14 +29,21 @@ func TestCreateNewGossipTable(t *testing.T) {
 	peerInfo.peerID = "1"
 	peerInfo.counter = 1
 	peerInfo.ipAddress = "127.0.0.1"
+	peerInfo.timeStamp = time.Now()
 
 	//then
-	gossipTable := CreateNewGossipTable(peerInfo)
+	gossipTable,err := CreateNewGossipTable(peerInfo)
 
-	//result
-	assert.Equal(t,1,len(gossipTable.peerList))
-	assert.Equal(t,peerInfo,gossipTable.peerList[0])
-	assert.Equal(t,peerInfo.peerID,gossipTable.myID)
+	if err != nil{
+		assert.Fail(t,"fail to create new gossip table")
+	}else{
+		//result
+		assert.Equal(t,1,len(gossipTable.peerList))
+		assert.Equal(t,peerInfo,gossipTable.peerList[0])
+		assert.Equal(t,peerInfo.peerID,gossipTable.myID)
+	}
+
+
 
 }
 
@@ -141,19 +148,20 @@ func TestGossipTable_SelectRandomPeerInfo(t *testing.T) {
 
 //todo refactor와 go routine exit action추가 해야함
 func TestGossip_Process(t *testing.T){
+
 	peerInfo := &PeerInfo{}
 	peerInfo.peerID = "1"
 	peerInfo.counter = 1
 	peerInfo.ipAddress = "127.0.0.1"
 	peerInfo.timeStamp = time.Now()
-	gossiptable1 := CreateNewGossipTable(peerInfo)
+	gossiptable1,_ := CreateNewGossipTable(peerInfo)
 
 	peerInfo2 := &PeerInfo{}
 	peerInfo2.peerID = "2"
 	peerInfo2.counter = 1
 	peerInfo2.ipAddress = "127.0.0.2"
 	peerInfo2.timeStamp = time.Now()
-	gossiptable2 := CreateNewGossipTable(peerInfo2)
+	gossiptable2,_ := CreateNewGossipTable(peerInfo2)
 	gossiptable1.addPeerInfo(peerInfo2)
 
 	peerInfo3 := &PeerInfo{}
@@ -161,7 +169,7 @@ func TestGossip_Process(t *testing.T){
 	peerInfo3.counter = 1
 	peerInfo3.ipAddress = "127.0.0.3"
 	peerInfo3.timeStamp = time.Now()
-	gossiptable3 := CreateNewGossipTable(peerInfo3)
+	gossiptable3,_ := CreateNewGossipTable(peerInfo3)
 	gossiptable2.addPeerInfo(peerInfo3)
 
 	gossipTableList := []*GossipTable{gossiptable1,gossiptable2,gossiptable3}

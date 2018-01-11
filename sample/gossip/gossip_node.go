@@ -13,11 +13,10 @@ const (
 	port = ":50052"
 )
 
-
-
-
 type server struct{}
 
+
+//gossip을 받음
 func (s *server) PushGossip(ctx context.Context, in *pb.GossipTable) (*pb.Empty, error) {
 	return &pb.Empty{},nil
 }
