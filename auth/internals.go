@@ -17,3 +17,11 @@ type Verifier interface {
 	Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error)
 
 }
+
+type KeyGenOpts interface {}
+
+type KeyGenerator interface {
+
+	KeyGenerate(opts KeyGenOpts) (key Key, err error)
+
+}
