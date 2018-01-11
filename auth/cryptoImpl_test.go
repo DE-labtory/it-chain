@@ -13,13 +13,13 @@ import (
 
 func TestNew(t *testing.T) {
 
-	// Generate Implementation
+	// Generate Collector
 	_, err := New()
 	assert.NoError(t, err)
 
 }
 
-func TestImpl_RSASign(t *testing.T) {
+func TestCollector_RSASign(t *testing.T) {
 
 	cryp, err := New()
 	assert.NoError(t, err)
@@ -78,7 +78,7 @@ func TestImpl_RSASign(t *testing.T) {
 
 }
 
-func TestImpl_ECDSASign(t *testing.T) {
+func TestCollector_ECDSASign(t *testing.T) {
 
 	cryp, err := New()
 	assert.NoError(t, err)
@@ -125,4 +125,8 @@ func TestImpl_ECDSASign(t *testing.T) {
 	assert.Error(t, err)
 
 
+}
+
+func TestCollector_KeyGenerate(t *testing.T) {
+	
 }
