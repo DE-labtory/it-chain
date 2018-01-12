@@ -5,56 +5,57 @@ import (
 	"errors"
 )
 
-type Status int32
+type Status int
 
 const (
-	Status_UNCONFIRMED Status = 0
-	Status_CONFIRMED   Status = 1
+	Status_BLOCK_UNCONFIRMED Status = 0
+	Status_BLOCK_CONFIRMED   Status = 1
 
 	TRANSACTION_SIZE int = 4096
 )
 
 type Block struct {
-	header          	*BlockHeader
-	merkleTree      	[2*TRANSACTION_SIZE - 1][32]uint8
-	transactionCount	int
-	transactions	 	[TRANSACTION_SIZE]*Transaction
+	Header          	*BlockHeader
+	MerkleTree      	[2*TRANSACTION_SIZE - 1][32]uint8
+	TransactionCount	int
+	Transactions	 	[TRANSACTION_SIZE]*Transaction
 }
 
 func (s *Block) Reset() { *s = Block{} }
 
 type BlockHeader struct {
-	number             uint64
-	previousHash       string
-	dataHash           string
-	version            string
-	merkleTreeRootHash string
-	timeStamp          time.Time
-	blockHeight        int
-	blockStatus        Status
-	createdPeerID      string
-	signature          []byte
+	Number             uint64
+	PreviousHash       string
+	DataHash           string
+	Version            string
+	MerkleTreeRootHash string
+	TimeStamp          time.Time
+	BlockHeight        int
+	BlockStatus        Status
+	CreatedPeerID      string
+	Signature          []byte
+	PeerId             string
 }
 
 func (s *BlockHeader) Reset() { *s = BlockHeader{} }
 
 func (s *Block) PutTranscation(tx Transaction) bool{
-	if tx.transactionStatus == Status_UNCONFIRMED{
+	if tx.TransactionStatus == Status_BLOCK_UNCONFIRMED{
 		if tx.Validate(){
-			tx.transactionStatus = Status_CONFIRMED
+			tx.TransactionStatus = Status_BLOCK_CONFIRMED
 		} else {
 			return false
 		}
 	}
-	s.transactions[s.transactionCount] = &tx
-	s.merkleTree[TRANSACTION_SIZE - 1 + s.transactionCount] = tx.transactionHash
-	s.transactionCount++
+	s.Transactions[s.TransactionCount] = &tx
+	s.MerkleTree[TRANSACTION_SIZE - 1 + s.TransactionCount] = tx.TransactionHash
+	s.TransactionCount++
 	return true
 }
 
 func (s Block) FindTransactionIndex(hash [32]uint8) (idx int, err error){
-	for idx = 0; idx < s.transactionCount; idx++{
-		if hash == s.transactions[idx].transactionHash{
+	for idx = 0; idx < s.TransactionCount; idx++{
+		if hash == s.Transactions[idx].TransactionHash{
 			return idx, nil
 		}
 	}
