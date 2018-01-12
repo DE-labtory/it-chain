@@ -3,16 +3,18 @@ package auth
 import (
 	"reflect"
 	"errors"
+	"crypto/elliptic"
 )
 
-type impl struct {
+type collector struct {
 
 	signers map[reflect.Type]Signer
 	verifiers map[reflect.Type]Verifier
+	keyGenerators map[reflect.Type]KeyGenerator
 
 }
 
-func New() (Crypto, error) {
+func NewCollector() (Crypto, error) {
 
 	signers := make(map[reflect.Type]Signer)
 	signers[reflect.TypeOf(&rsaPrivateKey{})] = &rsaSigner{}
@@ -22,16 +24,21 @@ func New() (Crypto, error) {
 	verifiers[reflect.TypeOf(&rsaPublicKey{})] = &rsaVerifier{}
 	verifiers[reflect.TypeOf(&ecdsaPublicKey{})] = &ecdsaVerifier{}
 
-	impl := &impl{
-		signers: 	signers,
-		verifiers: 	verifiers,
+	keyGenerators := make(map[reflect.Type]KeyGenerator)
+	keyGenerators[reflect.TypeOf(&rsaKeyGenOpts{})] = &rsaKeyGenerator{1024}
+	keyGenerators[reflect.TypeOf(&ecdsaKeyGenOpts{})] = &ecdsaKeyGenerator{elliptic.P256()}
+
+	coll := &collector{
+		signers: 		signers,
+		verifiers: 		verifiers,
+		keyGenerators: 	keyGenerators,
 	}
 
-	return impl, nil
+	return coll, nil
 
 }
 
-func (i *impl) Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, err error) {
+func (c *collector) Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, err error) {
 
 	if key == nil {
 		return nil, errors.New("invalid key")
@@ -41,7 +48,7 @@ func (i *impl) Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, 
 		return nil, errors.New("invalid digest")
 	}
 
-	signer, found := i.signers[reflect.TypeOf(key)]
+	signer, found := c.signers[reflect.TypeOf(key)]
 	if !found {
 		return nil, errors.New("unsupported key type")
 	}
@@ -55,7 +62,7 @@ func (i *impl) Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, 
 
 }
 
-func (i *impl) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error) {
+func (c *collector) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error) {
 
 	if key == nil {
 		return false, errors.New("invalid key")
@@ -69,7 +76,7 @@ func (i *impl) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid
 		return false, errors.New("invalid digest")
 	}
 
-	verifier, found := i.verifiers[reflect.TypeOf(key)]
+	verifier, found := c.verifiers[reflect.TypeOf(key)]
 	if !found {
 		return false, errors.New("unsupported key type")
 	}
@@ -77,6 +84,26 @@ func (i *impl) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid
 	valid, err = verifier.Verify(key, signature, digest, opts)
 	if err != nil {
 		return false, errors.New("verifying error is occurred")
+	}
+
+	return
+
+}
+
+func (c *collector) KeyGenerate(opts KeyGenOpts) (key Key, err error) {
+
+	if opts == nil {
+		return nil, errors.New("Invalid KeyGen Options")
+	}
+
+	keyGenerator, found := c.keyGenerators[reflect.TypeOf(opts)]
+	if !found {
+		return nil, errors.New("Invalid KeyGen Options")
+	}
+
+	key, err = keyGenerator.KeyGenerate(opts)
+	if err != nil {
+		return nil, errors.New("Failed to generate a Key")
 	}
 
 	return

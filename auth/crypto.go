@@ -8,4 +8,6 @@ type Crypto interface {
 
 	Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error)
 
+	KeyGenerate(opts KeyGenOpts) (key Key, err error)
+
 }

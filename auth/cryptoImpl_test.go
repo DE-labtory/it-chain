@@ -13,15 +13,15 @@ import (
 
 func TestNew(t *testing.T) {
 
-	// Generate Implementation
-	_, err := New()
+	// Generate Collector
+	_, err := NewCollector()
 	assert.NoError(t, err)
 
 }
 
-func TestImpl_RSASign(t *testing.T) {
+func TestCollector_RSASign(t *testing.T) {
 
-	cryp, err := New()
+	cryp, err := NewCollector()
 	assert.NoError(t, err)
 
 	// Generate an RSA Key
@@ -78,9 +78,9 @@ func TestImpl_RSASign(t *testing.T) {
 
 }
 
-func TestImpl_ECDSASign(t *testing.T) {
+func TestCollector_ECDSASign(t *testing.T) {
 
-	cryp, err := New()
+	cryp, err := NewCollector()
 	assert.NoError(t, err)
 
 	generatedKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -124,5 +124,45 @@ func TestImpl_ECDSASign(t *testing.T) {
 	_, err = cryp.Verify(publicKey, nil, digest, nil)
 	assert.Error(t, err)
 
+
+}
+
+func TestCollector_RSAKeyGenerate(t *testing.T) {
+
+	cryp, err := NewCollector()
+	assert.NoError(t, err)
+
+	key, err := cryp.KeyGenerate(&rsaKeyGenOpts{})
+	assert.NoError(t, err)
+	assert.NotNil(t, key)
+
+	_, err = cryp.KeyGenerate(nil)
+	assert.Error(t, err)
+
+	rsaKey, valid := key.(*rsaPrivateKey)
+	assert.True(t, valid)
+	assert.NotNil(t, rsaKey)
+
+	assert.Equal(t, 1024, rsaKey.priv.N.BitLen())
+
+}
+
+func TestCollector_ECDSAKeyGenerate(t *testing.T) {
+
+	cryp, err := NewCollector()
+	assert.NoError(t, err)
+
+	key, err := cryp.KeyGenerate(&ecdsaKeyGenOpts{})
+	assert.NoError(t, err)
+	assert.NotNil(t, key)
+
+	_, err = cryp.KeyGenerate(nil)
+	assert.Error(t, err)
+
+	ecdsaKey, valid := key.(*ecdsaPrivateKey)
+	assert.True(t, valid)
+	assert.NotNil(t, ecdsaKey)
+
+	assert.Equal(t, elliptic.P256(), ecdsaKey.priv.Curve)
 
 }

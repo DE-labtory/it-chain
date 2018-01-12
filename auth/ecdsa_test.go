@@ -29,12 +29,12 @@ func TestMarshalECDSASignature(t *testing.T) {
 	assert.Error(t, err)
 
 	// UnMarshal
-	r, s, err = unMarshalECDSASignature(sig)
+	r, s, err = unmarshalECDSASignature(sig)
 	assert.NoError(t, err)
 	assert.NotNil(t, r)
 	assert.NotNil(t, s)
 
-	_, _, err = unMarshalECDSASignature(nil)
+	_, _, err = unmarshalECDSASignature(nil)
 	assert.Error(t, err)
 
 }
