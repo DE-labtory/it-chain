@@ -7,7 +7,7 @@ import (
 )
 
 type MessageHandler interface{
-	handle([]byte) (interface{},error)
+	handle(interface{}) (interface{},error)
 }
 
 type GRPCBatcher struct {
@@ -24,6 +24,14 @@ type batchedMessage struct {
 	iterationsLeft int
 }
 
+//batcher T시간 간격으로 handler에게 메세지를 전달해준다
+//deleting option에 따라서 전달한 message를 지울껀지 아니면 계속 남겨둘지를 설정한다.
+
+//buff: message queue
+//lock: sync
+//period: T time
+//stopflag: tostop batcher
+//handler: messaging handler
 func NewGRPCMessageBatcher(period time.Duration, handler MessageHandler, deleting bool) *GRPCBatcher{
 
 	gb := &GRPCBatcher{
@@ -34,26 +42,28 @@ func NewGRPCMessageBatcher(period time.Duration, handler MessageHandler, deletin
 		handler:  handler,
 		deleting: deleting,
 	}
+
+	go gb.periodicEmit()
+
 	return gb
 }
 
-
+//tested
 func (gb *GRPCBatcher)Add(message interface{}){
 
 	gb.lock.Lock()
 	defer gb.lock.Unlock()
 
-	interation := len(gb.buff)
-	gb.buff = append(gb.buff, &batchedMessage{data: message, iterationsLeft: interation})
-
+	iteration := len(gb.buff)
+	gb.buff = append(gb.buff, &batchedMessage{data: message, iterationsLeft: iteration})
 }
 
-// Stop stops the component
+//tested
 func (gb *GRPCBatcher)Stop(){
 	atomic.StoreInt32(&(gb.stopFlag), int32(1))
 }
 
-// Size returns the amount of pending messages to be emitted
+//tested
 func (gb *GRPCBatcher)Size() int{
 
 	gb.lock.Lock()
@@ -61,23 +71,12 @@ func (gb *GRPCBatcher)Size() int{
 	return len(gb.buff)
 }
 
+//tested
 func (gb *GRPCBatcher) toDie() bool {
 	return atomic.LoadInt32(&(gb.stopFlag)) == int32(1)
 }
 
-func (gb *GRPCBatcher) decrementCounters() {
-	n := len(gb.buff)
-	for i := 0; i < n; i++ {
-		msg := gb.buff[i]
-		msg.iterationsLeft--
-		if msg.iterationsLeft == 0 {
-			gb.buff = append(gb.buff[:i], gb.buff[i+1:]...)
-			n--
-			i--
-		}
-	}
-}
-
+//tested
 func (gb *GRPCBatcher) periodicEmit() {
 	for !gb.toDie() {
 		time.Sleep(gb.Period)
@@ -87,18 +86,28 @@ func (gb *GRPCBatcher) periodicEmit() {
 	}
 }
 
+//tested
 func (gb *GRPCBatcher) emit() {
-	//if gb.toDie() {
-	//	return
-	//}
-	//if len(gb.buff) == 0 {
-	//	return
-	//}
-	//msgs2beEmitted := make([]interface{}, len(gb.buff))
-	//for i, v := range gb.buff {
-	//	msgs2beEmitted[i] = v.data
-	//}
-	//
-	//gb.handler.handle()
-	//gb.decrementCounters()
+
+	if gb.toDie(){
+		return
+	}
+
+	if len(gb.buff) == 0{
+		return
+	}
+
+	for _, message := range gb.buff{
+		gb.handler.handle(message.data)
+	}
+
+	gb.vacate()
+}
+
+
+func (gb *GRPCBatcher) vacate() {
+
+	if gb.deleting{
+		gb.buff = gb.buff[0:0]
+	}
 }

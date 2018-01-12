@@ -16,7 +16,6 @@ func InitLogger() *logrus.Logger{
 
 
 func GetLogger(name string) *logrus.Entry{
-
 	return ilogger.WithFields(logrus.Fields{
 		"File": name,
 	})

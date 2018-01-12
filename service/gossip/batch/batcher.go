@@ -13,6 +13,10 @@ limitations under the License.
 
 package batch
 
+import "it-chain/common"
+
+var logger = common.GetLogger("batch")
+
 type Batcher interface {
 
 	// Add adds a message to be batched
