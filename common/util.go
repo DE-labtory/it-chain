@@ -58,7 +58,6 @@ func DirEmpty(dirPath string) (bool, error) {
 	return false, err
 }
 
-
 func ComputeSHA256(data []byte) (hash [32]uint8) {
 	hash = sha256.Sum256(data)
 	return hash
