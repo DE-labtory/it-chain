@@ -27,7 +27,7 @@ type batchedMessage struct {
 //batcher T시간 간격으로 handler에게 메세지를 전달해준다
 //deleting option에 따라서 전달한 message를 지울껀지 아니면 계속 남겨둘지를 설정한다.
 
-//buff: message queue
+//buff: protos queue
 //lock: sync
 //period: T time
 //stopflag: tostop batcher
@@ -104,7 +104,7 @@ func (gb *GRPCBatcher) emit() {
 	gb.vacate()
 }
 
-
+//test
 func (gb *GRPCBatcher) vacate() {
 
 	if gb.deleting{

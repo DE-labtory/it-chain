@@ -19,7 +19,7 @@ var logger = common.GetLogger("batch")
 
 type Batcher interface {
 
-	// Add adds a message to be batched
+	// Add adds a protos to be batched
 	Add(interface{})
 
 	// Stop stops the component

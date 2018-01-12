@@ -26,7 +26,7 @@ func (s *server) Ping(ctx context.Context, in *pb.Empty) (*pb.Empty, error) {
 }
 
 
-// return my gossip tables
+// return my peer tables
 func (s *server) GetGossipTable(ctx context.Context, in *pb.Empty) (*pb.GossipTable, error) {
 	return &pb.GossipTable{
 		MyID: "1",

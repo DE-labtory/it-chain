@@ -1,6 +1,14 @@
 syntax = "proto3";
 
-package proto;
+package message;
+
+service Gossip{
+
+    rpc Stream (stream Envelope) returns (stream Envelope) {}
+    // Ping is used to probe a remote peer's aliveness
+    rpc Ping (Empty) returns (Empty) {}
+}
+
 
 message Envelope {
 

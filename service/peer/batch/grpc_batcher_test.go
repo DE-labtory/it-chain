@@ -3,7 +3,7 @@ package batch
 import (
 	"testing"
 	"time"
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 	"sync"
 )
 
@@ -132,4 +132,14 @@ func TestGRPCBatcher_FuntionalTest_with_deleting_false(t *testing.T) {
 	batcher.Stop()
 
 	assert.Equal(t,batcher.Size(),4)
+}
+
+
+func TestGRPCBatcher_Add2(t *testing.T){
+
+	var s interface{}
+	s = "asd"
+	i := s.(int)
+
+	println(i)
 }

@@ -1,4 +1,4 @@
-package gossip
+package peer
 
 import (
 	"testing"
@@ -35,7 +35,7 @@ func TestCreateNewGossipTable(t *testing.T) {
 	gossipTable,err := CreateNewGossipTable(peerInfo)
 
 	if err != nil{
-		assert.Fail(t,"fail to create new gossip table")
+		assert.Fail(t,"fail to create new peer table")
 	}else{
 		//result
 		assert.Equal(t,1,len(gossipTable.peerList))
