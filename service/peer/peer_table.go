@@ -45,19 +45,18 @@ type PeerTable struct {
 //	return gossipTable, nil
 //}
 //
-////tested
-//func (gt *GossipTable) FindPeerByPeerID(peerID string) (*PeerInfo){
-//
-//	for _, peer := range gt.peerList {
-//		if peer.peerID == peerID{
-//			return peer
-//		}
-//	}
-//
-//	logger.Info("can not find peer by ",peerID)
-//
-//	return nil
-//}
+
+//tested
+func (gt *PeerTable) FindPeerByPeerID(peerID string) (*PeerInfo){
+
+	peerInfo, ok := gt.PeerMap[peerID]
+
+	if ok {
+		return peerInfo
+	}
+
+	return nil
+}
 //
 ////tested
 //func (gt *GossipTable) addPeerInfo(peerInfo *PeerInfo){

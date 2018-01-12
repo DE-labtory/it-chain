@@ -1,13 +1,28 @@
 package peer
 
 import (
-	"golang.org/x/net/context"
-	"google.golang.org/grpc"
-	pb "it-chain/sample/gossip/grpc"
+	"it-chain/service/peer/batch"
 )
 
-type P2PServiceImpl struct{
-	gossipTable *GossipTable
+type PeerServiceImpl struct {
+	peerTable *PeerTable
+	batcher     *batch.Batcher
+}
+
+func (ps *PeerServiceImpl) GetPeerTable() PeerTable{
+	return *ps.peerTable
+}
+
+//peer info 찾기
+func (ps *PeerServiceImpl) GetPeerInfoByPeerID(peerID string) (*PeerInfo){
+
+	peerInfo := ps.peerTable.FindPeerByPeerID(peerID)
+	return peerInfo
+}
+
+//peer info
+func (ps *PeerServiceImpl) PushPeerTable(peerIDs []string){
+
 }
 
 ////peer message를 peersIP에 전파
