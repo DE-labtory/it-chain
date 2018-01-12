@@ -14,7 +14,7 @@ type collector struct {
 
 }
 
-func New() (Crypto, error) {
+func NewCollector() (Crypto, error) {
 
 	signers := make(map[reflect.Type]Signer)
 	signers[reflect.TypeOf(&rsaPrivateKey{})] = &rsaSigner{}
