@@ -127,8 +127,42 @@ func TestCollector_ECDSASign(t *testing.T) {
 
 }
 
-func TestCollector_KeyGenerate(t *testing.T) {
+func TestCollector_RSAKeyGenerate(t *testing.T) {
 
-	
+	cryp, err := NewCollector()
+	assert.NoError(t, err)
+
+	key, err := cryp.KeyGenerate(&rsaKeyGenOpts{})
+	assert.NoError(t, err)
+	assert.NotNil(t, key)
+
+	_, err = cryp.KeyGenerate(nil)
+	assert.Error(t, err)
+
+	rsaKey, valid := key.(*rsaPrivateKey)
+	assert.True(t, valid)
+	assert.NotNil(t, rsaKey)
+
+	assert.Equal(t, 1024, rsaKey.priv.N.BitLen())
+
+}
+
+func TestCollector_ECDSAKeyGenerate(t *testing.T) {
+
+	cryp, err := NewCollector()
+	assert.NoError(t, err)
+
+	key, err := cryp.KeyGenerate(&ecdsaKeyGenOpts{})
+	assert.NoError(t, err)
+	assert.NotNil(t, key)
+
+	_, err = cryp.KeyGenerate(nil)
+	assert.Error(t, err)
+
+	ecdsaKey, valid := key.(*ecdsaPrivateKey)
+	assert.True(t, valid)
+	assert.NotNil(t, ecdsaKey)
+
+	assert.Equal(t, elliptic.P256(), ecdsaKey.priv.Curve)
 
 }
