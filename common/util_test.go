@@ -5,8 +5,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"os"
 	"path"
-	"it-chain/service/blockchain"
+	"time"
 )
+
+type TestStrunct struct {
+	MemberString string
+	MemberInt    int
+	MemberTime   time.Time
+	MemberByte   []byte
+}
 
 func TestCreateDirIfMissing(t *testing.T){
 
@@ -38,12 +45,12 @@ func TestDirEmpty(t *testing.T) {
 }
 
 func TestSerialize(t *testing.T) {
-	block := &blockchain.Block{}
+	testStruct := &TestStrunct{}
 
-	serialized, err := Serialize(block)
+	serialized, err := Serialize(testStruct)
 	assert.NoError(t, err)
 
-	deserialized, err := Deserialize(serialized, &blockchain.Block{})
+	deserialized, err := Deserialize(serialized, &TestStrunct{})
 	assert.NoError(t, err)
-	assert.Equal(t, block, deserialized)
+	assert.Equal(t, testStruct, deserialized)
 }

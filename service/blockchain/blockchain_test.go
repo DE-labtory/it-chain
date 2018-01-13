@@ -8,8 +8,7 @@ import (
 func TestCreateNewBlockChainTest(t *testing.T){
 
 	var blockChains = CreateNewBlockChain(defaultChannelName,defaultPeerId)
-
 	assert.Equal(t,0,len(blockChains.Blocks))
-	assert.Equal(t,defaultPeerId,blockChains.Header.peerID)
-	assert.Equal(t,defaultChannelName,blockChains.Header.channelName)
+	assert.Equal(t,defaultPeerId,blockChains.Header.PeerID)
+	assert.Equal(t,defaultChannelName,blockChains.Header.ChannelName)
 }

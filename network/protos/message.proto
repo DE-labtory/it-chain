@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package message;
+
+service Gossip{
+
+    rpc Stream (stream Envelope) returns (stream Envelope) {}
+    // Ping is used to probe a remote peer's aliveness
+    rpc Ping (Empty) returns (Empty) {}
+}
+
+
+message Envelope {
+
+    //marshalled Message
+    bytes payload = 1;
+
+    // signed Message
+    bytes signature = 2;
+
+    // sender's public key
+    bytes pubkey = 3;
+}
+
+message Empty {}
+
+message Message{
+
+    bytes channel = 1;
+
+    oneof content{
+        Block block = 2;
+        Transaction transaction = 3;
+        PeerTable peerTable = 4;
+    }
+}
+
+message Block{
+
+}
+
+message Transaction{
+
+}
+
+message PeerTable{
+
+}

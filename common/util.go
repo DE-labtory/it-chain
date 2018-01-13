@@ -23,6 +23,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
+	"crypto/sha256"
 )
 
 var logger = GetLogger("util.go")
@@ -85,4 +86,9 @@ func Deserialize(serializedBytes []byte, object interface{}) (interface{}, error
 	}
 
 	return object, err
+}
+
+func ComputeSHA256(data []byte) (hash [32]uint8) {
+	hash = sha256.Sum256(data)
+	return hash
 }

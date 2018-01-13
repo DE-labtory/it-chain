@@ -2,52 +2,32 @@ package blockchain
 
 import (
 	"sync"
-	"time"
 )
-
-type BlockStatus int
 
 const (
-	blockUnconfirmed BlockStatus = 0 + iota //unconfirmed block
-	blockConfirmed
-)
-
-const(
 	defaultChannelName = "0"
-	defaultPeerId = "0"
+	defaultPeerId      = "0"
 )
 
 type ChainHeader struct {
-	chainHeight int    //height of chain
-	channelName string //channel name
-	peerID      string //owner peer id of chain
-}
-
-type Block struct {
-	Version            string //version of block
-	PreviousBlockHash  string //hash of previous block
-	MerkleTreeRootHash string
-	MerkleTree         []*Transaction
-	TimeStamp          time.Time
-	BlockHeight        int
-	BlockStatus        BlockStatus
-	CreatedPeerID      string
-	Signature          []byte
+	ChainHeight int    //height of chain
+	ChannelName string //channel name
+	PeerID      string //owner peer id of chain
 }
 
 type BlockChain struct {
-	sync.RWMutex //lock
-	Header *ChainHeader //chain meta information
-	Blocks []*Block     //list of bloc
+	sync.RWMutex              //lock
+	Header       *ChainHeader //chain meta information
+	Blocks       []*Block     //list of bloc
 }
 
-func CreateNewBlockChain(channelID string,peerId string) *BlockChain{
+func CreateNewBlockChain(channelID string, peerId string) *BlockChain {
 
 	var header = ChainHeader{
-		chainHeight: 0,
-		channelName: channelID,
-		peerID: peerId,
+		ChainHeight: 0,
+		ChannelName: channelID,
+		PeerID:      peerId,
 	}
 
-	return &BlockChain{Header:&header,Blocks:make([]*Block,0)}
+	return &BlockChain{Header: &header, Blocks: make([]*Block, 0)}
 }
