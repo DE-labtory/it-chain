@@ -1,7 +1,6 @@
 package blockchain
 
 import (
-	"github.com/magiconair/properties/assert"
 	"testing"
 	"fmt"
 )
