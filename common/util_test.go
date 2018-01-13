@@ -1,11 +1,11 @@
 package common
 
-
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"path"
+	"it-chain/service/blockchain"
 )
 
 func TestCreateDirIfMissing(t *testing.T){
@@ -35,4 +35,15 @@ func TestDirEmpty(t *testing.T) {
 
 	//clean up
 	os.Remove(dirPath)
+}
+
+func TestSerialize(t *testing.T) {
+	block := &blockchain.Block{}
+
+	serialized, err := Serialize(block)
+	assert.NoError(t, err)
+
+	deserialized, err := Deserialize(serialized, &blockchain.Block{})
+	assert.NoError(t, err)
+	assert.Equal(t, block, deserialized)
 }
