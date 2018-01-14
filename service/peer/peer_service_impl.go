@@ -1,19 +1,17 @@
 package peer
 
 import (
-	"it-chain/service/peer/batch"
+	"it-chain/service/batch"
 )
 
 type PeerServiceImpl struct {
 	peerTable *PeerTable
-	batcher   *batch.Batcher
 }
 
-func NewPeerServiceImpl(peerTable *PeerTable, batcher *batch.Batcher) *PeerServiceImpl{
+func NewPeerServiceImpl(peerTable *PeerTable) *PeerServiceImpl{
 
 	return &PeerServiceImpl{
 		peerTable: peerTable,
-		batcher: batcher,
 	}
 }
 
@@ -30,6 +28,12 @@ func (ps *PeerServiceImpl) GetPeerInfoByPeerID(peerID string) (*PeerInfo){
 
 //peer info
 func (ps *PeerServiceImpl) PushPeerTable(peerIDs []string){
+
+}
+
+//주기적으로 handle 함수가 콜 된다.
+//주기적으로 peerTable의 peerlist에게 peerTable을 전송한다.
+func (ps *PeerServiceImpl) handle(interface{}) (interface{},error){
 
 }
 

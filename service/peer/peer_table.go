@@ -139,7 +139,6 @@ func (pi PeerInfo) String() string {
 	return string(b)
 }
 
-
 func (pt PeerTable) String() string {
 
 	b, err := json.Marshal(pt)

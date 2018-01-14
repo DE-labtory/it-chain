@@ -24,12 +24,12 @@ func (mh *MockHandler) handle(ms interface{}) (interface{},error){
 	return "success", nil
 }
 
-func MockNewGRPCMessageBatcher(done chan int) (*GRPCBatcher, *MockHandler){
+func MockNewGRPCMessageBatcher(done chan int) (*EventBatcher, *MockHandler){
 
 	seconds := 2 * time.Second
 	mockHanlder := &MockHandler{counter:0,done:done}
 
-	return &GRPCBatcher{
+	return &EventBatcher{
 		buff:     make([]*batchedMessage, 0),
 		lock:     &sync.Mutex{},
 		Period:   seconds,
@@ -51,7 +51,7 @@ func TestNewGRPCMessageBatcher(t *testing.T) {
 
 }
 
-func TestGRPCBatcher_Add(t *testing.T) {
+func TestEventBatcher_Add(t *testing.T) {
 
 	done := make(chan int)
 	batcher,_ := MockNewGRPCMessageBatcher(done)
@@ -61,7 +61,7 @@ func TestGRPCBatcher_Add(t *testing.T) {
 	assert.Equal(t,batcher.buff[0].iterationsLeft,0)
 }
 
-func TestGRPCBatcher_periodic_emit(t *testing.T){
+func TestEventBatcher_periodic_emit(t *testing.T){
 
 	done := make(chan int)
 	batcher,handler := MockNewGRPCMessageBatcher(done)
@@ -73,7 +73,7 @@ func TestGRPCBatcher_periodic_emit(t *testing.T){
 	assert.Equal(t,handler.counter,4)
 }
 
-func TestGRPCBatcher_Stop(t *testing.T) {
+func TestEventBatcher_Stop(t *testing.T) {
 
 	done := make(chan int)
 	batcher,handler := MockNewGRPCMessageBatcher(done)
@@ -87,14 +87,14 @@ func TestGRPCBatcher_Stop(t *testing.T) {
 	assert.Equal(t,handler.counter,1)
 }
 
-func TestGRPCBatcher_Size(t *testing.T) {
+func TestEventBatcher_Size(t *testing.T) {
 	done := make(chan int)
 	batcher,_ := MockNewGRPCMessageBatcher(done)
 	batcher.buff = append(batcher.buff, &batchedMessage{data: "hello", iterationsLeft: len(batcher.buff)})
 	assert.Equal(t,batcher.Size(),1)
 }
 
-func TestGRPCBatcher_FuntionalTestWithDeletingTrue(t *testing.T) {
+func TestEventBatcher_FuntionalTestWithDeletingTrue(t *testing.T) {
 
 	done := make(chan int)
 	mockHanlder := &MockHandler{counter:0,done:done}
@@ -114,7 +114,7 @@ func TestGRPCBatcher_FuntionalTestWithDeletingTrue(t *testing.T) {
 	assert.Equal(t,batcher.Size(),0)
 }
 
-func TestGRPCBatcher_FuntionalTest_with_deleting_false(t *testing.T) {
+func TestEventBatcher_FuntionalTest_with_deleting_false(t *testing.T) {
 
 	done := make(chan int)
 	mockHanlder := &MockHandler{counter:0,done:done}
@@ -132,14 +132,4 @@ func TestGRPCBatcher_FuntionalTest_with_deleting_false(t *testing.T) {
 	batcher.Stop()
 
 	assert.Equal(t,batcher.Size(),4)
-}
-
-
-func TestGRPCBatcher_Add2(t *testing.T){
-
-	var s interface{}
-	s = "asd"
-	i := s.(int)
-
-	println(i)
 }

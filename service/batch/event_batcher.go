@@ -6,16 +6,16 @@ import (
 	"sync/atomic"
 )
 
-type MessageHandler interface{
+type EventHandler interface{
 	handle(interface{}) (interface{},error)
 }
 
-type GRPCBatcher struct {
+type EventBatcher struct {
 	Period   time.Duration
 	lock     *sync.Mutex
 	stopFlag int32
 	buff     []*batchedMessage
-	handler  MessageHandler
+	handler  EventHandler
 	deleting bool
 }
 
@@ -30,11 +30,11 @@ type batchedMessage struct {
 //buff: protos queue
 //lock: sync
 //period: T time
-//stopflag: tostop batcher
+//stopflag: to stop batcher
 //handler: messaging handler
-func NewGRPCMessageBatcher(period time.Duration, handler MessageHandler, deleting bool) *GRPCBatcher{
+func NewGRPCMessageBatcher(period time.Duration, handler EventHandler, deleting bool) *EventBatcher{
 
-	gb := &GRPCBatcher{
+	gb := &EventBatcher{
 		buff:     make([]*batchedMessage, 0),
 		lock:     &sync.Mutex{},
 		Period:   period,
@@ -49,7 +49,7 @@ func NewGRPCMessageBatcher(period time.Duration, handler MessageHandler, deletin
 }
 
 //tested
-func (gb *GRPCBatcher)Add(message interface{}){
+func (gb *EventBatcher)Add(message interface{}){
 
 	gb.lock.Lock()
 	defer gb.lock.Unlock()
@@ -59,12 +59,12 @@ func (gb *GRPCBatcher)Add(message interface{}){
 }
 
 //tested
-func (gb *GRPCBatcher)Stop(){
+func (gb *EventBatcher)Stop(){
 	atomic.StoreInt32(&(gb.stopFlag), int32(1))
 }
 
 //tested
-func (gb *GRPCBatcher)Size() int{
+func (gb *EventBatcher)Size() int{
 
 	gb.lock.Lock()
 	defer gb.lock.Unlock()
@@ -72,12 +72,12 @@ func (gb *GRPCBatcher)Size() int{
 }
 
 //tested
-func (gb *GRPCBatcher) toDie() bool {
+func (gb *EventBatcher) toDie() bool {
 	return atomic.LoadInt32(&(gb.stopFlag)) == int32(1)
 }
 
 //tested
-func (gb *GRPCBatcher) periodicEmit() {
+func (gb *EventBatcher) periodicEmit() {
 	for !gb.toDie() {
 		time.Sleep(gb.Period)
 		gb.lock.Lock()
@@ -87,7 +87,7 @@ func (gb *GRPCBatcher) periodicEmit() {
 }
 
 //tested
-func (gb *GRPCBatcher) emit() {
+func (gb *EventBatcher) emit() {
 
 	if gb.toDie(){
 		return
@@ -105,7 +105,7 @@ func (gb *GRPCBatcher) emit() {
 }
 
 //test
-func (gb *GRPCBatcher) vacate() {
+func (gb *EventBatcher) vacate() {
 
 	if gb.deleting{
 		gb.buff = gb.buff[0:0]
