@@ -7,7 +7,7 @@ import (
 )
 
 type EventHandler interface{
-	handle(interface{}) (interface{},error)
+	handle(interface{})
 }
 
 type EventBatcher struct {
