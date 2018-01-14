@@ -6,7 +6,15 @@ import (
 
 type PeerServiceImpl struct {
 	peerTable *PeerTable
-	batcher     *batch.Batcher
+	batcher   *batch.Batcher
+}
+
+func NewPeerServiceImpl(peerTable *PeerTable, batcher *batch.Batcher) *PeerServiceImpl{
+
+	return &PeerServiceImpl{
+		peerTable: peerTable,
+		batcher: batcher,
+	}
 }
 
 func (ps *PeerServiceImpl) GetPeerTable() PeerTable{

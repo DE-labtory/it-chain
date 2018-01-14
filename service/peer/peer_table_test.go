@@ -1,4 +1,146 @@
 package peer
+
+import (
+	"testing"
+	"time"
+	"github.com/stretchr/testify/assert"
+	"fmt"
+)
+
+func MockCreateNewPeerInfo(peerID string) *PeerInfo{
+
+	return  &PeerInfo{
+		PeerID: peerID,
+		Port: "8080",
+		IpAddress: "127.0.0.1",
+		HeartBeat: 1,
+		TimeStamp: time.Now(),
+	}
+}
+
+func MockCreateNewPeerTable(peerID string) *PeerTable{
+
+	peerInfo := MockCreateNewPeerInfo(peerID)
+	peerTable,err := NewPeerTable(peerInfo)
+
+	if err != nil{
+
+	}
+
+	return peerTable
+}
+
+func TestPeerInfo_Update(t *testing.T) {
+	peer1 := MockCreateNewPeerInfo("test1")
+	peer2 := MockCreateNewPeerInfo("test1")
+	peer2.HeartBeat = 5
+	peer2.Port = "7777"
+	peer2.IpAddress = "127.0.0.2"
+
+	peer1.Update(peer2)
+
+	assert.Equal(t,peer1.HeartBeat ,5)
+	assert.Equal(t,peer1.Port ,"7777")
+	assert.Equal(t,peer1.IpAddress ,"127.0.0.2")
+}
+
+func TestNewPeerTable(t *testing.T) {
+
+	peerInfo := MockCreateNewPeerInfo("test1")
+	peerTable,err := NewPeerTable(peerInfo)
+
+	if err != nil{
+		assert.Fail(t,"fail to create new peertable")
+	}
+
+	assert.Equal(t,len(peerTable.PeerMap),1)
+	assert.Equal(t,peerTable.PeerMap[peerInfo.PeerID],peerInfo)
+}
+
+func TestPeerTable_FindPeerByPeerID(t *testing.T) {
+
+	peerInfo := MockCreateNewPeerInfo("test1")
+	peerTable,err := NewPeerTable(peerInfo)
+	if err != nil{
+		assert.Fail(t,"fail to create new peertable")
+	}
+
+	//when peer exist
+	assert.Equal(t,peerTable.FindPeerByPeerID(peerInfo.PeerID),peerInfo)
+
+	//when peer does not exist
+	assert.Nil(t,peerTable.FindPeerByPeerID("test2"))
+}
+
+func TestPeerTable_AddPeerInfo(t *testing.T) {
+	//when
+	peerInfo := MockCreateNewPeerInfo("test1")
+	peerTable,err := NewPeerTable(peerInfo)
+
+	if err != nil{
+		assert.Fail(t,"fail to create new peertable")
+	}
+
+	peerInfo2 := MockCreateNewPeerInfo("test2")
+	peerTable.AddPeerInfo(peerInfo2)
+
+	assert.Equal(t,len(peerTable.PeerMap),2)
+	assert.Equal(t,peerTable.PeerMap[peerInfo2.PeerID],peerInfo2)
+}
+
+func TestPeerTable_UpdatePeerTable(t *testing.T) {
+
+	peerInfo := MockCreateNewPeerInfo("test1")
+	peerTable,err := NewPeerTable(peerInfo)
+
+	if err != nil{
+		assert.Fail(t,"fail to create new peertable")
+	}
+
+	peerInfo2 := MockCreateNewPeerInfo("test1")
+	peerInfo2.HeartBeat = 3
+	peerInfo2.IpAddress = "127.0.0.2"
+	peerInfo2.Port = "7070"
+
+	peerInfo3 := MockCreateNewPeerInfo("test3")
+
+	peerTable2,err := NewPeerTable(peerInfo2)
+
+	if err != nil{
+		assert.Fail(t,"fail to create new peertable")
+	}
+
+	peerTable2.PeerMap[peerInfo3.PeerID] = peerInfo3
+
+
+	//////
+	peerTable.UpdatePeerTable(*peerTable2)
+
+
+	assert.Equal(t,len(peerTable.PeerMap),2)
+	assert.Equal(t,peerTable.PeerMap[peerInfo2.PeerID].HeartBeat,peerInfo2.HeartBeat)
+	assert.Equal(t,peerTable.PeerMap[peerInfo2.PeerID].IpAddress,peerInfo2.IpAddress)
+	assert.Equal(t,peerTable.PeerMap[peerInfo2.PeerID].Port,peerInfo2.Port)
+
+	assert.Equal(t,peerTable.PeerMap[peerInfo3.PeerID].HeartBeat,peerInfo3.HeartBeat)
+	assert.Equal(t,peerTable.PeerMap[peerInfo3.PeerID].IpAddress,peerInfo3.IpAddress)
+	assert.Equal(t,peerTable.PeerMap[peerInfo3.PeerID].Port,peerInfo3.Port)
+}
+
+func TestPeerTable_IncrementHeartBeat(t *testing.T) {
+
+	peerTable := MockCreateNewPeerTable("test1")
+
+	peerTable.IncrementHeartBeat()
+
+	assert.Equal(t,peerTable.PeerMap["test1"].HeartBeat,2)
+}
+
+func TestPeerTable_string(t *testing.T){
+	peerTable := MockCreateNewPeerTable("test1")
+	fmt.Println(peerTable)
+}
+
 //
 //import (
 //	"testing"
