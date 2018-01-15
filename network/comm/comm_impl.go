@@ -39,7 +39,7 @@ func (comm *CommImpl)CreateConn(peerInfo peer.PeerInfo) error{
 	return nil
 }
 
-func (comm *CommImpl) Send(envelop pb.Envelope, peerInfos []peer.PeerInfo, errorCallBack onError){
+func (comm *CommImpl) Send(envelop pb.Envelope, errorCallBack onError, peerInfos ...peer.PeerInfo){
 
 	for _, peerInfo := range peerInfos{
 		conn, ok := comm.connectionMap[peerInfo.PeerID]
@@ -52,15 +52,23 @@ func (comm *CommImpl) Send(envelop pb.Envelope, peerInfos []peer.PeerInfo, error
 }
 
 func (comm *CommImpl) Stop(){
-	for _, conn := range comm.connectionMap{
+
+	for id, conn := range comm.connectionMap{
 		conn.Close()
+		delete(comm.connectionMap,id)
 	}
 }
 
 func (comm *CommImpl) Close(peerInfo peer.PeerInfo){
+
 	conn, ok := comm.connectionMap[peerInfo.PeerID]
 
 	if ok{
 		conn.Close()
+		delete(comm.connectionMap,peerInfo.PeerID)
 	}
+}
+
+func (comm *CommImpl) Size() int{
+	return len(comm.connectionMap)
 }
