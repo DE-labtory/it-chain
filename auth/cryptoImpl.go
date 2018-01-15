@@ -25,8 +25,8 @@ func NewCollector() (Crypto, error) {
 	verifiers[reflect.TypeOf(&ecdsaPublicKey{})] = &ecdsaVerifier{}
 
 	keyGenerators := make(map[reflect.Type]KeyGenerator)
-	keyGenerators[reflect.TypeOf(&rsaKeyGenOpts{})] = &rsaKeyGenerator{1024}
-	keyGenerators[reflect.TypeOf(&ecdsaKeyGenOpts{})] = &ecdsaKeyGenerator{elliptic.P256()}
+	keyGenerators[reflect.TypeOf(&RSAKeyGenOpts{false})] = &RSAKeyGenerator{1024}
+	keyGenerators[reflect.TypeOf(&ECDSAKeyGenOpts{false})] = &ECDSAKeyGenerator{elliptic.P256()}
 
 	coll := &collector{
 		signers: 		signers,
