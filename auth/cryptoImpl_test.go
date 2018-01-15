@@ -132,7 +132,7 @@ func TestCollector_RSAKeyGenerate(t *testing.T) {
 	cryp, err := NewCollector()
 	assert.NoError(t, err)
 
-	key, err := cryp.KeyGenerate(&rsaKeyGenOpts{})
+	key, err := cryp.KeyGenerate(&RSAKeyGenOpts{false})
 	assert.NoError(t, err)
 	assert.NotNil(t, key)
 
@@ -152,7 +152,7 @@ func TestCollector_ECDSAKeyGenerate(t *testing.T) {
 	cryp, err := NewCollector()
 	assert.NoError(t, err)
 
-	key, err := cryp.KeyGenerate(&ecdsaKeyGenOpts{})
+	key, err := cryp.KeyGenerate(&ECDSAKeyGenOpts{false})
 	assert.NoError(t, err)
 	assert.NotNil(t, key)
 
