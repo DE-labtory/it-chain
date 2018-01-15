@@ -38,6 +38,10 @@ func (pi *PeerInfo) Update(peerInfo *PeerInfo) (error){
 	return nil
 }
 
+func (pi *PeerInfo)GetEndPoint() string{
+	return pi.IpAddress+":"+pi.Port
+}
+
 type PeerTable struct {
 	PeerMap  map[string]*PeerInfo
 	TimeStamp time.Time

@@ -1,9 +1,5 @@
 package peer
 
-import (
-	"it-chain/service/batch"
-)
-
 type PeerServiceImpl struct {
 	peerTable *PeerTable
 }
