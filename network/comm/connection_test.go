@@ -26,7 +26,7 @@ func (s *Mockserver) Stream(stream pb.MessageService_StreamServer) (error) {
 
 	for {
 		message,err := stream.Recv()
-		counter += 1
+
 		if err == io.EOF {
 			return nil
 		}
@@ -34,7 +34,7 @@ func (s *Mockserver) Stream(stream pb.MessageService_StreamServer) (error) {
 		if err != nil {
 			return err
 		}
-
+		counter += 1
 		fmt.Printf("Received: %d\n", message.String())
 	}
 }
@@ -94,7 +94,7 @@ func TestNewConnection(t *testing.T) {
 }
 
 func TestConnection_SendWithStream(t *testing.T) {
-
+	counter = 0
 	server, listner := ListenMockServer()
 
 	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
@@ -112,6 +112,8 @@ func TestConnection_SendWithStream(t *testing.T) {
 	}
 
 	envelope := &pb.Envelope{Signature:[]byte("123")}
+
+	fmt.Println(counter)
 
 	conn.SendWithStream(envelope,nil)
 	conn.SendWithStream(envelope,nil)
