@@ -10,7 +10,7 @@ const defaultTimeout = time.Second * 3
 
 //get time from config
 //timeOut := viper.GetInt("grpc.timeout")
-func NewClientConnectionWithAddress(peerAddress string,  tslEnabled bool, creds credentials.TransportCredentials) (*grpc.ClientConn, error){
+func NewConnectionWithAddress(peerAddress string,  tslEnabled bool, creds credentials.TransportCredentials) (*grpc.ClientConn, error){
 
 	var opts []grpc.DialOption
 

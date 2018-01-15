@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package message;
 
-service Gossip{
+service MessageService{
 
     rpc Stream (stream Envelope) returns (stream Envelope) {}
     // Ping is used to probe a remote peer's aliveness
