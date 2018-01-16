@@ -51,8 +51,8 @@ type Transaction struct {
 	TxData            *TxData
 }
 
-func CreateNewTransaction(peer_id string, tx_id string, status Status, tx_type TransactionType, key []byte, hash string, t time.Time, data *TxData) *Transaction{
-	return &Transaction{InvokePeerID:peer_id, TransactionID:tx_id, TransactionStatus:status, TransactionType:tx_type, PublicKey:key, TransactionHash:hash, TimeStamp:t, TxData:data}
+func CreateNewTransaction(peer_id string, tx_id string, status Status, tx_type TransactionType, key []byte, t time.Time, data *TxData) *Transaction{
+	return &Transaction{InvokePeerID:peer_id, TransactionID:tx_id, TransactionStatus:status, TransactionType:tx_type, PublicKey:key, TimeStamp:t, TxData:data}
 }
 
 func MakeHashArg(tx Transaction) []string{

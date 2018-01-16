@@ -34,34 +34,47 @@ type BlockHeader struct {
 	CreatedPeerID      string
 	Signature          []byte
 	PeerId             string
+	BlockHash          string
 }
 
-func CreateNewBlock(num uint64, prev_hash string, ver string, t time.Time, create_peerId string) *Block{
-	var header = BlockHeader{
-		Number: num,
-		PreviousHash: prev_hash,
-		Version:      ver,
-		TimeStamp:	t,
-		BlockHeight: 0,
-		BlockStatus: Status_BLOCK_UNCONFIRMED,
-		CreatedPeerID: create_peerId,
+func CreateNewBlock(prevBlock *Block, createPeerId string) *Block{
+	var header BlockHeader
+	if prevBlock == nil{
+		header.Number = 0
+		header.PreviousHash = ""
+		header.Version = ""
+		header.BlockHeight = 0
+	} else {
+		header.Number = prevBlock.Header.Number + 1
+		header.PreviousHash = prevBlock.Header.BlockHash
+		header.Version = prevBlock.Header.Version
+		header.BlockHeight = prevBlock.Header.BlockHeight
 	}
-	return &Block{Header:&header, MerkleTree:make([][]string, 0), TransactionCount:0, Transactions:make([]*Transaction, 0)}
+	header.CreatedPeerID = createPeerId
+	header.TimeStamp = time.Now()
+	header.BlockStatus = Status_BLOCK_UNCONFIRMED
+
+	return &Block{Header:&header, MerkleTree:make([][]string, 0), MerkleTreeHeight:0, TransactionCount:0, Transactions:make([]*Transaction, 0)}
 }
 
 func (s *BlockHeader) Reset() { *s = BlockHeader{} }
 
-func (s *Block) PutTranscation(tx *Transaction) bool{
-	if tx.TransactionStatus == Status_BLOCK_UNCONFIRMED{
-		if tx.Validate(){
+func (s *Block) PutTranscation(tx *Transaction) (valid bool, err error){
+	if tx.TransactionStatus == Status_BLOCK_UNCONFIRMED {
+		if tx.Validate() {
 			tx.TransactionStatus = Status_BLOCK_CONFIRMED
 		} else {
-			return false
+			return false, errors.New("invalid tx")
+		}
+	}
+	for _, confirmedTx := range s.Transactions{
+		if confirmedTx.TransactionHash == tx.TransactionHash{
+			return false, errors.New("tx already exists")
 		}
 	}
 	s.Transactions = append(s.Transactions, tx)
 	s.TransactionCount++
-	return true
+	return true, nil
 }
 
 func (s Block) FindTransactionIndex(hash string) (idx int, err error){
@@ -70,7 +83,7 @@ func (s Block) FindTransactionIndex(hash string) (idx int, err error){
 			return idx, nil
 		}
 	}
-	return -1, errors.New("wrong Hash")
+	return -1, errors.New("hash is not here")
 }
 
 func (s *Block) MakeMerkleTree(){
@@ -78,16 +91,17 @@ func (s *Block) MakeMerkleTree(){
 	for _, h := range s.Transactions{
 		mtList = append(mtList, h.TransactionHash)
 	}
-	s.MerkleTree[s.MerkleTreeHeight] = mtList
 	for {
 		treeLength := len(mtList)
 		s.MerkleTreeHeight++
 		if treeLength <= 1 {
+			s.MerkleTree = append(s.MerkleTree, mtList)
 			break
 		} else if treeLength % 2 == 1 {
 			mtList = append(mtList, mtList[treeLength - 1])
 			treeLength++
 		}
+		s.MerkleTree = append(s.MerkleTree, mtList)
 		var tmpMtList []string
 		for x := 0; x < treeLength/2; x++{
 			idx := x * 2
@@ -96,15 +110,26 @@ func (s *Block) MakeMerkleTree(){
 			tmpMtList = append(tmpMtList, mkHash)
 		}
 		mtList = tmpMtList
-		s.MerkleTree[s.MerkleTreeHeight] = mtList
 	}
 	if len(mtList) == 1 {
 		s.Header.MerkleTreeRootHash = mtList[0]
 	}
 }
 
-func (s *Block) MakeMerklePath(){
+func (s Block) MakeMerklePath(idx int) (path []string){
+	for i := 0; i < s.MerkleTreeHeight-1; i++{
+		path = append(path, s.MerkleTree[i][(idx >> uint(i)) ^ 1])
+	}
+	return path
+}
 
+func (s *Block) GenerateBlockHash() error{
+	if s.Header.MerkleTreeRootHash == "" {
+		return errors.New("No MerkleTreeRootHash!")
+	}
+	str := []string{s.Header.MerkleTreeRootHash, s.Header.TimeStamp.String(), s.Header.PreviousHash}
+	s.Header.BlockHash = common.ComputeSHA256(str)
+	return nil
 }
 
 
