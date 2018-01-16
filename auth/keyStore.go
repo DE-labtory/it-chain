@@ -24,4 +24,12 @@ func (ks *keyStore) StoreKey(key Key) (err error) {
 	return nil
 }
 
+func storePublicKey(path string) (err error) {
+
+}
+
+func storePrivateKey(path string) (err error) {
+
+}
+
 
