@@ -4,7 +4,9 @@ import (
 	"errors"
 )
 
-type keyStorer struct {}
+type keyStorer struct {
+	path string
+}
 
 func (ks *keyStorer) Store(key Key) (err error) {
 
@@ -24,11 +26,11 @@ func (ks *keyStorer) Store(key Key) (err error) {
 	return nil
 }
 
-func storePublicKey(path string) (err error) {
+func storePublicKey(key Key) (err error) {
 	return nil
 }
 
-func storePrivateKey(path string) (err error) {
+func storePrivateKey(key Key) (err error) {
 	return nil
 }
 

@@ -14,14 +14,14 @@ import (
 func TestNew(t *testing.T) {
 
 	// Generate Collector
-	_, err := NewCollector()
+	_, err := NewCrypto("./")
 	assert.NoError(t, err)
 
 }
 
 func TestCollector_RSASign(t *testing.T) {
 
-	cryp, err := NewCollector()
+	cryp, err := NewCrypto("./")
 	assert.NoError(t, err)
 
 	// Generate an RSA Key
@@ -80,7 +80,7 @@ func TestCollector_RSASign(t *testing.T) {
 
 func TestCollector_ECDSASign(t *testing.T) {
 
-	cryp, err := NewCollector()
+	cryp, err := NewCrypto("./")
 	assert.NoError(t, err)
 
 	generatedKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -129,7 +129,7 @@ func TestCollector_ECDSASign(t *testing.T) {
 
 func TestCollector_RSAKeyGenerate(t *testing.T) {
 
-	cryp, err := NewCollector()
+	cryp, err := NewCrypto("./")
 	assert.NoError(t, err)
 
 	key, err := cryp.KeyGenerate(&RSAKeyGenOpts{false})
@@ -149,7 +149,7 @@ func TestCollector_RSAKeyGenerate(t *testing.T) {
 
 func TestCollector_ECDSAKeyGenerate(t *testing.T) {
 
-	cryp, err := NewCollector()
+	cryp, err := NewCrypto("./")
 	assert.NoError(t, err)
 
 	key, err := cryp.KeyGenerate(&ECDSAKeyGenOpts{false})

@@ -15,9 +15,13 @@ type collector struct {
 
 }
 
-func NewCollector() (Crypto, error) {
+func NewCrypto(keyStorePath string) (Crypto, error) {
 
-	keyStorer := &keyStorer{}
+	if len(keyStorePath) == 0 {
+		return nil, errors.New("KeyStorePath cannot be empty")
+	}
+
+	keyStorer := &keyStorer{path:keyStorePath}
 
 	signers := make(map[reflect.Type]Signer)
 	signers[reflect.TypeOf(&rsaPrivateKey{})] = &rsaSigner{}
