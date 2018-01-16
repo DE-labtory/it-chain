@@ -2,9 +2,9 @@ package auth
 
 type Key interface {}
 
-type KeyStore interface {
+type KeyStorer interface {
 
-	StoreKey(key Key) (err error)
+	Store(key Key) (err error)
 
 }
 

@@ -4,9 +4,9 @@ import (
 	"errors"
 )
 
-type keyStore struct {}
+type keyStorer struct {}
 
-func (ks *keyStore) StoreKey(key Key) (err error) {
+func (ks *keyStorer) Store(key Key) (err error) {
 
 	if key == nil {
 		return errors.New("Failed to get Key Data")
@@ -25,11 +25,11 @@ func (ks *keyStore) StoreKey(key Key) (err error) {
 }
 
 func storePublicKey(path string) (err error) {
-
+	return nil
 }
 
 func storePrivateKey(path string) (err error) {
-
+	return nil
 }
 
 

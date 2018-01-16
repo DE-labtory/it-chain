@@ -166,3 +166,6 @@ func TestCollector_ECDSAKeyGenerate(t *testing.T) {
 	assert.Equal(t, elliptic.P256(), ecdsaKey.priv.Curve)
 
 }
+
+func TestKeyStorer_Store(t *testing.T) {
+}

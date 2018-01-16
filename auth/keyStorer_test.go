@@ -9,17 +9,17 @@ import (
 )
 
 func TestKeyStore_StoreKey(t *testing.T) {
-	ks := &keyStore{}
+	ks := &keyStorer{}
 
 	generatedKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	assert.NoError(t, err)
 	assert.NotNil(t, generatedKey)
 
 	ecdsaKey := &ecdsaPrivateKey{generatedKey}
-	err = ks.StoreKey(ecdsaKey)
+	err = ks.Store(ecdsaKey)
 	assert.NoError(t, err)
 
-	err = ks.StoreKey(nil)
+	err = ks.Store(nil)
 	assert.Error(t, err)
 
 }
