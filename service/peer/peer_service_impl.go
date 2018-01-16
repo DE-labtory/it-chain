@@ -1,22 +1,32 @@
 package peer
 
+import (
+	"it-chain/network/comm"
+	"it-chain/service/domain"
+	"it-chain/common"
+)
+
+var logger = common.GetLogger("peer_service.go")
+
 type PeerServiceImpl struct {
-	peerTable *PeerTable
+	peerTable *domain.PeerTable
+	comm comm.Comm
 }
 
-func NewPeerServiceImpl(peerTable *PeerTable) *PeerServiceImpl{
+func NewPeerServiceImpl(peerTable *domain.PeerTable,comm comm.Comm) *PeerServiceImpl{
 
 	return &PeerServiceImpl{
 		peerTable: peerTable,
+		comm: comm,
 	}
 }
 
-func (ps *PeerServiceImpl) GetPeerTable() PeerTable{
+func (ps *PeerServiceImpl) GetPeerTable() domain.PeerTable{
 	return *ps.peerTable
 }
 
 //peer info 찾기
-func (ps *PeerServiceImpl) GetPeerInfoByPeerID(peerID string) (*PeerInfo){
+func (ps *PeerServiceImpl) GetPeerInfoByPeerID(peerID string) (*domain.PeerInfo){
 
 	peerInfo := ps.peerTable.FindPeerByPeerID(peerID)
 	return peerInfo
@@ -29,8 +39,8 @@ func (ps *PeerServiceImpl) PushPeerTable(peerIDs []string){
 
 //주기적으로 handle 함수가 콜 된다.
 //주기적으로 peerTable의 peerlist에게 peerTable을 전송한다.
-func (ps *PeerServiceImpl) handle(interface{}){
-
+func (ps *PeerServiceImpl) Handle(interface{}){
+	logger.Println("pushing peer table")
 }
 
 ////peer message를 peersIP에 전파

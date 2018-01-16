@@ -1,9 +1,9 @@
 package comm
 
 import (
-	"it-chain/service/peer"
 	pb "it-chain/network/protos"
 	"sync"
+	"it-chain/service/domain"
 )
 type CommImpl struct{
 	connectionMap map[string]*Connection
@@ -16,7 +16,7 @@ func NewCommImpl() *CommImpl{
 	}
 }
 
-func (comm *CommImpl)CreateConn(peerInfo peer.PeerInfo) error{
+func (comm *CommImpl)CreateConn(peerInfo domain.PeerInfo) error{
 
 	//peerInfo의 ipAddress로 connection을 연결
 	endpoint := peerInfo.GetEndPoint()
@@ -39,7 +39,7 @@ func (comm *CommImpl)CreateConn(peerInfo peer.PeerInfo) error{
 	return nil
 }
 
-func (comm *CommImpl) Send(envelop pb.Envelope, errorCallBack onError, peerInfos ...peer.PeerInfo){
+func (comm *CommImpl) Send(envelop pb.Envelope, errorCallBack onError, peerInfos ...domain.PeerInfo){
 
 	for _, peerInfo := range peerInfos{
 		conn, ok := comm.connectionMap[peerInfo.PeerID]
@@ -59,7 +59,7 @@ func (comm *CommImpl) Stop(){
 	}
 }
 
-func (comm *CommImpl) Close(peerInfo peer.PeerInfo){
+func (comm *CommImpl) Close(peerInfo domain.PeerInfo){
 
 	conn, ok := comm.connectionMap[peerInfo.PeerID]
 

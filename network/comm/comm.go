@@ -2,7 +2,7 @@ package comm
 
 import (
 	"it-chain/network/protos"
-	"it-chain/service/peer"
+	"it-chain/service/domain"
 )
 
 type onError func(error)
@@ -11,13 +11,13 @@ type onError func(error)
 //comm을 통해 peer들과 통신한다.
 type Comm interface{
 
-	Send(envelop message.Envelope, errorCallBack onError, peerInfos ...peer.PeerInfo)
+	Send(envelop message.Envelope, errorCallBack onError, peerInfos ...domain.PeerInfo)
 
 	Stop()
 
-	Close(peerInfo peer.PeerInfo)
+	Close(peerInfo domain.PeerInfo)
 
-	CreateConn(peerInfo peer.PeerInfo) error
+	CreateConn(peerInfo domain.PeerInfo) error
 
 	Size() int
 }
