@@ -8,9 +8,11 @@ import (
 
 type collector struct {
 
-	signers map[reflect.Type]Signer
-	verifiers map[reflect.Type]Verifier
-	keyGenerators map[reflect.Type]KeyGenerator
+	keyStore 		KeyStore
+
+	signers 		map[reflect.Type]Signer
+	verifiers 		map[reflect.Type]Verifier
+	keyGenerators 	map[reflect.Type]KeyGenerator
 
 }
 
@@ -25,8 +27,8 @@ func NewCollector() (Crypto, error) {
 	verifiers[reflect.TypeOf(&ecdsaPublicKey{})] = &ecdsaVerifier{}
 
 	keyGenerators := make(map[reflect.Type]KeyGenerator)
-	keyGenerators[reflect.TypeOf(&RSAKeyGenOpts{false})] = &RSAKeyGenerator{1024}
-	keyGenerators[reflect.TypeOf(&ECDSAKeyGenOpts{false})] = &ECDSAKeyGenerator{elliptic.P256()}
+	keyGenerators[reflect.TypeOf(&RSAKeyGenOpts{false})] = &rsaKeyGenerator{1024}
+	keyGenerators[reflect.TypeOf(&ECDSAKeyGenOpts{false})] = &ecdsaKeyGenerator{elliptic.P256()}
 
 	coll := &collector{
 		signers: 		signers,
@@ -105,6 +107,13 @@ func (c *collector) KeyGenerate(opts KeyGenOpts) (key Key, err error) {
 	if err != nil {
 		return nil, errors.New("Failed to generate a Key")
 	}
+
+	//if !opts.Ephemeral() {
+	//	err = c.keyStore.StoreKey(key)
+	//	if err != nil {
+	//		return nil, errors.New("Failed to store a Key")
+	//	}
+	//}
 
 	return
 
