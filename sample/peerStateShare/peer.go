@@ -22,14 +22,14 @@ import (
 var logger = common.GetLogger("peer.go")
 
 type MessageServer struct {
-
+	peerService peer.PeerService
 }
 
 //message를 받으면 state를 업데이트 한다.
 func (s *MessageServer) Stream(stream pb.MessageService_StreamServer) (error) {
 
 	for {
-		message,err := stream.Recv()
+		envelope,err := stream.Recv()
 
 		if err == io.EOF {
 			return nil
@@ -38,7 +38,17 @@ func (s *MessageServer) Stream(stream pb.MessageService_StreamServer) (error) {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Received: %d\n", message.String())
+
+		byteMessage,err := common.Deserialize(envelope.Payload,&pb.Message{})
+		message := byteMessage.(pb.Message)
+
+		s.peerService.UpdatePeerTable(*message.GetPeerTable_())
+
+		if err != nil{
+			logger.Println("fail to deserialize message")
+		}
+
+		fmt.Printf("Received: %d\n", message)
 	}
 }
 
@@ -46,11 +56,11 @@ func (s *MessageServer) Ping(ctx context.Context, in *pb.Empty) (*pb.Empty, erro
 	return &pb.Empty{}, nil
 }
 
-func SetPeer(ipAddress string, peerID string){
+func SetPeer(ipAddress string, peerID string,port string, bootport string,myID string){
 
 	peer1 := &domain.PeerInfo{
-		Port: "5555",
-		PeerID: "peer1",
+		Port: port,
+		PeerID: myID,
 		IpAddress: "127.0.0.1",
 		HeartBeat: 0,
 		TimeStamp: time.Now(),
@@ -60,6 +70,22 @@ func SetPeer(ipAddress string, peerID string){
 
 	if err != nil{
 
+	}
+
+	logger.Println(ipAddress)
+	logger.Println(peerID)
+	logger.Println(bootport)
+
+	if ipAddress != "" && peerID != "" && bootport != ""{
+		peer2 := &domain.PeerInfo{
+			Port: bootport,
+			PeerID: peerID,
+			IpAddress: ipAddress,
+			HeartBeat: 0,
+			TimeStamp: time.Now(),
+		}
+		peerTable.AddPeerInfo(peer2)
+		logger.Println("boot peer added")
 	}
 
 	comm := comm.NewCommImpl()
@@ -76,9 +102,11 @@ func SetPeer(ipAddress string, peerID string){
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterMessageServiceServer(s, &MessageServer{})
+	pb.RegisterMessageServiceServer(s, &MessageServer{peerService})
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
+
+	logger.Println("peer is on",peer1.GetEndPoint())
 
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
@@ -88,39 +116,62 @@ func SetPeer(ipAddress string, peerID string){
 
 }
 
-func main(){
 
+func main(){
+	const defaultPost = "5555"
+	const defaultID = "peer1"
 	var ipAddress = ""
 	var peerID = ""
+	var port = ""
+	var bootport = ""
+	var myID = ""
 
 	app := cli.NewApp()
 	app.Name = "PEER"
-	app.Usage = "fight the loneliness!"
+	app.Usage = "check peer's status!"
 
 	app.Flags = []cli.Flag {
 		cli.StringFlag{
-			Name:        "ip, i",
+			Name:        "port, P",
+			Usage:       "my port number",
+			Destination: &port,
+		},
+		cli.StringFlag{
+			Name:        "id, I",
+			Usage:       "my port number",
+			Destination: &myID,
+		},
+		cli.StringFlag{
+			Name:        "bootip, bip",
 			Usage:       "IP Address of Boot Peer",
 			Destination: &ipAddress,
 		},
 		cli.StringFlag{
-			Name:        "peerid, p",
-			Usage:       "ID of Peer",
+			Name:        "bootid, bid",
+			Usage:       "ID of Boot Peer",
 			Destination: &peerID,
+		},cli.StringFlag{
+			Name:        "bootport, bport",
+			Usage:       "Port of Boot Peer",
+			Destination: &bootport,
 		},
 	}
 
 	app.Action = func(c *cli.Context) error {
+		if port == ""{
+			port = defaultPost
+		}
 
-
-
+		if myID == ""{
+			myID = defaultID
+		}
 		if ipAddress == "" || peerID == ""{
 			logger.Println("initiating boot peer")
 		}else{
 			logger.Println("initiating peer with ",peerID)
 		}
 
-		SetPeer(ipAddress,peerID)
+		SetPeer(ipAddress,peerID,port,bootport,myID)
 
 		return nil
 	}

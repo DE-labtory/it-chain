@@ -13,4 +13,7 @@ type PeerService interface{
 
 	//peer info
 	PushPeerTable(peerIDs []string)
+
+	//update peerTable
+	UpdatePeerTable(peerTable domain.PeerTable)
 }

@@ -44,5 +44,14 @@ message Transaction{
 }
 
 message PeerTable{
+    string OwnerID = 1;
+    repeated PeerInfo peerInfos = 2;
+}
 
+message PeerInfo {
+    string ipAddress = 1;
+    string port = 2;
+    string peerID = 3;
+    int32 heartBeat = 4;
+    bytes pubKey = 5;
 }

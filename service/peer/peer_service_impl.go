@@ -4,6 +4,8 @@ import (
 	"it-chain/network/comm"
 	"it-chain/service/domain"
 	"it-chain/common"
+	pb "it-chain/network/protos"
+	"github.com/golang/protobuf/proto"
 )
 
 var logger = common.GetLogger("peer_service.go")
@@ -39,8 +41,39 @@ func (ps *PeerServiceImpl) PushPeerTable(peerIDs []string){
 
 //주기적으로 handle 함수가 콜 된다.
 //주기적으로 peerTable의 peerlist에게 peerTable을 전송한다.
+//todo signing이 들어가야함
+//todo struct to grpc proto의 변환 문제
 func (ps *PeerServiceImpl) Handle(interface{}){
 	logger.Println("pushing peer table")
+
+	peerInfos, err := ps.peerTable.SelectRandomPeerInfos(0.5)
+
+	if err != nil{
+		logger.Println("no peer exist")
+		logger.Println(ps.peerTable)
+		return
+	}
+
+	message := &pb.Message{}
+	message.Content = pb.PeerTableToTable(peerInfos,ps.peerTable.OwnerID)
+
+	envelope := pb.Envelope{}
+	envelope.Payload, err = proto.Marshal(message)
+
+	if err !=nil{
+		logger.Println("fail to serialize message")
+	}
+
+	errorCallBack := func(onError error) {
+		logger.Println("fail to send message")
+		logger.Println(onError.Error())
+	}
+
+	ps.comm.Send(envelope,errorCallBack, peerInfos...)
+}
+
+func (ps *PeerServiceImpl) UpdatePeerTable(peerTable domain.PeerTable){
+
 }
 
 ////peer message를 peersIP에 전파
