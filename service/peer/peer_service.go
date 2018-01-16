@@ -16,4 +16,7 @@ type PeerService interface{
 
 	//update peerTable
 	UpdatePeerTable(peerTable domain.PeerTable)
+
+	//Add peer
+	AddPeerInfo(peerInfo *domain.PeerInfo)
 }

@@ -5,15 +5,16 @@ import (
 	"fmt"
 )
 
-func PeerTableToTable(peerInfos []domain.PeerInfo, ownerID string) *Message_PeerTable{
+func PeerTableToTable(peerTable domain.PeerTable) *Message_PeerTable{
 
 	peerTable_ := &Message_PeerTable{}
 	peerTable_.PeerTable = &PeerTable{}
-	peerTable_.PeerTable.OwnerID = ownerID
+	peerTable_.PeerTable.OwnerID = peerTable.OwnerID
 	pbPeerInfos := make([]*PeerInfo,0)
 
-	for _, peerInfo := range peerInfos {
+	for _, peerInfo := range peerTable.PeerMap {
 		pbPeerInfo := &PeerInfo{}
+		pbPeerInfo.IpAddress = peerInfo.IpAddress
 		pbPeerInfo.PeerID = peerInfo.PeerID
 		pbPeerInfo.HeartBeat = int32(peerInfo.HeartBeat)
 		pbPeerInfo.Port = peerInfo.Port
@@ -53,12 +54,14 @@ func (m *Message) SetPeerInfos(peerInfos []domain.PeerInfo, ownerID string){
 }
 
 func (m *Message) GetPeerTable_() *domain.PeerTable{
+
 	peerTable := &domain.PeerTable{}
 	peerTable.OwnerID = m.GetPeerTable().OwnerID
 	peerTable.PeerMap = make(map[string]*domain.PeerInfo)
 
 	for _, peerInfo := range m.GetPeerTable().PeerInfos {
 		peerInfo_ := &domain.PeerInfo{}
+		peerInfo_.IpAddress = peerInfo.IpAddress
 		peerInfo_.PeerID  = peerInfo.PeerID
 		peerInfo_.PubKey = peerInfo.PubKey
 		peerInfo_.HeartBeat = int(peerInfo.HeartBeat)

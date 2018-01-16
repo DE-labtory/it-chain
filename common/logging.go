@@ -16,16 +16,6 @@ func init() {
 	log.Level = logrus.DebugLevel
 }
 
-//
-//func InitLogger() *logrus.Logger{
-//
-//	logrus.SetFormatter(&prefixed.TextFormatter{})
-//	logrus.SetOutput(os.Stdout)
-//
-//	return logrus.New()
-//}
-
-
 func GetLogger(name string) *logrus.Entry{
 	return log.WithFields(logrus.Fields{
 		"File": name,

@@ -48,14 +48,18 @@ func (ps *PeerServiceImpl) Handle(interface{}){
 
 	peerInfos, err := ps.peerTable.SelectRandomPeerInfos(0.5)
 
+
 	if err != nil{
 		logger.Println("no peer exist")
-		logger.Println(ps.peerTable)
 		return
 	}
 
+	logger.Println("pushing peerTable:",ps.peerTable)
+
+	ps.peerTable.IncrementHeartBeat()
+
 	message := &pb.Message{}
-	message.Content = pb.PeerTableToTable(peerInfos,ps.peerTable.OwnerID)
+	message.Content = pb.PeerTableToTable(*ps.peerTable)
 
 	envelope := pb.Envelope{}
 	envelope.Payload, err = proto.Marshal(message)
@@ -69,57 +73,35 @@ func (ps *PeerServiceImpl) Handle(interface{}){
 		logger.Println(onError.Error())
 	}
 
+
 	ps.comm.Send(envelope,errorCallBack, peerInfos...)
 }
 
 func (ps *PeerServiceImpl) UpdatePeerTable(peerTable domain.PeerTable){
 
+	ps.peerTable.Lock()
+	defer ps.peerTable.Unlock()
+
+	for id, peerInfo := range peerTable.PeerMap{
+		peer,ok := ps.peerTable.PeerMap[id]
+
+		if ok{
+			peer.Update(peerInfo)
+		}else{
+			ps.AddPeerInfo(peerInfo)
+		}
+	}
+
+	ps.peerTable.UpdateTimeStamp()
 }
 
-////peer message를 peersIP에 전파
-//func (gs GossipServiceImpl) Push(gossipTable GossipTable, peersIP []string){
-//
-//	for _, ip := range peersIP{
-//		go func(){
-//			conn, err := grpc.Dial(ip, grpc.WithInsecure())
-//			if err != nil {
-//				logger.Fatalf("did not connect: %v", err)
-//			}
-//
-//			defer conn.Close()
-//			c := pb.NewGossipClient(conn)
-//
-//			r, err := c.PushGossip(context.Background(), gossipTable.toProto())
-//
-//			if err != nil {
-//				logger.Error("fail to push peer ",r.String())
-//			}
-//
-//			logger.Info("success to push peer",r.String())
-//		}()
-//	}
-//}
-//
-//func (gs *GossipServiceImpl) Update(gossipTable GossipTable){
-//
-//	gs.gossipTable.UpdateGossipTable(gossipTable)
-//	logger.Info("update peer", gs.gossipTable)
-//}
-//
-//func (gs GossipServiceImpl) Listen(gossipTable GossipTable){
-//
-//}
-//
-//func (gs GossipServiceImpl) Pull() GossipTable{
-//
-//	return *gs.gossipTable
-//}
-//
-//func (gs GossipServiceImpl) Stop(){
-//
-//}
-//
-//func (gs GossipServiceImpl) GetMyGossipTable() *GossipTable{
-//	return gs.gossipTable
-//}
+func (ps *PeerServiceImpl) AddPeerInfo(peerInfo *domain.PeerInfo){
+	err := ps.comm.CreateConn(*peerInfo)
 
+	if err != nil{
+		logger.Error("failed to connect with", peerInfo)
+		return
+	}
+
+	ps.peerTable.AddPeerInfo(peerInfo)
+}

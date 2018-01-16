@@ -19,6 +19,12 @@ func NewCommImpl() *CommImpl{
 func (comm *CommImpl)CreateConn(peerInfo domain.PeerInfo) error{
 
 	//peerInfo의 ipAddress로 connection을 연결
+	_, ok := comm.connectionMap[peerInfo.PeerID]
+
+	if ok{
+		return nil
+	}
+
 	endpoint := peerInfo.GetEndPoint()
 	grpcConnection,err := NewConnectionWithAddress(endpoint,false,nil)
 
@@ -26,7 +32,7 @@ func (comm *CommImpl)CreateConn(peerInfo domain.PeerInfo) error{
 		return err
 	}
 
-	conn,err  := NewConnection(grpcConnection)
+	conn,err := NewConnection(grpcConnection)
 
 	if err != nil{
 		return err

@@ -2,7 +2,6 @@ package main
 
 import (
 	"io"
-	"fmt"
 	pb "it-chain/network/protos"
 	"golang.org/x/net/context"
 	"it-chain/service/peer"
@@ -17,6 +16,7 @@ import (
 	"github.com/urfave/cli"
 	"os"
 	"it-chain/common"
+	"github.com/golang/protobuf/proto"
 )
 
 var logger = common.GetLogger("peer.go")
@@ -39,16 +39,21 @@ func (s *MessageServer) Stream(stream pb.MessageService_StreamServer) (error) {
 			return err
 		}
 
-		byteMessage,err := common.Deserialize(envelope.Payload,&pb.Message{})
-		message := byteMessage.(pb.Message)
+		message := &pb.Message{}
+
+		err = proto.Unmarshal(envelope.Payload,message)
+
+		if err != nil{
+			logger.Error("fail to deserialize message")
+		}
+
+		logger.Println("recevied peerTable",*message.GetPeerTable_())
 
 		s.peerService.UpdatePeerTable(*message.GetPeerTable_())
 
 		if err != nil{
 			logger.Println("fail to deserialize message")
 		}
-
-		fmt.Printf("Received: %d\n", message)
 	}
 }
 
@@ -76,6 +81,12 @@ func SetPeer(ipAddress string, peerID string,port string, bootport string,myID s
 	logger.Println(peerID)
 	logger.Println(bootport)
 
+
+
+	comm := comm.NewCommImpl()
+
+	peerService := peer.NewPeerServiceImpl(peerTable,comm)
+
 	if ipAddress != "" && peerID != "" && bootport != ""{
 		peer2 := &domain.PeerInfo{
 			Port: bootport,
@@ -84,13 +95,10 @@ func SetPeer(ipAddress string, peerID string,port string, bootport string,myID s
 			HeartBeat: 0,
 			TimeStamp: time.Now(),
 		}
-		peerTable.AddPeerInfo(peer2)
 		logger.Println("boot peer added")
+		peerService.AddPeerInfo(peer2)
+		logger.Println(peerService.GetPeerTable())
 	}
-
-	comm := comm.NewCommImpl()
-
-	peerService := peer.NewPeerServiceImpl(peerTable,comm)
 
 	eventBatcher := batch.NewGRPCMessageBatcher(time.Second*5,peerService,false)
 
