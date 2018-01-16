@@ -2,6 +2,12 @@ package auth
 
 type Key interface {}
 
+type KeyStore interface {
+
+	StoreKey(key Key) (err error)
+
+}
+
 type Crypto interface {
 
 	Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, err error)
