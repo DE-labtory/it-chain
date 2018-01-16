@@ -40,7 +40,7 @@ func (l *BlockchainLevelDB) AddBlock(block *blockchain.Block) error {
 		return err
 	}
 
-	err = blockHashDB.Put([]byte(block.Header.DataHash), serializedBlock, true)
+	err = blockHashDB.Put([]byte(block.Header.BlockHash), serializedBlock, true)
 	if err != nil {
 		return err
 	}

@@ -15,7 +15,7 @@ func TestBlockchainLevelDB_AddBlock(t *testing.T) {
 		os.RemoveAll(path)
 	}()
 
-	block := &blockchain.Block{}
+	block := blockchain.CreateNewBlock(nil, "test")
 
 	err := blockchainLevelDB.AddBlock(block)
 	assert.NoError(t, err)
@@ -29,10 +29,8 @@ func TestBlockchainLevelDB_GetBlockByNumber(t *testing.T) {
 		os.RemoveAll(path)
 	}()
 
-	block := &blockchain.Block{}
-
-	blockNumber := uint64(1)
-	block.Header.Number = blockNumber
+	block := blockchain.CreateNewBlock(nil, "test")
+	blockNumber := block.Header.Number
 
 	err := blockchainLevelDB.AddBlock(block)
 	assert.NoError(t, err)
@@ -50,10 +48,8 @@ func TestBlockchainLevelDB_GetBlockByHash(t *testing.T) {
 		os.RemoveAll(path)
 	}()
 
-	block := &blockchain.Block{}
-
-	blockHash := "hash"
-	block.Header.DataHash = blockHash
+	block := blockchain.CreateNewBlock(nil, "test")
+	blockHash := block.Header.BlockHash
 
 	err := blockchainLevelDB.AddBlock(block)
 	assert.NoError(t, err)
