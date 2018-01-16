@@ -74,7 +74,7 @@ func Serialize(object interface{}) ([]byte, error) {
 	return b.Bytes(), err
 }
 
-func Deserialize(serializedBytes []byte, object interface{}) (interface{}, error) {
+func Deserialize(serializedBytes []byte, object interface{}) error {
 	var b bytes.Buffer
 
 	b.Write(serializedBytes)
@@ -85,7 +85,7 @@ func Deserialize(serializedBytes []byte, object interface{}) (interface{}, error
 		panic(fmt.Sprintf("Error decoding block : %s", err))
 	}
 
-	return object, err
+	return err
 }
 
 func ComputeSHA256(data []byte) (hash [32]uint8) {
