@@ -16,7 +16,7 @@ func (ks *keyStore) StoreKey(key Key) (err error) {
 		return errors.New("Failed to get Key Data")
 	}
 
-	switch k := key.(type) {
+	switch key.(type) {
 	case *rsaPrivateKey:
 	case *rsaPublicKey:
 	case *ecdsaPrivateKey:
