@@ -20,6 +20,9 @@ import (
 	"os"
 	"path"
 	"io"
+	"bytes"
+	"encoding/gob"
+	"fmt"
 	"crypto/sha256"
 	"encoding/hex"
 )
@@ -64,4 +67,31 @@ func ComputeSHA256(data []string) string {
 	hash := sha256.New()
 	hash.Write([]byte(arg))
 	return hex.EncodeToString(hash.Sum(nil))
+
+}
+func Serialize(object interface{}) ([]byte, error) {
+	var b bytes.Buffer
+
+	encoder := gob.NewEncoder(&b)
+	err := encoder.Encode(object)
+
+	if err != nil {
+		panic(fmt.Sprintf("Error encoding block : %s", err))
+	}
+
+	return b.Bytes(), err
+}
+
+func Deserialize(serializedBytes []byte, object interface{}) (interface{}, error) {
+	var b bytes.Buffer
+
+	b.Write(serializedBytes)
+	decoder := gob.NewDecoder(&b)
+	err := decoder.Decode(object)
+
+	if err != nil {
+		panic(fmt.Sprintf("Error decoding block : %s", err))
+	}
+
+	return object, err
 }
