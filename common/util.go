@@ -24,6 +24,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"crypto/sha256"
+	"encoding/hex"
 )
 
 var logger = GetLogger("util.go")
@@ -61,6 +62,13 @@ func DirEmpty(dirPath string) (bool, error) {
 	return false, err
 }
 
+func ComputeSHA256(data []string) string {
+	arg := strings.Join(data, ",")
+	hash := sha256.New()
+	hash.Write([]byte(arg))
+	return hex.EncodeToString(hash.Sum(nil))
+
+}
 func Serialize(object interface{}) ([]byte, error) {
 	var b bytes.Buffer
 
@@ -86,9 +94,4 @@ func Deserialize(serializedBytes []byte, object interface{}) (interface{}, error
 	}
 
 	return object, err
-}
-
-func ComputeSHA256(data []byte) (hash [32]uint8) {
-	hash = sha256.Sum256(data)
-	return hash
 }
