@@ -1,6 +1,10 @@
 package auth
 
-type Key interface {}
+type Key interface {
+
+	SKI() (ski []byte)
+
+}
 
 type KeyStorer interface {
 

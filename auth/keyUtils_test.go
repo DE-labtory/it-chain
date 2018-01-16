@@ -19,7 +19,7 @@ func TestRSAPublicKeyToPem(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, pub)
 
-	data, err := PublicKeyToPem(pub.(*rsaPublicKey).pub)
+	data, err := PublicKeyToPem(pub.(*rsaPublicKey))
 	assert.NoError(t, err)
 	assert.NotNil(t, data)
 
@@ -32,7 +32,7 @@ func TestRSAPrivateKeyToPem(t *testing.T) {
 
 	rsaKey := &rsaPrivateKey{generatedRSAKey}
 
-	data, err := PrivateKeyToPem(rsaKey.priv)
+	data, err := PrivateKeyToPem(rsaKey)
 	assert.NoError(t, err)
 	assert.NotNil(t, data)
 
@@ -48,7 +48,7 @@ func TestECDSAPublicKeyToPem(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, pub)
 
-	data, err := PublicKeyToPem(pub.(*ecdsaPublicKey).pub)
+	data, err := PublicKeyToPem(pub.(*ecdsaPublicKey))
 	assert.NoError(t, err)
 	assert.NotNil(t, data)
 
@@ -61,7 +61,7 @@ func TestECDSAPrivateKeyToPem(t *testing.T) {
 
 	rsaKey := &ecdsaPrivateKey{generatedECDSAKey}
 
-	data, err := PrivateKeyToPem(rsaKey.priv)
+	data, err := PrivateKeyToPem(rsaKey)
 	assert.NoError(t, err)
 	assert.NotNil(t, data)
 

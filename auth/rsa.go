@@ -4,6 +4,9 @@ import (
 	"crypto/rsa"
 	"errors"
 	"crypto/rand"
+	"encoding/asn1"
+	"math/big"
+	"crypto/sha256"
 )
 
 type rsaSigner struct{}
@@ -43,8 +46,29 @@ func (v *rsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpts)
 
 }
 
+type rsaKeyMarshalOpt struct {
+	N *big.Int
+	E int
+}
+
 type rsaPrivateKey struct {
 	priv *rsa.PrivateKey
+}
+
+func (key *rsaPrivateKey) SKI() (ski []byte) {
+
+	if key.priv == nil {
+		return nil
+	}
+
+	data, _ := asn1.Marshal(rsaKeyMarshalOpt{
+		key.priv.N, key.priv.E,
+	})
+
+	hash := sha256.New()
+	hash.Write(data)
+	return hash.Sum(nil)
+
 }
 
 func (key *rsaPrivateKey) PublicKey() (pub Key, err error) {
@@ -53,4 +77,20 @@ func (key *rsaPrivateKey) PublicKey() (pub Key, err error) {
 
 type rsaPublicKey struct {
 	pub *rsa.PublicKey
+}
+
+func (key *rsaPublicKey) SKI() (ski []byte) {
+
+	if key.pub == nil {
+		return nil
+	}
+
+	data, _ := asn1.Marshal(rsaKeyMarshalOpt{
+		key.pub.N, key.pub.E,
+	})
+
+	hash := sha256.New()
+	hash.Write(data)
+	return hash.Sum(nil)
+
 }

@@ -1,10 +1,8 @@
 package auth
 
 import (
-	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"crypto/ecdsa"
 	"errors"
 )
 
@@ -15,9 +13,9 @@ func PublicKeyToPem(pub Key) (data []byte, err error) {
 	}
 
 	switch k := pub.(type) {
-	case *rsa.PublicKey:
+	case *rsaPublicKey:
 
-		keyData, err := x509.MarshalPKIXPublicKey(k)
+		keyData, err := x509.MarshalPKIXPublicKey(k.pub)
 		if err != nil {
 			return nil, err
 		}
@@ -29,9 +27,9 @@ func PublicKeyToPem(pub Key) (data []byte, err error) {
 			},
 		), nil
 
-	case *ecdsa.PublicKey:
+	case *ecdsaPublicKey:
 
-		keyData, err := x509.MarshalPKIXPublicKey(k)
+		keyData, err := x509.MarshalPKIXPublicKey(k.pub)
 		if err != nil {
 			return nil, err
 		}
@@ -56,8 +54,8 @@ func PrivateKeyToPem(pri Key) (data []byte, err error) {
 	}
 
 	switch k := pri.(type) {
-	case *rsa.PrivateKey:
-		keyData := x509.MarshalPKCS1PrivateKey(k)
+	case *rsaPrivateKey:
+		keyData := x509.MarshalPKCS1PrivateKey(k.priv)
 
 		return pem.EncodeToMemory(
 			&pem.Block{
@@ -66,8 +64,8 @@ func PrivateKeyToPem(pri Key) (data []byte, err error) {
 			},
 		), nil
 
-	case *ecdsa.PrivateKey:
-		keyData, err := x509.MarshalECPrivateKey(k)
+	case *ecdsaPrivateKey:
+		keyData, err := x509.MarshalECPrivateKey(k.priv)
 		if err != nil {
 			return nil, err
 		}
