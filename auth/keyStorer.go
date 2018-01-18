@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"io/ioutil"
 	"encoding/hex"
+	"os"
 )
 
 type keyStorer struct {
@@ -40,7 +41,12 @@ func (ks *keyStorer) storePublicKey(key Key) (err error) {
 		return
 	}
 
-	err = ioutil.WriteFile(ks.getFullPath(hex.EncodeToString(key.SKI()), "pub"), data, 0700)
+	path, err := ks.getFullPath(hex.EncodeToString(key.SKI()), "pub")
+	if err != nil {
+		return
+	}
+
+	err = ioutil.WriteFile(path, data, 0700)
 	if err != nil {
 		return
 	}
@@ -55,7 +61,12 @@ func (ks *keyStorer) storePrivateKey(key Key) (err error) {
 		return
 	}
 
-	err = ioutil.WriteFile(ks.getFullPath(hex.EncodeToString(key.SKI()), "pri"), data, 0700)
+	path, err := ks.getFullPath(hex.EncodeToString(key.SKI()), "pri")
+	if err != nil {
+		return
+	}
+
+	err = ioutil.WriteFile(path, data, 0700)
 	if err != nil {
 		return
 	}
@@ -63,8 +74,15 @@ func (ks *keyStorer) storePrivateKey(key Key) (err error) {
 	return nil
 }
 
-func (ks *keyStorer) getFullPath(alias, suffix string) string {
-	return filepath.Join(ks.path, alias + "_" + suffix)
+func (ks *keyStorer) getFullPath(alias, suffix string) (path string, err error) {
+	if _, err := os.Stat(ks.path); os.IsNotExist(err) {
+		err = os.MkdirAll(ks.path, 0755)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return filepath.Join(ks.path, alias + "_" + suffix), nil
 }
 
 
