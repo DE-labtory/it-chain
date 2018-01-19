@@ -7,6 +7,7 @@ import (
 	pb "it-chain/network/protos"
 	"github.com/golang/protobuf/proto"
 	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/codes"
 )
 
 var logger = common.GetLogger("peer_service.go")
@@ -70,16 +71,24 @@ func (ps *PeerServiceImpl) Handle(interface{}){
 	}
 
 	errorCallBack := func(onError error) {
-		logger.Println("fail to send message")
-		logger.Println(onError.Error())
-		statusCode,ok := status.FromError(onError)
-
+		logger.Println("fail to send message error:", onError.Error())
+		status,ok := status.FromError(onError)
 		if ok{
-			logger.Println(statusCode.Code())
+			ps.grpcErrorHandling(status)
 		}
 	}
 
 	ps.comm.Send(envelope,errorCallBack, peerInfos...)
+}
+
+func (ps *PeerServiceImpl) grpcErrorHandling(status *status.Status){
+	switch status.Code(){
+		case codes.Unavailable:
+			//연결 취소 해야함
+			logger.Infoln("unavailable error occured :")
+		default:
+			logger.Infoln("no matching grpc error code:", status.Code())
+	}
 }
 
 func (ps *PeerServiceImpl) UpdatePeerTable(peerTable domain.PeerTable){

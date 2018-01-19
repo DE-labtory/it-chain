@@ -127,7 +127,7 @@ func SetPeer(ipAddress string, peerID string,port string, bootport string,myID s
 
 func main(){
 	const defaultPost = "5555"
-	const defaultID = "peer1"
+	const defaultID = "peer0"
 	var ipAddress = ""
 	var peerID = ""
 	var port = ""
