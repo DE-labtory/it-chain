@@ -3,18 +3,18 @@ package comm
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"it-chain/service/peer"
 	"time"
 	"net"
 	"log"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc"
 	pb "it-chain/network/protos"
+	"it-chain/service/domain"
 )
 
-func MockCreateNewPeerInfo(peerID string) *peer.PeerInfo{
+func MockCreateNewPeerInfo(peerID string) *domain.PeerInfo{
 
-	return  &peer.PeerInfo{
+	return  &domain.PeerInfo{
 		PeerID: peerID,
 		Port: "5555",
 		IpAddress: "127.0.0.1",
@@ -23,7 +23,7 @@ func MockCreateNewPeerInfo(peerID string) *peer.PeerInfo{
 	}
 }
 
-func ListenMockServerWithPeer(peer peer.PeerInfo) (*grpc.Server,net.Listener){
+func ListenMockServerWithPeer(peer domain.PeerInfo) (*grpc.Server,net.Listener){
 	lis, err := net.Listen("tcp", peer.GetEndPoint())
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

@@ -7,7 +7,7 @@ import (
 )
 
 type EventHandler interface{
-	handle(interface{})
+	Handle(interface{})
 }
 
 type EventBatcher struct {
@@ -98,7 +98,7 @@ func (gb *EventBatcher) emit() {
 	}
 
 	for _, message := range gb.buff{
-		gb.handler.handle(message.data)
+		gb.handler.Handle(message.data)
 	}
 
 	gb.vacate()
