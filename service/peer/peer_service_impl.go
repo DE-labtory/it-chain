@@ -6,6 +6,7 @@ import (
 	"it-chain/common"
 	pb "it-chain/network/protos"
 	"github.com/golang/protobuf/proto"
+	"google.golang.org/grpc/status"
 )
 
 var logger = common.GetLogger("peer_service.go")
@@ -71,8 +72,12 @@ func (ps *PeerServiceImpl) Handle(interface{}){
 	errorCallBack := func(onError error) {
 		logger.Println("fail to send message")
 		logger.Println(onError.Error())
-	}
+		statusCode,ok := status.FromError(onError)
 
+		if ok{
+			logger.Println(statusCode.Code())
+		}
+	}
 
 	ps.comm.Send(envelope,errorCallBack, peerInfos...)
 }
