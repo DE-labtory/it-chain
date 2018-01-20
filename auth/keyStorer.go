@@ -46,9 +46,11 @@ func (ks *keyStorer) storePublicKey(key Key) (err error) {
 		return
 	}
 
-	err = ioutil.WriteFile(path, data, 0700)
-	if err != nil {
-		return
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		err = ioutil.WriteFile(path, data, 0700)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -66,9 +68,11 @@ func (ks *keyStorer) storePrivateKey(key Key) (err error) {
 		return
 	}
 
-	err = ioutil.WriteFile(path, data, 0700)
-	if err != nil {
-		return
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		err = ioutil.WriteFile(path, data, 0700)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
