@@ -78,7 +78,9 @@ func (ps *PeerServiceImpl) Handle(interface{}){
 		}
 	}
 
-	ps.comm.Send(envelope,errorCallBack, peerInfos...)
+	for _,peerInfo := range peerInfos{
+		ps.comm.Send(envelope,errorCallBack, peerInfo)
+	}
 }
 
 func (ps *PeerServiceImpl) grpcErrorHandling(status *status.Status){

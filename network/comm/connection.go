@@ -42,15 +42,15 @@ func (conn *Connection) toDie() bool {
 	return atomic.LoadInt32(&(conn.stopFlag)) == int32(1)
 }
 
-func (conn *Connection) SendWithStream(envelop *message.Envelope, errorCallback onError){
+func (conn *Connection) SendWithStream(envelop *message.Envelope) error{
 
 	err := conn.clientStream.Send(envelop)
 	if err != nil{
-		if errorCallback != nil{
-			errorCallback(err)
-		}
-		return
+
+		return err
 	}
+
+	return nil
 }
 
 
