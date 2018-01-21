@@ -12,6 +12,7 @@ type collector struct {
 	signers 		map[reflect.Type]Signer
 	verifiers 		map[reflect.Type]Verifier
 	keyGenerators 	map[reflect.Type]KeyGenerator
+	keyImporters	map[reflect.Type]KeyImporter
 
 }
 
@@ -35,11 +36,18 @@ func NewCrypto(keyStorePath string) (Crypto, error) {
 	keyGenerators[reflect.TypeOf(&RSAKeyGenOpts{false})] = &rsaKeyGenerator{1024}
 	keyGenerators[reflect.TypeOf(&ECDSAKeyGenOpts{false})] = &ecdsaKeyGenerator{elliptic.P256()}
 
+	keyImporters := make(map[reflect.Type]KeyImporter)
+	keyImporters[reflect.TypeOf(&RSAPrivateKeyImporterOpts{})] = &rsaPrivateKeyImporter{}
+	keyImporters[reflect.TypeOf(&RSAPublicKeyImporterOpts{})] = &rsaPublicKeyImporter{}
+	keyImporters[reflect.TypeOf(&ECDSAPrivateKeyImporterOpts{})] = &ecdsaPrivateKeyImporter{}
+	keyImporters[reflect.TypeOf(&ECDSAPublicKeyImporterOpts{})] = &ecdsaPublicKeyImporter{}
+
 	coll := &collector{
 		keyStorer:		keyStorer,
 		signers: 		signers,
 		verifiers: 		verifiers,
 		keyGenerators: 	keyGenerators,
+		keyImporters: 	keyImporters,
 	}
 
 	return coll, nil
@@ -123,4 +131,27 @@ func (c *collector) KeyGenerate(opts KeyGenOpts) (key Key, err error) {
 
 	return
 
+}
+
+func (c *collector) Import(data interface{}, opts KeyGenOpts) (key Key, err error) {
+
+	if data == nil {
+		return nil, errors.New("Data have not to be NIL")
+	}
+
+	if opts == nil {
+		return nil, errors.New("Invalid KeyImporter Opts")
+	}
+
+	keyImporter, found := c.keyImporters[reflect.TypeOf(opts)]
+	if !found {
+		return nil, errors.New("Invalid KeyImporter Opts")
+	}
+
+	key, err = keyImporter.Import(data)
+	if err != nil {
+		return nil, errors.New("Failed to import key from input data")
+	}
+
+	return
 }

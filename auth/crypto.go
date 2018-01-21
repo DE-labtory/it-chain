@@ -20,4 +20,6 @@ type Crypto interface {
 
 	KeyGenerate(opts KeyGenOpts) (key Key, err error)
 
+	KeyImporter(data interface{}, opts KeyImporterOpts) (key Key, err error)
+
 }

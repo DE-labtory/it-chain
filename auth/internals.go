@@ -29,3 +29,11 @@ type KeyGenerator interface {
 	KeyGenerate(opts KeyGenOpts) (key Key, err error)
 
 }
+
+type KeyImporterOpts interface {}
+
+type KeyImporter interface {
+
+	Import(data interface{}) (key Key, err error)
+
+}
