@@ -11,7 +11,7 @@ type onError func(error)
 //comm을 통해 peer들과 통신한다.
 type Comm interface{
 
-	Send(envelop message.Envelope, errorCallBack onError, peerInfos ...domain.PeerInfo)
+	Send(envelop message.Envelope, errorCallBack onError, peerInfo domain.PeerInfo)
 
 	Stop()
 

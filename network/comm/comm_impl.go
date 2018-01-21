@@ -4,7 +4,11 @@ import (
 	pb "it-chain/network/protos"
 	"sync"
 	"it-chain/service/domain"
+	"it-chain/common"
 )
+
+var commLogger = common.GetLogger("comm_impl.go")
+
 type CommImpl struct{
 	connectionMap map[string]*Connection
 	sync.RWMutex
@@ -45,15 +49,21 @@ func (comm *CommImpl)CreateConn(peerInfo domain.PeerInfo) error{
 	return nil
 }
 
-func (comm *CommImpl) Send(envelop pb.Envelope, errorCallBack onError, peerInfos ...domain.PeerInfo){
+func (comm *CommImpl) Send(envelop pb.Envelope, errorCallBack onError, peerInfo domain.PeerInfo){
 
-	for _, peerInfo := range peerInfos{
-		conn, ok := comm.connectionMap[peerInfo.PeerID]
-		if ok{
-			conn.SendWithStream(&envelop,errorCallBack)
-		}else{
-			//todo 처리
+	conn, ok := comm.connectionMap[peerInfo.PeerID]
+
+	if ok{
+		err := conn.SendWithStream(&envelop)
+		if err != nil{
+			//todo 어떤 error일 경우에 conn을 close 할지 정해야함
+			commLogger.Error(err)
+			conn.Close()
+			delete(comm.connectionMap, peerInfo.PeerID)
+			commLogger.Println("connection: ",peerInfo.PeerID, "is closing")
 		}
+	}else{
+		//todo 처리
 	}
 }
 
