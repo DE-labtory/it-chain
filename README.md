@@ -1,5 +1,5 @@
 # it-chain
-Generalized Private Chain For All
+Generalized My Private Chain For All
 
 
 ## License
