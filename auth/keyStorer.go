@@ -36,7 +36,7 @@ func (ks *keyStorer) Store(key Key) (err error) {
 
 func (ks *keyStorer) storePublicKey(key Key) (err error) {
 
-	data, err := PublicKeyToPem(key)
+	data, err := PublicKeyToPEM(key)
 	if err != nil {
 		return
 	}
@@ -58,7 +58,7 @@ func (ks *keyStorer) storePublicKey(key Key) (err error) {
 
 func (ks *keyStorer) storePrivateKey(key Key) (err error) {
 
-	data, err := PrivateKeyToPem(key)
+	data, err := PrivateKeyToPEM(key)
 	if err != nil {
 		return
 	}
