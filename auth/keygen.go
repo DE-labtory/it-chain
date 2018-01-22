@@ -9,8 +9,6 @@ import (
 	"errors"
 )
 
-type rsaKeyGenOpts struct {}
-
 type rsaKeyGenerator struct {
 	bits int
 }
@@ -30,8 +28,6 @@ func (keygen *rsaKeyGenerator) KeyGenerate(opts KeyGenOpts) (key Key, err error)
 	return &rsaPrivateKey{generatedKey}, nil
 
 }
-
-type ecdsaKeyGenOpts struct {}
 
 type ecdsaKeyGenerator struct {
 	curve elliptic.Curve

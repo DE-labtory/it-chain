@@ -9,19 +9,20 @@ import (
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
+	"os"
 )
 
 func TestNew(t *testing.T) {
 
 	// Generate Collector
-	_, err := NewCollector()
+	_, err := NewCrypto(os.TempDir())
 	assert.NoError(t, err)
 
 }
 
 func TestCollector_RSASign(t *testing.T) {
 
-	cryp, err := NewCollector()
+	cryp, err := NewCrypto(os.TempDir())
 	assert.NoError(t, err)
 
 	// Generate an RSA Key
@@ -80,7 +81,7 @@ func TestCollector_RSASign(t *testing.T) {
 
 func TestCollector_ECDSASign(t *testing.T) {
 
-	cryp, err := NewCollector()
+	cryp, err := NewCrypto(os.TempDir())
 	assert.NoError(t, err)
 
 	generatedKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -129,10 +130,12 @@ func TestCollector_ECDSASign(t *testing.T) {
 
 func TestCollector_RSAKeyGenerate(t *testing.T) {
 
-	cryp, err := NewCollector()
+	cryp, err := NewCrypto("./RSAKeyGen_Test")
 	assert.NoError(t, err)
 
-	key, err := cryp.KeyGenerate(&rsaKeyGenOpts{})
+	defer os.RemoveAll("./RSAKeyGen_Test")
+
+	key, err := cryp.KeyGenerate(&RSAKeyGenOpts{false})
 	assert.NoError(t, err)
 	assert.NotNil(t, key)
 
@@ -149,10 +152,12 @@ func TestCollector_RSAKeyGenerate(t *testing.T) {
 
 func TestCollector_ECDSAKeyGenerate(t *testing.T) {
 
-	cryp, err := NewCollector()
+	cryp, err := NewCrypto("./ECDSAKeyGen_Test")
 	assert.NoError(t, err)
 
-	key, err := cryp.KeyGenerate(&ecdsaKeyGenOpts{})
+	defer os.RemoveAll("./ECDSAKeyGen_Test")
+
+	key, err := cryp.KeyGenerate(&ECDSAKeyGenOpts{false})
 	assert.NoError(t, err)
 	assert.NotNil(t, key)
 

@@ -18,7 +18,11 @@ type Verifier interface {
 
 }
 
-type KeyGenOpts interface {}
+type KeyGenOpts interface {
+
+	Ephemeral() bool
+
+}
 
 type KeyGenerator interface {
 
