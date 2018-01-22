@@ -9,7 +9,7 @@ type onError func(error)
 
 //comm은 peer 들간의 connection을 유지하고있다.
 //comm을 통해 peer들과 통신한다.
-type Comm interface{
+type ConnectionManager interface{
 
 	SendStream(envelope message.Envelope, errorCallBack onError, connectionID string)
 
@@ -17,11 +17,7 @@ type Comm interface{
 
 	Close(peerInfo domain.PeerInfo)
 
-	//connection이 유지
-	CreateStreamConn(connectionID string, ip string) error
-
-	//connection이 유지되지 않는다.
-	Send(ip string) error
+	CreateStreamConn(connectionID string, ip string, handler handler) error
 
 	Size() int
 }

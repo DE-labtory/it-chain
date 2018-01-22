@@ -9,18 +9,18 @@ import (
 
 var commLogger = common.GetLogger("comm_impl.go")
 
-type CommImpl struct{
+type ConnectionManagerImpl struct{
 	connectionMap map[string]*Connection
 	sync.RWMutex
 }
 
-func NewCommImpl() *CommImpl{
-	return &CommImpl{
+func NewConnectionManagerImpl() *ConnectionManagerImpl{
+	return &ConnectionManagerImpl{
 		connectionMap: make(map[string]*Connection),
 	}
 }
 
-func (comm *CommImpl) CreateStreamConn(connectionID string, ip string, handler handler) error{
+func (comm *ConnectionManagerImpl) CreateStreamConn(connectionID string, ip string, handler handler) error{
 
 	//peerInfo의 ipAddress로 connection을 연결
 	_, ok := comm.connectionMap[connectionID]
@@ -50,7 +50,7 @@ func (comm *CommImpl) CreateStreamConn(connectionID string, ip string, handler h
 	return nil
 }
 
-func (comm *CommImpl) SendStream(envelope pb.Envelope, errorCallBack onError, connectionID string){
+func (comm *ConnectionManagerImpl) SendStream(envelope pb.Envelope, errorCallBack onError, connectionID string){
 
 	conn, ok := comm.connectionMap[connectionID]
 
@@ -62,7 +62,7 @@ func (comm *CommImpl) SendStream(envelope pb.Envelope, errorCallBack onError, co
 	}
 }
 
-func (comm *CommImpl) Stop(){
+func (comm *ConnectionManagerImpl) Stop(){
 	commLogger.Println("all connections are closing")
 	for id, conn := range comm.connectionMap{
 		conn.Close()
@@ -70,7 +70,7 @@ func (comm *CommImpl) Stop(){
 	}
 }
 
-func (comm *CommImpl) Close(peerInfo domain.PeerInfo){
+func (comm *ConnectionManagerImpl) Close(peerInfo domain.PeerInfo){
 
 	conn, ok := comm.connectionMap[peerInfo.PeerID]
 
@@ -81,6 +81,6 @@ func (comm *CommImpl) Close(peerInfo domain.PeerInfo){
 	}
 }
 
-func (comm *CommImpl) Size() int{
+func (comm *ConnectionManagerImpl) Size() int{
 	return len(comm.connectionMap)
 }

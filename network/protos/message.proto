@@ -9,6 +9,10 @@ service MessageService{
     rpc Ping (Empty) returns (Empty) {}
 }
 
+service PeerService{
+    rpc PeerInfo (Empty) returns (PeerInfo) {}
+}
+
 message Envelope {
 
     //marshalled Message

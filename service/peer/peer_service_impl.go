@@ -12,10 +12,10 @@ var logger = common.GetLogger("peer_service.go")
 
 type PeerServiceImpl struct {
 	peerTable *domain.PeerTable
-	comm comm.Comm
+	comm comm.ConnectionManager
 }
 
-func NewPeerServiceImpl(peerTable *domain.PeerTable,comm comm.Comm) *PeerServiceImpl{
+func NewPeerServiceImpl(peerTable *domain.PeerTable,comm comm.ConnectionManager) *PeerServiceImpl{
 
 	return &PeerServiceImpl{
 		peerTable: peerTable,

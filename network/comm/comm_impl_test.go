@@ -51,10 +51,11 @@ func TestCommImpl_CreateStreamConn(t *testing.T) {
 
 	peer2 := MockCreateNewPeerInfo("test2")
 	peer2.Port = "6666"
+	peer2.Port = "6666"
 	server2, listner2 := ListenMockServerWithPeer(*peer2)
 
 
-	comm := NewCommImpl()
+	comm := NewConnectionManagerImpl()
 	comm.CreateStreamConn(peer1.PeerID,peer1.GetEndPoint(),nil)
 	comm.CreateStreamConn(peer2.PeerID,peer2.GetEndPoint(),nil)
 
@@ -81,7 +82,7 @@ func TestCommImpl_Send(t *testing.T) {
 
 
 
-	comm := NewCommImpl()
+	comm := NewConnectionManagerImpl()
 	comm.CreateStreamConn(peer1.PeerID,peer1.GetEndPoint(),nil)
 	comm.CreateStreamConn(peer2.PeerID,peer2.GetEndPoint(),nil)
 
@@ -113,7 +114,7 @@ func TestCommImpl_Stop(t *testing.T) {
 	server2, listner2 := ListenMockServerWithPeer(*peer2)
 
 
-	comm := NewCommImpl()
+	comm := NewConnectionManagerImpl()
 	comm.CreateStreamConn(peer1.PeerID,peer1.GetEndPoint(),nil)
 	comm.CreateStreamConn(peer2.PeerID,peer2.GetEndPoint(),nil)
 
@@ -145,7 +146,7 @@ func TestCommImpl_Close(t *testing.T) {
 		listner2.Close()
 	}()
 
-	comm := NewCommImpl()
+	comm := NewConnectionManagerImpl()
 	comm.CreateStreamConn(peer1.PeerID,peer1.GetEndPoint(),nil)
 	comm.CreateStreamConn(peer2.PeerID,peer2.GetEndPoint(),nil)
 
