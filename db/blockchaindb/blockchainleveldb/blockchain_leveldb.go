@@ -5,6 +5,7 @@ import (
 	"it-chain/service/blockchain"
 	"it-chain/common"
 	"fmt"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -18,6 +19,9 @@ type BlockchainLevelDB struct {
 }
 
 func CreateNewBlockchainLevelDB(levelDBPath string) *BlockchainLevelDB {
+	if levelDBPath == "" {
+		levelDBPath = viper.GetString("database.leveldb.default_path")
+	}
 	levelDBProvider := leveldbhelper.CreateNewDBProvider(levelDBPath)
 	return &BlockchainLevelDB{levelDBProvider}
 }
