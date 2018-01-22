@@ -20,5 +20,6 @@ type PeerService interface{
 	//Add peer
 	AddPeerInfo(peerInfo *domain.PeerInfo)
 
-	GetPeerInfo() *domain.PeerInfo
+	//Request Peer Info
+	RequestPeerInfo(host string, port string) *domain.PeerInfo
 }

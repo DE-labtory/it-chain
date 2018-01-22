@@ -20,55 +20,50 @@ func NewCommImpl() *CommImpl{
 	}
 }
 
-func (comm *CommImpl)CreateConn(peerInfo domain.PeerInfo) error{
+func (comm *CommImpl) CreateStreamConn(connectionID string, ip string, handler handler) error{
 
 	//peerInfo의 ipAddress로 connection을 연결
-	_, ok := comm.connectionMap[peerInfo.PeerID]
+	_, ok := comm.connectionMap[connectionID]
 
 	if ok{
 		return nil
 	}
 
-	endpoint := peerInfo.GetEndPoint()
-	grpcConnection,err := NewConnectionWithAddress(endpoint,false,nil)
+	grpcConnection,err := NewConnectionWithAddress(ip,false,nil)
 
 	if err != nil{
 		return err
 	}
 
-	conn,err := NewConnection(grpcConnection)
+	conn,err := NewConnection(grpcConnection,handler,connectionID)
 
 	if err != nil{
 		return err
 	}
 
 	comm.Lock()
-	comm.connectionMap[peerInfo.PeerID] = conn
+	comm.connectionMap[connectionID] = conn
 	comm.Unlock()
+
+	commLogger.Println("new connection:",connectionID, "are created")
 
 	return nil
 }
 
-func (comm *CommImpl) Send(envelop pb.Envelope, errorCallBack onError, peerInfo domain.PeerInfo){
+func (comm *CommImpl) SendStream(envelope pb.Envelope, errorCallBack onError, connectionID string){
 
-	conn, ok := comm.connectionMap[peerInfo.PeerID]
+	conn, ok := comm.connectionMap[connectionID]
 
 	if ok{
-		err := conn.SendWithStream(&envelop)
-		if err != nil{
-			//todo 어떤 error일 경우에 conn을 close 할지 정해야함
-			commLogger.Error(err)
-			conn.Close()
-			delete(comm.connectionMap, peerInfo.PeerID)
-			commLogger.Println("connection: ",peerInfo.PeerID, "is closing")
-		}
+		conn.Send(&envelope,errorCallBack)
+		//todo 어떤 error일 경우에 conn을 close 할지 정해야함
 	}else{
 		//todo 처리
 	}
 }
 
 func (comm *CommImpl) Stop(){
-
+	commLogger.Println("all connections are closing")
 	for id, conn := range comm.connectionMap{
 		conn.Close()
 		delete(comm.connectionMap,id)
@@ -80,6 +75,7 @@ func (comm *CommImpl) Close(peerInfo domain.PeerInfo){
 	conn, ok := comm.connectionMap[peerInfo.PeerID]
 
 	if ok{
+		commLogger.Println("connection:",peerInfo.PeerID, "is closing")
 		conn.Close()
 		delete(comm.connectionMap,peerInfo.PeerID)
 	}

@@ -6,8 +6,6 @@ import (
 	"it-chain/common"
 	pb "it-chain/network/protos"
 	"github.com/golang/protobuf/proto"
-	"google.golang.org/grpc/status"
-	"google.golang.org/grpc/codes"
 )
 
 var logger = common.GetLogger("peer_service.go")
@@ -72,27 +70,12 @@ func (ps *PeerServiceImpl) Handle(interface{}){
 
 	errorCallBack := func(onError error) {
 		logger.Println("fail to send message error:", onError.Error())
-		status,ok := status.FromError(onError)
-		if ok{
-			ps.grpcErrorHandling(status)
-		}
 	}
 
 	for _,peerInfo := range peerInfos{
-		ps.comm.Send(envelope,errorCallBack, peerInfo)
+		ps.comm.SendStream(envelope,errorCallBack, peerInfo.PeerID)
 	}
 }
-
-func (ps *PeerServiceImpl) grpcErrorHandling(status *status.Status){
-	switch status.Code(){
-		case codes.Unavailable:
-			//연결 취소 해야함
-			logger.Infoln("unavailable error occured :")
-		default:
-			logger.Infoln("no matching grpc error code:", status.Code())
-	}
-}
-
 func (ps *PeerServiceImpl) UpdatePeerTable(peerTable domain.PeerTable){
 
 	ps.peerTable.Lock()
@@ -112,7 +95,17 @@ func (ps *PeerServiceImpl) UpdatePeerTable(peerTable domain.PeerTable){
 }
 
 func (ps *PeerServiceImpl) AddPeerInfo(peerInfo *domain.PeerInfo){
-	err := ps.comm.CreateConn(*peerInfo)
+
+	if peerInfo.PeerID == ""{
+		logger.Error("failed to connect with", peerInfo)
+		return
+	}
+
+	if peerInfo.GetEndPoint() == ""{
+		logger.Error("failed to connect with", peerInfo)
+		return
+	}
+	err := ps.comm.CreateStreamConn(peerInfo.PeerID,peerInfo.GetEndPoint())
 
 	if err != nil{
 		logger.Error("failed to connect with", peerInfo)
@@ -120,4 +113,9 @@ func (ps *PeerServiceImpl) AddPeerInfo(peerInfo *domain.PeerInfo){
 	}
 
 	ps.peerTable.AddPeerInfo(peerInfo)
+}
+
+func (ps *PeerServiceImpl) RequestPeerInfo(ip string) *domain.PeerInfo{
+
+	return nil
 }
