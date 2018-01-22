@@ -51,7 +51,7 @@ func CreateNewBlock(prevBlock *Block, createPeerId string) *Block{
 		header.BlockHeight = prevBlock.Header.BlockHeight
 	}
 	header.CreatedPeerID = createPeerId
-	header.TimeStamp = time.Now()
+	header.TimeStamp = time.Now().Round(0)
 	header.BlockStatus = Status_BLOCK_UNCONFIRMED
 
 	return &Block{Header:&header, MerkleTree:make([][]string, 0), MerkleTreeHeight:0, TransactionCount:0, Transactions:make([]*Transaction, 0)}
