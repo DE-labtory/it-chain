@@ -9,6 +9,9 @@ service MessageService{
     rpc Ping (Empty) returns (Empty) {}
 }
 
+service PeerService{
+    rpc PeerInfo (Empty) returns (PeerInfo) {}
+}
 
 message Envelope {
 
@@ -32,6 +35,7 @@ message Message{
         Block block = 2;
         Transaction transaction = 3;
         PeerTable peerTable = 4;
+        PeerInfo peerInfo = 5;
     }
 }
 
@@ -55,3 +59,4 @@ message PeerInfo {
     int32 heartBeat = 4;
     bytes pubKey = 5;
 }
+
