@@ -15,7 +15,7 @@ Use it-code to create your own Dapp
 
 Contribution documents will be updated shortly. 
 
-For the time being, email leebduk@gmail
+For the time being, email leebduk@gmail.com
 
 
 
