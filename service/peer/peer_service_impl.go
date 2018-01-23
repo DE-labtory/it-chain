@@ -105,7 +105,7 @@ func (ps *PeerServiceImpl) AddPeerInfo(peerInfo *domain.PeerInfo){
 		logger.Error("failed to connect with", peerInfo)
 		return
 	}
-	err := ps.comm.CreateStreamConn(peerInfo.PeerID,peerInfo.GetEndPoint())
+	err := ps.comm.CreateStreamConn(peerInfo.PeerID,peerInfo.GetEndPoint(), nil)
 
 	if err != nil{
 		logger.Error("failed to connect with", peerInfo)
