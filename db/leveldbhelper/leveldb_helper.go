@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package blockchainleveldb
+package leveldbhelper
 
 import (
 	"sync"
@@ -33,7 +33,7 @@ const (
 	opened
 )
 
-var logger = common.GetLogger("leveldbhelper.go")
+var logger = common.GetLogger("leveldb_helper.go")
 
 type DB struct {
 	levelDBPath     string

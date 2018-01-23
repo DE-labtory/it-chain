@@ -20,11 +20,10 @@ import (
 	"os"
 	"path"
 	"io"
-	"bytes"
-	"encoding/gob"
 	"fmt"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 )
 
 var logger = GetLogger("util.go")
@@ -69,29 +68,26 @@ func ComputeSHA256(data []string) string {
 	return hex.EncodeToString(hash.Sum(nil))
 
 }
+
+/**
+gob encoder로 인코딩했을 때 문제점
+1. empty slice(make 로 생성한거) 가 디코딩하면 nil 로 디코딩 됨.
+ㄴ json marshal로 바꾸면서 해결
+2. time.Time 값들은 뒤에 monotonic 파트가 없어짐.
+2번은 문제가 안 될수도 있는데 테스트 실패의 원인..
+ */
 func Serialize(object interface{}) ([]byte, error) {
-	var b bytes.Buffer
-
-	encoder := gob.NewEncoder(&b)
-	err := encoder.Encode(object)
-
+	data, err := json.Marshal(object)
 	if err != nil {
-		panic(fmt.Sprintf("Error encoding block : %s", err))
+		panic(fmt.Sprintf("Error encoding : %s", err))
 	}
-
-	return b.Bytes(), err
+	return data, nil
 }
 
-func Deserialize(serializedBytes []byte, object interface{}) (interface{}, error) {
-	var b bytes.Buffer
-
-	b.Write(serializedBytes)
-	decoder := gob.NewDecoder(&b)
-	err := decoder.Decode(object)
-
+func Deserialize(serializedBytes []byte, object interface{}) error {
+	err := json.Unmarshal(serializedBytes, object)
 	if err != nil {
-		panic(fmt.Sprintf("Error decoding block : %s", err))
+		panic(fmt.Sprintf("Error decoding : %s", err))
 	}
-
-	return object, err
+	return err
 }
