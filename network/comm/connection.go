@@ -87,6 +87,7 @@ func (conn *Connection) Close(){
 	}
 
 	amIFirst := atomic.CompareAndSwapInt32(&conn.stopFlag, int32(0), int32(1))
+
 	if !amIFirst {
 		return
 	}
