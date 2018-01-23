@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type TestStrunct struct {
+type TestStruct struct {
 	MemberString string
 	MemberInt    int
 	MemberTime   time.Time
@@ -45,12 +45,13 @@ func TestDirEmpty(t *testing.T) {
 }
 
 func TestSerialize(t *testing.T) {
-	testStruct := &TestStrunct{}
+	testStruct := &TestStruct{MemberString: "test"}
 
 	serialized, err := Serialize(testStruct)
 	assert.NoError(t, err)
 
-	deserialized, err := Deserialize(serialized, &TestStrunct{})
+	data := &TestStruct{}
+	err = Deserialize(serialized, data)
 	assert.NoError(t, err)
-	assert.Equal(t, testStruct, deserialized)
+	assert.Equal(t, testStruct, data)
 }

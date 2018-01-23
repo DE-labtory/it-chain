@@ -1,4 +1,4 @@
-package blockchainleveldb
+package leveldbhelper
 
 import (
 	"sync"
