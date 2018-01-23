@@ -2,6 +2,12 @@
 
 
 
+## Overview
+
+It describes the important implementation decisions of the it-chain. Sample code for each detailed implementation can be found in the sample folder. 
+
+
+
 ## Table of Contents
 
 1. [BlockChain](#BlockChain)
