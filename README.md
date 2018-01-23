@@ -3,7 +3,21 @@
 
 ## Overview
 
-Generalized Private Chain For All
+Generalized Private Chain For All 
+
+it-chain makes it easy for anyone to have their own block chain platform
+
+Use it-code to create your own Dapp
+
+
+
+## Contribution
+
+Contribution documents will be updated shortly. 
+
+For the time being, email leebduk@gmail
+
+
 
 ## License
 

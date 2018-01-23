@@ -12,7 +12,7 @@ import (
 
 var logger_comm = common.GetLogger("connection.go")
 
-type handler func(message *message.Envelope)
+type handler func(message outterMessage)
 
 //직접적으로 grpc를 보내는 역활 수행
 //todo client 와 server connection을 합칠 것인지 분리 할 것인지 생각 지금은 client만을 고려한 구조체
@@ -28,10 +28,6 @@ type Connection struct {
 	readChannel    chan *message.Envelope
 	stopChannel    chan struct{}
 	sync.RWMutex
-}
-
-type ConnectionInfo struct{
-
 }
 
 //todo channel의 buffer size를 config에서 읽기
@@ -125,7 +121,7 @@ func (conn *Connection) listen() error{
 			case err := <-errChan:
 				return err
 			case msg := <-conn.readChannel:
-				conn.handler(msg)
+				conn.handler(outterMessage{msg,conn.connectionID})
 		}
 	}
 
@@ -203,4 +199,9 @@ func (conn *Connection) WriteStream(){
 type innerMessage struct{
 	envelope *message.Envelope
 	onErr    func(error)
+}
+
+type outterMessage struct{
+	envelope *message.Envelope
+	connectionID string
 }
