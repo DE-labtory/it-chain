@@ -12,6 +12,9 @@ type KeyStorer interface {
 
 }
 
+type KeyLoader interface {
+}
+
 type Crypto interface {
 
 	Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, err error)
