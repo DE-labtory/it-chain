@@ -83,7 +83,7 @@ func SetPeer(ipAddress string, peerID string,port string, bootport string,myID s
 
 
 
-	comm := comm.NewCommImpl()
+	comm := comm.NewConnectionManagerImpl()
 
 	peerService := peer.NewPeerServiceImpl(peerTable,comm)
 
