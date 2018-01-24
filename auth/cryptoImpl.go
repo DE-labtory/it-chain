@@ -16,7 +16,11 @@ type collector struct {
 
 }
 
-func NewCrypto(keyManagerPath string) (Crypto, error) {
+func NewDefaultCrypto() (Crypto, error) {
+
+}
+
+func NewCrypto(keyManagerPath string, ) (Crypto, error) {
 
 	if len(keyManagerPath) == 0 {
 		return nil, errors.New("KeyStorePath cannot be empty")
@@ -33,8 +37,8 @@ func NewCrypto(keyManagerPath string) (Crypto, error) {
 	verifiers[reflect.TypeOf(&ecdsaPublicKey{})] = &ecdsaVerifier{}
 
 	keyGenerators := make(map[reflect.Type]KeyGenerator)
-	keyGenerators[reflect.TypeOf(&RSAKeyGenOpts{false})] = &rsaKeyGenerator{1024}
-	keyGenerators[reflect.TypeOf(&ECDSAKeyGenOpts{false})] = &ecdsaKeyGenerator{elliptic.P256()}
+	keyGenerators[reflect.TypeOf(&RSAKeyGenOpts{})] = &rsaKeyGenerator{1024}
+	keyGenerators[reflect.TypeOf(&ECDSAKeyGenOpts{})] = &ecdsaKeyGenerator{elliptic.P256()}
 
 	keyImporters := make(map[reflect.Type]KeyImporter)
 	keyImporters[reflect.TypeOf(&RSAPrivateKeyImporterOpts{})] = &rsaPrivateKeyImporter{}
@@ -122,11 +126,9 @@ func (c *collector) KeyGenerate(opts KeyGenOpts) (key Key, err error) {
 		return nil, errors.New("Failed to generate a Key")
 	}
 
-	if !opts.Ephemeral() {
-		err = c.keyManager.Store(key)
-		if err != nil {
-			return nil, errors.New("Failed to store a Key")
-		}
+	err = c.keyManager.Store(key)
+	if err != nil {
+		return nil, errors.New("Failed to store a Key")
 	}
 
 	return

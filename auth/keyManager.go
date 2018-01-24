@@ -12,7 +12,7 @@ type keyManager struct {
 	path string
 }
 
-func (ks *keyManager) Store(key Key) (err error) {
+func (km *keyManager) Store(key Key) (err error) {
 
 	if key == nil {
 		return errors.New("Failed to get Key Data")
@@ -20,13 +20,13 @@ func (ks *keyManager) Store(key Key) (err error) {
 
 	switch k := key.(type) {
 	case *rsaPrivateKey:
-		err = ks.storePrivateKey(k)
+		err = km.storePrivateKey(k)
 	case *rsaPublicKey:
-		err = ks.storePublicKey(k)
+		err = km.storePublicKey(k)
 	case *ecdsaPrivateKey:
-		err = ks.storePrivateKey(k)
+		err = km.storePrivateKey(k)
 	case *ecdsaPublicKey:
-		err = ks.storePublicKey(k)
+		err = km.storePublicKey(k)
 	default:
 		return errors.New("Unspported Key Type.")
 	}
@@ -34,14 +34,14 @@ func (ks *keyManager) Store(key Key) (err error) {
 	return
 }
 
-func (ks *keyManager) storePublicKey(key Key) (err error) {
+func (km *keyManager) storePublicKey(key Key) (err error) {
 
 	data, err := PublicKeyToPEM(key)
 	if err != nil {
 		return
 	}
 
-	path, err := ks.getFullPath(hex.EncodeToString(key.SKI()), "pub")
+	path, err := km.getFullPath(hex.EncodeToString(key.SKI()), "pub")
 	if err != nil {
 		return
 	}
@@ -56,14 +56,14 @@ func (ks *keyManager) storePublicKey(key Key) (err error) {
 	return nil
 }
 
-func (ks *keyManager) storePrivateKey(key Key) (err error) {
+func (km *keyManager) storePrivateKey(key Key) (err error) {
 
 	data, err := PrivateKeyToPEM(key)
 	if err != nil {
 		return
 	}
 
-	path, err := ks.getFullPath(hex.EncodeToString(key.SKI()), "pri")
+	path, err := km.getFullPath(hex.EncodeToString(key.SKI()), "pri")
 	if err != nil {
 		return
 	}
@@ -78,19 +78,29 @@ func (ks *keyManager) storePrivateKey(key Key) (err error) {
 	return nil
 }
 
-func (ks *keyManager) Load(alias string) (key interface{}, err error) {
+func (km *keyManager) Load(alias string) (key interface{}, err error) {
 	return nil, nil
 }
 
-func (ks *keyManager) getFullPath(alias, suffix string) (path string, err error) {
-	if _, err := os.Stat(ks.path); os.IsNotExist(err) {
-		err = os.MkdirAll(ks.path, 0755)
+func (km *keyManager) loadPublicKey(alias string) (key interface{}, err error) {
+
+}
+
+func (km *keyManager) loadPrivateKey(alias string) (key interface{}, err error) {
+
+}
+
+func (km *keyManager) getSuffix()
+
+func (km *keyManager) getFullPath(alias, suffix string) (path string, err error) {
+	if _, err := os.Stat(km.path); os.IsNotExist(err) {
+		err = os.MkdirAll(km.path, 0755)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	return filepath.Join(ks.path, alias + "_" + suffix), nil
+	return filepath.Join(km.path, alias + "_" + suffix), nil
 }
 
 
