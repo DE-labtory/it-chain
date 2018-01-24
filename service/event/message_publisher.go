@@ -56,7 +56,8 @@ func (mh *MessagePublisher) AddSubscriber(topic string, subfunc func(message com
 	return errors.New("invaild topic")
 }
 
-//invaild message검증 및 전파
+//todo invaild message검증 및 전파
+//todo panic으로 부터 recover
 func (mh *MessagePublisher) ReceivedMessageHandle(message comm.OutterMessage){
 
 	//todo vaild message 검증
