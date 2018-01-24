@@ -75,7 +75,7 @@ func TestNewConnection(t *testing.T) {
 		assert.Fail(t,"fail to create connection")
 	}
 
-	conn,err  := NewConnection(grpc_conn)
+	conn,err  := NewConnection(grpc_conn,nil,"1")
 
 	defer conn.Close()
 
@@ -103,7 +103,7 @@ func TestConnection_SendWithStream(t *testing.T) {
 		assert.Fail(t,"fail to create connection")
 	}
 
-	conn,err  := NewConnection(grpc_conn)
+	conn,err  := NewConnection(grpc_conn, nil, "1")
 
 	defer conn.Close()
 
@@ -115,9 +115,9 @@ func TestConnection_SendWithStream(t *testing.T) {
 
 	fmt.Println(counter)
 
-	conn.SendWithStream(envelope,nil)
-	conn.SendWithStream(envelope,nil)
-	conn.SendWithStream(envelope,nil)
+	conn.Send(envelope,nil)
+	conn.Send(envelope, nil)
+	conn.Send(envelope, nil)
 
 	time.Sleep(3*time.Second)
 
