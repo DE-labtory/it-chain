@@ -12,7 +12,7 @@ import (
 
 var logger_comm = common.GetLogger("connection.go")
 
-type ReceiveMessageHandle func(message outterMessage)
+type ReceiveMessageHandle func(message OutterMessage)
 
 //직접적으로 grpc를 보내는 역활 수행
 //todo client 와 server connection을 합칠 것인지 분리 할 것인지 생각 지금은 client만을 고려한 구조체
@@ -121,7 +121,7 @@ func (conn *Connection) listen() error{
 			case err := <-errChan:
 				return err
 			case msg := <-conn.readChannel:
-				conn.handle(outterMessage{msg,conn.connectionID})
+				conn.handle(OutterMessage{msg,conn.connectionID})
 		}
 	}
 
@@ -201,7 +201,7 @@ type innerMessage struct{
 	onErr    func(error)
 }
 
-type outterMessage struct{
-	envelope *message.Envelope
-	connectionID string
+type OutterMessage struct{
+	Envelope *message.Envelope
+	ConnectionID string
 }

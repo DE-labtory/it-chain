@@ -20,7 +20,7 @@ func NewConnectionManagerImpl() *ConnectionManagerImpl{
 	}
 }
 
-func (comm *ConnectionManagerImpl) CreateStreamConn(connectionID string, ip string, handler handler) error{
+func (comm *ConnectionManagerImpl) CreateStreamConn(connectionID string, ip string, handler ReceiveMessageHandle) error{
 
 	//peerInfo의 ipAddress로 connection을 연결
 	_, ok := comm.connectionMap[connectionID]

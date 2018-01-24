@@ -1,10 +1,12 @@
-hash: dc42d8a40f4afc6627d8bb12509ec5d7fdbaec40bb14fc8219b211b5689e1c71
-updated: 2018-01-16T15:16:32.038589354+09:00
+hash: c77dff780dff5e3675d5f2b453f403cd6e4e480eab6331b18fcde091011e1cb2
+updated: 2018-01-24T20:04:10.696206141+09:00
 imports:
+- name: github.com/asaskevich/EventBus
+  version: 68a521d7cbbb7a859c2608b06342f384b3bd5f5a
 - name: github.com/fsnotify/fsnotify
   version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
 - name: github.com/golang/protobuf
-  version: 1e59b77b52bf8e4b449a57e6f79f21226d571845
+  version: c65a0412e71e8b9b3bfd22925720d23c0f054237
   subpackages:
   - proto
   - protoc-gen-go
@@ -39,7 +41,7 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: b4575eea38cca1123ec2dc90c26529b5c5acfcff
 - name: github.com/pelletier/go-toml
-  version: 9bf0212445a9fb4769aca5d2d86fbc381af39d52
+  version: acdc4509485b587f5e675510c4f2c63e90ff68a8
 - name: github.com/sirupsen/logrus
   version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
 - name: github.com/spf13/afero
@@ -78,11 +80,11 @@ imports:
 - name: github.com/x-cray/logrus-prefixed-formatter
   version: bb2702d423886830dee131692131d35648c382e2
 - name: golang.org/x/crypto
-  version: 13931e22f9e72ea58bb73048bc752b48c6d4d4ac
+  version: 3d37316aaa6bd9929127ac9a527abf408178ea7b
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
-  version: 5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec
+  version: 0ed95abb35c445290478a5348a7b38bb154135fd
   subpackages:
   - context
   - http2
@@ -92,7 +94,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: fff93fa7cd278d84afc205751523809c464168ab
+  version: af50095a40f9041b3b38960738837185c26e9419
   subpackages:
   - unix
   - windows
@@ -104,11 +106,11 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/genproto
-  version: a8101f21cf983e773d0c1133ebc5424792003214
+  version: 14790a1795ea4c3387aaf24aed670ddb51f18292
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 7cea4cc846bcf00cbb27595b07da5de875ef7de9
+  version: 6b51017f791ae1cfbec89c52efdf444b13b550ef
   subpackages:
   - balancer
   - balancer/base

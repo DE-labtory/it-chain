@@ -3,6 +3,7 @@ package message
 import (
 	"it-chain/service/domain"
 	"fmt"
+	"it-chain/service/peer/event"
 )
 
 func PeerTableToTable(peerTable domain.PeerTable) *Message_PeerTable{
@@ -72,3 +73,17 @@ func (m *Message) GetPeerTable_() *domain.PeerTable{
 
 	return peerTable
 }
+
+func (m *Message) IsPeerTableUpdateMessage() bool{
+	return m.GetPeerTable() != nil
+}
+
+func (message *Message) GetMessageType() string {
+
+	if message.GetPeerTable() != nil{
+		return event.UpdatePeerTable
+	}
+
+	return "no"
+}
+
