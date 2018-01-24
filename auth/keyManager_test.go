@@ -12,8 +12,8 @@ import (
 	"crypto/rsa"
 )
 
-func TestKeyStore_StoreKey(t *testing.T) {
-	ks := &keyStorer{"./testStorer"}
+func TestKeyManager_StoreKey(t *testing.T) {
+	ks := &keyManager{"./testStorer"}
 
 	defer os.RemoveAll(ks.path)
 
@@ -55,9 +55,9 @@ func TestKeyStore_StoreKey(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestKeyStorer_InvalidInput(t *testing.T) {
+func TestKeyManager_StoreInvalidInput(t *testing.T) {
 
-	ks := &keyStorer{"./testStorer"}
+	ks := &keyManager{"./testStorer"}
 
 	defer os.RemoveAll(ks.path)
 

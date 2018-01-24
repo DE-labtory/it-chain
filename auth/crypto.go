@@ -6,13 +6,12 @@ type Key interface {
 
 }
 
-type KeyStorer interface {
+type KeyManager interface {
 
 	Store(key Key) (err error)
 
-}
+	Load(alias string) (key interface{}, err error)
 
-type KeyLoader interface {
 }
 
 type Crypto interface {
@@ -23,6 +22,6 @@ type Crypto interface {
 
 	KeyGenerate(opts KeyGenOpts) (key Key, err error)
 
-	KeyImporter(data interface{}, opts KeyImporterOpts) (key Key, err error)
+	KeyImport(data interface{}, opts KeyImporterOpts) (key Key, err error)
 
 }

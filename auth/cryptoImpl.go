@@ -8,7 +8,7 @@ import (
 
 type collector struct {
 
-	keyStorer		KeyStorer
+	keyManager		KeyManager
 	signers 		map[reflect.Type]Signer
 	verifiers 		map[reflect.Type]Verifier
 	keyGenerators 	map[reflect.Type]KeyGenerator
@@ -16,13 +16,13 @@ type collector struct {
 
 }
 
-func NewCrypto(keyStorePath string) (Crypto, error) {
+func NewCrypto(keyManagerPath string) (Crypto, error) {
 
-	if len(keyStorePath) == 0 {
+	if len(keyManagerPath) == 0 {
 		return nil, errors.New("KeyStorePath cannot be empty")
 	}
 
-	keyStorer := &keyStorer{path:keyStorePath}
+	keyManager := &keyManager{path:keyManagerPath}
 
 	signers := make(map[reflect.Type]Signer)
 	signers[reflect.TypeOf(&rsaPrivateKey{})] = &rsaSigner{}
@@ -43,7 +43,7 @@ func NewCrypto(keyStorePath string) (Crypto, error) {
 	keyImporters[reflect.TypeOf(&ECDSAPublicKeyImporterOpts{})] = &ecdsaPublicKeyImporter{}
 
 	coll := &collector{
-		keyStorer:		keyStorer,
+		keyManager:		keyManager,
 		signers: 		signers,
 		verifiers: 		verifiers,
 		keyGenerators: 	keyGenerators,
@@ -123,7 +123,7 @@ func (c *collector) KeyGenerate(opts KeyGenOpts) (key Key, err error) {
 	}
 
 	if !opts.Ephemeral() {
-		err = c.keyStorer.Store(key)
+		err = c.keyManager.Store(key)
 		if err != nil {
 			return nil, errors.New("Failed to store a Key")
 		}
@@ -133,7 +133,7 @@ func (c *collector) KeyGenerate(opts KeyGenOpts) (key Key, err error) {
 
 }
 
-func (c *collector) Import(data interface{}, opts KeyGenOpts) (key Key, err error) {
+func (c *collector) KeyImport(data interface{}, opts KeyImporterOpts) (key Key, err error) {
 
 	if data == nil {
 		return nil, errors.New("Data have not to be NIL")

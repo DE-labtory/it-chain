@@ -4,8 +4,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"crypto/rsa"
-	"crypto/ecdsa"
 )
 
 func PublicKeyToPEM(pub Key) (data []byte, err error) {

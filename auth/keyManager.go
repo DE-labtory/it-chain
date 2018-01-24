@@ -8,11 +8,11 @@ import (
 	"os"
 )
 
-type keyStorer struct {
+type keyManager struct {
 	path string
 }
 
-func (ks *keyStorer) Store(key Key) (err error) {
+func (ks *keyManager) Store(key Key) (err error) {
 
 	if key == nil {
 		return errors.New("Failed to get Key Data")
@@ -34,7 +34,7 @@ func (ks *keyStorer) Store(key Key) (err error) {
 	return
 }
 
-func (ks *keyStorer) storePublicKey(key Key) (err error) {
+func (ks *keyManager) storePublicKey(key Key) (err error) {
 
 	data, err := PublicKeyToPEM(key)
 	if err != nil {
@@ -56,7 +56,7 @@ func (ks *keyStorer) storePublicKey(key Key) (err error) {
 	return nil
 }
 
-func (ks *keyStorer) storePrivateKey(key Key) (err error) {
+func (ks *keyManager) storePrivateKey(key Key) (err error) {
 
 	data, err := PrivateKeyToPEM(key)
 	if err != nil {
@@ -78,7 +78,11 @@ func (ks *keyStorer) storePrivateKey(key Key) (err error) {
 	return nil
 }
 
-func (ks *keyStorer) getFullPath(alias, suffix string) (path string, err error) {
+func (ks *keyManager) Load(alias string) (key interface{}, err error) {
+	return nil, nil
+}
+
+func (ks *keyManager) getFullPath(alias, suffix string) (path string, err error) {
 	if _, err := os.Stat(ks.path); os.IsNotExist(err) {
 		err = os.MkdirAll(ks.path, 0755)
 		if err != nil {
