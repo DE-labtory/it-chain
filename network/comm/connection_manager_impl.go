@@ -7,7 +7,7 @@ import (
 	"it-chain/common"
 )
 
-var commLogger = common.GetLogger("comm_impl.go")
+var commLogger = common.GetLogger("connection_manager_impl.go")
 
 type ConnectionManagerImpl struct{
 	connectionMap map[string]*Connection
@@ -20,7 +20,7 @@ func NewConnectionManagerImpl() *ConnectionManagerImpl{
 	}
 }
 
-func (comm *ConnectionManagerImpl) CreateStreamConn(connectionID string, ip string, handler handler) error{
+func (comm *ConnectionManagerImpl) CreateStreamConn(connectionID string, ip string, handler ReceiveMessageHandle) error{
 
 	//peerInfo의 ipAddress로 connection을 연결
 	_, ok := comm.connectionMap[connectionID]

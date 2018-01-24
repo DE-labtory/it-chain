@@ -17,7 +17,7 @@ type ConnectionManager interface{
 
 	Close(peerInfo domain.PeerInfo)
 
-	CreateStreamConn(connectionID string, ip string, handler handler) error
+	CreateStreamConn(connectionID string, ip string, handle ReceiveMessageHandle) error
 
 	Size() int
 }

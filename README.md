@@ -1,10 +1,9 @@
 # it-chain
+<p align="center">
 
+​	<img src="./images/logo.png" width="300px" height="200px" align="center">
 
-
-<p align="center"><img src="./images/logo.png" width="300px" height="200px"></p>
-
-
+</p>
 
 ## Overview
 

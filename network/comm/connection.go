@@ -12,7 +12,7 @@ import (
 
 var logger_comm = common.GetLogger("connection.go")
 
-type handler func(message outterMessage)
+type ReceiveMessageHandle func(message OutterMessage)
 
 //직접적으로 grpc를 보내는 역활 수행
 //todo client 와 server connection을 합칠 것인지 분리 할 것인지 생각 지금은 client만을 고려한 구조체
@@ -23,7 +23,7 @@ type Connection struct {
 	cancel         context.CancelFunc
 	stopFlag       int32
 	connectionID   string
-	handler        handler
+	handle        ReceiveMessageHandle
 	outChannl      chan *innerMessage
 	readChannel    chan *message.Envelope
 	stopChannel    chan struct{}
@@ -31,7 +31,7 @@ type Connection struct {
 }
 
 //todo channel의 buffer size를 config에서 읽기
-func NewConnection(conn *grpc.ClientConn, handler handler,connectionID string) (*Connection,error){
+func NewConnection(conn *grpc.ClientConn, handle ReceiveMessageHandle,connectionID string) (*Connection,error){
 
 	ctx, cf := context.WithCancel(context.Background())
 	client := message.NewMessageServiceClient(conn)
@@ -50,7 +50,7 @@ func NewConnection(conn *grpc.ClientConn, handler handler,connectionID string) (
 		outChannl: make(chan *innerMessage,200),
 		readChannel: make(chan *message.Envelope,200),
 		stopChannel: make(chan struct{},1),
-		handler: handler,
+		handle: handle,
 		connectionID: connectionID,
 	}
 
@@ -121,7 +121,7 @@ func (conn *Connection) listen() error{
 			case err := <-errChan:
 				return err
 			case msg := <-conn.readChannel:
-				conn.handler(outterMessage{msg,conn.connectionID})
+				conn.handle(OutterMessage{msg,conn.connectionID})
 		}
 	}
 
@@ -201,7 +201,7 @@ type innerMessage struct{
 	onErr    func(error)
 }
 
-type outterMessage struct{
-	envelope *message.Envelope
-	connectionID string
+type OutterMessage struct{
+	Envelope *message.Envelope
+	ConnectionID string
 }
