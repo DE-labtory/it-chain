@@ -7,7 +7,7 @@ import (
 	"it-chain/common"
 )
 
-var commLogger = common.GetLogger("comm_impl.go")
+var commLogger = common.GetLogger("connection_manager_impl.go")
 
 type ConnectionManagerImpl struct{
 	connectionMap map[string]*Connection
