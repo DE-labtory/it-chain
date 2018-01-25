@@ -26,6 +26,6 @@ For the time being, email leebduk@gmail.com
 It-Chain Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the [LICENSE](LICENSE) file.
 
 ## Designed by
-Hyemin choi
-Jieun Oh
-Jongmo Moon
+Hyemin choi<br>
+Jieun Oh<br>
+Jongmo Moon<br>
