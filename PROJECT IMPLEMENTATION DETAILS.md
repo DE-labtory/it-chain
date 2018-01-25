@@ -26,7 +26,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 
 ## Grpc Communication <a name="Communication"></a>
 
-![grpc implemenation](./images/grpc implementation.png)
+<img src="./images/grpc implementation.png"></img>
 
 Since it is complex to handle the reception and transmission of the peers' messages while maintaining the connection between the peers, the message handler is used to separate the reception and transmission and obtain the processing service using the message type.
 
