@@ -7,6 +7,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"crypto/rand"
+	"os"
+	"io/ioutil"
+	"encoding/hex"
 )
 
 func TestRSAPublicKeyToPEM(t *testing.T) {
@@ -64,5 +67,39 @@ func TestECDSAPrivateKeyToPEM(t *testing.T) {
 	data, err := PrivateKeyToPEM(rsaKey)
 	assert.NoError(t, err)
 	assert.NotNil(t, data)
+
+}
+
+func TestPEMToPrivatePublicKey(t *testing.T) {
+
+	cryp, err := NewCrypto("")
+	assert.NoError(t, err)
+
+	pri, pub, err := cryp.GenerateKey(&RSAKeyGenOpts{})
+	assert.NoError(t, err)
+	assert.NotNil(t, pri)
+	assert.NotNil(t, pub)
+
+	defer os.RemoveAll("./KeyRepository")
+
+	path := "./KeyRepository/" + hex.EncodeToString(pri.SKI()) + "_pri"
+
+	data, err := ioutil.ReadFile(path)
+	assert.NoError(t, err)
+	assert.NotNil(t, data)
+
+	key, err := PEMToPrivateKey(data)
+	assert.NoError(t, err)
+	assert.NotNil(t, key)
+
+	path = "./KeyRepository/" + hex.EncodeToString(pub.SKI()) + "_pub"
+
+	data, err = ioutil.ReadFile(path)
+	assert.NoError(t, err)
+	assert.NotNil(t, data)
+
+	key, err = PEMToPublicKey(data)
+	assert.NoError(t, err)
+	assert.NotNil(t, key)
 
 }

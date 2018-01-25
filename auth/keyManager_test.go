@@ -84,3 +84,30 @@ func TestKeyManager_StoreInvalidInput(t *testing.T) {
 	assert.Error(t, err)
 
 }
+
+func TestKeyManager_LoadKey(t *testing.T) {
+
+	km := &keyManager{}
+	km.Init("")
+
+	defer os.RemoveAll(km.path)
+
+	rsaRawKey, err := rsa.GenerateKey(rand.Reader, 1024)
+
+	rsaPriKey := &rsaPrivateKey{rsaRawKey}
+	err = km.Store(rsaPriKey)
+	assert.NoError(t, err)
+
+	rsaPubKey := &rsaPublicKey{&rsaPriKey.priv.PublicKey}
+	err = km.Store(rsaPubKey)
+	assert.NoError(t, err)
+
+	pri, pub, err := km.LoadKey()
+	assert.NoError(t, err)
+	assert.NotNil(t, pri)
+	assert.NotNil(t, pub)
+
+	assert.Equal(t, rsaPriKey, pri.(*rsaPrivateKey))
+	assert.Equal(t, rsaPubKey, pub.(*rsaPublicKey))
+
+}

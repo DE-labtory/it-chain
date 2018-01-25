@@ -166,3 +166,25 @@ func TestCollector_ECDSAGenerateKey(t *testing.T) {
 	assert.Equal(t, elliptic.P256(), ecdsaPriKey.priv.Curve)
 
 }
+
+func TestCryptoHelper_LoadKey(t *testing.T) {
+
+	cryp, err := NewCrypto("")
+	assert.NoError(t, err)
+
+	defer os.RemoveAll("./KeyRepository")
+
+	pri, pub, err := cryp.GenerateKey(&RSAKeyGenOpts{})
+	assert.NoError(t, err)
+	assert.NotNil(t, pri)
+	assert.NotNil(t, pub)
+
+	pri2, pub2, err := cryp.LoadKey()
+	assert.NoError(t, err)
+	assert.NotNil(t, pri2)
+	assert.NotNil(t, pub2)
+
+	assert.Equal(t, pri, pri2)
+	assert.Equal(t, pub, pub2)
+
+}
