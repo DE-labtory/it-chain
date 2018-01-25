@@ -27,7 +27,7 @@ type Connection struct {
 	cancel         context.CancelFunc
 	stopFlag       int32
 	connectionID   string
-	handle        ReceiveMessageHandle
+	handle         ReceiveMessageHandle
 	outChannl      chan *innerMessage
 	readChannel    chan *message.Envelope
 	stopChannel    chan struct{}

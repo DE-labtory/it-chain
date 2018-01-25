@@ -61,13 +61,14 @@ func (mh *MessagePublisher) ReceivedMessageHandle(message comm.OutterMessage){
 
 	//todo vaild message 검증
 	//message
-	m := &pb.Message{}
+
 
 	if message.Envelope == nil{
 		logger_event_publisher.Info("message is nil", message)
 		return
 	}
 
+	m := &pb.Message{}
 	err := proto.Unmarshal(message.Envelope.Payload,m)
 
 	if err != nil{
@@ -75,7 +76,6 @@ func (mh *MessagePublisher) ReceivedMessageHandle(message comm.OutterMessage){
 	}
 
 	messageType := m.GetMessageType()
-
 	mt, ok := mh.topicMap[messageType]
 
 	if ok{

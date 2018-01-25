@@ -23,3 +23,5 @@ import:
   version: v0.5.2
 - package: github.com/mgutz/ansi
 - package: github.com/asaskevich/EventBus
+- package: github.com/jeevatkm/go-model
+  version: v1.0

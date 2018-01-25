@@ -58,7 +58,7 @@ func (ps *PeerServiceImpl) Handle(interface{}){
 	ps.peerTable.IncrementHeartBeat()
 
 	message := &pb.Message{}
-	message.Content = pb.PeerTableToTable(*ps.peerTable)
+	//message.Content = pb.PeerTableToTable(*ps.peerTable)
 
 	envelope := pb.Envelope{}
 	envelope.Payload, err = proto.Marshal(message)
