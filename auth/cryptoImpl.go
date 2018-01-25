@@ -8,7 +8,7 @@ import (
 
 type cryptoHelper struct {
 
-	privKey			Key
+	priKey			Key
 	pubKey			Key
 
 	keyManager		keyManager
@@ -48,16 +48,25 @@ func NewCrypto(path string) (Crypto, error) {
 
 func (ch *cryptoHelper) Sign(digest []byte, opts SignerOpts) (signature []byte, err error) {
 
+	ch.priKey, ch.pubKey, err = ch.LoadKey()
+	if err != nil {
+		return nil, errors.New("Key is not exist.")
+	}
+
 	if len(digest) == 0 {
-		return nil, errors.New("invalid digest")
+		return nil, errors.New("invalid digest.")
 	}
 
-	signer, found := ch.signers[reflect.TypeOf(key)]
+	if ch.priKey == nil {
+		return nil, errors.New("Private key is not exist.")
+	}
+
+	signer, found := ch.signers[reflect.TypeOf(ch.priKey)]
 	if !found {
-		return nil, errors.New("unsupported key type")
+		return nil, errors.New("unsupported key type.")
 	}
 
-	signature, err = signer.Sign(key, digest, opts)
+	signature, err = signer.Sign(ch.priKey, digest, opts)
 	if err != nil {
 		return nil, errors.New("signing error is occurred")
 	}
@@ -66,7 +75,7 @@ func (ch *cryptoHelper) Sign(digest []byte, opts SignerOpts) (signature []byte, 
 
 }
 
-func (c *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error) {
+func (ch *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error) {
 
 	if key == nil {
 		return false, errors.New("invalid key")
@@ -80,7 +89,7 @@ func (c *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpts
 		return false, errors.New("invalid digest")
 	}
 
-	verifier, found := c.verifiers[reflect.TypeOf(key)]
+	verifier, found := ch.verifiers[reflect.TypeOf(key)]
 	if !found {
 		return false, errors.New("unsupported key type")
 	}
@@ -94,25 +103,25 @@ func (c *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpts
 
 }
 
-func (ch *cryptoHelper) GenerateKey(opts KeyGenOpts) (key Key, err error) {
+func (ch *cryptoHelper) GenerateKey(opts KeyGenOpts) (pri, pub Key, err error) {
 
 	if opts == nil {
-		return nil, errors.New("Invalid KeyGen Options")
+		return nil, nil, errors.New("Invalid KeyGen Options")
 	}
 
 	keyGenerator, found := ch.keyGenerators[reflect.TypeOf(opts)]
 	if !found {
-		return nil, errors.New("Invalid KeyGen Options")
+		return nil,nil, errors.New("Invalid KeyGen Options")
 	}
 
-	key, err = keyGenerator.GenerateKey(opts)
+	pri, pub, err = keyGenerator.GenerateKey(opts)
 	if err != nil {
-		return nil, errors.New("Failed to generate a Key")
+		return nil, nil, errors.New("Failed to generate a Key")
 	}
 
-	err = ch.keyManager.Store(key)
+	err = ch.keyManager.Store(pri, pub)
 	if err != nil {
-		return nil, errors.New("Failed to store a Key")
+		return nil, nil, errors.New("Failed to store a Key")
 	}
 
 	return
@@ -123,7 +132,7 @@ func (ch *cryptoHelper) LoadKey() (pri Key, pub Key, err error) {
 
 	pri, pub, err = ch.keyManager.LoadKey()
 	if err != nil {
-		return nil, nil, errors.New("Failed to Load Key")
+		return nil, nil, err
 	}
 
 	return

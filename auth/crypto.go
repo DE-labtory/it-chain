@@ -12,8 +12,8 @@ type Crypto interface {
 
 	Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error)
 
-	GenerateKey(opts KeyGenOpts) (key Key, err error)
+	GenerateKey(opts KeyGenOpts) (pri, pub Key, err error)
 
-	LoadKey() (pri Key, pub Key, err error)
+	LoadKey() (pri, pub Key, err error)
 
 }

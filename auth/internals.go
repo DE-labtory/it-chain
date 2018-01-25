@@ -22,7 +22,7 @@ type KeyGenOpts interface {}
 
 type keyGenerator interface {
 
-	GenerateKey(opts KeyGenOpts) (key Key, err error)
+	GenerateKey(opts KeyGenOpts) (pri, pub Key, err error)
 
 }
 
