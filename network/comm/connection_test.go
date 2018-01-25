@@ -8,10 +8,10 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc"
 	pb "it-chain/network/protos"
-	"golang.org/x/net/context"
 	"fmt"
-	"io"
 	"time"
+	"io"
+	"golang.org/x/net/context"
 )
 
 const (
@@ -21,6 +21,7 @@ const (
 var counter = 0
 
 type Mockserver struct {}
+
 
 func (s *Mockserver) Stream(stream pb.MessageService_StreamServer) (error) {
 
