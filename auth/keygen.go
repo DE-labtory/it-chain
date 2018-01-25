@@ -13,7 +13,7 @@ type rsaKeyGenerator struct {
 	bits int
 }
 
-func (keygen *rsaKeyGenerator) KeyGenerate(opts KeyGenOpts) (key Key, err error) {
+func (keygen *rsaKeyGenerator) GenerateKey(opts KeyGenOpts) (key Key, err error) {
 
 	if keygen.bits <= 0 {
 		return nil, errors.New("Bits length should be bigger than 0")
@@ -33,7 +33,7 @@ type ecdsaKeyGenerator struct {
 	curve elliptic.Curve
 }
 
-func (keygen *ecdsaKeyGenerator) KeyGenerate(opts KeyGenOpts) (key Key, err error) {
+func (keygen *ecdsaKeyGenerator) GenerateKey(opts KeyGenOpts) (key Key, err error) {
 
 	if keygen.curve == nil {
 		return nil, errors.New("Curve value have not to be nil")

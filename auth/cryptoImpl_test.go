@@ -128,18 +128,18 @@ func TestCollector_ECDSASign(t *testing.T) {
 
 }
 
-func TestCollector_RSAKeyGenerate(t *testing.T) {
+func TestCollector_RSAGenerateKey(t *testing.T) {
 
 	cryp, err := NewCrypto("./RSAKeyGen_Test")
 	assert.NoError(t, err)
 
 	defer os.RemoveAll("./RSAKeyGen_Test")
 
-	key, err := cryp.KeyGenerate(&RSAKeyGenOpts{false})
+	key, err := cryp.GenerateKey(&RSAKeyGenOpts{})
 	assert.NoError(t, err)
 	assert.NotNil(t, key)
 
-	_, err = cryp.KeyGenerate(nil)
+	_, err = cryp.GenerateKey(nil)
 	assert.Error(t, err)
 
 	rsaKey, valid := key.(*rsaPrivateKey)
@@ -150,18 +150,18 @@ func TestCollector_RSAKeyGenerate(t *testing.T) {
 
 }
 
-func TestCollector_ECDSAKeyGenerate(t *testing.T) {
+func TestCollector_ECDSAGenerateKey(t *testing.T) {
 
 	cryp, err := NewCrypto("./ECDSAKeyGen_Test")
 	assert.NoError(t, err)
 
 	defer os.RemoveAll("./ECDSAKeyGen_Test")
 
-	key, err := cryp.KeyGenerate(&ECDSAKeyGenOpts{false})
+	key, err := cryp.GenerateKey(&ECDSAKeyGenOpts{})
 	assert.NoError(t, err)
 	assert.NotNil(t, key)
 
-	_, err = cryp.KeyGenerate(nil)
+	_, err = cryp.GenerateKey(nil)
 	assert.Error(t, err)
 
 	ecdsaKey, valid := key.(*ecdsaPrivateKey)
