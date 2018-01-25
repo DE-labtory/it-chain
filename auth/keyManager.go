@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"encoding/hex"
 	"os"
-	"reflect"
 	"strings"
 	"crypto/rsa"
 	"crypto/ecdsa"
@@ -14,25 +13,19 @@ import (
 
 type keyManager struct {
 	path string
-
-	keyImporters map[reflect.Type]keyImporter
 }
 
 func (km *keyManager) Init(path string) {
 
 	if len(path) == 0 {
-		km.path = "/KeyRepository"
+		km.path = "./KeyRepository"
 	} else {
-		km.path = path
+		if !strings.HasPrefix(path, "./") {
+			km.path = "./" + path
+		} else {
+			km.path = path
+		}
 	}
-
-	keyImporters := make(map[reflect.Type]keyImporter)
-	keyImporters[reflect.TypeOf(&RSAPrivateKeyImporterOpts{})] = &rsaPrivateKeyImporter{}
-	keyImporters[reflect.TypeOf(&RSAPublicKeyImporterOpts{})] = &rsaPublicKeyImporter{}
-	keyImporters[reflect.TypeOf(&ECDSAPrivateKeyImporterOpts{})] = &ecdsaPrivateKeyImporter{}
-	keyImporters[reflect.TypeOf(&ECDSAPublicKeyImporterOpts{})] = &ecdsaPublicKeyImporter{}
-
-	km.keyImporters = keyImporters
 
 }
 

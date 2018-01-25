@@ -13,72 +13,74 @@ import (
 )
 
 func TestKeyManager_StoreKey(t *testing.T) {
-	ks := &keyManager{"./testStorer"}
+	km := &keyManager{}
+	km.Init("")
 
-	defer os.RemoveAll(ks.path)
+	defer os.RemoveAll(km.path)
 
 	rsaRawKey, err := rsa.GenerateKey(rand.Reader, 1024)
 
 	rsaPriKey := &rsaPrivateKey{rsaRawKey}
-	err = ks.Store(rsaPriKey)
+	err = km.Store(rsaPriKey)
 	assert.NoError(t, err)
 
 	rsaPubKey := &rsaPublicKey{&rsaPriKey.priv.PublicKey}
-	err = ks.Store(rsaPubKey)
+	err = km.Store(rsaPubKey)
 	assert.NoError(t, err)
 
 	ecdsaRawKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 
 	ecdsaPriKey := &ecdsaPrivateKey{ecdsaRawKey}
-	err = ks.Store(ecdsaPriKey)
+	err = km.Store(ecdsaPriKey)
 	assert.NoError(t, err)
 
 	ecdsaPubKey := &ecdsaPublicKey{&ecdsaPriKey.priv.PublicKey}
-	err = ks.Store(ecdsaPubKey)
+	err = km.Store(ecdsaPubKey)
 	assert.NoError(t, err)
 
 	// check whether file is exist
-	path := filepath.Join(ks.path, hex.EncodeToString(rsaPriKey.SKI()) + "_pri")
+	path := filepath.Join(km.path, hex.EncodeToString(rsaPriKey.SKI()) + "_pri")
 	assert.FileExists(t, path)
 
-	path = filepath.Join(ks.path, hex.EncodeToString(rsaPubKey.SKI()) + "_pub")
+	path = filepath.Join(km.path, hex.EncodeToString(rsaPubKey.SKI()) + "_pub")
 	assert.FileExists(t, path)
 
-	path = filepath.Join(ks.path, hex.EncodeToString(ecdsaPriKey.SKI()) + "_pri")
+	path = filepath.Join(km.path, hex.EncodeToString(ecdsaPriKey.SKI()) + "_pri")
 	assert.FileExists(t, path)
 
-	path = filepath.Join(ks.path, hex.EncodeToString(ecdsaPubKey.SKI()) + "_pub")
+	path = filepath.Join(km.path, hex.EncodeToString(ecdsaPubKey.SKI()) + "_pub")
 	assert.FileExists(t, path)
 
-	// Invalid input for KeyStore
-	err = ks.Store(nil)
+	// Invalid input for Store
+	err = km.Store(nil)
 	assert.Error(t, err)
 }
 
 func TestKeyManager_StoreInvalidInput(t *testing.T) {
 
-	ks := &keyManager{"./testStorer"}
+	km := &keyManager{}
+	km.Init("")
 
-	defer os.RemoveAll(ks.path)
+	defer os.RemoveAll(km.path)
 
 	rsaRawKey, err := rsa.GenerateKey(rand.Reader, 1024)
 
 	rsaPriKey := &rsaPrivateKey{rsaRawKey}
-	err = ks.storePublicKey(rsaPriKey)
+	err = km.storePublicKey(rsaPriKey)
 	assert.Error(t, err)
 
 	rsaPubKey := &rsaPublicKey{&rsaPriKey.priv.PublicKey}
-	err = ks.storePrivateKey(rsaPubKey)
+	err = km.storePrivateKey(rsaPubKey)
 	assert.Error(t, err)
 
 	ecdsaRawKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 
 	ecdsaPriKey := &ecdsaPrivateKey{ecdsaRawKey}
-	err = ks.storePublicKey(ecdsaPriKey)
+	err = km.storePublicKey(ecdsaPriKey)
 	assert.Error(t, err)
 
 	ecdsaPubKey := &ecdsaPublicKey{&ecdsaPriKey.priv.PublicKey}
-	err = ks.storePrivateKey(ecdsaPubKey)
+	err = km.storePrivateKey(ecdsaPubKey)
 	assert.Error(t, err)
 
 }

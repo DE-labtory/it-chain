@@ -4,10 +4,8 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"crypto/rsa"
-	"crypto/rand"
 	"crypto/sha256"
 	"crypto"
-	"crypto/ecdsa"
 	"crypto/elliptic"
 	"os"
 )
@@ -22,18 +20,13 @@ func TestNew(t *testing.T) {
 
 func TestCollector_RSASign(t *testing.T) {
 
-	cryp, err := NewCrypto(os.TempDir())
+	cryp, err := NewCrypto("")
 	assert.NoError(t, err)
 
-	// Generate an RSA Key
-	generatedKey, err := rsa.GenerateKey(rand.Reader, 1024)
+	privateKey, publicKey, err := cryp.GenerateKey(&RSAKeyGenOpts{})
 	assert.NoError(t, err)
 
-	// Set private key
-	privateKey := &rsaPrivateKey{generatedKey}
-
-	// Get public key
-	publicKey, err := privateKey.PublicKey()
+	defer os.RemoveAll("./KeyRepository")
 
 	rawData := []byte("RSASign Test Data")
 
@@ -43,21 +36,18 @@ func TestCollector_RSASign(t *testing.T) {
 	hash.Write(rawData)
 	digest := hash.Sum(nil)
 
-	sig, err := cryp.Sign(privateKey, digest, opts)
+	sig, err := cryp.Sign(digest, opts)
 	assert.NoError(t, err)
 	assert.NotNil(t, sig)
 
 	// Test RSA Signer
-	_, err = cryp.Sign(nil, digest, opts)
+	_, err = cryp.Sign(digest, opts)
+	assert.NoError(t, err)
+
+	_, err = cryp.Sign(rawData, opts)
 	assert.Error(t, err)
 
-	_, err = cryp.Sign(publicKey, digest, opts)
-	assert.Error(t, err)
-
-	_, err = cryp.Sign(privateKey, rawData, opts)
-	assert.Error(t, err)
-
-	_, err = cryp.Sign(privateKey, nil, opts)
+	_, err = cryp.Sign(nil, opts)
 	assert.Error(t, err)
 
 	// Test RSA Verifier
@@ -81,15 +71,13 @@ func TestCollector_RSASign(t *testing.T) {
 
 func TestCollector_ECDSASign(t *testing.T) {
 
-	cryp, err := NewCrypto(os.TempDir())
+	cryp, err := NewCrypto("")
 	assert.NoError(t, err)
 
-	generatedKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	privateKey, publicKey, err := cryp.GenerateKey(&ECDSAKeyGenOpts{})
 	assert.NoError(t, err)
 
-	privateKey := &ecdsaPrivateKey{generatedKey}
-	publicKey, err := privateKey.PublicKey()
-	assert.NoError(t, err)
+	defer os.RemoveAll("./KeyRepository")
 
 	rawData := []byte("ECDSA Sign Test")
 
@@ -97,18 +85,15 @@ func TestCollector_ECDSASign(t *testing.T) {
 	hash.Write(rawData)
 	digest := hash.Sum(nil)
 
-	sig, err := cryp.Sign(privateKey, digest, nil)
+	sig, err := cryp.Sign(digest, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, sig)
 
 	// Test RSA Signer
-	_, err = cryp.Sign(nil, digest, nil)
-	assert.Error(t, err)
+	_, err = cryp.Sign(digest, nil)
+	assert.NoError(t, err)
 
-	_, err = cryp.Sign(publicKey, digest, nil)
-	assert.Error(t, err)
-
-	_, err = cryp.Sign(privateKey, nil, nil)
+	_, err = cryp.Sign(nil, nil)
 	assert.Error(t, err)
 
 	// Test RSA Verifier
@@ -135,18 +120,23 @@ func TestCollector_RSAGenerateKey(t *testing.T) {
 
 	defer os.RemoveAll("./RSAKeyGen_Test")
 
-	key, err := cryp.GenerateKey(&RSAKeyGenOpts{})
+	pri, pub, err := cryp.GenerateKey(&RSAKeyGenOpts{})
 	assert.NoError(t, err)
-	assert.NotNil(t, key)
+	assert.NotNil(t, pri)
+	assert.NotNil(t, pub)
 
-	_, err = cryp.GenerateKey(nil)
+	_, _, err = cryp.GenerateKey(nil)
 	assert.Error(t, err)
 
-	rsaKey, valid := key.(*rsaPrivateKey)
+	rsaPriKey, valid := pri.(*rsaPrivateKey)
 	assert.True(t, valid)
-	assert.NotNil(t, rsaKey)
+	assert.NotNil(t, rsaPriKey)
 
-	assert.Equal(t, 1024, rsaKey.priv.N.BitLen())
+	rsaPubKey, valid := pub.(*rsaPublicKey)
+	assert.True(t, valid)
+	assert.NotNil(t, rsaPubKey)
+
+	assert.Equal(t, 1024, rsaPriKey.priv.N.BitLen())
 
 }
 
@@ -157,17 +147,22 @@ func TestCollector_ECDSAGenerateKey(t *testing.T) {
 
 	defer os.RemoveAll("./ECDSAKeyGen_Test")
 
-	key, err := cryp.GenerateKey(&ECDSAKeyGenOpts{})
+	pri, pub, err := cryp.GenerateKey(&ECDSAKeyGenOpts{})
 	assert.NoError(t, err)
-	assert.NotNil(t, key)
+	assert.NotNil(t, pri)
+	assert.NotNil(t, pub)
 
-	_, err = cryp.GenerateKey(nil)
+	_, _, err = cryp.GenerateKey(nil)
 	assert.Error(t, err)
 
-	ecdsaKey, valid := key.(*ecdsaPrivateKey)
+	ecdsaPriKey, valid := pri.(*ecdsaPrivateKey)
 	assert.True(t, valid)
-	assert.NotNil(t, ecdsaKey)
+	assert.NotNil(t, ecdsaPriKey)
 
-	assert.Equal(t, elliptic.P256(), ecdsaKey.priv.Curve)
+	ecdsaPubKey, valid := pub.(*ecdsaPublicKey)
+	assert.True(t, valid)
+	assert.NotNil(t, ecdsaPubKey)
+
+	assert.Equal(t, elliptic.P256(), ecdsaPriKey.priv.Curve)
 
 }
