@@ -26,6 +26,26 @@ It describes the important implementation decisions of the it-chain. Sample code
 
 ## Grpc Communication <a name="Communication"></a>
 
+![grpc implemenation](/Users/jun/go_workspace/src/it-chain/images/grpc implementation.png)
+
+Since it is complex to handle the reception and transmission of the peers' messages while maintaining the connection between the peers, the message handler is used to separate the reception and transmission and obtain the processing service using the message type.
+
+- ConnectionManager
+
+  The connection manager manages grpc connections with other peers in the network. Services send messages to peers through the connection manager. The reason for maintaining the connection between each peer is to make a consensus in a short time through fast block propagation.
+
+- Grpc Client
+
+  The grpc client is a bi-stream and can be sent or received. Both message transmission and reception are handled as go-routines, and when a message is received, it is transmitted to the MessageHandler. The client is not involved in the message content.
+
+- MessageHandler
+
+  The message handler receives all messages received by the grpc client, performs message validation, and forwards the message to the corresponding service according to the message type.
+
+- Services
+
+  Each service has a connectionManager and sends a message through the connectionManager. Services register a callback to a message of interest to the messageHandler, and process the message through a callback when the corresponding type of message is received.
+
 ### Author
 
 @Junbeomlee
