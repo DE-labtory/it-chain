@@ -129,26 +129,3 @@ func (ch *cryptoHelper) LoadKey() (pri Key, pub Key, err error) {
 	return
 
 }
-
-//func (ch *cryptoHelper) KeyImport(data interface{}, opts KeyImporterOpts) (key Key, err error) {
-//
-//	if data == nil {
-//		return nil, errors.New("Data have not to be NIL")
-//	}
-//
-//	if opts == nil {
-//		return nil, errors.New("Invalid KeyImporter Opts")
-//	}
-//
-//	keyImporter, found := ch.keyImporters[reflect.TypeOf(opts)]
-//	if !found {
-//		return nil, errors.New("Invalid KeyImporter Opts")
-//	}
-//
-//	key, err = keyImporter.Import(data)
-//	if err != nil {
-//		return nil, errors.New("Failed to import key from input data")
-//	}
-//
-//	return
-//}

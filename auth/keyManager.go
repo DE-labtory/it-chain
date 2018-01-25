@@ -8,6 +8,8 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"crypto/rsa"
+	"crypto/ecdsa"
 )
 
 type keyManager struct {
@@ -102,7 +104,7 @@ func (km *keyManager) storePrivateKey(key Key) (err error) {
 	return nil
 }
 
-func (km *keyManager) LoadKey() (pub, pri Key, err error) {
+func (km *keyManager) LoadKey() (pri, pub Key, err error) {
 
 	if _, err := os.Stat(km.path); os.IsNotExist(err) {
 		return nil, nil, errors.New("Keys are not exist")
@@ -120,46 +122,92 @@ func (km *keyManager) LoadKey() (pub, pri Key, err error) {
 			alias := strings.Split(file.Name(), "_")[0]
 			switch suffix {
 			case "pri":
-				data, err := km.loadPrivateKey(alias)
+				key, err := km.loadPrivateKey(alias)
 				if err != nil {
 					return nil, nil, err
 				}
 
-				pri, err = km.importKey(data)
-				if err != nil {
-					return nil, nil, err
+				switch key.(type) {
+				case *rsa.PrivateKey:
+					pri = &rsaPrivateKey{key.(*rsa.PrivateKey)}
+				case *ecdsa.PrivateKey:
+					pri = &ecdsaPrivateKey{key.(*ecdsa.PrivateKey)}
+				default:
+					return nil, nil, errors.New("Failed to load Key")
 				}
+
 			case "pub":
-				data, err := km.loadPublicKey(alias)
+				key, err := km.loadPublicKey(alias)
 				if err != nil {
 					return nil, nil, err
 				}
 
-				pri, err = km.importKey(data)
-				if err != nil {
-					return nil, nil, err
+				switch key.(type) {
+				case *rsa.PublicKey:
+					pub = &rsaPublicKey{key.(*rsa.PublicKey)}
+				case *ecdsa.PublicKey:
+					pub = &ecdsaPublicKey{key.(*ecdsa.PublicKey)}
+				default:
+					return nil, nil, errors.New("Failed to load Key")
 				}
 			}
 		}
+	}
+
+	if pri == nil || pub == nil {
+		return nil, nil, errors.New("Failed to load Key")
 	}
 
 	return
 
 }
 
-func (km *keyManager) loadPrivateKey(alias string) (data interface{}, err error) {
+func (km *keyManager) loadPrivateKey(alias string) (key interface{}, err error) {
 
-}
-
-func (km *keyManager) loadPublicKey(alias string) (data interface{}, err error) {
-
-}
-
-func (km *keyManager) importKey(data interface{}) (key Key, err error) {
-
-	if data == nil {
-		return nil, errors.New("Data should not be NIL")
+	if len(alias) == 0 {
+		return nil, errors.New("Input value should not be blank")
 	}
+
+	path, err := km.getFullPath(alias, "pri")
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	key, err = PEMToPrivateKey(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return
+
+}
+
+func (km *keyManager) loadPublicKey(alias string) (key interface{}, err error) {
+
+	if len(alias) == 0 {
+		return nil, errors.New("Input value should not be blank")
+	}
+
+	path, err := km.getFullPath(alias, "pub")
+	if err != nil {
+		return nil, err
+	}
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	key, err = PEMToPublicKey(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return
 
 }
 
