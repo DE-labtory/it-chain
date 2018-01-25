@@ -6,13 +6,13 @@ type SignerOpts interface {
 	crypto.SignerOpts
 }
 
-type Signer interface {
+type signer interface {
 
 	Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, err error)
 
 }
 
-type Verifier interface {
+type verifier interface {
 
 	Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error)
 
@@ -20,15 +20,15 @@ type Verifier interface {
 
 type KeyGenOpts interface {}
 
-type KeyGenerator interface {
+type keyGenerator interface {
 
-	KeyGenerate(opts KeyGenOpts) (key Key, err error)
+	GenerateKey(opts KeyGenOpts) (key Key, err error)
 
 }
 
 type KeyImporterOpts interface {}
 
-type KeyImporter interface {
+type keyImporter interface {
 
 	Import(data interface{}) (key Key, err error)
 
