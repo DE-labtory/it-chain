@@ -1,4 +1,4 @@
-package chaincode
+package smartcontract
 
 import (
 	"testing"
@@ -7,9 +7,9 @@ import (
 
 func TestDeploy_Deploy(t *testing.T) {
 
-	chaincode := Chaincode{map[string]string{}}
+	smartcontract := SmartContract{map[string]string{}}
 	ContractPath := "junbeomlee/bloom"
 
-	deploy_result := chaincode.Deploy(ContractPath)
+	deploy_result := smartcontract.Deploy(ContractPath)
 	assert.Equal(t,nil,deploy_result)
 }

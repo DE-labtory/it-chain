@@ -1,4 +1,4 @@
-package chaincode
+package smartcontract
 
 import (
 	"errors"
