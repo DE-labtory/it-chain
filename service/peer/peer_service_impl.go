@@ -2,7 +2,6 @@ package peer
 
 import (
 	"it-chain/network/comm"
-	"it-chain/service/domain"
 	"it-chain/common"
 	pb "it-chain/network/protos"
 	"github.com/golang/protobuf/proto"
@@ -11,11 +10,11 @@ import (
 var logger = common.GetLogger("peer_service.go")
 
 type PeerServiceImpl struct {
-	peerTable *domain.PeerTable
+	peerTable *PeerTable
 	comm comm.ConnectionManager
 }
 
-func NewPeerServiceImpl(peerTable *domain.PeerTable,comm comm.ConnectionManager) *PeerServiceImpl{
+func NewPeerServiceImpl(peerTable *PeerTable,comm comm.ConnectionManager) *PeerServiceImpl{
 
 	return &PeerServiceImpl{
 		peerTable: peerTable,
@@ -23,12 +22,12 @@ func NewPeerServiceImpl(peerTable *domain.PeerTable,comm comm.ConnectionManager)
 	}
 }
 
-func (ps *PeerServiceImpl) GetPeerTable() domain.PeerTable{
+func (ps *PeerServiceImpl) GetPeerTable() PeerTable{
 	return *ps.peerTable
 }
 
 //peer info 찾기
-func (ps *PeerServiceImpl) GetPeerInfoByPeerID(peerID string) (*domain.PeerInfo){
+func (ps *PeerServiceImpl) GetPeerInfoByPeerID(peerID string) (*PeerInfo){
 
 	peerInfo := ps.peerTable.FindPeerByPeerID(peerID)
 	return peerInfo
@@ -59,7 +58,7 @@ func (ps *PeerServiceImpl) Handle(interface{}){
 	ps.peerTable.IncrementHeartBeat()
 
 	message := &pb.Message{}
-	message.Content = pb.PeerTableToTable(*ps.peerTable)
+	//message.Content = pb.PeerTableToTable(*ps.peerTable)
 
 	envelope := pb.Envelope{}
 	envelope.Payload, err = proto.Marshal(message)
@@ -76,7 +75,7 @@ func (ps *PeerServiceImpl) Handle(interface{}){
 		ps.comm.SendStream(envelope,errorCallBack, peerInfo.PeerID)
 	}
 }
-func (ps *PeerServiceImpl) UpdatePeerTable(peerTable domain.PeerTable){
+func (ps *PeerServiceImpl) UpdatePeerTable(peerTable PeerTable){
 
 	ps.peerTable.Lock()
 	defer ps.peerTable.Unlock()
@@ -94,7 +93,7 @@ func (ps *PeerServiceImpl) UpdatePeerTable(peerTable domain.PeerTable){
 	ps.peerTable.UpdateTimeStamp()
 }
 
-func (ps *PeerServiceImpl) AddPeerInfo(peerInfo *domain.PeerInfo){
+func (ps *PeerServiceImpl) AddPeerInfo(peerInfo *PeerInfo){
 
 	if peerInfo.PeerID == ""{
 		logger.Error("failed to connect with", peerInfo)
@@ -115,7 +114,7 @@ func (ps *PeerServiceImpl) AddPeerInfo(peerInfo *domain.PeerInfo){
 	ps.peerTable.AddPeerInfo(peerInfo)
 }
 
-func (ps *PeerServiceImpl) RequestPeerInfo(ip string) *domain.PeerInfo{
+func (ps *PeerServiceImpl) RequestPeerInfo(ip string) *PeerInfo{
 
 	return nil
 }

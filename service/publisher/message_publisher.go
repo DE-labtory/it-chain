@@ -1,4 +1,4 @@
-package event
+package publisher
 
 import (
 	"github.com/asaskevich/EventBus"
@@ -19,7 +19,6 @@ type MessagePublisher struct{
 }
 
 //todo signer를 받아야함
-//
 //topic의 일치성을 위해 처음에 topic의 list를 받고 이 list에 없는 topic은 등록불가하다.
 func NewMessagePublisher(messageTypes []string) *MessagePublisher{
 
@@ -62,13 +61,14 @@ func (mh *MessagePublisher) ReceivedMessageHandle(message comm.OutterMessage){
 
 	//todo vaild message 검증
 	//message
-	m := &pb.Message{}
+
 
 	if message.Envelope == nil{
 		logger_event_publisher.Info("message is nil", message)
 		return
 	}
 
+	m := &pb.Message{}
 	err := proto.Unmarshal(message.Envelope.Payload,m)
 
 	if err != nil{
@@ -76,7 +76,6 @@ func (mh *MessagePublisher) ReceivedMessageHandle(message comm.OutterMessage){
 	}
 
 	messageType := m.GetMessageType()
-
 	mt, ok := mh.topicMap[messageType]
 
 	if ok{

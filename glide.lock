@@ -1,5 +1,5 @@
-hash: c77dff780dff5e3675d5f2b453f403cd6e4e480eab6331b18fcde091011e1cb2
-updated: 2018-01-24T20:04:10.696206141+09:00
+hash: ffb65182df42d77dd1c0b8ecd690429e8f0f3cbc853855021e3807b3a91c71fc
+updated: 2018-01-25T15:38:26.575887389+09:00
 imports:
 - name: github.com/asaskevich/EventBus
   version: 68a521d7cbbb7a859c2608b06342f384b3bd5f5a
@@ -28,6 +28,8 @@ imports:
   - json/parser
   - json/scanner
   - json/token
+- name: github.com/jeevatkm/go-model
+  version: 00bcf69e10573c4ba261c9842194d07e6d4b50e9
 - name: github.com/magiconair/properties
   version: 49d762b9817ba1c2e9d0c69183c2b4a8b8f1d934
   subpackages:
@@ -135,6 +137,8 @@ imports:
   - status
   - tap
   - transport
+- name: gopkg.in/jeevatkm/go-model.v1
+  version: 00bcf69e10573c4ba261c9842194d07e6d4b50e9
 - name: gopkg.in/yaml.v2
   version: d670f9405373e636a5a2765eea47fac0c9bc91a4
 testImports:

@@ -4,30 +4,19 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"time"
+	pb "it-chain/network/protos"
 	"net"
 	"log"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc"
-	pb "it-chain/network/protos"
-	"it-chain/service/domain"
 )
 
-func MockCreateNewPeerInfo(peerID string) *domain.PeerInfo{
-
-	return  &domain.PeerInfo{
-		PeerID: peerID,
-		Port: "5555",
-		IpAddress: "127.0.0.1",
-		HeartBeat: 1,
-		TimeStamp: time.Now(),
-	}
-}
-
-func ListenMockServerWithPeer(peer domain.PeerInfo) (*grpc.Server,net.Listener){
-	lis, err := net.Listen("tcp", peer.GetEndPoint())
+func ListenMockServerWithIP(ip string) (*grpc.Server,net.Listener){
+	lis, err := net.Listen("tcp", ip)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
 	s := grpc.NewServer()
 	pb.RegisterMessageServiceServer(s, &Mockserver{})
 	// Register reflection service on gRPC server.
@@ -46,18 +35,13 @@ func ListenMockServerWithPeer(peer domain.PeerInfo) (*grpc.Server,net.Listener){
 
 func TestCommImpl_CreateStreamConn(t *testing.T) {
 
-	peer1 := MockCreateNewPeerInfo("test1")
-	server1, listner1 := ListenMockServerWithPeer(*peer1)
-
-	peer2 := MockCreateNewPeerInfo("test2")
-	peer2.Port = "6666"
-	peer2.Port = "6666"
-	server2, listner2 := ListenMockServerWithPeer(*peer2)
+	server1, listner1 := ListenMockServerWithIP("127.0.0.1:5555")
+	server2, listner2 := ListenMockServerWithIP("127.0.0.1:6666")
 
 
 	comm := NewConnectionManagerImpl()
-	comm.CreateStreamConn(peer1.PeerID,peer1.GetEndPoint(),nil)
-	comm.CreateStreamConn(peer2.PeerID,peer2.GetEndPoint(),nil)
+	comm.CreateStreamConn("1","127.0.0.1:5555",nil)
+	comm.CreateStreamConn("2","127.0.0.1:6666",nil)
 
 	defer func(){
 		server1.Stop()
@@ -73,23 +57,18 @@ func TestCommImpl_CreateStreamConn(t *testing.T) {
 func TestCommImpl_Send(t *testing.T) {
 	counter = 0
 
-	peer1 := MockCreateNewPeerInfo("test1")
-	server1, listner1 := ListenMockServerWithPeer(*peer1)
-
-	peer2 := MockCreateNewPeerInfo("test2")
-	peer2.Port = "6666"
-	server2, listner2 := ListenMockServerWithPeer(*peer2)
-
+	server1, listner1 := ListenMockServerWithIP("127.0.0.1:5555")
+	server2, listner2 := ListenMockServerWithIP("127.0.0.1:6666")
 
 
 	comm := NewConnectionManagerImpl()
-	comm.CreateStreamConn(peer1.PeerID,peer1.GetEndPoint(),nil)
-	comm.CreateStreamConn(peer2.PeerID,peer2.GetEndPoint(),nil)
+	comm.CreateStreamConn("1","127.0.0.1:5555",nil)
+	comm.CreateStreamConn("2","127.0.0.1:6666",nil)
 
 	envelope := &pb.Envelope{Signature:[]byte("123")}
 
-	comm.SendStream(*envelope,nil, peer2.PeerID)
-	comm.SendStream(*envelope, nil, peer2.PeerID)
+	comm.SendStream(*envelope,nil, "2")
+	comm.SendStream(*envelope, nil, "2")
 
 	defer func(){
 		server1.Stop()
@@ -106,17 +85,13 @@ func TestCommImpl_Send(t *testing.T) {
 
 func TestCommImpl_Stop(t *testing.T) {
 	counter = 0
-	peer1 := MockCreateNewPeerInfo("test1")
-	server1, listner1 := ListenMockServerWithPeer(*peer1)
-
-	peer2 := MockCreateNewPeerInfo("test2")
-	peer2.Port = "6666"
-	server2, listner2 := ListenMockServerWithPeer(*peer2)
+	server1, listner1 := ListenMockServerWithIP("127.0.0.1:5555")
+	server2, listner2 := ListenMockServerWithIP("127.0.0.1:6666")
 
 
 	comm := NewConnectionManagerImpl()
-	comm.CreateStreamConn(peer1.PeerID,peer1.GetEndPoint(),nil)
-	comm.CreateStreamConn(peer2.PeerID,peer2.GetEndPoint(),nil)
+	comm.CreateStreamConn("1","127.0.0.1:5555",nil)
+	comm.CreateStreamConn("2","127.0.0.1:6666",nil)
 
 	defer func(){
 		server1.Stop()
@@ -132,12 +107,13 @@ func TestCommImpl_Stop(t *testing.T) {
 
 func TestCommImpl_Close(t *testing.T) {
 
-	peer1 := MockCreateNewPeerInfo("test1")
-	server1, listner1 := ListenMockServerWithPeer(*peer1)
+	server1, listner1 := ListenMockServerWithIP("127.0.0.1:5555")
+	server2, listner2 := ListenMockServerWithIP("127.0.0.1:6666")
 
-	peer2 := MockCreateNewPeerInfo("test2")
-	peer2.Port = "6666"
-	server2, listner2 := ListenMockServerWithPeer(*peer2)
+
+	comm := NewConnectionManagerImpl()
+	comm.CreateStreamConn("1","127.0.0.1:5555",nil)
+	comm.CreateStreamConn("2","127.0.0.1:6666",nil)
 
 	defer func(){
 		server1.Stop()
@@ -146,11 +122,7 @@ func TestCommImpl_Close(t *testing.T) {
 		listner2.Close()
 	}()
 
-	comm := NewConnectionManagerImpl()
-	comm.CreateStreamConn(peer1.PeerID,peer1.GetEndPoint(),nil)
-	comm.CreateStreamConn(peer2.PeerID,peer2.GetEndPoint(),nil)
-
-	comm.Close(*peer1)
+	comm.Close("1")
 
 	assert.Equal(t,1,comm.Size())
 

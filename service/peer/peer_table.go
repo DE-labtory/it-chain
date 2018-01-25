@@ -1,4 +1,4 @@
-package domain
+package peer
 
 import (
 	"time"
@@ -44,9 +44,9 @@ func (pi *PeerInfo)GetEndPoint() string{
 }
 
 type PeerTable struct {
-	PeerMap  map[string]*PeerInfo
+	PeerMap   map[string]*PeerInfo
 	TimeStamp time.Time
-	OwnerID      string
+	OwnerID   string
 	sync.RWMutex
 }
 

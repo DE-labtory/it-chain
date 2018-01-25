@@ -10,7 +10,7 @@ service MessageService{
 }
 
 service PeerService{
-    rpc PeerInfo (Empty) returns (PeerInfo) {}
+    rpc GetPeerInfo (PeerInfo) returns (PeerInfo) {}
 }
 
 message Envelope {
@@ -49,7 +49,7 @@ message Transaction{
 
 message PeerTable{
     string OwnerID = 1;
-    repeated PeerInfo peerInfos = 2;
+    map <string, PeerInfo> PeerMap= 2;
 }
 
 message PeerInfo {
@@ -58,5 +58,9 @@ message PeerInfo {
     string peerID = 3;
     int32 heartBeat = 4;
     bytes pubKey = 5;
+}
+
+enum{
+
 }
 
