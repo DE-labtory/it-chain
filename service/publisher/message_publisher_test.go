@@ -1,4 +1,4 @@
-package event
+package publisher
 
 import (
 	"testing"
@@ -13,7 +13,6 @@ import (
 )
 
 func MakeEnvelopeHavingPeerTable() *message.Envelope{
-
 
 	peerTable := &pb.Message_PeerTable{}
 	peerTable.PeerTable = &pb.PeerTable{}
@@ -73,4 +72,43 @@ func TestMessagePublisher_ReceivedMessageHandle(t *testing.T) {
 	time.Sleep(1*time.Second)
 
 	assert.Equal(t,count,2)
+}
+
+func TestMessagePublisher_MultipleReceivedMessageHandle(t *testing.T) {
+
+	count := 1
+	messageHandler := NewMessagePublisher(event.MessageTypes)
+
+	subfunc := func(message comm.OutterMessage){
+		count ++
+		fmt.Println("published")
+	}
+
+	err := messageHandler.AddSubscriber(event.UpdatePeerTable,subfunc,true)
+	err = messageHandler.AddSubscriber(event.UpdatePeerTable,subfunc,true)
+
+	envelop := MakeEnvelopeHavingPeerTable()
+
+	messageHandler.ReceivedMessageHandle(comm.OutterMessage{Envelope:envelop})
+
+	assert.NoError(t,err)
+
+	time.Sleep(1*time.Second)
+
+	assert.Equal(t,count,3)
+}
+
+func TestMessagePublisher_ReceivedMessageHandleError(t *testing.T) {
+
+	count := 1
+	messageHandler := NewMessagePublisher(event.MessageTypes)
+
+	subfunc := func(message comm.OutterMessage){
+		count ++
+		fmt.Println("published")
+	}
+
+	err := messageHandler.AddSubscriber("hello",subfunc,true)
+
+	assert.Error(t,err)
 }

@@ -1,12 +1,12 @@
 package message
 
 import (
-	"it-chain/service/domain"
+	"it-chain/service/peer"
 	"fmt"
 	"it-chain/service/peer/event"
 )
 
-func PeerTableToTable(peerTable domain.PeerTable) *Message_PeerTable{
+func PeerTableToTable(peerTable peer.PeerTable) *Message_PeerTable{
 
 	peerTable_ := &Message_PeerTable{}
 	peerTable_.PeerTable = &PeerTable{}
@@ -28,12 +28,12 @@ func PeerTableToTable(peerTable domain.PeerTable) *Message_PeerTable{
 	return peerTable_
 }
 
-func (m *Message) FromPeerTable(peerTable domain.PeerTable){
+func (m *Message) FromPeerTable(peerTable peer.PeerTable){
 	m.GetPeerTable().OwnerID = peerTable.OwnerID
 
 }
 
-func (m *Message) SetPeerInfos(peerInfos []domain.PeerInfo, ownerID string){
+func (m *Message) SetPeerInfos(peerInfos []peer.PeerInfo, ownerID string){
 
 	fmt.Println(m.GetPeerTable())
 
@@ -54,14 +54,14 @@ func (m *Message) SetPeerInfos(peerInfos []domain.PeerInfo, ownerID string){
 
 }
 
-func (m *Message) GetPeerTable_() *domain.PeerTable{
+func (m *Message) GetPeerTable_() *peer.PeerTable{
 
-	peerTable := &domain.PeerTable{}
+	peerTable := &peer.PeerTable{}
 	peerTable.OwnerID = m.GetPeerTable().OwnerID
-	peerTable.PeerMap = make(map[string]*domain.PeerInfo)
+	peerTable.PeerMap = make(map[string]*peer.PeerInfo)
 
 	for _, peerInfo := range m.GetPeerTable().PeerInfos {
-		peerInfo_ := &domain.PeerInfo{}
+		peerInfo_ := &peer.PeerInfo{}
 		peerInfo_.IpAddress = peerInfo.IpAddress
 		peerInfo_.PeerID  = peerInfo.PeerID
 		peerInfo_.PubKey = peerInfo.PubKey

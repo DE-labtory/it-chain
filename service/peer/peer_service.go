@@ -1,25 +1,23 @@
 package peer
 
-import "it-chain/service/domain"
-
 //peer 최상위 service
 type PeerService interface{
 
 	//peer table 조회
-	GetPeerTable() domain.PeerTable
+	GetPeerTable() PeerTable
 
 	//peer info 찾기
-	GetPeerInfoByPeerID(peerID string) *domain.PeerInfo
+	GetPeerInfoByPeerID(peerID string) *PeerInfo
 
 	//peer info
 	PushPeerTable(peerIDs []string)
 
 	//update peerTable
-	UpdatePeerTable(peerTable domain.PeerTable)
+	UpdatePeerTable(peerTable PeerTable)
 
 	//Add peer
-	AddPeerInfo(peerInfo *domain.PeerInfo)
+	AddPeerInfo(peerInfo *PeerInfo)
 
 	//Request Peer Info
-	RequestPeerInfo(host string, port string) *domain.PeerInfo
+	RequestPeerInfo(host string, port string) *PeerInfo
 }

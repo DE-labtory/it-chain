@@ -10,7 +10,7 @@ service MessageService{
 }
 
 service PeerService{
-    rpc PeerInfo (Empty) returns (PeerInfo) {}
+    rpc GetPeerInfo (PeerInfo) returns (PeerInfo) {}
 }
 
 message Envelope {

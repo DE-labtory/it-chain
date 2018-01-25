@@ -2,7 +2,6 @@ package comm
 
 import (
 	"it-chain/network/protos"
-	"it-chain/service/domain"
 )
 
 type onError func(error)
@@ -15,7 +14,7 @@ type ConnectionManager interface{
 
 	Stop()
 
-	Close(peerInfo domain.PeerInfo)
+	Close(connectionID string)
 
 	CreateStreamConn(connectionID string, ip string, handle ReceiveMessageHandle) error
 

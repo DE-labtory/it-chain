@@ -80,8 +80,6 @@ func TestCommImpl_Send(t *testing.T) {
 	peer2.Port = "6666"
 	server2, listner2 := ListenMockServerWithPeer(*peer2)
 
-
-
 	comm := NewConnectionManagerImpl()
 	comm.CreateStreamConn(peer1.PeerID,peer1.GetEndPoint(),nil)
 	comm.CreateStreamConn(peer2.PeerID,peer2.GetEndPoint(),nil)

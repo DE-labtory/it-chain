@@ -8,9 +8,13 @@ import (
 	"sync/atomic"
 	"errors"
 	"it-chain/common"
+	"time"
+	"google.golang.org/grpc/credentials"
 )
 
 var logger_comm = common.GetLogger("connection.go")
+
+const defaultTimeout = time.Second * 3
 
 type ReceiveMessageHandle func(message OutterMessage)
 
@@ -28,6 +32,28 @@ type Connection struct {
 	readChannel    chan *message.Envelope
 	stopChannel    chan struct{}
 	sync.RWMutex
+}
+
+//get time from config
+//timeOut := viper.GetInt("grpc.timeout")
+func NewConnectionWithAddress(peerAddress string,  tslEnabled bool, creds credentials.TransportCredentials) (*grpc.ClientConn, error){
+
+	var opts []grpc.DialOption
+
+	if tslEnabled {
+		opts = append(opts, grpc.WithTransportCredentials(creds))
+	} else {
+		opts = append(opts, grpc.WithInsecure())
+	}
+
+	opts = append(opts, grpc.WithTimeout(defaultTimeout))
+
+	conn, err := grpc.Dial(peerAddress, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, err
 }
 
 //todo channel의 buffer size를 config에서 읽기

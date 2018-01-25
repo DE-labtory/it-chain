@@ -3,7 +3,6 @@ package comm
 import (
 	pb "it-chain/network/protos"
 	"sync"
-	"it-chain/service/domain"
 	"it-chain/common"
 )
 
@@ -70,14 +69,14 @@ func (comm *ConnectionManagerImpl) Stop(){
 	}
 }
 
-func (comm *ConnectionManagerImpl) Close(peerInfo domain.PeerInfo){
+func (comm *ConnectionManagerImpl) Close(connectionID string){
 
-	conn, ok := comm.connectionMap[peerInfo.PeerID]
+	conn, ok := comm.connectionMap[connectionID]
 
 	if ok{
-		commLogger.Println("connection:",peerInfo.PeerID, "is closing")
+		commLogger.Println("connection:",connectionID, "is closing")
 		conn.Close()
-		delete(comm.connectionMap,peerInfo.PeerID)
+		delete(comm.connectionMap,connectionID)
 	}
 }
 
