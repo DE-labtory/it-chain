@@ -25,11 +25,3 @@ type keyGenerator interface {
 	GenerateKey(opts KeyGenOpts) (pri, pub Key, err error)
 
 }
-
-type KeyImporterOpts interface {}
-
-type keyImporter interface {
-
-	Import(data interface{}) (key Key, err error)
-
-}
