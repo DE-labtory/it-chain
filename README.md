@@ -1,9 +1,7 @@
 # it-chain
-<p align="center">
 
-​	<img src="./images/logo.png" width="300px" height="200px" align="center">
 
-</p>
+<p align="center"><img src="./images/logo.png" width="300px" height="200px"></p>
 
 ## Overview
 
@@ -26,3 +24,8 @@ For the time being, email leebduk@gmail.com
 ## License
 
 It-Chain Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the [LICENSE](LICENSE) file.
+
+## Designed by
+@Hyemin choi<br>
+@Jieun Oh<br>
+@Jongmo Moon<br>
