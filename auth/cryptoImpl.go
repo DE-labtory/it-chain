@@ -6,69 +6,53 @@ import (
 	"crypto/elliptic"
 )
 
-type collector struct {
+type cryptoHelper struct {
 
-	keyManager		KeyManager
-	signers 		map[reflect.Type]Signer
-	verifiers 		map[reflect.Type]Verifier
-	keyGenerators 	map[reflect.Type]KeyGenerator
-	keyImporters	map[reflect.Type]KeyImporter
+	privKey			Key
+	pubKey			Key
 
-}
-
-func NewDefaultCrypto() (Crypto, error) {
+	keyManager		keyManager
+	signers 		map[reflect.Type]signer
+	verifiers 		map[reflect.Type]verifier
+	keyGenerators 	map[reflect.Type]keyGenerator
 
 }
 
-func NewCrypto(keyManagerPath string, ) (Crypto, error) {
+func NewCrypto(path string) (Crypto, error) {
 
-	if len(keyManagerPath) == 0 {
-		return nil, errors.New("KeyStorePath cannot be empty")
-	}
+	km := &keyManager{}
+	km.Init(path)
 
-	keyManager := &keyManager{path:keyManagerPath}
-
-	signers := make(map[reflect.Type]Signer)
+	signers := make(map[reflect.Type]signer)
 	signers[reflect.TypeOf(&rsaPrivateKey{})] = &rsaSigner{}
 	signers[reflect.TypeOf(&ecdsaPrivateKey{})] = &ecdsaSigner{}
 
-	verifiers := make(map[reflect.Type]Verifier)
+	verifiers := make(map[reflect.Type]verifier)
 	verifiers[reflect.TypeOf(&rsaPublicKey{})] = &rsaVerifier{}
 	verifiers[reflect.TypeOf(&ecdsaPublicKey{})] = &ecdsaVerifier{}
 
-	keyGenerators := make(map[reflect.Type]KeyGenerator)
+	keyGenerators := make(map[reflect.Type]keyGenerator)
 	keyGenerators[reflect.TypeOf(&RSAKeyGenOpts{})] = &rsaKeyGenerator{1024}
 	keyGenerators[reflect.TypeOf(&ECDSAKeyGenOpts{})] = &ecdsaKeyGenerator{elliptic.P256()}
 
-	keyImporters := make(map[reflect.Type]KeyImporter)
-	keyImporters[reflect.TypeOf(&RSAPrivateKeyImporterOpts{})] = &rsaPrivateKeyImporter{}
-	keyImporters[reflect.TypeOf(&RSAPublicKeyImporterOpts{})] = &rsaPublicKeyImporter{}
-	keyImporters[reflect.TypeOf(&ECDSAPrivateKeyImporterOpts{})] = &ecdsaPrivateKeyImporter{}
-	keyImporters[reflect.TypeOf(&ECDSAPublicKeyImporterOpts{})] = &ecdsaPublicKeyImporter{}
-
-	coll := &collector{
-		keyManager:		keyManager,
+	ch := &cryptoHelper{
+		keyManager:		*km,
 		signers: 		signers,
 		verifiers: 		verifiers,
 		keyGenerators: 	keyGenerators,
-		keyImporters: 	keyImporters,
 	}
 
-	return coll, nil
+	return ch, nil
 
 }
 
-func (c *collector) Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, err error) {
-
-	if key == nil {
-		return nil, errors.New("invalid key")
-	}
+func (ch *cryptoHelper) Sign(digest []byte, opts SignerOpts) (signature []byte, err error) {
 
 	if len(digest) == 0 {
 		return nil, errors.New("invalid digest")
 	}
 
-	signer, found := c.signers[reflect.TypeOf(key)]
+	signer, found := ch.signers[reflect.TypeOf(key)]
 	if !found {
 		return nil, errors.New("unsupported key type")
 	}
@@ -82,7 +66,7 @@ func (c *collector) Sign(key Key, digest []byte, opts SignerOpts) (signature []b
 
 }
 
-func (c *collector) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error) {
+func (c *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error) {
 
 	if key == nil {
 		return false, errors.New("invalid key")
@@ -110,23 +94,23 @@ func (c *collector) Verify(key Key, signature, digest []byte, opts SignerOpts) (
 
 }
 
-func (c *collector) KeyGenerate(opts KeyGenOpts) (key Key, err error) {
+func (ch *cryptoHelper) GenerateKey(opts KeyGenOpts) (key Key, err error) {
 
 	if opts == nil {
 		return nil, errors.New("Invalid KeyGen Options")
 	}
 
-	keyGenerator, found := c.keyGenerators[reflect.TypeOf(opts)]
+	keyGenerator, found := ch.keyGenerators[reflect.TypeOf(opts)]
 	if !found {
 		return nil, errors.New("Invalid KeyGen Options")
 	}
 
-	key, err = keyGenerator.KeyGenerate(opts)
+	key, err = keyGenerator.GenerateKey(opts)
 	if err != nil {
 		return nil, errors.New("Failed to generate a Key")
 	}
 
-	err = c.keyManager.Store(key)
+	err = ch.keyManager.Store(key)
 	if err != nil {
 		return nil, errors.New("Failed to store a Key")
 	}
@@ -135,25 +119,36 @@ func (c *collector) KeyGenerate(opts KeyGenOpts) (key Key, err error) {
 
 }
 
-func (c *collector) KeyImport(data interface{}, opts KeyImporterOpts) (key Key, err error) {
+func (ch *cryptoHelper) LoadKey() (pri Key, pub Key, err error) {
 
-	if data == nil {
-		return nil, errors.New("Data have not to be NIL")
-	}
-
-	if opts == nil {
-		return nil, errors.New("Invalid KeyImporter Opts")
-	}
-
-	keyImporter, found := c.keyImporters[reflect.TypeOf(opts)]
-	if !found {
-		return nil, errors.New("Invalid KeyImporter Opts")
-	}
-
-	key, err = keyImporter.Import(data)
+	pri, pub, err = ch.keyManager.LoadKey()
 	if err != nil {
-		return nil, errors.New("Failed to import key from input data")
+		return nil, nil, errors.New("Failed to Load Key")
 	}
 
 	return
+
 }
+
+//func (ch *cryptoHelper) KeyImport(data interface{}, opts KeyImporterOpts) (key Key, err error) {
+//
+//	if data == nil {
+//		return nil, errors.New("Data have not to be NIL")
+//	}
+//
+//	if opts == nil {
+//		return nil, errors.New("Invalid KeyImporter Opts")
+//	}
+//
+//	keyImporter, found := ch.keyImporters[reflect.TypeOf(opts)]
+//	if !found {
+//		return nil, errors.New("Invalid KeyImporter Opts")
+//	}
+//
+//	key, err = keyImporter.Import(data)
+//	if err != nil {
+//		return nil, errors.New("Failed to import key from input data")
+//	}
+//
+//	return
+//}
