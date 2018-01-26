@@ -20,7 +20,7 @@ Contribution documents will be updated shortly.
 For the time being, email leebduk@gmail.com
 
 ## Implemnation Details
-Core implementation decisions can be found in the Project Implementation Details. 
+Core implementation decisions can be found in the Project Implementation Details. <br>
 [PROJECT IMPLEMENTATION DETAILS](PROJECT-IMPLEMENTATION-DETAILS.md)
 
 ## License
