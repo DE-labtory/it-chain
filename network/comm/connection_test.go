@@ -8,10 +8,10 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc"
 	pb "it-chain/network/protos"
-	"golang.org/x/net/context"
 	"fmt"
-	"io"
 	"time"
+	"io"
+	"golang.org/x/net/context"
 )
 
 const (
@@ -21,6 +21,7 @@ const (
 var counter = 0
 
 type Mockserver struct {}
+
 
 func (s *Mockserver) Stream(stream pb.MessageService_StreamServer) (error) {
 
@@ -75,7 +76,7 @@ func TestNewConnection(t *testing.T) {
 		assert.Fail(t,"fail to create connection")
 	}
 
-	conn,err  := NewConnection(grpc_conn)
+	conn,err  := NewConnection(grpc_conn,nil,"1")
 
 	defer conn.Close()
 
@@ -103,7 +104,7 @@ func TestConnection_SendWithStream(t *testing.T) {
 		assert.Fail(t,"fail to create connection")
 	}
 
-	conn,err  := NewConnection(grpc_conn)
+	conn,err  := NewConnection(grpc_conn, nil, "1")
 
 	defer conn.Close()
 
@@ -115,9 +116,9 @@ func TestConnection_SendWithStream(t *testing.T) {
 
 	fmt.Println(counter)
 
-	conn.SendWithStream(envelope,nil)
-	conn.SendWithStream(envelope,nil)
-	conn.SendWithStream(envelope,nil)
+	conn.Send(envelope,nil)
+	conn.Send(envelope, nil)
+	conn.Send(envelope, nil)
 
 	time.Sleep(3*time.Second)
 
@@ -125,4 +126,16 @@ func TestConnection_SendWithStream(t *testing.T) {
 	listner.Close()
 
 	assert.Equal(t,3,counter)
+}
+
+func TestNewConnectionWithAddress(t *testing.T) {
+
+	conn,err := NewConnectionWithAddress("127.0.0.1:8080",false,nil)
+	defer conn.Close()
+
+	if err != nil{
+		assert.Fail(t,"fail to connect")
+	}
+
+	assert.NotNil(t,conn)
 }

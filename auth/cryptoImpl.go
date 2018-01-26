@@ -6,54 +6,67 @@ import (
 	"crypto/elliptic"
 )
 
-type collector struct {
+type cryptoHelper struct {
 
-	signers map[reflect.Type]Signer
-	verifiers map[reflect.Type]Verifier
-	keyGenerators map[reflect.Type]KeyGenerator
+	priKey			Key
+	pubKey			Key
+
+	keyManager		keyManager
+	signers 		map[reflect.Type]signer
+	verifiers 		map[reflect.Type]verifier
+	keyGenerators 	map[reflect.Type]keyGenerator
 
 }
 
-func NewCollector() (Crypto, error) {
+func NewCrypto(path string) (Crypto, error) {
 
-	signers := make(map[reflect.Type]Signer)
+	km := &keyManager{}
+	km.Init(path)
+
+	signers := make(map[reflect.Type]signer)
 	signers[reflect.TypeOf(&rsaPrivateKey{})] = &rsaSigner{}
 	signers[reflect.TypeOf(&ecdsaPrivateKey{})] = &ecdsaSigner{}
 
-	verifiers := make(map[reflect.Type]Verifier)
+	verifiers := make(map[reflect.Type]verifier)
 	verifiers[reflect.TypeOf(&rsaPublicKey{})] = &rsaVerifier{}
 	verifiers[reflect.TypeOf(&ecdsaPublicKey{})] = &ecdsaVerifier{}
 
-	keyGenerators := make(map[reflect.Type]KeyGenerator)
-	keyGenerators[reflect.TypeOf(&rsaKeyGenOpts{})] = &rsaKeyGenerator{1024}
-	keyGenerators[reflect.TypeOf(&ecdsaKeyGenOpts{})] = &ecdsaKeyGenerator{elliptic.P256()}
+	keyGenerators := make(map[reflect.Type]keyGenerator)
+	keyGenerators[reflect.TypeOf(&RSAKeyGenOpts{})] = &rsaKeyGenerator{1024}
+	keyGenerators[reflect.TypeOf(&ECDSAKeyGenOpts{})] = &ecdsaKeyGenerator{elliptic.P256()}
 
-	coll := &collector{
+	ch := &cryptoHelper{
+		keyManager:		*km,
 		signers: 		signers,
 		verifiers: 		verifiers,
 		keyGenerators: 	keyGenerators,
 	}
 
-	return coll, nil
+	return ch, nil
 
 }
 
-func (c *collector) Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, err error) {
+func (ch *cryptoHelper) Sign(digest []byte, opts SignerOpts) (signature []byte, err error) {
 
-	if key == nil {
-		return nil, errors.New("invalid key")
+	ch.priKey, ch.pubKey, err = ch.LoadKey()
+	if err != nil {
+		return nil, errors.New("Key is not exist.")
 	}
 
 	if len(digest) == 0 {
-		return nil, errors.New("invalid digest")
+		return nil, errors.New("invalid digest.")
 	}
 
-	signer, found := c.signers[reflect.TypeOf(key)]
+	if ch.priKey == nil {
+		return nil, errors.New("Private key is not exist.")
+	}
+
+	signer, found := ch.signers[reflect.TypeOf(ch.priKey)]
 	if !found {
-		return nil, errors.New("unsupported key type")
+		return nil, errors.New("unsupported key type.")
 	}
 
-	signature, err = signer.Sign(key, digest, opts)
+	signature, err = signer.Sign(ch.priKey, digest, opts)
 	if err != nil {
 		return nil, errors.New("signing error is occurred")
 	}
@@ -62,7 +75,7 @@ func (c *collector) Sign(key Key, digest []byte, opts SignerOpts) (signature []b
 
 }
 
-func (c *collector) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error) {
+func (ch *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error) {
 
 	if key == nil {
 		return false, errors.New("invalid key")
@@ -76,7 +89,7 @@ func (c *collector) Verify(key Key, signature, digest []byte, opts SignerOpts) (
 		return false, errors.New("invalid digest")
 	}
 
-	verifier, found := c.verifiers[reflect.TypeOf(key)]
+	verifier, found := ch.verifiers[reflect.TypeOf(key)]
 	if !found {
 		return false, errors.New("unsupported key type")
 	}
@@ -90,20 +103,36 @@ func (c *collector) Verify(key Key, signature, digest []byte, opts SignerOpts) (
 
 }
 
-func (c *collector) KeyGenerate(opts KeyGenOpts) (key Key, err error) {
+func (ch *cryptoHelper) GenerateKey(opts KeyGenOpts) (pri, pub Key, err error) {
 
 	if opts == nil {
-		return nil, errors.New("Invalid KeyGen Options")
+		return nil, nil, errors.New("Invalid KeyGen Options")
 	}
 
-	keyGenerator, found := c.keyGenerators[reflect.TypeOf(opts)]
+	keyGenerator, found := ch.keyGenerators[reflect.TypeOf(opts)]
 	if !found {
-		return nil, errors.New("Invalid KeyGen Options")
+		return nil,nil, errors.New("Invalid KeyGen Options")
 	}
 
-	key, err = keyGenerator.KeyGenerate(opts)
+	pri, pub, err = keyGenerator.GenerateKey(opts)
 	if err != nil {
-		return nil, errors.New("Failed to generate a Key")
+		return nil, nil, errors.New("Failed to generate a Key")
+	}
+
+	err = ch.keyManager.Store(pri, pub)
+	if err != nil {
+		return nil, nil, errors.New("Failed to store a Key")
+	}
+
+	return
+
+}
+
+func (ch *cryptoHelper) LoadKey() (pri Key, pub Key, err error) {
+
+	pri, pub, err = ch.keyManager.LoadKey()
+	if err != nil {
+		return nil, nil, err
 	}
 
 	return

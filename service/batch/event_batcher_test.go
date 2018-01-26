@@ -14,14 +14,13 @@ type MockHandler struct {
 
 var mock_iter = 3
 
-func (mh *MockHandler) handle(ms interface{}) (interface{},error){
+func (mh *MockHandler) Handle(ms interface{}){
 
 	mh.counter = mh.counter +1
 
 	if mh.counter > mock_iter{
 		mh.done <- 3
 	}
-	return "success", nil
 }
 
 func MockNewGRPCMessageBatcher(done chan int) (*EventBatcher, *MockHandler){

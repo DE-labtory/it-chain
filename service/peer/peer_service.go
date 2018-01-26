@@ -11,4 +11,13 @@ type PeerService interface{
 
 	//peer info
 	PushPeerTable(peerIDs []string)
+
+	//update peerTable
+	UpdatePeerTable(peerTable PeerTable)
+
+	//Add peer
+	AddPeerInfo(peerInfo *PeerInfo)
+
+	//Request Peer Info
+	RequestPeerInfo(host string, port string) *PeerInfo
 }

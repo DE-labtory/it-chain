@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"encoding/json"
+	"math/rand"
 )
 
 type PeerInfo struct {
@@ -43,9 +44,9 @@ func (pi *PeerInfo)GetEndPoint() string{
 }
 
 type PeerTable struct {
-	PeerMap  map[string]*PeerInfo
+	PeerMap   map[string]*PeerInfo
 	TimeStamp time.Time
-	OwnerID      string
+	OwnerID   string
 	sync.RWMutex
 }
 
@@ -131,6 +132,40 @@ func (pt *PeerTable) IncrementHeartBeat() error{
 	myPeer.HeartBeat += 1
 
 	return nil
+}
+
+func (pt *PeerTable) SelectRandomPeerInfos(percent float64) ([]PeerInfo,error){
+
+	if len(pt.PeerMap) <= 1{
+		return nil, errors.New("no peer in gossiptable")
+	}
+
+	num := int(percent*float64(len(pt.PeerMap)))
+
+	if num < 1{
+		return nil, errors.New("no peer in gossiptable")
+	}
+
+	tmp := make([]*PeerInfo, 0)
+	for _, peer := range pt.PeerMap{
+		if peer.PeerID != pt.OwnerID{
+			//내 ID는 삭제
+			tmp = append(tmp, peer)
+		}
+	}
+
+	peerInfoList := make([]PeerInfo, 0)
+
+	for i := 0; i < num; i++ {
+		rand.Seed(time.Now().UTC().UnixNano())
+		randNum := rand.Int() % len(tmp)
+		peerInfoList = append(peerInfoList, *tmp[randNum])
+
+		//delete
+		tmp = append(tmp[:randNum], tmp[randNum+1:]...)
+	}
+
+	return peerInfoList,nil
 }
 
 func (pi PeerInfo) String() string {

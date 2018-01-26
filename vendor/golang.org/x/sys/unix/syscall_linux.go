@@ -1197,22 +1197,6 @@ func ReadDirent(fd int, buf []byte) (n int, err error) {
 	return Getdents(fd, buf)
 }
 
-func direntIno(buf []byte) (uint64, bool) {
-	return readInt(buf, unsafe.Offsetof(Dirent{}.Ino), unsafe.Sizeof(Dirent{}.Ino))
-}
-
-func direntReclen(buf []byte) (uint64, bool) {
-	return readInt(buf, unsafe.Offsetof(Dirent{}.Reclen), unsafe.Sizeof(Dirent{}.Reclen))
-}
-
-func direntNamlen(buf []byte) (uint64, bool) {
-	reclen, ok := direntReclen(buf)
-	if !ok {
-		return 0, false
-	}
-	return reclen - uint64(unsafe.Offsetof(Dirent{}.Name)), true
-}
-
 //sys	mount(source string, target string, fstype string, flags uintptr, data *byte) (err error)
 
 func Mount(source string, target string, fstype string, flags uintptr, data string) (err error) {
@@ -1318,6 +1302,7 @@ func Setgid(uid int) (err error) {
 
 //sys	Setpriority(which int, who int, prio int) (err error)
 //sys	Setxattr(path string, attr string, data []byte, flags int) (err error)
+//sys	Statx(dirfd int, path string, flags int, mask int, stat *Statx_t) (err error)
 //sys	Sync()
 //sys	Syncfs(fd int) (err error)
 //sysnb	Sysinfo(info *Sysinfo_t) (err error)
@@ -1455,11 +1440,9 @@ func Vmsplice(fd int, iovs []Iovec, flags int) (int, error) {
 // RtSigtimedwait
 // SchedGetPriorityMax
 // SchedGetPriorityMin
-// SchedGetaffinity
 // SchedGetparam
 // SchedGetscheduler
 // SchedRrGetInterval
-// SchedSetaffinity
 // SchedSetparam
 // SchedYield
 // Security
