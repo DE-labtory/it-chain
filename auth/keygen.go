@@ -13,19 +13,25 @@ type rsaKeyGenerator struct {
 	bits int
 }
 
-func (keygen *rsaKeyGenerator) KeyGenerate(opts KeyGenOpts) (key Key, err error) {
+func (keygen *rsaKeyGenerator) GenerateKey(opts KeyGenOpts) (pri, pub Key, err error) {
 
 	if keygen.bits <= 0 {
-		return nil, errors.New("Bits length should be bigger than 0")
+		return nil, nil, errors.New("Bits length should be bigger than 0")
 	}
 
 	generatedKey, err := rsa.GenerateKey(rand.Reader, keygen.bits)
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to generate RSA key : %s", err)
+		return nil, nil, fmt.Errorf("Failed to generate RSA key : %s", err)
 	}
 
-	return &rsaPrivateKey{generatedKey}, nil
+	pri = &rsaPrivateKey{generatedKey}
+	pub, err = pri.(*rsaPrivateKey).PublicKey()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return
 
 }
 
@@ -33,18 +39,24 @@ type ecdsaKeyGenerator struct {
 	curve elliptic.Curve
 }
 
-func (keygen *ecdsaKeyGenerator) KeyGenerate(opts KeyGenOpts) (key Key, err error) {
+func (keygen *ecdsaKeyGenerator) GenerateKey(opts KeyGenOpts) (pri, pub Key, err error) {
 
 	if keygen.curve == nil {
-		return nil, errors.New("Curve value have not to be nil")
+		return nil, nil, errors.New("Curve value have not to be nil")
 	}
 
 	generatedKey, err := ecdsa.GenerateKey(keygen.curve, rand.Reader)
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to generate ECDSA key : %s", err)
+		return nil, nil, fmt.Errorf("Failed to generate ECDSA key : %s", err)
 	}
 
-	return &ecdsaPrivateKey{generatedKey}, nil
+	pri = &ecdsaPrivateKey{generatedKey}
+	pub, err = pri.(*ecdsaPrivateKey).PublicKey()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return
 
 }
