@@ -7,7 +7,7 @@ import (
 
 func TestDeploy_Deploy(t *testing.T) {
 
-	smartcontract := SmartContract{map[string]string{}}
+	smartcontract := SmartContractManager{map[string]SmartContract{}}
 	ContractPath := "junbeomlee/bloom"
 
 	deploy_result := smartcontract.Deploy(ContractPath)

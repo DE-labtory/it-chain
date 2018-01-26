@@ -3,6 +3,7 @@ package smartcontract
 import (
 	"errors"
 	"it-chain/service/blockchain"
+	"os"
 )
 
 const (
@@ -10,19 +11,24 @@ const (
 )
 
 type SmartContract struct {
-	SmartContractMap map[string]string
+	RepoName string
+	ContractPath string
+}
+
+type SmartContractManager struct {
+	SmartContractMap map[string]SmartContract
 }
 
 func Init() {
 }
 
-func (smartcontract *SmartContract) Deploy(ContractPath string) (error) {
-	_, ok := smartcontract.SmartContractMap[ContractPath];
+func (scm *SmartContractManager) Deploy(ContractID string) (error) {
+	_, ok := scm.SmartContractMap[ContractID];
 	if ok {
 		return errors.New("Already exist smart contract ID")
 	}
 
-	_, err := GetRepos(ContractPath)
+	smartcontract, err := GetRepos(ContractPath)
 	if err != nil {
 		return errors.New("An error occured while getting repos!")
 	}
@@ -32,7 +38,7 @@ func (smartcontract *SmartContract) Deploy(ContractPath string) (error) {
 		return errors.New("An error occured while forking repos!")
 	}
 
-	smartcontract.SmartContractMap[ContractPath] = githubResponse.Full_name
+	scm.SmartContractMap[ContractPath] = githubResponse.Full_name
 
 	return nil
 }
@@ -44,18 +50,22 @@ func (smartcontract *SmartContract) Deploy(ContractPath string) (error) {
  *	5. docker container Start
  *	6. docker에서 smartcontract 실행
  ****************************************************/
-func (smartcontract *SmartContract) Query(transaction blockchain.Transaction) (error) {
+func (scm *SmartContractManager) Query(transaction blockchain.Transaction) (error) {
 
-	_, ok := smartcontract.SmartContractMap[transaction.TxData.ContractID];
+	_, ok := scm.SmartContractMap[transaction.TxData.ContractID];
 	if !ok {
 		return errors.New("Not exist contract ID")
 	}
 
+	_, err := os.Stat(f)
+	if os.IsNotExist(err) {
+		return false
+	}
 
 	return nil
 }
 
 
-func (smartcontract *SmartContract) Invoke() {
+func (smartcontract *SmartContractManager) Invoke() {
 
 }
