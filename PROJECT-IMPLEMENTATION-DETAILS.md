@@ -52,7 +52,7 @@ Since it is complex to handle the reception and transmission of the peers' messa
 @Junbeomlee
 
 
-## Crpyto <a name="Crpyto"></a>
+## Crpyto <a name="Crypto"></a>
 
 ![crpyto-implemenation-module](./images/crpyto-implemenation-module.png)
 
