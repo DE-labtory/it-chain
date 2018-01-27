@@ -60,9 +60,9 @@ func CreateNewBlock(prevBlock *Block, createPeerId string) *Block{
 func (s *BlockHeader) Reset() { *s = BlockHeader{} }
 
 func (s *Block) PutTranscation(tx *Transaction) (valid bool, err error){
-	if tx.TransactionStatus == Status_BLOCK_UNCONFIRMED {
+	if tx.TransactionStatus != status_TRANSACTION_CONFIRMED {
 		if tx.Validate() {
-			tx.TransactionStatus = Status_BLOCK_CONFIRMED
+			tx.TransactionStatus = status_TRANSACTION_CONFIRMED
 		} else {
 			return false, errors.New("invalid tx")
 		}
@@ -125,11 +125,21 @@ func (s Block) MakeMerklePath(idx int) (path []string){
 
 func (s *Block) GenerateBlockHash() error{
 	if s.Header.MerkleTreeRootHash == "" {
-		return errors.New("No MerkleTreeRootHash!")
+		return errors.New("no merkle tree root hash")
 	}
 	str := []string{s.Header.MerkleTreeRootHash, s.Header.TimeStamp.String(), s.Header.PreviousHash}
 	s.Header.BlockHash = common.ComputeSHA256(str)
 	return nil
+}
+
+func (s Block) BlockSerialize() ([]byte, error){
+	return common.Serialize(s)
+}
+
+func BlockDeserialize(by []byte) (Block, error) {
+	block := Block{}
+	err := common.Deserialize(by, &block)
+	return block, err
 }
 
 
