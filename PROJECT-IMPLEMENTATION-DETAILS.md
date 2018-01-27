@@ -50,7 +50,40 @@ Since it is complex to handle the reception and transmission of the peers' messa
 
 @Junbeomlee
 
+
+
 ## Crpyto
 
+![crpyto-implemenation-module](./images/crpyto-implemenation-module.png)
+
+Crypto signs and verifies the data used in the block-chain platform and manages the keys used in the process. it-chain supports rsa and ecdsa encryption method.
+
+- KeyGenerator
+
+  The node generates a key that matches the encryption scheme that you want to use for signing.
+
+- KeyManager
+
+  Stores the generated key, and loads the stored key.
+
+- Signer
+
+  Performs data signature.
+
+- Verifier
+
+  Verify the signed data.
+
+- KeyUtil
+
+  Perform the necessary processing tasks in the process of storing and loading the key.
 
 
+
+![crpyto-implementaion-seq](./images/crpyto-implementaion-seq.png)
+
+​									<Signing process of data>
+
+### Author
+
+@yojkim
