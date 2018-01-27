@@ -16,6 +16,6 @@ func PushRepos(dir string) (error) {
 }
 
 func main() {
-	err := PushRepos("/Users/hackurity/Documents/it-chain/test/bloom2")
+	err := PushRepos("/Users/hackurity/Documents/it-chain/test/bloom")
 	println(err)
 }
