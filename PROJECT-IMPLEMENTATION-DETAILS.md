@@ -13,6 +13,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 1. [BlockChain](#BlockChain)
 2. [SmartContract](#SmartContract)
 3. [Communication](#Communication)
+4. [Crypto](#Crypto)
 
 
 
@@ -51,8 +52,7 @@ Since it is complex to handle the reception and transmission of the peers' messa
 @Junbeomlee
 
 
-<br>
-## Crpyto
+## Crpyto <a name="Crpyto"></a>
 
 ![crpyto-implemenation-module](./images/crpyto-implemenation-module.png)
 
