@@ -7,10 +7,10 @@ import (
 )
 
 func TestDeploy_Deploy(t *testing.T) {
-	scm := SmartContractManager{"hackurity01", map[string]SmartContract{}}
+	scs := SmartContractService{"hackurity01", map[string]SmartContract{}}
 	ContractPath := "junbeomlee/bloom"
 
-	deploy_result, err := scm.Deploy(ContractPath)
+	deploy_result, err := scs.Deploy(ContractPath)
 
 	fmt.Println(deploy_result)
 	if err != nil {

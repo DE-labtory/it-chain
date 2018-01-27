@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	GITHUB_TOKEN string = "1f8f0f1e16bb4b98e3d5d6113b34a3d8cb6ab8d2"
+	GITHUB_TOKEN string = "619ee819fca81e424589a5f10416c2e2e99ed744"
 
 )
 
@@ -19,7 +19,7 @@ type SmartContract struct {
 	ContractPath string
 }
 
-type SmartContractManager struct {
+type SmartContractService struct {
 	GithubID string
 	SmartContractMap map[string]SmartContract
 }
@@ -27,11 +27,11 @@ type SmartContractManager struct {
 func Init() {
 }
 
-func (scm *SmartContractManager) Deploy(ContractPath string) (string, error) {
+func (scs *SmartContractService) Deploy(ContractPath string) (string, error) {
 	origin_repos_name := strings.Split(ContractPath, "/")[1]
 	new_repos_name := strings.Replace(ContractPath, "/", "_", -1)
 
-	_, ok := scm.keyByValue(ContractPath)
+	_, ok := scs.keyByValue(ContractPath)
 	if ok {
 		// 버전 업데이트
 		return "", errors.New("Already exist smart contract ID")
@@ -53,10 +53,10 @@ func (scm *SmartContractManager) Deploy(ContractPath string) (string, error) {
 	fmt.Println(new_repos_name)
 	_, err = CreateRepos(new_repos_name, GITHUB_TOKEN)
 	if err != nil {
-		return "", errors.New("An error occured while creating repos!")
+		return "", errors.New(err.Error())//"An error occured while creating repos!")
 	}
 
-	err = ChangeRemote(scm.GithubID + "/" + new_repos_name, "/Users/hackurity/Documents/it-chain/test/" + origin_repos_name)
+	err = ChangeRemote(scs.GithubID + "/" + new_repos_name, "/Users/hackurity/Documents/it-chain/test/" + origin_repos_name)
 	if err != nil {
 		return "", errors.New("An error occured while cloning repos!")
 	}
@@ -82,9 +82,9 @@ func (scm *SmartContractManager) Deploy(ContractPath string) (string, error) {
 		return "", errors.New(err.Error())
 	}
 
-	githubResponseCommits, err := GetReposCommits(scm.GithubID + "/" + new_repos_name)
+	githubResponseCommits, err := GetReposCommits(scs.GithubID + "/" + new_repos_name)
 
-	scm.SmartContractMap[githubResponseCommits[0].Sha] = SmartContract{new_repos_name, ContractPath}
+	scs.SmartContractMap[githubResponseCommits[0].Sha] = SmartContract{new_repos_name, ContractPath}
 
 	return githubResponseCommits[0].Sha, nil
 }
@@ -96,9 +96,9 @@ func (scm *SmartContractManager) Deploy(ContractPath string) (string, error) {
  *	5. docker container Start
  *	6. docker에서 smartcontract 실행
  ****************************************************/
-func (scm *SmartContractManager) Query(transaction blockchain.Transaction) (error) {
+func (scs *SmartContractService) Query(transaction blockchain.Transaction) (error) {
 
-	_, ok := scm.SmartContractMap[transaction.TxData.ContractID];
+	_, ok := scs.SmartContractMap[transaction.TxData.ContractID];
 	if !ok {
 		return errors.New("Not exist contract ID")
 	}
@@ -112,13 +112,13 @@ func (scm *SmartContractManager) Query(transaction blockchain.Transaction) (erro
 }
 
 
-func (scm *SmartContractManager) Invoke() {
+func (scs *SmartContractService) Invoke() {
 
 }
 
-func (scm *SmartContractManager) keyByValue(ContractPath string) (key string, ok bool) {
+func (scs *SmartContractService) keyByValue(ContractPath string) (key string, ok bool) {
 	contractName := strings.Replace(ContractPath, "/", "^", -1)
-	for k, v := range scm.SmartContractMap {
+	for k, v := range scs.SmartContractMap {
 		if contractName == v.ContractPath {
 			key = k
 			ok = true
