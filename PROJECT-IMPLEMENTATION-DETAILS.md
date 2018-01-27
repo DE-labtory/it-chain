@@ -23,7 +23,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 
 ## SmartContract <a name="SmartContract"></a>
 
-![smartContract-implementation-deploy](/Users/jun/go_workspace/src/it-chain/images/smartContract-implementation-deploy.png)
+![smartContract-implementation-deploy](./images/smartContract-implementation-deploy.png)
 
 SmartContract is stored on git repository and is executed by the smart contract service. After testing Smart Contract in a Docker-based virtual environment, it is reflected in the actual database.
 
