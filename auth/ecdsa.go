@@ -6,6 +6,8 @@ import (
 	"encoding/asn1"
 	"errors"
 	"crypto/rand"
+	"crypto/elliptic"
+	"crypto/sha256"
 )
 
 type ecdsaSignature struct {
@@ -78,10 +80,38 @@ type ecdsaPrivateKey struct {
 	priv *ecdsa.PrivateKey
 }
 
+func (key *ecdsaPrivateKey) SKI() (ski []byte) {
+
+	if key.priv == nil {
+		return nil
+	}
+
+	data := elliptic.Marshal(key.priv.Curve, key.priv.PublicKey.X, key.priv.PublicKey.Y)
+
+	hash := sha256.New()
+	hash.Write(data)
+	return hash.Sum(nil)
+
+}
+
 func (key *ecdsaPrivateKey) PublicKey() (pub Key, err error) {
 	return &ecdsaPublicKey{&key.priv.PublicKey}, nil
 }
 
 type ecdsaPublicKey struct {
 	pub *ecdsa.PublicKey
+}
+
+func (key *ecdsaPublicKey) SKI() (ski []byte) {
+
+	if key.pub == nil {
+		return nil
+	}
+
+	data := elliptic.Marshal(key.pub.Curve, key.pub.X, key.pub.Y)
+
+	hash := sha256.New()
+	hash.Write(data)
+	return hash.Sum(nil)
+
 }

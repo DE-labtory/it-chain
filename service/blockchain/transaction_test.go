@@ -1,25 +1,37 @@
 package blockchain
 
 import (
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 	"testing"
-	"fmt"
+	"time"
+	"strconv"
 )
 
 func TestCreateNewTransactionTest(t *testing.T){
-
+	tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), general, time.Now(), SetTxData("", invoke, SetTxMethodParameters(0, "", []string{""}), ""))
+	assert.Equal(t, status_TRANSACTION_UNKNOWN, tx.TransactionStatus)
 }
 
-func TestTxTest(t *testing.T) {
-	blk := Block{}
-	tx := Transaction{}
-	tx.TxData = &TxData{"ss","dd", Params{3, "func", []string{"10", "6"}}, "ff"}
+func TestSetTxMethodParameters(t *testing.T) {
+	var par = SetTxMethodParameters(0, "void", []string{""})
+	assert.Equal(t, 0, par.ParamsType)
+}
+
+func TestSetTxData(t *testing.T) {
+	var txdata = SetTxData("temp", query, SetTxMethodParameters(0, "void", []string{""}), "111")
+	assert.Equal(t, query, txdata.Method)
+}
+
+func TestTransaction_Validate(t *testing.T) {
+	tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), general, time.Now(), SetTxData("", invoke, SetTxMethodParameters(0, "", []string{""}), ""))
 	tx.GenerateHash()
-
-	if blk.PutTranscation(tx) == true{
-		idx, err := blk.FindTransactionIndex(tx.TransactionHash)
-		fmt.Println(idx, err)
-		fmt.Printf("%x\n", blk.Transactions[idx].TransactionHash)
-	}
-
+	assert.Equal(t, true, tx.Validate())
 }
+
+func TestTransaction_SignHash(t *testing.T) {
+	tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), general, time.Now(), SetTxData("", invoke, SetTxMethodParameters(0, "", []string{""}), ""))
+	_, err := tx.SignHash()
+	assert.NoError(t, err)
+}
+
+

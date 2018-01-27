@@ -20,7 +20,11 @@ import (
 	"os"
 	"path"
 	"io"
+	"fmt"
 	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"sort"
 )
 
 var logger = GetLogger("util.go")
@@ -58,7 +62,34 @@ func DirEmpty(dirPath string) (bool, error) {
 	return false, err
 }
 
-func ComputeSHA256(data []byte) (hash [32]uint8) {
-	hash = sha256.Sum256(data)
-	return hash
+func ComputeSHA256(data []string) string {
+	sort.Strings(data)
+	arg := strings.Join(data, ",")
+	hash := sha256.New()
+	hash.Write([]byte(arg))
+	return hex.EncodeToString(hash.Sum(nil))
+
+}
+
+/**
+gob encoder로 인코딩했을 때 문제점
+1. empty slice(make 로 생성한거) 가 디코딩하면 nil 로 디코딩 됨.
+ㄴ json marshal로 바꾸면서 해결
+2. time.Time 값들은 뒤에 monotonic 파트가 없어짐.
+2번은 문제가 안 될수도 있는데 테스트 실패의 원인..
+ */
+func Serialize(object interface{}) ([]byte, error) {
+	data, err := json.Marshal(object)
+	if err != nil {
+		panic(fmt.Sprintf("Error encoding : %s", err))
+	}
+	return data, nil
+}
+
+func Deserialize(serializedBytes []byte, object interface{}) error {
+	err := json.Unmarshal(serializedBytes, object)
+	if err != nil {
+		panic(fmt.Sprintf("Error decoding : %s", err))
+	}
+	return err
 }

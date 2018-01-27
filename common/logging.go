@@ -2,21 +2,22 @@ package common
 
 import (
 	"github.com/sirupsen/logrus"
-	"os"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
-var ilogger = InitLogger()
+var log = logrus.New()
 
-func InitLogger() *logrus.Logger{
 //todo config을 통해 log 설정을 수행한다. (level 등등)
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logrus.SetOutput(os.Stdout)
-	return logrus.New()
+func init() {
+	customFormatter := new(prefixed.TextFormatter)
+	customFormatter.FullTimestamp = true
+
+	log.Formatter = customFormatter
+	log.Level = logrus.DebugLevel
 }
 
-
 func GetLogger(name string) *logrus.Entry{
-	return ilogger.WithFields(logrus.Fields{
+	return log.WithFields(logrus.Fields{
 		"File": name,
 	})
 }
