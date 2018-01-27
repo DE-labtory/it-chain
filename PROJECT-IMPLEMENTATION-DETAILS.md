@@ -79,7 +79,6 @@ Crypto signs and verifies the data used in the block-chain platform and manages 
   Perform the necessary processing tasks in the process of storing and loading the key.
 
 <br>
-<br>
 
 ### Signing process of data
 ![crpyto-implementaion-seq](./images/crpyto-implementaion-seq.png)
