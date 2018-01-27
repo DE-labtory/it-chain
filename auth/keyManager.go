@@ -15,6 +15,13 @@ type keyManager struct {
 	path string
 }
 
+type keyType string
+
+const (
+	PRIVATE_KEY keyType = "pri"
+	PUBLIC_KEY	keyType = "pub"
+)
+
 func (km *keyManager) Init(path string) {
 
 	if len(path) == 0 {
@@ -38,13 +45,13 @@ func (km *keyManager) Store(keys... Key) (err error) {
 	for _, key := range keys {
 		switch k := key.(type) {
 		case *rsaPrivateKey:
-			err = km.storePrivateKey(k)
+			err = km.storeKey(k, PRIVATE_KEY)
 		case *rsaPublicKey:
-			err = km.storePublicKey(k)
+			err = km.storeKey(k, PUBLIC_KEY)
 		case *ecdsaPrivateKey:
-			err = km.storePrivateKey(k)
+			err = km.storeKey(k, PRIVATE_KEY)
 		case *ecdsaPublicKey:
-			err = km.storePublicKey(k)
+			err = km.storeKey(k, PUBLIC_KEY)
 		default:
 			return errors.New("Unspported Key Type.")
 		}
@@ -53,36 +60,24 @@ func (km *keyManager) Store(keys... Key) (err error) {
 	return nil
 }
 
-func (km *keyManager) storePublicKey(key Key) (err error) {
+func (km *keyManager) storeKey(key Key, keyType keyType) (err error) {
 
-	data, err := PublicKeyToPEM(key)
+	var data []byte
+
+	switch keyType {
+	case PRIVATE_KEY:
+		data, err = PrivateKeyToPEM(key)
+	case PUBLIC_KEY:
+		data, err = PublicKeyToPEM(key)
+	default:
+		return errors.New("Unsupported Key Type")
+	}
+
 	if err != nil {
 		return
 	}
 
-	path, err := km.getFullPath(hex.EncodeToString(key.SKI()), "pub")
-	if err != nil {
-		return
-	}
-
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err = ioutil.WriteFile(path, data, 0700)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (km *keyManager) storePrivateKey(key Key) (err error) {
-
-	data, err := PrivateKeyToPEM(key)
-	if err != nil {
-		return
-	}
-
-	path, err := km.getFullPath(hex.EncodeToString(key.SKI()), "pri")
+	path, err := km.getFullPath(hex.EncodeToString(key.SKI()), string(keyType))
 	if err != nil {
 		return
 	}
@@ -95,6 +90,7 @@ func (km *keyManager) storePrivateKey(key Key) (err error) {
 	}
 
 	return nil
+
 }
 
 func (km *keyManager) LoadKey() (pri, pub Key, err error) {
