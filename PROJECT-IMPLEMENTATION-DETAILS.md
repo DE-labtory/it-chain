@@ -81,11 +81,9 @@ Crypto signs and verifies the data used in the block-chain platform and manages 
 <br>
 <br>
 
-#### Signing process of data
+### Signing process of data
 ![crpyto-implementaion-seq](./images/crpyto-implementaion-seq.png)
-
-​									
-
+						
 ### Author
 
 @yojkim
