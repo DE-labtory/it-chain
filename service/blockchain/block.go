@@ -4,9 +4,6 @@ import (
 	"time"
 	"errors"
 	"it-chain/common"
-	"bytes"
-	"encoding/gob"
-	"encoding/base64"
 )
 
 type Status int
@@ -135,25 +132,13 @@ func (s *Block) GenerateBlockHash() error{
 	return nil
 }
 
-func (s Block) BlockSerialize() (string, error){
-	b := bytes.Buffer{}
-	enc := gob.NewEncoder(&b)
-	err := enc.Encode(s)
-
-	if err != nil { return "", errors.New("encode fail") }
-
-	return base64.StdEncoding.EncodeToString(b.Bytes()), err
+func (s Block) BlockSerialize() ([]byte, error){
+	return common.Serialize(s)
 }
 
-func BlockDeserialize(str string) (Block, error){
+func BlockDeserialize(by []byte) (Block, error) {
 	block := Block{}
-	by, err := base64.StdEncoding.DecodeString(str)
-	if err != nil { return block, errors.New("base64 decode fail") }
-	b := bytes.Buffer{}
-	b.Write(by)
-	dec := gob.NewDecoder(&b)
-	err = dec.Decode(&block)
-	if err != nil { return block, errors.New("gob decode fail") }
+	err := common.Deserialize(by, &block)
 	return block, err
 }
 
