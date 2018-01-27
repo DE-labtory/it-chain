@@ -9,7 +9,7 @@ Generalized Private Chain For All
 
 it-chain makes it easy for anyone to have their own block chain platform
 
-Use it-code to create your own Dapp
+Use Smart-Contract to create your own Dapp
 
 
 
