@@ -61,12 +61,14 @@ func CreateNewBlock(prevBlock *Block, createPeerId string) *Block{
 func (s *BlockHeader) Reset() { *s = BlockHeader{} }
 
 func (s *Block) PutTranscation(tx *Transaction) (valid bool, err error){
-	if tx.TransactionStatus != status_TRANSACTION_CONFIRMED {
-		if tx.Validate() {
+	if tx.Validate() == false{
+		return false, errors.New("invalid tx")
+	}
+	if tx.TransactionStatus == status_TRANSACTION_UNKNOWN {
+		if true { // Docker에서 실행하고 return이 true면 Confirmed 나중에 수정할 것.
 			tx.TransactionStatus = status_TRANSACTION_CONFIRMED
 		} else {
 			tx.TransactionStatus = status_TRANSACTION_UNCONFIRMED
-			return false, errors.New("invalid tx")
 		}
 	}
 	for _, confirmedTx := range s.Transactions{
