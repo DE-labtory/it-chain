@@ -4,6 +4,7 @@ import (
 	"time"
 	"errors"
 	"it-chain/common"
+	"strconv"
 )
 
 type Status int
@@ -64,6 +65,7 @@ func (s *Block) PutTranscation(tx *Transaction) (valid bool, err error){
 		if tx.Validate() {
 			tx.TransactionStatus = status_TRANSACTION_CONFIRMED
 		} else {
+			tx.TransactionStatus = status_TRANSACTION_UNCONFIRMED
 			return false, errors.New("invalid tx")
 		}
 	}
@@ -83,7 +85,7 @@ func (s Block) FindTransactionIndex(hash string) (idx int, err error){
 			return idx, nil
 		}
 	}
-	return -1, errors.New("hash is not here")
+	return -1, errors.New("txHash is not here")
 }
 
 func (s *Block) MakeMerkleTree(){
@@ -140,6 +142,41 @@ func BlockDeserialize(by []byte) (Block, error) {
 	block := Block{}
 	err := common.Deserialize(by, &block)
 	return block, err
+}
+
+// 해당 트랜잭션이 정당한지 머클패스로 검사함
+func (s Block) VarifyTx(tx Transaction) (bool, error) {
+	hash := tx.TransactionHash
+	idx, err := s.FindTransactionIndex(hash)
+
+	if err != nil {
+		return false, err
+	}
+
+	merklePath := s.MakeMerklePath(idx)
+
+	for _, sibling_hash := range merklePath{
+		str := []string{hash, sibling_hash}
+		hash = common.ComputeSHA256(str)
+	}
+
+	if hash == s.Header.MerkleTreeRootHash{
+		return true, nil
+	} else {
+		return false, errors.New("tx is invalid")
+	}
+}
+
+// 블럭내의 모든 트랜잭션들이 정당한지 머클패스로 검사함
+func (s Block) VarifyBlock() (bool, error) {
+	for idx := 0; idx < s.TransactionCount; idx++{
+		txVarification, txErr := s.VarifyTx(*s.Transactions[idx])
+		if txVarification == false  {
+			err := errors.New("block is invalid --- " + strconv.Itoa(idx) + "'s " + txErr.Error())
+			return false, err
+		}
+	}
+	return true, nil
 }
 
 

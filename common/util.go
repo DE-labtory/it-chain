@@ -24,6 +24,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"sort"
 )
 
 var logger = GetLogger("util.go")
@@ -62,6 +63,7 @@ func DirEmpty(dirPath string) (bool, error) {
 }
 
 func ComputeSHA256(data []string) string {
+	sort.Strings(data)
 	arg := strings.Join(data, ",")
 	hash := sha256.New()
 	hash.Write([]byte(arg))
