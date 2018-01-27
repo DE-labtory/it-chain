@@ -4,6 +4,9 @@ import (
 	"time"
 	"errors"
 	"it-chain/common"
+	"bytes"
+	"encoding/gob"
+	"encoding/base64"
 )
 
 type Status int
@@ -60,9 +63,9 @@ func CreateNewBlock(prevBlock *Block, createPeerId string) *Block{
 func (s *BlockHeader) Reset() { *s = BlockHeader{} }
 
 func (s *Block) PutTranscation(tx *Transaction) (valid bool, err error){
-	if tx.TransactionStatus == Status_BLOCK_UNCONFIRMED {
+	if tx.TransactionStatus != status_TRANSACTION_CONFIRMED {
 		if tx.Validate() {
-			tx.TransactionStatus = Status_BLOCK_CONFIRMED
+			tx.TransactionStatus = status_TRANSACTION_CONFIRMED
 		} else {
 			return false, errors.New("invalid tx")
 		}
@@ -125,11 +128,33 @@ func (s Block) MakeMerklePath(idx int) (path []string){
 
 func (s *Block) GenerateBlockHash() error{
 	if s.Header.MerkleTreeRootHash == "" {
-		return errors.New("No MerkleTreeRootHash!")
+		return errors.New("no merkle tree root hash")
 	}
 	str := []string{s.Header.MerkleTreeRootHash, s.Header.TimeStamp.String(), s.Header.PreviousHash}
 	s.Header.BlockHash = common.ComputeSHA256(str)
 	return nil
+}
+
+func (s Block) BlockSerialize() (string, error){
+	b := bytes.Buffer{}
+	enc := gob.NewEncoder(&b)
+	err := enc.Encode(s)
+
+	if err != nil { return "", errors.New("encode fail") }
+
+	return base64.StdEncoding.EncodeToString(b.Bytes()), err
+}
+
+func BlockDeserialize(str string) (Block, error){
+	block := Block{}
+	by, err := base64.StdEncoding.DecodeString(str)
+	if err != nil { return block, errors.New("base64 decode fail") }
+	b := bytes.Buffer{}
+	b.Write(by)
+	dec := gob.NewDecoder(&b)
+	err = dec.Decode(&block)
+	if err != nil { return block, errors.New("gob decode fail") }
+	return block, err
 }
 
 
