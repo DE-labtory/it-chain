@@ -9,7 +9,7 @@ Generalized Private Chain For All
 
 it-chain makes it easy for anyone to have their own block chain platform
 
-Use it-code to create your own Dapp
+Use Smart-Contract to create your own Dapp
 
 
 
@@ -19,7 +19,7 @@ Contribution documents will be updated shortly.
 
 For the time being, email leebduk@gmail.com
 
-## Implemnation Details
+## Implementation Details
 Core implementation decisions can be found in the Project Implementation Details. <br>
 [PROJECT IMPLEMENTATION DETAILS](PROJECT-IMPLEMENTATION-DETAILS.md)
 

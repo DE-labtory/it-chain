@@ -4,6 +4,7 @@ import (
 	"time"
 	"errors"
 	"it-chain/common"
+	"strconv"
 )
 
 type Status int
@@ -60,11 +61,14 @@ func CreateNewBlock(prevBlock *Block, createPeerId string) *Block{
 func (s *BlockHeader) Reset() { *s = BlockHeader{} }
 
 func (s *Block) PutTranscation(tx *Transaction) (valid bool, err error){
-	if tx.TransactionStatus == Status_BLOCK_UNCONFIRMED {
-		if tx.Validate() {
-			tx.TransactionStatus = Status_BLOCK_CONFIRMED
+	if tx.Validate() == false{
+		return false, errors.New("invalid tx")
+	}
+	if tx.TransactionStatus == status_TRANSACTION_UNKNOWN {
+		if true { // Docker에서 실행하고 return이 true면 Confirmed 나중에 수정할 것.
+			tx.TransactionStatus = status_TRANSACTION_CONFIRMED
 		} else {
-			return false, errors.New("invalid tx")
+			tx.TransactionStatus = status_TRANSACTION_UNCONFIRMED
 		}
 	}
 	for _, confirmedTx := range s.Transactions{
@@ -83,7 +87,7 @@ func (s Block) FindTransactionIndex(hash string) (idx int, err error){
 			return idx, nil
 		}
 	}
-	return -1, errors.New("hash is not here")
+	return -1, errors.New("txHash is not here")
 }
 
 func (s *Block) MakeMerkleTree(){
@@ -125,11 +129,56 @@ func (s Block) MakeMerklePath(idx int) (path []string){
 
 func (s *Block) GenerateBlockHash() error{
 	if s.Header.MerkleTreeRootHash == "" {
-		return errors.New("No MerkleTreeRootHash!")
+		return errors.New("no merkle tree root hash")
 	}
 	str := []string{s.Header.MerkleTreeRootHash, s.Header.TimeStamp.String(), s.Header.PreviousHash}
 	s.Header.BlockHash = common.ComputeSHA256(str)
 	return nil
+}
+
+func (s Block) BlockSerialize() ([]byte, error){
+	return common.Serialize(s)
+}
+
+func BlockDeserialize(by []byte) (Block, error) {
+	block := Block{}
+	err := common.Deserialize(by, &block)
+	return block, err
+}
+
+// 해당 트랜잭션이 정당한지 머클패스로 검사함
+func (s Block) VarifyTx(tx Transaction) (bool, error) {
+	hash := tx.TransactionHash
+	idx, err := s.FindTransactionIndex(hash)
+
+	if err != nil {
+		return false, err
+	}
+
+	merklePath := s.MakeMerklePath(idx)
+
+	for _, sibling_hash := range merklePath{
+		str := []string{hash, sibling_hash}
+		hash = common.ComputeSHA256(str)
+	}
+
+	if hash == s.Header.MerkleTreeRootHash{
+		return true, nil
+	} else {
+		return false, errors.New("tx is invalid")
+	}
+}
+
+// 블럭내의 모든 트랜잭션들이 정당한지 머클패스로 검사함
+func (s Block) VarifyBlock() (bool, error) {
+	for idx := 0; idx < s.TransactionCount; idx++{
+		txVarification, txErr := s.VarifyTx(*s.Transactions[idx])
+		if txVarification == false  {
+			err := errors.New("block is invalid --- " + strconv.Itoa(idx) + "'s " + txErr.Error())
+			return false, err
+		}
+	}
+	return true, nil
 }
 
 

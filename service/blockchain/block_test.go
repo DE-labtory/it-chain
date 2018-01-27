@@ -9,7 +9,7 @@ import (
 	"it-chain/common"
 )
 
-const txsize = 9
+const txsize = 999
 
 func TestCreateNewBlockTest(t *testing.T){
 
@@ -19,18 +19,16 @@ func TestCreateNewBlockTest(t *testing.T){
 
 func TestBlock_PutTranscation(t *testing.T) {
 	block := CreateNewBlock(nil, "")
-	tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), status_TRANSACTION_UNCONFIRMED, 0, []byte("123"), time.Now(), &TxData{"", "", Params{0, "", []string{""}}, ""})
+	tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), general, time.Now(), SetTxData("", invoke, SetTxMethodParameters(0, "", []string{""}), ""))
 	tx.GenerateHash()
 	_, err := block.PutTranscation(tx)
-	assert.NoError(t, err)
-	_, err = block.PutTranscation(tx)
 	assert.NoError(t, err)
 }
 
 func TestBlock_MakeMerkleTree(t *testing.T) {
 	block := CreateNewBlock(nil, "")
 	for i := 0; i < txsize; i++{
-		tx := CreateNewTransaction(strconv.Itoa(i), strconv.Itoa(i), status_TRANSACTION_UNCONFIRMED, 0, []byte("123"), time.Now(), &TxData{"", "", Params{0, "", []string{""}}, ""})
+		tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), general, time.Now(), SetTxData("", invoke, SetTxMethodParameters(0, "", []string{""}), ""))
 		tx.GenerateHash()
 		block.PutTranscation(tx)
 	}
@@ -46,20 +44,20 @@ func TestBlock_MakeMerkleTree(t *testing.T) {
 		fmt.Printf("\n")
 	}
 
-	assert.Equal(t, 9, block.TransactionCount, "tx_count")
+	assert.Equal(t, 999, block.TransactionCount, "tx_count")
 
 	str := []string{block.MerkleTree[0][len(block.MerkleTree[0])-1], block.MerkleTree[0][len(block.MerkleTree[0])-1]}
 	assert.Equal(t, block.MerkleTree[1][len(block.MerkleTree[1])-1], common.ComputeSHA256(str), "hash")
 
 
 	//assert.Equal(t, 16, len(block.MerkleTree[0]), "tx_list")
-	assert.Equal(t, 5, block.MerkleTreeHeight, "mt_height")
+	assert.Equal(t, 11, block.MerkleTreeHeight, "mt_height")
 }
 
 func TestBlock_FindTransactionIndex(t *testing.T) {
 	block := CreateNewBlock(nil, "")
 	for i := 0; i < txsize; i++{
-		tx := CreateNewTransaction(strconv.Itoa(i), strconv.Itoa(i), status_TRANSACTION_UNCONFIRMED, 0, []byte("123"), time.Now(), &TxData{"", "", Params{0, "", []string{""}}, ""})
+		tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), general, time.Now(), SetTxData("", invoke, SetTxMethodParameters(0, "", []string{""}), ""))
 		tx.GenerateHash()
 		block.PutTranscation(tx)
 	}
@@ -68,20 +66,20 @@ func TestBlock_FindTransactionIndex(t *testing.T) {
 	idx, err := block.FindTransactionIndex(block.MerkleTree[0][len(block.MerkleTree[0])-1])
 
 	assert.NoError(t, err)
-	assert.Equal(t, 8, idx)
+	assert.Equal(t, 998, idx)
 
 }
 
 func TestBlock_MakeMerklePath(t *testing.T) {
 	block := CreateNewBlock(nil, "")
 	for i := 0; i < txsize; i++{
-		tx := CreateNewTransaction(strconv.Itoa(i), strconv.Itoa(i), status_TRANSACTION_UNCONFIRMED, 0, []byte("123"), time.Now(), &TxData{"", "", Params{0, "", []string{""}}, ""})
+		tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), general, time.Now(), SetTxData("", invoke, SetTxMethodParameters(0, "", []string{""}), ""))
 		tx.GenerateHash()
 		block.PutTranscation(tx)
 	}
 	block.MakeMerkleTree()
 
-	idx := 0
+	idx := 2
 
 	path := block.MakeMerklePath(idx)
 	hash := block.Transactions[idx].TransactionHash
@@ -96,11 +94,42 @@ func TestBlock_MakeMerklePath(t *testing.T) {
 func TestBlock_GenerateBlockHash(t *testing.T) {
 	block := CreateNewBlock(nil, "")
 	for i := 0; i < txsize; i++{
-		tx := CreateNewTransaction(strconv.Itoa(i), strconv.Itoa(i), status_TRANSACTION_UNCONFIRMED, 0, []byte("123"), time.Now(), &TxData{"", "", Params{0, "", []string{""}}, ""})
+		tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), general, time.Now(), SetTxData("", invoke, SetTxMethodParameters(0, "", []string{""}), ""))
 		tx.GenerateHash()
 		block.PutTranscation(tx)
 	}
 	block.MakeMerkleTree()
 
 	assert.NoError(t, block.GenerateBlockHash())
+}
+
+func TestSerializationAndDeserialization(t *testing.T) {
+	block := CreateNewBlock(nil, "12312313")
+	for i := 0; i < txsize; i++{
+		tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), general, time.Now(), SetTxData("", invoke, SetTxMethodParameters(0, "", []string{""}), ""))
+		tx.GenerateHash()
+		block.PutTranscation(tx)
+	}
+	block.MakeMerkleTree()
+
+	str, err1 := block.BlockSerialize()
+	assert.NoError(t, err1)
+
+	_, err2 := BlockDeserialize(str)
+
+	assert.NoError(t, err2)
+}
+
+func TestVarifyBlock(t *testing.T){
+	block := CreateNewBlock(nil, "12312313")
+	for i := 0; i < txsize; i++{
+		tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), general, time.Now(), SetTxData("", invoke, SetTxMethodParameters(0, "", []string{""}), ""))
+		tx.GenerateHash()
+		block.PutTranscation(tx)
+	}
+
+	block.MakeMerkleTree()
+
+	_, err := block.VarifyBlock()
+	assert.NoError(t, err)
 }
