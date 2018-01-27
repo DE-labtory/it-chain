@@ -13,6 +13,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 1. [BlockChain](#BlockChain)
 2. [SmartContract](#SmartContract)
 3. [Communication](#Communication)
+4. [Crypto](#Crypto)
 
 
 
@@ -87,8 +88,7 @@ Since it is complex to handle the reception and transmission of the peers' messa
 [@Junbeomlee](https://github.com/junbeomlee)
 
 
-
-## Crpyto
+## Crpyto <a name="Crypto"></a>
 
 ![crpyto-implemenation-module](./images/crpyto-implemenation-module.png)
 
@@ -114,12 +114,11 @@ Crypto signs and verifies the data used in the block-chain platform and manages 
 
   Perform the necessary processing tasks in the process of storing and loading the key.
 
+<br>
 
-
+### Signing process of data
 ![crpyto-implementaion-seq](./images/crpyto-implementaion-seq.png)
-
-​									<Signing process of data>
-
+						
 ### Author
 
 @yojkim
