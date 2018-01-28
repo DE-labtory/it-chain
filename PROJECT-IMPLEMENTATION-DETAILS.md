@@ -119,4 +119,4 @@ Crypto signs and verifies the data used in the block-chain platform and manages 
 						
 ### Author
 
-@yojkim
+[@yojkim](https://github.com/yojkim)
