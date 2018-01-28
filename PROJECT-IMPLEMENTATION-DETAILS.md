@@ -156,6 +156,13 @@ Blocks are totally stored in key-value storage leveldb.
   Also transactions are serialized and saved in leveldb. Basically all transactions are saved together block.
   For indexing, block hash that transaction belongs to also saved. Transaction ID is used for key.
   
+| DB name       | Key             | Value                   | Description                                                                               |
+| ------------- | --------------- | ----------------------- | ----------------------------------------------------------------------------------------- |
+| block_hash    | BlockHash       | Serialized Block        | Save block using blockhash                                                                |
+| block_number  | BlockNumber     | Serialized Block        | Save block using block's number                                                           |
+| transaction   | Transaction ID  | Serialized Transaction  | Save transactions                                                                         |
+| util          | Predefined Key  | Depends on Key          | Save last block, unconfirmed block, blockhash of block that transaction is stored, ...    |
+  
 ### File
 Block's metadata is saved in leveldb or other key-value database. Block body is saved in file.
 
