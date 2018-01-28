@@ -130,7 +130,7 @@ func (ch *cryptoHelper) GenerateKey(opts KeyGenOpts) (pri, pub Key, err error) {
 
 func (ch *cryptoHelper) LoadKey() (pri Key, pub Key, err error) {
 
-	pri, pub, err = ch.keyManager.LoadKey()
+	pri, pub, err = ch.keyManager.Load()
 	if err != nil {
 		return nil, nil, err
 	}
