@@ -38,8 +38,6 @@ SmartContract is stored on git repository and is executed by the smart contract 
 
 - SmartContractService
 
-  깃과 Docker VM을 관리하는 서비스이다. 깃을 통해 스마트 컨트랙트를 푸쉬 및 클론하고 Docker VM에 world State DB와 smart contract을 copy하여 실행시킨다. 
-
   It is a service that manages git and Docker VM. After pushing and cloning the smart contract on the git, it copies the world state DB and smart contract to Docker VM and executes it.
 
   ​
@@ -122,7 +120,7 @@ Crypto signs and verifies the data used in the block-chain platform and manages 
 						
 ### Author
 
-@yojkim
+[@yojkim](https://github.com/yojkim)
 
 ## Database <a name="DB"></a>
 Blockchain can be stored in multiple types of database depend on configuration. For now leveldbhepler and fileheper functions are added. Basic DB implementation uses leveldb. Blocks can be retrieved by block hash and block number and transaction ID. Transactions can be retrieved by transaction ID.
@@ -176,4 +174,4 @@ Block's metadata is saved in leveldb or other key-value database. Block body is 
   
 ### Author
 
-@luke9407
+[@luke9407](https://github.com/luke9407)
