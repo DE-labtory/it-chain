@@ -20,7 +20,30 @@ It describes the important implementation decisions of the it-chain. Sample code
 
 ## BlockChain <a name="BlockChain"></a>
 
+![blockchain-implemeneation-logical](./images/blockchain-implemeneation-logical.png)
 
+- BlockChain
+
+  A blockchain is a continuously growing list of blocks, which are linked by a [hash](https://en.wikipedia.org/wiki/Cryptographic_hash_function) pointer as a link to a previous block.
+
+- Block
+
+  The block consists of a block header and block data, and the next block has a value obtained by hashing the block header for the block structure of the Ledger.
+  The block header has the previous block hash value and the merge tree root hash value. The block data has a transaction list and has a merge tree To efficiently manage forgery and tampering of transactions.
+
+- Transaction
+
+  It is an atomic operation that performs Smart Contract. Transaction has TxData which contains ID of Peer (Node) to actually execute, transaction hash value that hashes transaction header, and contract contents.
+
+- MerkleTree
+
+  The Merkle Tree consists of a binary tree, and the leaf node is the hash value of the transactions in the transaction list of the block. The root node is a hash value representing the entire transaction that hashes the transaction hash value pair from the leaf node to the end. The merge tree can be immediately known at constant time via a hash root hash to see if the transaction's information has changed, since the next block has the value of the hash value of the block header and hashes the block header, the validity of all the transactions of the Ledger can be efficiently managed. And Merkle Path (a sibling node to the root node of tx), so that the validity of a particular transaction can be checked at log time.
+
+  ![blockchain-implementation-merkletree](./images/blockchain-implementation-merkletree.png)
+
+#### Author
+
+[@emperorhan](https://github.com/emperorhan)
 
 ## SmartContract <a name="SmartContract"></a>
 
@@ -112,7 +135,7 @@ Crypto signs and verifies the data used in the block-chain platform and manages 
 - KeyUtils
 
   Perform the necessary processing tasks in the process of storing and loading the key such as converting key data to `PEM` file.
-  
+
 - Key
 
   Provides attribute values related to the interface of key data required in the signature or verification process.
@@ -121,7 +144,7 @@ Crypto signs and verifies the data used in the block-chain platform and manages 
 
 ### Signing process of data
 ![crpyto-implementaion-seq](./images/crpyto-implementaion-seq.png)
-						
+​						
 ### Author
 
 [@yojkim](https://github.com/yojkim)
@@ -136,13 +159,13 @@ Database config is defined in config.yaml as database section
 - type
 
   Type of database. For now only leveldb is supported and little helper function for file is supported.
-  
+
 - leveldb
 
   Configuration for leveldb.
-  
-  | key          | description                                                                   |
-  | ------------ | ----------------------------------------------------------------------------- |
+
+  | key          | description                              |
+  | ------------ | ---------------------------------------- |
   | default_path | If no other path for leveldb is provided, leveldb data is stored in this path |
 
 ### LevelDB
@@ -152,30 +175,30 @@ Blocks are totally stored in key-value storage leveldb.
 
   Blocks are serialized to JSON and saved in leveldb. For key block hash and block number are used.
   Last block and unconfirmed block are saved for recover.
-  
+
 - Transactions
 
   Also transactions are serialized and saved in leveldb. Basically all transactions are saved together block.
   For indexing, block hash that transaction belongs to also saved. Transaction ID is used for key.
-  
-| DB name       | Key             | Value                   | Description                                                                               |
-| ------------- | --------------- | ----------------------- | ----------------------------------------------------------------------------------------- |
-| block_hash    | BlockHash       | Serialized Block        | Save block using blockhash                                                                |
-| block_number  | BlockNumber     | Serialized Block        | Save block using block's number                                                           |
-| transaction   | Transaction ID  | Serialized Transaction  | Save transactions                                                                         |
-| util          | Predefined Key  | Depends on Key          | Save last block, unconfirmed block, blockhash of block that transaction is stored, ...    |
-  
+
+| DB name      | Key            | Value                  | Description                              |
+| ------------ | -------------- | ---------------------- | ---------------------------------------- |
+| block_hash   | BlockHash      | Serialized Block       | Save block using blockhash               |
+| block_number | BlockNumber    | Serialized Block       | Save block using block's number          |
+| transaction  | Transaction ID | Serialized Transaction | Save transactions                        |
+| util         | Predefined Key | Depends on Key         | Save last block, unconfirmed block, blockhash of block that transaction is stored, ... |
+
 ### File
 Block's metadata is saved in leveldb or other key-value database. Block body is saved in file.
 
 - Blocks
 
   Block's metadata is serialized to JSON and saved in leveldb. Block body data is written into file.
-  
+
 - Transactions
 
   Transaction data is stored in file. For finding, information of the file is stored in key-value database using transaction ID as key.
-  
+
 ### Author
 
 [@luke9407](https://github.com/luke9407)
