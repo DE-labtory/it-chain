@@ -93,7 +93,7 @@ func (km *keyManager) storeKey(key Key, keyType keyType) (err error) {
 
 }
 
-func (km *keyManager) LoadKey() (pri, pub Key, err error) {
+func (km *keyManager) Load() (pri, pub Key, err error) {
 
 	if _, err := os.Stat(km.path); os.IsNotExist(err) {
 		return nil, nil, errors.New("Keys are not exist")
@@ -111,7 +111,7 @@ func (km *keyManager) LoadKey() (pri, pub Key, err error) {
 			alias := strings.Split(file.Name(), "_")[0]
 			switch suffix {
 			case "pri":
-				key, err := km.loadPrivateKey(alias)
+				key, err := km.loadKey(alias, PRIVATE_KEY)
 				if err != nil {
 					return nil, nil, err
 				}
@@ -126,7 +126,7 @@ func (km *keyManager) LoadKey() (pri, pub Key, err error) {
 				}
 
 			case "pub":
-				key, err := km.loadPublicKey(alias)
+				key, err := km.loadKey(alias, PUBLIC_KEY)
 				if err != nil {
 					return nil, nil, err
 				}
@@ -151,13 +151,13 @@ func (km *keyManager) LoadKey() (pri, pub Key, err error) {
 
 }
 
-func (km *keyManager) loadPrivateKey(alias string) (key interface{}, err error) {
+func (km *keyManager) loadKey(alias string, keyType keyType) (key interface{}, err error) {
 
 	if len(alias) == 0 {
 		return nil, errors.New("Input value should not be blank")
 	}
 
-	path, err := km.getFullPath(alias, "pri")
+	path, err := km.getFullPath(alias, string(keyType))
 	if err != nil {
 		return nil, err
 	}
@@ -167,31 +167,13 @@ func (km *keyManager) loadPrivateKey(alias string) (key interface{}, err error) 
 		return nil, err
 	}
 
-	key, err = PEMToPrivateKey(data)
-	if err != nil {
-		return nil, err
+	switch keyType {
+	case PRIVATE_KEY:
+		key, err = PEMToPrivateKey(data)
+	case PUBLIC_KEY:
+		key, err = PEMToPublicKey(data)
 	}
 
-	return
-
-}
-
-func (km *keyManager) loadPublicKey(alias string) (key interface{}, err error) {
-
-	if len(alias) == 0 {
-		return nil, errors.New("Input value should not be blank")
-	}
-
-	path, err := km.getFullPath(alias, "pub")
-	if err != nil {
-		return nil, err
-	}
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	key, err = PEMToPublicKey(data)
 	if err != nil {
 		return nil, err
 	}

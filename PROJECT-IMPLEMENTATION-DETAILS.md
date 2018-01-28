@@ -90,7 +90,7 @@ Since it is complex to handle the reception and transmission of the peers' messa
 
 ![crpyto-implemenation-module](./images/crpyto-implemenation-module.png)
 
-Crypto signs and verifies the data used in the block-chain platform and manages the keys used in the process. it-chain supports rsa and ecdsa encryption method.
+Crypto signs and verifies the data used in the block-chain platform and manages the keys used in the process. *it-chain* supports `RSA` and `ECDSA` encryption method.
 
 - KeyGenerator
 
@@ -108,9 +108,13 @@ Crypto signs and verifies the data used in the block-chain platform and manages 
 
   Verify the signed data.
 
-- KeyUtil
+- KeyUtils
 
-  Perform the necessary processing tasks in the process of storing and loading the key.
+  Perform the necessary processing tasks in the process of storing and loading the key such as converting key data to `PEM` file.
+  
+- Key
+
+  Provides attribute values related to the interface of key data required in the signature or verification process.
 
 <br>
 

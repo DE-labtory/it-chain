@@ -102,7 +102,7 @@ func TestKeyManager_LoadKey(t *testing.T) {
 	err = km.Store(rsaPubKey)
 	assert.NoError(t, err)
 
-	pri, pub, err := km.LoadKey()
+	pri, pub, err := km.Load()
 	assert.NoError(t, err)
 	assert.NotNil(t, pri)
 	assert.NotNil(t, pub)
