@@ -55,8 +55,6 @@ The deployed user's repository is stored and managed in the Authenticated Smart 
 | B/b                              | {authenticated_git_id}/B_b               | It-chain/SmartContracts/B_b/{commit_hash} |
 | C/c                              | {authenticated_git_id}/C_c               | It-chain/SmartContracts/C_c/{commit_hash} |
 
-
-
 ### Author
 
 [@hackurity01](https://github.com/hackurity01)
@@ -118,7 +116,7 @@ Crypto signs and verifies the data used in the block-chain platform and manages 
 
 ### Signing process of data
 ![crpyto-implementaion-seq](./images/crpyto-implementaion-seq.png)
-						
+​						
 ### Author
 
 @yojkim
