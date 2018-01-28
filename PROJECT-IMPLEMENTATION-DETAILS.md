@@ -41,7 +41,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 
   ![blockchain-implementation-merkletree](./images/blockchain-implementation-merkletree.png)
 
-#### Author
+### Author
 
 [@emperorhan](https://github.com/emperorhan)
 
