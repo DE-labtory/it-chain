@@ -37,8 +37,6 @@ SmartContract is stored on git repository and is executed by the smart contract 
 
 - SmartContractService
 
-  깃과 Docker VM을 관리하는 서비스이다. 깃을 통해 스마트 컨트랙트를 푸쉬 및 클론하고 Docker VM에 world State DB와 smart contract을 copy하여 실행시킨다. 
-
   It is a service that manages git and Docker VM. After pushing and cloning the smart contract on the git, it copies the world state DB and smart contract to Docker VM and executes it.
 
   ​
