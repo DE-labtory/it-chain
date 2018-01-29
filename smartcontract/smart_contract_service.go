@@ -15,8 +15,9 @@ const (
 )
 
 type SmartContract struct {
-	RepoName string
-	ContractPath string
+	ReposName string
+	OriginReposPath string
+	SmartContractPath string
 }
 
 type SmartContractService struct {
@@ -27,17 +28,17 @@ type SmartContractService struct {
 func Init() {
 }
 
-func (scs *SmartContractService) Deploy(ContractPath string) (string, error) {
-	origin_repos_name := strings.Split(ContractPath, "/")[1]
-	new_repos_name := strings.Replace(ContractPath, "/", "_", -1)
+func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
+	origin_repos_name := strings.Split(ReposPath, "/")[1]
+	new_repos_name := strings.Replace(ReposPath, "/", "_", -1)
 
-	_, ok := scs.keyByValue(ContractPath)
+	_, ok := scs.keyByValue(ReposPath)
 	if ok {
 		// 버전 업데이트
 		return "", errors.New("Already exist smart contract ID")
 	}
 
-	repos, err := GetRepos(ContractPath)
+	repos, err := GetRepos(ReposPath)
 	if err != nil {
 		return "", errors.New("An error occured while getting repos!")
 	}
@@ -45,7 +46,7 @@ func (scs *SmartContractService) Deploy(ContractPath string) (string, error) {
 		return "", errors.New("Not Exist Repos!")
 	}
 
-	err = CloneRepos(ContractPath, "/Users/hackurity/Documents/it-chain/test")
+	err = CloneRepos(ReposPath, "/Users/hackurity/Documents/it-chain/test")
 	if err != nil {
 		return "", errors.New("An error occured while cloning repos!")
 	}
@@ -84,7 +85,7 @@ func (scs *SmartContractService) Deploy(ContractPath string) (string, error) {
 
 	githubResponseCommits, err := GetReposCommits(scs.GithubID + "/" + new_repos_name)
 
-	scs.SmartContractMap[githubResponseCommits[0].Sha] = SmartContract{new_repos_name, ContractPath}
+	scs.SmartContractMap[githubResponseCommits[0].Sha] = SmartContract{new_repos_name, ReposPath, ""}
 
 	return githubResponseCommits[0].Sha, nil
 }
@@ -98,15 +99,20 @@ func (scs *SmartContractService) Deploy(ContractPath string) (string, error) {
  ****************************************************/
 func (scs *SmartContractService) Query(transaction blockchain.Transaction) (error) {
 
-	_, ok := scs.SmartContractMap[transaction.TxData.ContractID];
+	sc, ok := scs.SmartContractMap[transaction.TxData.ContractID];
 	if !ok {
 		return errors.New("Not exist contract ID")
 	}
 
-	//_, err := os.Stat(f)
-	//if os.IsNotExist(err) {
-	//	return false
-	//}
+	_, err := os.Stat(sc.SmartContractPath)
+	if os.IsNotExist(err) {
+		fmt.Println("File or Directory Not Exist")
+		return errors.New("File or Directory Not Exist")
+	}
+
+	tarFile := makeTar(sc.SmartContractPath, "/Users/hackurity/Documents/it-chain/test")
+
+	fmt.Println(tarFile)
 
 	return nil
 }
@@ -116,10 +122,10 @@ func (scs *SmartContractService) Invoke() {
 
 }
 
-func (scs *SmartContractService) keyByValue(ContractPath string) (key string, ok bool) {
-	contractName := strings.Replace(ContractPath, "/", "^", -1)
+func (scs *SmartContractService) keyByValue(OriginReposPath string) (key string, ok bool) {
+	contractName := strings.Replace(OriginReposPath, "/", "^", -1)
 	for k, v := range scs.SmartContractMap {
-		if contractName == v.ContractPath {
+		if contractName == v.OriginReposPath {
 			key = k
 			ok = true
 			return key, ok
