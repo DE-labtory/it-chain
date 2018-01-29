@@ -28,16 +28,17 @@ It describes the important implementation decisions of the it-chain. Sample code
 
 - Block
 
-  The block consists of a block header and block data, and the next block has a value obtained by hashing the block header for the block structure of the Ledger.
-  The block header has the previous block hash value and the merge tree root hash value. The block data has a transaction list and has a merge tree To efficiently manage forgery and tampering of transactions.
+  The block consists of a block header and block data, and the next block has a value obtained by hashing the block header for the block structure of the Ledger. 
+  The block header has the previous block hash value and the merkle tree root hash value. The block data has a transaction list and has a merkle tree To efficiently manage forgery and tampering of transactions.
 
 - Transaction
 
-  It is an atomic operation that performs Smart Contract. Transaction has TxData which contains ID of Peer (Node) to actually execute, transaction hash value that hashes transaction header, and contract contents.
+  It is an atomic operation that performs Smart Contract. The transaction has an ID of the peer (Node) that actually executes the transaction, a transaction hash value that hashes the transaction header, and TxData which contains the contract contents.
 
 - MerkleTree
 
-  The Merkle Tree consists of a binary tree, and the leaf node is the hash value of the transactions in the transaction list of the block. The root node is a hash value representing the entire transaction that hashes the transaction hash value pair from the leaf node to the end. The merge tree can be immediately known at constant time via a hash root hash to see if the transaction's information has changed, since the next block has the value of the hash value of the block header and hashes the block header, the validity of all the transactions of the Ledger can be efficiently managed. And Merkle Path (a sibling node to the root node of tx), so that the validity of a particular transaction can be checked at log time.
+  The Merkle Tree consists of a binary tree, and the leaf node is the hash value of the transactions in the transaction list of the block. The root node is a hash value representing the entire transaction that hashes the transaction hash value pair from the leaf node to the end. 
+ Merkle Tree is able to check in constant time whether transaction information has changed through merkle tree root hash. In addition, Merkle Tree can effectively manage the validity of all transactions in the ledger because the block header has the Merkle Tree root hash value and the next block has hash value from hashed the block header. And since Merkle Tree can provide the Merkle Path (the Sibling node to the root node of tx), it has the advantage of being able to check the validity of a particular transaction at log time.
 
   ![blockchain-implementation-merkletree](./images/blockchain-implementation-merkletree.png)
 
