@@ -56,10 +56,7 @@ func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
 	logger.Println("pushing peerTable:",ps.peerTable)
 
 	ps.peerTable.IncrementHeartBeat()
-
 	message := &pb.Message{}
-	//message.Content = pb.PeerTableToTable(*ps.peerTable)
-
 	envelope := pb.Envelope{}
 	envelope.Payload, err = proto.Marshal(message)
 
