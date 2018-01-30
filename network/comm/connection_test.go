@@ -85,10 +85,6 @@ func TestNewConnection(t *testing.T) {
 	}
 
 	assert.NotNil(t,conn)
-	assert.NotNil(t,conn.conn)
-	assert.NotNil(t,conn.cancel)
-	assert.NotNil(t,conn.client)
-	assert.NotNil(t,conn.clientStream)
 
 	server.Stop()
 	listner.Close()
