@@ -22,6 +22,7 @@ type SmartContract struct {
 
 type SmartContractService struct {
 	GithubID string
+	SmartContractDirPath string
 	SmartContractMap map[string]SmartContract
 }
 
@@ -34,7 +35,7 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
 
 	_, ok := scs.keyByValue(ReposPath)
 	if ok {
-		// 버전 업데이트
+		// 버전 업데이트 기능 추가 필요
 		return "", errors.New("Already exist smart contract ID")
 	}
 
@@ -46,25 +47,29 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
 		return "", errors.New("Not Exist Repos!")
 	}
 
-	err = CloneRepos(ReposPath, "/Users/hackurity/Documents/it-chain/test")
+	err = os.MkdirAll(scs.SmartContractDirPath + "/" + new_repos_name, 0755)
+	if err != nil {
+		return "", errors.New("An error occured while make repository's directory!")
+	}
+
+	err = CloneRepos(ReposPath, scs.SmartContractDirPath + "/" + new_repos_name)
 	if err != nil {
 		return "", errors.New("An error occured while cloning repos!")
 	}
 
-	fmt.Println(new_repos_name)
 	_, err = CreateRepos(new_repos_name, GITHUB_TOKEN)
 	if err != nil {
 		return "", errors.New(err.Error())//"An error occured while creating repos!")
 	}
 
-	err = ChangeRemote(scs.GithubID + "/" + new_repos_name, "/Users/hackurity/Documents/it-chain/test/" + origin_repos_name)
+	err = ChangeRemote(scs.GithubID + "/" + new_repos_name, scs.SmartContractDirPath + "/" + new_repos_name + "/" + origin_repos_name)
 	if err != nil {
 		return "", errors.New("An error occured while cloning repos!")
 	}
 
 	// 버전 관리를 위한 파일 추가
 	now := time.Now().Format("2006-01-02 15:04:05");
-	file, err := os.OpenFile("/Users/hackurity/Documents/it-chain/test/" + origin_repos_name + "/version", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	file, err := os.OpenFile(scs.SmartContractDirPath + "/" + new_repos_name + "/" + origin_repos_name + "/version", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return "", errors.New("An error occured while creating or opening file!")
 	}
@@ -78,12 +83,22 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
 		return "", errors.New("An error occured while closing file!")
 	}
 
-	err = CommitAndPush("/Users/hackurity/Documents/it-chain/test/" + origin_repos_name, "It-Chain Smart Contract \"" + new_repos_name + "\" Deploy")
+	err = CommitAndPush(scs.SmartContractDirPath + "/" + new_repos_name, "It-Chain Smart Contract \"" + new_repos_name + "\" Deploy")
 	if err != nil {
-		return "", errors.New(err.Error())
+		return "", errors.New("An error occured while committing and pushing!")
 	}
 
 	githubResponseCommits, err := GetReposCommits(scs.GithubID + "/" + new_repos_name)
+	if err != nil {
+		return "", errors.New("An error occured while getting commit log!")
+	}
+
+
+	reposDirPath := scs.SmartContractDirPath + "/" + new_repos_name + "/" + githubResponseCommits[0].Sha
+	err = os.Rename(scs.SmartContractDirPath + "/" + new_repos_name + "/" + origin_repos_name, reposDirPath)
+	if err != nil {
+		return "", errors.New("An error occured while renaming directory!")
+	}
 
 	scs.SmartContractMap[githubResponseCommits[0].Sha] = SmartContract{new_repos_name, ReposPath, ""}
 
@@ -98,6 +113,7 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
  *	6. docker에서 smartcontract 실행
  ****************************************************/
 func (scs *SmartContractService) Query(transaction blockchain.Transaction) (error) {
+	tmpDir := "/tmp"
 	sc, ok := scs.SmartContractMap[transaction.TxData.ContractID];
 	if !ok {
 		return errors.New("Not exist contract ID")
@@ -109,12 +125,12 @@ func (scs *SmartContractService) Query(transaction blockchain.Transaction) (erro
 		return errors.New("File or Directory Not Exist")
 	}
 
-	err = MakeTar(sc.SmartContractPath, "/Users/hackurity/Documents/it-chain/test")
+	err = MakeTar(sc.SmartContractPath, tmpDir)
 	if err != nil {
 		return errors.New("An error occured while archiving file!")
 	}
 
-	PullAndCopyAndRunDocker("docker.io/library/node", "/Users/hackurity/Documents/it-chain/test"+"/"+transaction.TxData.ContractID+".tar")
+	PullAndCopyAndRunDocker("docker.io/library/node", tmpDir+"/"+transaction.TxData.ContractID+".tar")
 
 	return nil
 }

@@ -53,7 +53,7 @@ func GetRepos(repos_path string) (GithubResponse, error) {
 	defer res.Body.Close()
 
 	if res.Header.Get("Status") != "200 OK" {
-		return body, errors.New("Not Found")
+		return body, errors.New("Not Found (in GetRepos)")
 	}
 
 	bodyBytes, err := ioutil.ReadAll(res.Body)
@@ -76,7 +76,7 @@ func GetReposCommits(repos_path string) ([]GithubResponseCommits, error) {
 	defer res.Body.Close()
 
 	if res.Header.Get("Status") != "200 OK" {
-		return body, errors.New("Not Found")
+		return body, errors.New("Not Found (in GetReposCommits)")
 	}
 
 	bodyBytes, err := ioutil.ReadAll(res.Body)
