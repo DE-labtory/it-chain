@@ -105,7 +105,7 @@ func CreateRepos(repos_name string, token string) (GithubResponse, error) {
 	defer res.Body.Close()
 
 	if res.Header.Get("Status") != "201 Created" {
-		return body, errors.New("Not Found")
+		return body, errors.New("Not Found (in CreateRepos)")
 	}
 
 	bodyBytes, err := ioutil.ReadAll(res.Body)
@@ -167,6 +167,7 @@ func CommitAll(dir string, comment string) (error) {
 	cmd_add.Dir = dir
 	error := cmd_add.Run()
 	if error != nil {
+		println("error in add")
 		return error
 	}
 
@@ -174,6 +175,7 @@ func CommitAll(dir string, comment string) (error) {
 	cmd_commit.Dir = dir
 	error = cmd_commit.Run()
 	if error != nil {
+		println("error in commit")
 		return error
 	}
 
@@ -185,6 +187,7 @@ func PushRepos(dir string) (error) {
 	cmd.Dir = dir
 	error := cmd.Run()
 	if error != nil {
+		println("error in push")
 		return error
 	}
 

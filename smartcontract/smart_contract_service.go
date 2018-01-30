@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	GITHUB_TOKEN string = "619ee819fca81e424589a5f10416c2e2e99ed744"
+	GITHUB_TOKEN string = "20fc6f01c0cab8f97ac3e8433a946c8b869702cd"
 
 )
 
@@ -83,9 +83,10 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
 		return "", errors.New("An error occured while closing file!")
 	}
 
-	err = CommitAndPush(scs.SmartContractDirPath + "/" + new_repos_name, "It-Chain Smart Contract \"" + new_repos_name + "\" Deploy")
+	err = CommitAndPush(scs.SmartContractDirPath + "/" + new_repos_name + "/" + origin_repos_name, "It-Chain Smart Contract \"" + new_repos_name + "\" Deploy")
 	if err != nil {
-		return "", errors.New("An error occured while committing and pushing!")
+		return "", errors.New(err.Error())
+		//return "", errors.New("An error occured while committing and pushing!")
 	}
 
 	githubResponseCommits, err := GetReposCommits(scs.GithubID + "/" + new_repos_name)
