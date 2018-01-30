@@ -23,17 +23,17 @@ func (mh *MockHandler) Handle(ms interface{}){
 	}
 }
 
-func MockNewGRPCMessageBatcher(done chan int) (*EventBatcher, *MockHandler){
+func MockNewGRPCMessageBatcher(done chan int) (*EventBatcherServiceImpl, *MockHandler){
 
 	seconds := 2 * time.Second
 	mockHanlder := &MockHandler{counter:0,done:done}
 
-	return &EventBatcher{
+	return &EventBatcherServiceImpl{
 		buff:     make([]*batchedMessage, 0),
 		lock:     &sync.Mutex{},
 		Period:   seconds,
 		stopFlag: int32(0),
-		handler:  mockHanlder,
+		handle:  mockHanlder.Handle,
 		deleting: false,
 	}, mockHanlder
 }
@@ -42,7 +42,14 @@ func TestNewGRPCMessageBatcher(t *testing.T) {
 
 	mockHanlder := &MockHandler{}
 	seconds := 2 * time.Second
-	batcher := NewGRPCMessageBatcher(seconds, mockHanlder,false)
+	batcher := &EventBatcherServiceImpl{
+		buff:     make([]*batchedMessage, 0),
+		lock:     &sync.Mutex{},
+		Period:   seconds,
+		stopFlag: int32(0),
+		handle:  mockHanlder.Handle,
+		deleting: false,
+	}
 
 	assert.Equal(t,batcher.stopFlag,int32(0))
 	assert.Equal(t,batcher.deleting,false)
@@ -98,7 +105,7 @@ func TestEventBatcher_FuntionalTestWithDeletingTrue(t *testing.T) {
 	done := make(chan int)
 	mockHanlder := &MockHandler{counter:0,done:done}
 	seconds := 2 * time.Second
-	batcher := NewGRPCMessageBatcher(seconds, mockHanlder,true)
+	batcher := NewBatchService(seconds, mockHanlder.Handle,true)
 
 	batcher.Add("hello1")
 	batcher.Add("hello2")
@@ -118,7 +125,7 @@ func TestEventBatcher_FuntionalTest_with_deleting_false(t *testing.T) {
 	done := make(chan int)
 	mockHanlder := &MockHandler{counter:0,done:done}
 	seconds := 2 * time.Second
-	batcher := NewGRPCMessageBatcher(seconds, mockHanlder,false)
+	batcher := NewBatchService(seconds, mockHanlder.Handle,false)
 
 	batcher.Add("hello1")
 	batcher.Add("hello2")
