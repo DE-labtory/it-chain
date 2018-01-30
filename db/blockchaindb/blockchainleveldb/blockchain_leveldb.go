@@ -90,7 +90,7 @@ func (l *BlockchainLevelDB) AddUnconfirmedBlock(block *blockchain.Block) error {
 		return err
 	}
 
-	err = utilDB.Put([]byte(block.Header.BlockHash), serializedBlock, true)
+	err = utilDB.Put([]byte(UNCONFIRMED_BLOCK_KEY), serializedBlock, true)
 	if err != nil {
 		return err
 	}
