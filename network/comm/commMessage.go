@@ -19,6 +19,6 @@ type OutterMessage struct{
 
 // Respond sends a msg to the source that sent the ReceivedMessageImpl
 func (m *OutterMessage) Respond(envelope *message.Envelope, errCallBack func(error)) {
-	
+
 	m.Conn.Send(envelope, errCallBack)
 }

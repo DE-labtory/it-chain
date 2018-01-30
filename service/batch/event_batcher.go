@@ -6,16 +6,15 @@ import (
 	"sync/atomic"
 )
 
-type EventHandler interface{
-	Handle(interface{})
-}
+type Handle func(interface{})
+
 
 type EventBatcher struct {
 	Period   time.Duration
 	lock     *sync.Mutex
 	stopFlag int32
 	buff     []*batchedMessage
-	handler  EventHandler
+	handle  Handle
 	deleting bool
 }
 
@@ -32,14 +31,14 @@ type batchedMessage struct {
 //period: T time
 //stopflag: to stop batcher
 //handler: messaging handler
-func NewGRPCMessageBatcher(period time.Duration, handler EventHandler, deleting bool) *EventBatcher{
+func NewGRPCMessageBatcher(period time.Duration, handle Handle, deleting bool) *EventBatcher{
 
 	gb := &EventBatcher{
 		buff:     make([]*batchedMessage, 0),
 		lock:     &sync.Mutex{},
 		Period:   period,
 		stopFlag: int32(0),
-		handler:  handler,
+		handle:  handle,
 		deleting: deleting,
 	}
 
@@ -98,7 +97,7 @@ func (gb *EventBatcher) emit() {
 	}
 
 	for _, message := range gb.buff{
-		gb.handler.Handle(message.data)
+		gb.handle(message.data)
 	}
 
 	gb.vacate()

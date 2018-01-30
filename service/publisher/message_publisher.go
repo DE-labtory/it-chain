@@ -59,10 +59,6 @@ func (mh *MessagePublisher) AddSubscriber(topic string, subfunc func(message com
 //todo panic으로 부터 recover
 func (mh *MessagePublisher) ReceivedMessageHandle(message comm.OutterMessage){
 
-	//todo vaild message 검증
-	//message
-
-
 	if message.Envelope == nil{
 		logger_event_publisher.Info("message is nil", message)
 		return

@@ -14,7 +14,7 @@ type PeerServiceImpl struct {
 	comm comm.ConnectionManager
 }
 
-func NewPeerServiceImpl(peerTable *PeerTable,comm comm.ConnectionManager) *PeerServiceImpl{
+func NewPeerServiceImpl(peerTable *PeerTable,comm comm.ConnectionManager) PeerService{
 
 	return &PeerServiceImpl{
 		peerTable: peerTable,
@@ -42,7 +42,7 @@ func (ps *PeerServiceImpl) PushPeerTable(peerIDs []string){
 //주기적으로 peerTable의 peerlist에게 peerTable을 전송한다.
 //todo signing이 들어가야함
 //todo struct to grpc proto의 변환 문제
-func (ps *PeerServiceImpl) Handle(interface{}){
+func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
 	logger.Println("pushing peer table")
 
 	peerInfos, err := ps.peerTable.SelectRandomPeerInfos(0.5)
@@ -114,7 +114,7 @@ func (ps *PeerServiceImpl) AddPeerInfo(peerInfo *PeerInfo){
 	ps.peerTable.AddPeerInfo(peerInfo)
 }
 
-func (ps *PeerServiceImpl) RequestPeerInfo(ip string) *PeerInfo{
+func (ps *PeerServiceImpl) RequestPeerInfo(host string, port string) *PeerInfo{
 
 	return nil
 }
