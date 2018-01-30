@@ -9,7 +9,7 @@ import (
 	"io"
 )
 
-func makeTar(source string, target string) error {
+func MakeTar(source string, target string) error {
 	filename := filepath.Base(source)
 	fmt.Println("filename : "+filename)
 	target = filepath.Join(target, fmt.Sprintf("%s.tar", filename))
