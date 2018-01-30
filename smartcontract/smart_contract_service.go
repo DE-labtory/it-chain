@@ -91,14 +91,13 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
 }
 /***************************************************
  *	1. smartcontract 검사
- *	2. smartcontract -> sc.tar
+ *	2. smartcontract -> sc.tar : 애초에 풀 받을 때 압축해 둘 수 있음
  *	3. go 버전에 맞는 docker image를 Create
  *	4. sc.tar를 docker container로 복사
  *	5. docker container Start
  *	6. docker에서 smartcontract 실행
  ****************************************************/
 func (scs *SmartContractService) Query(transaction blockchain.Transaction) (error) {
-
 	sc, ok := scs.SmartContractMap[transaction.TxData.ContractID];
 	if !ok {
 		return errors.New("Not exist contract ID")
@@ -110,9 +109,12 @@ func (scs *SmartContractService) Query(transaction blockchain.Transaction) (erro
 		return errors.New("File or Directory Not Exist")
 	}
 
-	tarFile := makeTar(sc.SmartContractPath, "/Users/hackurity/Documents/it-chain/test")
+	err = MakeTar(sc.SmartContractPath, "/Users/hackurity/Documents/it-chain/test")
+	if err != nil {
+		return errors.New("An error occured while archiving file!")
+	}
 
-	fmt.Println(tarFile)
+	PullAndCopyAndRunDocker("docker.io/library/node", "/Users/hackurity/Documents/it-chain/test"+"/"+transaction.TxData.ContractID+".tar")
 
 	return nil
 }

@@ -43,7 +43,7 @@ func TestSmartContractService_Query(t *testing.T) {
 			"abc": SmartContract{
 				ReposName:         "bloom",
 				OriginReposPath:   "junbeomlee/bloom",
-				SmartContractPath: "/Users/hackurity/Documents/it-chain/test/scm_dir",
+				SmartContractPath: "/Users/hackurity/Documents/it-chain/test/abc",
 			},
 		},
 	}
