@@ -6,16 +6,15 @@ import (
 	"sync/atomic"
 )
 
-type EventHandler interface{
-	Handle(interface{})
-}
+type Handle func(interface{})
 
-type EventBatcher struct {
+
+type EventBatcherServiceImpl struct {
 	Period   time.Duration
 	lock     *sync.Mutex
 	stopFlag int32
 	buff     []*batchedMessage
-	handler  EventHandler
+	handle  Handle
 	deleting bool
 }
 
@@ -26,20 +25,19 @@ type batchedMessage struct {
 
 //batcher T시간 간격으로 handler에게 메세지를 전달해준다
 //deleting option에 따라서 전달한 message를 지울껀지 아니면 계속 남겨둘지를 설정한다.
-
 //buff: protos queue
 //lock: sync
 //period: T time
 //stopflag: to stop batcher
 //handler: messaging handler
-func NewGRPCMessageBatcher(period time.Duration, handler EventHandler, deleting bool) *EventBatcher{
+func NewBatchService(period time.Duration, handle Handle, deleting bool) BatchService{
 
-	gb := &EventBatcher{
+	gb := &EventBatcherServiceImpl{
 		buff:     make([]*batchedMessage, 0),
 		lock:     &sync.Mutex{},
 		Period:   period,
 		stopFlag: int32(0),
-		handler:  handler,
+		handle:  handle,
 		deleting: deleting,
 	}
 
@@ -49,7 +47,7 @@ func NewGRPCMessageBatcher(period time.Duration, handler EventHandler, deleting 
 }
 
 //tested
-func (gb *EventBatcher)Add(message interface{}){
+func (gb *EventBatcherServiceImpl)Add(message interface{}){
 
 	gb.lock.Lock()
 	defer gb.lock.Unlock()
@@ -59,12 +57,12 @@ func (gb *EventBatcher)Add(message interface{}){
 }
 
 //tested
-func (gb *EventBatcher)Stop(){
+func (gb *EventBatcherServiceImpl)Stop(){
 	atomic.StoreInt32(&(gb.stopFlag), int32(1))
 }
 
 //tested
-func (gb *EventBatcher)Size() int{
+func (gb *EventBatcherServiceImpl)Size() int{
 
 	gb.lock.Lock()
 	defer gb.lock.Unlock()
@@ -72,12 +70,12 @@ func (gb *EventBatcher)Size() int{
 }
 
 //tested
-func (gb *EventBatcher) toDie() bool {
+func (gb *EventBatcherServiceImpl) toDie() bool {
 	return atomic.LoadInt32(&(gb.stopFlag)) == int32(1)
 }
 
 //tested
-func (gb *EventBatcher) periodicEmit() {
+func (gb *EventBatcherServiceImpl) periodicEmit() {
 	for !gb.toDie() {
 		time.Sleep(gb.Period)
 		gb.lock.Lock()
@@ -87,7 +85,7 @@ func (gb *EventBatcher) periodicEmit() {
 }
 
 //tested
-func (gb *EventBatcher) emit() {
+func (gb *EventBatcherServiceImpl) emit() {
 
 	if gb.toDie(){
 		return
@@ -98,14 +96,14 @@ func (gb *EventBatcher) emit() {
 	}
 
 	for _, message := range gb.buff{
-		gb.handler.Handle(message.data)
+		gb.handle(message.data)
 	}
 
 	gb.vacate()
 }
 
 //test
-func (gb *EventBatcher) vacate() {
+func (gb *EventBatcherServiceImpl) vacate() {
 
 	if gb.deleting{
 		gb.buff = gb.buff[0:0]

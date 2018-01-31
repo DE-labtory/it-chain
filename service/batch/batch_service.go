@@ -17,7 +17,7 @@ import "it-chain/common"
 
 var logger = common.GetLogger("batch")
 
-type Batcher interface {
+type BatchService interface {
 
 	// Add adds a protos to be batched
 	Add(interface{})
