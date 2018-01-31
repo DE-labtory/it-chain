@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/docker/docker/client"
 	"context"
-	"github.com/docker/docker/api/types"
+	"docker.io/go-docker"
+	"docker.io/go-docker/api/types"
 )
 
 func main() {
 	ctx := context.Background()
-	cli, err := client.NewEnvClient()
+	cli, err := docker.NewEnvClient()
 	if err != nil {
 		panic(err)
 	}
@@ -17,7 +17,6 @@ func main() {
 	r, err := cli.ContainerExecCreate(ctx, "031948a18830", types.ExecConfig{
 		Cmd: []string{"go", "run", "/go/src/fileio.go"},
 		User: "root",
-		WorkingDir: "/go/src",
 		//Cmd: []string{"touch","/home/aa"},
 	})
 	if err != nil {

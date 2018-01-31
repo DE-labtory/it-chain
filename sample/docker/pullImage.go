@@ -4,13 +4,13 @@ import (
 	"io"
 	"os"
 	"context"
-	"github.com/docker/docker/client"
-	"github.com/docker/docker/api/types"
+	"docker.io/go-docker"
+	"docker.io/go-docker/api/types"
 )
 
 func PullImage(imageName string) error {
 	ctx := context.Background()
-	cli, err := client.NewEnvClient()
+	cli, err := docker.NewEnvClient()
 	if err != nil {
 		panic(err)
 	}

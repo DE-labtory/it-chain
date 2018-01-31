@@ -25,3 +25,4 @@ import:
 - package: github.com/asaskevich/EventBus
 - package: github.com/jeevatkm/go-model
   version: v1.0
+- package: docker.io/go-docker

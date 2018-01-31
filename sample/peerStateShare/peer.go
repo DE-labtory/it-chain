@@ -12,7 +12,6 @@ import (
 	"google.golang.org/grpc"
 	"it-chain/service/batch"
 	"it-chain/network/comm"
-	"it-chain/service/domain"
 	"github.com/urfave/cli"
 	"os"
 	"it-chain/common"
