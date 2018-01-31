@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"bytes"
 	"context"
-	"github.com/docker/docker/client"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
+	"docker.io/go-docker"
+	"docker.io/go-docker/api/types"
+	"docker.io/go-docker/api/types/container"
 	"strings"
 )
 
@@ -71,9 +71,9 @@ func CopyTarToDockerContainer() {
 
 
 // Temporary Function. It have to be splited for legibility and maintenance.
-func PullAndCopyAndRunDocker(imageName string, tarPath string) *client.Client{
+func PullAndCopyAndRunDocker(imageName string, tarPath string) *docker.Client{
 	ctx := context.Background()
-	cli, err := client.NewEnvClient()
+	cli, err := docker.NewEnvClient()
 	if err != nil {
 		panic(err)
 	}
