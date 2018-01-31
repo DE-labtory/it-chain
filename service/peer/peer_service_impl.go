@@ -47,7 +47,6 @@ func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
 
 	peerInfos, err := ps.peerTable.SelectRandomPeerInfos(0.5)
 
-
 	if err != nil{
 		logger.Println("no peer exist")
 		return
@@ -57,6 +56,7 @@ func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
 
 	ps.peerTable.IncrementHeartBeat()
 	message := &pb.Message{}
+
 	envelope := pb.Envelope{}
 	envelope.Payload, err = proto.Marshal(message)
 
@@ -72,6 +72,7 @@ func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
 		ps.comm.SendStream(envelope,errorCallBack, peerInfo.PeerID)
 	}
 }
+
 func (ps *PeerServiceImpl) UpdatePeerTable(peerTable PeerTable){
 
 	ps.peerTable.Lock()
@@ -79,7 +80,6 @@ func (ps *PeerServiceImpl) UpdatePeerTable(peerTable PeerTable){
 
 	for id, peerInfo := range peerTable.PeerMap{
 		peer,ok := ps.peerTable.PeerMap[id]
-
 		if ok{
 			peer.Update(peerInfo)
 		}else{

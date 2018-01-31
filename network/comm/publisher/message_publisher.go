@@ -18,6 +18,7 @@ type MessagePublisher struct{
 	//signer 있어야함
 }
 
+//todo Message Publisher를 connectionManager가 관리하게 할지 고민
 //todo signer를 받아야함
 //topic의 일치성을 위해 처음에 topic의 list를 받고 이 list에 없는 topic은 등록불가하다.
 func NewMessagePublisher(messageTypes []string) *MessagePublisher{
