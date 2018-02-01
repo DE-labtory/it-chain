@@ -1,12 +1,48 @@
-hash: ffb65182df42d77dd1c0b8ecd690429e8f0f3cbc853855021e3807b3a91c71fc
-updated: 2018-01-25T15:38:26.575887389+09:00
+hash: d391cacba1ba593460615e8e41e91fda5138f329d6e59b6466b217cb01f1988d
+updated: 2018-02-01T00:22:36.613865212+09:00
 imports:
+- name: docker.io/go-docker
+  version: b3f5b5de7bbce0acc6a7fc0a4c2b88db678e262e
+  subpackages:
+  - api
+  - api/types
+  - api/types/blkiodev
+  - api/types/container
+  - api/types/events
+  - api/types/filters
+  - api/types/image
+  - api/types/mount
+  - api/types/network
+  - api/types/registry
+  - api/types/strslice
+  - api/types/swarm
+  - api/types/swarm/runtime
+  - api/types/time
+  - api/types/versions
+  - api/types/volume
 - name: github.com/asaskevich/EventBus
   version: 68a521d7cbbb7a859c2608b06342f384b3bd5f5a
+- name: github.com/docker/distribution
+  version: 5cb406d511b7b9163bff9b6439072e4892e5ae3b
+  subpackages:
+  - digestset
+  - reference
+- name: github.com/docker/go-connections
+  version: 98e7d807e5d804e4e42a98d74d1dd695321224ef
+  subpackages:
+  - nat
+  - sockets
+  - tlsconfig
+- name: github.com/docker/go-units
+  version: d59758554a3d3911fa25c0269de1ebe2f1912c39
 - name: github.com/fsnotify/fsnotify
   version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
+- name: github.com/gogo/protobuf
+  version: 26de2f9a7d3b1826f275e7a97c8cad5080589426
+  subpackages:
+  - proto
 - name: github.com/golang/protobuf
-  version: c65a0412e71e8b9b3bfd22925720d23c0f054237
+  version: 925541529c1fa6821df4e44ce2723319eb2be768
   subpackages:
   - proto
   - protoc-gen-go
@@ -22,6 +58,7 @@ imports:
   subpackages:
   - hcl/ast
   - hcl/parser
+  - hcl/printer
   - hcl/scanner
   - hcl/strconv
   - hcl/token
@@ -40,10 +77,21 @@ imports:
   version: 6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c
 - name: github.com/mgutz/ansi
   version: 9520e82c474b0a04dd04f8a40959027271bab992
+- name: github.com/Microsoft/go-winio
+  version: 7da180ee92d8bd8bb8c37fc560e673e6557c392f
 - name: github.com/mitchellh/mapstructure
   version: b4575eea38cca1123ec2dc90c26529b5c5acfcff
+- name: github.com/opencontainers/go-digest
+  version: 279bed98673dd5bef374d3b6e4b09e2af76183bf
+- name: github.com/opencontainers/image-spec
+  version: 577479e4dc273d3779f00c223c7e0dba4cd6b8b0
+  subpackages:
+  - specs-go
+  - specs-go/v1
 - name: github.com/pelletier/go-toml
   version: acdc4509485b587f5e675510c4f2c63e90ff68a8
+- name: github.com/pkg/errors
+  version: 30136e27e2ac8d167177e8a583aa4c3fea5be833
 - name: github.com/sirupsen/logrus
   version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
 - name: github.com/spf13/afero
@@ -63,7 +111,7 @@ imports:
   subpackages:
   - assert
 - name: github.com/syndtr/goleveldb
-  version: 34011bf325bce385408353a30b101fe5e923eb6e
+  version: 211f780988068502fe874c44dae530528ebd840f
   subpackages:
   - leveldb
   - leveldb/cache
@@ -82,21 +130,23 @@ imports:
 - name: github.com/x-cray/logrus-prefixed-formatter
   version: bb2702d423886830dee131692131d35648c382e2
 - name: golang.org/x/crypto
-  version: 3d37316aaa6bd9929127ac9a527abf408178ea7b
+  version: 1875d0a70c90e57f11972aefd42276df65e895b9
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
   version: 0ed95abb35c445290478a5348a7b38bb154135fd
   subpackages:
   - context
+  - context/ctxhttp
   - http2
   - http2/hpack
   - idna
   - internal/timeseries
   - lex/httplex
+  - proxy
   - trace
 - name: golang.org/x/sys
-  version: af50095a40f9041b3b38960738837185c26e9419
+  version: 3dbebcf8efb6a5011a60c2b4591c1022a759af8a
   subpackages:
   - unix
   - windows
@@ -108,7 +158,7 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/genproto
-  version: 14790a1795ea4c3387aaf24aed670ddb51f18292
+  version: 4eb30f4778eed4c258ba66527a0d4f9ec8a36c45
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
@@ -143,7 +193,7 @@ imports:
   version: d670f9405373e636a5a2765eea47fac0c9bc91a4
 testImports:
 - name: github.com/davecgh/go-spew
-  version: ecdeabc65495df2dec95d7c4a4c3e021903035e5
+  version: db69d09d2c587e9b9677f991dfcab1fc24d9086e
   subpackages:
   - spew
 - name: github.com/pmezard/go-difflib

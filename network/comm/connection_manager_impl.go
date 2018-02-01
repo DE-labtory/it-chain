@@ -9,13 +9,13 @@ import (
 var commLogger = common.GetLogger("connection_manager_impl.go")
 
 type ConnectionManagerImpl struct{
-	connectionMap map[string]*Connection
+	connectionMap map[string]Connection
 	sync.RWMutex
 }
 
 func NewConnectionManagerImpl() *ConnectionManagerImpl{
 	return &ConnectionManagerImpl{
-		connectionMap: make(map[string]*Connection),
+		connectionMap: make(map[string]Connection),
 	}
 }
 
