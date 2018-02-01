@@ -27,6 +27,10 @@ type SmartContractService struct {
 }
 
 func Init() {
+	pullAllSmartContracts()
+}
+
+func pullAllSmartContracts() (error) {
 }
 
 func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
