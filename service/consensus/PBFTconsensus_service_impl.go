@@ -1,11 +1,15 @@
 package consensus
 
-import "it-chain/service/blockchain"
+import (
+	"it-chain/service/blockchain"
+	"it-chain/network/comm"
+	"sync"
+	"time"
+)
 
 
 type RequestMsg struct {
-	Timestamp  int64
-	block      blockchain.Block
+	block      *blockchain.Block
 	SequenceID int64
 }
 
@@ -18,14 +22,15 @@ const (
 )
 
 //consesnsus message can has 3 types
-type ConsensusMessage struct{
+type ConsensusMessage struct {
 	ConsensusID string
-	ViewID     int64
-	SequenceID int64
-	RequestMsg *RequestMsg
-	Stage 	   MsgType
-	PeerID     string
-	MsgType
+	ViewID      string
+	SequenceID  int64
+	RequestMsg  *RequestMsg
+	Stage       Stage
+	PeerID      string
+	MsgType     MsgType
+	TimeStamp   time.Time
 }
 
 type Stage int
@@ -49,13 +54,50 @@ type View struct{
 	ID string
 }
 
-type PBFTConsensusService struct{
-	ConsensusStates map[string]*ConsensusState
+type PBFTConsensusService struct {
+	consensusStates map[string]*ConsensusState
+	comm            comm.ConnectionManager
+	View            View
+	SequenceID      int64
+	sync.RWMutex
+}
+
+func NewPBFTConsensusService(comm comm.ConnectionManager) ConsensusService{
+
+	pbft := &PBFTConsensusService{
+		consensusStates: make(map[string]*ConsensusState),
+		comm:comm,
+		SequenceID: 0,
+	}
+
+	return pbft
 }
 
 //Consensus 시작
 func (cs *PBFTConsensusService) StartConsensus(block *blockchain.Block){
 
+	requestMsg := &RequestMsg{
+		SequenceID: cs.SequenceID,
+		block: block,
+	}
+
+	//temp consensusID and PeerID
+	consensusMessage := ConsensusMessage{
+		ConsensusID: "1",
+		ViewID: cs.View.ID,
+		SequenceID: cs.SequenceID,
+		Stage: PrePrepared,
+		MsgType:PreprepareMsg,
+		TimeStamp: time.Now(),
+		PeerID:"0",
+		RequestMsg: requestMsg,
+	}
+
+	cs.Lock()
+	cs.SequenceID++
+	cs.Unlock()
+
+	cs.broadcastMessage(consensusMessage)
 }
 
 func (cs *PBFTConsensusService) StopConsensus(){
@@ -63,5 +105,13 @@ func (cs *PBFTConsensusService) StopConsensus(){
 }
 
 func (cs *PBFTConsensusService) ReceiveConsensusMessage(consensusMsg *ConsensusMessage){
+
+}
+
+func (cs *PBFTConsensusService) consensusMessageHandler(){
+
+}
+
+func (cs *PBFTConsensusService) broadcastMessage(consensusMsg ConsensusMessage){
 
 }
