@@ -9,8 +9,7 @@ Generalized Private Chain For All
 
 it-chain makes it easy for anyone to have their own block chain platform
 
-Use it-code to create your own Dapp
-
+Use Smart-Contract to create your own Dapp
 
 
 ## Contribution
@@ -18,6 +17,10 @@ Use it-code to create your own Dapp
 Contribution documents will be updated shortly. 
 
 For the time being, email leebduk@gmail.com
+
+## Blockchain Key Concept
+The key concept of blockchain can be found in the KEYCONEPT. <br>
+[KEYCONEPT](KEYCONEPT)
 
 ## Implementation Details
 Core implementation decisions can be found in the Project Implementation Details. <br>

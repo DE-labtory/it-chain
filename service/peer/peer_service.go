@@ -20,4 +20,6 @@ type PeerService interface{
 
 	//Request Peer Info
 	RequestPeerInfo(host string, port string) *PeerInfo
+
+	BroadCastPeerTable(interface{})
 }

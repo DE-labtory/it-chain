@@ -3,6 +3,7 @@ package blockchain
 import (
 	"time"
 	"it-chain/common"
+	"errors"
 )
 
 type TransactionStatus int
@@ -51,8 +52,16 @@ type Transaction struct {
 	TxData            *TxData
 }
 
-func CreateNewTransaction(peer_id string, tx_id string, status Status, tx_type TransactionType, key []byte, t time.Time, data *TxData) *Transaction{
-	return &Transaction{InvokePeerID:peer_id, TransactionID:tx_id, TransactionStatus:status, TransactionType:tx_type, PublicKey:key, TimeStamp:t, TxData:data}
+func CreateNewTransaction(peer_id string, tx_id string, tx_type TransactionType, t time.Time, data *TxData) *Transaction{
+	return &Transaction{InvokePeerID:peer_id, TransactionID:tx_id, TransactionStatus:status_TRANSACTION_UNKNOWN, TransactionType:tx_type, TimeStamp:t, TxData:data}
+}
+
+func SetTxMethodParameters(params_type int, function FunctionType, args []string) Params{
+	return Params{params_type, function, args}
+}
+
+func SetTxData(jsonrpc string, method TxDataType, params Params, contract_id string) *TxData{
+	return &TxData{jsonrpc, method, params, contract_id}
 }
 
 func MakeHashArg(tx Transaction) []string{
@@ -61,10 +70,9 @@ func MakeHashArg(tx Transaction) []string{
 	return sum
 }
 
-func (tx *Transaction) GenerateHash() error{
+func (tx *Transaction) GenerateHash() {
 	Arg := MakeHashArg(*tx)
 	tx.TransactionHash = common.ComputeSHA256(Arg)
-	return nil
 }
 
 func (tx Transaction) GenerateTransactionHash() string{
@@ -81,4 +89,19 @@ func (tx Transaction) Validate() bool{
 		return false
 	}
 	return true
+}
+
+func (tx *Transaction) SignHash() (ret bool, err error){
+	signature := []byte("temp")
+	tx.PublicKey = []byte("temp")
+
+	if signature != nil {
+		tx.Signature = signature
+		err = nil
+		ret = true
+	} else {
+		err = errors.New("transaction signature fail")
+		ret = false
+	}
+	return ret, err
 }

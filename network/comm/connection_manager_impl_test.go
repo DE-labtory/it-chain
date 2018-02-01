@@ -38,7 +38,6 @@ func TestCommImpl_CreateStreamConn(t *testing.T) {
 	server1, listner1 := ListenMockServerWithIP("127.0.0.1:5555")
 	server2, listner2 := ListenMockServerWithIP("127.0.0.1:6666")
 
-
 	comm := NewConnectionManagerImpl()
 	comm.CreateStreamConn("1","127.0.0.1:5555",nil)
 	comm.CreateStreamConn("2","127.0.0.1:6666",nil)
