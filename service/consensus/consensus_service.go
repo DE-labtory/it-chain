@@ -5,7 +5,7 @@ import "it-chain/service/blockchain"
 type ConsensusService interface{
 
 	//Consensus 시작
-	StartConsensus(transaction blockchain.Transaction)
+	StartConsensus(block *blockchain.Block)
 
 	StopConsensus()
 
