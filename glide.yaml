@@ -26,3 +26,4 @@ import:
 - package: github.com/jeevatkm/go-model
   version: v1.0
 - package: docker.io/go-docker
+- package: golang.org/x/oauth2

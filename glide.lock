@@ -1,5 +1,5 @@
-hash: d391cacba1ba593460615e8e41e91fda5138f329d6e59b6466b217cb01f1988d
-updated: 2018-02-02T19:42:24.683968+09:00
+hash: 52b4656fc20fca05aaba4d6157e7bc2662f8eb9717eee0cfdd3bed1b9ea40345
+updated: 2018-02-02T21:12:01.238166+09:00
 imports:
 - name: docker.io/go-docker
   version: 4daae26030ad00e348edddff9767924ae57a3b82
@@ -53,6 +53,14 @@ imports:
   - ptypes/timestamp
 - name: github.com/golang/snappy
   version: 553a641470496b2327abcac10b36396bd98e45c9
+- name: github.com/google/go-github
+  version: 897969cdc831052c4694e205e24a033fe7248c2f
+  subpackages:
+  - github
+- name: github.com/google/go-querystring
+  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
+  subpackages:
+  - query
 - name: github.com/hashicorp/hcl
   version: 23c074d0eceb2b8a5bfdbb271ab780cde70f05a8
   subpackages:
@@ -173,6 +181,10 @@ imports:
   - proxy
   - trace
   - websocket
+- name: golang.org/x/oauth2
+  version: a032972e28060ca4f5644acffae3dfc268cc09db
+  subpackages:
+  - internal
 - name: golang.org/x/sys
   version: 8f27ce8a604014414f8dfffc25cbcde83a3f2216
   subpackages:
@@ -185,6 +197,19 @@ imports:
   - transform
   - unicode/bidi
   - unicode/norm
+- name: google.golang.org/appengine
+  version: 5bee14b453b4c71be47ec1781b0fa61c2ea182db
+  subpackages:
+  - internal
+  - internal/app_identity
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/modules
+  - internal/remote_api
+  - internal/urlfetch
+  - log
+  - urlfetch
 - name: google.golang.org/genproto
   version: 4eb30f4778eed4c258ba66527a0d4f9ec8a36c45
   subpackages:
