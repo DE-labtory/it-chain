@@ -1,8 +1,8 @@
 hash: d391cacba1ba593460615e8e41e91fda5138f329d6e59b6466b217cb01f1988d
-updated: 2018-02-01T00:22:36.613865212+09:00
+updated: 2018-02-02T19:42:24.683968+09:00
 imports:
 - name: docker.io/go-docker
-  version: b3f5b5de7bbce0acc6a7fc0a4c2b88db678e262e
+  version: 4daae26030ad00e348edddff9767924ae57a3b82
   subpackages:
   - api
   - api/types
@@ -23,7 +23,7 @@ imports:
 - name: github.com/asaskevich/EventBus
   version: 68a521d7cbbb7a859c2608b06342f384b3bd5f5a
 - name: github.com/docker/distribution
-  version: 5cb406d511b7b9163bff9b6439072e4892e5ae3b
+  version: 85b4d46b4f4ab02aa90a172d9f4d3ca8114fe33b
   subpackages:
   - digestset
   - reference
@@ -58,15 +58,26 @@ imports:
   subpackages:
   - hcl/ast
   - hcl/parser
-  - hcl/printer
   - hcl/scanner
   - hcl/strconv
   - hcl/token
   - json/parser
   - json/scanner
   - json/token
+- name: github.com/inconshreveable/log15
+  version: 0decfc6c20d9ca0ad143b0e89dcaa20f810b4fb3
+  subpackages:
+  - term
 - name: github.com/jeevatkm/go-model
   version: 00bcf69e10573c4ba261c9842194d07e6d4b50e9
+- name: github.com/klauspost/compress
+  version: b88785bfd699aa994985ea91b90ee8a1721c3fe1
+  subpackages:
+  - flate
+  - gzip
+  - zlib
+- name: github.com/klauspost/cpuid
+  version: ae832f27941af41db13bd6d8efd2493e3b22415a
 - name: github.com/magiconair/properties
   version: 49d762b9817ba1c2e9d0c69183c2b4a8b8f1d934
   subpackages:
@@ -92,6 +103,20 @@ imports:
   version: acdc4509485b587f5e675510c4f2c63e90ff68a8
 - name: github.com/pkg/errors
   version: 30136e27e2ac8d167177e8a583aa4c3fea5be833
+- name: github.com/revel/config
+  version: 662332b741dd464a886ab0901379c02b9bc5dc30
+- name: github.com/revel/log15
+  version: 793412a67da6f8d15fede4c38f5c66272478cb8a
+- name: github.com/revel/modules
+  version: d5343789b6a44790fc84c5e0df69cd36f275d6b9
+  subpackages:
+  - db/app
+- name: github.com/revel/pathtree
+  version: 41257a1839e945fce74afd070e02bab2ea2c776a
+- name: github.com/revel/revel
+  version: 3fd5bb2fbc33b2c545f3076b7c5c7f01457c2ede
+  subpackages:
+  - logger
 - name: github.com/sirupsen/logrus
   version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
 - name: github.com/spf13/afero
@@ -107,7 +132,7 @@ imports:
 - name: github.com/spf13/viper
   version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: github.com/stretchr/testify
-  version: b91bfb9ebec76498946beb6af7c0230c7cc7ba6c
+  version: 12b6f73e6084dad08a7c6e575284b177ecafbc71
   subpackages:
   - assert
 - name: github.com/syndtr/goleveldb
@@ -129,12 +154,14 @@ imports:
   version: cfb38830724cc34fedffe9a2a29fb54fa9169cd1
 - name: github.com/x-cray/logrus-prefixed-formatter
   version: bb2702d423886830dee131692131d35648c382e2
+- name: github.com/xeonx/timeago
+  version: 714e6695c468c22fb6431a914d8c5f9d19fa2367
 - name: golang.org/x/crypto
   version: 1875d0a70c90e57f11972aefd42276df65e895b9
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
-  version: 0ed95abb35c445290478a5348a7b38bb154135fd
+  version: b417086c80e91bfa321ef761574721644b8b9f61
   subpackages:
   - context
   - context/ctxhttp
@@ -145,8 +172,9 @@ imports:
   - lex/httplex
   - proxy
   - trace
+  - websocket
 - name: golang.org/x/sys
-  version: 3dbebcf8efb6a5011a60c2b4591c1022a759af8a
+  version: 8f27ce8a604014414f8dfffc25cbcde83a3f2216
   subpackages:
   - unix
   - windows
@@ -187,8 +215,14 @@ imports:
   - status
   - tap
   - transport
+- name: gopkg.in/fsnotify.v1
+  version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
 - name: gopkg.in/jeevatkm/go-model.v1
   version: 00bcf69e10573c4ba261c9842194d07e6d4b50e9
+- name: gopkg.in/natefinch/lumberjack.v2
+  version: a96e63847dc3c67d17befa69c303767e2f84e54f
+- name: gopkg.in/stack.v0
+  version: 9b43fcefddd0178abdabf4d484ab0d695d0011db
 - name: gopkg.in/yaml.v2
   version: d670f9405373e636a5a2765eea47fac0c9bc91a4
 testImports:

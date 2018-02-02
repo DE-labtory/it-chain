@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	GITHUB_TOKEN string = "39046f44fd880a8889d71f143ece180dce0e4f27"
+	GITHUB_TOKEN string = "31d8f4c1bfc6906806b9a77803087b5b671fac2d"
 
 )
 
