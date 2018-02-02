@@ -51,7 +51,16 @@ func (h *DBHandle) Delete(key []byte, sync bool) error {
 	return h.db.Delete(dbKey(h.dbName, key), sync)
 }
 
-func (h *DBHandle) WriteBatch(batch *leveldb.Batch, sync bool) error {
+func (h *DBHandle) WriteBatch(KVs map[string][]byte, sync bool) error {
+	batch := &leveldb.Batch{}
+	for k, v := range KVs {
+		key := dbKey(h.dbName, []byte(k))
+		if v == nil {
+			batch.Delete(key)
+		} else {
+			batch.Put(key, v)
+		}
+	}
 	return h.db.WriteBatch(batch, sync)
 }
 
