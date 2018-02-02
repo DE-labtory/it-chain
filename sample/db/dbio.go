@@ -11,7 +11,6 @@ func main() {
 	dbProvider := leveldbhelper.CreateNewDBProvider(path)
 	defer func(){
 		dbProvider.Close()
-		os.RemoveAll(path)
 	}()
 
 	wsDB := "worldStateDB"
