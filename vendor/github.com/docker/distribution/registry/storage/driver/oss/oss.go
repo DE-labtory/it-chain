@@ -13,7 +13,6 @@ package oss
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -22,6 +21,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/docker/distribution/context"
 
 	"github.com/denverdino/aliyungo/oss"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
@@ -477,12 +478,6 @@ func (d *driver) URLFor(ctx context.Context, path string, options map[string]int
 	signedURL := d.Bucket.SignedURLWithMethod(methodString, d.ossPath(path), expiresTime, nil, nil)
 	logrus.Infof("signed URL: %s", signedURL)
 	return signedURL, nil
-}
-
-// Walk traverses a filesystem defined within driver, starting
-// from the given path, calling f on each file
-func (d *driver) Walk(ctx context.Context, path string, f storagedriver.WalkFn) error {
-	return storagedriver.WalkFallback(ctx, d, path, f)
 }
 
 func (d *driver) ossPath(path string) string {

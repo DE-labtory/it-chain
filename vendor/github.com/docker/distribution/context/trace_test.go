@@ -1,7 +1,6 @@
 package context
 
 import (
-	"context"
 	"runtime"
 	"testing"
 	"time"
@@ -36,7 +35,7 @@ func TestWithTrace(t *testing.T) {
 	ctx, done := WithTrace(Background())
 	defer done("this will be emitted at end of test")
 
-	checkContextForValues(ctx, t, append(base, valueTestCase{
+	checkContextForValues(t, ctx, append(base, valueTestCase{
 		key:      "trace.func",
 		expected: f.Name(),
 	}))
@@ -49,7 +48,7 @@ func TestWithTrace(t *testing.T) {
 		ctx, done := WithTrace(ctx)
 		defer done("this should be subordinate to the other trace")
 		time.Sleep(time.Second)
-		checkContextForValues(ctx, t, append(base, valueTestCase{
+		checkContextForValues(t, ctx, append(base, valueTestCase{
 			key:      "trace.func",
 			expected: f.Name(),
 		}, valueTestCase{
@@ -68,7 +67,8 @@ type valueTestCase struct {
 	notnilorempty bool // just check not empty/not nil
 }
 
-func checkContextForValues(ctx context.Context, t *testing.T, values []valueTestCase) {
+func checkContextForValues(t *testing.T, ctx Context, values []valueTestCase) {
+
 	for _, testcase := range values {
 		v := ctx.Value(testcase.key)
 		if testcase.notnilorempty {

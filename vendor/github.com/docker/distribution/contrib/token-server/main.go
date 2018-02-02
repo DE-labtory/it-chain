@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
 	"math/rand"
@@ -10,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/docker/distribution/registry/auth"
 	_ "github.com/docker/distribution/registry/auth/htpasswd"
@@ -86,7 +85,7 @@ func main() {
 	// TODO: Make configurable
 	issuer.Expiration = 15 * time.Minute
 
-	ctx := dcontext.Background()
+	ctx := context.Background()
 
 	ts := &tokenServer{
 		issuer:           issuer,
@@ -116,23 +115,23 @@ func main() {
 // request context from a base context.
 func handlerWithContext(ctx context.Context, handler func(context.Context, http.ResponseWriter, *http.Request)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := dcontext.WithRequest(ctx, r)
-		logger := dcontext.GetRequestLogger(ctx)
-		ctx = dcontext.WithLogger(ctx, logger)
+		ctx := context.WithRequest(ctx, r)
+		logger := context.GetRequestLogger(ctx)
+		ctx = context.WithLogger(ctx, logger)
 
 		handler(ctx, w, r)
 	})
 }
 
 func handleError(ctx context.Context, err error, w http.ResponseWriter) {
-	ctx, w = dcontext.WithResponseWriter(ctx, w)
+	ctx, w = context.WithResponseWriter(ctx, w)
 
 	if serveErr := errcode.ServeJSON(w, err); serveErr != nil {
-		dcontext.GetResponseLogger(ctx).Errorf("error sending error response: %v", serveErr)
+		context.GetResponseLogger(ctx).Errorf("error sending error response: %v", serveErr)
 		return
 	}
 
-	dcontext.GetResponseLogger(ctx).Info("application error")
+	context.GetResponseLogger(ctx).Info("application error")
 }
 
 var refreshCharacters = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -174,13 +173,13 @@ func filterAccessList(ctx context.Context, scope string, requestedAccessList []a
 	for _, access := range requestedAccessList {
 		if access.Type == "repository" {
 			if !strings.HasPrefix(access.Name, scope) {
-				dcontext.GetLogger(ctx).Debugf("Resource scope not allowed: %s", access.Name)
+				context.GetLogger(ctx).Debugf("Resource scope not allowed: %s", access.Name)
 				continue
 			}
 			if enforceRepoClass {
 				if class, ok := repositoryClassCache[access.Name]; ok {
 					if class != access.Class {
-						dcontext.GetLogger(ctx).Debugf("Different repository class: %q, previously %q", access.Class, class)
+						context.GetLogger(ctx).Debugf("Different repository class: %q, previously %q", access.Class, class)
 						continue
 					}
 				} else if strings.EqualFold(access.Action, "push") {
@@ -189,12 +188,12 @@ func filterAccessList(ctx context.Context, scope string, requestedAccessList []a
 			}
 		} else if access.Type == "registry" {
 			if access.Name != "catalog" {
-				dcontext.GetLogger(ctx).Debugf("Unknown registry resource: %s", access.Name)
+				context.GetLogger(ctx).Debugf("Unknown registry resource: %s", access.Name)
 				continue
 			}
 			// TODO: Limit some actions to "admin" users
 		} else {
-			dcontext.GetLogger(ctx).Debugf("Skipping unsupported resource type: %s", access.Type)
+			context.GetLogger(ctx).Debugf("Skipping unsupported resource type: %s", access.Type)
 			continue
 		}
 		grantedAccessList = append(grantedAccessList, access)
@@ -217,7 +216,7 @@ func (grantedAccess) String() string { return "grantedAccess" }
 // getToken handles authenticating the request and authorizing access to the
 // requested scopes.
 func (ts *tokenServer) getToken(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	dcontext.GetLogger(ctx).Info("getToken")
+	context.GetLogger(ctx).Info("getToken")
 
 	params := r.URL.Query()
 	service := params.Get("service")
@@ -243,30 +242,30 @@ func (ts *tokenServer) getToken(ctx context.Context, w http.ResponseWriter, r *h
 		}
 
 		// Get response context.
-		ctx, w = dcontext.WithResponseWriter(ctx, w)
+		ctx, w = context.WithResponseWriter(ctx, w)
 
 		challenge.SetHeaders(w)
 		handleError(ctx, errcode.ErrorCodeUnauthorized.WithDetail(challenge.Error()), w)
 
-		dcontext.GetResponseLogger(ctx).Info("get token authentication challenge")
+		context.GetResponseLogger(ctx).Info("get token authentication challenge")
 
 		return
 	}
 	ctx = authorizedCtx
 
-	username := dcontext.GetStringValue(ctx, "auth.user.name")
+	username := context.GetStringValue(ctx, "auth.user.name")
 
 	ctx = context.WithValue(ctx, acctSubject{}, username)
-	ctx = dcontext.WithLogger(ctx, dcontext.GetLogger(ctx, acctSubject{}))
+	ctx = context.WithLogger(ctx, context.GetLogger(ctx, acctSubject{}))
 
-	dcontext.GetLogger(ctx).Info("authenticated client")
+	context.GetLogger(ctx).Info("authenticated client")
 
 	ctx = context.WithValue(ctx, requestedAccess{}, requestedAccessList)
-	ctx = dcontext.WithLogger(ctx, dcontext.GetLogger(ctx, requestedAccess{}))
+	ctx = context.WithLogger(ctx, context.GetLogger(ctx, requestedAccess{}))
 
 	grantedAccessList := filterAccessList(ctx, username, requestedAccessList)
 	ctx = context.WithValue(ctx, grantedAccess{}, grantedAccessList)
-	ctx = dcontext.WithLogger(ctx, dcontext.GetLogger(ctx, grantedAccess{}))
+	ctx = context.WithLogger(ctx, context.GetLogger(ctx, grantedAccess{}))
 
 	token, err := ts.issuer.CreateJWT(username, service, grantedAccessList)
 	if err != nil {
@@ -274,7 +273,7 @@ func (ts *tokenServer) getToken(ctx context.Context, w http.ResponseWriter, r *h
 		return
 	}
 
-	dcontext.GetLogger(ctx).Info("authorized client")
+	context.GetLogger(ctx).Info("authorized client")
 
 	response := tokenResponse{
 		Token:     token,
@@ -289,12 +288,12 @@ func (ts *tokenServer) getToken(ctx context.Context, w http.ResponseWriter, r *h
 		}
 	}
 
-	ctx, w = dcontext.WithResponseWriter(ctx, w)
+	ctx, w = context.WithResponseWriter(ctx, w)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 
-	dcontext.GetResponseLogger(ctx).Info("get token complete")
+	context.GetResponseLogger(ctx).Info("get token complete")
 }
 
 type postTokenResponse struct {
@@ -379,16 +378,16 @@ func (ts *tokenServer) postToken(ctx context.Context, w http.ResponseWriter, r *
 	}
 
 	ctx = context.WithValue(ctx, acctSubject{}, subject)
-	ctx = dcontext.WithLogger(ctx, dcontext.GetLogger(ctx, acctSubject{}))
+	ctx = context.WithLogger(ctx, context.GetLogger(ctx, acctSubject{}))
 
-	dcontext.GetLogger(ctx).Info("authenticated client")
+	context.GetLogger(ctx).Info("authenticated client")
 
 	ctx = context.WithValue(ctx, requestedAccess{}, requestedAccessList)
-	ctx = dcontext.WithLogger(ctx, dcontext.GetLogger(ctx, requestedAccess{}))
+	ctx = context.WithLogger(ctx, context.GetLogger(ctx, requestedAccess{}))
 
 	grantedAccessList := filterAccessList(ctx, subject, requestedAccessList)
 	ctx = context.WithValue(ctx, grantedAccess{}, grantedAccessList)
-	ctx = dcontext.WithLogger(ctx, dcontext.GetLogger(ctx, grantedAccess{}))
+	ctx = context.WithLogger(ctx, context.GetLogger(ctx, grantedAccess{}))
 
 	token, err := ts.issuer.CreateJWT(subject, service, grantedAccessList)
 	if err != nil {
@@ -396,7 +395,7 @@ func (ts *tokenServer) postToken(ctx context.Context, w http.ResponseWriter, r *
 		return
 	}
 
-	dcontext.GetLogger(ctx).Info("authorized client")
+	context.GetLogger(ctx).Info("authorized client")
 
 	response := postTokenResponse{
 		Token:     token,
@@ -417,10 +416,10 @@ func (ts *tokenServer) postToken(ctx context.Context, w http.ResponseWriter, r *
 		response.RefreshToken = rToken
 	}
 
-	ctx, w = dcontext.WithResponseWriter(ctx, w)
+	ctx, w = context.WithResponseWriter(ctx, w)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 
-	dcontext.GetResponseLogger(ctx).Info("post token complete")
+	context.GetResponseLogger(ctx).Info("post token complete")
 }

@@ -5,11 +5,11 @@ import (
 	"it-chain/network/protos"
 	"it-chain/network/comm"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/mock"
 )
 
-
 type MockConnectionManager struct{
-
+	mock.Mock
 }
 
 func (mcm MockConnectionManager) SendStream(envelope message.Envelope, errorCallBack comm.OnError, connectionID string){
@@ -37,9 +37,11 @@ type MockCrypto struct{
 }
 
 
+
+
 func TestNewPBFTConsensusService(t *testing.T) {
 	comm:=MockConnectionManager{}
-	NewPBFTConsensusService(comm,)
+	//NewPBFTConsensusService(comm,)
 }
 
 func TestPBFTConsensusService_broadcastMessage(t *testing.T) {

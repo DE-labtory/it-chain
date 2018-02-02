@@ -15,7 +15,7 @@ func TestDeploy_Deploy(t *testing.T) {
 	if err != nil {
 		assert.Fail(t, err.Error())
 	}
-	scs := SmartContractService{"hackurity01", currentDir + "/sample_smartcontract",map[string]SmartContract{}}
+	scs := SmartContractService{"steve-buzzni", currentDir + "/sample_smartcontract",map[string]SmartContract{}}
 	ContractPath := "junbeomlee/bloom"
 
 	deploy_result, err := scs.Deploy(ContractPath)

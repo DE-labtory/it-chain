@@ -1,7 +1,6 @@
 package context
 
 import (
-	"context"
 	"runtime"
 	"time"
 
@@ -37,7 +36,7 @@ import (
 //
 // Notice that the function name is automatically resolved, along with the
 // package and a trace id is emitted that can be linked with parent ids.
-func WithTrace(ctx context.Context) (context.Context, func(format string, a ...interface{})) {
+func WithTrace(ctx Context) (Context, func(format string, a ...interface{})) {
 	if ctx == nil {
 		ctx = Background()
 	}
@@ -70,7 +69,7 @@ func WithTrace(ctx context.Context) (context.Context, func(format string, a ...i
 // also provides fast lookup for the various attributes that are available on
 // the trace.
 type traced struct {
-	context.Context
+	Context
 	id     string
 	parent string
 	start  time.Time
