@@ -6,7 +6,6 @@ import (
 	"sync"
 	"github.com/rs/xid"
 	"it-chain/service/peer"
-	"fmt"
 	"it-chain/common"
 	"it-chain/auth"
 )

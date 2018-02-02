@@ -22,4 +22,13 @@ func TestNewConsensusState(t *testing.T) {
 
 func TestNewConsesnsusMessage(t *testing.T) {
 
+	viewID := "view"
+	block := &blockchain.Block{}
+
+	message:= NewConsesnsusMessage(viewID,1,block,"peer1",PrepareMsg)
+
+	assert.Equal(t,message.ViewID,viewID)
+	assert.Equal(t,message.SequenceID,int64(1))
+	assert.Equal(t,message.MsgType,PrepareMsg)
+	assert.Equal(t,message.Block,block)
 }
