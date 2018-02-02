@@ -1,5 +1,5 @@
-hash: d391cacba1ba593460615e8e41e91fda5138f329d6e59b6466b217cb01f1988d
-updated: 2018-02-01T00:22:36.613865212+09:00
+hash: 9a52dad09cf3361917916a66193b2407630ae01b2c95d8bcba080428526e4f2e
+updated: 2018-02-02T11:04:27.366340987+09:00
 imports:
 - name: docker.io/go-docker
   version: b3f5b5de7bbce0acc6a7fc0a4c2b88db678e262e
@@ -23,7 +23,7 @@ imports:
 - name: github.com/asaskevich/EventBus
   version: 68a521d7cbbb7a859c2608b06342f384b3bd5f5a
 - name: github.com/docker/distribution
-  version: 5cb406d511b7b9163bff9b6439072e4892e5ae3b
+  version: 85b4d46b4f4ab02aa90a172d9f4d3ca8114fe33b
   subpackages:
   - digestset
   - reference
@@ -58,7 +58,6 @@ imports:
   subpackages:
   - hcl/ast
   - hcl/parser
-  - hcl/printer
   - hcl/scanner
   - hcl/strconv
   - hcl/token
@@ -92,6 +91,8 @@ imports:
   version: acdc4509485b587f5e675510c4f2c63e90ff68a8
 - name: github.com/pkg/errors
   version: 30136e27e2ac8d167177e8a583aa4c3fea5be833
+- name: github.com/rs/xid
+  version: 02dd45c33376f85d1064355dc790dcc4850596b1
 - name: github.com/sirupsen/logrus
   version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
 - name: github.com/spf13/afero
@@ -107,7 +108,7 @@ imports:
 - name: github.com/spf13/viper
   version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: github.com/stretchr/testify
-  version: b91bfb9ebec76498946beb6af7c0230c7cc7ba6c
+  version: 12b6f73e6084dad08a7c6e575284b177ecafbc71
   subpackages:
   - assert
 - name: github.com/syndtr/goleveldb
@@ -134,7 +135,7 @@ imports:
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
-  version: 0ed95abb35c445290478a5348a7b38bb154135fd
+  version: b417086c80e91bfa321ef761574721644b8b9f61
   subpackages:
   - context
   - context/ctxhttp
@@ -146,7 +147,7 @@ imports:
   - proxy
   - trace
 - name: golang.org/x/sys
-  version: 3dbebcf8efb6a5011a60c2b4591c1022a759af8a
+  version: 8f27ce8a604014414f8dfffc25cbcde83a3f2216
   subpackages:
   - unix
   - windows

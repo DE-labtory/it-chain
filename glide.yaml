@@ -26,3 +26,5 @@ import:
 - package: github.com/jeevatkm/go-model
   version: v1.0
 - package: docker.io/go-docker
+- package: github.com/rs/xid
+  version: v1.1
