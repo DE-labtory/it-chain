@@ -1,12 +1,11 @@
 package storage
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 
+	"encoding/json"
 	"github.com/docker/distribution"
-	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest"
 	"github.com/docker/distribution/manifest/manifestlist"
 	"github.com/docker/distribution/manifest/schema1"
@@ -54,7 +53,7 @@ type manifestStore struct {
 var _ distribution.ManifestService = &manifestStore{}
 
 func (ms *manifestStore) Exists(ctx context.Context, dgst digest.Digest) (bool, error) {
-	dcontext.GetLogger(ms.ctx).Debug("(*manifestStore).Exists")
+	context.GetLogger(ms.ctx).Debug("(*manifestStore).Exists")
 
 	_, err := ms.blobStore.Stat(ms.ctx, dgst)
 	if err != nil {
@@ -69,7 +68,7 @@ func (ms *manifestStore) Exists(ctx context.Context, dgst digest.Digest) (bool, 
 }
 
 func (ms *manifestStore) Get(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
-	dcontext.GetLogger(ms.ctx).Debug("(*manifestStore).Get")
+	context.GetLogger(ms.ctx).Debug("(*manifestStore).Get")
 
 	// TODO(stevvooe): Need to check descriptor from above to ensure that the
 	// mediatype is as we expect for the manifest store.
@@ -110,7 +109,7 @@ func (ms *manifestStore) Get(ctx context.Context, dgst digest.Digest, options ..
 }
 
 func (ms *manifestStore) Put(ctx context.Context, manifest distribution.Manifest, options ...distribution.ManifestServiceOption) (digest.Digest, error) {
-	dcontext.GetLogger(ms.ctx).Debug("(*manifestStore).Put")
+	context.GetLogger(ms.ctx).Debug("(*manifestStore).Put")
 
 	switch manifest.(type) {
 	case *schema1.SignedManifest:
@@ -126,7 +125,7 @@ func (ms *manifestStore) Put(ctx context.Context, manifest distribution.Manifest
 
 // Delete removes the revision of the specified manifest.
 func (ms *manifestStore) Delete(ctx context.Context, dgst digest.Digest) error {
-	dcontext.GetLogger(ms.ctx).Debug("(*manifestStore).Delete")
+	context.GetLogger(ms.ctx).Debug("(*manifestStore).Delete")
 	return ms.blobStore.Delete(ctx, dgst)
 }
 

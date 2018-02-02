@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"crypto"
 	"crypto/rand"
 	"encoding/base64"
@@ -12,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/auth"
 	"github.com/docker/distribution/registry/auth/token"
 	"github.com/docker/libtrust"
@@ -28,7 +27,7 @@ func ResolveScopeSpecifiers(ctx context.Context, scopeSpecs []string) []auth.Acc
 		parts := strings.SplitN(scopeSpecifier, ":", 3)
 
 		if len(parts) != 3 {
-			dcontext.GetLogger(ctx).Infof("ignoring unsupported scope format %s", scopeSpecifier)
+			context.GetLogger(ctx).Infof("ignoring unsupported scope format %s", scopeSpecifier)
 			continue
 		}
 

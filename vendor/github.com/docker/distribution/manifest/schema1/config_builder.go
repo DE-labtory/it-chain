@@ -1,7 +1,6 @@
 package schema1
 
 import (
-	"context"
 	"crypto/sha512"
 	"encoding/json"
 	"errors"
@@ -9,6 +8,7 @@ import (
 	"time"
 
 	"github.com/docker/distribution"
+	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/libtrust"

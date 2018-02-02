@@ -1,12 +1,11 @@
 package storage
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 
+	"encoding/json"
 	"github.com/docker/distribution"
-	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/manifestlist"
 	"github.com/opencontainers/go-digest"
 )
@@ -21,7 +20,7 @@ type manifestListHandler struct {
 var _ ManifestHandler = &manifestListHandler{}
 
 func (ms *manifestListHandler) Unmarshal(ctx context.Context, dgst digest.Digest, content []byte) (distribution.Manifest, error) {
-	dcontext.GetLogger(ms.ctx).Debug("(*manifestListHandler).Unmarshal")
+	context.GetLogger(ms.ctx).Debug("(*manifestListHandler).Unmarshal")
 
 	var m manifestlist.DeserializedManifestList
 	if err := json.Unmarshal(content, &m); err != nil {
@@ -32,7 +31,7 @@ func (ms *manifestListHandler) Unmarshal(ctx context.Context, dgst digest.Digest
 }
 
 func (ms *manifestListHandler) Put(ctx context.Context, manifestList distribution.Manifest, skipDependencyVerification bool) (digest.Digest, error) {
-	dcontext.GetLogger(ms.ctx).Debug("(*manifestListHandler).Put")
+	context.GetLogger(ms.ctx).Debug("(*manifestListHandler).Put")
 
 	m, ok := manifestList.(*manifestlist.DeserializedManifestList)
 	if !ok {
@@ -50,7 +49,7 @@ func (ms *manifestListHandler) Put(ctx context.Context, manifestList distributio
 
 	revision, err := ms.blobStore.Put(ctx, mt, payload)
 	if err != nil {
-		dcontext.GetLogger(ctx).Errorf("error putting payload into blobstore: %v", err)
+		context.GetLogger(ctx).Errorf("error putting payload into blobstore: %v", err)
 		return "", err
 	}
 
