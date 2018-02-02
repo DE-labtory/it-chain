@@ -7,7 +7,13 @@ import (
 
 func TestGetRepositoryList(t *testing.T) {
 
-	err := GetRepositoryList("yojkim")
+	list, err := GetRepositoryList("yojkim")
 	assert.NoError(t, err)
+	assert.NotNil(t, list)
+
+	t.Log(list)
+
+	_, err = GetRepositoryList("")
+	assert.Error(t, err)
 
 }

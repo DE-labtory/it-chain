@@ -53,42 +53,42 @@ type GithubRequestCreateRepos struct {
 	Description	string		`json:"description"`
 }
 
-type GithubRepositoryListResponse struct {
+type GithubRepoInfoResponse struct {
 	Name		string		`json:"name"`
 	FullName	string		`json:"full_name"`
 }
 
-func GetRepositoryList(userName string) (error) {
+func GetRepositoryList(userName string) ([]GithubRepoInfoResponse, error) {
 
-	var body []GithubRepositoryListResponse
+	var body []GithubRepoInfoResponse
 
 	if userName == "" {
-		return errors.New("Username sholuld not be empty")
+		return nil, errors.New("Username sholuld not be empty")
 	}
 
 	apiURL := GITHUB_API_URL + "users/" + userName + "/repos"
 	res, err := http.Get(apiURL)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	defer res.Body.Close()
 
 	if res.Header.Get("Status") != STATUS_OK {
-		return errors.New("Not Found (in GetRepositoryList)")
+		return nil, errors.New("Not Found (in GetRepositoryList)")
 	}
 
 	bodyBytes, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return errors.New("Error occured with reading process")
+		return nil, errors.New("Error occured with reading process")
 	}
 
 	err = json.Unmarshal(bodyBytes, &body)
 	if err != nil {
-		return errors.New("Unmarshal Error occured")
+		return nil, errors.New("Unmarshal Error occured")
 	}
 
-	return nil
+	return body, nil
 
 }
 

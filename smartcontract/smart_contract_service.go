@@ -31,6 +31,7 @@ func Init() {
 }
 
 func pullAllSmartContracts() (error) {
+	return nil
 }
 
 func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
