@@ -18,7 +18,7 @@ The use of a consensus algorithm is essential because anyone participating in a 
 
 |                               | PoW               | PoS     | PBFT                   |
 | ----------------------------- | ----------------- | ------- | ---------------------- |
-| **Major Blockchain Platform** | Bitcoin, Ethereal | Cardano | Hyperledger fabric 0.6 |
+| **Major Blockchain Platform** | Bitcoin, Ethereum | Cardano | Hyperledger fabric 0.6 |
 
 ### PBFT
 
