@@ -8,7 +8,6 @@ type ConsensusService interface{
 	StartConsensus(block *blockchain.Block)
 
 	StopConsensus()
-
 	//consensus메세지는 모두 이쪽으로 받는다.
 	ReceiveConsensusMessage(consensusMsg *ConsensusMessage)
 }

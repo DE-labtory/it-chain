@@ -11,7 +11,7 @@ var logger = common.GetLogger("peer_service.go")
 
 type PeerServiceImpl struct {
 	peerTable *PeerTable
-	comm comm.ConnectionManager
+	comm      comm.ConnectionManager
 }
 
 func NewPeerServiceImpl(peerTable *PeerTable,comm comm.ConnectionManager) PeerService{

@@ -40,6 +40,7 @@ type ConsensusState struct {
 	ID             string
 	ViewID         string
 	CurrentStage   Stage
+	Block          *blockchain.Block
 	PrepareMsgs    []*ConsensusMessage
 	CommitMsgs     []*ConsensusMessage
 }
@@ -48,25 +49,26 @@ type View struct{
 	ID string
 }
 
-func NewConsensusState(viewID string, consensusID string) *ConsensusState{
+func NewConsensusState(viewID string, consensusID string, block *blockchain.Block, currentStage Stage) *ConsensusState{
 	return &ConsensusState{
 		ID:consensusID,
 		ViewID:viewID,
-		CurrentStage:PrePrepared,
+		CurrentStage:currentStage,
+		Block: block,
 		PrepareMsgs: make([]*ConsensusMessage,0),
 		CommitMsgs: make([]*ConsensusMessage,0),
 	}
 }
 
-func NewConsesnsusMessage(viewID string,sequenceID int64, block *blockchain.Block) ConsensusMessage{
+func NewConsesnsusMessage(viewID string,sequenceID int64, block *blockchain.Block,peerID string, msgType MsgType) ConsensusMessage{
+
 	return ConsensusMessage{
 		ConsensusID: "1",
 		ViewID: viewID,
 		SequenceID: sequenceID,
-		Stage: PrePrepared,
-		MsgType:PreprepareMsg,
+		MsgType:msgType,
 		TimeStamp: time.Now(),
-		PeerID:"0",
+		PeerID:peerID,
 		Block: block,
 	}
 }
