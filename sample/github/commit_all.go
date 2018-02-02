@@ -10,6 +10,7 @@ func CommitAll(dir string, comment string) (error) {
 	cmd_add.Dir = dir
 	error := cmd_add.Run()
 	if error != nil {
+		println("error in add")
 		return error
 	}
 
@@ -17,6 +18,7 @@ func CommitAll(dir string, comment string) (error) {
 	cmd_commit.Dir = dir
 	error = cmd_commit.Run()
 	if error != nil {
+		println("error in commit")
 		return error
 	}
 
@@ -24,7 +26,7 @@ func CommitAll(dir string, comment string) (error) {
 }
 
 func main() {
-	err := CommitAll("/Users/hackurity/Documents/it-chain/test/bloom2", "test")
+	err := CommitAll("/Users/hackurity/go/src/it-chain/smartcontract/sample_smartcontract/junbeomlee_bloom/bloom", "test")
 	if err != nil {
 		panic(err)
 	}

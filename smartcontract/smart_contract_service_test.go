@@ -7,10 +7,15 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"path/filepath"
 )
 
 func TestDeploy_Deploy(t *testing.T) {
-	scs := SmartContractService{"hackurity01", map[string]SmartContract{}}
+	currentDir, err := filepath.Abs("./")
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+	scs := SmartContractService{"hackurity01", currentDir + "/sample_smartcontract",map[string]SmartContract{}}
 	ContractPath := "junbeomlee/bloom"
 
 	deploy_result, err := scs.Deploy(ContractPath)
@@ -25,6 +30,10 @@ func TestDeploy_Deploy(t *testing.T) {
 }
 
 func TestSmartContractService_Query(t *testing.T) {
+	currentDir, err := filepath.Abs("./")
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
 	tx := blockchain.CreateNewTransaction(
 		strconv.Itoa(1),
 		strconv.Itoa(1),
@@ -39,6 +48,7 @@ func TestSmartContractService_Query(t *testing.T) {
 	)
 	scs := SmartContractService{
 		"hackurity01",
+		currentDir + "/sample_smartcontract",
 		map[string]SmartContract{
 			"abc": SmartContract{
 				ReposName:         "bloom",

@@ -14,7 +14,7 @@ type PeerServiceImpl struct {
 	comm comm.ConnectionManager
 }
 
-func NewPeerServiceImpl(peerTable *PeerTable,comm comm.ConnectionManager) *PeerServiceImpl{
+func NewPeerServiceImpl(peerTable *PeerTable,comm comm.ConnectionManager) PeerService{
 
 	return &PeerServiceImpl{
 		peerTable: peerTable,
@@ -42,11 +42,10 @@ func (ps *PeerServiceImpl) PushPeerTable(peerIDs []string){
 //주기적으로 peerTable의 peerlist에게 peerTable을 전송한다.
 //todo signing이 들어가야함
 //todo struct to grpc proto의 변환 문제
-func (ps *PeerServiceImpl) Handle(interface{}){
+func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
 	logger.Println("pushing peer table")
 
 	peerInfos, err := ps.peerTable.SelectRandomPeerInfos(0.5)
-
 
 	if err != nil{
 		logger.Println("no peer exist")
@@ -56,9 +55,7 @@ func (ps *PeerServiceImpl) Handle(interface{}){
 	logger.Println("pushing peerTable:",ps.peerTable)
 
 	ps.peerTable.IncrementHeartBeat()
-
 	message := &pb.Message{}
-	//message.Content = pb.PeerTableToTable(*ps.peerTable)
 
 	envelope := pb.Envelope{}
 	envelope.Payload, err = proto.Marshal(message)
@@ -75,6 +72,7 @@ func (ps *PeerServiceImpl) Handle(interface{}){
 		ps.comm.SendStream(envelope,errorCallBack, peerInfo.PeerID)
 	}
 }
+
 func (ps *PeerServiceImpl) UpdatePeerTable(peerTable PeerTable){
 
 	ps.peerTable.Lock()
@@ -82,7 +80,6 @@ func (ps *PeerServiceImpl) UpdatePeerTable(peerTable PeerTable){
 
 	for id, peerInfo := range peerTable.PeerMap{
 		peer,ok := ps.peerTable.PeerMap[id]
-
 		if ok{
 			peer.Update(peerInfo)
 		}else{
@@ -114,7 +111,7 @@ func (ps *PeerServiceImpl) AddPeerInfo(peerInfo *PeerInfo){
 	ps.peerTable.AddPeerInfo(peerInfo)
 }
 
-func (ps *PeerServiceImpl) RequestPeerInfo(ip string) *PeerInfo{
+func (ps *PeerServiceImpl) RequestPeerInfo(host string, port string) *PeerInfo{
 
 	return nil
 }
