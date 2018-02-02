@@ -64,6 +64,10 @@ func (h *DBHandle) WriteBatch(KVs map[string][]byte, sync bool) error {
 	return h.db.WriteBatch(batch, sync)
 }
 
+func (h *DBHandle) Snapshot() (map[string][]byte, error) {
+	return h.db.Snapshot()
+}
+
 func dbKey(dbName string, key []byte) []byte {
 	dbName = dbName + "_"
 	return append([]byte(dbName), key...)
