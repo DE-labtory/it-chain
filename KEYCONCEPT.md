@@ -11,6 +11,15 @@ It describes the important concept of blockchains.
 ## Blockchain
 
 ## SmartContract
+Smart contracts are computer protocols that can facilitate, verify or enforce the negotiation or performance of a contract or make a contractual clause unnecessary. They usually have a User Interface and can emulate the logic of contractual clauses. They can execute the terms of a contract in an automated way. They can make contractual clauses partially or fully self-executing and self-enforcing.
+Smart contracts are implemented using blockchain. Once a smart contract is created, it is placed in a blockchain.
+
+### Advantages of Smart Contracts
+- Smart Contracts eliminate the need of any intermediary like a broker, lawyer etc.
+- The documents are encrypted in blockchain, which makes it much more secure. Also, the involved parties can be anonymous and maintain privacy.
+- Usually a user has to spend lots of time for paperwork or to manually process documents. Smart contracts can automate the whole process, thereby saving time.
+- As smart contracts eliminate the need of intermediaries, it saves costs involved in the whole process.
+- As smart contracts are executed in an automated manner, it helps in avoiding errors that result from manual execution.
 
 ## Consensus
 

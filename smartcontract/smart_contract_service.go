@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	GITHUB_TOKEN string = "20fc6f01c0cab8f97ac3e8433a946c8b869702cd"
+	GITHUB_TOKEN string = "31d8f4c1bfc6906806b9a77803087b5b671fac2d"
 
 )
 
@@ -131,7 +131,7 @@ func (scs *SmartContractService) Query(transaction blockchain.Transaction) (erro
 		return errors.New("An error occured while archiving file!")
 	}
 
-	PullAndCopyAndRunDocker("docker.io/library/node", tmpDir+"/"+transaction.TxData.ContractID+".tar")
+	PullAndCopyAndRunDocker("docker.io/library/golang:rc-alpine", tmpDir+"/"+transaction.TxData.ContractID+".tar")
 
 	return nil
 }
