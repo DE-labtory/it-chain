@@ -43,6 +43,9 @@ type GithubResponse struct {
 type GithubResponseCommits struct {
 	Message	  string
 	Sha       string		`json:"sha"`
+	Author struct {
+		Login	string		`json:"login"`
+	}						`json:"author"`
 	Committer struct {
 		Login	string		`json:"login"`
 	}						`json:"committer"`
@@ -63,7 +66,7 @@ func GetRepositoryList(userName string) ([]GithubRepoInfoResponse, error) {
 	var body []GithubRepoInfoResponse
 
 	if userName == "" {
-		return nil, errors.New("Username sholuld not be empty")
+		return nil, errors.New("Username sholuld not be blank")
 	}
 
 	apiURL := GITHUB_API_URL + "users/" + userName + "/repos"
@@ -190,6 +193,17 @@ func ForkRepos(repos_path string, token string) (GithubResponse, error) {
 	return body, nil
 }
 
+func CloneReposWithName(repos_path string, dir string, dirName string) (error) {
+	cmd := exec.Command("git", "clone", GITHUB_DEFAULT_URL + repos_path + ".git", dirName)
+	cmd.Dir = dir
+	error := cmd.Run()
+	if error != nil {
+		return error
+	}
+
+	return nil
+}
+
 func CloneRepos(repos_path string, dir string) (error) {
 	cmd := exec.Command("git", "clone", GITHUB_DEFAULT_URL + repos_path + ".git")
 	cmd.Dir = dir
@@ -203,6 +217,17 @@ func CloneRepos(repos_path string, dir string) (error) {
 
 func ChangeRemote(repos_path string, dir string) (error) {
 	cmd := exec.Command("git", "remote", "set-url", "origin", GITHUB_DEFAULT_URL + repos_path + ".git")
+	cmd.Dir = dir
+	error := cmd.Run()
+	if error != nil {
+		return error
+	}
+
+	return nil
+}
+
+func ResetWithSHA(dir string, sha string) (error) {
+	cmd := exec.Command("git", "reset", "--hard", sha)
 	cmd.Dir = dir
 	error := cmd.Run()
 	if error != nil {
