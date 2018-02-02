@@ -62,7 +62,7 @@ func (s *MessageServer) Ping(ctx context.Context, in *pb.Empty) (*pb.Empty, erro
 
 func SetPeer(ipAddress string, peerID string,port string, bootport string,myID string){
 
-	peer1 := &domain.PeerInfo{
+	peer1 := &peer.PeerInfo{
 		Port: port,
 		PeerID: myID,
 		IpAddress: "127.0.0.1",
@@ -70,7 +70,7 @@ func SetPeer(ipAddress string, peerID string,port string, bootport string,myID s
 		TimeStamp: time.Now(),
 	}
 
-	peerTable,err := domain.NewPeerTable(peer1)
+	peerTable,err := peer.NewPeerTable(peer1)
 
 	if err != nil{
 
@@ -87,7 +87,7 @@ func SetPeer(ipAddress string, peerID string,port string, bootport string,myID s
 	peerService := peer.NewPeerServiceImpl(peerTable,comm)
 
 	if ipAddress != "" && peerID != "" && bootport != ""{
-		peer2 := &domain.PeerInfo{
+		peer2 := &peer.PeerInfo{
 			Port: bootport,
 			PeerID: peerID,
 			IpAddress: ipAddress,
@@ -99,7 +99,7 @@ func SetPeer(ipAddress string, peerID string,port string, bootport string,myID s
 		logger.Println(peerService.GetPeerTable())
 	}
 
-	eventBatcher := batch.NewGRPCMessageBatcher(time.Second*5,peerService,false)
+	eventBatcher := batch.NewGRPCMessageBatcher(time.Second*5,peerService.BroadCastPeerTable,false)
 
 	eventBatcher.Add("push peerTable")
 

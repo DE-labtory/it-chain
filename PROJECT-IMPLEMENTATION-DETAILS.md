@@ -15,6 +15,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 3. [Communication](#Communication)
 4. [Crypto](#Crypto)
 5. [Database](#DB)
+6. [Consensus](#Consesnsus)
 
 
 
@@ -38,7 +39,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 - MerkleTree
 
   The Merkle Tree consists of a binary tree, and the leaf node is the hash value of the transactions in the transaction list of the block. The root node is a hash value representing the entire transaction that hashes the transaction hash value pair from the leaf node to the end. 
- Merkle Tree is able to check in constant time whether transaction information has changed through merkle tree root hash. In addition, Merkle Tree can effectively manage the validity of all transactions in the ledger because the block header has the Merkle Tree root hash value and the next block has hash value from hashed the block header. And since Merkle Tree can provide the Merkle Path (the Sibling node to the root node of tx), it has the advantage of being able to check the validity of a particular transaction at log time.
+   Merkle Tree is able to check in constant time whether transaction information has changed through merkle tree root hash. In addition, Merkle Tree can effectively manage the validity of all transactions in the ledger because the block header has the Merkle Tree root hash value and the next block has hash value from hashed the block header. And since Merkle Tree can provide the Merkle Path (the Sibling node to the root node of tx), it has the advantage of being able to check the validity of a particular transaction at log time.
 
   ![blockchain-implementation-merkletree](./images/blockchain-implementation-merkletree.png)
 
@@ -201,3 +202,19 @@ Block's metadata is saved in leveldb or other key-value database. Block body is 
 ### Author
 
 [@luke9407](https://github.com/luke9407)
+
+
+
+## Consensus <a name="Consensus"></a>
+
+![consensus-implementation-messagetype](./images/consensus-implementation-messagetype.png)
+
+
+
+![consensus-implementation-seq](./images/consensus-implementation-seq.png)
+
+
+
+### Author
+
+[@Junbeomlee](https://github.com/junbeomlee)

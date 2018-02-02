@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package message;
 
+import "network/protos/gossip.proto"
+
 service MessageService{
 
     rpc Stream (stream Envelope) returns (stream Envelope) {}
