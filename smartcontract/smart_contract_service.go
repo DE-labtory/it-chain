@@ -15,7 +15,7 @@ const (
 )
 
 // temp
-const AUTHENTICATED_GIT = "gunddol"
+const AUTHENTICATED_GIT = "emperorhan"
 
 type SmartContract struct {
 	ReposName string
