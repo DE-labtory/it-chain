@@ -10,8 +10,14 @@ import (
 )
 
 const (
-	GITHUB_API_URL = "https://api.github.com/"
-	GITHUB_DEFAULT_URL = "https://github.com/"
+	GITHUB_API_URL 		= "https://api.github.com/"
+	GITHUB_DEFAULT_URL 	= "https://github.com/"
+)
+
+const (
+	STATUS_OK 			= "200 OK"
+	STATUS_CREATED 		= "201 Created"
+	STATUS_ACCEPTED 	= "202 Accepted"
 )
 
 type GithubResponse struct {
@@ -47,6 +53,45 @@ type GithubRequestCreateRepos struct {
 	Description	string		`json:"description"`
 }
 
+type GithubRepositoryListResponse struct {
+	Name		string		`json:"name"`
+	FullName	string		`json:"full_name"`
+}
+
+func GetRepositoryList(userName string) (error) {
+
+	var body []GithubRepositoryListResponse
+
+	if userName == "" {
+		return errors.New("Username sholuld not be empty")
+	}
+
+	apiURL := GITHUB_API_URL + "users/" + userName + "/repos"
+	res, err := http.Get(apiURL)
+	if err != nil {
+		return err
+	}
+
+	defer res.Body.Close()
+
+	if res.Header.Get("Status") != STATUS_OK {
+		return errors.New("Not Found (in GetRepositoryList)")
+	}
+
+	bodyBytes, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return errors.New("Error occured with reading process")
+	}
+
+	err = json.Unmarshal(bodyBytes, &body)
+	if err != nil {
+		return errors.New("Unmarshal Error occured")
+	}
+
+	return nil
+
+}
+
 func GetRepos(repos_path string) (GithubResponse, error) {
 	var body = GithubResponse{}
 	api_url := GITHUB_API_URL + "repos/" + repos_path
@@ -57,7 +102,7 @@ func GetRepos(repos_path string) (GithubResponse, error) {
 	}
 	defer res.Body.Close()
 
-	if res.Header.Get("Status") != "200 OK" {
+	if res.Header.Get("Status") != STATUS_OK {
 		return body, errors.New("Not Found (in GetRepos)")
 	}
 
@@ -80,7 +125,7 @@ func GetReposCommits(repos_path string) ([]GithubResponseCommits, error) {
 	}
 	defer res.Body.Close()
 
-	if res.Header.Get("Status") != "200 OK" {
+	if res.Header.Get("Status") != STATUS_OK {
 		return body, errors.New("Not Found (in GetReposCommits)")
 	}
 
@@ -109,7 +154,7 @@ func CreateRepos(repos_name string, token string) (GithubResponse, error) {
 	}
 	defer res.Body.Close()
 
-	if res.Header.Get("Status") != "201 Created" {
+	if res.Header.Get("Status") != STATUS_CREATED {
 		return body, errors.New("Not Found (in CreateRepos)")
 	}
 
@@ -132,7 +177,7 @@ func ForkRepos(repos_path string, token string) (GithubResponse, error) {
 	}
 	defer res.Body.Close()
 
-	if res.Header.Get("Status") != "202 Accepted" {
+	if res.Header.Get("Status") != STATUS_ACCEPTED {
 		return body, errors.New("Post Error")
 	}
 
