@@ -9,6 +9,11 @@ import (
 	"os/exec"
 )
 
+const (
+	GITHUB_API_URL = "https://api.github.com/"
+	GITHUB_DEFAULT_URL = "https://github.com/"
+)
+
 type GithubResponse struct {
 	Message	  string
 	Id        int			`json:"id"`
@@ -44,7 +49,7 @@ type GithubRequestCreateRepos struct {
 
 func GetRepos(repos_path string) (GithubResponse, error) {
 	var body = GithubResponse{}
-	api_url := "https://api.github.com/repos/" + repos_path
+	api_url := GITHUB_API_URL + "repos/" + repos_path
 
 	res, err := http.Get(api_url)
 	if err != nil {
@@ -67,7 +72,7 @@ func GetRepos(repos_path string) (GithubResponse, error) {
 
 func GetReposCommits(repos_path string) ([]GithubResponseCommits, error) {
 	var body []GithubResponseCommits
-	api_url := "https://api.github.com/repos/" + repos_path + "/commits"
+	api_url := GITHUB_API_URL + "repos/" + repos_path + "/commits"
 
 	res, err := http.Get(api_url)
 	if err != nil {
@@ -90,7 +95,7 @@ func GetReposCommits(repos_path string) ([]GithubResponseCommits, error) {
 
 func CreateRepos(repos_name string, token string) (GithubResponse, error) {
 	var body = GithubResponse{}
-	api_url := "https://api.github.com/user/repos?access_token=" + token
+	api_url := GITHUB_API_URL + "user/repos?access_token=" + token
 
 	param := GithubRequestCreateRepos{repos_name, repos_name}
 	param_bytes, err := json.Marshal(param)
@@ -119,7 +124,7 @@ func CreateRepos(repos_name string, token string) (GithubResponse, error) {
 
 func ForkRepos(repos_path string, token string) (GithubResponse, error) {
 	var body = GithubResponse{}
-	api_url := "https://api.github.com/repos/" + repos_path + "/forks?access_token=" + token
+	api_url := GITHUB_API_URL + "repos/" + repos_path + "/forks?access_token=" + token
 
 	res, err := http.Post(api_url, "", bytes.NewBufferString(""))
 	if err != nil {
@@ -141,7 +146,7 @@ func ForkRepos(repos_path string, token string) (GithubResponse, error) {
 }
 
 func CloneRepos(repos_path string, dir string) (error) {
-	cmd := exec.Command("git", "clone", "https://github.com/"+repos_path+".git")
+	cmd := exec.Command("git", "clone", GITHUB_DEFAULT_URL + repos_path + ".git")
 	cmd.Dir = dir
 	error := cmd.Run()
 	if error != nil {
@@ -152,7 +157,7 @@ func CloneRepos(repos_path string, dir string) (error) {
 }
 
 func ChangeRemote(repos_path string, dir string) (error) {
-	cmd := exec.Command("git", "remote", "set-url", "origin", "https://github.com/"+repos_path+".git")
+	cmd := exec.Command("git", "remote", "set-url", "origin", GITHUB_DEFAULT_URL + repos_path + ".git")
 	cmd.Dir = dir
 	error := cmd.Run()
 	if error != nil {
