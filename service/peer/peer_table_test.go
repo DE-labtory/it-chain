@@ -141,6 +141,49 @@ func TestPeerTable_string(t *testing.T){
 	fmt.Println(peerTable)
 }
 
+func TestPeerTable_GetPeerList(t *testing.T) {
+	peerTable := MockCreateNewPeerTable("test1")
+
+	peerInfo2 := MockCreateNewPeerInfo("test2")
+	peerInfo2.HeartBeat = 3
+	peerInfo2.IpAddress = "127.0.0.2"
+	peerInfo2.Port = "7070"
+	peerTable.AddPeerInfo(peerInfo2)
+
+	peerInfo3 := MockCreateNewPeerInfo("test3")
+	peerInfo3.HeartBeat = 3
+	peerInfo3.IpAddress = "127.0.0.2"
+	peerInfo3.Port = "7070"
+	peerTable.AddPeerInfo(peerInfo3)
+
+	peerInfo4 := MockCreateNewPeerInfo("test4")
+	peerInfo4.HeartBeat = 3
+	peerInfo4.IpAddress = "127.0.0.2"
+	peerInfo4.Port = "7070"
+	peerTable.AddPeerInfo(peerInfo4)
+
+
+	peerList := peerTable.GetPeerList()
+
+	assert.Equal(t,peerList[0].PeerID,"test2")
+	assert.Equal(t,peerList[1].PeerID,"test3")
+	assert.Equal(t,peerList[2].PeerID,"test4")
+}
+
+func TestPeerTable_GetMyInfo(t *testing.T) {
+	peerTable := MockCreateNewPeerTable("test1")
+
+	peerInfo2 := MockCreateNewPeerInfo("test2")
+	peerInfo2.HeartBeat = 3
+	peerInfo2.IpAddress = "127.0.0.2"
+	peerInfo2.Port = "7070"
+	peerTable.AddPeerInfo(peerInfo2)
+
+	myInfo := peerTable.GetMyInfo()
+
+	assert.Equal(t,myInfo.PeerID,"test1")
+}
+
 ////todo for문 돌면서 addpeer에 대한 검증이 필요함
 //func TestGossipTable_UpdateGossipTable(t *testing.T) {
 //

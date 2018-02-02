@@ -65,3 +65,7 @@
 
 [[constraint]]
   name = "gopkg.in/jeevatkm/go-model.v1"
+
+[[constraint]]
+  name = "github.com/golang/mock"
+  version = "1.0.0"
