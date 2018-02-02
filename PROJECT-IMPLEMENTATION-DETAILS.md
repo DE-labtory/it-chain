@@ -184,7 +184,7 @@ Blocks are totally stored in key-value storage leveldb.
 | DB name      | Key            | Value                  | Description                              |
 | ------------ | -------------- | ---------------------- | ---------------------------------------- |
 | block_hash   | BlockHash      | Serialized Block       | Save block using blockhash               |
-| block_number | BlockNumber    | Serialized Block       | Save block using block's number          |
+| block_number | BlockNumber    | Block Hash               | Save block using block's number          |
 | transaction  | Transaction ID | Serialized Transaction | Save transactions                        |
 | util         | Predefined Key | Depends on Key         | DB for multiple usage                    |
 
