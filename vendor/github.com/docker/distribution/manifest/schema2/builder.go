@@ -1,9 +1,8 @@
 package schema2
 
 import (
-	"context"
-
 	"github.com/docker/distribution"
+	"github.com/docker/distribution/context"
 	"github.com/opencontainers/go-digest"
 )
 

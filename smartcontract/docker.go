@@ -89,7 +89,7 @@ func PullAndCopyAndRunDocker(imageName string, tarPath string) *docker.Client{
 
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: image,
-		Cmd: []string{"/bin/bash"},
+		Cmd: []string{"touch", "/home/kkk"},
 		Tty: true,
 	}, nil, nil, "")
 	if err != nil {
@@ -102,8 +102,6 @@ func PullAndCopyAndRunDocker(imageName string, tarPath string) *docker.Client{
 	}
 
 	fmt.Println(file)
-
-
 
 	err = cli.CopyToContainer(ctx, resp.ID, "/home", bytes.NewReader(file), types.CopyToContainerOptions{
 		AllowOverwriteDirWithFile: false,

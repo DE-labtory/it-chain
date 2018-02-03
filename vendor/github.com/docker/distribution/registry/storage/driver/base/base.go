@@ -38,10 +38,9 @@
 package base
 
 import (
-	"context"
 	"io"
 
-	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/context"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 )
 
@@ -80,7 +79,7 @@ func (base *Base) setDriverName(e error) error {
 
 // GetContent wraps GetContent of underlying storage driver.
 func (base *Base) GetContent(ctx context.Context, path string) ([]byte, error) {
-	ctx, done := dcontext.WithTrace(ctx)
+	ctx, done := context.WithTrace(ctx)
 	defer done("%s.GetContent(%q)", base.Name(), path)
 
 	if !storagedriver.PathRegexp.MatchString(path) {
@@ -93,7 +92,7 @@ func (base *Base) GetContent(ctx context.Context, path string) ([]byte, error) {
 
 // PutContent wraps PutContent of underlying storage driver.
 func (base *Base) PutContent(ctx context.Context, path string, content []byte) error {
-	ctx, done := dcontext.WithTrace(ctx)
+	ctx, done := context.WithTrace(ctx)
 	defer done("%s.PutContent(%q)", base.Name(), path)
 
 	if !storagedriver.PathRegexp.MatchString(path) {
@@ -105,7 +104,7 @@ func (base *Base) PutContent(ctx context.Context, path string, content []byte) e
 
 // Reader wraps Reader of underlying storage driver.
 func (base *Base) Reader(ctx context.Context, path string, offset int64) (io.ReadCloser, error) {
-	ctx, done := dcontext.WithTrace(ctx)
+	ctx, done := context.WithTrace(ctx)
 	defer done("%s.Reader(%q, %d)", base.Name(), path, offset)
 
 	if offset < 0 {
@@ -122,7 +121,7 @@ func (base *Base) Reader(ctx context.Context, path string, offset int64) (io.Rea
 
 // Writer wraps Writer of underlying storage driver.
 func (base *Base) Writer(ctx context.Context, path string, append bool) (storagedriver.FileWriter, error) {
-	ctx, done := dcontext.WithTrace(ctx)
+	ctx, done := context.WithTrace(ctx)
 	defer done("%s.Writer(%q, %v)", base.Name(), path, append)
 
 	if !storagedriver.PathRegexp.MatchString(path) {
@@ -135,7 +134,7 @@ func (base *Base) Writer(ctx context.Context, path string, append bool) (storage
 
 // Stat wraps Stat of underlying storage driver.
 func (base *Base) Stat(ctx context.Context, path string) (storagedriver.FileInfo, error) {
-	ctx, done := dcontext.WithTrace(ctx)
+	ctx, done := context.WithTrace(ctx)
 	defer done("%s.Stat(%q)", base.Name(), path)
 
 	if !storagedriver.PathRegexp.MatchString(path) && path != "/" {
@@ -148,7 +147,7 @@ func (base *Base) Stat(ctx context.Context, path string) (storagedriver.FileInfo
 
 // List wraps List of underlying storage driver.
 func (base *Base) List(ctx context.Context, path string) ([]string, error) {
-	ctx, done := dcontext.WithTrace(ctx)
+	ctx, done := context.WithTrace(ctx)
 	defer done("%s.List(%q)", base.Name(), path)
 
 	if !storagedriver.PathRegexp.MatchString(path) && path != "/" {
@@ -161,7 +160,7 @@ func (base *Base) List(ctx context.Context, path string) ([]string, error) {
 
 // Move wraps Move of underlying storage driver.
 func (base *Base) Move(ctx context.Context, sourcePath string, destPath string) error {
-	ctx, done := dcontext.WithTrace(ctx)
+	ctx, done := context.WithTrace(ctx)
 	defer done("%s.Move(%q, %q", base.Name(), sourcePath, destPath)
 
 	if !storagedriver.PathRegexp.MatchString(sourcePath) {
@@ -175,7 +174,7 @@ func (base *Base) Move(ctx context.Context, sourcePath string, destPath string) 
 
 // Delete wraps Delete of underlying storage driver.
 func (base *Base) Delete(ctx context.Context, path string) error {
-	ctx, done := dcontext.WithTrace(ctx)
+	ctx, done := context.WithTrace(ctx)
 	defer done("%s.Delete(%q)", base.Name(), path)
 
 	if !storagedriver.PathRegexp.MatchString(path) {
@@ -187,7 +186,7 @@ func (base *Base) Delete(ctx context.Context, path string) error {
 
 // URLFor wraps URLFor of underlying storage driver.
 func (base *Base) URLFor(ctx context.Context, path string, options map[string]interface{}) (string, error) {
-	ctx, done := dcontext.WithTrace(ctx)
+	ctx, done := context.WithTrace(ctx)
 	defer done("%s.URLFor(%q)", base.Name(), path)
 
 	if !storagedriver.PathRegexp.MatchString(path) {
@@ -196,16 +195,4 @@ func (base *Base) URLFor(ctx context.Context, path string, options map[string]in
 
 	str, e := base.StorageDriver.URLFor(ctx, path, options)
 	return str, base.setDriverName(e)
-}
-
-// Walk wraps Walk of underlying storage driver.
-func (base *Base) Walk(ctx context.Context, path string, f storagedriver.WalkFn) error {
-	ctx, done := dcontext.WithTrace(ctx)
-	defer done("%s.Walk(%q)", base.Name(), path)
-
-	if !storagedriver.PathRegexp.MatchString(path) && path != "/" {
-		return storagedriver.InvalidPathError{Path: path, DriverName: base.StorageDriver.Name()}
-	}
-
-	return base.setDriverName(base.StorageDriver.Walk(ctx, path, f))
 }

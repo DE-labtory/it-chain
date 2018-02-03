@@ -8,12 +8,11 @@
 package silly
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strings"
 
-	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/auth"
 )
 
@@ -44,7 +43,7 @@ func newAccessController(options map[string]interface{}) (auth.AccessController,
 // Authorized simply checks for the existence of the authorization header,
 // responding with a bearer challenge if it doesn't exist.
 func (ac *accessController) Authorized(ctx context.Context, accessRecords ...auth.Access) (context.Context, error) {
-	req, err := dcontext.GetRequest(ctx)
+	req, err := context.GetRequest(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -66,11 +65,7 @@ func (ac *accessController) Authorized(ctx context.Context, accessRecords ...aut
 		return nil, &challenge
 	}
 
-	ctx = auth.WithUser(ctx, auth.UserInfo{Name: "silly"})
-	ctx = dcontext.WithLogger(ctx, dcontext.GetLogger(ctx, auth.UserNameKey, auth.UserKey))
-
-	return ctx, nil
-
+	return auth.WithUser(ctx, auth.UserInfo{Name: "silly"}), nil
 }
 
 type challenge struct {

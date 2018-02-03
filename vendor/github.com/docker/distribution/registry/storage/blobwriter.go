@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -9,7 +8,7 @@ import (
 	"time"
 
 	"github.com/docker/distribution"
-	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/context"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	"github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"
@@ -57,7 +56,7 @@ func (bw *blobWriter) StartedAt() time.Time {
 // Commit marks the upload as completed, returning a valid descriptor. The
 // final size and digest are checked against the first descriptor provided.
 func (bw *blobWriter) Commit(ctx context.Context, desc distribution.Descriptor) (distribution.Descriptor, error) {
-	dcontext.GetLogger(ctx).Debug("(*blobWriter).Commit")
+	context.GetLogger(ctx).Debug("(*blobWriter).Commit")
 
 	if err := bw.fileWriter.Commit(); err != nil {
 		return distribution.Descriptor{}, err
@@ -95,16 +94,20 @@ func (bw *blobWriter) Commit(ctx context.Context, desc distribution.Descriptor) 
 // Cancel the blob upload process, releasing any resources associated with
 // the writer and canceling the operation.
 func (bw *blobWriter) Cancel(ctx context.Context) error {
-	dcontext.GetLogger(ctx).Debug("(*blobWriter).Cancel")
+	context.GetLogger(ctx).Debug("(*blobWriter).Cancel")
 	if err := bw.fileWriter.Cancel(); err != nil {
 		return err
 	}
 
 	if err := bw.Close(); err != nil {
-		dcontext.GetLogger(ctx).Errorf("error closing blobwriter: %s", err)
+		context.GetLogger(ctx).Errorf("error closing blobwriter: %s", err)
 	}
 
-	return bw.removeResources(ctx)
+	if err := bw.removeResources(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (bw *blobWriter) Size() int64 {
@@ -258,7 +261,7 @@ func (bw *blobWriter) validateBlob(ctx context.Context, desc distribution.Descri
 	}
 
 	if !verified {
-		dcontext.GetLoggerWithFields(ctx,
+		context.GetLoggerWithFields(ctx,
 			map[interface{}]interface{}{
 				"canonical": canonical,
 				"provided":  desc.Digest,
@@ -362,7 +365,7 @@ func (bw *blobWriter) removeResources(ctx context.Context) error {
 			// This should be uncommon enough such that returning an error
 			// should be okay. At this point, the upload should be mostly
 			// complete, but perhaps the backend became unaccessible.
-			dcontext.GetLogger(ctx).Errorf("unable to delete layer upload resources %q: %v", dirPath, err)
+			context.GetLogger(ctx).Errorf("unable to delete layer upload resources %q: %v", dirPath, err)
 			return err
 		}
 	}
@@ -380,7 +383,7 @@ func (bw *blobWriter) Reader() (io.ReadCloser, error) {
 		}
 		switch err.(type) {
 		case storagedriver.PathNotFoundError:
-			dcontext.GetLogger(bw.ctx).Debugf("Nothing found on try %d, sleeping...", try)
+			context.GetLogger(bw.ctx).Debugf("Nothing found on try %d, sleeping...", try)
 			time.Sleep(1 * time.Second)
 			try++
 		default:
