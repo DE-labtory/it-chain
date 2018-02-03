@@ -1,6 +1,8 @@
 package message
 
-import "it-chain/service/peer/event"
+import (
+	"it-chain/network"
+)
 
 //
 //import (
@@ -85,7 +87,7 @@ import "it-chain/service/peer/event"
 func (message *Message) GetMessageType() string {
 
 	if message.GetPeerTable() != nil{
-		return event.UpdatePeerTable
+		return network.UpdatePeerTable
 	}
 
 	return "no"
