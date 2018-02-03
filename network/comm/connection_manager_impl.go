@@ -78,7 +78,7 @@ func (comm *ConnectionManagerImpl) SendStream(data interface{}, errorCallBack On
 	envelope.Payload = payload
 	envelope.Pubkey = pub.SKI()
 	envelope.Signature = sig
-
+	
 	conn, ok := comm.connectionMap[connectionID]
 
 	if ok{
