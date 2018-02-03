@@ -4,18 +4,22 @@ import (
 	pb "it-chain/network/protos"
 	"sync"
 	"it-chain/common"
+	"it-chain/auth"
+	"encoding/json"
 )
 
 var commLogger = common.GetLogger("connection_manager_impl.go")
 
-type ConnectionManagerImpl struct{
+type ConnectionManagerImpl struct {
 	connectionMap map[string]Connection
+	crpyto        auth.Crypto
 	sync.RWMutex
 }
 
-func NewConnectionManagerImpl() *ConnectionManagerImpl{
+func NewConnectionManagerImpl(crpyto auth.Crypto) *ConnectionManagerImpl{
 	return &ConnectionManagerImpl{
 		connectionMap: make(map[string]Connection),
+		crpyto: crpyto,
 	}
 }
 
@@ -49,12 +53,36 @@ func (comm *ConnectionManagerImpl) CreateStreamConn(connectionID string, ip stri
 	return nil
 }
 
-func (comm *ConnectionManagerImpl) SendStream(envelope pb.Envelope, errorCallBack OnError, connectionID string){
+func (comm *ConnectionManagerImpl) SendStream(data interface{}, errorCallBack OnError, connectionID string){
+
+
+	payload, err := json.Marshal(data)
+
+	if err != nil{
+		return
+	}
+
+	_, pub, err  := comm.crpyto.LoadKey()
+
+	if err != nil{
+		return
+	}
+
+	sig, err  := comm.crpyto.Sign(payload,nil)
+
+	if err != nil{
+		return
+	}
+
+	envelope := &pb.Envelope{}
+	envelope.Payload = payload
+	envelope.Pubkey = pub.SKI()
+	envelope.Signature = sig
 
 	conn, ok := comm.connectionMap[connectionID]
 
 	if ok{
-		conn.Send(&envelope,errorCallBack)
+		conn.Send(envelope,errorCallBack)
 		//todo 어떤 error일 경우에 conn을 close 할지 정해야함
 	}else{
 		//todo 처리
