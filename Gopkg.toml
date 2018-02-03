@@ -69,3 +69,7 @@
 [[constraint]]
   name = "github.com/golang/mock"
   version = "1.0.0"
+
+[[override]]
+  name = "github.com/stretchr/objx"
+  version = "0.1.0"

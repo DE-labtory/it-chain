@@ -49,7 +49,7 @@ func (comm *ConnectionManagerImpl) CreateStreamConn(connectionID string, ip stri
 	return nil
 }
 
-func (comm *ConnectionManagerImpl) SendStream(envelope pb.Envelope, errorCallBack onError, connectionID string){
+func (comm *ConnectionManagerImpl) SendStream(envelope pb.Envelope, errorCallBack OnError, connectionID string){
 
 	conn, ok := comm.connectionMap[connectionID]
 
