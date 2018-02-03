@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"it-chain/db/leveldbhelper"
 )
 

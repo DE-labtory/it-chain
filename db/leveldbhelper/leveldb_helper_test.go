@@ -164,3 +164,26 @@ func TestDB_WriteBatch(t *testing.T) {
 	}
 	assert.Equal(t,string(byteValue),"jun")
 }
+
+func TestDB_Snapshot(t *testing.T) {
+	path := "./test_db_path"
+	db := getDB(path)
+	db.Open()
+	defer func() {
+		db.Close()
+		os.RemoveAll(path)
+	}()
+
+	batch := new(leveldb.Batch)
+	batch.Put([]byte("key1"), []byte("val1"))
+	batch.Put([]byte("key2"), []byte("val2"))
+	batch.Put([]byte("key3"), []byte("val3"))
+	db.WriteBatch(batch,true)
+
+	snap, err := db.Snapshot()
+	assert.NoError(t, err)
+
+	assert.Equal(t, "val1", string(snap["key1"]))
+	assert.Equal(t, "val2", string(snap["key2"]))
+	assert.Equal(t, "val3", string(snap["key3"]))
+}
