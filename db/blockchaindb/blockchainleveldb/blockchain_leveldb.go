@@ -13,11 +13,11 @@ var logger = common.GetLogger("blockchain_leveldb.go")
 const (
 	BLOCK_HASH_DB = "block_hash"
 	BLOCK_NUMBER_DB = "block_number"
+	UNCONFIRMED_BLOCK_DB = "unconfirmed_block"
 	TRANSACTION_DB = "transaction"
 	UTIL_DB = "util"
 
 	LAST_BLOCK_KEY = "last_block"
-	UNCONFIRMED_BLOCK_KEY = "unconfirmed_block"
 )
 
 type BlockchainLevelDB struct {
@@ -40,6 +40,7 @@ func (l *BlockchainLevelDB) AddBlock(block *blockchain.Block) error {
 	blockHashDB := l.DBProvider.GetDBHandle(BLOCK_HASH_DB)
 	blockNumberDB := l.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
 	transactionDB := l.DBProvider.GetDBHandle(TRANSACTION_DB)
+	unconfirmedDB := l.DBProvider.GetDBHandle(UNCONFIRMED_BLOCK_DB)
 	utilDB := l.DBProvider.GetDBHandle(UTIL_DB)
 
 	serializedBlock, err := common.Serialize(block)
@@ -79,18 +80,23 @@ func (l *BlockchainLevelDB) AddBlock(block *blockchain.Block) error {
 		}
 	}
 
+	err = unconfirmedDB.Delete([]byte(block.Header.BlockHash), true)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (l *BlockchainLevelDB) AddUnconfirmedBlock(block *blockchain.Block) error {
-	utilDB := l.DBProvider.GetDBHandle(UTIL_DB)
+	unconfirmedDB := l.DBProvider.GetDBHandle(UNCONFIRMED_BLOCK_DB)
 
 	serializedBlock, err := common.Serialize(block)
 	if err != nil {
 		return err
 	}
 
-	err = utilDB.Put([]byte(UNCONFIRMED_BLOCK_KEY), serializedBlock, true)
+	err = unconfirmedDB.Put([]byte(block.Header.BlockHash), serializedBlock, true)
 	if err != nil {
 		return err
 	}
