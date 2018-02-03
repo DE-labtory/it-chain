@@ -10,9 +10,12 @@ import (
 )
 
 const (
-	GITHUB_TOKEN string = "20fc6f01c0cab8f97ac3e8433a946c8b869702cd"
+	GITHUB_TOKEN string = "31d8f4c1bfc6906806b9a77803087b5b671fac2d"
 
 )
+
+// temp
+const AUTHENTICATED_GIT = "emperorhan"
 
 type SmartContract struct {
 	ReposName string
@@ -27,6 +30,48 @@ type SmartContractService struct {
 }
 
 func Init() {
+
+}
+
+func (scs *SmartContractService) pullAllSmartContracts() (error) {
+
+	repoList, err := GetRepositoryList(AUTHENTICATED_GIT)
+	if err != nil {
+		return errors.New("An error was occured during getting repository list")
+	}
+
+	for _, repo := range repoList {
+		localReposPath := scs.SmartContractDirPath + "/" +
+			strings.Replace(repo.FullName, "/", "_", -1)
+
+		err = os.MkdirAll(localReposPath, 0755)
+		if err != nil {
+			return errors.New("An error was occured during making repository path")
+		}
+
+		commits, err := GetReposCommits(repo.FullName)
+		if err != nil {
+			return errors.New("An error was occured during getting commit logs")
+		}
+
+		for _, commit := range commits {
+			if commit.Author.Login == AUTHENTICATED_GIT {
+
+				err := CloneReposWithName(repo.FullName, localReposPath, commit.Sha)
+				if err != nil {
+					return errors.New("An error was occured during cloning with name")
+				}
+
+				err = ResetWithSHA(localReposPath + "/" + commit.Sha, commit.Sha)
+				if err != nil {
+					return errors.New("An error was occured during resetting with SHA")
+				}
+
+			}
+		}
+	}
+
+	return nil
 }
 
 func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
@@ -131,7 +176,7 @@ func (scs *SmartContractService) Query(transaction blockchain.Transaction) (erro
 		return errors.New("An error occured while archiving file!")
 	}
 
-	PullAndCopyAndRunDocker("docker.io/library/node", tmpDir+"/"+transaction.TxData.ContractID+".tar")
+	PullAndCopyAndRunDocker("docker.io/library/golang:rc-alpine", tmpDir+"/"+transaction.TxData.ContractID+".tar")
 
 	return nil
 }

@@ -134,6 +134,7 @@ func (pt *PeerTable) IncrementHeartBeat() error{
 	return nil
 }
 
+////tested
 func (pt *PeerTable) SelectRandomPeerInfos(percent float64) ([]PeerInfo,error){
 
 	if len(pt.PeerMap) <= 1{
@@ -166,6 +167,34 @@ func (pt *PeerTable) SelectRandomPeerInfos(percent float64) ([]PeerInfo,error){
 	}
 
 	return peerInfoList,nil
+}
+
+//tested
+//나자신을 제외한 peerInfo의 list를 return
+func (pt *PeerTable) GetPeerList() []PeerInfo{
+
+	tmp := make([]PeerInfo, 0)
+	for _, peer := range pt.PeerMap{
+		if peer.PeerID != pt.OwnerID{
+			//내 ID는 삭제
+			tmp = append(tmp, *peer)
+		}
+	}
+
+	return tmp
+}
+
+//tested
+func (pt *PeerTable) GetMyInfo() PeerInfo{
+	peerInfo, ok := pt.PeerMap[pt.OwnerID]
+
+	if ok{
+		return *peerInfo
+	}
+
+	logger.Println("No my peer info")
+
+	return *peerInfo
 }
 
 func (pi PeerInfo) String() string {

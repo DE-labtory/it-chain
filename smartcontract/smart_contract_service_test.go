@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 	"path/filepath"
+	"os"
 )
 
 func TestDeploy_Deploy(t *testing.T) {
@@ -15,7 +16,7 @@ func TestDeploy_Deploy(t *testing.T) {
 	if err != nil {
 		assert.Fail(t, err.Error())
 	}
-	scs := SmartContractService{"hackurity01", currentDir + "/sample_smartcontract",map[string]SmartContract{}}
+	scs := SmartContractService{"steve-buzzni", currentDir + "/sample_smartcontract",map[string]SmartContract{}}
 	ContractPath := "junbeomlee/bloom"
 
 	deploy_result, err := scs.Deploy(ContractPath)
@@ -63,5 +64,24 @@ func TestSmartContractService_Query(t *testing.T) {
 }
 
 func TestSmartContractService_Invoke(t *testing.T) {
+
+}
+
+func TestSmartContractService_pullAllSmartContracts(t *testing.T) {
+
+	currentDir, err := filepath.Abs("./")
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	scs := SmartContractService{
+		"yojkim",
+	currentDir + "/pull_test_repositories",
+	map[string]SmartContract{}}
+
+	err = scs.pullAllSmartContracts()
+	assert.NoError(t, err)
+
+	defer os.RemoveAll(scs.SmartContractDirPath)
 
 }

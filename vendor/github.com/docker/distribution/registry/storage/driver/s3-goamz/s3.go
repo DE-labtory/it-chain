@@ -14,7 +14,6 @@ package s3
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -24,12 +23,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/docker/goamz/aws"
+	"github.com/docker/goamz/s3"
+
+	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/client/transport"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	"github.com/docker/distribution/registry/storage/driver/base"
 	"github.com/docker/distribution/registry/storage/driver/factory"
-	"github.com/docker/goamz/aws"
-	"github.com/docker/goamz/s3"
 )
 
 const driverName = "s3goamz"
@@ -544,12 +545,6 @@ func (d *driver) s3Path(path string) string {
 // S3BucketKey returns the s3 bucket key for the given storage driver path.
 func (d *Driver) S3BucketKey(path string) string {
 	return d.StorageDriver.(*driver).s3Path(path)
-}
-
-// Walk traverses a filesystem defined within driver, starting
-// from the given path, calling f on each file
-func (d *driver) Walk(ctx context.Context, path string, f storagedriver.WalkFn) error {
-	return storagedriver.WalkFallback(ctx, d, path, f)
 }
 
 func parseError(path string, err error) error {

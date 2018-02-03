@@ -18,7 +18,6 @@ package swift
 import (
 	"bufio"
 	"bytes"
-	"context"
 	"crypto/rand"
 	"crypto/sha1"
 	"crypto/tls"
@@ -35,6 +34,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/ncw/swift"
 
+	"github.com/docker/distribution/context"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	"github.com/docker/distribution/registry/storage/driver/base"
 	"github.com/docker/distribution/registry/storage/driver/factory"
@@ -642,12 +642,6 @@ func (d *driver) URLFor(ctx context.Context, path string, options map[string]int
 	}
 
 	return tempURL, nil
-}
-
-// Walk traverses a filesystem defined within driver, starting
-// from the given path, calling f on each file
-func (d *driver) Walk(ctx context.Context, path string, f storagedriver.WalkFn) error {
-	return storagedriver.WalkFallback(ctx, d, path, f)
 }
 
 func (d *driver) swiftPath(path string) string {

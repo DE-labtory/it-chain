@@ -15,5 +15,4 @@ type Crypto interface {
 	GenerateKey(opts KeyGenOpts) (pri, pub Key, err error)
 
 	LoadKey() (pri, pub Key, err error)
-
 }

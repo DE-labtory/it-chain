@@ -1,16 +1,16 @@
 package handlers
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
 	"github.com/docker/distribution"
-	dcontext "github.com/docker/distribution/context"
+	ctxu "github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/docker/distribution/registry/api/v2"
 	"github.com/docker/distribution/registry/auth"
 	"github.com/opencontainers/go-digest"
+	"golang.org/x/net/context"
 )
 
 // Context should contain the request specific context for use in across
@@ -44,26 +44,26 @@ func (ctx *Context) Value(key interface{}) interface{} {
 }
 
 func getName(ctx context.Context) (name string) {
-	return dcontext.GetStringValue(ctx, "vars.name")
+	return ctxu.GetStringValue(ctx, "vars.name")
 }
 
 func getReference(ctx context.Context) (reference string) {
-	return dcontext.GetStringValue(ctx, "vars.reference")
+	return ctxu.GetStringValue(ctx, "vars.reference")
 }
 
 var errDigestNotAvailable = fmt.Errorf("digest not available in context")
 
 func getDigest(ctx context.Context) (dgst digest.Digest, err error) {
-	dgstStr := dcontext.GetStringValue(ctx, "vars.digest")
+	dgstStr := ctxu.GetStringValue(ctx, "vars.digest")
 
 	if dgstStr == "" {
-		dcontext.GetLogger(ctx).Errorf("digest not available")
+		ctxu.GetLogger(ctx).Errorf("digest not available")
 		return "", errDigestNotAvailable
 	}
 
 	d, err := digest.Parse(dgstStr)
 	if err != nil {
-		dcontext.GetLogger(ctx).Errorf("error parsing digest=%q: %v", dgstStr, err)
+		ctxu.GetLogger(ctx).Errorf("error parsing digest=%q: %v", dgstStr, err)
 		return "", err
 	}
 
@@ -71,13 +71,13 @@ func getDigest(ctx context.Context) (dgst digest.Digest, err error) {
 }
 
 func getUploadUUID(ctx context.Context) (uuid string) {
-	return dcontext.GetStringValue(ctx, "vars.uuid")
+	return ctxu.GetStringValue(ctx, "vars.uuid")
 }
 
 // getUserName attempts to resolve a username from the context and request. If
 // a username cannot be resolved, the empty string is returned.
 func getUserName(ctx context.Context, r *http.Request) string {
-	username := dcontext.GetStringValue(ctx, auth.UserNameKey)
+	username := ctxu.GetStringValue(ctx, auth.UserNameKey)
 
 	// Fallback to request user with basic auth
 	if username == "" {
