@@ -47,12 +47,12 @@ func (l *BlockchainLevelDB) AddBlock(block *blockchain.Block) error {
 		return err
 	}
 
-	err = blockNumberDB.Put([]byte(fmt.Sprint(block.Header.Number)), serializedBlock, true)
+	err = blockHashDB.Put([]byte(block.Header.BlockHash), serializedBlock, true)
 	if err != nil {
 		return err
 	}
 
-	err = blockHashDB.Put([]byte(block.Header.BlockHash), serializedBlock, true)
+	err = blockNumberDB.Put([]byte(fmt.Sprint(block.Header.Number)), []byte(block.Header.BlockHash), true)
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func (l *BlockchainLevelDB) AddUnconfirmedBlock(block *blockchain.Block) error {
 		return err
 	}
 
-	err = utilDB.Put([]byte(block.Header.BlockHash), serializedBlock, true)
+	err = utilDB.Put([]byte(UNCONFIRMED_BLOCK_KEY), serializedBlock, true)
 	if err != nil {
 		return err
 	}
@@ -101,18 +101,12 @@ func (l *BlockchainLevelDB) AddUnconfirmedBlock(block *blockchain.Block) error {
 func (l *BlockchainLevelDB) GetBlockByNumber(blockNumber uint64) (*blockchain.Block, error) {
 	blockNumberDB := l.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
 
-	serializedBlock, err := blockNumberDB.Get([]byte(fmt.Sprint(blockNumber)))
+	blockHash, err := blockNumberDB.Get([]byte(fmt.Sprint(blockNumber)))
 	if err != nil {
 		return nil, err
 	}
 
-	block := &blockchain.Block{}
-	err = common.Deserialize(serializedBlock, block)
-	if err != nil {
-		return nil, err
-	}
-
-	return block, err
+	return l.GetBlockByHash(string(blockHash))
 }
 
 func (l *BlockchainLevelDB) GetBlockByHash(hash string) (*blockchain.Block, error) {

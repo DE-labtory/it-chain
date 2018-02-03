@@ -166,3 +166,24 @@ func (db *DB) WriteBatch(batch *leveldb.Batch, sync bool) error {
 func (db *DB) GetIterator(startKey []byte, endKey []byte) iterator.Iterator {
 	return db.db.NewIterator(&util.Range{Start: startKey, Limit: endKey}, db.readOpts)
 }
+
+func (db *DB) Snapshot() (map[string][]byte, error) {
+	snap, err := db.db.GetSnapshot()
+	if err != nil {
+		logger.Error("Error while taking snapshot")
+		return nil, err
+	}
+	data := make(map[string][]byte)
+	iter := snap.NewIterator(nil, nil)
+	for iter.Next() {
+		key := iter.Key()
+		val := iter.Value()
+		data[string(key)] = append([]byte{}, val...)
+	}
+	iter.Release()
+	if iter.Error() != nil {
+		logger.Error("Error with iterator")
+		return nil, iter.Error()
+	}
+	return data, nil
+}
