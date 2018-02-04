@@ -31,7 +31,7 @@ func (keygen *rsaKeyGenerator) GenerateKey(opts KeyGenOpts) (pri, pub Key, err e
 		return nil, nil, err
 	}
 
-	return
+	return pri, pub, nil
 
 }
 
@@ -57,6 +57,6 @@ func (keygen *ecdsaKeyGenerator) GenerateKey(opts KeyGenOpts) (pri, pub Key, err
 		return nil, nil, err
 	}
 
-	return
+	return pri, pub, nil
 
 }
