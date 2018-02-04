@@ -8,13 +8,13 @@ type SignerOpts interface {
 
 type signer interface {
 
-	Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, err error)
+	Sign(key Key, digest []byte, opts SignerOpts) ([]byte, error)
 
 }
 
 type verifier interface {
 
-	Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error)
+	Verify(key Key, signature, digest []byte, opts SignerOpts) (bool, error)
 
 }
 
