@@ -46,7 +46,9 @@ func NewCrypto(path string) (Crypto, error) {
 
 }
 
-func (ch *cryptoHelper) Sign(digest []byte, opts SignerOpts) (signature []byte, err error) {
+func (ch *cryptoHelper) Sign(digest []byte, opts SignerOpts) ([]byte, error) {
+
+	var err error
 
 	ch.priKey, ch.pubKey, err = ch.LoadKey()
 	if err != nil {
@@ -66,16 +68,16 @@ func (ch *cryptoHelper) Sign(digest []byte, opts SignerOpts) (signature []byte, 
 		return nil, errors.New("unsupported key type.")
 	}
 
-	signature, err = signer.Sign(ch.priKey, digest, opts)
+	signature, err := signer.Sign(ch.priKey, digest, opts)
 	if err != nil {
 		return nil, errors.New("signing error is occurred")
 	}
 
-	return
+	return signature, err
 
 }
 
-func (ch *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error) {
+func (ch *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpts) (bool, error) {
 
 	if key == nil {
 		return false, errors.New("invalid key")
@@ -94,12 +96,12 @@ func (ch *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpt
 		return false, errors.New("unsupported key type")
 	}
 
-	valid, err = verifier.Verify(key, signature, digest, opts)
+	valid, err := verifier.Verify(key, signature, digest, opts)
 	if err != nil {
 		return false, errors.New("verifying error is occurred")
 	}
 
-	return
+	return valid, nil
 
 }
 
@@ -124,17 +126,17 @@ func (ch *cryptoHelper) GenerateKey(opts KeyGenOpts) (pri, pub Key, err error) {
 		return nil, nil, errors.New("Failed to store a Key")
 	}
 
-	return
+	return pri, pub, nil
 
 }
 
-func (ch *cryptoHelper) LoadKey() (pri Key, pub Key, err error) {
+func (ch *cryptoHelper) LoadKey() (pri, pub Key, err error) {
 
 	pri, pub, err = ch.keyManager.Load()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return
+	return pri, pub, err
 
 }
