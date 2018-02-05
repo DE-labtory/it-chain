@@ -7,6 +7,14 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"io/ioutil"
+	"bytes"
+	"context"
+	"docker.io/go-docker"
+	"io"
+	"docker.io/go-docker/api/types"
+	"docker.io/go-docker/api/types/container"
+	"encoding/json"
 )
 
 const (
@@ -130,8 +138,128 @@ func (scs *SmartContractService) Query(transaction blockchain.Transaction) (erro
 	if err != nil {
 		return errors.New("An error occured while archiving file!")
 	}
+	fmt.Println("Passed MakeTar Smart Contract")
 
-	PullAndCopyAndRunDocker("docker.io/library/golang:rc-alpine", tmpDir+"/"+transaction.TxData.ContractID+".tar")
+	err = MakeTar("./smartcontract/worldstatedb", tmpDir)
+	if err != nil {
+		return errors.New("An error occured while archiving file!")
+	}
+	fmt.Println("Passed MakeTar World State DB")
+
+
+	//PullAndCopyAndRunDocker("docker.io/library/golang:rc-alpine", tmpDir+"/"+transaction.TxData.ContractID+".tar")
+
+	// Docker Code
+	imageName := "docker.io/library/golang:rc-alpine"
+	tarPath := tmpDir+"/"+transaction.TxData.ContractID+".tar"
+	tarPath_wsdb := tmpDir+"/worldstatedb.tar"
+
+	ctx := context.Background()
+	cli, err := docker.NewEnvClient()
+	if err != nil {
+		panic(err)
+	}
+
+	out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
+	if err != nil {
+		panic(err)
+	}
+	io.Copy(os.Stdout, out)
+	fmt.Println("Passed ImagePull")
+
+	imageName_splited := strings.Split(imageName, "/")
+	image := imageName_splited[len(imageName_splited)-1]
+
+	resp, err := cli.ContainerCreate(ctx, &container.Config{
+		Image: image,
+		Cmd: []string{"touch", "/home/kkk"},
+		Tty: true,
+	}, nil, nil, "")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Passed ContainerCreate")
+
+	file, err := ioutil.ReadFile(tarPath)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	wsdb, err := ioutil.ReadFile(tarPath_wsdb)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	err = cli.CopyToContainer(ctx, resp.ID, "/go/src/", bytes.NewReader(file), types.CopyToContainerOptions{
+		AllowOverwriteDirWithFile: false,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Passed CopyToContainer Go File")
+
+	err = cli.CopyToContainer(ctx, resp.ID, "/go/src/", bytes.NewReader(wsdb), types.CopyToContainerOptions{
+		AllowOverwriteDirWithFile: false,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Passed CopyToContainer World State DB")
+
+	err = cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Passed ContainerStart")
+
+
+	/* Set Transaction Arg
+	------------------------*/
+	tx_bytes, err := json.Marshal(transaction)
+	if err != nil {
+		return errors.New("Tx Marshal Error")
+	}
+	fmt.Println("Passed Marshal Tx")
+
+
+	/* go build in docker
+	----------------------*/
+	exec_build, err := cli.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
+		Cmd: []string{"go", "build", "-o", "/go/src/" + sc.ReposName, "/go/src/" + sc.ReposName + ".go"},
+		User: "root",
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = cli.ContainerExecStart(ctx, exec_build.ID, types.ExecStartCheck{
+		Detach: true,
+		Tty:    true,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Passed go build in docker")
+
+
+	/* go run in docker
+	--------------------*/
+	exec_run, err := cli.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
+		Cmd: []string{"/go/src/" + transaction.TxData.ContractID + "/" + sc.ReposName, string(tx_bytes)},
+		User: "root",
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = cli.ContainerExecStart(ctx, exec_run.ID, types.ExecStartCheck{
+		Detach: true,
+		Tty:    true,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Passed go run in docker")
 
 	return nil
 }

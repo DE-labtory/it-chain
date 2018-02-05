@@ -41,19 +41,19 @@ func TestSmartContractService_Query(t *testing.T) {
 		time.Now(),
 		blockchain.SetTxData(
 			"",
-			"query",
+			"Invoke",
 			blockchain.SetTxMethodParameters(0, "", []string{""}),
-			"abc",
+			"sample1_path",
 		),
 	)
 	scs := SmartContractService{
 		"hackurity01",
 		currentDir + "/sample_smartcontract",
 		map[string]SmartContract{
-			"abc": SmartContract{
-				ReposName:         "bloom",
-				OriginReposPath:   "junbeomlee/bloom",
-				SmartContractPath: "/Users/hackurity/Documents/it-chain/test/abc",
+			"sample1_path": SmartContract{
+				ReposName:         "sample1",
+				OriginReposPath:   "sample/sample1",
+				SmartContractPath: currentDir + "/sample_smartcontract/sample1_path",
 			},
 		},
 	}
