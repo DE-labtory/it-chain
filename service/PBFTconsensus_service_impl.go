@@ -62,6 +62,7 @@ func (cs *PBFTConsensusService) StopConsensus(){
 
 //consensusMessage가 들어옴
 //todo FromConsensusProtoMessage에서 block변환도 해야함
+//todo 이전 요청인지 아닌지를 판별할 로직을 추가해야함
 func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.OutterMessage){
 
 	message := outterMessage.Message
@@ -78,10 +79,13 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 
 	switch msgType{
 	case domain.PreprepareMsg:
+		//새로운 ConsensusState를 만들어야함
 		return
 	case domain.PrepareMsg:
+
 		return
 	case domain.CommitMsg:
+
 		return
 	default:
 		return
