@@ -12,6 +12,7 @@ type innerMessage struct{
 
 type OutterMessage struct{
 	Envelope *message.Envelope
+	Message *message.Message
 	ConnectionID string
 	Conn Connection
 	sync.Mutex

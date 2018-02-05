@@ -18,7 +18,6 @@ type ConsensusMessage struct {
 	ViewID      string
 	SequenceID  int64
 	Block       *Block
-	Stage       Stage
 	PeerID      string
 	MsgType     MsgType
 	TimeStamp   time.Time

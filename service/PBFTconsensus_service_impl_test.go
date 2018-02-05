@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"it-chain/auth"
 	"it-chain/domain"
+	"github.com/stretchr/testify/assert"
 )
 
 type MockConnectionManager struct{
@@ -14,9 +15,6 @@ type MockConnectionManager struct{
 }
 
 func (mcm MockConnectionManager) SendStream(data interface{}, errorCallBack comm.OnError, connectionID string){
-	//mcm.Called(data)
-	//mcm.Called(data,errorCallBack,connectionID)
-	//mcm.Called(data,nil,connectionID)
 	mcm.MethodCalled("SendStream",data,nil,connectionID)
 }
 
@@ -107,7 +105,20 @@ func (mps MockPeerService) BroadCastPeerTable(interface{}){
 
 }
 
+
 func TestNewPBFTConsensusService(t *testing.T) {
+	comm:= new(MockConnectionManager)
+	peerService := new(MockPeerService)
+
+	pbftService := NewPBFTConsensusService(comm,peerService)
+
+	consensusStates := pbftService.GetCurrentConsensusState()
+	assert.NotNil(t,consensusStates)
+}
+
+//todo assertnumberofcall 테스트 추가해야함
+func TestPBFTConsensusService_StartConsensus(t *testing.T) {
+
 	comm:= new(MockConnectionManager)
 	peerService := new(MockPeerService)
 
@@ -119,15 +130,15 @@ func TestNewPBFTConsensusService(t *testing.T) {
 
 	pbftService.StartConsensus(block)
 
+	consensusStates := pbftService.GetCurrentConsensusState()
+
+	assert.Equal(t,len(consensusStates),1)
+
+	for _, state := range consensusStates{
+		assert.Equal(t,state.Block,block)
+		assert.Equal(t,state.CurrentStage,domain.PrePrepared)
+	}
+
 	comm.AssertExpectations(t)
-	//comm.AssertNumberOfCalls(t,"SendStream",1)
-	//comm.AssertNumberOfCalls(t,"SendStream",2)
-}
-
-func TestPBFTConsensusService_broadcastMessage(t *testing.T) {
-
-}
-
-func TestPBFTConsensusService_StartConsensus(t *testing.T) {
 
 }

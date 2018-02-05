@@ -5,9 +5,10 @@ import (
 	"sync"
 	"github.com/rs/xid"
 	"it-chain/domain"
-	"fmt"
+	pb "it-chain/network/protos"
+	"golang.org/x/text/message"
+	"github.com/gogo/protobuf/proto"
 )
-
 
 //todo peerID를 어디서 가져올 것인가??
 type PBFTConsensusService struct {
@@ -32,7 +33,7 @@ func NewPBFTConsensusService(comm comm.ConnectionManager, peerService PeerServic
 	return pbft
 }
 
-//not tested
+//tested
 //Consensus 시작
 //1. Consensus의 state를 추가한다.
 //2. 합의할 block을 consensusMessage에 담고 prepreMsg로 전파한다.
@@ -52,11 +53,31 @@ func (cs *PBFTConsensusService) StartConsensus(block *domain.Block){
 	cs.broadcastMessage(preprepareConsensusMessage)
 }
 
+func (cs *PBFTConsensusService) GetCurrentConsensusState() map[string]*domain.ConsensusState{
+	return cs.consensusStates
+}
+
 func (cs *PBFTConsensusService) StopConsensus(){
 
 }
 
-func (cs *PBFTConsensusService) ReceiveConsensusMessage(consensusMsg *domain.ConsensusMessage){
+//consensusMessage가 들어옴
+func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.OutterMessage){
+
+	message := outterMessage.Message
+
+	message.gET
+
+	switch msgType{
+	case domain.PreprepareMsg:
+		return
+	case domain.PrepareMsg:
+		return
+	case domain.CommitMsg:
+		return
+	default:
+		return
+	}
 
 }
 
@@ -64,14 +85,13 @@ func (cs *PBFTConsensusService) consensusMessageHandler(){
 
 }
 
-//not tested
+//tested
 func (cs *PBFTConsensusService) broadcastMessage(consensusMsg domain.ConsensusMessage){
 
 	peerTable := cs.peerService.GetPeerTable()
 	peerList := peerTable.GetPeerList()
 
 	for _, peer := range peerList{
-		fmt.Println("called")
 		cs.comm.SendStream(consensusMsg,nil,peer.PeerID)
 	}
 }
