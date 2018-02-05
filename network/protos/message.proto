@@ -67,12 +67,7 @@ message ConsensusMessage {
     int64 SequenceID = 3;
     Block Block = 4;
     string PeerID = 5;
-    MsgType MsgType = 6;
+    int32 MsgType = 6;
 }
 
-enum MsgType {
-    PreprepareMsg = 0;
-    PrepareMsg = 1;
-    CommitMsg = 2;
-}
 

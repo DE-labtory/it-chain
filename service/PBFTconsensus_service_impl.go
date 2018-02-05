@@ -6,8 +6,6 @@ import (
 	"github.com/rs/xid"
 	"it-chain/domain"
 	pb "it-chain/network/protos"
-	"golang.org/x/text/message"
-	"github.com/gogo/protobuf/proto"
 )
 
 //todo peerID를 어디서 가져올 것인가??
@@ -37,6 +35,7 @@ func NewPBFTConsensusService(comm comm.ConnectionManager, peerService PeerServic
 //Consensus 시작
 //1. Consensus의 state를 추가한다.
 //2. 합의할 block을 consensusMessage에 담고 prepreMsg로 전파한다.
+//todo sequence 를 nano로 수정
 func (cs *PBFTConsensusService) StartConsensus(block *domain.Block){
 
 	cs.Lock()
@@ -62,11 +61,20 @@ func (cs *PBFTConsensusService) StopConsensus(){
 }
 
 //consensusMessage가 들어옴
+//todo FromConsensusProtoMessage에서 block변환도 해야함
 func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.OutterMessage){
 
 	message := outterMessage.Message
 
-	message.gET
+	cm:= message.GetConsensusMessage()
+
+	if cm == nil{
+		return
+	}
+
+	consensusMessage := domain.FromConsensusProtoMessage(*cm)
+
+	msgType := consensusMessage.MsgType
 
 	switch msgType{
 	case domain.PreprepareMsg:
@@ -78,7 +86,6 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 	default:
 		return
 	}
-
 }
 
 func (cs *PBFTConsensusService) consensusMessageHandler(){

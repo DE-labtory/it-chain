@@ -2,6 +2,7 @@ package domain
 
 import (
 	"time"
+	pb "it-chain/network/protos"
 )
 
 type MsgType int
@@ -68,5 +69,17 @@ func NewConsesnsusMessage(viewID string,sequenceID int64, block *Block,peerID st
 		TimeStamp: time.Now(),
 		PeerID:peerID,
 		Block: block,
+	}
+}
+
+//todo block을 넣어야함
+func FromConsensusProtoMessage(consensusMessage pb.ConsensusMessage) ConsensusMessage{
+
+	return ConsensusMessage{
+		ViewID: consensusMessage.ViewID,
+		SequenceID: consensusMessage.SequenceID,
+		PeerID: consensusMessage.PeerID,
+		ConsensusID: consensusMessage.ConsensusID,
+		MsgType: MsgType(consensusMessage.MsgType),
 	}
 }
