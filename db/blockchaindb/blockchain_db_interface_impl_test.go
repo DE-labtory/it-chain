@@ -3,8 +3,8 @@ package blockchaindb
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"it-chain/service/blockchain"
 	"os"
+	"it-chain/domain"
 )
 
 func TestBlockchainDB_AddBlock(t *testing.T) {
@@ -15,7 +15,7 @@ func TestBlockchainDB_AddBlock(t *testing.T) {
 		os.RemoveAll(path)
 	}()
 
-	block := blockchain.CreateNewBlock(nil, "test")
+	block := domain.CreateNewBlock(nil, "test")
 	err := b.AddBlock(block)
 	assert.NoError(t, err)
 }
@@ -28,7 +28,7 @@ func TestBlockchainDBImpl_GetBlockByNumber(t *testing.T) {
 		os.RemoveAll(path)
 	}()
 
-	block := blockchain.CreateNewBlock(nil, "test")
+	block := domain.CreateNewBlock(nil, "test")
 	blockNumber := block.Header.Number
 
 	err := b.AddBlock(block)
@@ -47,7 +47,7 @@ func TestBlockchainDBImpl_GetBlockByHash(t *testing.T) {
 		os.RemoveAll(path)
 	}()
 
-	block := blockchain.CreateNewBlock(nil, "test")
+	block := domain.CreateNewBlock(nil, "test")
 	blockHash := block.Header.BlockHash
 
 	err := b.AddBlock(block)
