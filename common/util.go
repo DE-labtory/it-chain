@@ -89,6 +89,9 @@ func Serialize(object interface{}) ([]byte, error) {
 }
 
 func Deserialize(serializedBytes []byte, object interface{}) error {
+	if len(serializedBytes) == 0 {
+		return nil
+	}
 	err := json.Unmarshal(serializedBytes, object)
 	if err != nil {
 		panic(fmt.Sprintf("Error decoding : %s", err))
