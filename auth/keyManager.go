@@ -60,9 +60,10 @@ func (km *keyManager) Store(keys... Key) (err error) {
 	return nil
 }
 
-func (km *keyManager) storeKey(key Key, keyType keyType) (err error) {
+func (km *keyManager) storeKey(key Key, keyType keyType) (error) {
 
 	var data []byte
+	var err error
 
 	switch keyType {
 	case PRIVATE_KEY:
@@ -74,12 +75,12 @@ func (km *keyManager) storeKey(key Key, keyType keyType) (err error) {
 	}
 
 	if err != nil {
-		return
+		return err
 	}
 
 	path, err := km.getFullPath(hex.EncodeToString(key.SKI()), string(keyType))
 	if err != nil {
-		return
+		return err
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -147,7 +148,7 @@ func (km *keyManager) Load() (pri, pub Key, err error) {
 		return nil, nil, errors.New("Failed to load Key")
 	}
 
-	return
+	return pri, pub, nil
 
 }
 
@@ -178,11 +179,11 @@ func (km *keyManager) loadKey(alias string, keyType keyType) (key interface{}, e
 		return nil, err
 	}
 
-	return
+	return key, nil
 
 }
 
-func (km *keyManager) getSuffix(name string) (suffix string, valid bool) {
+func (km *keyManager) getSuffix(name string) (string, bool) {
 
 	if strings.HasSuffix(name, "pri") {
 		return "pri", true
@@ -194,7 +195,7 @@ func (km *keyManager) getSuffix(name string) (suffix string, valid bool) {
 
 }
 
-func (km *keyManager) getFullPath(alias, suffix string) (path string, err error) {
+func (km *keyManager) getFullPath(alias, suffix string) (string, error) {
 	if _, err := os.Stat(km.path); os.IsNotExist(err) {
 		err = os.MkdirAll(km.path, 0755)
 		if err != nil {
