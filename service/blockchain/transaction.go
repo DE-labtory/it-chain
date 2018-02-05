@@ -3,7 +3,6 @@ package blockchain
 import (
 	"time"
 	"it-chain/common"
-	"errors"
 )
 
 type TransactionStatus int
@@ -91,17 +90,18 @@ func (tx Transaction) Validate() bool{
 	return true
 }
 
-func (tx *Transaction) SignHash() (ret bool, err error){
-	signature := []byte("temp")
-	tx.PublicKey = []byte("temp")
-
-	if signature != nil {
-		tx.Signature = signature
-		err = nil
-		ret = true
-	} else {
-		err = errors.New("transaction signature fail")
-		ret = false
-	}
-	return ret, err
-}
+//func (tx *Transaction) SignHash() (ret bool, err error){
+//	crypto := auth.Crypto()
+//	signature := auth.Crypto().
+//	tx.PublicKey = []byte("temp")
+//
+//	if signature != nil {
+//		tx.Signature = signature
+//		err = nil
+//		ret = true
+//	} else {
+//		err = errors.New("transaction signature fail")
+//		ret = false
+//	}
+//	return ret, err
+//}
