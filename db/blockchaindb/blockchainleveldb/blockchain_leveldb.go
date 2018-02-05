@@ -2,10 +2,10 @@ package blockchainleveldb
 
 import (
 	"it-chain/db/leveldbhelper"
-	"it-chain/service/blockchain"
 	"it-chain/common"
 	"fmt"
 	"github.com/spf13/viper"
+	"it-chain/domain"
 )
 
 var logger = common.GetLogger("blockchain_leveldb.go")
@@ -36,7 +36,7 @@ func (l *BlockchainLevelDB) Close() {
 	l.DBProvider.Close()
 }
 
-func (l *BlockchainLevelDB) AddBlock(block *blockchain.Block) error {
+func (l *BlockchainLevelDB) AddBlock(block *domain.Block) error {
 	blockHashDB := l.DBProvider.GetDBHandle(BLOCK_HASH_DB)
 	blockNumberDB := l.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
 	transactionDB := l.DBProvider.GetDBHandle(TRANSACTION_DB)
@@ -88,7 +88,7 @@ func (l *BlockchainLevelDB) AddBlock(block *blockchain.Block) error {
 	return nil
 }
 
-func (l *BlockchainLevelDB) AddUnconfirmedBlock(block *blockchain.Block) error {
+func (l *BlockchainLevelDB) AddUnconfirmedBlock(block *domain.Block) error {
 	unconfirmedDB := l.DBProvider.GetDBHandle(UNCONFIRMED_BLOCK_DB)
 
 	serializedBlock, err := common.Serialize(block)
@@ -104,7 +104,7 @@ func (l *BlockchainLevelDB) AddUnconfirmedBlock(block *blockchain.Block) error {
 	return nil
 }
 
-func (l *BlockchainLevelDB) GetBlockByNumber(blockNumber uint64) (*blockchain.Block, error) {
+func (l *BlockchainLevelDB) GetBlockByNumber(blockNumber uint64) (*domain.Block, error) {
 	blockNumberDB := l.DBProvider.GetDBHandle(BLOCK_NUMBER_DB)
 
 	blockHash, err := blockNumberDB.Get([]byte(fmt.Sprint(blockNumber)))
@@ -115,7 +115,7 @@ func (l *BlockchainLevelDB) GetBlockByNumber(blockNumber uint64) (*blockchain.Bl
 	return l.GetBlockByHash(string(blockHash))
 }
 
-func (l *BlockchainLevelDB) GetBlockByHash(hash string) (*blockchain.Block, error) {
+func (l *BlockchainLevelDB) GetBlockByHash(hash string) (*domain.Block, error) {
 	blockHashDB := l.DBProvider.GetDBHandle(BLOCK_HASH_DB)
 
 	serializedBlock, err := blockHashDB.Get([]byte(hash))
@@ -123,7 +123,7 @@ func (l *BlockchainLevelDB) GetBlockByHash(hash string) (*blockchain.Block, erro
 		return nil, err
 	}
 
-	block := &blockchain.Block{}
+	block := &domain.Block{}
 	err = common.Deserialize(serializedBlock, block)
 	if err != nil {
 		return nil, err
@@ -132,7 +132,7 @@ func (l *BlockchainLevelDB) GetBlockByHash(hash string) (*blockchain.Block, erro
 	return block, err
 }
 
-func (l *BlockchainLevelDB) GetLastBlock() (*blockchain.Block, error) {
+func (l *BlockchainLevelDB) GetLastBlock() (*domain.Block, error) {
 	utilDB := l.DBProvider.GetDBHandle(UTIL_DB)
 
 	serializedBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
@@ -140,7 +140,7 @@ func (l *BlockchainLevelDB) GetLastBlock() (*blockchain.Block, error) {
 		return nil, err
 	}
 
-	block := &blockchain.Block{}
+	block := &domain.Block{}
 	err = common.Deserialize(serializedBlock, block)
 	if err != nil {
 		return nil, err
@@ -149,7 +149,7 @@ func (l *BlockchainLevelDB) GetLastBlock() (*blockchain.Block, error) {
 	return block, err
 }
 
-func (l *BlockchainLevelDB) GetTransactionByTxID(txid string) (*blockchain.Transaction, error) {
+func (l *BlockchainLevelDB) GetTransactionByTxID(txid string) (*domain.Transaction, error) {
 	transactionDB := l.DBProvider.GetDBHandle(TRANSACTION_DB)
 
 	serializedTX, err := transactionDB.Get([]byte(txid))
@@ -157,7 +157,7 @@ func (l *BlockchainLevelDB) GetTransactionByTxID(txid string) (*blockchain.Trans
 		return nil, err
 	}
 
-	transaction := &blockchain.Transaction{}
+	transaction := &domain.Transaction{}
 	err = common.Deserialize(serializedTX, transaction)
 	if err != nil {
 		return nil, err
@@ -166,7 +166,7 @@ func (l *BlockchainLevelDB) GetTransactionByTxID(txid string) (*blockchain.Trans
 	return transaction, err
 }
 
-func (l *BlockchainLevelDB) GetBlockByTxID(txid string) (*blockchain.Block, error) {
+func (l *BlockchainLevelDB) GetBlockByTxID(txid string) (*domain.Block, error) {
 	utilDB := l.DBProvider.GetDBHandle(UTIL_DB)
 
 	blockHash, err := utilDB.Get([]byte(txid))
