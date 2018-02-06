@@ -1,4 +1,4 @@
-package sample1_path
+package abc
 
 import (
 	"it-chain/service/blockchain"

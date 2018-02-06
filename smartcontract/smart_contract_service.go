@@ -122,9 +122,11 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
  *	6. docker에서 smartcontract 실행
  ****************************************************/
 func (scs *SmartContractService) Query(transaction blockchain.Transaction) (error) {
+	fmt.Println("func Query Start")
 	tmpDir := "/tmp"
 	sc, ok := scs.SmartContractMap[transaction.TxData.ContractID];
 	if !ok {
+		fmt.Println("Not exist contract ID")
 		return errors.New("Not exist contract ID")
 	}
 
@@ -134,18 +136,20 @@ func (scs *SmartContractService) Query(transaction blockchain.Transaction) (erro
 		return errors.New("File or Directory Not Exist")
 	}
 
-	err = MakeTar(sc.SmartContractPath, tmpDir)
+	err = MakeTar(sc.SmartContractPath + "/" + transaction.TxData.ContractID, tmpDir)
 	if err != nil {
 		return errors.New("An error occured while archiving file!")
 	}
 	fmt.Println("Passed MakeTar Smart Contract")
 
-	err = MakeTar("./smartcontract/worldstatedb", tmpDir)
+	err = MakeTar("/Users/hackurity/go/src/it-chain/smartcontract/worldstatedb", tmpDir)
 	if err != nil {
 		return errors.New("An error occured while archiving file!")
 	}
 	fmt.Println("Passed MakeTar World State DB")
 
+	fmt.Println("======== sc =======")
+	fmt.Println(sc)
 
 	//PullAndCopyAndRunDocker("docker.io/library/golang:rc-alpine", tmpDir+"/"+transaction.TxData.ContractID+".tar")
 
@@ -172,7 +176,7 @@ func (scs *SmartContractService) Query(transaction blockchain.Transaction) (erro
 
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: image,
-		Cmd: []string{"touch", "/home/kkk"},
+		//Cmd: []string{"/bin/bash"},
 		Tty: true,
 	}, nil, nil, "")
 	if err != nil {
@@ -206,6 +210,8 @@ func (scs *SmartContractService) Query(transaction blockchain.Transaction) (erro
 	}
 	fmt.Println("Passed CopyToContainer World State DB")
 
+	fmt.Println("============================")
+	fmt.Println("resp.ID : " + resp.ID)
 	err = cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
 	if err != nil {
 		panic(err)
@@ -225,9 +231,9 @@ func (scs *SmartContractService) Query(transaction blockchain.Transaction) (erro
 	/* go build in docker
 	----------------------*/
 	exec_build, err := cli.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
-		Cmd: []string{"go", "build", "-o", "/go/src/" + sc.ReposName, "/go/src/" + sc.ReposName + ".go"},
+		Cmd: []string{"go", "build", "-o", "/go/src/" + transaction.TxData.ContractID + "/" + sc.ReposName, "/go/src/" + transaction.TxData.ContractID + "/" + sc.ReposName + ".go"},
 		User: "root",
-	})
+	})	// go build -o /go/src/abc/sample1 /go/src/abc/sample1.go
 	if err != nil {
 		panic(err)
 	}
@@ -241,6 +247,8 @@ func (scs *SmartContractService) Query(transaction blockchain.Transaction) (erro
 	}
 	fmt.Println("Passed go build in docker")
 
+	fmt.Println("------------ tx_byte ------------")
+	fmt.Println(string(tx_bytes))
 
 	/* go run in docker
 	--------------------*/
