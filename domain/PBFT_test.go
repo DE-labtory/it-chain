@@ -5,12 +5,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var mockHandler = func (consensusState ConsensusState){
+
+}
+
 func TestNewConsensusState(t *testing.T) {
 	viewID := "view"
 	consensusID := "consensus"
 	block := &Block{}
 
-	consensusState := NewConsensusState(viewID,consensusID,block,PrePrepared)
+	consensusState := NewConsensusState(viewID,consensusID,block,PrePrepared,mockHandler)
 
 	assert.Equal(t,consensusState.ViewID,viewID)
 	assert.Equal(t,consensusState.ID,consensusID)
