@@ -5,7 +5,7 @@ import (
 	"sync"
 	"github.com/rs/xid"
 	"it-chain/domain"
-	pb "it-chain/network/protos"
+	//pb "it-chain/network/protos"
 )
 
 //todo peerID를 어디서 가져올 것인가??
