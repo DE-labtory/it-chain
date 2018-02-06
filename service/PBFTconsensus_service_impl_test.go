@@ -8,6 +8,9 @@ import (
 	"it-chain/auth"
 	"it-chain/domain"
 	"github.com/stretchr/testify/assert"
+	pb "it-chain/network/protos"
+	"time"
+	"fmt"
 )
 
 type MockConnectionManager struct{
@@ -131,7 +134,6 @@ func TestPBFTConsensusService_StartConsensus(t *testing.T) {
 	pbftService.StartConsensus(block)
 
 	consensusStates := pbftService.GetCurrentConsensusState()
-
 	assert.Equal(t,len(consensusStates),1)
 
 	for _, state := range consensusStates{
@@ -141,4 +143,74 @@ func TestPBFTConsensusService_StartConsensus(t *testing.T) {
 
 	comm.AssertExpectations(t)
 
+}
+
+func GetMockConsensusMessage(consensusID string, msgType domain.MsgType) *pb.Message{
+
+	consensusMessage := &pb.ConsensusMessage{}
+	consensusMessage.SequenceID = time.Now().UnixNano()
+	consensusMessage.ConsensusID = consensusID
+	consensusMessage.MsgType = int32(msgType)
+
+	message := &pb.Message{}
+	cm := &pb.Message_ConsensusMessage{}
+	cm.ConsensusMessage = consensusMessage
+	message.Content = cm
+
+	return message
+}
+
+func TestPBFTConsensusService_ReceiveConsensusMessage(t *testing.T) {
+
+	//when
+	connectionManager:= new(MockConnectionManager)
+	peerService := new(MockPeerService)
+	pbftService := NewPBFTConsensusService(connectionManager,peerService)
+
+	Message := GetMockConsensusMessage("1",domain.PreprepareMsg)
+
+	outMessage := comm.OutterMessage{}
+	outMessage.Message = Message
+
+	//then
+	pbftService.ReceiveConsensusMessage(outMessage)
+
+
+	//result WhenNoStateExist
+	addedState := pbftService.GetCurrentConsensusState()["1"]
+	fmt.Println(pbftService.GetCurrentConsensusState())
+	fmt.Println(Message.GetConsensusMessage())
+	assert.Equal(t,addedState.ID,Message.GetConsensusMessage().ConsensusID)
+	assert.Equal(t,addedState.ID,Message.GetConsensusMessage().ConsensusID)
+
+	//2 whenStateEx
+	Message2 := GetMockConsensusMessage("1",domain.CommitMsg)
+	outMessage2 := comm.OutterMessage{}
+	outMessage2.Message = Message2
+	fmt.Println(pbftService.GetCurrentConsensusState())
+	fmt.Println(Message.GetConsensusMessage())
+
+	pbftService.ReceiveConsensusMessage(outMessage2)
+
+
+	assert.Equal(t,len(pbftService.GetCurrentConsensusState()),1)
+
+	//3 multiState
+	Message3 := GetMockConsensusMessage("2",domain.CommitMsg)
+	outMessage3 := comm.OutterMessage{}
+	outMessage3.Message = Message3
+
+	pbftService.ReceiveConsensusMessage(outMessage3)
+	fmt.Println(pbftService.GetCurrentConsensusState())
+
+	assert.Equal(t,len(pbftService.GetCurrentConsensusState()),2)
+
+	//4 timeouted Message
+	Message4 := GetMockConsensusMessage("3",domain.PreprepareMsg)
+	Message4.GetConsensusMessage().SequenceID = time.Now().Local().Add(10*time.Minute).UnixNano()
+	outMessage4 := comm.OutterMessage{}
+	outMessage4.Message = Message4
+
+	pbftService.ReceiveConsensusMessage(outMessage4)
+	assert.Equal(t,len(pbftService.GetCurrentConsensusState()),2)
 }

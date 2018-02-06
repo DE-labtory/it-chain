@@ -6,7 +6,21 @@
 
 It describes the important concept of blockchains.
 
+## Comparison of Blockchains
 
+| Criteria    | Bitcoin                                  | Ethereum                     | HyperLedger                              |
+| :---------- | :--------------------------------------- | :--------------------------- | :--------------------------------------- |
+| Opensource? | Yes                                      | Yes                          | Yes                                      |
+| Block time  | 10min                                    | 15seconds                    | Immediately                              |
+| Consensus   | PoW                                      | PoW  -> PoS                  | Full-circle verification of the  correctness of a set of transactions comprising a block |
+| Storage     | Transactions                             | Transactions + code          | Transactions                             |
+| Description | Cryptocurrency based  on blockchain  platform | Generic  blockchain platform | Modular  blockchain platform             |
+| Openness    | Private                                  | Public                       | Private  + Public                        |
+| Transaction | Transfer of ownership                    | Message to send by account   | Chain Code Execution Message             |
+
+#### Author
+
+[Junbeomlee](https://github.com/junbeomlee)
 
 ## Blockchain
 
