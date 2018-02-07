@@ -6,6 +6,12 @@
 
 It describes the important concept of blockchains.
 
+
+
+[TOC]
+
+
+
 ## Comparison of Blockchains
 
 | Criteria    | Bitcoin                                  | Ethereum                     | HyperLedger                              |
