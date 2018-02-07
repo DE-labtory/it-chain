@@ -42,8 +42,8 @@ type ConsensusState struct {
 	ViewID              string
 	CurrentStage        Stage
 	Block               *Block
-	PrepareMsgs         []ConsensusMessage
-	CommitMsgs          []ConsensusMessage
+	PrepareMsgs         map[string]ConsensusMessage
+	CommitMsgs          map[string]ConsensusMessage
 	endChannel          chan struct{}
 	endConsensusHandler EndConsensusHandle
 	sync.RWMutex
@@ -60,8 +60,8 @@ func NewConsensusState(viewID string, consensusID string, block *Block, currentS
 		ViewID:viewID,
 		CurrentStage:currentStage,
 		Block: block,
-		PrepareMsgs: make([]ConsensusMessage,0),
-		CommitMsgs: make([]ConsensusMessage,0),
+		PrepareMsgs: make(map[string]ConsensusMessage),
+		CommitMsgs: make(map[string]ConsensusMessage),
 		endConsensusHandler: endConsensusHandler,
 	}
 }
@@ -117,12 +117,12 @@ func (cs *ConsensusState) AddMessage(consensusMessage ConsensusMessage){
 		break
 
 	case PrepareMsg:
-		cs.PrepareMsgs = append(cs.PrepareMsgs, consensusMessage)
+		//cs.PrepareMsgs = append(cs.PrepareMsgs, consensusMessage)
 		//commitMsg broadcast 해야함
 		break
 
 	case CommitMsg:
-		cs.CommitMsgs = append(cs.CommitMsgs, consensusMessage)
+		//cs.CommitMsgs = append(cs.CommitMsgs, consensusMessage)
 		//block 저장해야함
 		break
 	default:
