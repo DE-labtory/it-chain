@@ -25,13 +25,19 @@ func TestNewConsensusState(t *testing.T) {
 
 func TestNewConsesnsusMessage(t *testing.T) {
 
+	consensusID := "1"
 	viewID := "view"
 	block := &Block{}
 
-	message:= NewConsesnsusMessage(viewID,1,block,"peer1",PrepareMsg)
+	message:= NewConsesnsusMessage(consensusID,viewID,1,block,"peer1",PrepareMsg)
 
 	assert.Equal(t,message.ViewID,viewID)
 	assert.Equal(t,message.SequenceID,int64(1))
 	assert.Equal(t,message.MsgType,PrepareMsg)
 	assert.Equal(t,message.Block,block)
+}
+
+
+func TestFromConsensusProtoMessage(t *testing.T) {
+
 }

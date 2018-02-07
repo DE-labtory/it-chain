@@ -13,18 +13,18 @@ type FunctionType string
 
 const (
 
-	status_TRANSACTION_UNCONFIRMED	Status	= 0
-	status_TRANSACTION_CONFIRMED	Status	= 1
-	status_TRANSACTION_UNKNOWN		Status	= 2
+	Status_TRANSACTION_UNCONFIRMED	Status	= 0
+	Status_TRANSACTION_CONFIRMED	Status	= 1
+	Status_TRANSACTION_UNKNOWN		Status	= 2
 
-	invoke TxDataType = "invoke"
-	query TxDataType = "query"
+	Invoke TxDataType = "invoke"
+	Query TxDataType = "query"
 
-	general TransactionType = 0 + iota
+	General TransactionType = 0 + iota
 
-	write = "write"
-	read = "read"
-	delete = "delete"
+	Write = "write"
+	Read = "read"
+	Delete = "delete"
 )
 
 type Params struct {
@@ -53,7 +53,7 @@ type Transaction struct {
 }
 
 func CreateNewTransaction(peer_id string, tx_id string, tx_type TransactionType, t time.Time, data *TxData) *Transaction{
-	return &Transaction{InvokePeerID:peer_id, TransactionID:tx_id, TransactionStatus:status_TRANSACTION_UNKNOWN, TransactionType:tx_type, TimeStamp:t, TxData:data}
+	return &Transaction{InvokePeerID:peer_id, TransactionID:tx_id, TransactionStatus:Status_TRANSACTION_UNKNOWN, TransactionType:tx_type, TimeStamp:t, TxData:data}
 }
 
 func SetTxMethodParameters(params_type int, function FunctionType, args []string) Params{
