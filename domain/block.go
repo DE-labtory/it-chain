@@ -49,7 +49,7 @@ func CreateNewBlock(prevBlock *Block, createPeerId string) *Block{
 		header.Number = prevBlock.Header.Number + 1
 		header.PreviousHash = prevBlock.Header.BlockHash
 		header.Version = prevBlock.Header.Version
-		header.BlockHeight = prevBlock.Header.BlockHeight
+		header.BlockHeight = prevBlock.Header.BlockHeight + 1
 	}
 	header.CreatedPeerID = createPeerId
 	header.TimeStamp = time.Now().Round(0)
@@ -58,27 +58,25 @@ func CreateNewBlock(prevBlock *Block, createPeerId string) *Block{
 	return &Block{Header:&header, MerkleTree:make([][]string, 0), MerkleTreeHeight:0, TransactionCount:0, Transactions:make([]*Transaction, 0)}
 }
 
-func (s *BlockHeader) Reset() { *s = BlockHeader{} }
-
-func (s *Block) PutTranscation(tx *Transaction) (valid bool, err error){
+func (s *Block) PutTranscation(tx *Transaction) error{
 	if tx.Validate() == false{
-		return false, errors.New("invalid tx")
+		return errors.New("invalid tx")
 	}
-	if tx.TransactionStatus == status_TRANSACTION_UNKNOWN {
+	if tx.TransactionStatus == Status_TRANSACTION_UNKNOWN {
 		if true { // Docker에서 실행하고 return이 true면 Confirmed 나중에 수정할 것.
-			tx.TransactionStatus = status_TRANSACTION_CONFIRMED
+			tx.TransactionStatus = Status_TRANSACTION_CONFIRMED
 		} else {
-			tx.TransactionStatus = status_TRANSACTION_UNCONFIRMED
+			tx.TransactionStatus = Status_TRANSACTION_UNCONFIRMED
 		}
 	}
 	for _, confirmedTx := range s.Transactions{
 		if confirmedTx.TransactionHash == tx.TransactionHash{
-			return false, errors.New("tx already exists")
+			return errors.New("tx already exists")
 		}
 	}
 	s.Transactions = append(s.Transactions, tx)
 	s.TransactionCount++
-	return true, nil
+	return nil
 }
 
 func (s Block) FindTransactionIndex(hash string) (idx int, err error){
@@ -147,7 +145,7 @@ func BlockDeserialize(by []byte) (Block, error) {
 }
 
 // 해당 트랜잭션이 정당한지 머클패스로 검사함
-func (s Block) VarifyTx(tx Transaction) (bool, error) {
+func (s Block) VerifyTx(tx Transaction) (bool, error) {
 	hash := tx.TransactionHash
 	idx, err := s.FindTransactionIndex(hash)
 
@@ -170,9 +168,9 @@ func (s Block) VarifyTx(tx Transaction) (bool, error) {
 }
 
 // 블럭내의 모든 트랜잭션들이 정당한지 머클패스로 검사함
-func (s Block) VarifyBlock() (bool, error) {
+func (s Block) VerifyBlock() (bool, error) {
 	for idx := 0; idx < s.TransactionCount; idx++{
-		txVarification, txErr := s.VarifyTx(*s.Transactions[idx])
+		txVarification, txErr := s.VerifyTx(*s.Transactions[idx])
 		if txVarification == false  {
 			err := errors.New("block is invalid --- " + strconv.Itoa(idx) + "'s " + txErr.Error())
 			return false, err

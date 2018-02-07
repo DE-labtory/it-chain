@@ -1,13 +1,13 @@
 package service
 
 import (
-	"it-chain/network/comm"
-	"sync"
-	"github.com/rs/xid"
-	"it-chain/domain"
 	"time"
 	"it-chain/common"
 	"math"
+	"it-chain/domain"
+	"it-chain/network/comm"
+	"sync"
+	"github.com/rs/xid"
 )
 
 var logger_pbftservice = common.GetLogger("pbft_service")
