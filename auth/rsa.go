@@ -11,7 +11,7 @@ import (
 
 type rsaSigner struct{}
 
-func (s *rsaSigner) Sign(key Key, digest []byte, opts SignerOpts) (signature []byte, err error) {
+func (s *rsaSigner) Sign(key Key, digest []byte, opts SignerOpts) ([]byte, error) {
 
 	if opts == nil {
 		return nil, errors.New("invalid options")
@@ -23,7 +23,7 @@ func (s *rsaSigner) Sign(key Key, digest []byte, opts SignerOpts) (signature []b
 
 type rsaVerifier struct{}
 
-func (v *rsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpts) (valid bool, err error) {
+func (v *rsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpts) (bool, error) {
 
 	if opts == nil {
 		return false, errors.New("invalid options")
@@ -55,7 +55,7 @@ type rsaPrivateKey struct {
 	priv *rsa.PrivateKey
 }
 
-func (key *rsaPrivateKey) SKI() (ski []byte) {
+func (key *rsaPrivateKey) SKI() ([]byte) {
 
 	if key.priv == nil {
 		return nil
@@ -79,7 +79,7 @@ type rsaPublicKey struct {
 	pub *rsa.PublicKey
 }
 
-func (key *rsaPublicKey) SKI() (ski []byte) {
+func (key *rsaPublicKey) SKI() ([]byte) {
 
 	if key.pub == nil {
 		return nil

@@ -16,7 +16,7 @@ type ecdsaSignature struct {
 
 type ecdsaSigner struct{}
 
-func marshalECDSASignature(r, s *big.Int) (signature []byte, err error) {
+func marshalECDSASignature(r, s *big.Int) ([]byte, error) {
 	return asn1.Marshal(ecdsaSignature{r, s})
 }
 
@@ -80,7 +80,7 @@ type ecdsaPrivateKey struct {
 	priv *ecdsa.PrivateKey
 }
 
-func (key *ecdsaPrivateKey) SKI() (ski []byte) {
+func (key *ecdsaPrivateKey) SKI() ([]byte) {
 
 	if key.priv == nil {
 		return nil
@@ -94,7 +94,7 @@ func (key *ecdsaPrivateKey) SKI() (ski []byte) {
 
 }
 
-func (key *ecdsaPrivateKey) PublicKey() (pub Key, err error) {
+func (key *ecdsaPrivateKey) PublicKey() (Key, error) {
 	return &ecdsaPublicKey{&key.priv.PublicKey}, nil
 }
 
@@ -102,7 +102,7 @@ type ecdsaPublicKey struct {
 	pub *ecdsa.PublicKey
 }
 
-func (key *ecdsaPublicKey) SKI() (ski []byte) {
+func (key *ecdsaPublicKey) SKI() ([]byte) {
 
 	if key.pub == nil {
 		return nil

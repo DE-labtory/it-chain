@@ -6,12 +6,26 @@
 
 It describes the important concept of blockchains.
 
+## Comparison of Blockchains
 
+| Criteria    | Bitcoin                                  | Ethereum                     | HyperLedger                              |
+| :---------- | :--------------------------------------- | :--------------------------- | :--------------------------------------- |
+| Opensource? | Yes                                      | Yes                          | Yes                                      |
+| Block time  | 10min                                    | 15seconds                    | Immediately                              |
+| Consensus   | PoW                                      | PoW  -> PoS                  | Full-circle verification of the  correctness of a set of transactions comprising a block |
+| Storage     | Transactions                             | Transactions + code          | Transactions                             |
+| Description | Cryptocurrency based  on blockchain  platform | Generic  blockchain platform | Modular  blockchain platform             |
+| Openness    | Private                                  | Public                       | Private  + Public                        |
+| Transaction | Transfer of ownership                    | Message to send by account   | Chain Code Execution Message             |
+
+#### Author
+
+[Junbeomlee](https://github.com/junbeomlee)
 
 ## Blockchain
 
 ## SmartContract
-Smart contracts are computer protocols that can facilitate, verify or enforce the negotiation or performance of a contract or make a contractual clause unnecessary. They usually have a User Interface and can emulate the logic of contractual clauses. The can execute the terms of a contract in an automated way. They can make contractual clauses partially or fully self-executing and self-enforcing.
+Smart contracts are computer protocols that can facilitate, verify or enforce the negotiation or performance of a contract or make a contractual clause unnecessary. They usually have a User Interface and can emulate the logic of contractual clauses. They can execute the terms of a contract in an automated way. They can make contractual clauses partially or fully self-executing and self-enforcing.
 Smart contracts are implemented using blockchain. Once a smart contract is created, it is placed in a blockchain.
 
 ### Advantages of Smart Contracts

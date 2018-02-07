@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package message;
 
-import "network/protos/gossip.proto"
-
 service MessageService{
 
     rpc Stream (stream Envelope) returns (stream Envelope) {}
@@ -38,6 +36,7 @@ message Message{
         Transaction transaction = 3;
         PeerTable peerTable = 4;
         PeerInfo peerInfo = 5;
+        ConsensusMessage consensusMessage= 6;
     }
 }
 
@@ -62,7 +61,13 @@ message PeerInfo {
     bytes pubKey = 5;
 }
 
-enum{
-
+message ConsensusMessage {
+    string ConsensusID = 1;
+    string ViewID = 2;
+    int64 SequenceID = 3;
+    Block Block = 4;
+    string PeerID = 5;
+    int32 MsgType = 6;
 }
+
 
