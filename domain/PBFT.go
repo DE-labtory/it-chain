@@ -105,6 +105,31 @@ func (cs *ConsensusState) End(){
 func (cs *ConsensusState) AddMessage(consensusMessage ConsensusMessage){
 	//PreprepareMsg는 block이 존재
 	//commit, prepareMsg는 block 존재 안함
-	//prepare가 1/2이상일 경우
-	//commit이 1/2이상일 경우
+	//prepare가 2/3이상일 경우
+	//commit이 2/3이상일 경우
+
+	msgType := consensusMessage.MsgType
+
+	switch msgType {
+	case PreprepareMsg:
+		cs.Block = consensusMessage.Block
+		//prepareMsg broadcast 해야함
+		break
+
+	case PrepareMsg:
+		cs.PrepareMsgs = append(cs.PrepareMsgs, consensusMessage)
+		//commitMsg broadcast 해야함
+		break
+
+	case CommitMsg:
+		cs.CommitMsgs = append(cs.CommitMsgs, consensusMessage)
+		//block 저장해야함
+		break
+	default:
+		break
+	}
+}
+
+type Command interface{
+	Execute()
 }

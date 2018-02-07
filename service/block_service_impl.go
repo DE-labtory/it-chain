@@ -29,8 +29,27 @@ func (l *Ledger) CreateBlock(txList []*domain.Transaction, createPeerId string) 
 }
 
 func (l *Ledger) VerifyBlock(blk *domain.Block) (bool, error){
-	_, err := blk.VerifyBlock()
-	if err != nil { return false, err }
+
+	lastBlock, err := l.DB.GetLastBlock()
+
+	if err != nil {
+		return false, err
+	}
+
+	if lastBlock.Header.BlockHeight + 1 != blk.Header.BlockHeight{
+		return false, errors.New("Block height misMatched")
+	}
+
+	if lastBlock.Header.BlockHash != blk.Header.PreviousHash{
+		return false, errors.New("Block hash is different")
+	}
+
+	_, err = blk.VerifyBlock()
+
+	if err != nil {
+		return false, err
+	}
+
 	blk.Header.BlockStatus = domain.Status_BLOCK_CONFIRMED
 	return true, nil
 }
