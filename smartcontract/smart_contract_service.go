@@ -14,9 +14,6 @@ const (
 
 )
 
-// temp
-const AUTHENTICATED_GIT = "emperorhan"
-
 type SmartContract struct {
 	ReposName string
 	OriginReposPath string
@@ -33,9 +30,9 @@ func Init() {
 
 }
 
-func (scs *SmartContractService) pullAllSmartContracts() (error) {
+func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string) (error) {
 
-	repoList, err := GetRepositoryList(AUTHENTICATED_GIT)
+	repoList, err := GetRepositoryList(authenticatedGit)
 	if err != nil {
 		return errors.New("An error was occured during getting repository list")
 	}
@@ -55,7 +52,7 @@ func (scs *SmartContractService) pullAllSmartContracts() (error) {
 		}
 
 		for _, commit := range commits {
-			if commit.Author.Login == AUTHENTICATED_GIT {
+			if commit.Author.Login == authenticatedGit {
 
 				err := CloneReposWithName(repo.FullName, localReposPath, commit.Sha)
 				if err != nil {
