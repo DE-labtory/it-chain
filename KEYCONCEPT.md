@@ -79,6 +79,8 @@ Definitions of each abbreviation in the diagram are;
 - `i`: Peer(Node) ID
 - `r`: Result of the request's operation
 
+In this diagram, the fork/join node notation (black thin bars) is used to denote broadcasting the message. Normally, this notation is [a control node to support the parallelism in activities](https://www.uml-diagrams.org/activity-diagrams-controls.html#fork-node).
+
 ##### Why `count >= 2` ?
 
 In the diagram, the peer change its state to `prepared` or `committed` when the `count` value, which is the number of verified messages from other peers, is larger than `2`.
