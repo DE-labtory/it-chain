@@ -1,14 +1,13 @@
 package storage
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"path"
 	"time"
 
 	"github.com/docker/distribution"
-	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/storage/driver"
 	"github.com/docker/distribution/uuid"
@@ -87,7 +86,7 @@ func (lbs *linkedBlobStore) Put(ctx context.Context, mediaType string, p []byte)
 	// Place the data in the blob store first.
 	desc, err := lbs.blobStore.Put(ctx, mediaType, p)
 	if err != nil {
-		dcontext.GetLogger(ctx).Errorf("error putting into main store: %v", err)
+		context.GetLogger(ctx).Errorf("error putting into main store: %v", err)
 		return distribution.Descriptor{}, err
 	}
 
@@ -126,7 +125,7 @@ func WithMountFrom(ref reference.Canonical) distribution.BlobCreateOption {
 
 // Writer begins a blob write session, returning a handle.
 func (lbs *linkedBlobStore) Create(ctx context.Context, options ...distribution.BlobCreateOption) (distribution.BlobWriter, error) {
-	dcontext.GetLogger(ctx).Debug("(*linkedBlobStore).Writer")
+	context.GetLogger(ctx).Debug("(*linkedBlobStore).Writer")
 
 	var opts distribution.CreateOptions
 
@@ -175,7 +174,7 @@ func (lbs *linkedBlobStore) Create(ctx context.Context, options ...distribution.
 }
 
 func (lbs *linkedBlobStore) Resume(ctx context.Context, id string) (distribution.BlobWriter, error) {
-	dcontext.GetLogger(ctx).Debug("(*linkedBlobStore).Resume")
+	context.GetLogger(ctx).Debug("(*linkedBlobStore).Resume")
 
 	startedAtPath, err := pathFor(uploadStartedAtPathSpec{
 		name: lbs.repository.Named().Name(),
@@ -237,7 +236,7 @@ func (lbs *linkedBlobStore) Enumerate(ctx context.Context, ingestor func(digest.
 	if err != nil {
 		return err
 	}
-	return lbs.driver.Walk(ctx, rootPath, func(fileInfo driver.FileInfo) error {
+	err = Walk(ctx, lbs.blobStore.driver, rootPath, func(fileInfo driver.FileInfo) error {
 		// exit early if directory...
 		if fileInfo.IsDir() {
 			return nil
@@ -273,6 +272,12 @@ func (lbs *linkedBlobStore) Enumerate(ctx context.Context, ingestor func(digest.
 
 		return nil
 	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (lbs *linkedBlobStore) mount(ctx context.Context, sourceRepo reference.Named, dgst digest.Digest, sourceStat *distribution.Descriptor) (distribution.Descriptor, error) {
@@ -406,7 +411,7 @@ func (lbs *linkedBlobStatter) Stat(ctx context.Context, dgst digest.Digest) (dis
 
 	if target != dgst {
 		// Track when we are doing cross-digest domain lookups. ie, sha512 to sha256.
-		dcontext.GetLogger(ctx).Warnf("looking up blob with canonical target: %v -> %v", dgst, target)
+		context.GetLogger(ctx).Warnf("looking up blob with canonical target: %v -> %v", dgst, target)
 	}
 
 	// TODO(stevvooe): Look up repository local mediatype and replace that on

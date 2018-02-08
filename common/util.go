@@ -25,6 +25,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"sort"
+	"it-chain/network/protos"
+	"it-chain/auth"
 )
 
 var logger = GetLogger("util.go")
@@ -87,9 +89,35 @@ func Serialize(object interface{}) ([]byte, error) {
 }
 
 func Deserialize(serializedBytes []byte, object interface{}) error {
+	if len(serializedBytes) == 0 {
+		return nil
+	}
 	err := json.Unmarshal(serializedBytes, object)
 	if err != nil {
 		panic(fmt.Sprintf("Error decoding : %s", err))
 	}
 	return err
+}
+
+//이렇게 하는것이 과연 최선일까?..
+func ToEnvelope(data interface {}, crpyto auth.Crypto, pubkey []byte) message.Envelope{
+
+	byte,err := json.Marshal(data)
+
+	if err != nil {
+		panic(fmt.Sprintf("Error encoding : %s", err))
+	}
+
+	envelope := message.Envelope{}
+	signed, err :=crpyto.Sign(byte,nil)
+
+	if err != nil {
+		logger.Println("Fail to sign : %s", err)
+	}
+
+	envelope.Payload = byte
+	envelope.Signature = signed
+	envelope.Pubkey = pubkey
+
+	return envelope
 }

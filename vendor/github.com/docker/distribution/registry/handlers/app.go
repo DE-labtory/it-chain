@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	cryptorand "crypto/rand"
 	"expvar"
 	"fmt"
@@ -17,7 +16,7 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
-	dcontext "github.com/docker/distribution/context"
+	ctxu "github.com/docker/distribution/context"
 	"github.com/docker/distribution/health"
 	"github.com/docker/distribution/health/checks"
 	"github.com/docker/distribution/notifications"
@@ -38,7 +37,8 @@ import (
 	"github.com/docker/libtrust"
 	"github.com/garyburd/redigo/redis"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
+	"golang.org/x/net/context"
 )
 
 // randomSecretSize is the number of random bytes to generate if no secret
@@ -145,7 +145,7 @@ func NewApp(ctx context.Context, config *configuration.Configuration) *App {
 		}
 	}
 
-	startUploadPurger(app, app.driver, dcontext.GetLogger(app), purgeConfig)
+	startUploadPurger(app, app.driver, ctxu.GetLogger(app), purgeConfig)
 
 	app.driver, err = applyStorageMiddleware(app.driver, config.Middleware["storage"])
 	if err != nil {
@@ -208,7 +208,7 @@ func NewApp(ctx context.Context, config *configuration.Configuration) *App {
 		}
 	}
 	if redirectDisabled {
-		dcontext.GetLogger(app).Infof("backend redirection disabled")
+		ctxu.GetLogger(app).Infof("backend redirection disabled")
 	} else {
 		options = append(options, storage.EnableRedirect)
 	}
@@ -269,7 +269,7 @@ func NewApp(ctx context.Context, config *configuration.Configuration) *App {
 			if err != nil {
 				panic("could not create registry: " + err.Error())
 			}
-			dcontext.GetLogger(app).Infof("using redis blob descriptor cache")
+			ctxu.GetLogger(app).Infof("using redis blob descriptor cache")
 		case "inmemory":
 			cacheProvider := memorycache.NewInMemoryBlobDescriptorCacheProvider()
 			localOptions := append(options, storage.BlobDescriptorCacheProvider(cacheProvider))
@@ -277,10 +277,10 @@ func NewApp(ctx context.Context, config *configuration.Configuration) *App {
 			if err != nil {
 				panic("could not create registry: " + err.Error())
 			}
-			dcontext.GetLogger(app).Infof("using inmemory blob descriptor cache")
+			ctxu.GetLogger(app).Infof("using inmemory blob descriptor cache")
 		default:
 			if v != "" {
-				dcontext.GetLogger(app).Warnf("unknown cache type %q, caching disabled", config.Storage["cache"])
+				ctxu.GetLogger(app).Warnf("unknown cache type %q, caching disabled", config.Storage["cache"])
 			}
 		}
 	}
@@ -306,7 +306,7 @@ func NewApp(ctx context.Context, config *configuration.Configuration) *App {
 			panic(fmt.Sprintf("unable to configure authorization (%s): %v", authType, err))
 		}
 		app.accessController = accessController
-		dcontext.GetLogger(app).Debugf("configured %q access controller", authType)
+		ctxu.GetLogger(app).Debugf("configured %q access controller", authType)
 	}
 
 	// configure as a pull through cache
@@ -316,7 +316,7 @@ func NewApp(ctx context.Context, config *configuration.Configuration) *App {
 			panic(err.Error())
 		}
 		app.isCache = true
-		dcontext.GetLogger(app).Info("Registry configured as a proxy cache to ", config.Proxy.RemoteURL)
+		ctxu.GetLogger(app).Info("Registry configured as a proxy cache to ", config.Proxy.RemoteURL)
 	}
 
 	return app
@@ -346,10 +346,7 @@ func (app *App) RegisterHealthChecks(healthRegistries ...*health.Registry) {
 
 		storageDriverCheck := func() error {
 			_, err := app.driver.Stat(app, "/") // "/" should always exist
-			if _, ok := err.(storagedriver.PathNotFoundError); ok {
-				err = nil // pass this through, backend is responding, but this path doesn't exist.
-			}
-			return err
+			return err                          // any error will be treated as failure
 		}
 
 		if app.Config.Health.StorageDriver.Threshold != 0 {
@@ -364,7 +361,7 @@ func (app *App) RegisterHealthChecks(healthRegistries ...*health.Registry) {
 		if interval == 0 {
 			interval = defaultCheckInterval
 		}
-		dcontext.GetLogger(app).Infof("configuring file health check path=%s, interval=%d", fileChecker.File, interval/time.Second)
+		ctxu.GetLogger(app).Infof("configuring file health check path=%s, interval=%d", fileChecker.File, interval/time.Second)
 		healthRegistry.Register(fileChecker.File, health.PeriodicChecker(checks.FileChecker(fileChecker.File), interval))
 	}
 
@@ -382,10 +379,10 @@ func (app *App) RegisterHealthChecks(healthRegistries ...*health.Registry) {
 		checker := checks.HTTPChecker(httpChecker.URI, statusCode, httpChecker.Timeout, httpChecker.Headers)
 
 		if httpChecker.Threshold != 0 {
-			dcontext.GetLogger(app).Infof("configuring HTTP health check uri=%s, interval=%d, threshold=%d", httpChecker.URI, interval/time.Second, httpChecker.Threshold)
+			ctxu.GetLogger(app).Infof("configuring HTTP health check uri=%s, interval=%d, threshold=%d", httpChecker.URI, interval/time.Second, httpChecker.Threshold)
 			healthRegistry.Register(httpChecker.URI, health.PeriodicThresholdChecker(checker, interval, httpChecker.Threshold))
 		} else {
-			dcontext.GetLogger(app).Infof("configuring HTTP health check uri=%s, interval=%d", httpChecker.URI, interval/time.Second)
+			ctxu.GetLogger(app).Infof("configuring HTTP health check uri=%s, interval=%d", httpChecker.URI, interval/time.Second)
 			healthRegistry.Register(httpChecker.URI, health.PeriodicChecker(checker, interval))
 		}
 	}
@@ -399,10 +396,10 @@ func (app *App) RegisterHealthChecks(healthRegistries ...*health.Registry) {
 		checker := checks.TCPChecker(tcpChecker.Addr, tcpChecker.Timeout)
 
 		if tcpChecker.Threshold != 0 {
-			dcontext.GetLogger(app).Infof("configuring TCP health check addr=%s, interval=%d, threshold=%d", tcpChecker.Addr, interval/time.Second, tcpChecker.Threshold)
+			ctxu.GetLogger(app).Infof("configuring TCP health check addr=%s, interval=%d, threshold=%d", tcpChecker.Addr, interval/time.Second, tcpChecker.Threshold)
 			healthRegistry.Register(tcpChecker.Addr, health.PeriodicThresholdChecker(checker, interval, tcpChecker.Threshold))
 		} else {
-			dcontext.GetLogger(app).Infof("configuring TCP health check addr=%s, interval=%d", tcpChecker.Addr, interval/time.Second)
+			ctxu.GetLogger(app).Infof("configuring TCP health check addr=%s, interval=%d", tcpChecker.Addr, interval/time.Second)
 			healthRegistry.Register(tcpChecker.Addr, health.PeriodicChecker(checker, interval))
 		}
 	}
@@ -428,11 +425,11 @@ func (app *App) configureEvents(configuration *configuration.Configuration) {
 	var sinks []notifications.Sink
 	for _, endpoint := range configuration.Notifications.Endpoints {
 		if endpoint.Disabled {
-			dcontext.GetLogger(app).Infof("endpoint %s disabled, skipping", endpoint.Name)
+			ctxu.GetLogger(app).Infof("endpoint %s disabled, skipping", endpoint.Name)
 			continue
 		}
 
-		dcontext.GetLogger(app).Infof("configuring endpoint %v (%v), timeout=%s, headers=%v", endpoint.Name, endpoint.URL, endpoint.Timeout, endpoint.Headers)
+		ctxu.GetLogger(app).Infof("configuring endpoint %v (%v), timeout=%s, headers=%v", endpoint.Name, endpoint.URL, endpoint.Timeout, endpoint.Headers)
 		endpoint := notifications.NewEndpoint(endpoint.Name, endpoint.URL, notifications.EndpointConfig{
 			Timeout:           endpoint.Timeout,
 			Threshold:         endpoint.Threshold,
@@ -464,7 +461,7 @@ func (app *App) configureEvents(configuration *configuration.Configuration) {
 
 	app.events.source = notifications.SourceRecord{
 		Addr:       hostname,
-		InstanceID: dcontext.GetStringValue(app, "instance.id"),
+		InstanceID: ctxu.GetStringValue(app, "instance.id"),
 	}
 }
 
@@ -472,7 +469,7 @@ type redisStartAtKey struct{}
 
 func (app *App) configureRedis(configuration *configuration.Configuration) {
 	if configuration.Redis.Addr == "" {
-		dcontext.GetLogger(app).Infof("redis not configured")
+		ctxu.GetLogger(app).Infof("redis not configured")
 		return
 	}
 
@@ -482,8 +479,8 @@ func (app *App) configureRedis(configuration *configuration.Configuration) {
 			ctx := context.WithValue(app, redisStartAtKey{}, time.Now())
 
 			done := func(err error) {
-				logger := dcontext.GetLoggerWithField(ctx, "redis.connect.duration",
-					dcontext.Since(ctx, redisStartAtKey{}))
+				logger := ctxu.GetLoggerWithField(ctx, "redis.connect.duration",
+					ctxu.Since(ctx, redisStartAtKey{}))
 				if err != nil {
 					logger.Errorf("redis: error connecting: %v", err)
 				} else {
@@ -497,7 +494,7 @@ func (app *App) configureRedis(configuration *configuration.Configuration) {
 				configuration.Redis.ReadTimeout,
 				configuration.Redis.WriteTimeout)
 			if err != nil {
-				dcontext.GetLogger(app).Errorf("error connecting to redis instance %s: %v",
+				ctxu.GetLogger(app).Errorf("error connecting to redis instance %s: %v",
 					configuration.Redis.Addr, err)
 				done(err)
 				return nil, err
@@ -554,7 +551,7 @@ func (app *App) configureRedis(configuration *configuration.Configuration) {
 
 // configureLogHook prepares logging hook parameters.
 func (app *App) configureLogHook(configuration *configuration.Configuration) {
-	entry, ok := dcontext.GetLogger(app).(*logrus.Entry)
+	entry, ok := ctxu.GetLogger(app).(*log.Entry)
 	if !ok {
 		// somehow, we are not using logrus
 		return
@@ -592,7 +589,7 @@ func (app *App) configureSecret(configuration *configuration.Configuration) {
 			panic(fmt.Sprintf("could not generate random bytes for HTTP secret: %v", err))
 		}
 		configuration.HTTP.Secret = string(secretBytes[:])
-		dcontext.GetLogger(app).Warn("No HTTP secret provided - generated random secret. This may cause problems with uploads if multiple registries are behind a load-balancer. To provide a shared secret, fill in http.secret in the configuration file or set the REGISTRY_HTTP_SECRET environment variable.")
+		ctxu.GetLogger(app).Warn("No HTTP secret provided - generated random secret. This may cause problems with uploads if multiple registries are behind a load-balancer. To provide a shared secret, fill in http.secret in the configuration file or set the REGISTRY_HTTP_SECRET environment variable.")
 	}
 }
 
@@ -601,15 +598,15 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare the context with our own little decorations.
 	ctx := r.Context()
-	ctx = dcontext.WithRequest(ctx, r)
-	ctx, w = dcontext.WithResponseWriter(ctx, w)
-	ctx = dcontext.WithLogger(ctx, dcontext.GetRequestLogger(ctx))
+	ctx = ctxu.WithRequest(ctx, r)
+	ctx, w = ctxu.WithResponseWriter(ctx, w)
+	ctx = ctxu.WithLogger(ctx, ctxu.GetRequestLogger(ctx))
 	r = r.WithContext(ctx)
 
 	defer func() {
 		status, ok := ctx.Value("http.response.status").(int)
 		if ok && status >= 200 && status <= 399 {
-			dcontext.GetResponseLogger(r.Context()).Infof("response completed")
+			ctxu.GetResponseLogger(r.Context()).Infof("response completed")
 		}
 	}()
 
@@ -640,12 +637,12 @@ func (app *App) dispatcher(dispatch dispatchFunc) http.Handler {
 		context := app.context(w, r)
 
 		if err := app.authorized(w, r, context); err != nil {
-			dcontext.GetLogger(context).Warnf("error authorizing context: %v", err)
+			ctxu.GetLogger(context).Warnf("error authorizing context: %v", err)
 			return
 		}
 
 		// Add username to request logging
-		context.Context = dcontext.WithLogger(context.Context, dcontext.GetLogger(context.Context, auth.UserNameKey))
+		context.Context = ctxu.WithLogger(context.Context, ctxu.GetLogger(context.Context, auth.UserNameKey))
 
 		// sync up context on the request.
 		r = r.WithContext(context)
@@ -653,20 +650,20 @@ func (app *App) dispatcher(dispatch dispatchFunc) http.Handler {
 		if app.nameRequired(r) {
 			nameRef, err := reference.WithName(getName(context))
 			if err != nil {
-				dcontext.GetLogger(context).Errorf("error parsing reference from context: %v", err)
+				ctxu.GetLogger(context).Errorf("error parsing reference from context: %v", err)
 				context.Errors = append(context.Errors, distribution.ErrRepositoryNameInvalid{
 					Name:   getName(context),
 					Reason: err,
 				})
 				if err := errcode.ServeJSON(w, context.Errors); err != nil {
-					dcontext.GetLogger(context).Errorf("error serving error json: %v (from %v)", err, context.Errors)
+					ctxu.GetLogger(context).Errorf("error serving error json: %v (from %v)", err, context.Errors)
 				}
 				return
 			}
 			repository, err := app.registry.Repository(context, nameRef)
 
 			if err != nil {
-				dcontext.GetLogger(context).Errorf("error resolving repository: %v", err)
+				ctxu.GetLogger(context).Errorf("error resolving repository: %v", err)
 
 				switch err := err.(type) {
 				case distribution.ErrRepositoryUnknown:
@@ -678,7 +675,7 @@ func (app *App) dispatcher(dispatch dispatchFunc) http.Handler {
 				}
 
 				if err := errcode.ServeJSON(w, context.Errors); err != nil {
-					dcontext.GetLogger(context).Errorf("error serving error json: %v (from %v)", err, context.Errors)
+					ctxu.GetLogger(context).Errorf("error serving error json: %v (from %v)", err, context.Errors)
 				}
 				return
 			}
@@ -690,11 +687,11 @@ func (app *App) dispatcher(dispatch dispatchFunc) http.Handler {
 
 			context.Repository, err = applyRepoMiddleware(app, context.Repository, app.Config.Middleware["repository"])
 			if err != nil {
-				dcontext.GetLogger(context).Errorf("error initializing repository middleware: %v", err)
+				ctxu.GetLogger(context).Errorf("error initializing repository middleware: %v", err)
 				context.Errors = append(context.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
 
 				if err := errcode.ServeJSON(w, context.Errors); err != nil {
-					dcontext.GetLogger(context).Errorf("error serving error json: %v (from %v)", err, context.Errors)
+					ctxu.GetLogger(context).Errorf("error serving error json: %v (from %v)", err, context.Errors)
 				}
 				return
 			}
@@ -706,7 +703,7 @@ func (app *App) dispatcher(dispatch dispatchFunc) http.Handler {
 		// for layer upload).
 		if context.Errors.Len() > 0 {
 			if err := errcode.ServeJSON(w, context.Errors); err != nil {
-				dcontext.GetLogger(context).Errorf("error serving error json: %v (from %v)", err, context.Errors)
+				ctxu.GetLogger(context).Errorf("error serving error json: %v (from %v)", err, context.Errors)
 			}
 
 			app.logError(context, context.Errors)
@@ -726,31 +723,31 @@ type errDetailKey struct{}
 
 func (errDetailKey) String() string { return "err.detail" }
 
-func (app *App) logError(ctx context.Context, errors errcode.Errors) {
+func (app *App) logError(context context.Context, errors errcode.Errors) {
 	for _, e1 := range errors {
-		var c context.Context
+		var c ctxu.Context
 
 		switch e1.(type) {
 		case errcode.Error:
 			e, _ := e1.(errcode.Error)
-			c = context.WithValue(ctx, errCodeKey{}, e.Code)
-			c = context.WithValue(c, errMessageKey{}, e.Code.Message())
-			c = context.WithValue(c, errDetailKey{}, e.Detail)
+			c = ctxu.WithValue(context, errCodeKey{}, e.Code)
+			c = ctxu.WithValue(c, errMessageKey{}, e.Code.Message())
+			c = ctxu.WithValue(c, errDetailKey{}, e.Detail)
 		case errcode.ErrorCode:
 			e, _ := e1.(errcode.ErrorCode)
-			c = context.WithValue(ctx, errCodeKey{}, e)
-			c = context.WithValue(c, errMessageKey{}, e.Message())
+			c = ctxu.WithValue(context, errCodeKey{}, e)
+			c = ctxu.WithValue(c, errMessageKey{}, e.Message())
 		default:
 			// just normal go 'error'
-			c = context.WithValue(ctx, errCodeKey{}, errcode.ErrorCodeUnknown)
-			c = context.WithValue(c, errMessageKey{}, e1.Error())
+			c = ctxu.WithValue(context, errCodeKey{}, errcode.ErrorCodeUnknown)
+			c = ctxu.WithValue(c, errMessageKey{}, e1.Error())
 		}
 
-		c = dcontext.WithLogger(c, dcontext.GetLogger(c,
+		c = ctxu.WithLogger(c, ctxu.GetLogger(c,
 			errCodeKey{},
 			errMessageKey{},
 			errDetailKey{}))
-		dcontext.GetResponseLogger(c).Errorf("response completed with error")
+		ctxu.GetResponseLogger(c).Errorf("response completed with error")
 	}
 }
 
@@ -758,8 +755,8 @@ func (app *App) logError(ctx context.Context, errors errcode.Errors) {
 // called once per request.
 func (app *App) context(w http.ResponseWriter, r *http.Request) *Context {
 	ctx := r.Context()
-	ctx = dcontext.WithVars(ctx, r)
-	ctx = dcontext.WithLogger(ctx, dcontext.GetLogger(ctx,
+	ctx = ctxu.WithVars(ctx, r)
+	ctx = ctxu.WithLogger(ctx, ctxu.GetLogger(ctx,
 		"vars.name",
 		"vars.reference",
 		"vars.digest",
@@ -786,7 +783,7 @@ func (app *App) context(w http.ResponseWriter, r *http.Request) *Context {
 // repository. If it succeeds, the context may access the requested
 // repository. An error will be returned if access is not available.
 func (app *App) authorized(w http.ResponseWriter, r *http.Request, context *Context) error {
-	dcontext.GetLogger(context).Debug("authorizing request")
+	ctxu.GetLogger(context).Debug("authorizing request")
 	repo := getName(context)
 
 	if app.accessController == nil {
@@ -812,7 +809,7 @@ func (app *App) authorized(w http.ResponseWriter, r *http.Request, context *Cont
 			// that mistake elsewhere in the code, allowing any operation to
 			// proceed.
 			if err := errcode.ServeJSON(w, errcode.ErrorCodeUnauthorized); err != nil {
-				dcontext.GetLogger(context).Errorf("error serving error json: %v (from %v)", err, context.Errors)
+				ctxu.GetLogger(context).Errorf("error serving error json: %v (from %v)", err, context.Errors)
 			}
 			return fmt.Errorf("forbidden: no repository name")
 		}
@@ -827,21 +824,20 @@ func (app *App) authorized(w http.ResponseWriter, r *http.Request, context *Cont
 			err.SetHeaders(w)
 
 			if err := errcode.ServeJSON(w, errcode.ErrorCodeUnauthorized.WithDetail(accessRecords)); err != nil {
-				dcontext.GetLogger(context).Errorf("error serving error json: %v (from %v)", err, context.Errors)
+				ctxu.GetLogger(context).Errorf("error serving error json: %v (from %v)", err, context.Errors)
 			}
 		default:
 			// This condition is a potential security problem either in
 			// the configuration or whatever is backing the access
 			// controller. Just return a bad request with no information
 			// to avoid exposure. The request should not proceed.
-			dcontext.GetLogger(context).Errorf("error checking authorization: %v", err)
+			ctxu.GetLogger(context).Errorf("error checking authorization: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 		}
 
 		return err
 	}
 
-	dcontext.GetLogger(ctx).Info("authorized request")
 	// TODO(stevvooe): This pattern needs to be cleaned up a bit. One context
 	// should be replaced by another, rather than replacing the context on a
 	// mutable object.
@@ -855,7 +851,7 @@ func (app *App) eventBridge(ctx *Context, r *http.Request) notifications.Listene
 	actor := notifications.ActorRecord{
 		Name: getUserName(ctx, r),
 	}
-	request := notifications.NewRequestRecord(dcontext.GetRequestID(ctx), r)
+	request := notifications.NewRequestRecord(ctxu.GetRequestID(ctx), r)
 
 	return notifications.NewBridge(ctx.urlBuilder, app.events.source, actor, request, app.events.sink)
 }
@@ -990,7 +986,7 @@ func badPurgeUploadConfig(reason string) {
 
 // startUploadPurger schedules a goroutine which will periodically
 // check upload directories for old files and delete them
-func startUploadPurger(ctx context.Context, storageDriver storagedriver.StorageDriver, log dcontext.Logger, config map[interface{}]interface{}) {
+func startUploadPurger(ctx context.Context, storageDriver storagedriver.StorageDriver, log ctxu.Logger, config map[interface{}]interface{}) {
 	if config["enabled"] == false {
 		return
 	}

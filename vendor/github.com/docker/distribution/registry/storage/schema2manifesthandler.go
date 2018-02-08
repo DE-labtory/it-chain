@@ -1,14 +1,13 @@
 package storage
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
 
 	"github.com/docker/distribution"
-	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/opencontainers/go-digest"
@@ -31,7 +30,7 @@ type schema2ManifestHandler struct {
 var _ ManifestHandler = &schema2ManifestHandler{}
 
 func (ms *schema2ManifestHandler) Unmarshal(ctx context.Context, dgst digest.Digest, content []byte) (distribution.Manifest, error) {
-	dcontext.GetLogger(ms.ctx).Debug("(*schema2ManifestHandler).Unmarshal")
+	context.GetLogger(ms.ctx).Debug("(*schema2ManifestHandler).Unmarshal")
 
 	var m schema2.DeserializedManifest
 	if err := json.Unmarshal(content, &m); err != nil {
@@ -42,7 +41,7 @@ func (ms *schema2ManifestHandler) Unmarshal(ctx context.Context, dgst digest.Dig
 }
 
 func (ms *schema2ManifestHandler) Put(ctx context.Context, manifest distribution.Manifest, skipDependencyVerification bool) (digest.Digest, error) {
-	dcontext.GetLogger(ms.ctx).Debug("(*schema2ManifestHandler).Put")
+	context.GetLogger(ms.ctx).Debug("(*schema2ManifestHandler).Put")
 
 	m, ok := manifest.(*schema2.DeserializedManifest)
 	if !ok {
@@ -60,7 +59,7 @@ func (ms *schema2ManifestHandler) Put(ctx context.Context, manifest distribution
 
 	revision, err := ms.blobStore.Put(ctx, mt, payload)
 	if err != nil {
-		dcontext.GetLogger(ctx).Errorf("error putting payload into blobstore: %v", err)
+		context.GetLogger(ctx).Errorf("error putting payload into blobstore: %v", err)
 		return "", err
 	}
 
