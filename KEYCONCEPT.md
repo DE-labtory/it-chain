@@ -94,11 +94,11 @@ Every node replies the result of the request's operation to the client individua
 
 #### License
 
-The copyright of overall behavior of pbft and the sample implementation of pbft are in bigpicturelab.
+The copyright of overall behavior of pbft and the sample implementation of pbft are in bigpicturelabs.
 
 #### Author
 
-[bitpicturelab](https://github.com/bigpicturelabs)
+[bigpicturelabs](https://github.com/bigpicturelabs)
 
 [Junbeomlee](https://github.com/junbeomlee)
 
