@@ -44,7 +44,7 @@ func (cs *PBFTConsensusService) StartConsensus(block *domain.Block){
 
 	cs.Lock()
 	//set consensus with preprepared state
-	consensusState := domain.NewConsensusState(cs.view.ID,xid.New().String(),block,domain.PrePrepared,cs.HandleEndConsensus)
+	consensusState := domain.NewConsensusState(cs.view,xid.New().String(),block,domain.PrePrepared,cs.HandleEndConsensus,300)
 	cs.consensusStates[consensusState.ID] = consensusState
 
 	//set consensus message to broadcast
@@ -99,7 +99,7 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 
 	if !ok{
 		//consensus state생성
-		newConsensusState := domain.NewConsensusState(cs.view.ID,consensusMessage.ConsensusID,nil,domain.Stage(msgType),cs.HandleEndConsensus)
+		newConsensusState := domain.NewConsensusState(cs.view,consensusMessage.ConsensusID,nil,domain.Stage(msgType),cs.HandleEndConsensus,300)
 		cs.consensusStates[newConsensusState.ID] = newConsensusState
 	}
 

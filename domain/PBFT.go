@@ -18,10 +18,10 @@ const (
 //consesnsus message can has 3 types
 type ConsensusMessage struct {
 	ConsensusID string
-	ViewID      string
+	View        View
 	SequenceID  int64
 	Block       *Block
-	PeerID      string
+	SenderID    string
 	MsgType     MsgType
 	TimeStamp   time.Time
 }
@@ -80,26 +80,26 @@ func NewConsensusState(view View, consensusID string, block *Block, currentStage
 }
 
 //tested
-func NewConsesnsusMessage(consensusID string, viewID string,sequenceID int64, block *Block,peerID string, msgType MsgType) ConsensusMessage{
+func NewConsesnsusMessage(consensusID string, view View,sequenceID int64, block *Block,peerID string, msgType MsgType) ConsensusMessage{
 
 	return ConsensusMessage{
 		ConsensusID: consensusID,
-		ViewID: viewID,
+		View: view,
 		SequenceID: sequenceID,
 		MsgType:msgType,
 		TimeStamp: time.Now(),
-		PeerID:peerID,
+		SenderID:peerID,
 		Block: block,
 	}
 }
 
 //todo block을 넣어야함
+//todo View를 넣어야함
 func FromConsensusProtoMessage(consensusMessage pb.ConsensusMessage) ConsensusMessage{
 
 	return ConsensusMessage{
-		ViewID: consensusMessage.ViewID,
 		SequenceID: consensusMessage.SequenceID,
-		PeerID: consensusMessage.PeerID,
+		SenderID: consensusMessage.SenderID,
 		ConsensusID: consensusMessage.ConsensusID,
 		MsgType: MsgType(consensusMessage.MsgType),
 	}

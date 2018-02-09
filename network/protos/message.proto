@@ -63,11 +63,17 @@ message Peer {
 
 message ConsensusMessage {
     string ConsensusID = 1;
-    string ViewID = 2;
+    View View = 2;
     int64 SequenceID = 3;
     Block Block = 4;
-    string PeerID = 5;
+    string SenderID = 5;
     int32 MsgType = 6;
+}
+
+message View{
+    string ViewID = 1;
+    string LeaderID = 2;
+    repeated string PeerID = 3;
 }
 
 
