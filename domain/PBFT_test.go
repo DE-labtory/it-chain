@@ -3,10 +3,13 @@ package domain
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
+	"time"
 )
 
-var mockHandler = func (consensusState ConsensusState){
+var endFlag = false
 
+var mockHandler = func (consensusState ConsensusState){
+	endFlag = true
 }
 
 func TestNewConsensusState(t *testing.T) {
@@ -14,7 +17,7 @@ func TestNewConsensusState(t *testing.T) {
 	consensusID := "consensus"
 	block := &Block{}
 
-	consensusState := NewConsensusState(viewID,consensusID,block,PrePrepared,mockHandler)
+	consensusState := NewConsensusState(viewID,consensusID,block,PrePrepared,mockHandler,5)
 
 	assert.Equal(t,consensusState.ViewID,viewID)
 	assert.Equal(t,consensusState.ID,consensusID)
@@ -40,4 +43,46 @@ func TestNewConsesnsusMessage(t *testing.T) {
 
 func TestFromConsensusProtoMessage(t *testing.T) {
 
+}
+
+func TestConsensusState_start(t *testing.T) {
+	viewID := "view"
+	consensusID := "consensus"
+	block := &Block{}
+
+	NewConsensusState(viewID,consensusID,block,PrePrepared,mockHandler,3)
+
+	//var period float32 = 0.2
+	time.Sleep(6*time.Second)
+
+	assert.True(t,endFlag)
+
+	endFlag = false
+}
+
+func TestConsensusState_start2(t *testing.T) {
+	viewID := "view"
+	consensusID := "consensus"
+	block := &Block{}
+
+	NewConsensusState(viewID,consensusID,block,PrePrepared,mockHandler,6)
+
+	//var period float32 = 0.2
+	time.Sleep(3*time.Second)
+
+	assert.False(t,endFlag)
+	endFlag = false
+}
+
+func TestConsensusState_End(t *testing.T) {
+	viewID := "view"
+	consensusID := "consensus"
+	block := &Block{}
+
+	cs := NewConsensusState(viewID,consensusID,block,PrePrepared,mockHandler,3)
+
+	cs.End()
+
+	time.Sleep(6*time.Second)
+	assert.False(t,endFlag)
 }

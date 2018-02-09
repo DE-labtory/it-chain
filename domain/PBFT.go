@@ -4,6 +4,7 @@ import (
 	"time"
 	pb "it-chain/network/protos"
 	"sync"
+	"sync/atomic"
 )
 
 type MsgType int
@@ -46,6 +47,8 @@ type ConsensusState struct {
 	CommitMsgs          map[string]ConsensusMessage
 	endChannel          chan struct{}
 	endConsensusHandler EndConsensusHandle
+	IsEnd               int32
+	period 				int32
 	sync.RWMutex
 }
 
@@ -54,8 +57,9 @@ type View struct{
 }
 
 //tested
-func NewConsensusState(viewID string, consensusID string, block *Block, currentStage Stage, endConsensusHandler EndConsensusHandle) *ConsensusState{
-	return &ConsensusState{
+func NewConsensusState(viewID string, consensusID string, block *Block, currentStage Stage, endConsensusHandler EndConsensusHandle, periodSeconds int32) *ConsensusState{
+
+	cs := &ConsensusState{
 		ID:consensusID,
 		ViewID:viewID,
 		CurrentStage:currentStage,
@@ -63,7 +67,13 @@ func NewConsensusState(viewID string, consensusID string, block *Block, currentS
 		PrepareMsgs: make(map[string]ConsensusMessage),
 		CommitMsgs: make(map[string]ConsensusMessage),
 		endConsensusHandler: endConsensusHandler,
+		IsEnd: int32(0),
+		period: periodSeconds,
 	}
+
+	go cs.start()
+
+	return cs
 }
 
 //tested
@@ -93,12 +103,22 @@ func FromConsensusProtoMessage(consensusMessage pb.ConsensusMessage) ConsensusMe
 }
 
 //timer의 time이 끝나면 consensus를 종료한다.
-func (cs *ConsensusState) startTimer(){
+//Consensus timer는 new 했을 때 시작된다.
+func (cs *ConsensusState) start(){
+	time.Sleep(time.Duration(cs.period)*time.Second)
+	cs.Lock()
+	defer cs.Unlock()
 
+	//time out
+	//consensus did not end
+	//need to delete
+	if cs.IsEnd == 0{
+		cs.endConsensusHandler(*cs)
+	}
 }
 
 func (cs *ConsensusState) End(){
-
+	atomic.StoreInt32(&(cs.IsEnd), int32(1))
 }
 
 //message 종류에 따라서 다르게 넣어야함
