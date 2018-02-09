@@ -14,7 +14,7 @@ It has these top-level messages:
 	Block
 	Transaction
 	PeerTable
-	PeerInfo
+	Peer
 	ConsensusMessage
 */
 package message
@@ -88,7 +88,7 @@ type Message struct {
 	//	*Message_Block
 	//	*Message_Transaction
 	//	*Message_PeerTable
-	//	*Message_PeerInfo
+	//	*Message_Peer
 	//	*Message_ConsensusMessage
 	Content isMessage_Content `protobuf_oneof:"content"`
 }
@@ -111,8 +111,8 @@ type Message_Transaction struct {
 type Message_PeerTable struct {
 	PeerTable *PeerTable `protobuf:"bytes,4,opt,name=peerTable,oneof"`
 }
-type Message_PeerInfo struct {
-	PeerInfo *PeerInfo `protobuf:"bytes,5,opt,name=peerInfo,oneof"`
+type Message_Peer struct {
+	Peer *Peer `protobuf:"bytes,5,opt,name=Peer,oneof"`
 }
 type Message_ConsensusMessage struct {
 	ConsensusMessage *ConsensusMessage `protobuf:"bytes,6,opt,name=consensusMessage,oneof"`
@@ -121,7 +121,7 @@ type Message_ConsensusMessage struct {
 func (*Message_Block) isMessage_Content()            {}
 func (*Message_Transaction) isMessage_Content()      {}
 func (*Message_PeerTable) isMessage_Content()        {}
-func (*Message_PeerInfo) isMessage_Content()         {}
+func (*Message_Peer) isMessage_Content()         {}
 func (*Message_ConsensusMessage) isMessage_Content() {}
 
 func (m *Message) GetContent() isMessage_Content {
@@ -159,9 +159,9 @@ func (m *Message) GetPeerTable() *PeerTable {
 	return nil
 }
 
-func (m *Message) GetPeerInfo() *PeerInfo {
-	if x, ok := m.GetContent().(*Message_PeerInfo); ok {
-		return x.PeerInfo
+func (m *Message) GetPeer() *Peer {
+	if x, ok := m.GetContent().(*Message_Peer); ok {
+		return x.Peer
 	}
 	return nil
 }
@@ -179,7 +179,7 @@ func (*Message) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error
 		(*Message_Block)(nil),
 		(*Message_Transaction)(nil),
 		(*Message_PeerTable)(nil),
-		(*Message_PeerInfo)(nil),
+		(*Message_Peer)(nil),
 		(*Message_ConsensusMessage)(nil),
 	}
 }
@@ -203,9 +203,9 @@ func _Message_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
 		if err := b.EncodeMessage(x.PeerTable); err != nil {
 			return err
 		}
-	case *Message_PeerInfo:
+	case *Message_Peer:
 		b.EncodeVarint(5<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.PeerInfo); err != nil {
+		if err := b.EncodeMessage(x.Peer); err != nil {
 			return err
 		}
 	case *Message_ConsensusMessage:
@@ -247,13 +247,13 @@ func _Message_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer
 		err := b.DecodeMessage(msg)
 		m.Content = &Message_PeerTable{msg}
 		return true, err
-	case 5: // content.peerInfo
+	case 5: // content.Peer
 		if wire != proto.WireBytes {
 			return true, proto.ErrInternalBadWireType
 		}
-		msg := new(PeerInfo)
+		msg := new(Peer)
 		err := b.DecodeMessage(msg)
-		m.Content = &Message_PeerInfo{msg}
+		m.Content = &Message_Peer{msg}
 		return true, err
 	case 6: // content.consensusMessage
 		if wire != proto.WireBytes {
@@ -287,8 +287,8 @@ func _Message_OneofSizer(msg proto.Message) (n int) {
 		n += proto.SizeVarint(4<<3 | proto.WireBytes)
 		n += proto.SizeVarint(uint64(s))
 		n += s
-	case *Message_PeerInfo:
-		s := proto.Size(x.PeerInfo)
+	case *Message_Peer:
+		s := proto.Size(x.Peer)
 		n += proto.SizeVarint(5<<3 | proto.WireBytes)
 		n += proto.SizeVarint(uint64(s))
 		n += s
@@ -321,8 +321,8 @@ func (*Transaction) ProtoMessage()               {}
 func (*Transaction) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 type PeerTable struct {
-	OwnerID string               `protobuf:"bytes,1,opt,name=OwnerID" json:"OwnerID,omitempty"`
-	PeerMap map[string]*PeerInfo `protobuf:"bytes,2,rep,name=PeerMap" json:"PeerMap,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	MyID string               `protobuf:"bytes,1,opt,name=MyID" json:"MyID,omitempty"`
+	PeerMap map[string]*Peer `protobuf:"bytes,2,rep,name=PeerMap" json:"PeerMap,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 }
 
 func (m *PeerTable) Reset()                    { *m = PeerTable{} }
@@ -330,21 +330,21 @@ func (m *PeerTable) String() string            { return proto.CompactTextString(
 func (*PeerTable) ProtoMessage()               {}
 func (*PeerTable) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
 
-func (m *PeerTable) GetOwnerID() string {
+func (m *PeerTable) GetMyID() string {
 	if m != nil {
-		return m.OwnerID
+		return m.MyID
 	}
 	return ""
 }
 
-func (m *PeerTable) GetPeerMap() map[string]*PeerInfo {
+func (m *PeerTable) GetPeerMap() map[string]*Peer {
 	if m != nil {
 		return m.PeerMap
 	}
 	return nil
 }
 
-type PeerInfo struct {
+type Peer struct {
 	IpAddress string `protobuf:"bytes,1,opt,name=ipAddress" json:"ipAddress,omitempty"`
 	Port      string `protobuf:"bytes,2,opt,name=port" json:"port,omitempty"`
 	PeerID    string `protobuf:"bytes,3,opt,name=peerID" json:"peerID,omitempty"`
@@ -352,40 +352,40 @@ type PeerInfo struct {
 	PubKey    []byte `protobuf:"bytes,5,opt,name=pubKey,proto3" json:"pubKey,omitempty"`
 }
 
-func (m *PeerInfo) Reset()                    { *m = PeerInfo{} }
-func (m *PeerInfo) String() string            { return proto.CompactTextString(m) }
-func (*PeerInfo) ProtoMessage()               {}
-func (*PeerInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+func (m *Peer) Reset()                    { *m = Peer{} }
+func (m *Peer) String() string            { return proto.CompactTextString(m) }
+func (*Peer) ProtoMessage()               {}
+func (*Peer) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
-func (m *PeerInfo) GetIpAddress() string {
+func (m *Peer) GetIpAddress() string {
 	if m != nil {
 		return m.IpAddress
 	}
 	return ""
 }
 
-func (m *PeerInfo) GetPort() string {
+func (m *Peer) GetPort() string {
 	if m != nil {
 		return m.Port
 	}
 	return ""
 }
 
-func (m *PeerInfo) GetPeerID() string {
+func (m *Peer) GetPeerID() string {
 	if m != nil {
 		return m.PeerID
 	}
 	return ""
 }
 
-func (m *PeerInfo) GetHeartBeat() int32 {
+func (m *Peer) GetHeartBeat() int32 {
 	if m != nil {
 		return m.HeartBeat
 	}
 	return 0
 }
 
-func (m *PeerInfo) GetPubKey() []byte {
+func (m *Peer) GetPubKey() []byte {
 	if m != nil {
 		return m.PubKey
 	}
@@ -455,7 +455,7 @@ func init() {
 	proto.RegisterType((*Block)(nil), "message.Block")
 	proto.RegisterType((*Transaction)(nil), "message.Transaction")
 	proto.RegisterType((*PeerTable)(nil), "message.PeerTable")
-	proto.RegisterType((*PeerInfo)(nil), "message.PeerInfo")
+	proto.RegisterType((*Peer)(nil), "message.Peer")
 	proto.RegisterType((*ConsensusMessage)(nil), "message.ConsensusMessage")
 }
 
@@ -602,7 +602,7 @@ var _MessageService_serviceDesc = grpc.ServiceDesc{
 // Client API for PeerService service
 
 type PeerServiceClient interface {
-	GetPeerInfo(ctx context.Context, in *PeerInfo, opts ...grpc.CallOption) (*PeerInfo, error)
+	GetPeer(ctx context.Context, in *Peer, opts ...grpc.CallOption) (*Peer, error)
 }
 
 type peerServiceClient struct {
@@ -613,9 +613,9 @@ func NewPeerServiceClient(cc *grpc.ClientConn) PeerServiceClient {
 	return &peerServiceClient{cc}
 }
 
-func (c *peerServiceClient) GetPeerInfo(ctx context.Context, in *PeerInfo, opts ...grpc.CallOption) (*PeerInfo, error) {
-	out := new(PeerInfo)
-	err := grpc.Invoke(ctx, "/message.PeerService/GetPeerInfo", in, out, c.cc, opts...)
+func (c *peerServiceClient) GetPeer(ctx context.Context, in *Peer, opts ...grpc.CallOption) (*Peer, error) {
+	out := new(Peer)
+	err := grpc.Invoke(ctx, "/message.PeerService/GetPeer", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -625,27 +625,27 @@ func (c *peerServiceClient) GetPeerInfo(ctx context.Context, in *PeerInfo, opts 
 // Server API for PeerService service
 
 type PeerServiceServer interface {
-	GetPeerInfo(context.Context, *PeerInfo) (*PeerInfo, error)
+	GetPeer(context.Context, *Peer) (*Peer, error)
 }
 
 func RegisterPeerServiceServer(s *grpc.Server, srv PeerServiceServer) {
 	s.RegisterService(&_PeerService_serviceDesc, srv)
 }
 
-func _PeerService_GetPeerInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PeerInfo)
+func _PeerService_GetPeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Peer)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PeerServiceServer).GetPeerInfo(ctx, in)
+		return srv.(PeerServiceServer).GetPeer(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/message.PeerService/GetPeerInfo",
+		FullMethod: "/message.PeerService/GetPeer",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PeerServiceServer).GetPeerInfo(ctx, req.(*PeerInfo))
+		return srv.(PeerServiceServer).GetPeer(ctx, req.(*Peer))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -655,8 +655,8 @@ var _PeerService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*PeerServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetPeerInfo",
-			Handler:    _PeerService_GetPeerInfo_Handler,
+			MethodName: "GetPeer",
+			Handler:    _PeerService_GetPeer_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

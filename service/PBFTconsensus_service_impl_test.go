@@ -63,15 +63,15 @@ type MockPeerService struct{
 
 //peer table 조회
 func (mps MockPeerService) GetPeerTable() domain.PeerTable{
-	myPeer := &domain.PeerInfo{}
+	myPeer := &domain.Peer{}
 	myPeer.PeerID = "peer1"
 
-	peer1 := &domain.PeerInfo{}
+	peer1 := &domain.Peer{}
 	peer1.PeerID = "peer2"
 
 	peerTable := domain.PeerTable{}
-	peerTable.OwnerID = myPeer.PeerID
-	peerTable.PeerMap = make(map[string]*domain.PeerInfo)
+	peerTable.MyID = myPeer.PeerID
+	peerTable.PeerMap = make(map[string]*domain.Peer)
 	peerTable.PeerMap[myPeer.PeerID] = myPeer
 	peerTable.PeerMap[peer1.PeerID] = peer1
 
@@ -80,8 +80,8 @@ func (mps MockPeerService) GetPeerTable() domain.PeerTable{
 }
 
 //peer info 찾기
-func (mps MockPeerService) GetPeerInfoByPeerID(peerID string) *domain.PeerInfo{
-	return &domain.PeerInfo{}
+func (mps MockPeerService) GetPeerByPeerID(peerID string) *domain.Peer{
+	return &domain.Peer{}
 }
 
 //peer info
@@ -95,13 +95,13 @@ func (mps MockPeerService) UpdatePeerTable(peerTable domain.PeerTable){
 }
 
 //Add peer
-func (mps MockPeerService) AddPeerInfo(peerInfo *domain.PeerInfo){
+func (mps MockPeerService) AddPeer(Peer *domain.Peer){
 
 }
 
 //Request Peer Info
-func (mps MockPeerService) RequestPeerInfo(host string, port string) *domain.PeerInfo{
-	return &domain.PeerInfo{}
+func (mps MockPeerService) RequestPeer(host string, port string) *domain.Peer{
+	return &domain.Peer{}
 }
 
 func (mps MockPeerService) BroadCastPeerTable(interface{}){
