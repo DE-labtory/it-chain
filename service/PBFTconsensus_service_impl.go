@@ -16,18 +16,19 @@ var logger_pbftservice = common.GetLogger("pbft_service")
 type PBFTConsensusService struct {
 	consensusStates map[string]*domain.ConsensusState
 	comm            comm.ConnectionManager
-	view            domain.View
+	view            *domain.View
 	peerID          string
 	peerService 	PeerService
 	blockService    BlockService
 	sync.RWMutex
 }
 
-func NewPBFTConsensusService(comm comm.ConnectionManager, peerService PeerService, blockService BlockService) ConsensusService{
+func NewPBFTConsensusService(view *domain.View,comm comm.ConnectionManager, peerService PeerService, blockService BlockService) ConsensusService{
 
 	pbft := &PBFTConsensusService{
 		consensusStates: make(map[string]*domain.ConsensusState),
 		comm:comm,
+		view:view,
 		peerService: peerService,
 		blockService: blockService,
 	}
@@ -99,8 +100,13 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 
 	if !ok{
 		//consensus state생성
-		newConsensusState := domain.NewConsensusState(cs.view,consensusMessage.ConsensusID,nil,domain.Stage(msgType),cs.HandleEndConsensus,300)
-		cs.consensusStates[newConsensusState.ID] = newConsensusState
+		//prepremessage인 경우에만 block과 view를 세팅
+		//var newConsensusState *domain.ConsensusState
+		//if consensusMessage.MsgType == domain.PreprepareMsg{
+		//	newConsensusState = domain.NewConsensusState(&consensusMessage.View,consensusMessage.ConsensusID,consensusMessage.Block,domain.Stage(msgType),cs.HandleEndConsensus,300)
+		//}
+		//
+		//cs.consensusStates[newConsensusState.ID] = newConsensusState
 	}
 
 	//if !ok{

@@ -16,7 +16,7 @@ func TestNewConsensusState(t *testing.T) {
 
 	consensusID := "consensus"
 	block := &Block{}
-	view := View{}
+	view := &View{}
 
 	view.ID = "123"
 	view.LeaderID = "1"
@@ -57,7 +57,7 @@ func TestConsensusState_start(t *testing.T) {
 	consensusID := "consensus"
 	block := &Block{}
 
-	view := View{}
+	view := &View{}
 	view.ID = "123"
 	view.LeaderID = "1"
 	view.PeerID = []string{"1","2","3"}
@@ -76,7 +76,7 @@ func TestConsensusState_start2(t *testing.T) {
 	consensusID := "consensus"
 	block := &Block{}
 
-	view := View{}
+	view := &View{}
 	view.ID = "123"
 	view.LeaderID = "1"
 	view.PeerID = []string{"1","2","3"}
@@ -93,7 +93,7 @@ func TestConsensusState_start2(t *testing.T) {
 func TestConsensusState_End(t *testing.T) {
 	consensusID := "consensus"
 	block := &Block{}
-	view := View{}
+	view := &View{}
 	view.ID = "123"
 	view.LeaderID = "1"
 	view.PeerID = []string{"1","2","3"}

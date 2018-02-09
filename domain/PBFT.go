@@ -40,7 +40,7 @@ type EndConsensusHandle func(ConsensusState)
 //한개의 consensus는 1개의 state를 갖는다.
 type ConsensusState struct {
 	ID                  string
-	View                View
+	View                *View
 	CurrentStage        Stage
 	Block               *Block
 	PrepareMsgs         map[string]ConsensusMessage
@@ -60,7 +60,7 @@ type View struct {
 }
 
 //tested
-func NewConsensusState(view View, consensusID string, block *Block, currentStage Stage, endConsensusHandler EndConsensusHandle, periodSeconds int32) *ConsensusState{
+func NewConsensusState(view *View, consensusID string, block *Block, currentStage Stage, endConsensusHandler EndConsensusHandle, periodSeconds int32) *ConsensusState{
 
 	cs := &ConsensusState{
 		ID:consensusID,
