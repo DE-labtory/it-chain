@@ -6,6 +6,12 @@
 
 It describes the important concept of blockchains.
 
+
+
+[TOC]
+
+
+
 ## Comparison of Blockchains
 
 | Criteria    | Bitcoin                                  | Ethereum                     | HyperLedger                              |
@@ -73,6 +79,8 @@ Definitions of each abbreviation in the diagram are;
 - `i`: Peer(Node) ID
 - `r`: Result of the request's operation
 
+In this diagram, the fork/join node notation (black thin bars) is used to denote broadcasting the message. Normally, this notation is [a control node to support the parallelism in activities](https://www.uml-diagrams.org/activity-diagrams-controls.html#fork-node).
+
 ##### Why `count >= 2` ?
 
 In the diagram, the peer change its state to `prepared` or `committed` when the `count` value, which is the number of verified messages from other peers, is larger than `2`.
@@ -88,17 +96,54 @@ Every node replies the result of the request's operation to the client individua
 
 #### License
 
-The copyright of overall behavior of pbft and the sample implementation of pbft are in bigpicturelab.
+The copyright of overall behavior of pbft and the sample implementation of pbft are in bigpicturelabs.
 
 #### Author
 
-[bitpicturelab](https://github.com/bigpicturelabs)
+[bigpicturelabs](https://github.com/bigpicturelabs)
 
 [Junbeomlee](https://github.com/junbeomlee)
 
 
 
 ### POW
+
+A **proof of work(POW)** is a piece of data which is difficult (costly, time-consuming) to produce but easy for others to verify and which satisfies certain requirements. Producing a proof of work can be a random process with low probability so that a lot of trial and error is required *on average* before a valid proof of work is generated.
+
+#### Example
+
+Let's say the base string that we are going to do work on is "Hello, world!". Our target is to find a variation of it that SHA-256 hashes to a value beginning with '000'. We vary the string by adding an integer value to the end called a [nonce](https://en.bitcoin.it/wiki/Nonce) and incrementing it each time.
+
+```
+"Hello, world!0" => 1312af178c253f84028d480a6adc1e25e81caa44c749ec81976192e2ec934c64
+"Hello, world!1" => e9afc424b79e4f6ab42d99c81156d3a17228d6e1eef4139be78e948a9332a7d8
+"Hello, world!2" => ae37343a357a8297591625e7134cbea22f5928be8ca2a32aa475cf05fd4266b7
+...
+"Hello, world!4248" => 6e110d98b388e77e9c6f042ac6b497cec46660deef75a55ebc7cfdf65cc0b965
+"Hello, world!4249" => c004190b822f1669cac8dc37e761cb73652e7832fb814565702245cf26ebb9e6
+"Hello, world!4250" => 0000c3af42fc31103f1fdc0151fa747ff87349a4714df7cc52ea464e12dcd4e9
+```
+
+
+
+#### How can POW solve the Byzantine General problem 
+
+At first, the nodes are mining, without knowing who is the traitor (redundant use). However, in the block where a large number of honest nodes participate, mining is performed first, and transactions used as duplication, which is a traitor, are automatically discarded. When a majority of loyal and honest generals collaborate, the false information naturally disappears.
+
+To make a block, nodes have to solve a very difficult problem. Since a small number of malicious nodes can not solve problems faster and continuously than the majority of nodes involved in mining (because the computing power of many honest nodes is stronger. But if the malicious node's computing power exceeds 51% of the total, it may be vulnerable to security.)
+
+
+
+#### Pros and Cons
+
+**Pros**
+
+- Strong security
+
+**Cons**
+
+- Block creation speed is very slow.
+- Use of many resources(Electricity)
 
 
 
