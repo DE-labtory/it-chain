@@ -40,7 +40,7 @@ type EndConsensusHandle func(ConsensusState)
 //한개의 consensus는 1개의 state를 갖는다.
 type ConsensusState struct {
 	ID                  string
-	ViewID              string
+	View                View
 	CurrentStage        Stage
 	Block               *Block
 	PrepareMsgs         map[string]ConsensusMessage
@@ -48,20 +48,23 @@ type ConsensusState struct {
 	endChannel          chan struct{}
 	endConsensusHandler EndConsensusHandle
 	IsEnd               int32
-	period 				int32
+	period              int32
 	sync.RWMutex
 }
 
-type View struct{
-	ID string
+//현재 Consensus에 참여하는 leader와 peer정보
+type View struct {
+	ID       string
+	LeaderID string
+	PeerID   []string
 }
 
 //tested
-func NewConsensusState(viewID string, consensusID string, block *Block, currentStage Stage, endConsensusHandler EndConsensusHandle, periodSeconds int32) *ConsensusState{
+func NewConsensusState(view View, consensusID string, block *Block, currentStage Stage, endConsensusHandler EndConsensusHandle, periodSeconds int32) *ConsensusState{
 
 	cs := &ConsensusState{
 		ID:consensusID,
-		ViewID:viewID,
+		View:view,
 		CurrentStage:currentStage,
 		Block: block,
 		PrepareMsgs: make(map[string]ConsensusMessage),

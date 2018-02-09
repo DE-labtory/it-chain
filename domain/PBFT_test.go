@@ -13,13 +13,18 @@ var mockHandler = func (consensusState ConsensusState){
 }
 
 func TestNewConsensusState(t *testing.T) {
-	viewID := "view"
+
 	consensusID := "consensus"
 	block := &Block{}
+	view := View{}
 
-	consensusState := NewConsensusState(viewID,consensusID,block,PrePrepared,mockHandler,5)
+	view.ID = "123"
+	view.LeaderID = "1"
+	view.PeerID = []string{"1","2","3"}
 
-	assert.Equal(t,consensusState.ViewID,viewID)
+	consensusState := NewConsensusState(view,consensusID,block,PrePrepared,mockHandler,5)
+
+	assert.Equal(t,consensusState.View,view)
 	assert.Equal(t,consensusState.ID,consensusID)
 	assert.Equal(t,consensusState.CurrentStage,PrePrepared)
 	assert.NotNil(t,consensusState.CommitMsgs)
@@ -46,11 +51,15 @@ func TestFromConsensusProtoMessage(t *testing.T) {
 }
 
 func TestConsensusState_start(t *testing.T) {
-	viewID := "view"
 	consensusID := "consensus"
 	block := &Block{}
 
-	NewConsensusState(viewID,consensusID,block,PrePrepared,mockHandler,3)
+	view := View{}
+	view.ID = "123"
+	view.LeaderID = "1"
+	view.PeerID = []string{"1","2","3"}
+
+	NewConsensusState(view,consensusID,block,PrePrepared,mockHandler,3)
 
 	//var period float32 = 0.2
 	time.Sleep(6*time.Second)
@@ -61,11 +70,15 @@ func TestConsensusState_start(t *testing.T) {
 }
 
 func TestConsensusState_start2(t *testing.T) {
-	viewID := "view"
 	consensusID := "consensus"
 	block := &Block{}
 
-	NewConsensusState(viewID,consensusID,block,PrePrepared,mockHandler,6)
+	view := View{}
+	view.ID = "123"
+	view.LeaderID = "1"
+	view.PeerID = []string{"1","2","3"}
+
+	NewConsensusState(view,consensusID,block,PrePrepared,mockHandler,6)
 
 	//var period float32 = 0.2
 	time.Sleep(3*time.Second)
@@ -75,11 +88,14 @@ func TestConsensusState_start2(t *testing.T) {
 }
 
 func TestConsensusState_End(t *testing.T) {
-	viewID := "view"
 	consensusID := "consensus"
 	block := &Block{}
+	view := View{}
+	view.ID = "123"
+	view.LeaderID = "1"
+	view.PeerID = []string{"1","2","3"}
 
-	cs := NewConsensusState(viewID,consensusID,block,PrePrepared,mockHandler,3)
+	cs := NewConsensusState(view,consensusID,block,PrePrepared,mockHandler,3)
 
 	cs.End()
 
