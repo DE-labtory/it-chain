@@ -62,7 +62,7 @@ func (s *MessageServer) Ping(ctx context.Context, in *pb.Empty) (*pb.Empty, erro
 
 func SetPeer(ipAddress string, peerID string,port string, bootport string,myID string){
 
-	peer1 := &peer.PeerInfo{
+	peer1 := &peer.Peer{
 		Port: port,
 		PeerID: myID,
 		IpAddress: "127.0.0.1",
@@ -87,7 +87,7 @@ func SetPeer(ipAddress string, peerID string,port string, bootport string,myID s
 	peerService := peer.NewPeerServiceImpl(peerTable,comm)
 
 	if ipAddress != "" && peerID != "" && bootport != ""{
-		peer2 := &peer.PeerInfo{
+		peer2 := &peer.Peer{
 			Port: bootport,
 			PeerID: peerID,
 			IpAddress: ipAddress,
@@ -95,7 +95,7 @@ func SetPeer(ipAddress string, peerID string,port string, bootport string,myID s
 			TimeStamp: time.Now(),
 		}
 		logger.Println("boot peer added")
-		peerService.AddPeerInfo(peer2)
+		peerService.AddPeer(peer2)
 		logger.Println(peerService.GetPeerTable())
 	}
 
