@@ -10,7 +10,7 @@ service MessageService{
 }
 
 service PeerService{
-    rpc GetPeerInfo (PeerInfo) returns (PeerInfo) {}
+    rpc GetPeer (Peer) returns (Peer) {}
 }
 
 message Envelope {
@@ -35,7 +35,7 @@ message Message{
         Block block = 2;
         Transaction transaction = 3;
         PeerTable peerTable = 4;
-        PeerInfo peerInfo = 5;
+        Peer Peer = 5;
         ConsensusMessage consensusMessage= 6;
     }
 }
@@ -49,11 +49,11 @@ message Transaction{
 }
 
 message PeerTable{
-    string OwnerID = 1;
-    map <string, PeerInfo> PeerMap= 2;
+    string MyID = 1;
+    map <string, Peer> PeerMap= 2;
 }
 
-message PeerInfo {
+message Peer {
     string ipAddress = 1;
     string port = 2;
     string peerID = 3;
@@ -63,11 +63,17 @@ message PeerInfo {
 
 message ConsensusMessage {
     string ConsensusID = 1;
-    string ViewID = 2;
+    View View = 2;
     int64 SequenceID = 3;
     Block Block = 4;
-    string PeerID = 5;
+    string SenderID = 5;
     int32 MsgType = 6;
+}
+
+message View{
+    string ViewID = 1;
+    string LeaderID = 2;
+    repeated string PeerID = 3;
 }
 
 

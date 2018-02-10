@@ -15,65 +15,65 @@ import (
 //
 //	peerTable_ := &Message_PeerTable{}
 //	peerTable_.PeerTable = &PeerTable{}
-//	peerTable_.PeerTable.OwnerID = peerTable.OwnerID
-//	pbPeerInfos := make([]*PeerInfo,0)
+//	peerTable_.PeerTable.MyID = peerTable.MyID
+//	pbPeers := make([]*Peer,0)
 //
-//	for _, peerInfo := range peerTable.PeerMap {
-//		pbPeerInfo := &PeerInfo{}
-//		pbPeerInfo.IpAddress = peerInfo.IpAddress
-//		pbPeerInfo.PeerID = peerInfo.PeerID
-//		pbPeerInfo.HeartBeat = int32(peerInfo.HeartBeat)
-//		pbPeerInfo.Port = peerInfo.Port
-//		pbPeerInfo.PubKey = peerInfo.PubKey
-//		pbPeerInfos = append(pbPeerInfos, pbPeerInfo)
+//	for _, Peer := range peerTable.PeerMap {
+//		pbPeer := &Peer{}
+//		pbPeer.IpAddress = Peer.IpAddress
+//		pbPeer.PeerID = Peer.PeerID
+//		pbPeer.HeartBeat = int32(Peer.HeartBeat)
+//		pbPeer.Port = Peer.Port
+//		pbPeer.PubKey = Peer.PubKey
+//		pbPeers = append(pbPeers, pbPeer)
 //	}
 //
-//	peerTable_.PeerTable.PeerInfos = pbPeerInfos
+//	peerTable_.PeerTable.Peers = pbPeers
 //
 //	return peerTable_
 //}
 //
 //func (m *Message) FromPeerTable(peerTable peer.PeerTable){
-//	m.GetPeerTable().OwnerID = peerTable.OwnerID
+//	m.GetPeerTable().MyID = peerTable.MyID
 //
 //}
 //
-//func (m *Message) SetPeerInfos(peerInfos []peer.PeerInfo, ownerID string){
+//func (m *Message) SetPeers(Peers []peer.Peer, MyID string){
 //
 //	fmt.Println(m.GetPeerTable())
 //
-//	m.GetPeerTable().OwnerID = ownerID
+//	m.GetPeerTable().MyID = MyID
 //
-//	pbPeerInfos := make([]*PeerInfo,0)
+//	pbPeers := make([]*Peer,0)
 //
-//	for _, peerInfo := range peerInfos {
-//		pbPeerInfo := &PeerInfo{}
-//		pbPeerInfo.PeerID = peerInfo.PeerID
-//		pbPeerInfo.HeartBeat = int32(peerInfo.HeartBeat)
-//		pbPeerInfo.Port = peerInfo.Port
-//		pbPeerInfo.PubKey = peerInfo.PubKey
-//		pbPeerInfos = append(pbPeerInfos, pbPeerInfo)
+//	for _, Peer := range Peers {
+//		pbPeer := &Peer{}
+//		pbPeer.PeerID = Peer.PeerID
+//		pbPeer.HeartBeat = int32(Peer.HeartBeat)
+//		pbPeer.Port = Peer.Port
+//		pbPeer.PubKey = Peer.PubKey
+//		pbPeers = append(pbPeers, pbPeer)
 //	}
 //
-//	m.GetPeerTable().PeerInfos = pbPeerInfos
+//	m.GetPeerTable().Peers = pbPeers
 //
 //}
 //
 //func (m *Message) GetPeerTable_() *peer.PeerTable{
 //
 //	peerTable := &peer.PeerTable{}
-//	peerTable.OwnerID = m.GetPeerTable().OwnerID
-//	peerTable.PeerMap = make(map[string]*peer.PeerInfo)
+//	peerTable.MyID = m.GetPeerTable().MyID
+//	peerTable.PeerMap = make(map[string]*peer.Peer)
 //
-//	for _, peerInfo := range m.GetPeerTable().PeerInfos {
-//		peerInfo_ := &peer.PeerInfo{}
-//		peerInfo_.IpAddress = peerInfo.IpAddress
-//		peerInfo_.PeerID  = peerInfo.PeerID
-//		peerInfo_.PubKey = peerInfo.PubKey
-//		peerInfo_.HeartBeat = int(peerInfo.HeartBeat)
-//		peerInfo_.Port = peerInfo.Port
+//	for _, Peer := range m.GetPeerTable().Peers {
+//		Peer_ := &peer.Peer{}
+//		Peer_.IpAddress = Peer.IpAddress
+//		Peer_.PeerID  = Peer.PeerID
+//		Peer_.PubKey = Peer.PubKey
+//		Peer_.HeartBeat = int(Peer.HeartBeat)
+//		Peer_.Port = Peer.Port
 //
-//		peerTable.PeerMap[peerInfo.PeerID] = peerInfo_
+//		peerTable.PeerMap[Peer.PeerID] = Peer_
 //	}
 //
 //	return peerTable

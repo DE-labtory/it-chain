@@ -7,9 +7,9 @@ import (
 	"fmt"
 )
 
-func MockCreateNewPeerInfo(peerID string) *PeerInfo{
+func MockCreateNewPeer(peerID string) *Peer{
 
-	return  &PeerInfo{
+	return  &Peer{
 		PeerID: peerID,
 		Port: "8080",
 		IpAddress: "127.0.0.1",
@@ -20,8 +20,8 @@ func MockCreateNewPeerInfo(peerID string) *PeerInfo{
 
 func MockCreateNewPeerTable(peerID string) *PeerTable{
 
-	peerInfo := MockCreateNewPeerInfo(peerID)
-	peerTable,err := NewPeerTable(peerInfo)
+	Peer := MockCreateNewPeer(peerID)
+	peerTable,err := NewPeerTable(Peer)
 
 	if err != nil{
 
@@ -30,9 +30,9 @@ func MockCreateNewPeerTable(peerID string) *PeerTable{
 	return peerTable
 }
 
-func TestPeerInfo_Update(t *testing.T) {
-	peer1 := MockCreateNewPeerInfo("test1")
-	peer2 := MockCreateNewPeerInfo("test1")
+func TestPeer_Update(t *testing.T) {
+	peer1 := MockCreateNewPeer("test1")
+	peer2 := MockCreateNewPeer("test1")
 	peer2.HeartBeat = 5
 	peer2.Port = "7777"
 	peer2.IpAddress = "127.0.0.2"
@@ -46,71 +46,71 @@ func TestPeerInfo_Update(t *testing.T) {
 
 func TestNewPeerTable(t *testing.T) {
 
-	peerInfo := MockCreateNewPeerInfo("test1")
-	peerTable,err := NewPeerTable(peerInfo)
+	Peer := MockCreateNewPeer("test1")
+	peerTable,err := NewPeerTable(Peer)
 
 	if err != nil{
 		assert.Fail(t,"fail to create new peertable")
 	}
 
 	assert.Equal(t,len(peerTable.PeerMap),1)
-	assert.Equal(t,peerTable.PeerMap[peerInfo.PeerID],peerInfo)
+	assert.Equal(t,peerTable.PeerMap[Peer.PeerID],Peer)
 }
 
 func TestPeerTable_FindPeerByPeerID(t *testing.T) {
 
-	peerInfo := MockCreateNewPeerInfo("test1")
-	peerTable,err := NewPeerTable(peerInfo)
+	Peer := MockCreateNewPeer("test1")
+	peerTable,err := NewPeerTable(Peer)
 	if err != nil{
 		assert.Fail(t,"fail to create new peertable")
 	}
 
 	//when peer exist
-	assert.Equal(t,peerTable.FindPeerByPeerID(peerInfo.PeerID),peerInfo)
+	assert.Equal(t,peerTable.FindPeerByPeerID(Peer.PeerID),Peer)
 
 	//when peer does not exist
 	assert.Nil(t,peerTable.FindPeerByPeerID("test2"))
 }
 
-func TestPeerTable_AddPeerInfo(t *testing.T) {
+func TestPeerTable_AddPeer(t *testing.T) {
 	//when
-	peerInfo := MockCreateNewPeerInfo("test1")
-	peerTable,err := NewPeerTable(peerInfo)
+	Peer := MockCreateNewPeer("test1")
+	peerTable,err := NewPeerTable(Peer)
 
 	if err != nil{
 		assert.Fail(t,"fail to create new peertable")
 	}
 
-	peerInfo2 := MockCreateNewPeerInfo("test2")
-	peerTable.AddPeerInfo(peerInfo2)
+	Peer2 := MockCreateNewPeer("test2")
+	peerTable.AddPeer(Peer2)
 
 	assert.Equal(t,len(peerTable.PeerMap),2)
-	assert.Equal(t,peerTable.PeerMap[peerInfo2.PeerID],peerInfo2)
+	assert.Equal(t,peerTable.PeerMap[Peer2.PeerID],Peer2)
 }
 
 func TestPeerTable_UpdatePeerTable(t *testing.T) {
 
-	peerInfo := MockCreateNewPeerInfo("test1")
-	peerTable,err := NewPeerTable(peerInfo)
+	Peer := MockCreateNewPeer("test1")
+	peerTable,err := NewPeerTable(Peer)
 
 	if err != nil{
 		assert.Fail(t,"fail to create new peertable")
 	}
 
-	peerInfo2 := MockCreateNewPeerInfo("test1")
-	peerInfo2.HeartBeat = 3
-	peerInfo2.IpAddress = "127.0.0.2"
-	peerInfo2.Port = "7070"
+	Peer2 := MockCreateNewPeer("test1")
+	Peer2.HeartBeat = 3
+	Peer2.IpAddress = "127.0.0.2"
+	Peer2.Port = "7070"
 
-	peerInfo3 := MockCreateNewPeerInfo("test3")
+	Peer3 := MockCreateNewPeer("test3")
 
-	peerTable2,err := NewPeerTable(peerInfo2)
+	peerTable2,err := NewPeerTable(Peer2)
 
 	if err != nil{
 		assert.Fail(t,"fail to create new peertable")
 	}
 
-	peerTable2.PeerMap[peerInfo3.PeerID] = peerInfo3
+	peerTable2.PeerMap[Peer3.PeerID] = Peer3
 
 
 	//////
@@ -118,13 +118,13 @@ func TestPeerTable_UpdatePeerTable(t *testing.T) {
 
 
 	assert.Equal(t,len(peerTable.PeerMap),2)
-	assert.Equal(t,peerTable.PeerMap[peerInfo2.PeerID].HeartBeat,peerInfo2.HeartBeat)
-	assert.Equal(t,peerTable.PeerMap[peerInfo2.PeerID].IpAddress,peerInfo2.IpAddress)
-	assert.Equal(t,peerTable.PeerMap[peerInfo2.PeerID].Port,peerInfo2.Port)
+	assert.Equal(t,peerTable.PeerMap[Peer2.PeerID].HeartBeat,Peer2.HeartBeat)
+	assert.Equal(t,peerTable.PeerMap[Peer2.PeerID].IpAddress,Peer2.IpAddress)
+	assert.Equal(t,peerTable.PeerMap[Peer2.PeerID].Port,Peer2.Port)
 
-	assert.Equal(t,peerTable.PeerMap[peerInfo3.PeerID].HeartBeat,peerInfo3.HeartBeat)
-	assert.Equal(t,peerTable.PeerMap[peerInfo3.PeerID].IpAddress,peerInfo3.IpAddress)
-	assert.Equal(t,peerTable.PeerMap[peerInfo3.PeerID].Port,peerInfo3.Port)
+	assert.Equal(t,peerTable.PeerMap[Peer3.PeerID].HeartBeat,Peer3.HeartBeat)
+	assert.Equal(t,peerTable.PeerMap[Peer3.PeerID].IpAddress,Peer3.IpAddress)
+	assert.Equal(t,peerTable.PeerMap[Peer3.PeerID].Port,Peer3.Port)
 }
 
 func TestPeerTable_IncrementHeartBeat(t *testing.T) {
@@ -144,23 +144,23 @@ func TestPeerTable_string(t *testing.T){
 func TestPeerTable_GetPeerList(t *testing.T) {
 	peerTable := MockCreateNewPeerTable("test1")
 
-	peerInfo2 := MockCreateNewPeerInfo("test2")
-	peerInfo2.HeartBeat = 3
-	peerInfo2.IpAddress = "127.0.0.2"
-	peerInfo2.Port = "7070"
-	peerTable.AddPeerInfo(peerInfo2)
+	Peer2 := MockCreateNewPeer("test2")
+	Peer2.HeartBeat = 3
+	Peer2.IpAddress = "127.0.0.2"
+	Peer2.Port = "7070"
+	peerTable.AddPeer(Peer2)
 
-	peerInfo3 := MockCreateNewPeerInfo("test3")
-	peerInfo3.HeartBeat = 3
-	peerInfo3.IpAddress = "127.0.0.2"
-	peerInfo3.Port = "7070"
-	peerTable.AddPeerInfo(peerInfo3)
+	Peer3 := MockCreateNewPeer("test3")
+	Peer3.HeartBeat = 3
+	Peer3.IpAddress = "127.0.0.2"
+	Peer3.Port = "7070"
+	peerTable.AddPeer(Peer3)
 
-	peerInfo4 := MockCreateNewPeerInfo("test4")
-	peerInfo4.HeartBeat = 3
-	peerInfo4.IpAddress = "127.0.0.2"
-	peerInfo4.Port = "7070"
-	peerTable.AddPeerInfo(peerInfo4)
+	Peer4 := MockCreateNewPeer("test4")
+	Peer4.HeartBeat = 3
+	Peer4.IpAddress = "127.0.0.2"
+	Peer4.Port = "7070"
+	peerTable.AddPeer(Peer4)
 
 
 	peerList := peerTable.GetPeerList()
@@ -173,11 +173,11 @@ func TestPeerTable_GetPeerList(t *testing.T) {
 func TestPeerTable_GetMyInfo(t *testing.T) {
 	peerTable := MockCreateNewPeerTable("test1")
 
-	peerInfo2 := MockCreateNewPeerInfo("test2")
-	peerInfo2.HeartBeat = 3
-	peerInfo2.IpAddress = "127.0.0.2"
-	peerInfo2.Port = "7070"
-	peerTable.AddPeerInfo(peerInfo2)
+	Peer2 := MockCreateNewPeer("test2")
+	Peer2.HeartBeat = 3
+	Peer2.IpAddress = "127.0.0.2"
+	Peer2.Port = "7070"
+	peerTable.AddPeer(Peer2)
 
 	myInfo := peerTable.GetMyInfo()
 
@@ -188,19 +188,19 @@ func TestPeerTable_GetMyInfo(t *testing.T) {
 //func TestGossipTable_UpdateGossipTable(t *testing.T) {
 //
 //	//when
-//	gossipTable, _ := getMyGossipTableAndPeerInfo()
-//	peerInfo2 := &PeerInfo{}
-//	peerInfo2.peerID = "3"
-//	peerInfo2.counter = 2
-//	peerInfo2.ipAddress = "127.0.0.2"
-//	gossipTable.peerList = append(gossipTable.peerList, peerInfo2)
+//	gossipTable, _ := getMyGossipTableAndPeer()
+//	Peer2 := &Peer{}
+//	Peer2.peerID = "3"
+//	Peer2.counter = 2
+//	Peer2.ipAddress = "127.0.0.2"
+//	gossipTable.peerList = append(gossipTable.peerList, Peer2)
 //
-//	gossipTable2, _ := getMyGossipTableAndPeerInfo()
-//	peerInfo3 := &PeerInfo{}
-//	peerInfo3.peerID = "3"
-//	peerInfo3.counter = 3
-//	peerInfo3.ipAddress = "127.0.1.3"
-//	gossipTable2.peerList = append(gossipTable2.peerList,peerInfo3)
+//	gossipTable2, _ := getMyGossipTableAndPeer()
+//	Peer3 := &Peer{}
+//	Peer3.peerID = "3"
+//	Peer3.counter = 3
+//	Peer3.ipAddress = "127.0.1.3"
+//	gossipTable2.peerList = append(gossipTable2.peerList,Peer3)
 //
 //	//then
 //	gossipTable.UpdateGossipTable(*gossipTable2)
@@ -208,24 +208,24 @@ func TestPeerTable_GetMyInfo(t *testing.T) {
 //	assert.Equal(t,3,gossipTable.peerList[1].counter)
 //}
 //
-//func TestGossipTable_SelectRandomPeerInfo(t *testing.T) {
-//	gossipTable, _ := getMyGossipTableAndPeerInfo()
-//	peerInfo2 := &PeerInfo{}
-//	peerInfo2.peerID = "2"
-//	peerInfo2.counter = 2
-//	peerInfo2.ipAddress = "127.0.0.2"
-//	gossipTable.peerList = append(gossipTable.peerList, peerInfo2)
+//func TestGossipTable_SelectRandomPeer(t *testing.T) {
+//	gossipTable, _ := getMyGossipTableAndPeer()
+//	Peer2 := &Peer{}
+//	Peer2.peerID = "2"
+//	Peer2.counter = 2
+//	Peer2.ipAddress = "127.0.0.2"
+//	gossipTable.peerList = append(gossipTable.peerList, Peer2)
 //
-//	peerInfo3 := &PeerInfo{}
-//	peerInfo3.peerID = "3"
-//	peerInfo3.counter = 3
-//	peerInfo3.ipAddress = "127.0.1.3"
-//	gossipTable.peerList = append(gossipTable.peerList,peerInfo3)
+//	Peer3 := &Peer{}
+//	Peer3.peerID = "3"
+//	Peer3.counter = 3
+//	Peer3.ipAddress = "127.0.1.3"
+//	gossipTable.peerList = append(gossipTable.peerList,Peer3)
 //
 //	var ipAddresslist []string
 //	var err error
 //
-//	ipAddresslist, err = gossipTable.SelectRandomPeerInfo(1)
+//	ipAddresslist, err = gossipTable.SelectRandomPeer(1)
 //
 //	if err != nil{
 //		assert.Fail(t,err.Error())
@@ -233,7 +233,7 @@ func TestPeerTable_GetMyInfo(t *testing.T) {
 //
 //	assert.Equal(t,3,len(ipAddresslist))
 //
-//	ipAddresslist, err = gossipTable.SelectRandomPeerInfo(0.7)
+//	ipAddresslist, err = gossipTable.SelectRandomPeer(0.7)
 //
 //	if err != nil{
 //		assert.Fail(t,err.Error())
@@ -245,28 +245,28 @@ func TestPeerTable_GetMyInfo(t *testing.T) {
 ////todo refactor와 go routine exit action추가 해야함
 //func TestGossip_Process(t *testing.T){
 //
-//	peerInfo := &PeerInfo{}
-//	peerInfo.peerID = "1"
-//	peerInfo.counter = 1
-//	peerInfo.ipAddress = "127.0.0.1"
-//	peerInfo.timeStamp = time.Now()
-//	gossiptable1,_ := CreateNewGossipTable(peerInfo)
+//	Peer := &Peer{}
+//	Peer.peerID = "1"
+//	Peer.counter = 1
+//	Peer.ipAddress = "127.0.0.1"
+//	Peer.timeStamp = time.Now()
+//	gossiptable1,_ := CreateNewGossipTable(Peer)
 //
-//	peerInfo2 := &PeerInfo{}
-//	peerInfo2.peerID = "2"
-//	peerInfo2.counter = 1
-//	peerInfo2.ipAddress = "127.0.0.2"
-//	peerInfo2.timeStamp = time.Now()
-//	gossiptable2,_ := CreateNewGossipTable(peerInfo2)
-//	gossiptable1.addPeerInfo(peerInfo2)
+//	Peer2 := &Peer{}
+//	Peer2.peerID = "2"
+//	Peer2.counter = 1
+//	Peer2.ipAddress = "127.0.0.2"
+//	Peer2.timeStamp = time.Now()
+//	gossiptable2,_ := CreateNewGossipTable(Peer2)
+//	gossiptable1.addPeer(Peer2)
 //
-//	peerInfo3 := &PeerInfo{}
-//	peerInfo3.peerID = "3"
-//	peerInfo3.counter = 1
-//	peerInfo3.ipAddress = "127.0.0.3"
-//	peerInfo3.timeStamp = time.Now()
-//	gossiptable3,_ := CreateNewGossipTable(peerInfo3)
-//	gossiptable2.addPeerInfo(peerInfo3)
+//	Peer3 := &Peer{}
+//	Peer3.peerID = "3"
+//	Peer3.counter = 1
+//	Peer3.ipAddress = "127.0.0.3"
+//	Peer3.timeStamp = time.Now()
+//	gossiptable3,_ := CreateNewGossipTable(Peer3)
+//	gossiptable2.addPeer(Peer3)
 //
 //	gossipTableList := []*GossipTable{gossiptable1,gossiptable2,gossiptable3}
 //	fmt.Print(gossipTableList)
@@ -299,7 +299,7 @@ func TestPeerTable_GetMyInfo(t *testing.T) {
 //		for t := range ticker.C {
 //			gossiptable1.Lock()
 //			gossiptable1.IncrementMyCounter()
-//			peerList,err := gossiptable1.SelectRandomPeerInfo(0.6)
+//			peerList,err := gossiptable1.SelectRandomPeer(0.6)
 //
 //			if err != nil {
 //				fmt.Println(err)
@@ -330,7 +330,7 @@ func TestPeerTable_GetMyInfo(t *testing.T) {
 //			gossiptable2.Lock()
 //			gossiptable2.IncrementMyCounter()
 //
-//			peerList,err := gossiptable2.SelectRandomPeerInfo(0.6)
+//			peerList,err := gossiptable2.SelectRandomPeer(0.6)
 //			if err != nil {
 //			}
 //			for _, address := range peerList{
@@ -358,7 +358,7 @@ func TestPeerTable_GetMyInfo(t *testing.T) {
 //			gossiptable3.Lock()
 //			gossiptable3.IncrementMyCounter()
 //
-//			peerList,err := gossiptable3.SelectRandomPeerInfo(0.6)
+//			peerList,err := gossiptable3.SelectRandomPeer(0.6)
 //			if err != nil {
 //			}
 //			for _, address := range peerList{

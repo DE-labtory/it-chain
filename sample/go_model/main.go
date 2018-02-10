@@ -9,15 +9,15 @@ import (
 
 func main(){
 
-	peer1 := &domain.PeerInfo{}
+	peer1 := &domain.Peer{}
 	peer1.PeerID ="1"
 	peer1.IpAddress = "127.0.0.1"
 	peer1.PubKey = []byte("hello world!")
 
 	peerTable := &domain.PeerTable{}
-	peerTable.OwnerID = "123"
-	peerTable.PeerMap = make(map[string]*domain.PeerInfo)
-	peerTable.AddPeerInfo(peer1)
+	peerTable.MyID = "123"
+	peerTable.PeerMap = make(map[string]*domain.Peer)
+	peerTable.AddPeer(peer1)
 
 	pbPeerTable := &pb.PeerTable{}
 

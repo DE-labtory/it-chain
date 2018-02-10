@@ -25,10 +25,10 @@ func (ps *PeerServiceImpl) GetPeerTable() domain.PeerTable{
 }
 
 //peer info 찾기
-func (ps *PeerServiceImpl) GetPeerInfoByPeerID(peerID string) (*domain.PeerInfo){
+func (ps *PeerServiceImpl) GetPeerByPeerID(peerID string) (*domain.Peer){
 
-	peerInfo := ps.peerTable.FindPeerByPeerID(peerID)
-	return peerInfo
+	Peer := ps.peerTable.FindPeerByPeerID(peerID)
+	return Peer
 }
 
 //peer info
@@ -43,7 +43,7 @@ func (ps *PeerServiceImpl) PushPeerTable(peerIDs []string){
 func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
 	logger.Println("pushing peer table")
 
-	peerInfos, err := ps.peerTable.SelectRandomPeerInfos(0.5)
+	Peers, err := ps.peerTable.SelectRandomPeers(0.5)
 
 	if err != nil{
 		logger.Println("no peer exist")
@@ -66,8 +66,8 @@ func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
 		logger.Println("fail to send message error:", onError.Error())
 	}
 
-	for _,peerInfo := range peerInfos{
-		ps.comm.SendStream(envelope,errorCallBack, peerInfo.PeerID)
+	for _,Peer := range Peers{
+		ps.comm.SendStream(envelope,errorCallBack, Peer.PeerID)
 	}
 }
 
@@ -76,40 +76,44 @@ func (ps *PeerServiceImpl) UpdatePeerTable(peerTable domain.PeerTable){
 	ps.peerTable.Lock()
 	defer ps.peerTable.Unlock()
 
-	for id, peerInfo := range peerTable.PeerMap{
+	for id, Peer := range peerTable.PeerMap{
 		peer,ok := ps.peerTable.PeerMap[id]
 		if ok{
-			peer.Update(peerInfo)
+			peer.Update(Peer)
 		}else{
-			ps.AddPeerInfo(peerInfo)
+			ps.AddPeer(Peer)
 		}
 	}
 
 	ps.peerTable.UpdateTimeStamp()
 }
 
-func (ps *PeerServiceImpl) AddPeerInfo(peerInfo *domain.PeerInfo){
+func (ps *PeerServiceImpl) AddPeer(Peer *domain.Peer){
 
-	if peerInfo.PeerID == ""{
-		logger.Error("failed to connect with", peerInfo)
+	if Peer.PeerID == ""{
+		logger.Error("failed to connect with", Peer)
 		return
 	}
 
-	if peerInfo.GetEndPoint() == ""{
-		logger.Error("failed to connect with", peerInfo)
+	if Peer.GetEndPoint() == ""{
+		logger.Error("failed to connect with", Peer)
 		return
 	}
-	err := ps.comm.CreateStreamConn(peerInfo.PeerID,peerInfo.GetEndPoint(), nil)
+	err := ps.comm.CreateStreamConn(Peer.PeerID,Peer.GetEndPoint(), nil)
 
 	if err != nil{
-		logger.Error("failed to connect with", peerInfo)
+		logger.Error("failed to connect with", Peer)
 		return
 	}
 
-	ps.peerTable.AddPeerInfo(peerInfo)
+	ps.peerTable.AddPeer(Peer)
 }
 
-func (ps *PeerServiceImpl) RequestPeerInfo(host string, port string) *domain.PeerInfo{
+func (ps *PeerServiceImpl) RequestPeer(host string, port string) *domain.Peer{
 
 	return nil
+}
+
+func (ps *PeerServiceImpl) GetLeader() *domain.Peer{
+	return ps.peerTable.Leader
 }
