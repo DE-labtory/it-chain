@@ -2,7 +2,7 @@ package smartcontract
 
 import (
 	"errors"
-	"it-chain/service/blockchain"
+	"it-chain/domain"
 	"strings"
 	"fmt"
 	"os"
@@ -166,7 +166,7 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
  *	5. docker container Start
  *	6. docker에서 smartcontract 실행
  ****************************************************/
-func (scs *SmartContractService) Query(transaction blockchain.Transaction) (error) {
+func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 	fmt.Println("func Query Start")
 	tmpDir := "/tmp"
 	sc, ok := scs.SmartContractMap[transaction.TxData.ContractID];

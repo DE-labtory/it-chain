@@ -1,7 +1,7 @@
 package abc
 
 import (
-	"it-chain/service/blockchain"
+	"it-chain/domain"
 	"it-chain/db/leveldbhelper"
 	"os"
 	"encoding/json"
@@ -13,7 +13,7 @@ type SampleSmartContract struct {
 }
 
 func (sc *SampleSmartContract) Init(args []string) error {
-	tx := blockchain.Transaction{}
+	tx := domain.Transaction{}
 	err := json.Unmarshal([]byte(args[0]), &tx)
 	if err != nil {
 		return err
@@ -22,7 +22,7 @@ func (sc *SampleSmartContract) Init(args []string) error {
 
 	/* Init WorldStateDB
 	---------------------*/
-	path := "./"
+	path := "/go/src/worldstatedb"
 	dbProvider := leveldbhelper.CreateNewDBProvider(path)
 	defer func(){
 		dbProvider.Close()
@@ -41,12 +41,13 @@ func (sc *SampleSmartContract) Init(args []string) error {
 	return nil
 }
 
-func (sc *SampleSmartContract) Query(transaction blockchain.Transaction, wsDBHandle *leveldbhelper.DBHandle) {
+func (sc *SampleSmartContract) Query(transaction domain.Transaction, wsDBHandle *leveldbhelper.DBHandle) {
+	fmt.Println("func Query")
 }
 
-func (sc *SampleSmartContract) Invoke(transaction blockchain.Transaction, wsDBHandle *leveldbhelper.DBHandle) {
+func (sc *SampleSmartContract) Invoke(transaction domain.Transaction, wsDBHandle *leveldbhelper.DBHandle) {
 	//wsDBHandle.Put([]byte("test"), []byte("success"), true)
-	fmt.Println("fun Invoke")
+	fmt.Println("func Invoke")
 }
 
 func main()  {

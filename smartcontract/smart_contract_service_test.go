@@ -3,7 +3,7 @@ package smartcontract
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"it-chain/service/blockchain"
+	"it-chain/domain"
 	"fmt"
 	"strconv"
 	"time"
@@ -35,21 +35,21 @@ func TestSmartContractService_Query(t *testing.T) {
 	if err != nil {
 		assert.Fail(t, err.Error())
 	}
-	tx := blockchain.CreateNewTransaction(
+	tx := domain.CreateNewTransaction(
 		strconv.Itoa(1),
 		strconv.Itoa(1),
 		0,
 		time.Now(),
-		blockchain.SetTxData(
+		domain.SetTxData(
 			"",
 			"Invoke",
-			blockchain.SetTxMethodParameters(0, "", []string{""}),
+			domain.SetTxMethodParameters(0, "", []string{""}),
 			"abc",
 		),
 	)
 	fmt.Println("tx created")
 	scs := SmartContractService{
-		"hackurity01",
+		"steve-buzzni",
 		currentDir + "/sample_smartcontract",
 		map[string]SmartContract{
 			"abc": SmartContract{
