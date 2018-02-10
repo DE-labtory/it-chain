@@ -30,11 +30,15 @@ func Init() {
 
 }
 
-func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string) (error) {
+func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string) (errChan chan error) {
+
+	defer func() {
+		recover()
+	}()
 
 	repoList, err := GetRepositoryList(authenticatedGit)
 	if err != nil {
-		return errors.New("An error was occured during getting repository list")
+		errChan <- errors.New("An error was occured during getting repository list")
 	}
 
 	for _, repo := range repoList {
@@ -43,12 +47,14 @@ func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string) 
 
 		err = os.MkdirAll(localReposPath, 0755)
 		if err != nil {
-			return errors.New("An error was occured during making repository path")
+			errChan <- errors.New("An error was occured during making repository path")
+			return
 		}
 
 		commits, err := GetReposCommits(repo.FullName)
 		if err != nil {
-			return errors.New("An error was occured during getting commit logs")
+			errChan <- errors.New("An error was occured during getting commit logs")
+			return
 		}
 
 		for _, commit := range commits {
@@ -56,19 +62,21 @@ func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string) 
 
 				err := CloneReposWithName(repo.FullName, localReposPath, commit.Sha)
 				if err != nil {
-					return errors.New("An error was occured during cloning with name")
+					errChan <- errors.New("An error was occured during cloning with name")
+					return
 				}
 
 				err = ResetWithSHA(localReposPath + "/" + commit.Sha, commit.Sha)
 				if err != nil {
-					return errors.New("An error was occured during resetting with SHA")
+					errChan <- errors.New("An error was occured during resetting with SHA")
+					return
 				}
 
 			}
 		}
 	}
 
-	return nil
+
 }
 
 func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
