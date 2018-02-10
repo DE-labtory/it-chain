@@ -146,16 +146,3 @@ To make a block, nodes have to solve a very difficult problem. Since a small num
 
 
 ### POS
-
-A **proof of stake(POS)** is a type of algorithm to achieve distributed consensus. Basically POS is not all that different from POW. POS, like POW, also tries to produce a hash that is below certain target. Difference between POW and POS is this target. In POS, each node has different target. More stake, easier target.
-But if difficulty depends on amount of stake, richest member always has high probability to generate block. To solve this problem, several coins also combine concept of coin age. For example in Peercoin, coins that have not been spent for at least 30 days can compete to produce next block. So if you have larger amount of unspent coins, target will be easier. If member produces block, coin age of used coin will reset to zero.
-
-#### Pros and Cons
-
-**Pros**
-
-- Lower usage of resources than POW
-
-**Cons**
-
-- "nothing at stake" problem
