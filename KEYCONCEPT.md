@@ -79,6 +79,8 @@ Definitions of each abbreviation in the diagram are;
 - `i`: Peer(Node) ID
 - `r`: Result of the request's operation
 
+In this diagram, the fork/join node notation (black thin bars) is used to denote broadcasting the message. Normally, this notation is [a control node to support the parallelism in activities](https://www.uml-diagrams.org/activity-diagrams-controls.html#fork-node).
+
 ##### Why `count >= 2` ?
 
 In the diagram, the peer change its state to `prepared` or `committed` when the `count` value, which is the number of verified messages from other peers, is larger than `2`.
@@ -94,11 +96,11 @@ Every node replies the result of the request's operation to the client individua
 
 #### License
 
-The copyright of overall behavior of pbft and the sample implementation of pbft are in bigpicturelab.
+The copyright of overall behavior of pbft and the sample implementation of pbft are in bigpicturelabs.
 
 #### Author
 
-[bitpicturelab](https://github.com/bigpicturelabs)
+[bigpicturelabs](https://github.com/bigpicturelabs)
 
 [Junbeomlee](https://github.com/junbeomlee)
 

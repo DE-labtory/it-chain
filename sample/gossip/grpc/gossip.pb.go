@@ -10,7 +10,7 @@ It is generated from these files:
 It has these top-level messages:
 	Empty
 	GossipTable
-	PeerInfo
+	Peer
 	PeersInfo
 */
 package grpc
@@ -45,7 +45,7 @@ func (*Empty) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
 type GossipTable struct {
 	MyID     string      `protobuf:"bytes,1,opt,name=myID" json:"myID,omitempty"`
-	PeerInfo []*PeerInfo `protobuf:"bytes,2,rep,name=peerInfo" json:"peerInfo,omitempty"`
+	Peer []*Peer `protobuf:"bytes,2,rep,name=Peer" json:"Peer,omitempty"`
 }
 
 func (m *GossipTable) Reset()                    { *m = GossipTable{} }
@@ -60,39 +60,39 @@ func (m *GossipTable) GetMyID() string {
 	return ""
 }
 
-func (m *GossipTable) GetPeerInfo() []*PeerInfo {
+func (m *GossipTable) GetPeer() []*Peer {
 	if m != nil {
-		return m.PeerInfo
+		return m.Peer
 	}
 	return nil
 }
 
-type PeerInfo struct {
+type Peer struct {
 	IpAddress string `protobuf:"bytes,1,opt,name=ipAddress" json:"ipAddress,omitempty"`
 	PeerID    string `protobuf:"bytes,2,opt,name=peerID" json:"peerID,omitempty"`
 	Counter   int64  `protobuf:"varint,3,opt,name=counter" json:"counter,omitempty"`
 }
 
-func (m *PeerInfo) Reset()                    { *m = PeerInfo{} }
-func (m *PeerInfo) String() string            { return proto.CompactTextString(m) }
-func (*PeerInfo) ProtoMessage()               {}
-func (*PeerInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+func (m *Peer) Reset()                    { *m = Peer{} }
+func (m *Peer) String() string            { return proto.CompactTextString(m) }
+func (*Peer) ProtoMessage()               {}
+func (*Peer) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
-func (m *PeerInfo) GetIpAddress() string {
+func (m *Peer) GetIpAddress() string {
 	if m != nil {
 		return m.IpAddress
 	}
 	return ""
 }
 
-func (m *PeerInfo) GetPeerID() string {
+func (m *Peer) GetPeerID() string {
 	if m != nil {
 		return m.PeerID
 	}
 	return ""
 }
 
-func (m *PeerInfo) GetCounter() int64 {
+func (m *Peer) GetCounter() int64 {
 	if m != nil {
 		return m.Counter
 	}
@@ -110,7 +110,7 @@ func (*PeersInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3
 func init() {
 	proto.RegisterType((*Empty)(nil), "grpc.Empty")
 	proto.RegisterType((*GossipTable)(nil), "grpc.GossipTable")
-	proto.RegisterType((*PeerInfo)(nil), "grpc.PeerInfo")
+	proto.RegisterType((*Peer)(nil), "grpc.Peer")
 	proto.RegisterType((*PeersInfo)(nil), "grpc.PeersInfo")
 }
 

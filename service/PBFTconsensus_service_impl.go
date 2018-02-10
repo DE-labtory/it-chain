@@ -16,18 +16,21 @@ var logger_pbftservice = common.GetLogger("pbft_service")
 type PBFTConsensusService struct {
 	consensusStates map[string]*domain.ConsensusState
 	comm            comm.ConnectionManager
-	view            domain.View
+	view            *domain.View
 	peerID          string
 	peerService 	PeerService
+	blockService    BlockService
 	sync.RWMutex
 }
 
-func NewPBFTConsensusService(comm comm.ConnectionManager, peerService PeerService) ConsensusService{
+func NewPBFTConsensusService(view *domain.View,comm comm.ConnectionManager, peerService PeerService, blockService BlockService) ConsensusService{
 
 	pbft := &PBFTConsensusService{
 		consensusStates: make(map[string]*domain.ConsensusState),
 		comm:comm,
+		view:view,
 		peerService: peerService,
+		blockService: blockService,
 	}
 
 	return pbft
@@ -42,7 +45,7 @@ func (cs *PBFTConsensusService) StartConsensus(block *domain.Block){
 
 	cs.Lock()
 	//set consensus with preprepared state
-	consensusState := domain.NewConsensusState(cs.view.ID,xid.New().String(),block,domain.PrePrepared,cs.HandleEndConsensus)
+	consensusState := domain.NewConsensusState(cs.view,xid.New().String(),block,domain.PrePrepared,cs.HandleEndConsensus,300)
 	cs.consensusStates[consensusState.ID] = consensusState
 
 	//set consensus message to broadcast
@@ -66,6 +69,8 @@ func (cs *PBFTConsensusService) StopConsensus(){
 //todo FromConsensusProtoMessage에서 block변환도 해야함
 //todo 언제 Message를 무시해야 하는가 일단은 time laps는 5분
 //todo time을 config로 부터 읽어야함
+//todo 다음 block이 먼저 들어올 경우 고려해야함,
+//todo 블록의 높이와 이전 블록 해시가 올바른지 확인
 func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.OutterMessage){
 
 	message := outterMessage.Message
@@ -92,14 +97,30 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 	consensusState, ok := cs.consensusStates[consensusID]
 
 	cs.Lock()
-	if ok{
-		consensusState.AddMessage(consensusMessage)
-	}else{
-		//id가 다르면 check안함
-		newConsensusState := domain.NewConsensusState(cs.view.ID,consensusMessage.ConsensusID,nil,domain.Stage(msgType),cs.HandleEndConsensus)
-		newConsensusState.AddMessage(consensusMessage)
-		cs.consensusStates[newConsensusState.ID] = newConsensusState
+
+	if !ok{
+		//consensus state생성
+		//prepremessage인 경우에만 block과 view를 세팅
+		//var newConsensusState *domain.ConsensusState
+		//if consensusMessage.MsgType == domain.PreprepareMsg{
+		//	newConsensusState = domain.NewConsensusState(&consensusMessage.View,consensusMessage.ConsensusID,consensusMessage.Block,domain.Stage(msgType),cs.HandleEndConsensus,300)
+		//}
+		//
+		//cs.consensusStates[newConsensusState.ID] = newConsensusState
 	}
+
+	//if !ok{
+	//	//이미 state가 존재함
+	//	//prepare or commit message
+	//	consensusState.AddMessage(consensusMessage)
+	//}else{
+	//	//preprepare message를 받는경우
+	//	//id가 다르면 check안함
+	//	//block check
+	//	newConsensusState := domain.NewConsensusState(cs.view.ID,consensusMessage.ConsensusID,nil,domain.Stage(msgType),cs.HandleEndConsensus)
+	//	newConsensusState.AddMessage(consensusMessage)
+	//	cs.consensusStates[newConsensusState.ID] = newConsensusState
+	//}
 	cs.Unlock()
 }
 
