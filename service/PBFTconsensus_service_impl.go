@@ -40,7 +40,6 @@ func NewPBFTConsensusService(view *domain.View,comm comm.ConnectionManager, peer
 //Consensus 시작
 //1. Consensus의 state를 추가한다.
 //2. 합의할 block을 consensusMessage에 담고 prepreMsg로 전파한다.
-//todo sequence 를 nano로 수정
 func (cs *PBFTConsensusService) StartConsensus(block *domain.Block){
 
 	cs.Lock()
@@ -92,7 +91,6 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 
 	//2 consensus id check
 	cs.Lock()
-	defer cs.Unlock()
 
 	consensusID := consensusMessage.ConsensusID
 	consensusState, ok := cs.consensusStates[consensusID]
@@ -124,10 +122,11 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 		cs.consensusStates[consensusState.ID] = consensusState
 	}
 
+	cs.Unlock()
+
 	consensusState.AddMessage(consensusMessage)
 
 	//1. prepare stage && prepare message가 전체의 2/3이상 -> commitMsg전파
-
 	if consensusState.CurrentStage == domain.Prepared && consensusState.PrepareReady(){
 		sequenceID := time.Now().UnixNano()
 		commitConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*cs.view,sequenceID,consensusState.Block,cs.peerID,domain.CommitMsg)
@@ -143,7 +142,10 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 }
 
 func (cs *PBFTConsensusService) HandleEndConsensus(consensusState domain.ConsensusState){
-	
+	cs.Lock()
+	defer cs.Unlock()
+
+	delete(cs.consensusStates,consensusState.ID)
 }
 
 //tested

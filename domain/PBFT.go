@@ -242,7 +242,7 @@ func (cs *ConsensusState) PrepareReady() bool{
 	totalVotes := len(cs.View.PeerID)
 	nowVotes := len(cs.PrepareMsgs)
 
-	if nowVotes/totalVotes > 0.3{
+	if nowVotes/totalVotes > 2/3{
 		return true
 	}
 	return false
@@ -251,7 +251,7 @@ func (cs *ConsensusState) CommitReady() bool{
 	totalVotes := len(cs.View.PeerID)
 	nowVotes := len(cs.CommitMsgs)
 
-	if nowVotes/totalVotes > 0.3{
+	if nowVotes/totalVotes > 2/3{
 		return true
 	}
 	return false
