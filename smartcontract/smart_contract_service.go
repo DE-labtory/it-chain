@@ -30,7 +30,7 @@ func Init() {
 
 }
 
-func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string) (errChan chan error) {
+func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string, errChan chan error) () {
 
 	defer func() {
 		recover()
@@ -75,8 +75,6 @@ func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string) 
 			}
 		}
 	}
-
-
 }
 
 func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
