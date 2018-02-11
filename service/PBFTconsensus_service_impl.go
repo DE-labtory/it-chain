@@ -8,7 +8,6 @@ import (
 	"it-chain/network/comm"
 	"sync"
 	"github.com/rs/xid"
-	"google.golang.org/grpc/peer"
 )
 
 var logger_pbftservice = common.GetLogger("pbft_service")
