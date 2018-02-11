@@ -218,16 +218,13 @@ func (cs *ConsensusState) AddMessage(consensusMessage ConsensusMessage){
 
 	case PrepareMsg:
 		_ ,ok := cs.PrepareMsgs[consensusMessage.SenderID]
-
 		if !ok{
 			cs.PrepareMsgs[consensusMessage.SenderID] = consensusMessage
 		}
 		break
 
 	case CommitMsg:
-
 		_ ,ok := cs.CommitMsgs[consensusMessage.SenderID]
-
 		if !ok{
 			cs.CommitMsgs[consensusMessage.SenderID] = consensusMessage
 		}

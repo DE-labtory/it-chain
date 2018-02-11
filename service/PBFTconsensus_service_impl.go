@@ -8,6 +8,7 @@ import (
 	"it-chain/network/comm"
 	"sync"
 	"github.com/rs/xid"
+	"google.golang.org/grpc/peer"
 )
 
 var logger_pbftservice = common.GetLogger("pbft_service")
@@ -151,10 +152,9 @@ func (cs *PBFTConsensusService) EndConsensusState(consensusState domain.Consensu
 //tested
 func (cs *PBFTConsensusService) broadcastMessage(consensusMsg domain.ConsensusMessage){
 
-	peerTable := cs.peerService.GetPeerTable()
-	peerList := peerTable.GetPeerList()
+	peerIDList := cs.view.PeerID
 
-	for _, peer := range peerList{
-		cs.comm.SendStream(consensusMsg,nil,peer.PeerID)
+	for _, peerID := range peerIDList{
+		cs.comm.SendStream(consensusMsg,nil,peerID)
 	}
 }
