@@ -23,13 +23,12 @@ type PBFTConsensusService struct {
 	sync.RWMutex
 }
 
-func NewPBFTConsensusService(view *domain.View,comm comm.ConnectionManager, peerService PeerService, blockService BlockService) ConsensusService{
+func NewPBFTConsensusService(view *domain.View,comm comm.ConnectionManager, blockService BlockService) ConsensusService{
 
 	pbft := &PBFTConsensusService{
 		consensusStates: make(map[string]*domain.ConsensusState),
 		comm:comm,
 		view:view,
-		peerService: peerService,
 		blockService: blockService,
 	}
 
@@ -38,9 +37,16 @@ func NewPBFTConsensusService(view *domain.View,comm comm.ConnectionManager, peer
 
 //tested
 //Consensus 시작
+//만약 합의에 들어가는 peerID가 없다면 바로 block에 저장
 //1. Consensus의 state를 추가한다.
 //2. 합의할 block을 consensusMessage에 담고 prepreMsg로 전파한다.
 func (cs *PBFTConsensusService) StartConsensus(block *domain.Block){
+
+	if len(cs.view.PeerID) <= 1 && cs.view.LeaderID == cs.peerID{
+		//ADD block
+
+		return
+	}
 
 	cs.Lock()
 	//set consensus with preprepared state
@@ -71,6 +77,8 @@ func (cs *PBFTConsensusService) StopConsensus(){
 //todo 블록의 높이와 이전 블록 해시가 올바른지 확인
 func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.OutterMessage){
 
+	logger_pbftservice.Infoln("Received message: ",outterMessage)
+
 	message := outterMessage.Message
 	cm:= message.GetConsensusMessage()
 
@@ -89,8 +97,11 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 		return
 	}
 
+	logger_pbftservice.Infoln("Time check OK")
+
 	//2 consensus id check
 	cs.Lock()
+	defer cs.Unlock()
 
 	consensusID := consensusMessage.ConsensusID
 	consensusState, ok := cs.consensusStates[consensusID]
@@ -122,8 +133,7 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 		cs.consensusStates[consensusState.ID] = consensusState
 	}
 
-	cs.Unlock()
-
+	logger_pbftservice.Infoln("Add message to consensusState")
 	consensusState.AddMessage(consensusMessage)
 
 	//1. prepare stage && prepare message가 전체의 2/3이상 -> commitMsg전파
@@ -132,12 +142,14 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 		commitConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*cs.view,sequenceID,consensusState.Block,cs.peerID,domain.CommitMsg)
 		cs.broadcastMessage(commitConsensusMessage)
 		consensusState.CurrentStage = domain.Committed
+		logger_pbftservice.Infoln("ConsensusState is Committed")
 	}
 
 	//2. commit state && commit message가 전체의 2/3이상 -> 블록저장
 	if consensusState.CurrentStage == domain.Committed && consensusState.CommitReady(){
 		//block 저장
 		//todo block에 저장
+		logger_pbftservice.Infoln("ConsesnsusState is End")
 	}
 }
 
@@ -152,7 +164,6 @@ func (cs *PBFTConsensusService) EndConsensusState(consensusState domain.Consensu
 func (cs *PBFTConsensusService) broadcastMessage(consensusMsg domain.ConsensusMessage){
 
 	peerIDList := cs.view.PeerID
-
 	for _, peerID := range peerIDList{
 		cs.comm.SendStream(consensusMsg,nil,peerID)
 	}

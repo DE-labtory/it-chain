@@ -111,9 +111,12 @@ func (mps MockPeerService) BroadCastPeerTable(interface{}){
 
 func TestNewPBFTConsensusService(t *testing.T) {
 	comm:= new(MockConnectionManager)
-	peerService := new(MockPeerService)
+	view := &domain.View{}
+	view.ID = "123"
+	view.LeaderID = "1"
+	view.PeerID = []string{"1","2","3"}
 
-	pbftService := NewPBFTConsensusService(comm,peerService)
+	pbftService := NewPBFTConsensusService(view,comm,nil)
 
 	consensusStates := pbftService.GetCurrentConsensusState()
 	assert.NotNil(t,consensusStates)
@@ -122,26 +125,28 @@ func TestNewPBFTConsensusService(t *testing.T) {
 //todo assertnumberofcall 테스트 추가해야함
 func TestPBFTConsensusService_StartConsensus(t *testing.T) {
 
-	comm:= new(MockConnectionManager)
-	peerService := new(MockPeerService)
+	connctionManager:= new(MockConnectionManager)
+	view := &domain.View{}
+	view.ID = "123"
+	view.LeaderID = "1"
+	view.PeerID = []string{"1"}
 
-	pbftService := NewPBFTConsensusService(comm,peerService)
-
+	pbftService := NewPBFTConsensusService(view,connctionManager,nil)
 	block := &domain.Block{}
 
-	comm.On("SendStream", mock.AnythingOfType("ConsensusMessage"), nil, "peer2")
+	connctionManager.On("SendStream", mock.AnythingOfType("ConsensusMessage"), nil, "1")
 
 	pbftService.StartConsensus(block)
 
 	consensusStates := pbftService.GetCurrentConsensusState()
 	assert.Equal(t,len(consensusStates),1)
-
+	//
 	for _, state := range consensusStates{
 		assert.Equal(t,state.Block,block)
-		assert.Equal(t,state.CurrentStage,domain.PrePrepared)
+		assert.Equal(t,state.CurrentStage,domain.Prepared)
 	}
-
-	comm.AssertExpectations(t)
+	//
+	connctionManager.AssertExpectations(t)
 
 }
 
@@ -151,6 +156,12 @@ func GetMockConsensusMessage(consensusID string, msgType domain.MsgType) *pb.Mes
 	consensusMessage.SequenceID = time.Now().UnixNano()
 	consensusMessage.ConsensusID = consensusID
 	consensusMessage.MsgType = int32(msgType)
+	view := pb.View{}
+	view.ViewID = "123"
+	view.LeaderID = "1"
+	view.PeerID = []string{"1","2","3"}
+
+	consensusMessage.View = &view
 
 	message := &pb.Message{}
 	cm := &pb.Message_ConsensusMessage{}
@@ -163,9 +174,13 @@ func GetMockConsensusMessage(consensusID string, msgType domain.MsgType) *pb.Mes
 func TestPBFTConsensusService_ReceiveConsensusMessage(t *testing.T) {
 
 	//when
-	connectionManager:= new(MockConnectionManager)
-	peerService := new(MockPeerService)
-	pbftService := NewPBFTConsensusService(connectionManager,peerService)
+	connctionManager:= new(MockConnectionManager)
+	view := &domain.View{}
+	view.ID = "123"
+	view.LeaderID = "1"
+	view.PeerID = []string{"1","2","3"}
+
+	pbftService := NewPBFTConsensusService(view,connctionManager,nil)
 
 	Message := GetMockConsensusMessage("1",domain.PreprepareMsg)
 

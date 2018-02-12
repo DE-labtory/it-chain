@@ -134,6 +134,16 @@ type View struct {
 	PeerID   []string
 }
 
+func FromProtoView(protoView *pb.View) View{
+
+	view := &View{}
+	view.LeaderID = protoView.LeaderID
+	view.ID = protoView.ViewID
+	view.PeerID = protoView.PeerID
+
+	return *view
+}
+
 //tested
 func NewConsensusState(view *View, consensusID string, block *Block, currentStage Stage, endConsensusHandler EndConsensusHandle, periodSeconds int32) *ConsensusState{
 
@@ -171,7 +181,6 @@ func NewConsesnsusMessage(consensusID string, view View,sequenceID int64, block 
 
 
 //todo block을 넣어야함
-//todo View를 넣어야함
 func FromConsensusProtoMessage(consensusMessage pb.ConsensusMessage) ConsensusMessage{
 
 	return ConsensusMessage{
@@ -179,6 +188,7 @@ func FromConsensusProtoMessage(consensusMessage pb.ConsensusMessage) ConsensusMe
 		SenderID: consensusMessage.SenderID,
 		ConsensusID: consensusMessage.ConsensusID,
 		MsgType: MsgType(consensusMessage.MsgType),
+		View: FromProtoView(consensusMessage.View),
 	}
 }
 
@@ -239,14 +249,27 @@ func (cs *ConsensusState) PrepareReady() bool{
 	totalVotes := len(cs.View.PeerID)
 	nowVotes := len(cs.PrepareMsgs)
 
+	if totalVotes == 0{
+		return false
+	}
+
 	if nowVotes/totalVotes > 2/3{
 		return true
 	}
 	return false
 }
+
 func (cs *ConsensusState) CommitReady() bool{
 	totalVotes := len(cs.View.PeerID)
 	nowVotes := len(cs.CommitMsgs)
+
+	if totalVotes == 0{
+		return true
+	}
+
+	if totalVotes == 1{
+		return true
+	}
 
 	if nowVotes/totalVotes > 2/3{
 		return true
