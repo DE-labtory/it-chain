@@ -3,6 +3,7 @@ package leveldbhelper
 import (
 	"sync"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/iterator"
 )
 
 type DBHandle struct {
@@ -62,6 +63,10 @@ func (h *DBHandle) WriteBatch(KVs map[string][]byte, sync bool) error {
 		}
 	}
 	return h.db.WriteBatch(batch, sync)
+}
+
+func (h *DBHandle) GetIterator(startKey []byte, endKey []byte) iterator.Iterator {
+	return h.db.GetIterator(dbKey(h.dbName, startKey), dbKey(h.dbName, endKey))
 }
 
 func (h *DBHandle) Snapshot() (map[string][]byte, error) {
