@@ -14,6 +14,10 @@ func NewLedger(path string) BlockService{
 	return &Ledger{DB:blockchaindb.CreateNewBlockchainDB(path)}
 }
 
+func (l *Ledger) Close() {
+	l.DB.Close()
+}
+
 func (l *Ledger) CreateBlock(txList []*domain.Transaction, createPeerId string) (*domain.Block, error) {
 	lastBlock, err := l.GetLastBlock()
 	if err != nil { return nil, err }
@@ -31,6 +35,11 @@ func (l *Ledger) CreateBlock(txList []*domain.Transaction, createPeerId string) 
 func (l *Ledger) VerifyBlock(blk *domain.Block) (bool, error){
 
 	lastBlock, err := l.DB.GetLastBlock()
+
+	if lastBlock == nil {
+		blk.Header.BlockStatus = domain.Status_BLOCK_CONFIRMED
+		return true, nil
+	}
 
 	if err != nil {
 		return false, err
