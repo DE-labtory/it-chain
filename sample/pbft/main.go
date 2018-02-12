@@ -77,10 +77,13 @@ func NewNode(peerInfo *domain.Peer) *Node{
 	eventBatcher := service.NewBatchService(time.Second*5,peerService.BroadCastPeerTable,false)
 	eventBatcher.Add("push peerTable")
 
+	//publisher.NewMessagePublisher(domain.,crypto)
+
 	node.consensusService = consensusService
 	node.peerService = peerService
 	node.connectionManager = connectionManager
 	node.view = View
+
 
 	return node
 }
@@ -99,9 +102,25 @@ func (s *Node) Stream(stream pb.MessageService_StreamServer) (error) {
 		}
 
 		message := &pb.Message{}
-
 		err = proto.Unmarshal(envelope.Payload,message)
+
+		if err != nil{
+			log.Println(err)
+		}
+
 		log.Println("Received Envelop:",envelope)
+
+		if message.GetConsensusMessage() != nil{
+			log.Println("Consensus Message")
+			continue
+		}
+
+		if message.GetPeerTable() != nil{
+			pt := message.GetPeerTable()
+			peerTable := domain.FromProtoPeerTable(*pt)
+			s.peerService.UpdatePeerTable(*peerTable)
+			continue
+		}
 	}
 }
 
@@ -111,14 +130,9 @@ func (s *Node) Ping(ctx context.Context, in *pb.Empty) (*pb.Empty, error) {
 
 func (s *Node) GetPeer(context.Context, *pb.Empty) (*pb.Peer, error){
 
-	peer := &pb.Peer{}
-	peer.Port = s.myInfo.Port
-	peer.PubKey = s.myInfo.PubKey
-	peer.IpAddress = s.myInfo.IpAddress
-	peer.HeartBeat = int32(s.myInfo.HeartBeat)
-	peer.PeerID = s.myInfo.PeerID
+	pp := domain.ToProtoPeer(*s.myInfo)
 
-	return peer,nil
+	return pp,nil
 }
 
 func (s *Node) listen(){
