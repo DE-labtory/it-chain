@@ -9,7 +9,7 @@ import (
 	"math/rand"
 )
 
-type PeerInfo struct {
+type Peer struct {
 	IpAddress string
 	Port      string
 	PeerID    string
@@ -18,66 +18,67 @@ type PeerInfo struct {
 	PubKey    []byte
 }
 
-func (pi *PeerInfo) UpdateTimeStamp(){
+func (pi *Peer) UpdateTimeStamp(){
 	pi.TimeStamp = time.Now()
 }
 
-func (pi *PeerInfo) Update(peerInfo *PeerInfo) (error){
+func (pi *Peer) Update(Peer *Peer) (error){
 
-	if pi.PeerID != peerInfo.PeerID{
+	if pi.PeerID != Peer.PeerID{
 		return errors.New("different peer id")
 	}
 
-	if pi.HeartBeat < peerInfo.HeartBeat{
-		pi.HeartBeat = peerInfo.HeartBeat
-		pi.IpAddress = peerInfo.IpAddress
-		pi.Port = peerInfo.Port
-		pi.PubKey = peerInfo.PubKey
+	if pi.HeartBeat < Peer.HeartBeat{
+		pi.HeartBeat = Peer.HeartBeat
+		pi.IpAddress = Peer.IpAddress
+		pi.Port = Peer.Port
+		pi.PubKey = Peer.PubKey
 		pi.UpdateTimeStamp()
 	}
 
 	return nil
 }
 
-func (pi *PeerInfo)GetEndPoint() string{
+func (pi *Peer)GetEndPoint() string{
 	return pi.IpAddress+":"+pi.Port
 }
 
 type PeerTable struct {
-	PeerMap   map[string]*PeerInfo
+	PeerMap   map[string]*Peer
+	Leader    *Peer
 	TimeStamp time.Time
-	OwnerID   string
+	MyID   string
 	sync.RWMutex
 }
 
-func NewPeerTable(myInfo *PeerInfo) (*PeerTable, error){
+func NewPeerTable(myInfo *Peer) (*PeerTable, error){
 
-	// 생성할때 넣어주는 peerInfo의 ID가 myID가 된다.
+	// 생성할때 넣어주는 Peer의 ID가 myID가 된다.
 	if myInfo.PeerID == ""{
-		return nil, errors.New("peerInfo must have peerID")
+		return nil, errors.New("Peer must have peerID")
 	}
 
 	if myInfo.IpAddress == "" || myInfo.Port == ""{
-		return nil, errors.New("peerInfo must have ipAddress")
+		return nil, errors.New("Peer must have ipAddress")
 	}
 
-	peerMap := make(map[string]*PeerInfo)
+	peerMap := make(map[string]*Peer)
 	peerMap[myInfo.PeerID] = myInfo
 
 	return &PeerTable{
 		PeerMap: peerMap,
 		TimeStamp: time.Now(),
-		OwnerID: myInfo.PeerID,
+		MyID: myInfo.PeerID,
 	}, nil
 }
 
 //tested
-func (pt *PeerTable) FindPeerByPeerID(peerID string) (*PeerInfo){
+func (pt *PeerTable) FindPeerByPeerID(peerID string) (*Peer){
 
-	peerInfo, ok := pt.PeerMap[peerID]
+	Peer, ok := pt.PeerMap[peerID]
 
 	if ok {
-		return peerInfo
+		return Peer
 	}
 
 	return nil
@@ -86,10 +87,10 @@ func (pt *PeerTable) FindPeerByPeerID(peerID string) (*PeerInfo){
 //tested
 //if does not exist insert
 //if exist update all
-func (pt *PeerTable) AddPeerInfo(peerInfo *PeerInfo){
+func (pt *PeerTable) AddPeer(Peer *Peer){
 
-	pt.PeerMap[peerInfo.PeerID] = peerInfo
-	pt.PeerMap[peerInfo.PeerID].TimeStamp = time.Now()
+	pt.PeerMap[Peer.PeerID] = Peer
+	pt.PeerMap[Peer.PeerID].TimeStamp = time.Now()
 }
 
 //tested
@@ -98,13 +99,13 @@ func (pt *PeerTable) UpdatePeerTable(peerTable PeerTable){
 	pt.Lock()
 	defer pt.Unlock()
 
-	for id, peerInfo := range peerTable.PeerMap{
+	for id, Peer := range peerTable.PeerMap{
 		peer,ok := pt.PeerMap[id]
 
 		if ok{
-			peer.Update(peerInfo)
+			peer.Update(Peer)
 		}else{
-			pt.AddPeerInfo(peerInfo)
+			pt.AddPeer(Peer)
 		}
 	}
 
@@ -123,7 +124,7 @@ func (pt *PeerTable) IncrementHeartBeat() error{
 	pt.Lock()
 	defer pt.Unlock()
 
-	myPeer := pt.FindPeerByPeerID(pt.OwnerID)
+	myPeer := pt.FindPeerByPeerID(pt.MyID)
 
 	if myPeer == nil{
 		return errors.New("myID peer does not exist error")
@@ -135,7 +136,7 @@ func (pt *PeerTable) IncrementHeartBeat() error{
 }
 
 ////tested
-func (pt *PeerTable) SelectRandomPeerInfos(percent float64) ([]PeerInfo,error){
+func (pt *PeerTable) SelectRandomPeers(percent float64) ([]Peer,error){
 
 	if len(pt.PeerMap) <= 1{
 		return nil, errors.New("no peer in gossiptable")
@@ -147,35 +148,35 @@ func (pt *PeerTable) SelectRandomPeerInfos(percent float64) ([]PeerInfo,error){
 		return nil, errors.New("no peer in gossiptable")
 	}
 
-	tmp := make([]*PeerInfo, 0)
+	tmp := make([]*Peer, 0)
 	for _, peer := range pt.PeerMap{
-		if peer.PeerID != pt.OwnerID{
+		if peer.PeerID != pt.MyID{
 			//내 ID는 삭제
 			tmp = append(tmp, peer)
 		}
 	}
 
-	peerInfoList := make([]PeerInfo, 0)
+	PeerList := make([]Peer, 0)
 
 	for i := 0; i < num; i++ {
 		rand.Seed(time.Now().UTC().UnixNano())
 		randNum := rand.Int() % len(tmp)
-		peerInfoList = append(peerInfoList, *tmp[randNum])
+		PeerList = append(PeerList, *tmp[randNum])
 
 		//delete
 		tmp = append(tmp[:randNum], tmp[randNum+1:]...)
 	}
 
-	return peerInfoList,nil
+	return PeerList,nil
 }
 
 //tested
-//나자신을 제외한 peerInfo의 list를 return
-func (pt *PeerTable) GetPeerList() []PeerInfo{
+//나자신을 제외한 Peer의 list를 return
+func (pt *PeerTable) GetPeerList() []Peer{
 
-	tmp := make([]PeerInfo, 0)
+	tmp := make([]Peer, 0)
 	for _, peer := range pt.PeerMap{
-		if peer.PeerID != pt.OwnerID{
+		if peer.PeerID != pt.MyID{
 			//내 ID는 삭제
 			tmp = append(tmp, *peer)
 		}
@@ -185,17 +186,17 @@ func (pt *PeerTable) GetPeerList() []PeerInfo{
 }
 
 //tested
-func (pt *PeerTable) GetMyInfo() PeerInfo{
-	peerInfo, ok := pt.PeerMap[pt.OwnerID]
+func (pt *PeerTable) GetMyInfo() Peer{
+	Peer, ok := pt.PeerMap[pt.MyID]
 
 	if ok{
-		return *peerInfo
+		return *Peer
 	}
 
-	return *peerInfo
+	return *Peer
 }
 
-func (pi PeerInfo) String() string {
+func (pi Peer) String() string {
 
 	b, err := json.Marshal(pi)
 	if err != nil {

@@ -13,6 +13,6 @@ func (mh *MockHandler) handle(ms interface{}) (interface{},error){
 }
 
 
-func TestPeerServiceImpl_GetPeerInfoByPeerID(t *testing.T) {
+func TestPeerServiceImpl_GetPeerByPeerID(t *testing.T) {
 	//var peerServiceImpl := PeerServiceImpl{}
 }

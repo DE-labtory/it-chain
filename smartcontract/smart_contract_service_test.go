@@ -3,8 +3,8 @@ package smartcontract
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"it-chain/domain"
 	"fmt"
+	"it-chain/domain"
 	"strconv"
 	"time"
 	"path/filepath"

@@ -1356,7 +1356,7 @@
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
-											"text": "PeerInfo",
+											"text": "Peer",
 											"horizontalAlignment": 2,
 											"verticalAlignment": 5,
 											"wordWrap": false
@@ -6131,7 +6131,7 @@
 					"_parent": {
 						"$ref": "AAAAAAFF+qBWK6M3Z8Y="
 					},
-					"name": "PeerInfo",
+					"name": "Peer",
 					"ownedElements": [
 						{
 							"_type": "UMLAssociation",

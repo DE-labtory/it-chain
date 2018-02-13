@@ -182,7 +182,6 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 	fmt.Println("------------ tx_byte ------------")
 	fmt.Println(string(tx_bytes))
 
-
 	tmpDir := "/tmp"
 	sc, ok := scs.SmartContractMap[transaction.TxData.ContractID];
 	if !ok {

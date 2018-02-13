@@ -9,7 +9,7 @@ type PeerService interface{
 	GetPeerTable() domain.PeerTable
 
 	//peer info 찾기
-	GetPeerInfoByPeerID(peerID string) *domain.PeerInfo
+	GetPeerByPeerID(peerID string) *domain.Peer
 
 	//peer info
 	PushPeerTable(peerIDs []string)
@@ -18,10 +18,12 @@ type PeerService interface{
 	UpdatePeerTable(peerTable domain.PeerTable)
 
 	//Add peer
-	AddPeerInfo(peerInfo *domain.PeerInfo)
+	AddPeer(Peer *domain.Peer)
 
 	//Request Peer Info
-	RequestPeerInfo(host string, port string) *domain.PeerInfo
+	RequestPeer(host string, port string) *domain.Peer
 
 	BroadCastPeerTable(interface{})
+
+	GetLeader() *domain.Peer
 }

@@ -14,10 +14,10 @@ message Empty {}
 
 message GossipTable{
     string myID = 1;
-    repeated PeerInfo peerInfo = 2;
+    repeated Peer Peer = 2;
 }
 
-message PeerInfo{
+message Peer{
     string ipAddress = 1;
     string peerID = 2;
     int64 counter = 3;
