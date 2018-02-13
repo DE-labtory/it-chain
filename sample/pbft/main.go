@@ -18,13 +18,12 @@ import (
 	"github.com/urfave/cli"
 	"os"
 	"strings"
-	"github.com/rs/xid"
 )
 
 var View = &domain.View{
-	ID:"1",
-	LeaderID: "peer1",
-	PeerID: []string{"peer1","peer2","peer3","peer4"},
+	ID:"127.0.0.1:4444",
+	LeaderID: "127.0.0.1:4444",
+	PeerID: []string{"127.0.0.1:5555","127.0.0.1:6666","127.0.0.1:7777","127.0.0.1:4444"},
 }
 
 //pbft testing code
@@ -38,12 +37,17 @@ type Node struct {
 	blockService      service.BlockService
 	peerService       service.PeerService
 	messagePublisher  publisher.MessagePublisher
+	perviousBlock     *domain.Block
 }
 
 func NewNode(peerInfo *domain.Peer) *Node{
 
+
 	node := &Node{}
 	node.myInfo = peerInfo
+
+	//
+	node.perviousBlock = nil
 
 	crypto, err := auth.NewCrypto("./sample/pbft/"+node.myInfo.GetEndPoint())
 	_, pub ,err := crypto.GenerateKey(&auth.RSAKeyGenOpts{})
@@ -54,16 +58,15 @@ func NewNode(peerInfo *domain.Peer) *Node{
 
 	node.myInfo.PubKey = pub.SKI()
 
-	log.Println(node.myInfo.PubKey)
+	//log.Println(node.myInfo.PubKey)
 
 	if err != nil{
 		panic("fail to create keys")
 	}
 
 	connectionManager := comm.NewConnectionManagerImpl(crypto)
-
 	//consensusService
-	consensusService := service.NewPBFTConsensusService(View,connectionManager,nil)
+	consensusService := service.NewPBFTConsensusService(connectionManager,nil,node.myInfo.PeerID)
 
 	//peerService
 	peerTable,err := domain.NewPeerTable(node.myInfo)
@@ -78,12 +81,10 @@ func NewNode(peerInfo *domain.Peer) *Node{
 	eventBatcher.Add("push peerTable")
 
 	//publisher.NewMessagePublisher(domain.,crypto)
-
 	node.consensusService = consensusService
 	node.peerService = peerService
 	node.connectionManager = connectionManager
 	node.view = View
-
 
 	return node
 }
@@ -108,10 +109,18 @@ func (s *Node) Stream(stream pb.MessageService_StreamServer) (error) {
 			log.Println(err)
 		}
 
-		log.Println("Received Envelop:",envelope)
+		//log.Println("Received Envelop:",envelope)
 
 		if message.GetConsensusMessage() != nil{
 			log.Println("Consensus Message")
+			//pcm := message.GetConsensusMessage()
+			//consensusMessage := domain.FromConsensusProtoMessage(*pcm)
+			//consensusMessage.TimeStamp = time.Now()
+			//log.Println(consensusMessage)
+
+			outterMessage := comm.OutterMessage{Message:message}
+			s.consensusService.ReceiveConsensusMessage(outterMessage)
+
 			continue
 		}
 
@@ -135,9 +144,27 @@ func (s *Node) GetPeer(context.Context, *pb.Empty) (*pb.Peer, error){
 	return pp,nil
 }
 
+func (s *Node) StartConsensus(context.Context, *pb.Empty) (*pb.Empty, error){
+
+	log.Println("start consensus!!")
+
+	var block *domain.Block
+
+	if s.perviousBlock == nil{
+		block = domain.CreateNewBlock(nil,s.myInfo.PeerID)
+	}else{
+		block = domain.CreateNewBlock(s.perviousBlock,s.myInfo.PeerID)
+	}
+
+	s.consensusService.StartConsensus(View,block)
+
+	return &pb.Empty{},nil
+}
+
 func (s *Node) listen(){
 
 	lis, err := net.Listen("tcp", s.myInfo.GetEndPoint())
+
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -145,6 +172,7 @@ func (s *Node) listen(){
 	server := grpc.NewServer()
 	pb.RegisterMessageServiceServer(server, s)
 	pb.RegisterPeerServiceServer(server,s)
+	pb.RegisterTestConsensusServiceServer(server,s)
 	// Register reflection service on gRPC server.
 	reflection.Register(server)
 
@@ -169,7 +197,7 @@ func (s *Node) RequestPeer(address string) *pb.Peer{
 	peer, err := c.GetPeer(context.Background(), &pb.Empty{})
 
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Println("could not greet: %v", err)
 	}
 
 	log.Println("recevied peer Info:",peer)
@@ -202,7 +230,7 @@ func main(){
 		address := strings.Split(myAddress,":")
 
 		peer := &domain.Peer{}
-		peer.PeerID = xid.New().String()
+		peer.PeerID = myAddress
 		peer.IpAddress = address[0]
 		peer.Port = address[1]
 
@@ -213,10 +241,7 @@ func main(){
 		if bootAddress != ""{
 			log.Println("searching boot peer...")
 			p := node.RequestPeer(bootAddress)
-			log.Println(p)
 			bootPeer := domain.FromProtoPeer(*p)
-			log.Println(bootPeer)
-			log.Println(node.peerService)
 			node.peerService.AddPeer(bootPeer)
 		}
 
