@@ -73,3 +73,7 @@
 [[override]]
   name = "github.com/stretchr/objx"
   version = "0.1.0"
+
+[[override]]
+  name = "gopkg.in/src-d/go-git.v4"
+  version = "4.1.0"

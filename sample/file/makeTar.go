@@ -10,6 +10,7 @@ import (
 )
 
 func makeTar(source string, target string) error {
+	withDir := true
 	filename := filepath.Base(source)
 	fmt.Println("filename : "+filename)
 	target = filepath.Join(target, fmt.Sprintf("%s.tar", filename))
@@ -30,15 +31,18 @@ func makeTar(source string, target string) error {
 
 	var baseDir string
 	if info.IsDir() {
+		fmt.Println("source is dir : " + source)
 		baseDir = filepath.Base(source)
 	}
 
-	return filepath.Walk(source,
+	return filepath.Walk("/tmp/tt",
 		func(path string, info os.FileInfo, err error) error {
+			fmt.Println(withDir)
 			if err != nil {
 				return err
 			}
 			header, err := tar.FileInfoHeader(info, info.Name())
+			fmt.Println(info)
 			if err != nil {
 				return err
 			}
@@ -46,6 +50,7 @@ func makeTar(source string, target string) error {
 			if baseDir != "" {
 				header.Name = filepath.Join(baseDir, strings.TrimPrefix(path, source))
 			}
+			fmt.Println(info)
 
 			if err := tarball.WriteHeader(header); err != nil {
 				return err
@@ -54,7 +59,7 @@ func makeTar(source string, target string) error {
 			if info.IsDir() {
 				return nil
 			}
-
+			return nil
 			file, err := os.Open(path)
 			if err != nil {
 				return err
@@ -66,5 +71,5 @@ func makeTar(source string, target string) error {
 }
 
 func main() {
-	makeTar("/Users/hackurity/Documents/it-chain/test/bloom", "/Users/hackurity/Documents/it-chain/test")
+	makeTar("/tmp/tt/2", "/tmp")
 }

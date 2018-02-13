@@ -1,24 +1,23 @@
-package abc
+package main
 
 import (
 	"it-chain/domain"
 	"it-chain/db/leveldbhelper"
-	"os"
 	"encoding/json"
 	"fmt"
+	"os"
 )
 
 type SampleSmartContract struct {
-
 }
 
 func (sc *SampleSmartContract) Init(args []string) error {
+	fmt.Println("in Init func")
 	tx := domain.Transaction{}
 	err := json.Unmarshal([]byte(args[0]), &tx)
 	if err != nil {
 		return err
 	}
-
 
 	/* Init WorldStateDB
 	---------------------*/
@@ -30,7 +29,7 @@ func (sc *SampleSmartContract) Init(args []string) error {
 
 	wsDB := "worldStateDB"
 	wsDBHandle := dbProvider.GetDBHandle(wsDB)
-	//wsDBHandle.Put([]byte("key"), []byte("value1"), true)
+	//wsDBHandle.Put([]byte("test"), []byte("value1"), true)
 
 	if tx.TxData.Method == "Query" {
 		sc.Query(tx, wsDBHandle)
@@ -46,11 +45,14 @@ func (sc *SampleSmartContract) Query(transaction domain.Transaction, wsDBHandle 
 }
 
 func (sc *SampleSmartContract) Invoke(transaction domain.Transaction, wsDBHandle *leveldbhelper.DBHandle) {
-	//wsDBHandle.Put([]byte("test"), []byte("success"), true)
+	wsDBHandle.Put([]byte("test"), []byte("success"), true)
 	fmt.Println("func Invoke")
+	test, _ := wsDBHandle.Get([]byte("test"))
+	fmt.Println("test : " + string(test))
 }
 
 func main()  {
+	fmt.Println("func main")
 	args := os.Args[1:]
 	ssc := new(SampleSmartContract)
 
