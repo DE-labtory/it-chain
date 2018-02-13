@@ -15,7 +15,7 @@ func main() {
 	}
 
 	r, err := cli.ContainerExecCreate(ctx, "031948a18830", types.ExecConfig{
-		Cmd: []string{"go", "run", "/go/src/fileio.go"},
+		Cmd: []string{"go", "build", "-o", "test1", "/go/src/fileio.go"},
 		User: "root",
 		//Cmd: []string{"touch","/home/aa"},
 	})
