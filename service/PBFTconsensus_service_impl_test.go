@@ -116,7 +116,7 @@ func TestNewPBFTConsensusService(t *testing.T) {
 	view.LeaderID = "1"
 	view.PeerID = []string{"1","2","3"}
 
-	pbftService := NewPBFTConsensusService(view,comm,nil)
+	pbftService := NewPBFTConsensusService(comm,nil)
 
 	consensusStates := pbftService.GetCurrentConsensusState()
 	assert.NotNil(t,consensusStates)

@@ -53,7 +53,7 @@ func (comm *ConnectionManagerImpl) CreateStreamConn(connectionID string, ip stri
 	return nil
 }
 
-func (comm *ConnectionManagerImpl) SendStream(message *pb.Message, errorCallBack OnError, connectionID string){
+func (comm *ConnectionManagerImpl) SendStream(message *pb.StreamMessage, errorCallBack OnError, connectionID string){
 
 	//commLogger.Println("Sending data...")
 

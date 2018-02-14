@@ -10,6 +10,7 @@ import (
 	"it-chain/common"
 	"time"
 	"google.golang.org/grpc/credentials"
+	pb "it-chain/network/protos"
 )
 
 var logger_comm = common.GetLogger("connection.go")
@@ -22,8 +23,9 @@ type ReceiveMessageHandle func(message OutterMessage)
 //todo client 와 server connection을 합칠 것인지 분리 할 것인지 생각 지금은 client만을 고려한 구조체
 type ConnectionImpl struct {
 	conn           *grpc.ClientConn
-	client         message.MessageServiceClient
-	clientStream   message.MessageService_StreamClient
+	client         message.StreamServiceClient
+	clientStream   message.StreamService_StreamClient
+	serverStream   message.StreamService_StreamServer
 	cancel         context.CancelFunc
 	stopFlag       int32
 	connectionID   string
@@ -32,6 +34,11 @@ type ConnectionImpl struct {
 	readChannel    chan *message.Envelope
 	stopChannel    chan struct{}
 	sync.RWMutex
+}
+
+type stream interface{
+	Send(*pb.Envelope) error
+	Recv() (*pb.Envelope, error)
 }
 
 //get time from config
@@ -56,19 +63,12 @@ func NewConnectionWithAddress(peerAddress string,  tslEnabled bool, creds creden
 }
 
 //todo channel의 buffer size를 config에서 읽기
-func NewConnection(conn *grpc.ClientConn, handle ReceiveMessageHandle,connectionID string) (Connection,error){
-
-	ctx, cf := context.WithCancel(context.Background())
-	client := message.NewMessageServiceClient(conn)
-	clientStream, err := client.Stream(ctx)
-
-	if err != nil{
-		conn.Close()
-		return nil, err
-	}
+func NewConnection(clientStream pb.StreamService_StreamClient, serverStream pb.StreamService_StreamServer, conn *grpc.ClientConn,
+			client pb.StreamServiceClient, handle ReceiveMessageHandle, connectionID string, cf context.CancelFunc) (Connection,error){
 
 	connection := &ConnectionImpl{
 		clientStream: clientStream,
+		serverStream: serverStream,
 		cancel: cf,
 		client: client,
 		conn: conn,
@@ -152,13 +152,17 @@ func (conn *ConnectionImpl) listen() error{
 	return nil
 }
 
-func (conn *ConnectionImpl) getStream() message.MessageService_StreamClient{
+func (conn *ConnectionImpl) getStream() stream{
 
 	conn.Lock()
 	defer conn.Unlock()
 
 	if conn.clientStream != nil {
 		return conn.clientStream
+	}
+
+	if conn.serverStream != nil{
+		return conn.serverStream
 	}
 
 	return nil

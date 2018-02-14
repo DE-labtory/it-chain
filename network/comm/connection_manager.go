@@ -9,7 +9,7 @@ type OnError func(error)
 //comm을 통해 peer들과 통신한다.
 type ConnectionManager interface{
 
-	SendStream(data *pb.Message, errorCallBack OnError, connectionID string)
+	SendStream(data *pb.StreamMessage, errorCallBack OnError, connectionID string)
 
 	Stop()
 

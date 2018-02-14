@@ -7,7 +7,7 @@ import (
 )
 
 type Ledger struct {
-	DB *blockchaindb.BlockChainDB
+	DB blockchaindb.BlockChainDB
 }
 
 func NewLedger(path string) BlockService{
