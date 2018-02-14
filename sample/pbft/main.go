@@ -42,11 +42,9 @@ type Node struct {
 
 func NewNode(peerInfo *domain.Peer) *Node{
 
-
 	node := &Node{}
 	node.myInfo = peerInfo
 
-	//
 	node.perviousBlock = nil
 
 	crypto, err := auth.NewCrypto("./sample/pbft/"+node.myInfo.GetEndPoint())
