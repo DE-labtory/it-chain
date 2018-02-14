@@ -30,19 +30,14 @@ func Init() {
 
 }
 
-func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string) (error) {
-
-	errChan := make(chan error, 1)
-
-	defer func() {
-		close(errChan)
-		recover()
-	}()
+func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string, errorHandler func(error),
+	completionHandler func()) {
 
 	go func() {
 		repoList, err := GetRepositoryList(authenticatedGit)
 		if err != nil {
-			errChan <- errors.New("An error was occured during getting repository list")
+			errorHandler(errors.New("An error was occured during getting repository list"))
+			return
 		}
 
 		for _, repo := range repoList {
@@ -51,13 +46,13 @@ func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string) 
 
 			err = os.MkdirAll(localReposPath, 0755)
 			if err != nil {
-				errChan <- errors.New("An error was occured during making repository path")
+				errorHandler(errors.New("An error was occured during making repository path"))
 				return
 			}
 
 			commits, err := GetReposCommits(repo.FullName)
 			if err != nil {
-				errChan <- errors.New("An error was occured during getting commit logs")
+				errorHandler(errors.New("An error was occured during getting commit logs"))
 				return
 			}
 
@@ -66,13 +61,13 @@ func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string) 
 
 					err := CloneReposWithName(repo.FullName, localReposPath, commit.Sha)
 					if err != nil {
-						errChan <- errors.New("An error was occured during cloning with name")
+						errorHandler(errors.New("An error was occured during cloning with name"))
 						return
 					}
 
 					err = ResetWithSHA(localReposPath + "/" + commit.Sha, commit.Sha)
 					if err != nil {
-						errChan <- errors.New("An error was occured during resetting with SHA")
+						errorHandler(errors.New("An error was occured during resetting with SHA"))
 						return
 					}
 
@@ -80,11 +75,9 @@ func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string) 
 			}
 		}
 
-		errChan <- nil
+		completionHandler()
 		return
 	}()
-
-	return <- errChan
 
 }
 

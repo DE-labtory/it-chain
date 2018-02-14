@@ -79,8 +79,13 @@ func TestSmartContractService_pullAllSmartContracts(t *testing.T) {
 	currentDir + "/pull_test_repositories",
 	map[string]SmartContract{}}
 
-	err = scs.pullAllSmartContracts("emperorhan")
-	assert.NoError(t, err)
+	scs.pullAllSmartContracts("emperorhan", func(e error) {
+		assert.Fail(t, e.Error())
+	}, nil)
+
+	scs.pullAllSmartContracts("", func(e error) {
+		assert.Error(t, e)
+	}, nil)
 
 	defer os.RemoveAll(scs.SmartContractDirPath)
 
