@@ -18,6 +18,7 @@ func TestNew(t *testing.T) {
 
 }
 
+//todo fix testcase or hash part
 func TestCollector_RSASign(t *testing.T) {
 
 	cryp, err := NewCrypto("")

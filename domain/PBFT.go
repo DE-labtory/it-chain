@@ -16,6 +16,7 @@ const (
 )
 
 type ConsensusStateBuilder interface {
+
 	ConsensusID(string) ConsensusStateBuilder
 	CurrentStage(Stage) ConsensusStateBuilder
 	View(*View) ConsensusStateBuilder
@@ -23,6 +24,7 @@ type ConsensusStateBuilder interface {
 	Period(int32) ConsensusStateBuilder
 	Block(*Block) ConsensusStateBuilder
 	Build() *ConsensusState
+
 }
 
 type consensusStateBuilder struct {
@@ -134,6 +136,7 @@ type View struct {
 	PeerID   []string
 }
 
+//todo test
 func FromProtoView(protoView *pb.View) View{
 
 	view := &View{}
@@ -142,6 +145,17 @@ func FromProtoView(protoView *pb.View) View{
 	view.PeerID = protoView.PeerID
 
 	return *view
+}
+
+//todo test
+func ToProtoView(view View) *pb.View{
+
+	pbView := &pb.View{}
+	pbView.LeaderID = view.LeaderID
+	pbView.ViewID = view.ID
+	pbView.PeerID = view.PeerID
+
+	return pbView
 }
 
 //tested
@@ -181,14 +195,29 @@ func NewConsesnsusMessage(consensusID string, view View,sequenceID int64, block 
 
 
 //todo block을 넣어야함
-func FromConsensusProtoMessage(consensusMessage pb.ConsensusMessage) ConsensusMessage{
+//todo test
+func FromConsensusProtoMessage(consensusMessage pb.ConsensusMessage) *ConsensusMessage{
 
-	return ConsensusMessage{
+	return &ConsensusMessage{
 		SequenceID: consensusMessage.SequenceID,
 		SenderID: consensusMessage.SenderID,
 		ConsensusID: consensusMessage.ConsensusID,
 		MsgType: MsgType(consensusMessage.MsgType),
 		View: FromProtoView(consensusMessage.View),
+		Block: FromProtoBlock(consensusMessage.Block),
+	}
+}
+
+//
+func ToConsensusProtoMessage(consensusMessage ConsensusMessage) *pb.ConsensusMessage{
+
+	return &pb.ConsensusMessage{
+		SequenceID: consensusMessage.SequenceID,
+		SenderID: consensusMessage.SenderID,
+		ConsensusID: consensusMessage.ConsensusID,
+		MsgType: int32(consensusMessage.MsgType),
+		View: ToProtoView(consensusMessage.View),
+		Block: ToProtoBlock(consensusMessage.Block),
 	}
 }
 
@@ -223,7 +252,7 @@ func (cs *ConsensusState) AddMessage(consensusMessage ConsensusMessage){
 	case PreprepareMsg:
 		cs.Block = consensusMessage.Block
 		cs.View = &consensusMessage.View
-		cs.CurrentStage = Prepared
+		cs.CurrentStage = PrePrepared
 		break
 
 	case PrepareMsg:
@@ -253,9 +282,14 @@ func (cs *ConsensusState) PrepareReady() bool{
 		return false
 	}
 
-	if nowVotes/totalVotes > 2/3{
+	if totalVotes == 1{
 		return true
 	}
+
+	if nowVotes >= int(totalVotes/3) + 1{
+		return true
+	}
+
 	return false
 }
 
@@ -271,7 +305,7 @@ func (cs *ConsensusState) CommitReady() bool{
 		return true
 	}
 
-	if nowVotes/totalVotes > 2/3{
+	if nowVotes >= int(totalVotes/3) + 1{
 		return true
 	}
 	return false

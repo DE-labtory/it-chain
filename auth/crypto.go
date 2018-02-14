@@ -1,5 +1,10 @@
 package auth
 
+import (
+	"crypto/rsa"
+	"crypto"
+)
+
 type Key interface {
 
 	SKI() (ski []byte)
@@ -16,3 +21,5 @@ type Crypto interface {
 
 	LoadKey() (pri, pub Key, err error)
 }
+
+var DefaultRSAOption = &rsa.PSSOptions{SaltLength:rsa.PSSSaltLengthEqualsHash, Hash:crypto.SHA256}
