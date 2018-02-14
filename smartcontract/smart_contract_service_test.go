@@ -3,12 +3,15 @@ package smartcontract
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"path/filepath"
-	"os"
 	"fmt"
 	"it-chain/domain"
 	"strconv"
 	"time"
+	"path/filepath"
+	"os"
+	"os/exec"
+	"bytes"
+	"io"
 )
 
 func TestDeploy_Deploy(t *testing.T) {
@@ -42,25 +45,47 @@ func TestSmartContractService_Query(t *testing.T) {
 		time.Now(),
 		domain.SetTxData(
 			"",
-			"query",
+			"Invoke",
 			domain.SetTxMethodParameters(0, "", []string{""}),
 			"abc",
 		),
 	)
+	fmt.Println("tx created")
 	scs := SmartContractService{
-		"hackurity01",
+		"steve-buzzni",
 		currentDir + "/sample_smartcontract",
 		map[string]SmartContract{
 			"abc": SmartContract{
-				ReposName:         "bloom",
-				OriginReposPath:   "junbeomlee/bloom",
-				SmartContractPath: "/Users/hackurity/Documents/it-chain/test/abc",
+				Name:         "sample1",
+				OriginReposPath:   "sample1/path",
+				SmartContractPath: currentDir + "/sample_smartcontract/sample1_path",
+				//SmartContractPath: "/Users/hackurity/go/src/it-chain-smartcontract/sample1_path",
 			},
 		},
 	}
 
+	fmt.Println("scs created")
 	scs.Query(*tx)
 
+	defer func() {
+		//docker rm $(docker ps -a -f "ancestor=golang:1.9.2-alpine3.6" -q)
+		//docker ps -a -f "ancestor=golang:1.9.2-alpine3.6" -q | xargs -I {} docker rm {}
+		c1 := exec.Command("docker", "ps", "-a", "-f", "ancestor=golang:1.9.2-alpine3.6", "-q")
+		c2 := exec.Command("xargs", "-I", "{}", "docker", "rm", "{}")
+
+		r, w := io.Pipe()
+		c1.Stdout = w
+		c2.Stdin = r
+
+		var b2 bytes.Buffer
+		c2.Stdout = &b2
+
+		c1.Start()
+		c2.Start()
+		c1.Wait()
+		w.Close()
+		c2.Wait()
+	}()
 }
 
 func TestSmartContractService_Invoke(t *testing.T) {

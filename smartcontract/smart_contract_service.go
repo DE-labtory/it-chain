@@ -2,11 +2,21 @@ package smartcontract
 
 import (
 	"errors"
+	"it-chain/domain"
 	"strings"
 	"fmt"
 	"os"
 	"time"
-	"it-chain/domain"
+	"io/ioutil"
+	"bytes"
+	"context"
+	"docker.io/go-docker"
+	"io"
+	"docker.io/go-docker/api/types"
+	"docker.io/go-docker/api/types/container"
+	"encoding/json"
+	"bufio"
+	"os/exec"
 )
 
 const (
@@ -15,7 +25,7 @@ const (
 )
 
 type SmartContract struct {
-	ReposName string
+	Name string
 	OriginReposPath string
 	SmartContractPath string
 }
@@ -166,24 +176,199 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
  *	6. docker에서 smartcontract 실행
  ****************************************************/
 func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
+	fmt.Println("func Query Start")
+
+	/* Set Transaction Arg
+	------------------------*/
+	tx_bytes, err := json.Marshal(transaction)
+	if err != nil {
+		return errors.New("Tx Marshal Error")
+	}
+	fmt.Println("Passed Marshal Tx")
+
+	fmt.Println("------------ tx_byte ------------")
+	fmt.Println(string(tx_bytes))
+
 	tmpDir := "/tmp"
 	sc, ok := scs.SmartContractMap[transaction.TxData.ContractID];
 	if !ok {
+		fmt.Println("Not exist contract ID")
 		return errors.New("Not exist contract ID")
 	}
 
-	_, err := os.Stat(sc.SmartContractPath)
+	_, err = os.Stat(sc.SmartContractPath)
 	if os.IsNotExist(err) {
 		fmt.Println("File or Directory Not Exist")
 		return errors.New("File or Directory Not Exist")
 	}
 
-	err = MakeTar(sc.SmartContractPath, tmpDir)
+	// smartcontract build
+	fmt.Println("sc.Name : " + sc.Name)
+	cmd := exec.Command("env", "GOOS=linux", "go", "build", "-o", tmpDir + "/" + sc.Name, "./" + sc.Name + ".go")
+	cmd.Dir = sc.SmartContractPath + "/" + transaction.TxData.ContractID
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+	cmd = exec.Command("chmod", "777", tmpDir + "/" + sc.Name)
+	cmd.Dir = sc.SmartContractPath + "/" + transaction.TxData.ContractID
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	err = MakeTar(tmpDir + "/" + sc.Name, tmpDir)
 	if err != nil {
 		return errors.New("An error occured while archiving file!")
 	}
+	fmt.Println("Passed MakeTar Smart Contract")
 
-	PullAndCopyAndRunDocker("docker.io/library/golang:rc-alpine", tmpDir+"/"+transaction.TxData.ContractID+".tar")
+	err = MakeTar("$GOPATH/src/it-chain/smartcontract/worldstatedb", tmpDir)
+	if err != nil {
+		return errors.New("An error occured while archiving file!")
+	}
+	fmt.Println("Passed MakeTar World State DB")
+
+	// tar config file
+	cmd = exec.Command("tar", "-cf", tmpDir + "/config.tar", "./it-chain/config.yaml")
+	cmd.Dir = "../../"
+	err = cmd.Run()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	fmt.Println("======== sc =======")
+	fmt.Println(sc)
+
+	//PullAndCopyAndRunDocker("docker.io/library/golang:rc-alpine", tmpDir+"/"+transaction.TxData.ContractID+".tar")
+
+	// Docker Code
+	imageName := "docker.io/library/golang:1.9.2-alpine3.6"
+	tarPath := tmpDir + "/" + sc.Name + ".tar"
+	tarPath_wsdb := tmpDir + "/worldstatedb.tar"
+	tarPath_config := tmpDir + "/config.tar"
+
+	ctx := context.Background()
+	cli, err := docker.NewEnvClient()
+	if err != nil {
+		panic(err)
+	}
+
+	out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
+	if err != nil {
+		panic(err)
+	}
+	io.Copy(os.Stdout, out)
+	fmt.Println("Passed ImagePull")
+
+	imageName_splited := strings.Split(imageName, "/")
+	image := imageName_splited[len(imageName_splited)-1]
+
+	resp, err := cli.ContainerCreate(ctx, &container.Config{
+		Image: image,
+		//Cmd: []string{"/bin/sh"},
+		Cmd: []string{"/go/src/" + sc.Name, string(tx_bytes)},
+		Tty: true,
+		AttachStdout: true,
+		AttachStderr: true,
+	}, nil, nil, "")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Passed ContainerCreate")
+
+	/*** read tar file ***/
+	file, err := ioutil.ReadFile(tarPath)
+	if err != nil {
+		fmt.Print(err)
+	}
+	wsdb, err := ioutil.ReadFile(tarPath_wsdb)
+	if err != nil {
+		fmt.Print(err)
+	}
+	config, err := ioutil.ReadFile(tarPath_config)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	/*** copy file to docker ***/
+	err = cli.CopyToContainer(ctx, resp.ID, "/go/src/", bytes.NewReader(file), types.CopyToContainerOptions{
+		AllowOverwriteDirWithFile: false,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Passed CopyToContainer Go File")
+
+	err = cli.CopyToContainer(ctx, resp.ID, "/go/src/", bytes.NewReader(wsdb), types.CopyToContainerOptions{
+		AllowOverwriteDirWithFile: false,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Passed CopyToContainer World State DB")
+
+	err = cli.CopyToContainer(ctx, resp.ID, "/go/src/", bytes.NewReader(config), types.CopyToContainerOptions{
+		AllowOverwriteDirWithFile: false,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Passed CopyToContainer Config")
+
+
+	fmt.Println("============================")
+	fmt.Println("resp.ID : " + resp.ID)
+	err = cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Passed ContainerStart")
+
+
+
+	/* go run in docker
+	----------------------
+	exec, err := cli.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
+		Cmd: []string{"go", "run", "/go/src/" + transaction.TxData.ContractID + "/" + sc.ReposName + ".go", string(tx_bytes)},
+		User: "root",
+	})	// go build -o /go/src/abc/sample1 /go/src/abc/sample1.go
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(exec)
+
+	err = cli.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{
+		Detach: true,
+		Tty:    true,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Passed go run in docker")
+	*/
+
+
+	/* get docker output
+	----------------------*/
+	fmt.Println("=============<Docker Output>===============")
+	reader, err := cli.ContainerLogs(context.Background(), resp.ID, types.ContainerLogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Follow:     true,
+		Timestamps: false,
+	})
+	if err != nil {
+		panic(err)
+	}
+	defer reader.Close()
+
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
 
 	return nil
 }

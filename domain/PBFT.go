@@ -15,6 +15,83 @@ const (
 	CommitMsg
 )
 
+type ConsensusStateBuilder interface {
+
+	ConsensusID(string) ConsensusStateBuilder
+	CurrentStage(Stage) ConsensusStateBuilder
+	View(*View) ConsensusStateBuilder
+	EndConsensusHandler(EndConsensusHandle) ConsensusStateBuilder
+	Period(int32) ConsensusStateBuilder
+	Block(*Block) ConsensusStateBuilder
+	Build() *ConsensusState
+
+}
+
+type consensusStateBuilder struct {
+	id                  string
+	view                *View
+	currentStage        Stage
+	block               *Block
+	endConsensusHandler EndConsensusHandle
+	period              int32
+}
+
+func NewConsensusStateBuilder() ConsensusStateBuilder {
+	csb := &consensusStateBuilder{}
+	csb.view = nil
+	csb.block = nil
+	return csb
+}
+
+func (csb consensusStateBuilder) ConsensusID(id string) ConsensusStateBuilder{
+	csb.id = id
+	return csb
+}
+
+func (csb consensusStateBuilder) CurrentStage(stage Stage) ConsensusStateBuilder{
+	csb.currentStage = stage
+	return csb
+}
+
+func (csb consensusStateBuilder) View(view *View) ConsensusStateBuilder{
+	csb.view = view
+	return csb
+}
+
+func (csb consensusStateBuilder) EndConsensusHandler(endConsensusHandler EndConsensusHandle) ConsensusStateBuilder{
+	csb.endConsensusHandler = endConsensusHandler
+	return csb
+}
+
+func (csb consensusStateBuilder) Period(period int32) ConsensusStateBuilder{
+	csb.period = period
+	return csb
+}
+
+func (csb consensusStateBuilder) Block(block *Block) ConsensusStateBuilder{
+	csb.block = block
+	return csb
+}
+
+func (csb consensusStateBuilder) Build() *ConsensusState{
+
+	cs := &ConsensusState{
+		ID:csb.id,
+		View:csb.view,
+		CurrentStage:csb.currentStage,
+		Block: csb.block,
+		PrepareMsgs: make(map[string]ConsensusMessage),
+		CommitMsgs: make(map[string]ConsensusMessage),
+		endConsensusHandler: csb.endConsensusHandler,
+		IsEnd: int32(0),
+		period: csb.period,
+	}
+
+	go cs.start()
+
+	return cs
+}
+
 //consesnsus message can has 3 types
 type ConsensusMessage struct {
 	ConsensusID string
@@ -59,6 +136,28 @@ type View struct {
 	PeerID   []string
 }
 
+//todo test
+func FromProtoView(protoView *pb.View) View{
+
+	view := &View{}
+	view.LeaderID = protoView.LeaderID
+	view.ID = protoView.ViewID
+	view.PeerID = protoView.PeerID
+
+	return *view
+}
+
+//todo test
+func ToProtoView(view View) *pb.View{
+
+	pbView := &pb.View{}
+	pbView.LeaderID = view.LeaderID
+	pbView.ViewID = view.ID
+	pbView.PeerID = view.PeerID
+
+	return pbView
+}
+
 //tested
 func NewConsensusState(view *View, consensusID string, block *Block, currentStage Stage, endConsensusHandler EndConsensusHandle, periodSeconds int32) *ConsensusState{
 
@@ -93,15 +192,32 @@ func NewConsesnsusMessage(consensusID string, view View,sequenceID int64, block 
 	}
 }
 
-//todo block을 넣어야함
-//todo View를 넣어야함
-func FromConsensusProtoMessage(consensusMessage pb.ConsensusMessage) ConsensusMessage{
 
-	return ConsensusMessage{
+
+//todo block을 넣어야함
+//todo test
+func FromConsensusProtoMessage(consensusMessage pb.ConsensusMessage) *ConsensusMessage{
+
+	return &ConsensusMessage{
 		SequenceID: consensusMessage.SequenceID,
 		SenderID: consensusMessage.SenderID,
 		ConsensusID: consensusMessage.ConsensusID,
 		MsgType: MsgType(consensusMessage.MsgType),
+		View: FromProtoView(consensusMessage.View),
+		Block: FromProtoBlock(consensusMessage.Block),
+	}
+}
+
+//
+func ToConsensusProtoMessage(consensusMessage ConsensusMessage) *pb.ConsensusMessage{
+
+	return &pb.ConsensusMessage{
+		SequenceID: consensusMessage.SequenceID,
+		SenderID: consensusMessage.SenderID,
+		ConsensusID: consensusMessage.ConsensusID,
+		MsgType: int32(consensusMessage.MsgType),
+		View: ToProtoView(consensusMessage.View),
+		Block: ToProtoBlock(consensusMessage.Block),
 	}
 }
 
@@ -130,29 +246,68 @@ func (cs *ConsensusState) AddMessage(consensusMessage ConsensusMessage){
 	//commit, prepareMsg는 block 존재 안함
 	//prepare가 2/3이상일 경우
 	//commit이 2/3이상일 경우
-
 	msgType := consensusMessage.MsgType
 
 	switch msgType {
 	case PreprepareMsg:
 		cs.Block = consensusMessage.Block
-		//prepareMsg broadcast 해야함
+		cs.View = &consensusMessage.View
+		cs.CurrentStage = PrePrepared
 		break
 
 	case PrepareMsg:
-		//cs.PrepareMsgs = append(cs.PrepareMsgs, consensusMessage)
-		//commitMsg broadcast 해야함
+		_ ,ok := cs.PrepareMsgs[consensusMessage.SenderID]
+		if !ok{
+			cs.PrepareMsgs[consensusMessage.SenderID] = consensusMessage
+		}
 		break
 
 	case CommitMsg:
-		//cs.CommitMsgs = append(cs.CommitMsgs, consensusMessage)
-		//block 저장해야함
+		_ ,ok := cs.CommitMsgs[consensusMessage.SenderID]
+		if !ok{
+			cs.CommitMsgs[consensusMessage.SenderID] = consensusMessage
+		}
+
 		break
 	default:
 		break
 	}
 }
 
-type Command interface{
-	Execute()
+func (cs *ConsensusState) PrepareReady() bool{
+	totalVotes := len(cs.View.PeerID)
+	nowVotes := len(cs.PrepareMsgs)
+
+	if totalVotes == 0{
+		return false
+	}
+
+	if totalVotes == 1{
+		return true
+	}
+
+	if nowVotes >= int(totalVotes/3) + 1{
+		return true
+	}
+
+	return false
 }
+
+func (cs *ConsensusState) CommitReady() bool{
+	totalVotes := len(cs.View.PeerID)
+	nowVotes := len(cs.CommitMsgs)
+
+	if totalVotes == 0{
+		return true
+	}
+
+	if totalVotes == 1{
+		return true
+	}
+
+	if nowVotes >= int(totalVotes/3) + 1{
+		return true
+	}
+	return false
+}
+

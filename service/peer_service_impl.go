@@ -3,7 +3,6 @@ package service
 import (
 	"it-chain/network/comm"
 	pb "it-chain/network/protos"
-	"github.com/golang/protobuf/proto"
 	"it-chain/domain"
 )
 
@@ -38,10 +37,9 @@ func (ps *PeerServiceImpl) PushPeerTable(peerIDs []string){
 
 //주기적으로 handle 함수가 콜 된다.
 //주기적으로 peerTable의 peerlist에게 peerTable을 전송한다.
-//todo signing이 들어가야함
 //todo struct to grpc proto의 변환 문제
 func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
-	logger.Println("pushing peer table")
+	//logger.Println("pushing peer table")
 
 	Peers, err := ps.peerTable.SelectRandomPeers(0.5)
 
@@ -50,13 +48,14 @@ func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
 		return
 	}
 
-	logger.Println("pushing peerTable:",ps.peerTable)
+	//logger.Println("pushing peerTable:",ps.peerTable)
 
 	ps.peerTable.IncrementHeartBeat()
-	message := &pb.Message{}
 
-	envelope := pb.Envelope{}
-	envelope.Payload, err = proto.Marshal(message)
+	message := &pb.Message{}
+	message.Content = &pb.Message_PeerTable{
+		PeerTable: domain.ToProtoPeerTable(*ps.peerTable),
+	}
 
 	if err !=nil{
 		logger.Println("fail to serialize message")
@@ -67,7 +66,7 @@ func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
 	}
 
 	for _,Peer := range Peers{
-		ps.comm.SendStream(envelope,errorCallBack, Peer.PeerID)
+		ps.comm.SendStream(message,errorCallBack, Peer.PeerID)
 	}
 }
 
@@ -99,6 +98,7 @@ func (ps *PeerServiceImpl) AddPeer(Peer *domain.Peer){
 		logger.Error("failed to connect with", Peer)
 		return
 	}
+
 	err := ps.comm.CreateStreamConn(Peer.PeerID,Peer.GetEndPoint(), nil)
 
 	if err != nil{

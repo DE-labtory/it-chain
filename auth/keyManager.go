@@ -97,6 +97,7 @@ func (km *keyManager) storeKey(key Key, keyType keyType) (error) {
 func (km *keyManager) Load() (pri, pub Key, err error) {
 
 	if _, err := os.Stat(km.path); os.IsNotExist(err) {
+		
 		return nil, nil, errors.New("Keys are not exist")
 	}
 

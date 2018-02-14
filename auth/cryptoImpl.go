@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"errors"
 	"crypto/elliptic"
+	"crypto/sha256"
 )
 
 type cryptoHelper struct {
@@ -46,7 +47,7 @@ func NewCrypto(path string) (Crypto, error) {
 
 }
 
-func (ch *cryptoHelper) Sign(digest []byte, opts SignerOpts) ([]byte, error) {
+func (ch *cryptoHelper) Sign(data []byte, opts SignerOpts) ([]byte, error) {
 
 	var err error
 
@@ -55,7 +56,7 @@ func (ch *cryptoHelper) Sign(digest []byte, opts SignerOpts) ([]byte, error) {
 		return nil, errors.New("Key is not exist.")
 	}
 
-	if len(digest) == 0 {
+	if len(data) == 0 {
 		return nil, errors.New("invalid digest.")
 	}
 
@@ -67,6 +68,10 @@ func (ch *cryptoHelper) Sign(digest []byte, opts SignerOpts) ([]byte, error) {
 	if !found {
 		return nil, errors.New("unsupported key type.")
 	}
+
+	hash := sha256.New()
+	hash.Write(data)
+	digest := hash.Sum(nil)
 
 	signature, err := signer.Sign(ch.priKey, digest, opts)
 	if err != nil {
