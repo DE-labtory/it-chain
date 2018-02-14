@@ -5,7 +5,7 @@ import (
 	"sync"
 	"it-chain/common"
 	"it-chain/auth"
-	"encoding/json"
+	"github.com/golang/protobuf/proto"
 )
 
 var commLogger = common.GetLogger("connection_manager_impl.go")
@@ -53,24 +53,28 @@ func (comm *ConnectionManagerImpl) CreateStreamConn(connectionID string, ip stri
 	return nil
 }
 
-func (comm *ConnectionManagerImpl) SendStream(data interface{}, errorCallBack OnError, connectionID string){
+func (comm *ConnectionManagerImpl) SendStream(message *pb.Message, errorCallBack OnError, connectionID string){
 
+	//commLogger.Println("Sending data...")
 
-	payload, err := json.Marshal(data)
+	payload, err := proto.Marshal(message)
 
 	if err != nil{
+		commLogger.Println("Marshal error:", err)
 		return
 	}
 
 	_, pub, err  := comm.crpyto.LoadKey()
 
 	if err != nil{
+		commLogger.Println("Load key error:", err)
 		return
 	}
 
-	sig, err  := comm.crpyto.Sign(payload,nil)
+	sig, err  := comm.crpyto.Sign(payload,auth.DefaultRSAOption)
 
 	if err != nil{
+		commLogger.Println("Signing error:", err)
 		return
 	}
 
@@ -83,6 +87,7 @@ func (comm *ConnectionManagerImpl) SendStream(data interface{}, errorCallBack On
 
 	if ok{
 		conn.Send(envelope,errorCallBack)
+		//commLogger.Println("Sended Envelope:",envelope)
 		//todo 어떤 error일 경우에 conn을 close 할지 정해야함
 	}else{
 		//todo 처리
