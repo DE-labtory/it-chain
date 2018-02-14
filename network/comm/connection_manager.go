@@ -15,7 +15,7 @@ type ConnectionManager interface{
 
 	Close(connectionID string)
 
-	CreateStreamConn(connectionID string, ip string, handle ReceiveMessageHandle) error
+	CreateStreamClientConn(connectionID string, ip string, handle ReceiveMessageHandle) error
 
 	Size() int
 }

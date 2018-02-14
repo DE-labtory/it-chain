@@ -29,7 +29,7 @@ func (mcm MockConnectionManager) Close(connectionID string){
 
 }
 
-func (mcm MockConnectionManager) CreateStreamConn(connectionID string, ip string, handle comm.ReceiveMessageHandle) error{
+func (mcm MockConnectionManager) CreateStreamClientConn(connectionID string, ip string, handle comm.ReceiveMessageHandle) error{
 	return errors.New("error")
 }
 

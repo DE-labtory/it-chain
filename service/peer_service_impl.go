@@ -99,7 +99,7 @@ func (ps *PeerServiceImpl) AddPeer(Peer *domain.Peer){
 		return
 	}
 
-	err := ps.comm.CreateStreamConn(Peer.PeerID,Peer.GetEndPoint(), nil)
+	err := ps.comm.CreateStreamClientConn(Peer.PeerID,Peer.GetEndPoint(), nil)
 
 	if err != nil{
 		logger.Error("failed to connect with", Peer)

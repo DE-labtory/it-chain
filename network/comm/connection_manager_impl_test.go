@@ -11,6 +11,9 @@ import (
 	"google.golang.org/grpc"
 )
 
+
+//todo connection manager_impl test 모두 수정
+
 func ListenMockServerWithIP(ip string) (*grpc.Server,net.Listener){
 	lis, err := net.Listen("tcp", ip)
 	if err != nil {
@@ -18,7 +21,7 @@ func ListenMockServerWithIP(ip string) (*grpc.Server,net.Listener){
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterMessageServiceServer(s, &Mockserver{})
+	pb.RegisterStreamServiceServer(s, &Mockserver{})
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
 
@@ -33,14 +36,14 @@ func ListenMockServerWithIP(ip string) (*grpc.Server,net.Listener){
 	return s,lis
 }
 
-func TestCommImpl_CreateStreamConn(t *testing.T) {
+func TestCommImpl_CreateStreamClientConn(t *testing.T) {
 
 	server1, listner1 := ListenMockServerWithIP("127.0.0.1:5555")
 	server2, listner2 := ListenMockServerWithIP("127.0.0.1:6666")
 
 	comm := NewConnectionManagerImpl()
-	comm.CreateStreamConn("1","127.0.0.1:5555",nil)
-	comm.CreateStreamConn("2","127.0.0.1:6666",nil)
+	comm.CreateStreamClientConn("1","127.0.0.1:5555",nil)
+	comm.CreateStreamClientConn("2","127.0.0.1:6666",nil)
 
 	defer func(){
 		server1.Stop()
@@ -61,8 +64,8 @@ func TestCommImpl_Send(t *testing.T) {
 
 
 	comm := NewConnectionManagerImpl()
-	comm.CreateStreamConn("1","127.0.0.1:5555",nil)
-	comm.CreateStreamConn("2","127.0.0.1:6666",nil)
+	comm.CreateStreamClientConn("1","127.0.0.1:5555",nil)
+	comm.CreateStreamClientConn("2","127.0.0.1:6666",nil)
 
 	envelope := &pb.Envelope{Signature:[]byte("123")}
 
@@ -89,8 +92,8 @@ func TestCommImpl_Stop(t *testing.T) {
 
 
 	comm := NewConnectionManagerImpl()
-	comm.CreateStreamConn("1","127.0.0.1:5555",nil)
-	comm.CreateStreamConn("2","127.0.0.1:6666",nil)
+	comm.CreateStreamClientConn("1","127.0.0.1:5555",nil)
+	comm.CreateStreamClientConn("2","127.0.0.1:6666",nil)
 
 	defer func(){
 		server1.Stop()
@@ -111,8 +114,8 @@ func TestCommImpl_Close(t *testing.T) {
 
 
 	comm := NewConnectionManagerImpl()
-	comm.CreateStreamConn("1","127.0.0.1:5555",nil)
-	comm.CreateStreamConn("2","127.0.0.1:6666",nil)
+	comm.CreateStreamClientConn("1","127.0.0.1:5555",nil)
+	comm.CreateStreamClientConn("2","127.0.0.1:6666",nil)
 
 	defer func(){
 		server1.Stop()

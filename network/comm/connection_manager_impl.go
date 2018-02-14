@@ -1,11 +1,12 @@
 package comm
 
 import (
-	pb "it-chain/network/protos"
 	"sync"
 	"it-chain/common"
 	"it-chain/auth"
 	"github.com/golang/protobuf/proto"
+	"golang.org/x/net/context"
+	pb "it-chain/network/protos"
 )
 
 var commLogger = common.GetLogger("connection_manager_impl.go")
@@ -23,9 +24,9 @@ func NewConnectionManagerImpl(crpyto auth.Crypto) *ConnectionManagerImpl{
 	}
 }
 
-func (comm *ConnectionManagerImpl) CreateStreamConn(connectionID string, ip string, handler ReceiveMessageHandle) error{
+func (comm *ConnectionManagerImpl) CreateStreamClientConn(connectionID string, ip string, handler ReceiveMessageHandle) error{
 
-	//Peer의 ipAddress로 connection을 연결
+	//Peer의 connectionID로 connection을 연결
 	_, ok := comm.connectionMap[connectionID]
 
 	if ok{
@@ -38,7 +39,13 @@ func (comm *ConnectionManagerImpl) CreateStreamConn(connectionID string, ip stri
 		return err
 	}
 
-	conn,err := NewConnection(grpcConnection,handler,connectionID)
+	ctx, cf := context.WithCancel(context.Background())
+	client := pb.NewStreamServiceClient(grpcConnection)
+	clientStream, err := client.Stream(ctx)
+
+	//serverStream should be nil
+	conn,err := NewConnection(clientStream,nil,
+		grpcConnection,client,handler,connectionID,cf)
 
 	if err != nil{
 		return err
@@ -115,4 +122,9 @@ func (comm *ConnectionManagerImpl) Close(connectionID string){
 
 func (comm *ConnectionManagerImpl) Size() int{
 	return len(comm.connectionMap)
+}
+
+func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) (error) {
+
+	stream.
 }

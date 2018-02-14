@@ -19,8 +19,7 @@ const defaultTimeout = time.Second * 3
 
 type ReceiveMessageHandle func(message OutterMessage)
 
-//직접적으로 grpc를 보내는 역활 수행
-//todo client 와 server connection을 합칠 것인지 분리 할 것인지 생각 지금은 client만을 고려한 구조체
+//직접적으로 grpc를 보내고 받는 역활 수행
 type ConnectionImpl struct {
 	conn           *grpc.ClientConn
 	client         message.StreamServiceClient
@@ -221,5 +220,4 @@ func (conn *ConnectionImpl) WriteStream(){
 			return
 		}
 	}
-
 }
