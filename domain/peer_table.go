@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"encoding/json"
 	"math/rand"
+	pb "it-chain/network/protos"
 )
 
 type Peer struct {
@@ -214,4 +215,54 @@ func (pt PeerTable) String() string {
 	}
 
 	return string(b)
+}
+
+func FromProtoPeer(pp pb.Peer) *Peer{
+
+	peer := &Peer{}
+	peer.PubKey = pp.PubKey
+	peer.PeerID = pp.PeerID
+	peer.HeartBeat = int(pp.HeartBeat)
+	peer.IpAddress = pp.IpAddress
+	peer.Port = pp.Port
+
+	return peer
+}
+
+func ToProtoPeer(pp Peer) *pb.Peer{
+
+	peer := &pb.Peer{}
+	peer.PubKey = pp.PubKey
+	peer.PeerID = pp.PeerID
+	peer.HeartBeat = int32(pp.HeartBeat)
+	peer.IpAddress = pp.IpAddress
+	peer.Port = pp.Port
+
+	return peer
+}
+
+func ToProtoPeerTable(pt PeerTable) *pb.PeerTable{
+	peerTable := &pb.PeerTable{}
+	peerTable.MyID = pt.MyID
+	peerTable.PeerMap = make(map[string]*pb.Peer)
+
+	for _ ,peer := range pt.PeerMap{
+		protoPeer := ToProtoPeer(*peer)
+		peerTable.PeerMap[protoPeer.PeerID] = protoPeer
+	}
+
+	return peerTable
+}
+
+func FromProtoPeerTable(pt pb.PeerTable) *PeerTable{
+	peerTable := &PeerTable{}
+	peerTable.MyID = pt.MyID
+	peerTable.PeerMap = make(map[string]*Peer)
+
+	for _ ,protoPeer := range pt.PeerMap{
+		peer := FromProtoPeer(*protoPeer)
+		peerTable.PeerMap[peer.PeerID] = peer
+	}
+
+	return peerTable
 }

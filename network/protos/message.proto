@@ -10,8 +10,13 @@ service MessageService{
 }
 
 service PeerService{
-    rpc GetPeer (Peer) returns (Peer) {}
+    rpc GetPeer (Empty) returns (Peer) {}
 }
+
+service TestConsensusService{
+    rpc StartConsensus (Empty) returns (Empty) {}
+}
+
 
 message Envelope {
 
@@ -35,13 +40,12 @@ message Message{
         Block block = 2;
         Transaction transaction = 3;
         PeerTable peerTable = 4;
-        Peer Peer = 5;
-        ConsensusMessage consensusMessage= 6;
+        ConsensusMessage consensusMessage = 5;
     }
 }
 
 message Block{
-
+    bytes data = 1;
 }
 
 message Transaction{

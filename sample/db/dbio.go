@@ -6,7 +6,7 @@ import (
 
 func main() {
 
-	path := "./test"
+	path := "./sample/db/test"
 	dbProvider := leveldbhelper.CreateNewDBProvider(path)
 	defer func(){
 		dbProvider.Close()
@@ -14,5 +14,5 @@ func main() {
 
 	wsDB := "worldStateDB"
 	wsDBHandle := dbProvider.GetDBHandle(wsDB)
-	wsDBHandle.Put([]byte("key"), []byte("value1"), true)
+	wsDBHandle.Put([]byte("a"), []byte("value1"), true)
 }

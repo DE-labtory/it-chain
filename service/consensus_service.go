@@ -8,7 +8,7 @@ import (
 type ConsensusService interface{
 
 	//Consensus 시작
-	StartConsensus(block *domain.Block)
+	StartConsensus(view *domain.View, block *domain.Block)
 
 	StopConsensus()
 	//consensus메세지는 모두 이쪽으로 받는다.

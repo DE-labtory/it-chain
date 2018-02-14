@@ -19,6 +19,7 @@ func (l *Ledger) Close() {
 }
 
 func (l *Ledger) CreateBlock(txList []*domain.Transaction, createPeerId string) (*domain.Block, error) {
+
 	lastBlock, err := l.GetLastBlock()
 	if err != nil { return nil, err }
 	blk := domain.CreateNewBlock(lastBlock, createPeerId)

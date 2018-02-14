@@ -22,7 +22,6 @@ var counter = 0
 
 type Mockserver struct {}
 
-
 func (s *Mockserver) Stream(stream pb.MessageService_StreamServer) (error) {
 
 	for {
