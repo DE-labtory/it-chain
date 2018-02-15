@@ -18,7 +18,11 @@ type verifier interface {
 
 }
 
-type KeyGenOpts interface {}
+type KeyGenOpts interface {
+
+	Algorithm() string
+
+}
 
 type keyGenerator interface {
 
