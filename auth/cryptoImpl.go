@@ -5,6 +5,7 @@ import (
 	"errors"
 	"crypto/elliptic"
 	"crypto/sha256"
+	"crypto/rsa"
 )
 
 type cryptoHelper struct {
@@ -19,7 +20,7 @@ type cryptoHelper struct {
 
 }
 
-func NewCrypto(path string) (Crypto, error) {
+func NewCrypto(path string, keyGenOpts KeyGenOpts) (Crypto, error) {
 
 	km := &keyManager{}
 	km.Init(path)
@@ -33,8 +34,8 @@ func NewCrypto(path string) (Crypto, error) {
 	verifiers[reflect.TypeOf(&ecdsaPublicKey{})] = &ecdsaVerifier{}
 
 	keyGenerators := make(map[reflect.Type]keyGenerator)
-	keyGenerators[reflect.TypeOf(&RSAKeyGenOpts{})] = &rsaKeyGenerator{1024}
-	keyGenerators[reflect.TypeOf(&ECDSAKeyGenOpts{})] = &ecdsaKeyGenerator{elliptic.P256()}
+	keyGenerators[reflect.TypeOf(&RSAKeyGenOpts{})] = &rsaKeyGenerator{2048}
+	keyGenerators[reflect.TypeOf(&ECDSAKeyGenOpts{})] = &ecdsaKeyGenerator{elliptic.P521()}
 
 	ch := &cryptoHelper{
 		keyManager:		*km,
@@ -44,6 +45,31 @@ func NewCrypto(path string) (Crypto, error) {
 	}
 
 	return ch, nil
+
+}
+
+func (ch *cryptoHelper) generateKey(opts KeyGenOpts) (pri, pub Key, err error) {
+
+	if opts == nil {
+		return nil, nil, errors.New("Invalid KeyGen Options")
+	}
+
+	keyGenerator, found := ch.keyGenerators[reflect.TypeOf(opts)]
+	if !found {
+		return nil,nil, errors.New("Invalid KeyGen Options")
+	}
+
+	pri, pub, err = keyGenerator.GenerateKey(opts)
+	if err != nil {
+		return nil, nil, errors.New("Failed to generate a Key")
+	}
+
+	err = ch.keyManager.Store(pri, pub)
+	if err != nil {
+		return nil, nil, errors.New("Failed to store a Key")
+	}
+
+	return pri, pub, nil
 
 }
 
@@ -110,31 +136,7 @@ func (ch *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpt
 
 }
 
-func (ch *cryptoHelper) GenerateKey(opts KeyGenOpts) (pri, pub Key, err error) {
-
-	if opts == nil {
-		return nil, nil, errors.New("Invalid KeyGen Options")
-	}
-
-	keyGenerator, found := ch.keyGenerators[reflect.TypeOf(opts)]
-	if !found {
-		return nil,nil, errors.New("Invalid KeyGen Options")
-	}
-
-	pri, pub, err = keyGenerator.GenerateKey(opts)
-	if err != nil {
-		return nil, nil, errors.New("Failed to generate a Key")
-	}
-
-	err = ch.keyManager.Store(pri, pub)
-	if err != nil {
-		return nil, nil, errors.New("Failed to store a Key")
-	}
-
-	return pri, pub, nil
-
-}
-
+// return private key and public key if they are exist in path
 func (ch *cryptoHelper) LoadKey() (pri, pub Key, err error) {
 
 	pri, pub, err = ch.keyManager.Load()
