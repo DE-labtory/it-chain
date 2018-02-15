@@ -94,6 +94,10 @@ func (key *ecdsaPrivateKey) SKI() ([]byte) {
 
 }
 
+func (key *ecdsaPrivateKey) Algorithm() string {
+	return ECDSA
+}
+
 func (key *ecdsaPrivateKey) PublicKey() (Key, error) {
 	return &ecdsaPublicKey{&key.priv.PublicKey}, nil
 }
@@ -114,4 +118,8 @@ func (key *ecdsaPublicKey) SKI() ([]byte) {
 	hash.Write(data)
 	return hash.Sum(nil)
 
+}
+
+func (key *ecdsaPublicKey) Algorithm() string {
+	return ECDSA
 }
