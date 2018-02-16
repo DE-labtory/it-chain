@@ -19,7 +19,7 @@ type cryptoHelper struct {
 
 }
 
-func NewCrypto(path string) (Crypto, error) {
+func NewCrypto(path string, keyGenOpts KeyGenOpts) (Crypto, error) {
 
 	km := &keyManager{}
 	km.Init(path)
@@ -33,8 +33,8 @@ func NewCrypto(path string) (Crypto, error) {
 	verifiers[reflect.TypeOf(&ecdsaPublicKey{})] = &ecdsaVerifier{}
 
 	keyGenerators := make(map[reflect.Type]keyGenerator)
-	keyGenerators[reflect.TypeOf(&RSAKeyGenOpts{})] = &rsaKeyGenerator{1024}
-	keyGenerators[reflect.TypeOf(&ECDSAKeyGenOpts{})] = &ecdsaKeyGenerator{elliptic.P256()}
+	keyGenerators[reflect.TypeOf(&RSAKeyGenOpts{})] = &rsaKeyGenerator{2048}
+	keyGenerators[reflect.TypeOf(&ECDSAKeyGenOpts{})] = &ecdsaKeyGenerator{elliptic.P521()}
 
 	ch := &cryptoHelper{
 		keyManager:		*km,
@@ -43,7 +43,49 @@ func NewCrypto(path string) (Crypto, error) {
 		keyGenerators: 	keyGenerators,
 	}
 
+	err := ch.loadKey()
+	if err != nil ||
+		ch.priKey.Algorithm() != keyGenOpts.Algorithm() ||
+			ch.pubKey.Algorithm() != keyGenOpts.Algorithm() {
+			err := ch.generateKey(keyGenOpts)
+			if err != nil {
+				return nil, err
+			}
+	}
+
 	return ch, nil
+
+}
+
+func (ch *cryptoHelper) generateKey(opts KeyGenOpts) (err error) {
+
+	// remove all exist key file in specific path
+	err = ch.keyManager.removeKey()
+	if err != nil {
+		return err
+	}
+
+	if opts == nil {
+		return errors.New("Invalid KeyGen Options")
+	}
+
+	keyGenerator, found := ch.keyGenerators[reflect.TypeOf(opts)]
+	if !found {
+		return errors.New("Invalid KeyGen Options")
+	}
+
+	pri, pub, err := keyGenerator.GenerateKey(opts)
+	if err != nil {
+		return errors.New("Failed to generate a Key")
+	}
+
+	err = ch.keyManager.Store(pri, pub)
+	if err != nil {
+		return errors.New("Failed to store a Key")
+	}
+
+	ch.priKey, ch.pubKey = pri, pub
+	return nil
 
 }
 
@@ -51,13 +93,13 @@ func (ch *cryptoHelper) Sign(data []byte, opts SignerOpts) ([]byte, error) {
 
 	var err error
 
-	ch.priKey, ch.pubKey, err = ch.LoadKey()
+	err = ch.loadKey()
 	if err != nil {
 		return nil, errors.New("Key is not exist.")
 	}
 
 	if len(data) == 0 {
-		return nil, errors.New("invalid digest.")
+		return nil, errors.New("invalid data.")
 	}
 
 	if ch.priKey == nil {
@@ -110,38 +152,30 @@ func (ch *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpt
 
 }
 
-func (ch *cryptoHelper) GenerateKey(opts KeyGenOpts) (pri, pub Key, err error) {
+// load private and public key data to cryptoHelper if they are exist in path
+func (ch *cryptoHelper) loadKey() (err error) {
 
-	if opts == nil {
-		return nil, nil, errors.New("Invalid KeyGen Options")
-	}
-
-	keyGenerator, found := ch.keyGenerators[reflect.TypeOf(opts)]
-	if !found {
-		return nil,nil, errors.New("Invalid KeyGen Options")
-	}
-
-	pri, pub, err = keyGenerator.GenerateKey(opts)
+	pri, pub, err := ch.keyManager.Load()
 	if err != nil {
-		return nil, nil, errors.New("Failed to generate a Key")
+		return err
 	}
 
-	err = ch.keyManager.Store(pri, pub)
-	if err != nil {
-		return nil, nil, errors.New("Failed to store a Key")
-	}
+	ch.priKey, ch.pubKey = pri, pub
 
-	return pri, pub, nil
+	return nil
 
 }
 
-func (ch *cryptoHelper) LoadKey() (pri, pub Key, err error) {
+// return private key and public key if they are exist in path
+func (ch *cryptoHelper) GetKey() (pri, pub Key, err error) {
 
-	pri, pub, err = ch.keyManager.Load()
-	if err != nil {
-		return nil, nil, err
+	if ch.priKey == nil || ch.pubKey == nil {
+		err := ch.loadKey()
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
-	return pri, pub, err
+	return ch.priKey, ch.pubKey, nil
 
 }
