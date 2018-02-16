@@ -37,6 +37,8 @@ message StreamMessage{
         Transaction transaction = 3;
         PeerTable peerTable = 4;
         ConsensusMessage consensusMessage = 5;
+        Peer peer = 6;
+        ConnectionEstablish connectionEstablish = 7;
     }
 }
 
@@ -47,6 +49,8 @@ message Block{
 message Transaction{
 
 }
+
+message ConnectionEstablish {}
 
 message PeerTable{
     string MyID = 1;

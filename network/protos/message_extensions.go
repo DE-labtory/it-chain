@@ -1,8 +1,19 @@
 package message
 
-//import (
-//	"it-chain/network"
-//)
+import "github.com/gogo/protobuf/proto"
+
+func (envelope Envelope) GetMessage() (*StreamMessage, error){
+
+	m := &StreamMessage{}
+
+	err := proto.Unmarshal(envelope.Payload,m)
+
+	if err != nil{
+		return nil, err
+	}
+
+	return m, nil
+}
 
 //
 //import (

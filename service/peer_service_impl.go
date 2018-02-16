@@ -48,12 +48,10 @@ func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
 		return
 	}
 
-	//logger.Println("pushing peerTable:",ps.peerTable)
-
 	ps.peerTable.IncrementHeartBeat()
 
-	message := &pb.Message{}
-	message.Content = &pb.Message_PeerTable{
+	message := &pb.StreamMessage{}
+	message.Content = &pb.StreamMessage_PeerTable{
 		PeerTable: domain.ToProtoPeerTable(*ps.peerTable),
 	}
 
