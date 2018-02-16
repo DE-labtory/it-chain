@@ -9,6 +9,8 @@ type Key interface {
 
 	SKI() (ski []byte)
 
+	Algorithm() string
+
 }
 
 type Crypto interface {
@@ -17,9 +19,8 @@ type Crypto interface {
 
 	Verify(key Key, signature, digest []byte, opts SignerOpts) (bool, error)
 
-	GenerateKey(opts KeyGenOpts) (pri, pub Key, err error)
+	GetKey() (pri, pub Key, err error)
 
-	LoadKey() (pri, pub Key, err error)
 }
 
 var DefaultRSAOption = &rsa.PSSOptions{SaltLength:rsa.PSSSaltLengthEqualsHash, Hash:crypto.SHA256}

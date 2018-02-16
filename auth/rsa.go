@@ -71,6 +71,10 @@ func (key *rsaPrivateKey) SKI() ([]byte) {
 
 }
 
+func (key *rsaPrivateKey) Algorithm() string {
+	return RSA
+}
+
 func (key *rsaPrivateKey) PublicKey() (pub Key, err error) {
 	return &rsaPublicKey{&key.priv.PublicKey}, nil
 }
@@ -93,4 +97,8 @@ func (key *rsaPublicKey) SKI() ([]byte) {
 	hash.Write(data)
 	return hash.Sum(nil)
 
+}
+
+func (key *rsaPublicKey) Algorithm() string {
+	return RSA
 }
