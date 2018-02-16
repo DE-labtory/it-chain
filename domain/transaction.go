@@ -3,7 +3,6 @@ package domain
 import (
 	"time"
 	"it-chain/common"
-	"errors"
 )
 
 type TransactionStatus int
@@ -89,19 +88,4 @@ func (tx Transaction) Validate() bool{
 		return false
 	}
 	return true
-}
-
-func (tx *Transaction) SignHash() (ret bool, err error){
-	signature := []byte("temp")
-	tx.PublicKey = []byte("temp")
-
-	if signature != nil {
-		tx.Signature = signature
-		err = nil
-		ret = true
-	} else {
-		err = errors.New("transaction signature fail")
-		ret = false
-	}
-	return ret, err
 }

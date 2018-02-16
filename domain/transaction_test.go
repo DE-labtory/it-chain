@@ -27,11 +27,3 @@ func TestTransaction_Validate(t *testing.T) {
 	tx.GenerateHash()
 	assert.Equal(t, true, tx.Validate())
 }
-
-func TestTransaction_SignHash(t *testing.T) {
-	tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), General, time.Now(), SetTxData("", Invoke, SetTxMethodParameters(0, "", []string{""}), ""))
-	_, err := tx.SignHash()
-	assert.NoError(t, err)
-}
-
-

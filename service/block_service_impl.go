@@ -62,6 +62,10 @@ func (l *Ledger) GetLastBlock() (*domain.Block, error) {
 }
 
 func (l *Ledger) LookUpBlock(arg interface{}) (*domain.Block, error) {
+	_, err := l.GetLastBlock()
+	if err != nil{
+		return nil, errors.New("no block exist")
+	}
 	switch arg.(type)  {
 	case int:
 		arg = uint64(arg.(int))
@@ -74,6 +78,8 @@ func (l *Ledger) LookUpBlock(arg interface{}) (*domain.Block, error) {
 }
 
 func (l *Ledger) AddBlock(blk *domain.Block) (bool, error) {
+	_, err := l.LookUpBlock(blk.Header.BlockHash)
+	if err == nil{ return false, errors.New("already this blk exist") }
 	lastBlock, err := l.GetLastBlock()
 	if err != nil { return false, err }
 	if blk.Header.BlockStatus != domain.Status_BLOCK_CONFIRMED {
