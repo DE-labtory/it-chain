@@ -1,8 +1,8 @@
 package message
 
-import (
-	"it-chain/network"
-)
+//import (
+//	"it-chain/network"
+//)
 
 //
 //import (
@@ -83,12 +83,12 @@ import (
 //	return m.GetPeerTable() != nil
 //}
 //
-
-func (message *Message) GetMessageType() string {
-
-	if message.GetPeerTable() != nil{
-		return network.UpdatePeerTable
-	}
-
-	return "no"
-}
+//
+//func (message *Message) GetMessageType() string {
+//
+//	if message.GetPeerTable() != nil{
+//		return network.UpdatePeerTable
+//	}
+//
+//	return "no"
+//}

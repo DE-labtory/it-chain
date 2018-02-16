@@ -144,7 +144,9 @@ func (conn *ConnectionImpl) listen() error{
 		case err := <-errChan:
 			return err
 		case msg := <-conn.readChannel:
-			conn.handle(OutterMessage{Envelope:msg,Conn:conn,ConnectionID:conn.connectionID})
+			if conn.handle != nil{
+				conn.handle(OutterMessage{Envelope:msg,Conn:conn,ConnectionID:conn.connectionID})
+			}
 		}
 	}
 

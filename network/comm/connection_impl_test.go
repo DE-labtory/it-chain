@@ -22,7 +22,7 @@ var counter = 0
 
 type Mockserver struct {}
 
-func (s *Mockserver) Stream(stream pb.MessageService_StreamServer) (error) {
+func (s *Mockserver) Stream(stream pb.StreamService_StreamServer) (error) {
 
 	for {
 		message,err := stream.Recv()
@@ -36,6 +36,12 @@ func (s *Mockserver) Stream(stream pb.MessageService_StreamServer) (error) {
 		}
 		counter += 1
 		fmt.Printf("Received: %d\n", message.String())
+
+		err = stream.Send(message)
+
+		if err !=nil{
+			fmt.Printf("Send Error: %d\n", message.String())
+		}
 	}
 }
 
@@ -44,12 +50,15 @@ func (s *Mockserver) Ping(ctx context.Context, in *pb.Empty) (*pb.Empty, error) 
 }
 
 func ListenMockServer() (*grpc.Server,net.Listener){
+
 	lis, err := net.Listen("tcp", ipaddress)
+
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
 	s := grpc.NewServer()
-	pb.RegisterMessageServiceServer(s, &Mockserver{})
+	pb.RegisterStreamServiceServer(s, &Mockserver{})
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
 
@@ -75,7 +84,13 @@ func TestNewConnection(t *testing.T) {
 		assert.Fail(t,"fail to create connection")
 	}
 
-	conn,err  := NewConnection(grpc_conn,nil,"1")
+	ctx, cf := context.WithCancel(context.Background())
+	client := pb.NewStreamServiceClient(grpc_conn)
+	clientStream, err := client.Stream(ctx)
+
+	//serverStream should be nil
+	conn,err := NewConnection(clientStream,nil,
+		grpc_conn,client,nil,"1",cf)
 
 	defer conn.Close()
 
@@ -90,6 +105,7 @@ func TestNewConnection(t *testing.T) {
 }
 
 func TestConnection_SendWithStream(t *testing.T) {
+
 	counter = 0
 	server, listner := ListenMockServer()
 
@@ -99,7 +115,13 @@ func TestConnection_SendWithStream(t *testing.T) {
 		assert.Fail(t,"fail to create connection")
 	}
 
-	conn,err  := NewConnection(grpc_conn, nil, "1")
+	ctx, cf := context.WithCancel(context.Background())
+	client := pb.NewStreamServiceClient(grpc_conn)
+	clientStream, err := client.Stream(ctx)
+
+	//serverStream should be nil
+	conn,err := NewConnection(clientStream,nil,
+		grpc_conn,client,nil,"1",cf)
 
 	defer conn.Close()
 
@@ -133,4 +155,50 @@ func TestNewConnectionWithAddress(t *testing.T) {
 	}
 
 	assert.NotNil(t,conn)
+}
+
+func TestConnectionImpl_ReadStream(t *testing.T) {
+
+	server, listner := ListenMockServer()
+
+	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
+
+	if err != nil{
+		assert.Fail(t,"fail to create connection")
+	}
+
+	ctx, cf := context.WithCancel(context.Background())
+	client := pb.NewStreamServiceClient(grpc_conn)
+	clientStream, err := client.Stream(ctx)
+
+	var receivedMessageCounter = 0
+
+	var MockMessageHandle = func(message OutterMessage){
+		receivedMessageCounter ++
+	}
+
+	//serverStream should be nil
+	conn,err := NewConnection(clientStream,nil,
+		grpc_conn,client,MockMessageHandle,"1",cf)
+
+	defer conn.Close()
+
+	if err != nil{
+		assert.Fail(t,err.Error())
+	}
+
+	envelope := &pb.Envelope{Signature:[]byte("123")}
+
+	fmt.Println(counter)
+
+	conn.Send(envelope,nil)
+	conn.Send(envelope, nil)
+	conn.Send(envelope, nil)
+
+	time.Sleep(3*time.Second)
+
+	server.Stop()
+	listner.Close()
+
+	assert.Equal(t,3,receivedMessageCounter)
 }

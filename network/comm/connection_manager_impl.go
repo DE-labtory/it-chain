@@ -125,6 +125,5 @@ func (comm *ConnectionManagerImpl) Size() int{
 }
 
 func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) (error) {
-
-	stream.
+	return nil
 }
