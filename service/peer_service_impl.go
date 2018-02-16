@@ -48,12 +48,10 @@ func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
 		return
 	}
 
-	//logger.Println("pushing peerTable:",ps.peerTable)
-
 	ps.peerTable.IncrementHeartBeat()
 
-	message := &pb.Message{}
-	message.Content = &pb.Message_PeerTable{
+	message := &pb.StreamMessage{}
+	message.Content = &pb.StreamMessage_PeerTable{
 		PeerTable: domain.ToProtoPeerTable(*ps.peerTable),
 	}
 
@@ -99,7 +97,7 @@ func (ps *PeerServiceImpl) AddPeer(Peer *domain.Peer){
 		return
 	}
 
-	err := ps.comm.CreateStreamConn(Peer.PeerID,Peer.GetEndPoint(), nil)
+	err := ps.comm.CreateStreamClientConn(Peer.PeerID,Peer.GetEndPoint(), nil)
 
 	if err != nil{
 		logger.Error("failed to connect with", Peer)
