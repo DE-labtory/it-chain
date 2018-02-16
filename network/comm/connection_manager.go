@@ -3,6 +3,7 @@ package comm
 import (
 	pb "it-chain/network/protos"
 )
+
 type OnError func(error)
 
 //comm은 peer 들간의 connection을 유지하고있다.
@@ -18,4 +19,7 @@ type ConnectionManager interface{
 	CreateStreamClientConn(connectionID string, ip string, handle ReceiveMessageHandle) error
 
 	Size() int
+
+	//Server on function
+	Stream(stream pb.StreamService_StreamServer) (error)
 }

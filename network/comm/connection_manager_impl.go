@@ -119,6 +119,8 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 	//3. 생성완료후 OnConnectionHandler를 통해 처리한다.
 
 	//remoteAddress := extractRemoteAddress(stream)
+	commLogger.Println("new connection requests are made")
+
 	e := &pb.ConnectionEstablish{}
 	message := &pb.StreamMessage{}
 	message.Content = &pb.StreamMessage_ConnectionEstablish{
@@ -128,21 +130,24 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 	envelope, err := comm.signing(message)
 
 	if err != nil{
-		//error log
+		commLogger.Errorln(err.Error())
 	}
 
-	stream.Send(envelope)
+	err = stream.Send(envelope)
+
+	if err != nil{
+		commLogger.Errorln(err.Error())
+	}
 
 	if m, err := stream.Recv(); err == nil {
 		message,err := m.GetMessage()
 
 		if err != nil{
-			//error log
+			commLogger.Errorln("failed to unmarshal", err.Error())
 		}
 
 		if pp := message.GetPeer(); pp != nil{
 
-			//connection생성
 			_, cf := context.WithCancel(context.Background())
 
 			connectionID := pp.PeerID
@@ -154,6 +159,8 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 				return err
 			}
 
+			commLogger.Println()
+
 			_, ok := comm.connectionMap[connectionID]
 
 			if !ok{
@@ -161,6 +168,8 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 				comm.connectionMap[connectionID] = conn
 				comm.Unlock()
 				comm.onConnectionHandler(conn,*pp)
+			}else{
+				commLogger.Debugln("already exist connection:",connectionID)
 			}
 		}
 	}

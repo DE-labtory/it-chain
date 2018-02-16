@@ -18,7 +18,10 @@ func TestNewConnection(t *testing.T) {
 
 	}
 
-	server, listner := mock.ListenMockServer(ipaddress,handler)
+	mockServer := &mock.Mockserver{}
+	mockServer.Handler = handler
+
+	server, listner := mock.ListenMockServer(mockServer,ipaddress)
 
 	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
 
@@ -53,7 +56,10 @@ func TestConnection_SendWithStream(t *testing.T) {
 		counter++
 	}
 
-	server, listner := mock.ListenMockServer(ipaddress,handler)
+	mockServer := &mock.Mockserver{}
+	mockServer.Handler = handler
+
+	server, listner := mock.ListenMockServer(mockServer,ipaddress)
 
 	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
 
@@ -109,7 +115,10 @@ func TestConnectionImpl_ReadStream(t *testing.T) {
 		counter++
 	}
 
-	server, listner := mock.ListenMockServer(ipaddress,handler)
+	mockServer := &mock.Mockserver{}
+	mockServer.Handler = handler
+
+	server, listner := mock.ListenMockServer(mockServer,ipaddress)
 
 	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
 

@@ -1,12 +1,18 @@
 package message
 
-import "github.com/gogo/protobuf/proto"
+import (
 
-func (envelope Envelope) GetMessage() (*StreamMessage, error){
+	"log"
+	"github.com/golang/protobuf/proto"
+)
+
+func (envelope *Envelope) GetMessage() (*StreamMessage, error){
 
 	m := &StreamMessage{}
 
 	err := proto.Unmarshal(envelope.Payload,m)
+
+	log.Print(m)
 
 	if err != nil{
 		return nil, err

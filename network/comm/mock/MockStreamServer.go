@@ -10,12 +10,10 @@ import (
 	"log"
 )
 
-var counter = 0
-
 type MockServerHandler func(stream pb.StreamService_StreamServer, envelope *pb.Envelope)
 
 type Mockserver struct {
-	handler MockServerHandler
+	Handler MockServerHandler
 }
 
 func (s *Mockserver) Stream(stream pb.StreamService_StreamServer) (error) {
@@ -31,7 +29,7 @@ func (s *Mockserver) Stream(stream pb.StreamService_StreamServer) (error) {
 			return err
 		}
 
-		s.handler(stream,envelope)
+		s.Handler(stream,envelope)
 	}
 }
 
@@ -39,7 +37,7 @@ func (s *Mockserver) Ping(ctx context.Context, in *pb.Empty) (*pb.Empty, error) 
 	return &pb.Empty{}, nil
 }
 
-func ListenMockServer(ipAddress string, handler MockServerHandler) (*grpc.Server,net.Listener){
+func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grpc.Server,net.Listener){
 
 	lis, err := net.Listen("tcp", ipAddress)
 
@@ -47,12 +45,8 @@ func ListenMockServer(ipAddress string, handler MockServerHandler) (*grpc.Server
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	mockServer := &Mockserver{}
-	mockServer.handler = handler
-
 	s := grpc.NewServer()
 	pb.RegisterStreamServiceServer(s, mockServer)
-	// Register reflection service on gRPC server.
 	reflection.Register(s)
 
 	go func(){
