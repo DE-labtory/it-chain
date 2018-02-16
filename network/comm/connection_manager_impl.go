@@ -9,7 +9,6 @@ import (
 	pb "it-chain/network/protos"
 	"google.golang.org/grpc/peer"
 	"github.com/pkg/errors"
-	"it-chain/domain"
 )
 
 var commLogger = common.GetLogger("connection_manager_impl.go")
@@ -155,11 +154,14 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 				return err
 			}
 
-			comm.Lock()
-			comm.connectionMap[connectionID] = conn
-			comm.Unlock()
+			_, ok := comm.connectionMap[connectionID]
 
-			comm.onConnectionHandler(conn,*pp)
+			if !ok{
+				comm.Lock()
+				comm.connectionMap[connectionID] = conn
+				comm.Unlock()
+				comm.onConnectionHandler(conn,*pp)
+			}
 		}
 	}
 

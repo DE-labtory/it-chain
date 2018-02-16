@@ -3,80 +3,22 @@ package comm
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"net"
-	"log"
-	"google.golang.org/grpc/reflection"
-	"google.golang.org/grpc"
 	pb "it-chain/network/protos"
 	"fmt"
 	"time"
-	"io"
 	"golang.org/x/net/context"
+	"it-chain/network/comm/mock"
 )
 
-const (
-	ipaddress = "127.0.0.1:5555"
-)
-
-var counter = 0
-
-type Mockserver struct {}
-
-func (s *Mockserver) Stream(stream pb.StreamService_StreamServer) (error) {
-
-	for {
-		message,err := stream.Recv()
-
-		if err == io.EOF {
-			return nil
-		}
-
-		if err != nil {
-			return err
-		}
-		counter += 1
-		fmt.Printf("Received: %d\n", message.String())
-
-		err = stream.Send(message)
-
-		if err !=nil{
-			fmt.Printf("Send Error: %d\n", message.String())
-		}
-	}
-}
-
-func (s *Mockserver) Ping(ctx context.Context, in *pb.Empty) (*pb.Empty, error) {
-	return &pb.Empty{}, nil
-}
-
-func ListenMockServer() (*grpc.Server,net.Listener){
-
-	lis, err := net.Listen("tcp", ipaddress)
-
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
-	s := grpc.NewServer()
-	pb.RegisterStreamServiceServer(s, &Mockserver{})
-	// Register reflection service on gRPC server.
-	reflection.Register(s)
-
-	go func(){
-		if err := s.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %v", err)
-			s.Stop()
-			lis.Close()
-		}
-	}()
-
-	return s,lis
-}
-
+const ipaddress = "127.0.0.1:5555"
 
 func TestNewConnection(t *testing.T) {
 
-	server, listner := ListenMockServer()
+	handler := func (streamServer pb.StreamService_StreamServer,envelope *pb.Envelope){
+
+	}
+
+	server, listner := mock.ListenMockServer(ipaddress,handler)
 
 	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
 
@@ -106,8 +48,12 @@ func TestNewConnection(t *testing.T) {
 
 func TestConnection_SendWithStream(t *testing.T) {
 
-	counter = 0
-	server, listner := ListenMockServer()
+	counter := 0
+	handler := func (streamServer pb.StreamService_StreamServer,envelope *pb.Envelope){
+		counter++
+	}
+
+	server, listner := mock.ListenMockServer(ipaddress,handler)
 
 	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
 
@@ -131,7 +77,6 @@ func TestConnection_SendWithStream(t *testing.T) {
 
 	envelope := &pb.Envelope{Signature:[]byte("123")}
 
-	fmt.Println(counter)
 
 	conn.Send(envelope,nil)
 	conn.Send(envelope, nil)
@@ -159,7 +104,12 @@ func TestNewConnectionWithAddress(t *testing.T) {
 
 func TestConnectionImpl_ReadStream(t *testing.T) {
 
-	server, listner := ListenMockServer()
+	counter := 0
+	handler := func (streamServer pb.StreamService_StreamServer,envelope *pb.Envelope){
+		counter++
+	}
+
+	server, listner := mock.ListenMockServer(ipaddress,handler)
 
 	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
 
@@ -200,5 +150,5 @@ func TestConnectionImpl_ReadStream(t *testing.T) {
 	server.Stop()
 	listner.Close()
 
-	assert.Equal(t,3,receivedMessageCounter)
+	assert.Equal(t,3,counter)
 }
