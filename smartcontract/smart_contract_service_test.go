@@ -45,8 +45,8 @@ func TestSmartContractService_Query(t *testing.T) {
 		time.Now(),
 		domain.SetTxData(
 			"",
-			"Invoke",
-			domain.SetTxMethodParameters(0, "", []string{""}),
+			domain.Query,
+			domain.SetTxMethodParameters(0, "getA", []string{""}),
 			"abc",
 		),
 	)

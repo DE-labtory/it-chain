@@ -31,20 +31,22 @@ func (sc *SampleSmartContract) Init(args []string) error {
 	wsDBHandle := dbProvider.GetDBHandle(wsDB)
 	//wsDBHandle.Put([]byte("test"), []byte("value1"), true)
 
-	if tx.TxData.Method == "Query" {
+	if tx.TxData.Method == domain.Query {
 		sc.Query(tx, wsDBHandle)
-	} else if tx.TxData.Method == "Invoke" {
+	} else if tx.TxData.Method == domain.Invoke {
 		sc.Invoke(tx, wsDBHandle)
 	}
 
 	return nil
 }
 
-func (sc *SampleSmartContract) Query(transaction domain.Transaction, wsDBHandle *leveldbhelper.DBHandle) {
-	fmt.Println("func Query")
+func (sc *SampleSmartContract) Query(tx domain.Transaction, wsDBHandle *leveldbhelper.DBHandle) {
+	if tx.TxData.Params.Function == "getA" {
+		getA(wsDBHandle)
+	}
 }
 
-func (sc *SampleSmartContract) Invoke(transaction domain.Transaction, wsDBHandle *leveldbhelper.DBHandle) {
+func (sc *SampleSmartContract) Invoke(tx domain.Transaction, wsDBHandle *leveldbhelper.DBHandle) {
 	wsDBHandle.Put([]byte("test"), []byte("success"), true)
 	fmt.Println("func Invoke")
 	test, _ := wsDBHandle.Get([]byte("test"))
@@ -57,4 +59,13 @@ func main()  {
 	ssc := new(SampleSmartContract)
 
 	ssc.Init(args)
+}
+
+
+/* Custom Function
+ -----------------------*/
+
+func getA(wsDBHandle *leveldbhelper.DBHandle) {
+	a, _ := wsDBHandle.Get([]byte("a"))
+	fmt.Print("{a : " + string(a) + "}")
 }
