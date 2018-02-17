@@ -19,7 +19,7 @@ type cryptoImpl struct {
 
 }
 
-func NewCrypto(path string, keyGenOpts KeyGenOpts) (Crypto, error) {
+func NewCryptoImpl(path string, keyGenOpts KeyGenOpts) (Crypto, error) {
 
 	km := &keyManager{}
 	km.Init(path)

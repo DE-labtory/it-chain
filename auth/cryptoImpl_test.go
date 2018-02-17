@@ -13,7 +13,7 @@ import (
 func TestNew(t *testing.T) {
 
 	// Generate Collector
-	_, err := NewCrypto("", &RSAKeyGenOpts{})
+	_, err := NewCryptoImpl("", &RSAKeyGenOpts{})
 	assert.NoError(t, err)
 
 	defer os.RemoveAll("./KeyRepository")
@@ -23,7 +23,7 @@ func TestNew(t *testing.T) {
 //todo fix testcase or hash part
 func TestCollector_RSASign(t *testing.T) {
 
-	cryp, err := NewCrypto("", &RSAKeyGenOpts{})
+	cryp, err := NewCryptoImpl("", &RSAKeyGenOpts{})
 	assert.NoError(t, err)
 
 	privateKey, publicKey, err := cryp.GetKey()
@@ -71,7 +71,7 @@ func TestCollector_RSASign(t *testing.T) {
 
 func TestCollector_ECDSASign(t *testing.T) {
 
-	cryp, err := NewCrypto("", &ECDSAKeyGenOpts{})
+	cryp, err := NewCryptoImpl("", &ECDSAKeyGenOpts{})
 	assert.NoError(t, err)
 
 	privateKey, publicKey, err := cryp.GetKey()
@@ -115,7 +115,7 @@ func TestCollector_ECDSASign(t *testing.T) {
 
 func TestCollector_RSAGenerateKey(t *testing.T) {
 
-	cryp, err := NewCrypto("./RSAKeyGen_Test", &RSAKeyGenOpts{})
+	cryp, err := NewCryptoImpl("./RSAKeyGen_Test", &RSAKeyGenOpts{})
 	assert.NoError(t, err)
 
 	defer os.RemoveAll("./RSAKeyGen_Test")
@@ -139,7 +139,7 @@ func TestCollector_RSAGenerateKey(t *testing.T) {
 
 func TestCollector_ECDSAGenerateKey(t *testing.T) {
 
-	cryp, err := NewCrypto("./ECDSAKeyGen_Test", &ECDSAKeyGenOpts{})
+	cryp, err := NewCryptoImpl("./ECDSAKeyGen_Test", &ECDSAKeyGenOpts{})
 	assert.NoError(t, err)
 
 	defer os.RemoveAll("./ECDSAKeyGen_Test")
@@ -163,7 +163,7 @@ func TestCollector_ECDSAGenerateKey(t *testing.T) {
 
 func TestCryptoHelper_LoadKey(t *testing.T) {
 
-	cryp, err := NewCrypto("", &RSAKeyGenOpts{})
+	cryp, err := NewCryptoImpl("", &RSAKeyGenOpts{})
 	assert.NoError(t, err)
 
 	defer os.RemoveAll("./KeyRepository")
