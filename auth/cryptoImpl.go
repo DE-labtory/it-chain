@@ -7,7 +7,7 @@ import (
 	"crypto/sha256"
 )
 
-type cryptoHelper struct {
+type cryptoImpl struct {
 
 	priKey			Key
 	pubKey			Key
@@ -36,31 +36,31 @@ func NewCrypto(path string, keyGenOpts KeyGenOpts) (Crypto, error) {
 	keyGenerators[reflect.TypeOf(&RSAKeyGenOpts{})] = &rsaKeyGenerator{2048}
 	keyGenerators[reflect.TypeOf(&ECDSAKeyGenOpts{})] = &ecdsaKeyGenerator{elliptic.P521()}
 
-	ch := &cryptoHelper{
+	ci := &cryptoImpl{
 		keyManager:		*km,
 		signers: 		signers,
 		verifiers: 		verifiers,
 		keyGenerators: 	keyGenerators,
 	}
 
-	err := ch.loadKey()
+	err := ci.loadKey()
 	if err != nil ||
-		ch.priKey.Algorithm() != keyGenOpts.Algorithm() ||
-			ch.pubKey.Algorithm() != keyGenOpts.Algorithm() {
-			err := ch.generateKey(keyGenOpts)
+		ci.priKey.Algorithm() != keyGenOpts.Algorithm() ||
+			ci.pubKey.Algorithm() != keyGenOpts.Algorithm() {
+			err := ci.generateKey(keyGenOpts)
 			if err != nil {
 				return nil, err
 			}
 	}
 
-	return ch, nil
+	return ci, nil
 
 }
 
-func (ch *cryptoHelper) generateKey(opts KeyGenOpts) (err error) {
+func (ci *cryptoImpl) generateKey(opts KeyGenOpts) (err error) {
 
 	// remove all exist key file in specific path
-	err = ch.keyManager.removeKey()
+	err = ci.keyManager.removeKey()
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (ch *cryptoHelper) generateKey(opts KeyGenOpts) (err error) {
 		return errors.New("Invalid KeyGen Options")
 	}
 
-	keyGenerator, found := ch.keyGenerators[reflect.TypeOf(opts)]
+	keyGenerator, found := ci.keyGenerators[reflect.TypeOf(opts)]
 	if !found {
 		return errors.New("Invalid KeyGen Options")
 	}
@@ -79,21 +79,21 @@ func (ch *cryptoHelper) generateKey(opts KeyGenOpts) (err error) {
 		return errors.New("Failed to generate a Key")
 	}
 
-	err = ch.keyManager.Store(pri, pub)
+	err = ci.keyManager.Store(pri, pub)
 	if err != nil {
 		return errors.New("Failed to store a Key")
 	}
 
-	ch.priKey, ch.pubKey = pri, pub
+	ci.priKey, ci.pubKey = pri, pub
 	return nil
 
 }
 
-func (ch *cryptoHelper) Sign(data []byte, opts SignerOpts) ([]byte, error) {
+func (ci *cryptoImpl) Sign(data []byte, opts SignerOpts) ([]byte, error) {
 
 	var err error
 
-	err = ch.loadKey()
+	err = ci.loadKey()
 	if err != nil {
 		return nil, errors.New("Key is not exist.")
 	}
@@ -102,11 +102,11 @@ func (ch *cryptoHelper) Sign(data []byte, opts SignerOpts) ([]byte, error) {
 		return nil, errors.New("invalid data.")
 	}
 
-	if ch.priKey == nil {
+	if ci.priKey == nil {
 		return nil, errors.New("Private key is not exist.")
 	}
 
-	signer, found := ch.signers[reflect.TypeOf(ch.priKey)]
+	signer, found := ci.signers[reflect.TypeOf(ci.priKey)]
 	if !found {
 		return nil, errors.New("unsupported key type.")
 	}
@@ -115,7 +115,7 @@ func (ch *cryptoHelper) Sign(data []byte, opts SignerOpts) ([]byte, error) {
 	hash.Write(data)
 	digest := hash.Sum(nil)
 
-	signature, err := signer.Sign(ch.priKey, digest, opts)
+	signature, err := signer.Sign(ci.priKey, digest, opts)
 	if err != nil {
 		return nil, errors.New("signing error is occurred")
 	}
@@ -124,7 +124,7 @@ func (ch *cryptoHelper) Sign(data []byte, opts SignerOpts) ([]byte, error) {
 
 }
 
-func (ch *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpts) (bool, error) {
+func (ci *cryptoImpl) Verify(key Key, signature, digest []byte, opts SignerOpts) (bool, error) {
 
 	if key == nil {
 		return false, errors.New("invalid key")
@@ -138,7 +138,7 @@ func (ch *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpt
 		return false, errors.New("invalid digest")
 	}
 
-	verifier, found := ch.verifiers[reflect.TypeOf(key)]
+	verifier, found := ci.verifiers[reflect.TypeOf(key)]
 	if !found {
 		return false, errors.New("unsupported key type")
 	}
@@ -153,29 +153,29 @@ func (ch *cryptoHelper) Verify(key Key, signature, digest []byte, opts SignerOpt
 }
 
 // load private and public key data to cryptoHelper if they are exist in path
-func (ch *cryptoHelper) loadKey() (err error) {
+func (ci *cryptoImpl) loadKey() (err error) {
 
-	pri, pub, err := ch.keyManager.Load()
+	pri, pub, err := ci.keyManager.Load()
 	if err != nil {
 		return err
 	}
 
-	ch.priKey, ch.pubKey = pri, pub
+	ci.priKey, ci.pubKey = pri, pub
 
 	return nil
 
 }
 
 // return private key and public key if they are exist in path
-func (ch *cryptoHelper) GetKey() (pri, pub Key, err error) {
+func (ci *cryptoImpl) GetKey() (pri, pub Key, err error) {
 
-	if ch.priKey == nil || ch.pubKey == nil {
-		err := ch.loadKey()
+	if ci.priKey == nil || ci.pubKey == nil {
+		err := ci.loadKey()
 		if err != nil {
 			return nil, nil, err
 		}
 	}
 
-	return ch.priKey, ch.pubKey, nil
+	return ci.priKey, ci.pubKey, nil
 
 }
