@@ -42,11 +42,9 @@ type Node struct {
 
 func NewNode(peerInfo *domain.Peer) *Node{
 
-
 	node := &Node{}
 	node.myInfo = peerInfo
 
-	//
 	node.perviousBlock = nil
 
 	crypto, err := auth.NewCrypto("./sample/pbft/"+node.myInfo.GetEndPoint())
@@ -141,6 +139,7 @@ func (s *Node) GetPeer(context.Context, *pb.Empty) (*pb.Peer, error){
 
 	pp := domain.ToProtoPeer(*s.myInfo)
 
+	log.Println(pp)
 	return pp,nil
 }
 
@@ -171,8 +170,8 @@ func (s *Node) listen(){
 
 	server := grpc.NewServer()
 	pb.RegisterMessageServiceServer(server, s)
-	pb.RegisterPeerServiceServer(server,s)
 	pb.RegisterTestConsensusServiceServer(server,s)
+	pb.RegisterPeerServiceServer(server,s)
 	// Register reflection service on gRPC server.
 	reflection.Register(server)
 

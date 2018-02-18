@@ -49,17 +49,15 @@ func (cs *PBFTConsensusService) StartConsensus(view *domain.View, block *domain.
 	}
 
 	cs.Lock()
-	//set consensus with preprepared state
 	consensusState := domain.NewConsensusState(view,xid.New().String(),block,domain.PrePrepared,cs.EndConsensusState,300)
 	cs.consensusStates[consensusState.ID] = consensusState
 
-	//set consensus message to broadcast
 	sequenceID := time.Now().UnixNano()
-	//todo 임시 id
 	preprepareConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*view,sequenceID,consensusState.Block,cs.peerID,domain.PreprepareMsg)
-	go cs.broadcastMessage(preprepareConsensusMessage)
-	consensusState.CurrentStage = domain.Prepared
 
+	go cs.broadcastMessage(preprepareConsensusMessage)
+
+	consensusState.CurrentStage = domain.Prepared
 	cs.Unlock()
 }
 
@@ -137,8 +135,6 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 		cs.consensusStates[consensusState.ID] = consensusState
 	}
 
-	consensusState.Lock()
-
 	logger_pbftservice.Infoln("Add message to consensusState")
 	consensusState.AddMessage(*consensusMessage)
 
@@ -175,14 +171,12 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 			cs.blockService.AddBlock(consensusState.Block)
 		}
 
-
 		logger_pbftservice.Infoln("ConsesnsusState is End")
 	}
 
-	logger_pbftservice.Infoln(consensusState.CommitMsgs)
-	logger_pbftservice.Infoln(consensusState.PrepareMsgs)
+	//logger_pbftservice.Infoln(consensusState.CommitMsgs)
+	//logger_pbftservice.Infoln(consensusState.PrepareMsgs)
 
-	consensusState.Unlock()
 	cs.Unlock()
 }
 
@@ -194,7 +188,6 @@ func (cs *PBFTConsensusService) EndConsensusState(consensusState domain.Consensu
 }
 
 //tested
-//todo domain,ToConsensusMessage impl
 func (cs *PBFTConsensusService) broadcastMessage(consensusMsg domain.ConsensusMessage){
 
 	logger_pbftservice.Infoln("broadcast Message")

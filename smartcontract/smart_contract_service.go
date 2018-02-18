@@ -24,9 +24,6 @@ const (
 
 )
 
-// temp
-const AUTHENTICATED_GIT = "emperorhan"
-
 type SmartContract struct {
 	Name string
 	OriginReposPath string
@@ -43,45 +40,55 @@ func Init() {
 
 }
 
-func (scs *SmartContractService) pullAllSmartContracts() (error) {
+func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string, errorHandler func(error),
+	completionHandler func()) {
 
-	repoList, err := GetRepositoryList(AUTHENTICATED_GIT)
-	if err != nil {
-		return errors.New("An error was occured during getting repository list")
-	}
-
-	for _, repo := range repoList {
-		localReposPath := scs.SmartContractDirPath + "/" +
-			strings.Replace(repo.FullName, "/", "_", -1)
-
-		err = os.MkdirAll(localReposPath, 0755)
+	go func() {
+		repoList, err := GetRepositoryList(authenticatedGit)
 		if err != nil {
-			return errors.New("An error was occured during making repository path")
+			errorHandler(errors.New("An error was occured during getting repository list"))
+			return
 		}
 
-		commits, err := GetReposCommits(repo.FullName)
-		if err != nil {
-			return errors.New("An error was occured during getting commit logs")
-		}
+		for _, repo := range repoList {
+			localReposPath := scs.SmartContractDirPath + "/" +
+				strings.Replace(repo.FullName, "/", "_", -1)
 
-		for _, commit := range commits {
-			if commit.Author.Login == AUTHENTICATED_GIT {
+			err = os.MkdirAll(localReposPath, 0755)
+			if err != nil {
+				errorHandler(errors.New("An error was occured during making repository path"))
+				return
+			}
 
-				err := CloneReposWithName(repo.FullName, localReposPath, commit.Sha)
-				if err != nil {
-					return errors.New("An error was occured during cloning with name")
+			commits, err := GetReposCommits(repo.FullName)
+			if err != nil {
+				errorHandler(errors.New("An error was occured during getting commit logs"))
+				return
+			}
+
+			for _, commit := range commits {
+				if commit.Author.Login == authenticatedGit {
+
+					err := CloneReposWithName(repo.FullName, localReposPath, commit.Sha)
+					if err != nil {
+						errorHandler(errors.New("An error was occured during cloning with name"))
+						return
+					}
+
+					err = ResetWithSHA(localReposPath + "/" + commit.Sha, commit.Sha)
+					if err != nil {
+						errorHandler(errors.New("An error was occured during resetting with SHA"))
+						return
+					}
+
 				}
-
-				err = ResetWithSHA(localReposPath + "/" + commit.Sha, commit.Sha)
-				if err != nil {
-					return errors.New("An error was occured during resetting with SHA")
-				}
-
 			}
 		}
-	}
 
-	return nil
+		completionHandler()
+		return
+	}()
+
 }
 
 func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {

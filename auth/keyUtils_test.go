@@ -14,7 +14,7 @@ import (
 
 func TestRSAPublicKeyToPEM(t *testing.T) {
 
-	generatedRSAKey, err := rsa.GenerateKey(rand.Reader, 1024)
+	generatedRSAKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	assert.NoError(t, err)
 
 	rsaKey := &rsaPrivateKey{generatedRSAKey}
@@ -72,17 +72,17 @@ func TestECDSAPrivateKeyToPEM(t *testing.T) {
 
 func TestPEMToPrivatePublicKey(t *testing.T) {
 
-	cryp, err := NewCrypto("")
+	cryp, err := NewCrypto("", &RSAKeyGenOpts{})
 	assert.NoError(t, err)
 
-	pri, pub, err := cryp.GenerateKey(&RSAKeyGenOpts{})
+	pri, pub, err := cryp.GetKey()
 	assert.NoError(t, err)
 	assert.NotNil(t, pri)
 	assert.NotNil(t, pub)
 
 	defer os.RemoveAll("./KeyRepository")
 
-	path := "./KeyRepository/" + hex.EncodeToString(pri.SKI()) + "_pri"
+	path := "./KeyRepository/Keys/" + hex.EncodeToString(pri.SKI()) + "_pri"
 
 	data, err := ioutil.ReadFile(path)
 	assert.NoError(t, err)
@@ -92,7 +92,7 @@ func TestPEMToPrivatePublicKey(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, key)
 
-	path = "./KeyRepository/" + hex.EncodeToString(pub.SKI()) + "_pub"
+	path = "./KeyRepository/Keys/" + hex.EncodeToString(pub.SKI()) + "_pub"
 
 	data, err = ioutil.ReadFile(path)
 	assert.NoError(t, err)
