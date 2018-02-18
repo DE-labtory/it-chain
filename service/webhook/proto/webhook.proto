@@ -1,0 +1,16 @@
+syntax = "proto3";
+package proto;
+
+service Webhook {
+
+    rpc Register (WebhookRequest) returns (WebhookResponse) {}
+
+}
+
+message WebhookRequest {
+    string urls = 1;
+}
+
+message WebhookResponse {
+    string message = 1;
+}
