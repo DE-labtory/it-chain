@@ -161,7 +161,7 @@ func TestCollector_ECDSAGenerateKey(t *testing.T) {
 
 }
 
-func TestCryptoHelper_LoadKey(t *testing.T) {
+func TestCryptoImpl_LoadKey(t *testing.T) {
 
 	cryp, err := NewCryptoImpl("", &RSAKeyGenOpts{})
 	assert.NoError(t, err)
