@@ -335,7 +335,14 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 	fmt.Println("----Marshaled Output----")
 	fmt.Println(smartContractResponse)
 
+	if smartContractResponse.Result == SUCCESS {
+		logger.Println("Running smartcontract is success")
 
+		// tx hash reset
+		// real running smartcontract
+	} else if smartContractResponse.Result == FAIL {
+		logger.Errorln("An error occured while running smartcontract!")
+	}
 
 	return nil
 }
