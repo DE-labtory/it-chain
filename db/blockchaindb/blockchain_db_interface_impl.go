@@ -12,7 +12,7 @@ type BlockchainDBImpl struct {
 	db     BlockChainDB
 }
 
-func CreateNewBlockchainDB(dbPath string) *BlockchainDBImpl {
+func CreateNewBlockchainDB(dbPath string) BlockChainDB {
 	dbType := viper.GetString("database.type")
 	var db BlockChainDB
 	switch dbType {

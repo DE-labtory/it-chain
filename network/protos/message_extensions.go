@@ -1,8 +1,25 @@
 package message
 
 import (
-	"it-chain/network"
+
+	"log"
+	"github.com/golang/protobuf/proto"
 )
+
+func (envelope *Envelope) GetMessage() (*StreamMessage, error){
+
+	m := &StreamMessage{}
+
+	err := proto.Unmarshal(envelope.Payload,m)
+
+	log.Print(m)
+
+	if err != nil{
+		return nil, err
+	}
+
+	return m, nil
+}
 
 //
 //import (
@@ -83,12 +100,12 @@ import (
 //	return m.GetPeerTable() != nil
 //}
 //
-
-func (message *Message) GetMessageType() string {
-
-	if message.GetPeerTable() != nil{
-		return network.UpdatePeerTable
-	}
-
-	return "no"
-}
+//
+//func (message *Message) GetMessageType() string {
+//
+//	if message.GetPeerTable() != nil{
+//		return network.UpdatePeerTable
+//	}
+//
+//	return "no"
+//}

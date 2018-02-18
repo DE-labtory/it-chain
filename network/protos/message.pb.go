@@ -10,9 +10,10 @@ It is generated from these files:
 It has these top-level messages:
 	Envelope
 	Empty
-	Message
+	StreamMessage
 	Block
 	Transaction
+	ConnectionEstablish
 	PeerTable
 	Peer
 	ConsensusMessage
@@ -83,146 +84,164 @@ func (m *Empty) String() string            { return proto.CompactTextString(m) }
 func (*Empty) ProtoMessage()               {}
 func (*Empty) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
-type Message struct {
+type StreamMessage struct {
 	Channel []byte `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty"`
 	// Types that are valid to be assigned to Content:
-	//	*Message_Block
-	//	*Message_Transaction
-	//	*Message_PeerTable
-	//	*Message_Peer
-	//	*Message_ConsensusMessage
-	Content isMessage_Content `protobuf_oneof:"content"`
+	//	*StreamMessage_Block
+	//	*StreamMessage_Transaction
+	//	*StreamMessage_PeerTable
+	//	*StreamMessage_ConsensusMessage
+	//	*StreamMessage_Peer
+	//	*StreamMessage_ConnectionEstablish
+	Content isStreamMessage_Content `protobuf_oneof:"content"`
 }
 
-func (m *Message) Reset()                    { *m = Message{} }
-func (m *Message) String() string            { return proto.CompactTextString(m) }
-func (*Message) ProtoMessage()               {}
-func (*Message) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+func (m *StreamMessage) Reset()                    { *m = StreamMessage{} }
+func (m *StreamMessage) String() string            { return proto.CompactTextString(m) }
+func (*StreamMessage) ProtoMessage()               {}
+func (*StreamMessage) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
-type isMessage_Content interface {
-	isMessage_Content()
+type isStreamMessage_Content interface {
+	isStreamMessage_Content()
 }
 
-type Message_Block struct {
+type StreamMessage_Block struct {
 	Block *Block `protobuf:"bytes,2,opt,name=block,oneof"`
 }
-type Message_Transaction struct {
+type StreamMessage_Transaction struct {
 	Transaction *Transaction `protobuf:"bytes,3,opt,name=transaction,oneof"`
 }
-type Message_PeerTable struct {
+type StreamMessage_PeerTable struct {
 	PeerTable *PeerTable `protobuf:"bytes,4,opt,name=peerTable,oneof"`
 }
-type Message_Peer struct {
-	Peer *Peer `protobuf:"bytes,5,opt,name=Peer,oneof"`
+type StreamMessage_ConsensusMessage struct {
+	ConsensusMessage *ConsensusMessage `protobuf:"bytes,5,opt,name=consensusMessage,oneof"`
 }
-type Message_ConsensusMessage struct {
-	ConsensusMessage *ConsensusMessage `protobuf:"bytes,6,opt,name=consensusMessage,oneof"`
+type StreamMessage_Peer struct {
+	Peer *Peer `protobuf:"bytes,6,opt,name=peer,oneof"`
+}
+type StreamMessage_ConnectionEstablish struct {
+	ConnectionEstablish *ConnectionEstablish `protobuf:"bytes,7,opt,name=connectionEstablish,oneof"`
 }
 
-func (*Message_Block) isMessage_Content()            {}
-func (*Message_Transaction) isMessage_Content()      {}
-func (*Message_PeerTable) isMessage_Content()        {}
-func (*Message_Peer) isMessage_Content()             {}
-func (*Message_ConsensusMessage) isMessage_Content() {}
+func (*StreamMessage_Block) isStreamMessage_Content()               {}
+func (*StreamMessage_Transaction) isStreamMessage_Content()         {}
+func (*StreamMessage_PeerTable) isStreamMessage_Content()           {}
+func (*StreamMessage_ConsensusMessage) isStreamMessage_Content()    {}
+func (*StreamMessage_Peer) isStreamMessage_Content()                {}
+func (*StreamMessage_ConnectionEstablish) isStreamMessage_Content() {}
 
-func (m *Message) GetContent() isMessage_Content {
+func (m *StreamMessage) GetContent() isStreamMessage_Content {
 	if m != nil {
 		return m.Content
 	}
 	return nil
 }
 
-func (m *Message) GetChannel() []byte {
+func (m *StreamMessage) GetChannel() []byte {
 	if m != nil {
 		return m.Channel
 	}
 	return nil
 }
 
-func (m *Message) GetBlock() *Block {
-	if x, ok := m.GetContent().(*Message_Block); ok {
+func (m *StreamMessage) GetBlock() *Block {
+	if x, ok := m.GetContent().(*StreamMessage_Block); ok {
 		return x.Block
 	}
 	return nil
 }
 
-func (m *Message) GetTransaction() *Transaction {
-	if x, ok := m.GetContent().(*Message_Transaction); ok {
+func (m *StreamMessage) GetTransaction() *Transaction {
+	if x, ok := m.GetContent().(*StreamMessage_Transaction); ok {
 		return x.Transaction
 	}
 	return nil
 }
 
-func (m *Message) GetPeerTable() *PeerTable {
-	if x, ok := m.GetContent().(*Message_PeerTable); ok {
+func (m *StreamMessage) GetPeerTable() *PeerTable {
+	if x, ok := m.GetContent().(*StreamMessage_PeerTable); ok {
 		return x.PeerTable
 	}
 	return nil
 }
 
-func (m *Message) GetPeer() *Peer {
-	if x, ok := m.GetContent().(*Message_Peer); ok {
-		return x.Peer
-	}
-	return nil
-}
-
-func (m *Message) GetConsensusMessage() *ConsensusMessage {
-	if x, ok := m.GetContent().(*Message_ConsensusMessage); ok {
+func (m *StreamMessage) GetConsensusMessage() *ConsensusMessage {
+	if x, ok := m.GetContent().(*StreamMessage_ConsensusMessage); ok {
 		return x.ConsensusMessage
 	}
 	return nil
 }
 
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*Message) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _Message_OneofMarshaler, _Message_OneofUnmarshaler, _Message_OneofSizer, []interface{}{
-		(*Message_Block)(nil),
-		(*Message_Transaction)(nil),
-		(*Message_PeerTable)(nil),
-		(*Message_Peer)(nil),
-		(*Message_ConsensusMessage)(nil),
-	}
-}
-
-func _Message_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*Message)
-	// content
-	switch x := m.Content.(type) {
-	case *Message_Block:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Block); err != nil {
-			return err
-		}
-	case *Message_Transaction:
-		b.EncodeVarint(3<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Transaction); err != nil {
-			return err
-		}
-	case *Message_PeerTable:
-		b.EncodeVarint(4<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.PeerTable); err != nil {
-			return err
-		}
-	case *Message_Peer:
-		b.EncodeVarint(5<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Peer); err != nil {
-			return err
-		}
-	case *Message_ConsensusMessage:
-		b.EncodeVarint(6<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.ConsensusMessage); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("Message.Content has unexpected type %T", x)
+func (m *StreamMessage) GetPeer() *Peer {
+	if x, ok := m.GetContent().(*StreamMessage_Peer); ok {
+		return x.Peer
 	}
 	return nil
 }
 
-func _Message_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*Message)
+func (m *StreamMessage) GetConnectionEstablish() *ConnectionEstablish {
+	if x, ok := m.GetContent().(*StreamMessage_ConnectionEstablish); ok {
+		return x.ConnectionEstablish
+	}
+	return nil
+}
+
+// XXX_OneofFuncs is for the internal use of the proto package.
+func (*StreamMessage) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
+	return _StreamMessage_OneofMarshaler, _StreamMessage_OneofUnmarshaler, _StreamMessage_OneofSizer, []interface{}{
+		(*StreamMessage_Block)(nil),
+		(*StreamMessage_Transaction)(nil),
+		(*StreamMessage_PeerTable)(nil),
+		(*StreamMessage_ConsensusMessage)(nil),
+		(*StreamMessage_Peer)(nil),
+		(*StreamMessage_ConnectionEstablish)(nil),
+	}
+}
+
+func _StreamMessage_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
+	m := msg.(*StreamMessage)
+	// content
+	switch x := m.Content.(type) {
+	case *StreamMessage_Block:
+		b.EncodeVarint(2<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Block); err != nil {
+			return err
+		}
+	case *StreamMessage_Transaction:
+		b.EncodeVarint(3<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Transaction); err != nil {
+			return err
+		}
+	case *StreamMessage_PeerTable:
+		b.EncodeVarint(4<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.PeerTable); err != nil {
+			return err
+		}
+	case *StreamMessage_ConsensusMessage:
+		b.EncodeVarint(5<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.ConsensusMessage); err != nil {
+			return err
+		}
+	case *StreamMessage_Peer:
+		b.EncodeVarint(6<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Peer); err != nil {
+			return err
+		}
+	case *StreamMessage_ConnectionEstablish:
+		b.EncodeVarint(7<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.ConnectionEstablish); err != nil {
+			return err
+		}
+	case nil:
+	default:
+		return fmt.Errorf("StreamMessage.Content has unexpected type %T", x)
+	}
+	return nil
+}
+
+func _StreamMessage_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
+	m := msg.(*StreamMessage)
 	switch tag {
 	case 2: // content.block
 		if wire != proto.WireBytes {
@@ -230,7 +249,7 @@ func _Message_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer
 		}
 		msg := new(Block)
 		err := b.DecodeMessage(msg)
-		m.Content = &Message_Block{msg}
+		m.Content = &StreamMessage_Block{msg}
 		return true, err
 	case 3: // content.transaction
 		if wire != proto.WireBytes {
@@ -238,7 +257,7 @@ func _Message_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer
 		}
 		msg := new(Transaction)
 		err := b.DecodeMessage(msg)
-		m.Content = &Message_Transaction{msg}
+		m.Content = &StreamMessage_Transaction{msg}
 		return true, err
 	case 4: // content.peerTable
 		if wire != proto.WireBytes {
@@ -246,56 +265,69 @@ func _Message_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer
 		}
 		msg := new(PeerTable)
 		err := b.DecodeMessage(msg)
-		m.Content = &Message_PeerTable{msg}
+		m.Content = &StreamMessage_PeerTable{msg}
 		return true, err
-	case 5: // content.Peer
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Peer)
-		err := b.DecodeMessage(msg)
-		m.Content = &Message_Peer{msg}
-		return true, err
-	case 6: // content.consensusMessage
+	case 5: // content.consensusMessage
 		if wire != proto.WireBytes {
 			return true, proto.ErrInternalBadWireType
 		}
 		msg := new(ConsensusMessage)
 		err := b.DecodeMessage(msg)
-		m.Content = &Message_ConsensusMessage{msg}
+		m.Content = &StreamMessage_ConsensusMessage{msg}
+		return true, err
+	case 6: // content.peer
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(Peer)
+		err := b.DecodeMessage(msg)
+		m.Content = &StreamMessage_Peer{msg}
+		return true, err
+	case 7: // content.connectionEstablish
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(ConnectionEstablish)
+		err := b.DecodeMessage(msg)
+		m.Content = &StreamMessage_ConnectionEstablish{msg}
 		return true, err
 	default:
 		return false, nil
 	}
 }
 
-func _Message_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*Message)
+func _StreamMessage_OneofSizer(msg proto.Message) (n int) {
+	m := msg.(*StreamMessage)
 	// content
 	switch x := m.Content.(type) {
-	case *Message_Block:
+	case *StreamMessage_Block:
 		s := proto.Size(x.Block)
 		n += proto.SizeVarint(2<<3 | proto.WireBytes)
 		n += proto.SizeVarint(uint64(s))
 		n += s
-	case *Message_Transaction:
+	case *StreamMessage_Transaction:
 		s := proto.Size(x.Transaction)
 		n += proto.SizeVarint(3<<3 | proto.WireBytes)
 		n += proto.SizeVarint(uint64(s))
 		n += s
-	case *Message_PeerTable:
+	case *StreamMessage_PeerTable:
 		s := proto.Size(x.PeerTable)
 		n += proto.SizeVarint(4<<3 | proto.WireBytes)
 		n += proto.SizeVarint(uint64(s))
 		n += s
-	case *Message_Peer:
-		s := proto.Size(x.Peer)
+	case *StreamMessage_ConsensusMessage:
+		s := proto.Size(x.ConsensusMessage)
 		n += proto.SizeVarint(5<<3 | proto.WireBytes)
 		n += proto.SizeVarint(uint64(s))
 		n += s
-	case *Message_ConsensusMessage:
-		s := proto.Size(x.ConsensusMessage)
+	case *StreamMessage_Peer:
+		s := proto.Size(x.Peer)
 		n += proto.SizeVarint(6<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *StreamMessage_ConnectionEstablish:
+		s := proto.Size(x.ConnectionEstablish)
+		n += proto.SizeVarint(7<<3 | proto.WireBytes)
 		n += proto.SizeVarint(uint64(s))
 		n += s
 	case nil:
@@ -306,12 +338,20 @@ func _Message_OneofSizer(msg proto.Message) (n int) {
 }
 
 type Block struct {
+	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (m *Block) Reset()                    { *m = Block{} }
 func (m *Block) String() string            { return proto.CompactTextString(m) }
 func (*Block) ProtoMessage()               {}
 func (*Block) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+
+func (m *Block) GetData() []byte {
+	if m != nil {
+		return m.Data
+	}
+	return nil
+}
 
 type Transaction struct {
 }
@@ -321,6 +361,14 @@ func (m *Transaction) String() string            { return proto.CompactTextStrin
 func (*Transaction) ProtoMessage()               {}
 func (*Transaction) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
+type ConnectionEstablish struct {
+}
+
+func (m *ConnectionEstablish) Reset()                    { *m = ConnectionEstablish{} }
+func (m *ConnectionEstablish) String() string            { return proto.CompactTextString(m) }
+func (*ConnectionEstablish) ProtoMessage()               {}
+func (*ConnectionEstablish) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+
 type PeerTable struct {
 	MyID    string           `protobuf:"bytes,1,opt,name=MyID" json:"MyID,omitempty"`
 	PeerMap map[string]*Peer `protobuf:"bytes,2,rep,name=PeerMap" json:"PeerMap,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
@@ -329,7 +377,7 @@ type PeerTable struct {
 func (m *PeerTable) Reset()                    { *m = PeerTable{} }
 func (m *PeerTable) String() string            { return proto.CompactTextString(m) }
 func (*PeerTable) ProtoMessage()               {}
-func (*PeerTable) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+func (*PeerTable) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
 func (m *PeerTable) GetMyID() string {
 	if m != nil {
@@ -356,7 +404,7 @@ type Peer struct {
 func (m *Peer) Reset()                    { *m = Peer{} }
 func (m *Peer) String() string            { return proto.CompactTextString(m) }
 func (*Peer) ProtoMessage()               {}
-func (*Peer) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+func (*Peer) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
 func (m *Peer) GetIpAddress() string {
 	if m != nil {
@@ -405,7 +453,7 @@ type ConsensusMessage struct {
 func (m *ConsensusMessage) Reset()                    { *m = ConsensusMessage{} }
 func (m *ConsensusMessage) String() string            { return proto.CompactTextString(m) }
 func (*ConsensusMessage) ProtoMessage()               {}
-func (*ConsensusMessage) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+func (*ConsensusMessage) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
 
 func (m *ConsensusMessage) GetConsensusID() string {
 	if m != nil {
@@ -458,7 +506,7 @@ type View struct {
 func (m *View) Reset()                    { *m = View{} }
 func (m *View) String() string            { return proto.CompactTextString(m) }
 func (*View) ProtoMessage()               {}
-func (*View) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+func (*View) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
 func (m *View) GetViewID() string {
 	if m != nil {
@@ -484,9 +532,10 @@ func (m *View) GetPeerID() []string {
 func init() {
 	proto.RegisterType((*Envelope)(nil), "message.Envelope")
 	proto.RegisterType((*Empty)(nil), "message.Empty")
-	proto.RegisterType((*Message)(nil), "message.Message")
+	proto.RegisterType((*StreamMessage)(nil), "message.StreamMessage")
 	proto.RegisterType((*Block)(nil), "message.Block")
 	proto.RegisterType((*Transaction)(nil), "message.Transaction")
+	proto.RegisterType((*ConnectionEstablish)(nil), "message.ConnectionEstablish")
 	proto.RegisterType((*PeerTable)(nil), "message.PeerTable")
 	proto.RegisterType((*Peer)(nil), "message.Peer")
 	proto.RegisterType((*ConsensusMessage)(nil), "message.ConsensusMessage")
@@ -501,46 +550,44 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for MessageService service
+// Client API for StreamService service
 
-type MessageServiceClient interface {
-	Stream(ctx context.Context, opts ...grpc.CallOption) (MessageService_StreamClient, error)
-	// Ping is used to probe a remote peer's aliveness
-	Ping(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
+type StreamServiceClient interface {
+	Stream(ctx context.Context, opts ...grpc.CallOption) (StreamService_StreamClient, error)
 }
 
-type messageServiceClient struct {
+type streamServiceClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewMessageServiceClient(cc *grpc.ClientConn) MessageServiceClient {
-	return &messageServiceClient{cc}
+func NewStreamServiceClient(cc *grpc.ClientConn) StreamServiceClient {
+	return &streamServiceClient{cc}
 }
 
-func (c *messageServiceClient) Stream(ctx context.Context, opts ...grpc.CallOption) (MessageService_StreamClient, error) {
-	stream, err := grpc.NewClientStream(ctx, &_MessageService_serviceDesc.Streams[0], c.cc, "/message.MessageService/Stream", opts...)
+func (c *streamServiceClient) Stream(ctx context.Context, opts ...grpc.CallOption) (StreamService_StreamClient, error) {
+	stream, err := grpc.NewClientStream(ctx, &_StreamService_serviceDesc.Streams[0], c.cc, "/message.StreamService/Stream", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &messageServiceStreamClient{stream}
+	x := &streamServiceStreamClient{stream}
 	return x, nil
 }
 
-type MessageService_StreamClient interface {
+type StreamService_StreamClient interface {
 	Send(*Envelope) error
 	Recv() (*Envelope, error)
 	grpc.ClientStream
 }
 
-type messageServiceStreamClient struct {
+type streamServiceStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *messageServiceStreamClient) Send(m *Envelope) error {
+func (x *streamServiceStreamClient) Send(m *Envelope) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *messageServiceStreamClient) Recv() (*Envelope, error) {
+func (x *streamServiceStreamClient) Recv() (*Envelope, error) {
 	m := new(Envelope)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -548,46 +595,35 @@ func (x *messageServiceStreamClient) Recv() (*Envelope, error) {
 	return m, nil
 }
 
-func (c *messageServiceClient) Ping(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := grpc.Invoke(ctx, "/message.MessageService/Ping", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
+// Server API for StreamService service
+
+type StreamServiceServer interface {
+	Stream(StreamService_StreamServer) error
 }
 
-// Server API for MessageService service
-
-type MessageServiceServer interface {
-	Stream(MessageService_StreamServer) error
-	// Ping is used to probe a remote peer's aliveness
-	Ping(context.Context, *Empty) (*Empty, error)
+func RegisterStreamServiceServer(s *grpc.Server, srv StreamServiceServer) {
+	s.RegisterService(&_StreamService_serviceDesc, srv)
 }
 
-func RegisterMessageServiceServer(s *grpc.Server, srv MessageServiceServer) {
-	s.RegisterService(&_MessageService_serviceDesc, srv)
+func _StreamService_Stream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(StreamServiceServer).Stream(&streamServiceStreamServer{stream})
 }
 
-func _MessageService_Stream_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(MessageServiceServer).Stream(&messageServiceStreamServer{stream})
-}
-
-type MessageService_StreamServer interface {
+type StreamService_StreamServer interface {
 	Send(*Envelope) error
 	Recv() (*Envelope, error)
 	grpc.ServerStream
 }
 
-type messageServiceStreamServer struct {
+type streamServiceStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *messageServiceStreamServer) Send(m *Envelope) error {
+func (x *streamServiceStreamServer) Send(m *Envelope) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *messageServiceStreamServer) Recv() (*Envelope, error) {
+func (x *streamServiceStreamServer) Recv() (*Envelope, error) {
 	m := new(Envelope)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -595,37 +631,14 @@ func (x *messageServiceStreamServer) Recv() (*Envelope, error) {
 	return m, nil
 }
 
-func _MessageService_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MessageServiceServer).Ping(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/message.MessageService/Ping",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessageServiceServer).Ping(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _MessageService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "message.MessageService",
-	HandlerType: (*MessageServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Ping",
-			Handler:    _MessageService_Ping_Handler,
-		},
-	},
+var _StreamService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "message.StreamService",
+	HandlerType: (*StreamServiceServer)(nil),
+	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "Stream",
-			Handler:       _MessageService_Stream_Handler,
+			Handler:       _StreamService_Stream_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},
@@ -636,7 +649,7 @@ var _MessageService_serviceDesc = grpc.ServiceDesc{
 // Client API for PeerService service
 
 type PeerServiceClient interface {
-	GetPeer(ctx context.Context, in *Peer, opts ...grpc.CallOption) (*Peer, error)
+	GetPeer(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Peer, error)
 }
 
 type peerServiceClient struct {
@@ -647,7 +660,7 @@ func NewPeerServiceClient(cc *grpc.ClientConn) PeerServiceClient {
 	return &peerServiceClient{cc}
 }
 
-func (c *peerServiceClient) GetPeer(ctx context.Context, in *Peer, opts ...grpc.CallOption) (*Peer, error) {
+func (c *peerServiceClient) GetPeer(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Peer, error) {
 	out := new(Peer)
 	err := grpc.Invoke(ctx, "/message.PeerService/GetPeer", in, out, c.cc, opts...)
 	if err != nil {
@@ -659,7 +672,7 @@ func (c *peerServiceClient) GetPeer(ctx context.Context, in *Peer, opts ...grpc.
 // Server API for PeerService service
 
 type PeerServiceServer interface {
-	GetPeer(context.Context, *Peer) (*Peer, error)
+	GetPeer(context.Context, *Empty) (*Peer, error)
 }
 
 func RegisterPeerServiceServer(s *grpc.Server, srv PeerServiceServer) {
@@ -667,7 +680,7 @@ func RegisterPeerServiceServer(s *grpc.Server, srv PeerServiceServer) {
 }
 
 func _PeerService_GetPeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Peer)
+	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -679,7 +692,7 @@ func _PeerService_GetPeer_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/message.PeerService/GetPeer",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PeerServiceServer).GetPeer(ctx, req.(*Peer))
+		return srv.(PeerServiceServer).GetPeer(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -697,46 +710,114 @@ var _PeerService_serviceDesc = grpc.ServiceDesc{
 	Metadata: "message.proto",
 }
 
+// Client API for TestConsensusService service
+
+type TestConsensusServiceClient interface {
+	StartConsensus(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
+}
+
+type testConsensusServiceClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewTestConsensusServiceClient(cc *grpc.ClientConn) TestConsensusServiceClient {
+	return &testConsensusServiceClient{cc}
+}
+
+func (c *testConsensusServiceClient) StartConsensus(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := grpc.Invoke(ctx, "/message.TestConsensusService/StartConsensus", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Server API for TestConsensusService service
+
+type TestConsensusServiceServer interface {
+	StartConsensus(context.Context, *Empty) (*Empty, error)
+}
+
+func RegisterTestConsensusServiceServer(s *grpc.Server, srv TestConsensusServiceServer) {
+	s.RegisterService(&_TestConsensusService_serviceDesc, srv)
+}
+
+func _TestConsensusService_StartConsensus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TestConsensusServiceServer).StartConsensus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/message.TestConsensusService/StartConsensus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TestConsensusServiceServer).StartConsensus(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _TestConsensusService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "message.TestConsensusService",
+	HandlerType: (*TestConsensusServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "StartConsensus",
+			Handler:    _TestConsensusService_StartConsensus_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "message.proto",
+}
+
 func init() { proto.RegisterFile("message.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 606 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x64, 0x54, 0xcd, 0x6e, 0xd3, 0x40,
-	0x10, 0xb6, 0x93, 0x38, 0xae, 0xc7, 0x6d, 0x55, 0x46, 0x08, 0x99, 0x08, 0x41, 0x71, 0x11, 0x0a,
-	0x97, 0x0a, 0x05, 0x0e, 0x85, 0x1b, 0xa5, 0x55, 0x53, 0x95, 0x48, 0xd5, 0xa6, 0xe2, 0xc0, 0x6d,
-	0xe3, 0x8c, 0xd2, 0xa8, 0xe9, 0xda, 0xd8, 0x9b, 0x20, 0xbf, 0x00, 0x6f, 0xc2, 0x0b, 0xf0, 0x2a,
-	0xbc, 0x10, 0xda, 0x1f, 0xdb, 0xf9, 0x39, 0xc5, 0xdf, 0x7c, 0xf3, 0xf7, 0xcd, 0x4c, 0x16, 0x0e,
-	0x1e, 0xa9, 0x28, 0xf8, 0x8c, 0x4e, 0xb3, 0x3c, 0x95, 0x29, 0xfa, 0x16, 0xc6, 0x3f, 0x60, 0xef,
-	0x52, 0xac, 0x68, 0x91, 0x66, 0x84, 0x11, 0xf8, 0x19, 0x2f, 0x17, 0x29, 0x9f, 0x46, 0xee, 0xb1,
-	0xdb, 0xdf, 0x67, 0x15, 0xc4, 0x17, 0x10, 0x14, 0xf3, 0x99, 0xe0, 0x72, 0x99, 0x53, 0xd4, 0xd2,
-	0x5c, 0x63, 0xc0, 0x67, 0xd0, 0xcd, 0x96, 0x93, 0x07, 0x2a, 0xa3, 0xb6, 0xa6, 0x2c, 0x8a, 0x7d,
-	0xf0, 0x2e, 0x1f, 0x33, 0x59, 0xc6, 0x7f, 0x5b, 0xe0, 0x8f, 0x4c, 0x41, 0x55, 0x24, 0xb9, 0xe7,
-	0x42, 0xd0, 0xa2, 0x2a, 0x62, 0x21, 0xbe, 0x05, 0x6f, 0xb2, 0x48, 0x93, 0x07, 0x5d, 0x20, 0x1c,
-	0x1c, 0x9e, 0x56, 0x2d, 0x9f, 0x2b, 0xeb, 0xd0, 0x61, 0x86, 0xc6, 0x33, 0x08, 0x65, 0xce, 0x45,
-	0xc1, 0x13, 0x39, 0x4f, 0x85, 0xae, 0x19, 0x0e, 0x9e, 0xd6, 0xde, 0x77, 0x0d, 0x37, 0x74, 0xd8,
-	0xba, 0x2b, 0x0e, 0x20, 0xc8, 0x88, 0xf2, 0x3b, 0x3e, 0x59, 0x50, 0xd4, 0xd1, 0x71, 0x58, 0xc7,
-	0xdd, 0x56, 0xcc, 0xd0, 0x61, 0x8d, 0x1b, 0x9e, 0x40, 0x47, 0x31, 0x91, 0xa7, 0xdd, 0x0f, 0x36,
-	0xdc, 0x87, 0x0e, 0xd3, 0x24, 0x5e, 0xc1, 0x51, 0x92, 0x8a, 0x82, 0x44, 0xb1, 0x2c, 0xac, 0xd0,
-	0xa8, 0xab, 0x03, 0x9e, 0xd7, 0x01, 0x5f, 0xb7, 0x1c, 0x86, 0x0e, 0xdb, 0x09, 0x3a, 0x0f, 0xc0,
-	0x4f, 0x52, 0x21, 0x49, 0x48, 0x35, 0x3d, 0x2d, 0x3c, 0x3e, 0x80, 0x70, 0x4d, 0x53, 0xfc, 0xc7,
-	0x85, 0xa0, 0xee, 0x15, 0x11, 0x3a, 0xa3, 0xf2, 0xfa, 0x42, 0xcf, 0x32, 0x60, 0xfa, 0x1b, 0x3f,
-	0x81, 0xaf, 0x1c, 0x46, 0x3c, 0x8b, 0x5a, 0xc7, 0xed, 0x7e, 0x38, 0x78, 0xb5, 0x2b, 0xf2, 0xd4,
-	0x7a, 0x5c, 0x0a, 0x99, 0x97, 0xac, 0xf2, 0xef, 0x5d, 0xc3, 0xfe, 0x3a, 0x81, 0x47, 0xd0, 0x56,
-	0x7b, 0x35, 0xd9, 0xd5, 0x27, 0x9e, 0x80, 0xb7, 0xe2, 0x8b, 0x25, 0xd9, 0x2d, 0x6d, 0x0e, 0x84,
-	0x19, 0xee, 0x73, 0xeb, 0xcc, 0x8d, 0x7f, 0xbb, 0x66, 0x72, 0xea, 0x78, 0xe6, 0xd9, 0x97, 0xe9,
-	0x34, 0xa7, 0xa2, 0xb0, 0x99, 0x1a, 0x83, 0x12, 0x90, 0xa5, 0xb9, 0xd4, 0xe9, 0x02, 0xa6, 0xbf,
-	0xf5, 0x41, 0x11, 0xe5, 0xd7, 0x17, 0x7a, 0xb9, 0x01, 0xb3, 0x48, 0x65, 0xba, 0x27, 0x9e, 0xcb,
-	0x73, 0xe2, 0x52, 0xef, 0xcf, 0x63, 0x8d, 0xc1, 0x9e, 0xe1, 0x0d, 0x95, 0x7a, 0x57, 0xe6, 0x0c,
-	0x6f, 0xa8, 0x8c, 0xff, 0xb9, 0x70, 0xb4, 0x3d, 0x7c, 0x3c, 0x86, 0xb0, 0xb6, 0xd5, 0xe3, 0x5b,
-	0x37, 0xe1, 0x6b, 0xe8, 0x7c, 0x9f, 0xd3, 0xaf, 0x1d, 0x9d, 0xca, 0xc8, 0x34, 0x85, 0x2f, 0x01,
-	0xc6, 0xf4, 0x73, 0x49, 0x22, 0x21, 0xdb, 0x6b, 0x9b, 0xad, 0x59, 0xf0, 0x8d, 0x5d, 0xa1, 0xbd,
-	0xb5, 0xad, 0x8b, 0x66, 0x86, 0xc4, 0x1e, 0xec, 0x8d, 0x49, 0x4c, 0xb5, 0x5e, 0x4f, 0xf7, 0x51,
-	0x63, 0xf5, 0x6f, 0x19, 0x15, 0xb3, 0xbb, 0x32, 0x33, 0xf7, 0xe4, 0xb1, 0x0a, 0xc6, 0xcc, 0xb4,
-	0xa7, 0x54, 0xab, 0xdf, 0x5a, 0x83, 0x45, 0x2a, 0xeb, 0x37, 0xe2, 0x26, 0xab, 0x99, 0x6d, 0x8d,
-	0x55, 0xcc, 0x6d, 0x35, 0xdf, 0xb6, 0x8a, 0x31, 0x68, 0x90, 0xc1, 0xa1, 0x9d, 0xcf, 0x98, 0xf2,
-	0xd5, 0x3c, 0x21, 0xfc, 0x08, 0xdd, 0xb1, 0xcc, 0x89, 0x3f, 0xe2, 0x93, 0xba, 0xf9, 0xea, 0xbd,
-	0xe8, 0xed, 0x9a, 0x62, 0xa7, 0xef, 0xbe, 0x77, 0xb1, 0x0f, 0x9d, 0xdb, 0xb9, 0x98, 0x61, 0x23,
-	0x58, 0xbf, 0x03, 0xbd, 0x2d, 0x1c, 0x3b, 0x83, 0x33, 0x08, 0x55, 0xed, 0xaa, 0xdc, 0x3b, 0xf0,
-	0xaf, 0x48, 0xea, 0xab, 0xd9, 0x3c, 0xac, 0xde, 0x26, 0x8c, 0x9d, 0x49, 0x57, 0x3f, 0x64, 0x1f,
-	0xfe, 0x07, 0x00, 0x00, 0xff, 0xff, 0x51, 0xcd, 0x83, 0xc5, 0xd9, 0x04, 0x00, 0x00,
+	// 666 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x54, 0xdd, 0x4e, 0xdb, 0x4a,
+	0x10, 0xb6, 0x49, 0x9c, 0xe0, 0x31, 0x41, 0x9c, 0x85, 0x73, 0xe4, 0x93, 0xa2, 0x96, 0x9a, 0xaa,
+	0x42, 0xbd, 0x40, 0x95, 0xdb, 0x0b, 0xe8, 0x5d, 0x29, 0x11, 0xa1, 0x34, 0x12, 0xda, 0x44, 0xbd,
+	0xe8, 0xdd, 0xc6, 0x19, 0x41, 0x84, 0x59, 0xbb, 0xf6, 0x86, 0xca, 0x2f, 0xd0, 0x8b, 0xbe, 0x47,
+	0x9f, 0xa8, 0x2f, 0x54, 0xed, 0x78, 0x6d, 0x87, 0x84, 0x2b, 0xef, 0x7c, 0x33, 0xf3, 0xcd, 0x8f,
+	0xbf, 0x5d, 0xe8, 0xdd, 0x63, 0x9e, 0x8b, 0x1b, 0x3c, 0x4e, 0xb3, 0x44, 0x25, 0xac, 0x6b, 0xcc,
+	0xe0, 0x1b, 0x6c, 0x0e, 0xe4, 0x03, 0xc6, 0x49, 0x8a, 0xcc, 0x87, 0x6e, 0x2a, 0x8a, 0x38, 0x11,
+	0x33, 0xdf, 0x3e, 0xb0, 0x8f, 0xb6, 0x78, 0x65, 0xb2, 0x7d, 0x70, 0xf3, 0xf9, 0x8d, 0x14, 0x6a,
+	0x91, 0xa1, 0xbf, 0x41, 0xbe, 0x06, 0x60, 0xff, 0x41, 0x27, 0x5d, 0x4c, 0xef, 0xb0, 0xf0, 0x5b,
+	0xe4, 0x32, 0x56, 0xd0, 0x05, 0x67, 0x70, 0x9f, 0xaa, 0x22, 0xf8, 0xd5, 0x82, 0xde, 0x58, 0x65,
+	0x28, 0xee, 0x47, 0x65, 0x59, 0x5d, 0x2a, 0xba, 0x15, 0x52, 0x62, 0x5c, 0x95, 0x32, 0x26, 0x7b,
+	0x0d, 0xce, 0x34, 0x4e, 0xa2, 0x3b, 0x2a, 0xe3, 0x85, 0xdb, 0xc7, 0x55, 0xe3, 0x67, 0x1a, 0x1d,
+	0x5a, 0xbc, 0x74, 0xb3, 0x13, 0xf0, 0x54, 0x26, 0x64, 0x2e, 0x22, 0x35, 0x4f, 0x24, 0x55, 0xf6,
+	0xc2, 0xbd, 0x3a, 0x7a, 0xd2, 0xf8, 0x86, 0x16, 0x5f, 0x0e, 0x65, 0x21, 0xb8, 0x29, 0x62, 0x36,
+	0x11, 0xd3, 0x18, 0xfd, 0x36, 0xe5, 0xb1, 0x3a, 0xef, 0xba, 0xf2, 0x0c, 0x2d, 0xde, 0x84, 0xb1,
+	0x0b, 0xd8, 0x89, 0x12, 0x99, 0xa3, 0xcc, 0x17, 0xb9, 0x99, 0xc1, 0x77, 0x28, 0xf5, 0xff, 0x3a,
+	0xf5, 0xd3, 0x4a, 0xc0, 0xd0, 0xe2, 0x6b, 0x49, 0xec, 0x10, 0xda, 0x9a, 0xd5, 0xef, 0x50, 0x72,
+	0xef, 0x51, 0xdd, 0xa1, 0xc5, 0xc9, 0xc9, 0xae, 0x61, 0x37, 0x4a, 0xa4, 0x44, 0xea, 0x77, 0x90,
+	0x2b, 0x31, 0x8d, 0xe7, 0xf9, 0xad, 0xdf, 0xa5, 0x9c, 0xfd, 0xe5, 0x82, 0xab, 0x31, 0x43, 0x8b,
+	0x3f, 0x95, 0x7a, 0xe6, 0x42, 0x37, 0x4a, 0xa4, 0x42, 0xa9, 0x82, 0x67, 0xe0, 0xd0, 0x2a, 0x19,
+	0x83, 0xf6, 0x4c, 0x28, 0x61, 0x7e, 0x00, 0x9d, 0x83, 0x1e, 0x78, 0x4b, 0x9b, 0x0b, 0xfe, 0x85,
+	0xdd, 0x27, 0x8a, 0x04, 0xbf, 0x6d, 0x70, 0xeb, 0x45, 0x69, 0x9e, 0x51, 0x71, 0x79, 0x4e, 0x3c,
+	0x2e, 0xa7, 0x33, 0x3b, 0x85, 0xae, 0x0e, 0x18, 0x89, 0xd4, 0xdf, 0x38, 0x68, 0x1d, 0x79, 0xe1,
+	0x8b, 0xf5, 0x0d, 0x1f, 0x9b, 0x88, 0x81, 0x54, 0x59, 0xc1, 0xab, 0xf8, 0xfe, 0x25, 0x6c, 0x2d,
+	0x3b, 0xd8, 0x0e, 0xb4, 0xb4, 0xb4, 0x4a, 0x76, 0x7d, 0x64, 0x87, 0xe0, 0x3c, 0x88, 0x78, 0x81,
+	0x46, 0x22, 0x8f, 0x97, 0xc8, 0x4b, 0xdf, 0x87, 0x8d, 0x13, 0x3b, 0xf8, 0x69, 0x43, 0x5b, 0x63,
+	0x5a, 0xbf, 0xf3, 0xf4, 0xe3, 0x6c, 0x96, 0x61, 0x9e, 0x1b, 0xa6, 0x06, 0xd0, 0x03, 0xa4, 0x49,
+	0xa6, 0x88, 0xce, 0xe5, 0x74, 0x26, 0x4d, 0x23, 0x66, 0x97, 0xe7, 0xa4, 0x2c, 0x97, 0x1b, 0x4b,
+	0x33, 0xdd, 0xa2, 0xc8, 0xd4, 0x19, 0x0a, 0x45, 0xe2, 0x71, 0x78, 0x03, 0x98, 0x9b, 0x70, 0x85,
+	0x05, 0x89, 0xa3, 0xbc, 0x09, 0x57, 0x58, 0x04, 0x7f, 0x6c, 0xd8, 0x59, 0x95, 0x07, 0x3b, 0x00,
+	0xaf, 0xc6, 0xea, 0xf5, 0x2d, 0x43, 0xec, 0x25, 0xb4, 0xbf, 0xce, 0xf1, 0xc7, 0xda, 0x9c, 0x1a,
+	0xe4, 0xe4, 0x62, 0xcf, 0x01, 0xc6, 0xf8, 0x7d, 0x81, 0x32, 0x42, 0xd3, 0x6b, 0x8b, 0x2f, 0x21,
+	0xec, 0x95, 0xf9, 0xdb, 0x46, 0xe8, 0x2b, 0xd7, 0x89, 0x1b, 0x29, 0xf4, 0x61, 0x73, 0x8c, 0x72,
+	0x46, 0xf3, 0x3a, 0xd4, 0x47, 0x6d, 0xeb, 0xab, 0x3a, 0xca, 0x6f, 0x26, 0x45, 0x8a, 0x24, 0x5a,
+	0x87, 0x57, 0x66, 0xc0, 0xcb, 0xf6, 0xf4, 0xd4, 0xfa, 0x5b, 0xcf, 0x60, 0x2c, 0xcd, 0xfa, 0x05,
+	0x45, 0xc9, 0x5a, 0xee, 0xb6, 0xb6, 0x75, 0xce, 0x75, 0xb5, 0xdf, 0x96, 0xce, 0x29, 0xad, 0x70,
+	0x50, 0xbd, 0x14, 0x63, 0xcc, 0x1e, 0xe6, 0x11, 0xb2, 0xf7, 0xd0, 0x29, 0x01, 0xf6, 0x4f, 0xdd,
+	0x7b, 0xf5, 0x62, 0xf5, 0xd7, 0xa1, 0xc0, 0x3a, 0xb2, 0xdf, 0xda, 0xe1, 0x29, 0x78, 0x9a, 0xb0,
+	0x22, 0x79, 0x03, 0xdd, 0x0b, 0x54, 0x24, 0x85, 0x66, 0x03, 0xf4, 0x36, 0xf5, 0x1f, 0xab, 0x27,
+	0xb0, 0xc2, 0xcf, 0xb0, 0x37, 0xc1, 0x5c, 0xd5, 0xff, 0xa1, 0xe2, 0x08, 0x61, 0x7b, 0xac, 0x44,
+	0xd6, 0x38, 0xd6, 0xa8, 0x56, 0xec, 0xc0, 0x9a, 0x76, 0xe8, 0xb5, 0x7d, 0xf7, 0x37, 0x00, 0x00,
+	0xff, 0xff, 0x38, 0x8d, 0xdd, 0xe5, 0x7e, 0x05, 0x00, 0x00,
 }

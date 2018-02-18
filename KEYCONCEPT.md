@@ -21,7 +21,7 @@ It describes the important concept of blockchains.
 | Consensus   | PoW                                      | PoW  -> PoS                  | Full-circle verification of the  correctness of a set of transactions comprising a block |
 | Storage     | Transactions                             | Transactions + code          | Transactions                             |
 | Description | Cryptocurrency based  on blockchain  platform | Generic  blockchain platform | Modular  blockchain platform             |
-| Openness    | Private                                  | Public                       | Private  + Public                        |
+| Openness    | Public                                  | Public                       | Private  + Public                        |
 | Transaction | Transfer of ownership                    | Message to send by account   | Chain Code Execution Message             |
 
 #### Author

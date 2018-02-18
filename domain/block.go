@@ -5,6 +5,7 @@ import (
 	"errors"
 	"it-chain/common"
 	"strconv"
+	pb "it-chain/network/protos"
 )
 
 type Status int
@@ -39,6 +40,7 @@ type BlockHeader struct {
 }
 
 func CreateNewBlock(prevBlock *Block, createPeerId string) *Block{
+
 	var header BlockHeader
 	if prevBlock == nil{
 		header.Number = 0
@@ -177,6 +179,36 @@ func (s Block) VerifyBlock() (bool, error) {
 		}
 	}
 	return true, nil
+}
+
+
+//todo test
+func FromProtoBlock(pb *pb.Block) *Block{
+
+	block := &Block{}
+
+	err := common.Deserialize(pb.Data,block)
+
+	if err != nil{
+		return nil
+	}
+
+	return block
+}
+
+//todo test
+func ToProtoBlock(block *Block) *pb.Block {
+
+	data,err := common.Serialize(block)
+
+	if err != nil{
+		return nil
+	}
+
+	protoBlock := &pb.Block{}
+	protoBlock.Data = data
+
+	return protoBlock
 }
 
 

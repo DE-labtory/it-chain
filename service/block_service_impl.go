@@ -7,7 +7,7 @@ import (
 )
 
 type Ledger struct {
-	DB *blockchaindb.BlockchainDBImpl
+	DB blockchaindb.BlockChainDB
 }
 
 func NewLedger(path string) BlockService{
@@ -15,6 +15,7 @@ func NewLedger(path string) BlockService{
 }
 
 func (l *Ledger) CreateBlock(txList []*domain.Transaction, createPeerId string) (*domain.Block, error) {
+
 	lastBlock, err := l.GetLastBlock()
 	if err != nil { return nil, err }
 	blk := domain.CreateNewBlock(lastBlock, createPeerId)

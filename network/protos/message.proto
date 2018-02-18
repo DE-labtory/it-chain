@@ -2,15 +2,16 @@ syntax = "proto3";
 
 package message;
 
-service MessageService{
-
+service StreamService{
     rpc Stream (stream Envelope) returns (stream Envelope) {}
-    // Ping is used to probe a remote peer's aliveness
-    rpc Ping (Empty) returns (Empty) {}
 }
 
 service PeerService{
-    rpc GetPeer (Peer) returns (Peer) {}
+    rpc GetPeer (Empty) returns (Peer) {}
+}
+
+service TestConsensusService{
+    rpc StartConsensus (Empty) returns (Empty) {}
 }
 
 message Envelope {
@@ -27,7 +28,7 @@ message Envelope {
 
 message Empty {}
 
-message Message{
+message StreamMessage{
 
     bytes channel = 1;
 
@@ -35,18 +36,21 @@ message Message{
         Block block = 2;
         Transaction transaction = 3;
         PeerTable peerTable = 4;
-        Peer Peer = 5;
-        ConsensusMessage consensusMessage= 6;
+        ConsensusMessage consensusMessage = 5;
+        Peer peer = 6;
+        ConnectionEstablish connectionEstablish = 7;
     }
 }
 
 message Block{
-
+    bytes data = 1;
 }
 
 message Transaction{
 
 }
+
+message ConnectionEstablish {}
 
 message PeerTable{
     string MyID = 1;

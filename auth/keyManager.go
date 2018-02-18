@@ -34,6 +34,12 @@ func (km *keyManager) Init(path string) {
 		}
 	}
 
+	if strings.HasSuffix(path, "/") {
+		km.path = km.path + "Keys"
+	} else {
+		km.path = km.path + "/Keys"
+	}
+
 }
 
 func (km *keyManager) Store(keys... Key) (err error) {
@@ -97,6 +103,7 @@ func (km *keyManager) storeKey(key Key, keyType keyType) (error) {
 func (km *keyManager) Load() (pri, pub Key, err error) {
 
 	if _, err := os.Stat(km.path); os.IsNotExist(err) {
+		
 		return nil, nil, errors.New("Keys are not exist")
 	}
 
@@ -180,6 +187,17 @@ func (km *keyManager) loadKey(alias string, keyType keyType) (key interface{}, e
 	}
 
 	return key, nil
+
+}
+
+func (km *keyManager) removeKey() (error) {
+
+	err := os.RemoveAll(km.path)
+	if err != nil {
+		return err
+	}
+
+	return nil
 
 }
 
