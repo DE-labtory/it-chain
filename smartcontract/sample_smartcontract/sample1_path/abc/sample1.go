@@ -2,17 +2,18 @@ package main
 
 import (
 	"it-chain/domain"
+	"it-chain/common"
 	"it-chain/db/leveldbhelper"
 	"encoding/json"
-	"fmt"
 	"os"
 )
+var logger = common.GetLogger("smartcontract")
 
 type SampleSmartContract struct {
 }
 
 func (sc *SampleSmartContract) Init(args []string) error {
-	fmt.Println("in Init func")
+	logger.Println("in Init func")
 	tx := domain.Transaction{}
 	err := json.Unmarshal([]byte(args[0]), &tx)
 	if err != nil {
@@ -47,14 +48,22 @@ func (sc *SampleSmartContract) Query(tx domain.Transaction, wsDBHandle *leveldbh
 }
 
 func (sc *SampleSmartContract) Invoke(tx domain.Transaction, wsDBHandle *leveldbhelper.DBHandle) {
+	logger.Println("func Invoke")
 	wsDBHandle.Put([]byte("test"), []byte("success"), true)
-	fmt.Println("func Invoke")
 	test, _ := wsDBHandle.Get([]byte("test"))
-	fmt.Println("test : " + string(test))
+	logger.Println("test : " + string(test))
 }
 
 func main()  {
-	fmt.Println("func main")
+	defer func() {
+		if err := recover(); err != nil {
+			logger.Errorln(err)
+			logger.Println("FAIL")
+		} else {
+			logger.Println("SUCCESS")
+		}
+	}()
+
 	args := os.Args[1:]
 	ssc := new(SampleSmartContract)
 
@@ -66,6 +75,6 @@ func main()  {
  -----------------------*/
 
 func getA(wsDBHandle *leveldbhelper.DBHandle) {
-	a, _ := wsDBHandle.Get([]byte("a"))
-	fmt.Print("{a : " + string(a) + "}")
+	a, _ := wsDBHandle.Get([]byte("A"))
+	logger.Print("{a : " + string(a) + "}")
 }
