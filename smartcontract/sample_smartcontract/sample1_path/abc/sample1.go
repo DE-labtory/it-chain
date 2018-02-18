@@ -2,18 +2,17 @@ package main
 
 import (
 	"it-chain/domain"
-	"it-chain/common"
+	//"it-chain/common"
 	"it-chain/db/leveldbhelper"
 	"it-chain/smartcontract"
 	"encoding/json"
 	"os"
 	"fmt"
-	"errors"
 )
-var logger = common.GetLogger("smartcontract")
+//var logger = common.GetLogger("smartcontract")
 
 /*** Set SmartContractResponse ***/
-var smartcontract_response = smartcontract.SmartContractResponse{}
+var smartContractResponse = smartcontract.SmartContractResponse{Data: map[string]string{}}
 
 type SampleSmartContract struct {
 }
@@ -35,7 +34,9 @@ func (sc *SampleSmartContract) Init(args []string) error {
 
 	wsDB := "worldStateDB"
 	wsDBHandle := dbProvider.GetDBHandle(wsDB)
-	//wsDBHandle.Put([]byte("test"), []byte("value1"), true)
+
+	/*** Mock Data ***/
+	wsDBHandle.Put([]byte("A"), []byte("AAAAAAAA"), true)
 
 	if tx.TxData.Method == domain.Query {
 		sc.Query(tx, wsDBHandle)
@@ -59,17 +60,18 @@ func (sc *SampleSmartContract) Invoke(tx domain.Transaction, wsDBHandle *leveldb
 func main()  {
 	defer func() {
 		if err := recover(); err != nil {
-			smartcontract_response.Result = smartcontract.FAIL
-			smartcontract_response.Error = errors.New("An error occured while running smartcontract!")
+			smartContractResponse.Result = smartcontract.FAIL
+			smartContractResponse.Error = "An error occured while running smartcontract!"
+			return
 		} else {
-			smartcontract_response.Result = smartcontract.SUCCESS
+			smartContractResponse.Result = smartcontract.SUCCESS
 		}
 
 		/*** Marshal SmartContractResponse ***/
-		out, err := json.Marshal(smartcontract_response)
+		out, err := json.Marshal(smartContractResponse)
 		if err != nil {
-			smartcontract_response.Result = smartcontract.FAIL
-			smartcontract_response.Error = errors.New("An error occured while marshaling the response!")
+			smartContractResponse.Result = smartcontract.FAIL
+			smartContractResponse.Error = "An error occured while marshaling the response!"
 			return
 		}
 		fmt.Println(string(out))
@@ -87,5 +89,5 @@ func main()  {
 
 func getA(wsDBHandle *leveldbhelper.DBHandle) {
 	a, _ := wsDBHandle.Get([]byte("A"))
-	smartcontract_response.Data["A"] = string(a)
+	smartContractResponse.Data["A"] = string(a)
 }

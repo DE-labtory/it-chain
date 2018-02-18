@@ -9,5 +9,5 @@ type SmartContractResponse struct {
 	Result string			`json:"result"`
 	Method string			`json:"method"` // query, invoke
 	Data map[string]string	`json:"data"`
-	Error error				`json:"error"`	// It's set when the result is fail
+	Error string			`json:"error"`	// It's set when the result is fail
 }

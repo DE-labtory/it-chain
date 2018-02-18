@@ -328,7 +328,15 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 	for scanner.Scan() {
 		output += scanner.Text() + "\n"
 	}
-	logger.Println(output)
+	fmt.Println(output)
+
+	smartContractResponse := &SmartContractResponse{}
+	err = json.Unmarshal([]byte(output), smartContractResponse)
+	fmt.Println("----Marshaled Output----")
+	fmt.Println(smartContractResponse)
+
+
+
 	return nil
 }
 
