@@ -10,8 +10,6 @@ import (
 )
 
 func MakeTar(source string, target string) error {
-	fmt.Println("source : "+source)
-	fmt.Println("target : "+target)
 	filename := filepath.Base(source)
 	target = filepath.Join(target, fmt.Sprintf("%s.tar", filename))
 	tarfile, err := os.Create(target)

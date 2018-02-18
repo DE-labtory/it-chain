@@ -62,7 +62,6 @@ type GithubRepoInfoResponse struct {
 }
 
 func GetRepositoryList(userName string) ([]GithubRepoInfoResponse, error) {
-
 	var body []GithubRepoInfoResponse
 
 	if userName == "" {

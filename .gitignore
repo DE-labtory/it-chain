@@ -15,3 +15,7 @@ bnaries for programs and plugins
 
 #
 .DS_Store
+
+# worldstatedb
+smartcontract/worldstatedb/*
+sample/db/test/*
