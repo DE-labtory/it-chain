@@ -4,24 +4,29 @@ import (
 	"it-chain/domain"
 	"it-chain/common"
 	"it-chain/db/leveldbhelper"
+	"it-chain/smartcontract"
 	"encoding/json"
 	"os"
+	"fmt"
+	"errors"
 )
 var logger = common.GetLogger("smartcontract")
+
+/*** Set SmartContractResponse ***/
+var smartcontract_response = smartcontract.SmartContractResponse{}
 
 type SampleSmartContract struct {
 }
 
 func (sc *SampleSmartContract) Init(args []string) error {
-	logger.Println("in Init func")
+	/*** Set Transaction Struct ***/
 	tx := domain.Transaction{}
 	err := json.Unmarshal([]byte(args[0]), &tx)
 	if err != nil {
 		return err
 	}
 
-	/* Init WorldStateDB
-	---------------------*/
+	/*** Init WorldStateDB ***/
 	path := "/go/src/worldstatedb"
 	dbProvider := leveldbhelper.CreateNewDBProvider(path)
 	defer func(){
@@ -48,20 +53,26 @@ func (sc *SampleSmartContract) Query(tx domain.Transaction, wsDBHandle *leveldbh
 }
 
 func (sc *SampleSmartContract) Invoke(tx domain.Transaction, wsDBHandle *leveldbhelper.DBHandle) {
-	logger.Println("func Invoke")
-	wsDBHandle.Put([]byte("test"), []byte("success"), true)
-	test, _ := wsDBHandle.Get([]byte("test"))
-	logger.Println("test : " + string(test))
+	return
 }
 
 func main()  {
 	defer func() {
 		if err := recover(); err != nil {
-			logger.Errorln(err)
-			logger.Println("FAIL")
+			smartcontract_response.Result = smartcontract.FAIL
+			smartcontract_response.Error = errors.New("An error occured while running smartcontract!")
 		} else {
-			logger.Println("SUCCESS")
+			smartcontract_response.Result = smartcontract.SUCCESS
 		}
+
+		/*** Marshal SmartContractResponse ***/
+		out, err := json.Marshal(smartcontract_response)
+		if err != nil {
+			smartcontract_response.Result = smartcontract.FAIL
+			smartcontract_response.Error = errors.New("An error occured while marshaling the response!")
+			return
+		}
+		fmt.Println(string(out))
 	}()
 
 	args := os.Args[1:]
@@ -76,5 +87,5 @@ func main()  {
 
 func getA(wsDBHandle *leveldbhelper.DBHandle) {
 	a, _ := wsDBHandle.Get([]byte("A"))
-	logger.Print("{a : " + string(a) + "}")
+	smartcontract_response.Data["A"] = string(a)
 }
