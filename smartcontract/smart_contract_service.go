@@ -179,6 +179,7 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
  ****************************************************/
 func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 	/*** Set Transaction Arg ***/
+	logger.Errorln("query start")
 	tx_bytes, err := json.Marshal(transaction)
 	if err != nil {
 		return errors.New("Tx Marshal Error")
@@ -197,8 +198,10 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 	}
 
 	/*** smartcontract build ***/
+	logger.Errorln("build start")
 	cmd := exec.Command("env", "GOOS=linux", "go", "build", "-o", TMP_DIR + "/" + sc.Name, "./" + sc.Name + ".go")
 	cmd.Dir = sc.SmartContractPath + "/" + transaction.TxData.ContractID
+
 	err = cmd.Run()
 	if err != nil {
 		logger.Errorln("SmartContract build error")
@@ -212,6 +215,8 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 		return err
 	}
 
+	logger.Errorln("make tar")
+
 	err = MakeTar(TMP_DIR + "/" + sc.Name, TMP_DIR)
 	if err != nil {
 		logger.Errorln("An error occured while archiving smartcontract file!")
@@ -223,6 +228,8 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 		return err
 	}
 
+	logger.Errorln("exec cmd")
+
 	// tar config file
 	cmd = exec.Command("tar", "-cf", TMP_DIR + "/config.tar", "./it-chain/config.yaml")
 	cmd.Dir = "../../"
@@ -231,6 +238,8 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 		logger.Errorln("An error occured while archiving config file!")
 		return err
 	}
+
+	logger.Errorln("Pulling image")
 
 	// Docker Code
 	imageName := "docker.io/library/golang:1.9.2-alpine3.6"

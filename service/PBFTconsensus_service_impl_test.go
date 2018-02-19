@@ -33,6 +33,7 @@ func (mcm MockConnectionManager) CreateStreamClientConn(connectionID string, ip 
 	return errors.New("error")
 }
 
+
 func (mcm MockConnectionManager) Size() int{
 	return 0
 }
@@ -110,13 +111,14 @@ func (mps MockPeerService) BroadCastPeerTable(interface{}){
 
 
 func TestNewPBFTConsensusService(t *testing.T) {
+
 	comm:= new(MockConnectionManager)
 	view := &domain.View{}
 	view.ID = "123"
 	view.LeaderID = "1"
 	view.PeerID = []string{"1","2","3"}
 
-	pbftService := NewPBFTConsensusService(comm,nil)
+	pbftService := NewPBFTConsensusService(comm,nil,"1")
 
 	consensusStates := pbftService.GetCurrentConsensusState()
 	assert.NotNil(t,consensusStates)

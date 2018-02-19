@@ -25,7 +25,7 @@ const (
 func (km *keyManager) Init(path string) {
 
 	if len(path) == 0 {
-		km.path = "./KeyRepository"
+		km.path = "./.keyRepository"
 	} else {
 		if !strings.HasPrefix(path, "./") {
 			km.path = "./" + path
@@ -35,9 +35,9 @@ func (km *keyManager) Init(path string) {
 	}
 
 	if strings.HasSuffix(path, "/") {
-		km.path = km.path + "Keys"
+		km.path = km.path + ".keys"
 	} else {
-		km.path = km.path + "/Keys"
+		km.path = km.path + "/.keys"
 	}
 
 }

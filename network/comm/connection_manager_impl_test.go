@@ -33,8 +33,6 @@ func TestCommImpl_CreateStreamClientConn(t *testing.T) {
 	defer os.RemoveAll("./KeyRepository")
 	assert.NoError(t, err)
 
-
-
 	comm := NewConnectionManagerImpl(cryp)
 	comm.CreateStreamClientConn("1","127.0.0.1:5555",nil)
 	comm.CreateStreamClientConn("2","127.0.0.1:6666",nil)
@@ -49,6 +47,7 @@ func TestCommImpl_CreateStreamClientConn(t *testing.T) {
 	assert.NotNil(t,comm)
 	assert.Equal(t,2,comm.Size())
 }
+
 //
 func TestCommImpl_Send(t *testing.T) {
 
@@ -177,10 +176,7 @@ func TestConnectionManagerImpl_Stream(t *testing.T) {
 		log.Print("End")
 	}
 
-
 	comm.onConnectionHandler = onConnectionHandler
-
-
 	comm1.onConnectionHandler = onConnectionHandler
 
 	server1, listner1 := mock.ListenMockServer(comm,"127.0.0.1:5555")

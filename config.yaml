@@ -2,3 +2,7 @@ database:
   type: leveldb
   leveldb:
     default_path: ./.leveldb
+
+key:
+  type: RSA
+  default_path: ./.

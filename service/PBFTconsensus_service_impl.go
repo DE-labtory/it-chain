@@ -167,6 +167,7 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 		if err != nil{
 
 		}
+
 		if flag{
 			cs.blockService.AddBlock(consensusState.Block)
 		}
@@ -193,8 +194,8 @@ func (cs *PBFTConsensusService) broadcastMessage(consensusMsg domain.ConsensusMe
 	logger_pbftservice.Infoln("broadcast Message")
 	peerIDList := consensusMsg.View.PeerID
 
-	message := &pb.Message{}
-	message.Content = &pb.Message_ConsensusMessage{
+	message := &pb.StreamMessage{}
+	message.Content = &pb.StreamMessage_ConsensusMessage{
 		ConsensusMessage: domain.ToConsensusProtoMessage(consensusMsg),
 	}
 
