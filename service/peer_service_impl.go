@@ -4,6 +4,11 @@ import (
 	"it-chain/network/comm"
 	pb "it-chain/network/protos"
 	"it-chain/domain"
+	"strconv"
+	"time"
+	"github.com/spf13/viper"
+	"google.golang.org/grpc"
+	"golang.org/x/net/context"
 )
 
 type PeerServiceImpl struct {
@@ -12,11 +17,21 @@ type PeerServiceImpl struct {
 }
 
 func NewPeerServiceImpl(peerTable *domain.PeerTable,comm comm.ConnectionManager) PeerService{
-
-	return &PeerServiceImpl{
+	peerService := &PeerServiceImpl{
 		peerTable: peerTable,
 		comm: comm,
 	}
+
+	i, _ := strconv.Atoi(viper.GetString("batchTimer.pushPeerTable"))
+
+	broadCastPeerTableBatcher := NewBatchService(time.Duration(i)*time.Second,peerService.BroadCastPeerTable,false)
+	broadCastPeerTableBatcher.Add("push batching")
+	broadCastPeerTableBatcher.Start()
+
+	//common.Log.Println("push batching start")
+
+	return peerService
+
 }
 
 func (ps *PeerServiceImpl) GetPeerTable() domain.PeerTable{
@@ -39,7 +54,7 @@ func (ps *PeerServiceImpl) PushPeerTable(peerIDs []string){
 //주기적으로 peerTable의 peerlist에게 peerTable을 전송한다.
 //todo struct to grpc proto의 변환 문제
 func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
-	//logger.Println("pushing peer table")
+	logger.Println("pushing peer table")
 
 	Peers, err := ps.peerTable.SelectRandomPeers(0.5)
 
@@ -107,9 +122,25 @@ func (ps *PeerServiceImpl) AddPeer(Peer *domain.Peer){
 	ps.peerTable.AddPeer(Peer)
 }
 
-func (ps *PeerServiceImpl) RequestPeer(host string, port string) *domain.Peer{
+func (ps *PeerServiceImpl) RequestPeer(ip string) (*domain.Peer ,error){
 
-	return nil
+	conn, err := grpc.Dial(ip, grpc.WithInsecure())
+	if err != nil {
+		logger.Fatalf("did not connect: %v", err)
+		return &domain.Peer{},err
+	}
+
+	defer conn.Close()
+	c := pb.NewPeerServiceClient(conn)
+
+	peer, err := c.GetPeer(context.Background(), &pb.Empty{})
+
+	if err != nil {
+		logger.Println("could not greet: %v", err)
+		return &domain.Peer{},err
+	}
+
+	return domain.FromProtoPeer(*peer), nil
 }
 
 func (ps *PeerServiceImpl) GetLeader() *domain.Peer{

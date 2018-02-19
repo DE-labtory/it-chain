@@ -21,7 +21,7 @@ type PeerService interface{
 	AddPeer(Peer *domain.Peer)
 
 	//Request Peer Info
-	RequestPeer(host string, port string) *domain.Peer
+	RequestPeer(ip string) (*domain.Peer ,error)
 
 	BroadCastPeerTable(interface{})
 

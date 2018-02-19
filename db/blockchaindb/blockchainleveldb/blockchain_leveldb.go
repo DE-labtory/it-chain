@@ -26,7 +26,7 @@ type BlockchainLevelDB struct {
 
 func CreateNewBlockchainLevelDB(levelDBPath string) *BlockchainLevelDB {
 	if levelDBPath == "" {
-		levelDBPath = viper.GetString("database.leveldb.default_path")
+		levelDBPath = viper.GetString("database.leveldb.defaultPath")
 	}
 	levelDBProvider := leveldbhelper.CreateNewDBProvider(levelDBPath)
 	return &BlockchainLevelDB{levelDBProvider}

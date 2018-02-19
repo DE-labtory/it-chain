@@ -19,3 +19,12 @@ bnaries for programs and plugins
 # worldstatedb
 smartcontract/worldstatedb/*
 sample/db/test/*
+
+# key
+.keys
+
+# ledger
+.ledger
+
+# test
+test/*

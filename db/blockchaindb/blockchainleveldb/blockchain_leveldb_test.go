@@ -102,7 +102,7 @@ func TestBlockchainLevelDB_GetTransactionByTxID(t *testing.T) {
 		time.Now().Round(0),
 		&domain.TxData{})
 	tx.GenerateHash()
-	err := block.PutTranscation(tx)
+	err :=block.PutTranscation(tx)
 	assert.NoError(t, err)
 
 	err = blockchainLevelDB.AddBlock(block)

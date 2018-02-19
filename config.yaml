@@ -1,4 +1,26 @@
 database:
   type: leveldb
   leveldb:
-    default_path: ./.leveldb
+    defaultPath: ./.leveldb
+
+key:
+  type: RSA
+  defaultPath: ./.
+
+ledger:
+  defaultPath: ./.ledger
+
+smartContract:
+  defaultPath: ./.constracts
+  githubID: steve@buzzni.com
+  githubPassword: itchain123
+  githubAccessToken: 1a8ae688db783f63c2494d59f971b2eed5399b1d
+
+batchTimer:
+  pushPeerTable: 5
+
+bootNode:
+  ip: 127.0.0.1:5555
+
+Node:
+  ip: 127.0.0.1:4444

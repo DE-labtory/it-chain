@@ -23,11 +23,20 @@ type ConnectionManagerImpl struct {
 	sync.RWMutex
 }
 
-func NewConnectionManagerImpl(crpyto auth.Crypto) *ConnectionManagerImpl{
+func NewConnectionManagerImpl(crpyto auth.Crypto) ConnectionManager{
 	return &ConnectionManagerImpl{
 		connectionMap: make(map[string]Connection),
 		crpyto: crpyto,
 	}
+}
+
+func (comm *ConnectionManagerImpl) SetOnConnectHandler(onConnectionHandler OnConnectionHandler){
+	comm.Lock()
+
+	if onConnectionHandler != nil{
+		comm.onConnectionHandler = onConnectionHandler
+	}
+	comm.Unlock()
 }
 
 func (comm *ConnectionManagerImpl) CreateStreamClientConn(connectionID string, ip string, handler ReceiveMessageHandle) error{
@@ -133,6 +142,8 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 		commLogger.Errorln(err.Error())
 	}
 
+	commLogger.Println("sending connection message")
+
 	err = stream.Send(envelope)
 
 	if err != nil{
@@ -152,6 +163,7 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 
 			connectionID := pp.PeerID
 			//todo handler 넣어주기
+			commLogger.Println("creating new connection")
 			conn,err := NewConnection(nil,stream,
 				nil,nil, nil,connectionID,cf)
 

@@ -185,6 +185,10 @@ func (s Block) VerifyBlock() (bool, error) {
 //todo test
 func FromProtoBlock(pb *pb.Block) *Block{
 
+	if pb == nil{
+		return nil
+	}
+
 	block := &Block{}
 
 	err := common.Deserialize(pb.Data,block)

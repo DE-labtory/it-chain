@@ -1,4 +1,4 @@
-package smartcontract
+package service
 
 import (
 	"errors"
@@ -18,12 +18,13 @@ import (
 	"os/exec"
 	"it-chain/common"
 	"fmt"
+	"github.com/spf13/viper"
 )
 
 const (
-	GITHUB_TOKEN string = "31d8f4c1bfc6906806b9a77803087b5b671fac2d"
 	TMP_DIR string = "/tmp"
 )
+
 var logger = common.GetLogger("smart_contract_service.go")
 
 type SmartContract struct {
@@ -32,7 +33,7 @@ type SmartContract struct {
 	SmartContractPath string
 }
 
-type SmartContractService struct {
+type SmartContractServiceImpl struct {
 	GithubID string
 	SmartContractDirPath string
 	SmartContractMap map[string]SmartContract
@@ -42,11 +43,19 @@ func Init() {
 
 }
 
-func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string, errorHandler func(error),
+func NewSmartContractService(githubID string,smartContractDirPath string) SmartContractService{
+	return &SmartContractServiceImpl{
+		GithubID:githubID,
+		SmartContractDirPath:smartContractDirPath,
+		SmartContractMap: make(map[string]SmartContract),
+	}
+}
+
+func (scs *SmartContractServiceImpl) PullAllSmartContracts(authenticatedGit string, errorHandler func(error),
 	completionHandler func()) {
 
 	go func() {
-		repoList, err := GetRepositoryList(authenticatedGit)
+		repoList, err := domain.GetRepositoryList(authenticatedGit)
 		if err != nil {
 			errorHandler(errors.New("An error was occured during getting repository list"))
 			return
@@ -62,7 +71,7 @@ func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string, 
 				return
 			}
 
-			commits, err := GetReposCommits(repo.FullName)
+			commits, err := domain.GetReposCommits(repo.FullName)
 			if err != nil {
 				errorHandler(errors.New("An error was occured during getting commit logs"))
 				return
@@ -71,13 +80,13 @@ func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string, 
 			for _, commit := range commits {
 				if commit.Author.Login == authenticatedGit {
 
-					err := CloneReposWithName(repo.FullName, localReposPath, commit.Sha)
+					err := domain.CloneReposWithName(repo.FullName, localReposPath, commit.Sha)
 					if err != nil {
 						errorHandler(errors.New("An error was occured during cloning with name"))
 						return
 					}
 
-					err = ResetWithSHA(localReposPath + "/" + commit.Sha, commit.Sha)
+					err = domain.ResetWithSHA(localReposPath + "/" + commit.Sha, commit.Sha)
 					if err != nil {
 						errorHandler(errors.New("An error was occured during resetting with SHA"))
 						return
@@ -93,7 +102,7 @@ func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string, 
 
 }
 
-func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
+func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
 	origin_repos_name := strings.Split(ReposPath, "/")[1]
 	new_repos_name := strings.Replace(ReposPath, "/", "_", -1)
 
@@ -103,7 +112,7 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
 		return "", errors.New("Already exist smart contract ID")
 	}
 
-	repos, err := GetRepos(ReposPath)
+	repos, err := domain.GetRepos(ReposPath)
 	if err != nil {
 		return "", errors.New("An error occured while getting repos!")
 	}
@@ -116,17 +125,19 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
 		return "", errors.New("An error occured while make repository's directory!")
 	}
 
-	err = CloneRepos(ReposPath, scs.SmartContractDirPath + "/" + new_repos_name)
+	//todo gitpath이미 존재하는지 확인
+	err = domain.CloneRepos(ReposPath, scs.SmartContractDirPath + "/" + new_repos_name)
 	if err != nil {
 		return "", errors.New("An error occured while cloning repos!")
 	}
 
-	_, err = CreateRepos(new_repos_name, GITHUB_TOKEN)
+	common.Log.Println(viper.GetString("smartContract.githubID"))
+	_, err = domain.CreateRepos(new_repos_name,  viper.GetString("smartContract.githubAccessToken"))
 	if err != nil {
 		return "", errors.New(err.Error())//"An error occured while creating repos!")
 	}
 
-	err = ChangeRemote(scs.GithubID + "/" + new_repos_name, scs.SmartContractDirPath + "/" + new_repos_name + "/" + origin_repos_name)
+	err = domain.ChangeRemote(scs.GithubID + "/" + new_repos_name, scs.SmartContractDirPath + "/" + new_repos_name + "/" + origin_repos_name)
 	if err != nil {
 		return "", errors.New("An error occured while cloning repos!")
 	}
@@ -147,13 +158,13 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
 		return "", errors.New("An error occured while closing file!")
 	}
 
-	err = CommitAndPush(scs.SmartContractDirPath + "/" + new_repos_name + "/" + origin_repos_name, "It-Chain Smart Contract \"" + new_repos_name + "\" Deploy")
+	err = domain.CommitAndPush(scs.SmartContractDirPath + "/" + new_repos_name + "/" + origin_repos_name, "It-Chain Smart Contract \"" + new_repos_name + "\" Deploy")
 	if err != nil {
 		return "", errors.New(err.Error())
 		//return "", errors.New("An error occured while committing and pushing!")
 	}
 
-	githubResponseCommits, err := GetReposCommits(scs.GithubID + "/" + new_repos_name)
+	githubResponseCommits, err := domain.GetReposCommits(scs.GithubID + "/" + new_repos_name)
 	if err != nil {
 		return "", errors.New("An error occured while getting commit log!")
 	}
@@ -177,8 +188,9 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
  *	5. docker container Start
  *	6. docker에서 smartcontract 실행
  ****************************************************/
-func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
+func (scs *SmartContractServiceImpl) Query(transaction domain.Transaction) (error) {
 	/*** Set Transaction Arg ***/
+	logger.Errorln("query start")
 	tx_bytes, err := json.Marshal(transaction)
 	if err != nil {
 		return errors.New("Tx Marshal Error")
@@ -197,8 +209,10 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 	}
 
 	/*** smartcontract build ***/
+	logger.Errorln("build start")
 	cmd := exec.Command("env", "GOOS=linux", "go", "build", "-o", TMP_DIR + "/" + sc.Name, "./" + sc.Name + ".go")
 	cmd.Dir = sc.SmartContractPath + "/" + transaction.TxData.ContractID
+
 	err = cmd.Run()
 	if err != nil {
 		logger.Errorln("SmartContract build error")
@@ -212,16 +226,20 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 		return err
 	}
 
-	err = MakeTar(TMP_DIR + "/" + sc.Name, TMP_DIR)
+	logger.Errorln("make tar")
+
+	err = domain.MakeTar(TMP_DIR + "/" + sc.Name, TMP_DIR)
 	if err != nil {
 		logger.Errorln("An error occured while archiving smartcontract file!")
 		return err
 	}
-	err = MakeTar("$GOPATH/src/it-chain/smartcontract/worldstatedb", TMP_DIR)
+	err = domain.MakeTar("$GOPATH/src/it-chain/smartcontract/worldstatedb", TMP_DIR)
 	if err != nil {
 		logger.Errorln("An error occured while archiving worldstateDB file!")
 		return err
 	}
+
+	logger.Errorln("exec cmd")
 
 	// tar config file
 	cmd = exec.Command("tar", "-cf", TMP_DIR + "/config.tar", "./it-chain/config.yaml")
@@ -231,6 +249,8 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 		logger.Errorln("An error occured while archiving config file!")
 		return err
 	}
+
+	logger.Errorln("Pulling image")
 
 	// Docker Code
 	imageName := "docker.io/library/golang:1.9.2-alpine3.6"
@@ -337,17 +357,17 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 	}
 	fmt.Println(output)
 
-	smartContractResponse := &SmartContractResponse{}
+	smartContractResponse := &domain.SmartContractResponse{}
 	err = json.Unmarshal([]byte(output), smartContractResponse)
 	fmt.Println("----Marshaled Output----")
 	fmt.Println(smartContractResponse)
 
-	if smartContractResponse.Result == SUCCESS {
+	if smartContractResponse.Result == domain.SUCCESS {
 		logger.Println("Running smartcontract is success")
 
 		// tx hash reset
 		// real running smartcontract
-	} else if smartContractResponse.Result == FAIL {
+	} else if smartContractResponse.Result == domain.FAIL {
 		logger.Errorln("An error occured while running smartcontract!")
 	}
 
@@ -355,11 +375,11 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 }
 
 
-func (scs *SmartContractService) Invoke() {
+func (scs *SmartContractServiceImpl) Invoke() {
 
 }
 
-func (scs *SmartContractService) keyByValue(OriginReposPath string) (key string, ok bool) {
+func (scs *SmartContractServiceImpl) keyByValue(OriginReposPath string) (key string, ok bool) {
 	contractName := strings.Replace(OriginReposPath, "/", "^", -1)
 	for k, v := range scs.SmartContractMap {
 		if contractName == v.OriginReposPath {
