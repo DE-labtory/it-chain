@@ -6,6 +6,9 @@ type BlockService interface{
 	// Confirmed 된 블록 추가
 	AddBlock(blk *domain.Block) (bool, error)
 
+	// DB close
+	Close()
+
 	// Block Chain의 마지막 블록을 반환
 	GetLastBlock() (*domain.Block, error)
 

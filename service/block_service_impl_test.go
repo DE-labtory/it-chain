@@ -6,17 +6,19 @@ import (
 	"github.com/stretchr/testify/assert"
 	"os"
 	"it-chain/domain"
+	"fmt"
 )
 
 func TestLedger_CreateBlock(t *testing.T) {
 	path := "./test_db"
+	ledger := NewLedger(path)
 	defer func(){
+		ledger.Close()
 		os.RemoveAll(path)
 	}()
-	ledger := NewLedger(path)
 	txList := make([]*domain.Transaction, 0)
 	for i := 0; i < 999; i++{
-		tx := domain.CreateNewTransaction("1", "1", domain.General, time.Now(), domain.SetTxData("", domain.Invoke, domain.SetTxMethodParameters(0, "", []string{""}), ""))
+		tx := domain.CreateNewTransaction("1", fmt.Sprintf("%d", i), domain.General, time.Now(), domain.SetTxData("", domain.Invoke, domain.SetTxMethodParameters(0, "", []string{""}), ""))
 		tx.GenerateHash()
 		txList = append(txList, tx)
 	}
@@ -28,13 +30,14 @@ func TestLedger_CreateBlock(t *testing.T) {
 
 func TestLedger_AddBlock(t *testing.T) {
 	path := "./test_db"
+	ledger := NewLedger(path)
 	defer func(){
+		ledger.Close()
 		os.RemoveAll(path)
 	}()
-	ledger := NewLedger(path)
 	txList := make([]*domain.Transaction, 0)
 	for i := 0; i < 999; i++{
-		tx := domain.CreateNewTransaction("1", "1", domain.General, time.Now(), domain.SetTxData("", domain.Invoke, domain.SetTxMethodParameters(0, "", []string{""}), ""))
+		tx := domain.CreateNewTransaction("1", fmt.Sprintf("%d", i), domain.General, time.Now(), domain.SetTxData("", domain.Invoke, domain.SetTxMethodParameters(0, "", []string{""}), ""))
 		tx.GenerateHash()
 		txList = append(txList, tx)
 	}
@@ -50,13 +53,14 @@ func TestLedger_AddBlock(t *testing.T) {
 
 func TestLedger_GetLastBlock(t *testing.T) {
 	path := "./test_db"
+	ledger := NewLedger(path)
 	defer func(){
+		ledger.Close()
 		os.RemoveAll(path)
 	}()
-	ledger := NewLedger(path)
 	txList := make([]*domain.Transaction, 0)
 	for i := 0; i < 999; i++{
-		tx := domain.CreateNewTransaction("1", "1", domain.General, time.Now(), domain.SetTxData("", domain.Invoke, domain.SetTxMethodParameters(0, "", []string{""}), ""))
+		tx := domain.CreateNewTransaction("1", fmt.Sprintf("%d", i), domain.General, time.Now(), domain.SetTxData("", domain.Invoke, domain.SetTxMethodParameters(0, "", []string{""}), ""))
 		tx.GenerateHash()
 		txList = append(txList, tx)
 	}
@@ -76,13 +80,14 @@ func TestLedger_GetLastBlock(t *testing.T) {
 
 func TestLedger_LookUpBlock(t *testing.T) {
 	path := "./test_db"
+	ledger := NewLedger(path)
 	defer func(){
+		ledger.Close()
 		os.RemoveAll(path)
 	}()
-	ledger := NewLedger(path)
 	txList := make([]*domain.Transaction, 0)
 	for i := 0; i < 999; i++{
-		tx := domain.CreateNewTransaction("1", "1", domain.General, time.Now(), domain.SetTxData("", domain.Invoke, domain.SetTxMethodParameters(0, "", []string{""}), ""))
+		tx := domain.CreateNewTransaction("1", fmt.Sprintf("%d", i), domain.General, time.Now(), domain.SetTxData("", domain.Invoke, domain.SetTxMethodParameters(0, "", []string{""}), ""))
 		tx.GenerateHash()
 		txList = append(txList, tx)
 	}
@@ -107,13 +112,14 @@ func TestLedger_LookUpBlock(t *testing.T) {
 
 func TestLedger_VerifyBlock(t *testing.T) {
 	path := "./test_db"
+	ledger := NewLedger(path)
 	defer func(){
+		ledger.Close()
 		os.RemoveAll(path)
 	}()
-	ledger := NewLedger(path)
 	txList := make([]*domain.Transaction, 0)
 	for i := 0; i < 999; i++{
-		tx := domain.CreateNewTransaction("1", "1", domain.General, time.Now(), domain.SetTxData("", domain.Invoke, domain.SetTxMethodParameters(0, "", []string{""}), ""))
+		tx := domain.CreateNewTransaction("1", fmt.Sprintf("%d", i), domain.General, time.Now(), domain.SetTxData("", domain.Invoke, domain.SetTxMethodParameters(0, "", []string{""}), ""))
 		tx.GenerateHash()
 		txList = append(txList, tx)
 	}
