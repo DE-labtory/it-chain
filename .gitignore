@@ -25,3 +25,6 @@ sample/db/test/*
 
 # ledger
 .ledger
+
+# test
+test/*

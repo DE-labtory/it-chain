@@ -24,10 +24,7 @@ import (
 const (
 	TMP_DIR string = "/tmp"
 )
-//
-//func Init(){
-//
-//}
+
 var logger = common.GetLogger("smart_contract_service.go")
 
 type SmartContract struct {

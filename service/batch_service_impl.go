@@ -41,9 +41,11 @@ func NewBatchService(period time.Duration, handle Handle, deleting bool) BatchSe
 		deleting: deleting,
 	}
 
-	go gb.periodicEmit()
-
 	return gb
+}
+
+func (gb *EventBatcherServiceImpl) Start(){
+	go gb.periodicEmit()
 }
 
 //tested
