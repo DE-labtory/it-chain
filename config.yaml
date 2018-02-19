@@ -6,3 +6,6 @@ database:
 key:
   type: RSA
   default_path: ./.
+
+ledger:
+  default_path: ./.ledger

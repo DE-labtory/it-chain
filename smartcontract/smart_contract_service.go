@@ -42,6 +42,8 @@ func Init() {
 
 }
 
+func NewSmartContractService(githubID string,SmartContractDirPath string)
+
 func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string, errorHandler func(error),
 	completionHandler func()) {
 

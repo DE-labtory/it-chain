@@ -23,7 +23,7 @@ type ConnectionManagerImpl struct {
 	sync.RWMutex
 }
 
-func NewConnectionManagerImpl(crpyto auth.Crypto) *ConnectionManagerImpl{
+func NewConnectionManagerImpl(crpyto auth.Crypto) ConnectionManager{
 	return &ConnectionManagerImpl{
 		connectionMap: make(map[string]Connection),
 		crpyto: crpyto,

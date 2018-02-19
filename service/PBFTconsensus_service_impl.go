@@ -9,26 +9,29 @@ import (
 	"sync"
 	"github.com/rs/xid"
 	pb "it-chain/network/protos"
+	"it-chain/smartcontract"
 )
 
 var logger_pbftservice = common.GetLogger("pbft_service")
 
 //todo peerID를 어디서 가져올 것인가??
 type PBFTConsensusService struct {
-	consensusStates map[string]*domain.ConsensusState
-	comm            comm.ConnectionManager
-	peerID          string
-	peerService 	PeerService
-	blockService    BlockService
+	consensusStates      map[string]*domain.ConsensusState
+	comm                 comm.ConnectionManager
+	peerID               string
+	peerService          PeerService
+	blockService         BlockService
+	smartContractService smartcontract.SmartContractService
 	sync.RWMutex
 }
 
-func NewPBFTConsensusService(comm comm.ConnectionManager, blockService BlockService,peerID string) ConsensusService{
+func NewPBFTConsensusService(comm comm.ConnectionManager, blockService BlockService,peerID string, smartContractService smartcontract.SmartContractService) ConsensusService{
 
 	pbft := &PBFTConsensusService{
 		consensusStates: make(map[string]*domain.ConsensusState),
 		comm:comm,
 		blockService: blockService,
+		smartContractService: smartContractService,
 		peerID: peerID,
 	}
 
