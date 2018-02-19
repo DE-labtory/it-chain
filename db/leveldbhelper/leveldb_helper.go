@@ -167,6 +167,10 @@ func (db *DB) GetIterator(startKey []byte, endKey []byte) iterator.Iterator {
 	return db.db.NewIterator(&util.Range{Start: startKey, Limit: endKey}, db.readOpts)
 }
 
+func (db *DB) GetIteratorWithPrefix(prefix []byte) iterator.Iterator {
+	return db.db.NewIterator(util.BytesPrefix(prefix), db.readOpts)
+}
+
 func (db *DB) Snapshot() (map[string][]byte, error) {
 	snap, err := db.db.GetSnapshot()
 	if err != nil {
