@@ -14,17 +14,20 @@ import (
 	"io"
 )
 
+//todo deploy
 func TestDeploy_Deploy(t *testing.T) {
 	currentDir, err := filepath.Abs("./")
 	if err != nil {
 		assert.Fail(t, err.Error())
 	}
-	scs := SmartContractService{"steve-buzzni", currentDir + "/sample_smartcontract",map[string]SmartContract{}}
+
+	scs := SmartContractServiceImpl{"steve-buzzni", currentDir + "/sample_smartcontract",map[string]SmartContract{}}
 	ContractPath := "junbeomlee/bloom"
 
 	deploy_result, err := scs.Deploy(ContractPath)
 
 	fmt.Println(deploy_result)
+
 	if err != nil {
 		assert.Fail(t, err.Error())
 	}
@@ -51,7 +54,7 @@ func TestSmartContractService_Query(t *testing.T) {
 		),
 	)
 	fmt.Println("tx created")
-	scs := SmartContractService{
+	scs := SmartContractServiceImpl{
 		"steve-buzzni",
 		currentDir + "/sample_smartcontract",
 		map[string]SmartContract{
@@ -99,16 +102,16 @@ func TestSmartContractService_pullAllSmartContracts(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	scs := SmartContractService{
+	scs := SmartContractServiceImpl{
 		"yojkim",
 	currentDir + "/pull_test_repositories",
 	map[string]SmartContract{}}
 
-	scs.pullAllSmartContracts("emperorhan", func(e error) {
+	scs.PullAllSmartContracts("emperorhan", func(e error) {
 		assert.Fail(t, e.Error())
 	}, nil)
 
-	scs.pullAllSmartContracts("", func(e error) {
+	scs.PullAllSmartContracts("", func(e error) {
 		assert.Error(t, e)
 	}, nil)
 

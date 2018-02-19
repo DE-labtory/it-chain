@@ -15,7 +15,7 @@ package service
 
 import "it-chain/common"
 
-var logger = common.GetLogger("batch")
+var batchlogger = common.GetLogger("batch")
 
 type BatchService interface {
 

@@ -9,7 +9,6 @@ import (
 	"sync"
 	"github.com/rs/xid"
 	pb "it-chain/network/protos"
-	"it-chain/smartcontract"
 )
 
 var logger_pbftservice = common.GetLogger("pbft_service")
@@ -21,11 +20,11 @@ type PBFTConsensusService struct {
 	peerID               string
 	peerService          PeerService
 	blockService         BlockService
-	smartContractService smartcontract.SmartContractService
+	smartContractService SmartContractService
 	sync.RWMutex
 }
 
-func NewPBFTConsensusService(comm comm.ConnectionManager, blockService BlockService,peerID string, smartContractService smartcontract.SmartContractService) ConsensusService{
+func NewPBFTConsensusService(comm comm.ConnectionManager, blockService BlockService,peerID string, smartContractService SmartContractService) ConsensusService{
 
 	pbft := &PBFTConsensusService{
 		consensusStates: make(map[string]*domain.ConsensusState),
@@ -146,6 +145,9 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 	if consensusState.CurrentStage == domain.PrePrepared{
 		logger_pbftservice.Infoln("my id", cs.peerID)
 		sequenceID := time.Now().UnixNano()
+
+		logger_pbftservice.Infoln("block", consensusState.Block)
+
 		preprepareConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.peerID,domain.PrepareMsg)
 		go cs.broadcastMessage(preprepareConsensusMessage)
 		consensusState.CurrentStage = domain.Prepared

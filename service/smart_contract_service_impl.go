@@ -18,12 +18,16 @@ import (
 	"os/exec"
 	"it-chain/common"
 	"fmt"
+	"github.com/spf13/viper"
 )
 
 const (
-	GITHUB_TOKEN string = "31d8f4c1bfc6906806b9a77803087b5b671fac2d"
 	TMP_DIR string = "/tmp"
 )
+//
+//func Init(){
+//
+//}
 var logger = common.GetLogger("smart_contract_service.go")
 
 type SmartContract struct {
@@ -32,7 +36,7 @@ type SmartContract struct {
 	SmartContractPath string
 }
 
-type SmartContractService struct {
+type SmartContractServiceImpl struct {
 	GithubID string
 	SmartContractDirPath string
 	SmartContractMap map[string]SmartContract
@@ -42,11 +46,15 @@ func Init() {
 
 }
 
-func NewSmartContractService(githubID string,SmartContractDirPath string){
-
+func NewSmartContractService(githubID string,smartContractDirPath string) SmartContractService{
+	return &SmartContractServiceImpl{
+		GithubID:githubID,
+		SmartContractDirPath:smartContractDirPath,
+		SmartContractMap: make(map[string]SmartContract),
+	}
 }
 
-func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string, errorHandler func(error),
+func (scs *SmartContractServiceImpl) PullAllSmartContracts(authenticatedGit string, errorHandler func(error),
 	completionHandler func()) {
 
 	go func() {
@@ -97,7 +105,7 @@ func (scs *SmartContractService) pullAllSmartContracts(authenticatedGit string, 
 
 }
 
-func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
+func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
 	origin_repos_name := strings.Split(ReposPath, "/")[1]
 	new_repos_name := strings.Replace(ReposPath, "/", "_", -1)
 
@@ -120,12 +128,14 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
 		return "", errors.New("An error occured while make repository's directory!")
 	}
 
+	//todo gitpath이미 존재하는지 확인
 	err = domain.CloneRepos(ReposPath, scs.SmartContractDirPath + "/" + new_repos_name)
 	if err != nil {
 		return "", errors.New("An error occured while cloning repos!")
 	}
 
-	_, err = domain.CreateRepos(new_repos_name, GITHUB_TOKEN)
+	common.Log.Println(viper.GetString("smartContract.githubID"))
+	_, err = domain.CreateRepos(new_repos_name,  viper.GetString("smartContract.githubAccessToken"))
 	if err != nil {
 		return "", errors.New(err.Error())//"An error occured while creating repos!")
 	}
@@ -181,7 +191,7 @@ func (scs *SmartContractService) Deploy(ReposPath string) (string, error) {
  *	5. docker container Start
  *	6. docker에서 smartcontract 실행
  ****************************************************/
-func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
+func (scs *SmartContractServiceImpl) Query(transaction domain.Transaction) (error) {
 	/*** Set Transaction Arg ***/
 	logger.Errorln("query start")
 	tx_bytes, err := json.Marshal(transaction)
@@ -368,11 +378,11 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 }
 
 
-func (scs *SmartContractService) Invoke() {
+func (scs *SmartContractServiceImpl) Invoke() {
 
 }
 
-func (scs *SmartContractService) keyByValue(OriginReposPath string) (key string, ok bool) {
+func (scs *SmartContractServiceImpl) keyByValue(OriginReposPath string) (key string, ok bool) {
 	contractName := strings.Replace(OriginReposPath, "/", "^", -1)
 	for k, v := range scs.SmartContractMap {
 		if contractName == v.OriginReposPath {

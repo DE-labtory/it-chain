@@ -2,7 +2,6 @@ package main
 
 import (
 	"it-chain/service"
-	"it-chain/smartcontract"
 	"it-chain/network/comm"
 	"it-chain/auth"
 	"github.com/spf13/viper"
@@ -24,7 +23,7 @@ type Node struct {
 	blockService         service.BlockService
 	peerService          service.PeerService
 	consensusService     service.ConsensusService
-	smartContractService smartcontract.SmartContractService
+	smartContractService service.SmartContractService
 	connectionManager    comm.ConnectionManager
 	crypto               auth.Crypto
 }
@@ -41,7 +40,7 @@ func NewNode(ip string){
 	node.port = strings.Split(ip,":")[1]
 
 	//// crpyto
-	crpyto, err := auth.NewCrypto(viper.GetString("key.default_path"),&auth.RSAKeyGenOpts{})
+	crpyto, err := auth.NewCrypto(viper.GetString("key.defaultPath"),&auth.RSAKeyGenOpts{})
 
 	if err != nil{
 		common.Log.Errorln("crypto create error")
@@ -80,14 +79,14 @@ func NewNode(ip string){
 
 
 	/////blockService
-	blockService := service.NewLedger(viper.GetString("ledger.default_path"))
+	blockService := service.NewLedger(viper.GetString("ledger.defaultPath"))
 	node.blockService = blockService
 
 	///smartContractService
-	smartContractService := smartcontract.
+	smartContractService := service.NewSmartContractService(viper.GetString("smartcontract.defaultPath"),viper.GetString("smartContract.githubID"))
 
 	/////consensusService
-	consensusService := service.NewPBFTConsensusService(node.connectionManager,node.blockService,node.id)
+	consensusService := service.NewPBFTConsensusService(node.connectionManager,node.blockService,node.id,smartContractService)
 	node.consensusService = consensusService
 
 

@@ -17,7 +17,7 @@ type MockConnectionManager struct{
 	mock.Mock
 }
 
-func (mcm MockConnectionManager) SendStream(data interface{}, errorCallBack comm.OnError, connectionID string){
+func (mcm MockConnectionManager) SendStream(data *pb.StreamMessage, errorCallBack comm.OnError, connectionID string){
 	mcm.MethodCalled("SendStream",data,nil,connectionID)
 }
 
@@ -33,10 +33,15 @@ func (mcm MockConnectionManager) CreateStreamClientConn(connectionID string, ip 
 	return errors.New("error")
 }
 
-
 func (mcm MockConnectionManager) Size() int{
 	return 0
 }
+
+
+func (mcm MockConnectionManager) Stream(stream pb.StreamService_StreamServer) error{
+	return nil
+}
+
 
 type MockCrypto struct{
 	mock.Mock
@@ -118,7 +123,7 @@ func TestNewPBFTConsensusService(t *testing.T) {
 	view.LeaderID = "1"
 	view.PeerID = []string{"1","2","3"}
 
-	pbftService := NewPBFTConsensusService(comm,nil,"1")
+	pbftService := NewPBFTConsensusService(comm,nil,"1",nil)
 
 	consensusStates := pbftService.GetCurrentConsensusState()
 	assert.NotNil(t,consensusStates)
@@ -133,12 +138,12 @@ func TestPBFTConsensusService_StartConsensus(t *testing.T) {
 	view.LeaderID = "1"
 	view.PeerID = []string{"1"}
 
-	pbftService := NewPBFTConsensusService(view,connctionManager,nil)
+	pbftService := NewPBFTConsensusService(connctionManager,nil,"1",nil)
 	block := &domain.Block{}
 
-	connctionManager.On("SendStream", mock.AnythingOfType("ConsensusMessage"), nil, "1")
+	connctionManager.On("SendStream", mock.AnythingOfType("*StreamMessage"), nil, "1")
 
-	pbftService.StartConsensus(block)
+	pbftService.StartConsensus(view,block)
 
 	consensusStates := pbftService.GetCurrentConsensusState()
 	assert.Equal(t,len(consensusStates),1)
@@ -152,12 +157,14 @@ func TestPBFTConsensusService_StartConsensus(t *testing.T) {
 
 }
 
-func GetMockConsensusMessage(consensusID string, msgType domain.MsgType) *pb.Message{
+func GetMockConsensusMessage(consensusID string, msgType domain.MsgType) *pb.StreamMessage{
 
 	consensusMessage := &pb.ConsensusMessage{}
 	consensusMessage.SequenceID = time.Now().UnixNano()
 	consensusMessage.ConsensusID = consensusID
 	consensusMessage.MsgType = int32(msgType)
+	//consensusMessage.Block = &pb.Block{}
+
 	view := pb.View{}
 	view.ViewID = "123"
 	view.LeaderID = "1"
@@ -165,8 +172,8 @@ func GetMockConsensusMessage(consensusID string, msgType domain.MsgType) *pb.Mes
 
 	consensusMessage.View = &view
 
-	message := &pb.Message{}
-	cm := &pb.Message_ConsensusMessage{}
+	message := &pb.StreamMessage{}
+	cm := &pb.StreamMessage_ConsensusMessage{}
 	cm.ConsensusMessage = consensusMessage
 	message.Content = cm
 
@@ -182,7 +189,7 @@ func TestPBFTConsensusService_ReceiveConsensusMessage(t *testing.T) {
 	view.LeaderID = "1"
 	view.PeerID = []string{"1","2","3"}
 
-	pbftService := NewPBFTConsensusService(view,connctionManager,nil)
+	pbftService := NewPBFTConsensusService(connctionManager,nil,"1",nil)
 
 	Message := GetMockConsensusMessage("1",domain.PreprepareMsg)
 

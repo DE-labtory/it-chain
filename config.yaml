@@ -1,11 +1,17 @@
 database:
   type: leveldb
   leveldb:
-    default_path: ./.leveldb
+    defaultPath: ./.leveldb
 
 key:
   type: RSA
-  default_path: ./.
+  defaultPath: ./.
 
 ledger:
-  default_path: ./.ledger
+  defaultPath: ./.ledger
+
+smartContract:
+  defaultPath: ./.constracts
+  githubID: steve@buzzni.com
+  githubPassword: itchain123
+  githubAccessToken: 1a8ae688db783f63c2494d59f971b2eed5399b1d
