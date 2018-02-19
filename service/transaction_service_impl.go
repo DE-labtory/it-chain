@@ -4,6 +4,8 @@ import (
 	"it-chain/db/leveldbhelper"
 	"it-chain/domain"
 	"it-chain/common"
+	"it-chain/network/comm"
+	pb "it-chain/network/protos"
 )
 
 const (
@@ -12,10 +14,12 @@ const (
 
 type TransactionServiceImpl struct {
 	DB *leveldbhelper.DBProvider
+	Comm comm.ConnectionManager
+	PeerService PeerService
 }
 
-func CreateNewTransactionService(path string) *TransactionServiceImpl {
-	return &TransactionServiceImpl{DB: leveldbhelper.CreateNewDBProvider(path)}
+func CreateNewTransactionService(path string, comm comm.ConnectionManager, ps PeerService) *TransactionServiceImpl {
+	return &TransactionServiceImpl{DB: leveldbhelper.CreateNewDBProvider(path), Comm: comm, PeerService: ps}
 }
 
 func (t *TransactionServiceImpl) Close() {
@@ -44,10 +48,11 @@ func (t *TransactionServiceImpl) DeleteTransactions(txs []*domain.Transaction) e
 	return db.WriteBatch(batch, true)
 }
 
-func (t *TransactionServiceImpl) GetTransactions() ([]*domain.Transaction, error) {
+func (t *TransactionServiceImpl) GetTransactions(limit int) ([]*domain.Transaction, error) {
 	db := t.DB.GetDBHandle(WAITING_TRANSACTION)
 	iter := db.GetIteratorWithPrefix()
 	ret := make([]*domain.Transaction, 0)
+	cnt := 0
 
 	for iter.Next() {
 		val := iter.Value()
@@ -59,9 +64,36 @@ func (t *TransactionServiceImpl) GetTransactions() ([]*domain.Transaction, error
 		}
 
 		ret = append(ret, tx)
+		cnt++
+		if cnt == limit {
+			break
+		}
 	}
 
 	iter.Release()
 
 	return ret, nil
+}
+
+func (t *TransactionServiceImpl) SendToLeader(interface{}) {
+	txs, err := t.GetTransactions(1)
+	if err != nil {
+		logger.Println("Error on GetTransactions")
+	}
+
+	message := &pb.StreamMessage{}
+	message.Content = &pb.StreamMessage_Transaction{
+		Transaction: &pb.Transaction{},
+	}
+
+	if err !=nil{
+		logger.Println("fail to serialize message")
+	}
+
+	errorCallBack := func(onError error) {
+		logger.Println("fail to send message error:", onError.Error())
+	}
+
+	t.Comm.SendStream(message, errorCallBack, t.PeerService.GetLeader().PeerID)
+	t.DeleteTransactions(txs)
 }
