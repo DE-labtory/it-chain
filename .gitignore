@@ -22,3 +22,6 @@ sample/db/test/*
 
 # key
 .keys
+
+# ledger
+.ledger
