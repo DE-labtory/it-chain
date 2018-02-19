@@ -1,4 +1,4 @@
-package smartcontract
+package service
 
 import (
 	"testing"
