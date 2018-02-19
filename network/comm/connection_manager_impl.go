@@ -30,6 +30,15 @@ func NewConnectionManagerImpl(crpyto auth.Crypto) ConnectionManager{
 	}
 }
 
+func (comm *ConnectionManagerImpl) SetOnConnectHandler(onConnectionHandler OnConnectionHandler){
+	comm.Lock()
+
+	if onConnectionHandler != nil{
+		comm.onConnectionHandler = onConnectionHandler
+	}
+	comm.Unlock()
+}
+
 func (comm *ConnectionManagerImpl) CreateStreamClientConn(connectionID string, ip string, handler ReceiveMessageHandle) error{
 
 	//Peer의 connectionID로 connection을 연결
@@ -133,6 +142,8 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 		commLogger.Errorln(err.Error())
 	}
 
+	commLogger.Println("sending connection message")
+
 	err = stream.Send(envelope)
 
 	if err != nil{
@@ -152,6 +163,7 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 
 			connectionID := pp.PeerID
 			//todo handler 넣어주기
+			commLogger.Println("creating new connection")
 			conn,err := NewConnection(nil,stream,
 				nil,nil, nil,connectionID,cf)
 

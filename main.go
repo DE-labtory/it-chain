@@ -32,6 +32,7 @@ type Node struct {
 	crypto               auth.Crypto
 }
 
+//todo msg publisher를 통한 receive Message분배 로직 추가
 func NewNode(ip string) *Node{
 
 	//ip format (xxx.xxx.xxx.xxx:pppp)

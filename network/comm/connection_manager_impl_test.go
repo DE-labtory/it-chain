@@ -176,7 +176,7 @@ func TestConnectionManagerImpl_Stream(t *testing.T) {
 		log.Print("End")
 	}
 
-	comm.onConnectionHandler = onConnectionHandler
+	comm. = onConnectionHandler
 	comm1.onConnectionHandler = onConnectionHandler
 
 	server1, listner1 := mock.ListenMockServer(comm,"127.0.0.1:5555")

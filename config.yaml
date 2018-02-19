@@ -20,7 +20,7 @@ batchTimer:
   pushPeerTable: 5
 
 bootNode:
-  ip: 127.0.0.1:4444
+  ip: 127.0.0.1:5555
 
 Node:
-  ip: 127.0.0.1:5555
+  ip: 127.0.0.1:4444
