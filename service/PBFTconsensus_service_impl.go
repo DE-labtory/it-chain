@@ -9,6 +9,7 @@ import (
 	"sync"
 	"github.com/rs/xid"
 	pb "it-chain/network/protos"
+	"it-chain/network/comm/msg"
 )
 
 var logger_pbftservice = common.GetLogger("pbft_service")
@@ -76,7 +77,7 @@ func (cs *PBFTConsensusService) StopConsensus(){
 //todo time을 config로 부터 읽어야함
 //todo 다음 block이 먼저 들어올 경우 고려해야함,
 //todo 블록의 높이와 이전 블록 해시가 올바른지 확인
-func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.OutterMessage){
+func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage msg.OutterMessage){
 
 	logger_pbftservice.Infoln("Received message: ",outterMessage)
 

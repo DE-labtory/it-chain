@@ -1,4 +1,4 @@
-package comm
+package conn
 
 import (
 	"testing"
@@ -27,7 +27,7 @@ func TestNewConnection(t *testing.T) {
 	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
 
 	if err != nil{
-		assert.Fail(t,"fail to create connection")
+		assert.Fail(t,"fail to create conn")
 	}
 
 	ctx, cf := context.WithCancel(context.Background())
@@ -65,7 +65,7 @@ func TestConnection_SendWithStream(t *testing.T) {
 	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
 
 	if err != nil{
-		assert.Fail(t,"fail to create connection")
+		assert.Fail(t,"fail to create conn")
 	}
 
 	ctx, cf := context.WithCancel(context.Background())
@@ -124,7 +124,7 @@ func TestConnectionImpl_ReadStream(t *testing.T) {
 	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
 
 	if err != nil{
-		assert.Fail(t,"fail to create connection")
+		assert.Fail(t,"fail to create conn")
 	}
 
 	ctx, cf := context.WithCancel(context.Background())

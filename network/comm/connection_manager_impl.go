@@ -11,15 +11,16 @@ import (
 	"github.com/pkg/errors"
 	"it-chain/network/comm/publisher"
 	"it-chain/network/comm/msg"
+	"it-chain/network/comm/conn"
 )
 
 var commLogger = common.GetLogger("connection_manager_impl.go")
 
-type OnConnectionHandler func(conn Connection, peer pb.Peer)
+type OnConnectionHandler func(conn conn.Connection, peer pb.Peer)
 
 //Connection관리와 message-> Envelop검사를 수행한다.
 type ConnectionManagerImpl struct {
-	connectionMap       map[string]Connection
+	connectionMap       map[string]conn.Connection
 	crpyto              auth.Crypto
 	onConnectionHandler OnConnectionHandler
 	msgPublisher        *publisher.MessagePublisher
@@ -28,7 +29,7 @@ type ConnectionManagerImpl struct {
 
 func NewConnectionManagerImpl(crpyto auth.Crypto) ConnectionManager{
 	return &ConnectionManagerImpl{
-		connectionMap: make(map[string]Connection),
+		connectionMap: make(map[string]conn.Connection),
 		msgPublisher: publisher.NewMessagePublisher(crpyto),
 		crpyto: crpyto,
 	}
@@ -58,7 +59,7 @@ func (comm *ConnectionManagerImpl) CreateStreamClientConn(connectionID string, i
 		return nil
 	}
 
-	grpcConnection,err := NewConnectionWithAddress(ip,false,nil)
+	grpcConnection,err := conn.NewConnectionWithAddress(ip,false,nil)
 
 	if err != nil{
 		return err
@@ -69,7 +70,7 @@ func (comm *ConnectionManagerImpl) CreateStreamClientConn(connectionID string, i
 	clientStream, err := client.Stream(ctx)
 
 	//serverStream should be nil
-	conn,err := NewConnection(clientStream,nil,
+	conn,err := conn.NewConnection(clientStream,nil,
 		grpcConnection,client,comm.msgPublisher.ReceivedMessageHandle,connectionID,cf)
 
 	if err != nil{
@@ -80,7 +81,7 @@ func (comm *ConnectionManagerImpl) CreateStreamClientConn(connectionID string, i
 	comm.connectionMap[connectionID] = conn
 	comm.Unlock()
 
-	commLogger.Println("new connection:",connectionID, "are created")
+	commLogger.Println("new conn:",connectionID, "are created")
 
 	return nil
 }
@@ -122,7 +123,7 @@ func (comm *ConnectionManagerImpl) Close(connectionID string){
 	conn, ok := comm.connectionMap[connectionID]
 
 	if ok{
-		commLogger.Println("connection:",connectionID, "is closing")
+		commLogger.Println("conn:",connectionID, "is closing")
 		conn.Close()
 		delete(comm.connectionMap,connectionID)
 	}
@@ -138,7 +139,7 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 	//3. 생성완료후 OnConnectionHandler를 통해 처리한다.
 
 	//remoteAddress := extractRemoteAddress(stream)
-	commLogger.Println("new connection requests are made")
+	commLogger.Println("new conn requests are made")
 
 	e := &pb.ConnectionEstablish{}
 	message := &pb.StreamMessage{}
@@ -152,13 +153,15 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 		commLogger.Errorln(err.Error())
 	}
 
-	commLogger.Println("sending connection message")
+	commLogger.Println("Sending conn establish message")
 
 	err = stream.Send(envelope)
 
 	if err != nil{
 		commLogger.Errorln(err.Error())
 	}
+
+	commLogger.Println("Waiting response..")
 
 	if m, err := stream.Recv(); err == nil {
 		message,err := m.GetMessage()
@@ -173,15 +176,13 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 
 			connectionID := pp.PeerID
 			//todo handler 넣어주기
-			commLogger.Println("creating new connection")
-			conn,err := NewConnection(nil,stream,
+			commLogger.Println("creating new conn")
+			conn,err := conn.NewConnection(nil,stream,
 				nil,nil, comm.msgPublisher.ReceivedMessageHandle,connectionID,cf)
 
 			if err != nil{
 				return err
 			}
-
-			commLogger.Println()
 
 			_, ok := comm.connectionMap[connectionID]
 
@@ -191,10 +192,12 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 				comm.Unlock()
 				comm.onConnectionHandler(conn,*pp)
 			}else{
-				commLogger.Debugln("already exist connection:",connectionID)
+				commLogger.Debugln("already exist conn:",connectionID)
 			}
 		}
 	}
+
+	commLogger.Println("No response..")
 
 	return nil
 }

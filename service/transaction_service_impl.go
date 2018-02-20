@@ -78,7 +78,7 @@ func (t *TransactionServiceImpl) GetTransactions(limit int) ([]*domain.Transacti
 func (t *TransactionServiceImpl) SendToLeader(interface{}) {
 	txs, err := t.GetTransactions(1)
 	if err != nil {
-		logger.Println("Error on GetTransactions")
+		common.Log.Println("Error on GetTransactions")
 	}
 
 	message := &pb.StreamMessage{}
@@ -87,11 +87,11 @@ func (t *TransactionServiceImpl) SendToLeader(interface{}) {
 	}
 
 	if err !=nil{
-		logger.Println("fail to serialize message")
+		common.Log.Println("fail to serialize message")
 	}
 
 	errorCallBack := func(onError error) {
-		logger.Println("fail to send message error:", onError.Error())
+		common.Log.Println("fail to send message error:", onError.Error())
 	}
 
 	t.Comm.SendStream(message, errorCallBack, t.PeerService.GetLeader().PeerID)

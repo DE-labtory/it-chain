@@ -12,6 +12,7 @@ import (
 	"time"
 	"fmt"
 	"sync"
+	"it-chain/network/comm/msg"
 )
 
 type MockConnectionManager struct{
@@ -30,11 +31,15 @@ func (mcm MockConnectionManager) Close(connectionID string){
 
 }
 
-func (mcm MockConnectionManager) CreateStreamClientConn(connectionID string, ip string, handle comm.ReceiveMessageHandle) error{
+func (mcm MockConnectionManager) CreateStreamClientConn(connectionID string, ip string) error{
 	return errors.New("error")
 }
 
 func (mcm MockConnectionManager) SetOnConnectHandler(onConnectionHandler comm.OnConnectionHandler){
+
+}
+
+func (mcm MockConnectionManager) Subscribe(name string, subfunc func(message msg.OutterMessage)){
 
 }
 
@@ -203,7 +208,7 @@ func TestPBFTConsensusService_ReceiveConsensusMessage(t *testing.T) {
 
 	Message := GetMockConsensusMessage("1",domain.PreprepareMsg)
 
-	outMessage := comm.OutterMessage{}
+	outMessage := msg.OutterMessage{}
 	outMessage.Message = Message
 
 	//then
@@ -219,7 +224,7 @@ func TestPBFTConsensusService_ReceiveConsensusMessage(t *testing.T) {
 
 	//2 whenStateEx
 	Message2 := GetMockConsensusMessage("1",domain.CommitMsg)
-	outMessage2 := comm.OutterMessage{}
+	outMessage2 := msg.OutterMessage{}
 	outMessage2.Message = Message2
 	fmt.Println(pbftService.GetCurrentConsensusState())
 	fmt.Println(Message.GetConsensusMessage())
@@ -231,7 +236,7 @@ func TestPBFTConsensusService_ReceiveConsensusMessage(t *testing.T) {
 
 	//3 multiState
 	Message3 := GetMockConsensusMessage("2",domain.CommitMsg)
-	outMessage3 := comm.OutterMessage{}
+	outMessage3 := msg.OutterMessage{}
 	outMessage3.Message = Message3
 
 	pbftService.ReceiveConsensusMessage(outMessage3)
@@ -242,7 +247,7 @@ func TestPBFTConsensusService_ReceiveConsensusMessage(t *testing.T) {
 	//4 timeouted Message
 	Message4 := GetMockConsensusMessage("3",domain.PreprepareMsg)
 	Message4.GetConsensusMessage().SequenceID = time.Now().Local().Add(10*time.Minute).UnixNano()
-	outMessage4 := comm.OutterMessage{}
+	outMessage4 := msg.OutterMessage{}
 	outMessage4.Message = Message4
 
 	pbftService.ReceiveConsensusMessage(outMessage4)

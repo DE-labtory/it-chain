@@ -11,9 +11,10 @@ import (
 	"log"
 	"github.com/golang/protobuf/proto"
 	"it-chain/network/comm/msg"
+	"it-chain/network/comm/conn"
 )
 
-//todo connection manager_impl test 모두 수정
+//todo conn manager_impl test 모두 수정
 func TestCommImpl_CreateStreamClientConn(t *testing.T) {
 
 	counter := 0
@@ -167,8 +168,8 @@ func TestConnectionManagerImpl_Stream(t *testing.T) {
 	comm1 := NewConnectionManagerImpl(cryp)
 	comm := NewConnectionManagerImpl(cryp)
 
-	var onConnectionHandler = func(conn Connection, peer pb.Peer){
-		log.Print("Successfully create connection")
+	var onConnectionHandler = func(conn conn.Connection, peer pb.Peer){
+		log.Print("Successfully create conn")
 		assert.Equal(t,"1",peer.PeerID)
 		assert.Equal(t,comm1.Size(),1)
 		log.Print("End")

@@ -20,8 +20,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-
-
 type Node struct {
 	identity             *domain.Peer
 	blockService         service.BlockService

@@ -1,4 +1,4 @@
-package comm
+package conn
 
 import (
 	"google.golang.org/grpc"
@@ -14,7 +14,7 @@ import (
 	"it-chain/network/comm/msg"
 )
 
-var logger_comm = common.GetLogger("connection.go")
+var logger_comm = common.GetLogger("conn.go")
 
 const defaultTimeout = time.Second * 3
 
