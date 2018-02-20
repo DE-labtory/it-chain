@@ -12,7 +12,7 @@ import (
 
 func TestTransactionServiceImpl_AddTransaction(t *testing.T) {
 	path := "./test"
-	ts := CreateNewTransactionService(path,nil,nil)
+	ts := NewTransactionService(path,nil,nil)
 	defer func(){
 		ts.Close()
 		os.RemoveAll(path)
@@ -39,7 +39,7 @@ func TestTransactionServiceImpl_AddTransaction(t *testing.T) {
 
 func TestTransactionServiceImpl_DeleteTransactions(t *testing.T) {
 	path := "./test"
-	ts := CreateNewTransactionService(path,nil,nil)
+	ts := NewTransactionService(path,nil,nil)
 	defer func(){
 		ts.Close()
 		os.RemoveAll(path)
@@ -74,7 +74,7 @@ func TestTransactionServiceImpl_DeleteTransactions(t *testing.T) {
 
 func TestTransactionServiceImpl_GetTransactions(t *testing.T) {
 	path := "./test"
-	ts := CreateNewTransactionService(path,nil,nil)
+	ts := NewTransactionService(path,nil,nil)
 	defer func(){
 		ts.Close()
 		os.RemoveAll(path)

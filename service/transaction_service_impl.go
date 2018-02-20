@@ -6,6 +6,9 @@ import (
 	"it-chain/common"
 	"it-chain/network/comm"
 	pb "it-chain/network/protos"
+	"github.com/spf13/viper"
+	"strconv"
+	"time"
 )
 
 const (
@@ -19,7 +22,17 @@ type TransactionServiceImpl struct {
 }
 
 func NewTransactionService(path string, comm comm.ConnectionManager, ps PeerService) *TransactionServiceImpl {
-	return &TransactionServiceImpl{DB: leveldbhelper.CreateNewDBProvider(path), Comm: comm, PeerService: ps}
+	transactionService := &TransactionServiceImpl{DB: leveldbhelper.CreateNewDBProvider(path), Comm: comm, PeerService: ps}
+
+	i, _ := strconv.Atoi(viper.GetString("batchTimer.pushPeerTable"))
+
+	broadCastPeerTableBatcher := NewBatchService(time.Duration(i)*time.Second,transactionService.SendToLeader,false)
+	broadCastPeerTableBatcher.Add("Send tx to leader")
+	broadCastPeerTableBatcher.Start()
+
+	//comm.Subscribe()
+
+	return transactionService
 }
 
 func (t *TransactionServiceImpl) Close() {
@@ -49,6 +62,7 @@ func (t *TransactionServiceImpl) DeleteTransactions(txs []*domain.Transaction) e
 }
 
 func (t *TransactionServiceImpl) GetTransactions(limit int) ([]*domain.Transaction, error) {
+
 	db := t.DB.GetDBHandle(WAITING_TRANSACTION)
 	iter := db.GetIteratorWithPrefix()
 	ret := make([]*domain.Transaction, 0)
@@ -76,9 +90,17 @@ func (t *TransactionServiceImpl) GetTransactions(limit int) ([]*domain.Transacti
 }
 
 func (t *TransactionServiceImpl) SendToLeader(interface{}) {
-	txs, err := t.GetTransactions(1)
+	
+	//todo max 몇개까지 보낼것인지
+	txs, err := t.GetTransactions(100)
+
 	if err != nil {
 		common.Log.Println("Error on GetTransactions")
+	}
+
+	if len(txs) == 0{
+		common.Log.Println("No transactions to send")
+		return
 	}
 
 	message := &pb.StreamMessage{}

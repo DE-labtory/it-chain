@@ -10,7 +10,7 @@ key:
 ledger:
   defaultPath: ./.ledger
 
-transactionDatabase:
+txDatabase:
   defaultPath: ./.tx
 
 smartContract:

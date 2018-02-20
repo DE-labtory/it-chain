@@ -26,6 +26,7 @@ type Node struct {
 	peerService          service.PeerService
 	consensusService     service.ConsensusService
 	smartContractService service.SmartContractService
+	transactionService   service.TransactionService
 	connectionManager    comm.ConnectionManager
 	crypto               auth.Crypto
 }
@@ -73,7 +74,8 @@ func NewNode(ip string) *Node{
 	node.peerService = peerService
 
 	///// TransactionService
-	transactionService := service.NewTransactionService()
+	transactionService := service.NewTransactionService(viper.GetString("txDatabase.defaultPath"),connectionManager,peerService)
+	node.transactionService = transactionService
 
 	///// blockService
 	blockService := service.NewLedger(viper.GetString("ledger.defaultPath"))
@@ -115,6 +117,10 @@ func (n *Node) GetPeer(context.Context, *pb.Empty) (*pb.Peer, error){
 	pp := domain.ToProtoPeer(*n.identity)
 
 	return pp,nil
+}
+
+func (n *Node) PostTransaction(context context.Context,txData *pb.TxData) (*pb.Transaction, error){
+	n.transactionService.CreateTransaction(txData)
 }
 
 func (n* Node) Run() {
