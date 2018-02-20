@@ -55,7 +55,10 @@ type Transaction struct {
 }
 
 func CreateNewTransaction(peer_id string, tx_id string, tx_type TransactionType, t time.Time, data *TxData) *Transaction{
-	return &Transaction{InvokePeerID:peer_id, TransactionID:tx_id, TransactionStatus:Status_TRANSACTION_UNKNOWN, TransactionType:tx_type, TimeStamp:t, TxData:data}
+
+	transaction := &Transaction{InvokePeerID:peer_id, TransactionID:tx_id, TransactionStatus:Status_TRANSACTION_UNKNOWN, TransactionType:tx_type, TimeStamp:t, TxData:data}
+	transaction.GenerateHash()
+	return transaction
 }
 
 func SetTxMethodParameters(params_type int, function string, args []string) Params{
