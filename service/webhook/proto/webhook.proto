@@ -5,6 +5,8 @@ service Webhook {
 
     rpc Register (WebhookRequest) returns (WebhookResponse) {}
 
+    rpc Remove (WebhookRequest) returns (WebhookResponse) {}
+
 }
 
 message WebhookRequest {
