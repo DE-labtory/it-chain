@@ -2,6 +2,7 @@ package comm
 
 import (
 	pb "it-chain/network/protos"
+	"it-chain/network/comm/msg"
 )
 
 type OnError func(error)
@@ -16,7 +17,7 @@ type ConnectionManager interface{
 
 	Close(connectionID string)
 
-	CreateStreamClientConn(connectionID string, ip string, handle ReceiveMessageHandle) error
+	CreateStreamClientConn(connectionID string, ip string) error
 
 	Size() int
 
@@ -24,4 +25,6 @@ type ConnectionManager interface{
 	Stream(stream pb.StreamService_StreamServer) (error)
 
 	SetOnConnectHandler(onConnectionHandler OnConnectionHandler)
+
+	Subscribe(name string, subfunc func(message msg.OutterMessage))
 }

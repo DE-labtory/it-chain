@@ -10,6 +10,9 @@ key:
 ledger:
   defaultPath: ./.ledger
 
+txDatabase:
+  defaultPath: ./.tx
+
 smartContract:
   defaultPath: ./.constracts
   githubID: steve@buzzni.com
@@ -20,7 +23,7 @@ batchTimer:
   pushPeerTable: 5
 
 bootNode:
-  ip: 127.0.0.1:5555
+  ip: 127.0.0.1:4444
 
 Node:
-  ip: 127.0.0.1:4444
+  ip: 127.0.0.1:5555

@@ -1,4 +1,4 @@
-package comm
+package conn
 
 import "it-chain/network/protos"
 

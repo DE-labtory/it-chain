@@ -100,6 +100,7 @@ func TestSmartContractServiceImpl_ValidateTransactionsInBlock(t *testing.T) {
 
 func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
 	currentDir, err := filepath.Abs("./")
+	fmt.Println(currentDir)
 	if err != nil {
 		assert.Fail(t, err.Error())
 	}
@@ -123,7 +124,7 @@ func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
 			"abc": SmartContract{
 				Name:         "sample1",
 				OriginReposPath:   "sample1/path",
-				SmartContractPath: currentDir + "/sample_smartcontract/sample1_path",
+				SmartContractPath: currentDir + "/../sample/sample_smartcontract/sample1_path",
 				//SmartContractPath: "/Users/hackurity/go/src/it-chain-smartcontract/sample1_path",
 			},
 		},

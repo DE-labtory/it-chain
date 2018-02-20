@@ -10,9 +10,11 @@ import (
 	"time"
 	"log"
 	"github.com/golang/protobuf/proto"
+	"it-chain/network/comm/msg"
+	"it-chain/network/comm/conn"
 )
 
-//todo connection manager_impl test 모두 수정
+//todo conn manager_impl test 모두 수정
 func TestCommImpl_CreateStreamClientConn(t *testing.T) {
 
 	counter := 0
@@ -31,8 +33,8 @@ func TestCommImpl_CreateStreamClientConn(t *testing.T) {
 	assert.NoError(t, err)
 
 	comm := NewConnectionManagerImpl(cryp)
-	comm.CreateStreamClientConn("1","127.0.0.1:5555",nil)
-	comm.CreateStreamClientConn("2","127.0.0.1:6666",nil)
+	comm.CreateStreamClientConn("1","127.0.0.1:5555")
+	comm.CreateStreamClientConn("2","127.0.0.1:6666")
 
 	defer func(){
 		server1.Stop()
@@ -64,8 +66,8 @@ func TestCommImpl_Send(t *testing.T) {
 	assert.NoError(t, err)
 
 	comm := NewConnectionManagerImpl(cryp)
-	comm.CreateStreamClientConn("1","127.0.0.1:5555",nil)
-	comm.CreateStreamClientConn("2","127.0.0.1:6666",nil)
+	comm.CreateStreamClientConn("1","127.0.0.1:5555")
+	comm.CreateStreamClientConn("2","127.0.0.1:6666")
 
 	message := &pb.StreamMessage{}
 	message.Content = &pb.StreamMessage_ConnectionEstablish{
@@ -106,8 +108,8 @@ func TestCommImpl_Stop(t *testing.T) {
 	assert.NoError(t, err)
 
 	comm := NewConnectionManagerImpl(cryp)
-	comm.CreateStreamClientConn("1","127.0.0.1:5555",nil)
-	comm.CreateStreamClientConn("2","127.0.0.1:6666",nil)
+	comm.CreateStreamClientConn("1","127.0.0.1:5555")
+	comm.CreateStreamClientConn("2","127.0.0.1:6666")
 
 	defer func(){
 		server1.Stop()
@@ -140,8 +142,8 @@ func TestCommImpl_Close(t *testing.T) {
 	assert.NoError(t, err)
 
 	comm := NewConnectionManagerImpl(cryp)
-	comm.CreateStreamClientConn("1","127.0.0.1:5555",nil)
-	comm.CreateStreamClientConn("2","127.0.0.1:6666",nil)
+	comm.CreateStreamClientConn("1","127.0.0.1:5555")
+	comm.CreateStreamClientConn("2","127.0.0.1:6666")
 
 	defer func(){
 		server1.Stop()
@@ -166,8 +168,8 @@ func TestConnectionManagerImpl_Stream(t *testing.T) {
 	comm1 := NewConnectionManagerImpl(cryp)
 	comm := NewConnectionManagerImpl(cryp)
 
-	var onConnectionHandler = func(conn Connection, peer pb.Peer){
-		log.Print("Successfully create connection")
+	var onConnectionHandler = func(conn conn.Connection, peer pb.Peer){
+		log.Print("Successfully create conn")
 		assert.Equal(t,"1",peer.PeerID)
 		assert.Equal(t,comm1.Size(),1)
 		log.Print("End")
@@ -187,7 +189,7 @@ func TestConnectionManagerImpl_Stream(t *testing.T) {
 		listner2.Close()
 	}()
 
-	var receiveHandler = func(message OutterMessage){
+	var receiveHandler = func(message msg.OutterMessage){
 
 		log.Println("receivedHandler got message")
 
@@ -213,7 +215,9 @@ func TestConnectionManagerImpl_Stream(t *testing.T) {
 		log.Println("respond message")
 	}
 
-	comm.CreateStreamClientConn("1","127.0.0.1:6666",receiveHandler)
+	comm.Subscribe("mockReceiver",receiveHandler)
+
+	comm.CreateStreamClientConn("1","127.0.0.1:6666")
 
 	time.Sleep(3*time.Second)
 }

@@ -10,7 +10,6 @@ type Key interface {
 	SKI() (ski []byte)
 
 	Algorithm() string
-
 }
 
 type Crypto interface {

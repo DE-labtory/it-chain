@@ -12,7 +12,7 @@ import (
 
 func TestTransactionServiceImpl_AddTransaction(t *testing.T) {
 	path := "./test"
-	ts := CreateNewTransactionService(path)
+	ts := NewTransactionService(path,nil,nil)
 	defer func(){
 		ts.Close()
 		os.RemoveAll(path)
@@ -39,7 +39,7 @@ func TestTransactionServiceImpl_AddTransaction(t *testing.T) {
 
 func TestTransactionServiceImpl_DeleteTransactions(t *testing.T) {
 	path := "./test"
-	ts := CreateNewTransactionService(path)
+	ts := NewTransactionService(path,nil,nil)
 	defer func(){
 		ts.Close()
 		os.RemoveAll(path)
@@ -74,7 +74,7 @@ func TestTransactionServiceImpl_DeleteTransactions(t *testing.T) {
 
 func TestTransactionServiceImpl_GetTransactions(t *testing.T) {
 	path := "./test"
-	ts := CreateNewTransactionService(path)
+	ts := NewTransactionService(path,nil,nil)
 	defer func(){
 		ts.Close()
 		os.RemoveAll(path)
@@ -95,7 +95,7 @@ func TestTransactionServiceImpl_GetTransactions(t *testing.T) {
 		txs = append(txs, tx)
 	}
 
-	dbTXs, err := ts.GetTransactions()
+	dbTXs, err := ts.GetTransactions(2)
 	assert.NoError(t, err)
 	assert.Equal(t, txs, dbTXs)
 }

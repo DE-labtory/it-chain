@@ -6,6 +6,11 @@ import (
 	"it-chain/common"
 	"it-chain/network/comm"
 	pb "it-chain/network/protos"
+	"github.com/spf13/viper"
+	"strconv"
+	"time"
+	"github.com/rs/xid"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -18,8 +23,18 @@ type TransactionServiceImpl struct {
 	PeerService PeerService
 }
 
-func CreateNewTransactionService(path string, comm comm.ConnectionManager, ps PeerService) *TransactionServiceImpl {
-	return &TransactionServiceImpl{DB: leveldbhelper.CreateNewDBProvider(path), Comm: comm, PeerService: ps}
+func NewTransactionService(path string, comm comm.ConnectionManager, ps PeerService) *TransactionServiceImpl {
+	transactionService := &TransactionServiceImpl{DB: leveldbhelper.CreateNewDBProvider(path), Comm: comm, PeerService: ps}
+
+	i, _ := strconv.Atoi(viper.GetString("batchTimer.pushPeerTable"))
+
+	broadCastPeerTableBatcher := NewBatchService(time.Duration(i)*time.Second,transactionService.SendToLeader,false)
+	broadCastPeerTableBatcher.Add("Send tx to leader")
+	broadCastPeerTableBatcher.Start()
+
+	//comm.Subscribe()
+
+	return transactionService
 }
 
 func (t *TransactionServiceImpl) Close() {
@@ -49,6 +64,7 @@ func (t *TransactionServiceImpl) DeleteTransactions(txs []*domain.Transaction) e
 }
 
 func (t *TransactionServiceImpl) GetTransactions(limit int) ([]*domain.Transaction, error) {
+
 	db := t.DB.GetDBHandle(WAITING_TRANSACTION)
 	iter := db.GetIteratorWithPrefix()
 	ret := make([]*domain.Transaction, 0)
@@ -76,9 +92,17 @@ func (t *TransactionServiceImpl) GetTransactions(limit int) ([]*domain.Transacti
 }
 
 func (t *TransactionServiceImpl) SendToLeader(interface{}) {
-	txs, err := t.GetTransactions(1)
+	
+	//todo max 몇개까지 보낼것인지
+	txs, err := t.GetTransactions(100)
+
 	if err != nil {
-		logger.Println("Error on GetTransactions")
+		common.Log.Println("Error on GetTransactions")
+	}
+
+	if len(txs) == 0{
+		common.Log.Println("No transactions to send")
+		return
 	}
 
 	message := &pb.StreamMessage{}
@@ -87,13 +111,33 @@ func (t *TransactionServiceImpl) SendToLeader(interface{}) {
 	}
 
 	if err !=nil{
-		logger.Println("fail to serialize message")
+		common.Log.Println("fail to serialize message")
 	}
 
 	errorCallBack := func(onError error) {
-		logger.Println("fail to send message error:", onError.Error())
+		common.Log.Println("fail to send message error:", onError.Error())
 	}
 
-	t.Comm.SendStream(message, errorCallBack, t.PeerService.GetLeader().PeerID)
-	t.DeleteTransactions(txs)
+	if t.PeerService.GetLeader() != nil {
+		t.Comm.SendStream(message, errorCallBack, t.PeerService.GetLeader().PeerID)
+		t.DeleteTransactions(txs)
+	}
+}
+
+func (t *TransactionServiceImpl) CreateTransaction(txData *domain.TxData) (*domain.Transaction, error){
+
+	transaction := domain.CreateNewTransaction(
+		t.PeerService.GetPeerTable().MyID,
+		xid.New().String(),
+		domain.General,
+		time.Now(),
+		txData)
+
+	err := t.AddTransaction(transaction)
+
+	if err != nil{
+		return nil, errors.New("faild to add transaction")
+	}
+
+	return transaction, nil
 }
