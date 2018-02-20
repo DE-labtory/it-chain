@@ -353,8 +353,11 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 	return nil
 }
 
-
 func (scs *SmartContractService) Invoke() {
+
+}
+
+func (scs *SmartContractService) validateTransactionInBlock(block domain.Block) {
 
 }
 
