@@ -9,7 +9,6 @@ import (
 	"it-chain/network/protos"
 	pb "it-chain/network/protos"
 	"github.com/golang/protobuf/proto"
-	"it-chain/network"
 	"github.com/stretchr/testify/mock"
 	"it-chain/auth"
 )
@@ -27,7 +26,7 @@ func (mc MockCrypto) Verify(key auth.Key, signature, digest []byte, opts auth.Si
 	return true,nil
 }
 
-func (mc MockCrypto) GenerateKey(opts auth.KeyGenOpts) (pri, pub auth.Key, err error){
+func (mc MockCrypto) GetKey() (pri, pub auth.Key, err error){
 	return nil,nil,nil
 }
 
@@ -37,10 +36,10 @@ func (mc MockCrypto) LoadKey() (pri, pub auth.Key, err error){
 
 func MakeEnvelopeHavingPeerTable() *message.Envelope{
 
-	peerTable := &pb.Message_PeerTable{}
+	peerTable := &pb.StreamMessage_PeerTable{}
 	peerTable.PeerTable = &pb.PeerTable{}
 
-	message := &message.Message{}
+	message := &message.StreamMessage{}
 	message.Content = peerTable
 
 	envelope := &pb.Envelope{}
@@ -57,22 +56,23 @@ func MakeEnvelopeHavingPeerTable() *message.Envelope{
 
 func TestNewMessageHandler(t *testing.T) {
 	crpyto := MockCrypto{}
-	messageHandler := NewMessagePublisher(network.MessageTypes,crpyto)
+	messageHandler := NewMessagePublisher(crpyto)
 
-	assert.NotNil(t,messageHandler.bus)
-	assert.Equal(t,len(messageHandler.topicMap),1)
-	assert.Equal(t,messageHandler.topicMap[network.UpdatePeerTable],network.UpdatePeerTable)
+	assert.NotNil(t,messageHandler.subscribers)
+	assert.NotNil(t,messageHandler.crpyto)
 }
 
 func TestMessagePublisher_AddSubscriber(t *testing.T) {
 	crpyto := MockCrypto{}
-	messageHandler := NewMessagePublisher(network.MessageTypes,crpyto)
+	messageHandler := NewMessagePublisher(crpyto)
 
 	subfunc := func(message comm.OutterMessage){
 
 	}
 
-	err := messageHandler.AddSubscriber(network.UpdatePeerTable,subfunc,true)
+	err := messageHandler.AddSubscriber("mocksub",subfunc)
+
+	assert.Equal(t,1,len(messageHandler.subscribers))
 	assert.NoError(t,err)
 }
 
@@ -80,14 +80,14 @@ func TestMessagePublisher_ReceivedMessageHandle(t *testing.T) {
 
 	count := 1
 	crpyto := MockCrypto{}
-	messageHandler := NewMessagePublisher(network.MessageTypes,crpyto)
+	messageHandler := NewMessagePublisher(crpyto)
 
 	subfunc := func(message comm.OutterMessage){
 		count ++
 		fmt.Println("published")
 	}
 
-	err := messageHandler.AddSubscriber(network.UpdatePeerTable,subfunc,true)
+	err := messageHandler.AddSubscriber("mocksub",subfunc)
 
 	envelop := MakeEnvelopeHavingPeerTable()
 
@@ -104,15 +104,20 @@ func TestMessagePublisher_MultipleReceivedMessageHandle(t *testing.T) {
 
 	count := 1
 	crpyto := MockCrypto{}
-	messageHandler := NewMessagePublisher(network.MessageTypes,crpyto)
+	messageHandler := NewMessagePublisher(crpyto)
 
 	subfunc := func(message comm.OutterMessage){
 		count ++
 		fmt.Println("published")
 	}
 
-	err := messageHandler.AddSubscriber(network.UpdatePeerTable,subfunc,true)
-	err = messageHandler.AddSubscriber(network.UpdatePeerTable,subfunc,true)
+	subfunc2 := func(message comm.OutterMessage){
+		count ++
+		fmt.Println("published")
+	}
+
+	err := messageHandler.AddSubscriber("mocksub",subfunc)
+	err = messageHandler.AddSubscriber("mocksub2",subfunc2)
 
 	envelop := MakeEnvelopeHavingPeerTable()
 
@@ -124,19 +129,20 @@ func TestMessagePublisher_MultipleReceivedMessageHandle(t *testing.T) {
 
 	assert.Equal(t,count,3)
 }
-
+//
 func TestMessagePublisher_ReceivedMessageHandleError(t *testing.T) {
 
 	count := 1
 	crpyto := MockCrypto{}
-	messageHandler := NewMessagePublisher(network.MessageTypes,crpyto)
+	messageHandler := NewMessagePublisher(crpyto)
 
 	subfunc := func(message comm.OutterMessage){
 		count ++
 		fmt.Println("published")
 	}
 
-	err := messageHandler.AddSubscriber("hello",subfunc,true)
+	err := messageHandler.AddSubscriber("mocksub",subfunc)
+	err = messageHandler.AddSubscriber("mocksub",subfunc)
 
 	assert.Error(t,err)
 }

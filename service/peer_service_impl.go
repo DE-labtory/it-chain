@@ -126,7 +126,7 @@ func (ps *PeerServiceImpl) RequestPeer(ip string) (*domain.Peer ,error){
 
 	conn, err := grpc.Dial(ip, grpc.WithInsecure())
 	if err != nil {
-		logger.Fatalf("did not connect: %v", err)
+		logger.Println("can not connect: %v", err)
 		return &domain.Peer{},err
 	}
 
@@ -136,7 +136,7 @@ func (ps *PeerServiceImpl) RequestPeer(ip string) (*domain.Peer ,error){
 	peer, err := c.GetPeer(context.Background(), &pb.Empty{})
 
 	if err != nil {
-		logger.Println("could not greet: %v", err)
+		logger.Println("fail to get peerInfo: %v", err.Error())
 		return &domain.Peer{},err
 	}
 

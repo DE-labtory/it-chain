@@ -36,7 +36,6 @@ type Node struct {
 func NewNode(ip string) *Node{
 
 	//ip format (xxx.xxx.xxx.xxx:pppp)
-
 	node := &Node{}
 
 	////set baisc Info
@@ -56,7 +55,6 @@ func NewNode(ip string) *Node{
 	node.identity.PeerID = node.GenerateID()
 
 	///// comm
-	//todo need to set stream server
 	connectionManager := comm.NewConnectionManagerImpl(crpyto)
 	node.connectionManager = connectionManager
 

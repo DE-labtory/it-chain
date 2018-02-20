@@ -32,11 +32,10 @@ func NewConnectionManagerImpl(crpyto auth.Crypto) ConnectionManager{
 
 func (comm *ConnectionManagerImpl) SetOnConnectHandler(onConnectionHandler OnConnectionHandler){
 	comm.Lock()
-
+	defer comm.Unlock()
 	if onConnectionHandler != nil{
 		comm.onConnectionHandler = onConnectionHandler
 	}
-	comm.Unlock()
 }
 
 func (comm *ConnectionManagerImpl) CreateStreamClientConn(connectionID string, ip string, handler ReceiveMessageHandle) error{
