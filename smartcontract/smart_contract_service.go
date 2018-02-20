@@ -344,8 +344,7 @@ func (scs *SmartContractService) Query(transaction domain.Transaction) (error) {
 
 	if smartContractResponse.Result == SUCCESS {
 		logger.Println("Running smartcontract is success")
-
-		// tx hash reset
+		transaction.GenerateHash()
 		// real running smartcontract
 	} else if smartContractResponse.Result == FAIL {
 		logger.Errorln("An error occured while running smartcontract!")
