@@ -36,14 +36,17 @@ func NewConnectionManagerImpl(crpyto auth.Crypto) ConnectionManager{
 }
 
 func (comm *ConnectionManagerImpl) SetOnConnectHandler(onConnectionHandler OnConnectionHandler){
+
 	comm.Lock()
 	defer comm.Unlock()
+
 	if onConnectionHandler != nil{
 		comm.onConnectionHandler = onConnectionHandler
 	}
 }
 
 func (comm *ConnectionManagerImpl) Subscribe(name string, subfunc func(message msg.OutterMessage)){
+
 	comm.Lock()
 	defer comm.Unlock()
 
@@ -86,6 +89,7 @@ func (comm *ConnectionManagerImpl) CreateStreamClientConn(connectionID string, i
 	return nil
 }
 
+//todo close 어떻게 할지
 func (comm *ConnectionManagerImpl) SendStream(message *pb.StreamMessage, errorCallBack OnError, connectionID string){
 
 	//commLogger.Println("Sending data...")
@@ -111,7 +115,7 @@ func (comm *ConnectionManagerImpl) SendStream(message *pb.StreamMessage, errorCa
 }
 
 func (comm *ConnectionManagerImpl) Stop(){
-	commLogger.Println("all connections are closing")
+	commLogger.Println("All connections are closing")
 	for id, conn := range comm.connectionMap{
 		conn.Close()
 		delete(comm.connectionMap,id)
@@ -123,7 +127,7 @@ func (comm *ConnectionManagerImpl) Close(connectionID string){
 	conn, ok := comm.connectionMap[connectionID]
 
 	if ok{
-		commLogger.Println("conn:",connectionID, "is closing")
+		commLogger.Println("Conn:",connectionID, "is closing")
 		conn.Close()
 		delete(comm.connectionMap,connectionID)
 	}
@@ -139,7 +143,7 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 	//3. 생성완료후 OnConnectionHandler를 통해 처리한다.
 
 	//remoteAddress := extractRemoteAddress(stream)
-	commLogger.Println("new conn requests are made")
+	commLogger.Println("New conn requests are made")
 
 	e := &pb.ConnectionEstablish{}
 	message := &pb.StreamMessage{}
@@ -164,6 +168,10 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 	commLogger.Println("Waiting response..")
 
 	if m, err := stream.Recv(); err == nil {
+
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+
 		message,err := m.GetMessage()
 
 		if err != nil{
@@ -180,6 +188,7 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 			conn,err := conn.NewConnection(nil,stream,
 				nil,nil, comm.msgPublisher.ReceivedMessageHandle,connectionID,cf)
 
+
 			if err != nil{
 				return err
 			}
@@ -190,14 +199,21 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 				comm.Lock()
 				comm.connectionMap[connectionID] = conn
 				comm.Unlock()
-				comm.onConnectionHandler(conn,*pp)
+
+				if comm.onConnectionHandler != nil{
+					comm.onConnectionHandler(conn,*pp)
+				}else{
+					commLogger.Debugln("no onConnected Handler")
+				}
 			}else{
 				commLogger.Debugln("already exist conn:",connectionID)
 			}
 		}
+
+		wg.Wait()
 	}
 
-	commLogger.Println("No response..")
+	commLogger.Println("Closing server stream")
 
 	return nil
 }

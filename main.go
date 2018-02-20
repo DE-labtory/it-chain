@@ -72,6 +72,9 @@ func NewNode(ip string) *Node{
 	peerService := service.NewPeerServiceImpl(peerTable,connectionManager)
 	node.peerService = peerService
 
+	///// TransactionService
+	transactionService := service.NewTransactionService()
+
 	///// blockService
 	blockService := service.NewLedger(viper.GetString("ledger.defaultPath"))
 	node.blockService = blockService

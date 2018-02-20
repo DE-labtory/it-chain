@@ -132,6 +132,8 @@ func (conn *ConnectionImpl) Close(){
 }
 
 func (conn *ConnectionImpl) listen() error{
+
+
 	errChan := make(chan error, 1)
 
 	go conn.ReadStream(errChan)
@@ -187,10 +189,10 @@ func (conn *ConnectionImpl) ReadStream(errChan chan error){
 
 		envelope, err := stream.Recv()
 
-		logger_comm.Println("received:",envelope)
+		logger_comm.Println("Received..")
 
 		if conn.toDie() {
-			logger_comm.Debug(conn.connectionID, "canceling read because closing")
+			logger_comm.Debug(conn.connectionID, "Canceling read because closing")
 			return
 		}
 
@@ -214,7 +216,7 @@ func (conn *ConnectionImpl) WriteStream(){
 		}
 		select {
 		case m := <-conn.outChannl:
-			logger_comm.Println("sending", m.Envelope)
+			logger_comm.Println("Sending...")
 			err := stream.Send(m.Envelope)
 			if err != nil {
 				go m.OnErr(err)

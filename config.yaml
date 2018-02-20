@@ -10,6 +10,9 @@ key:
 ledger:
   defaultPath: ./.ledger
 
+transactionDatabase:
+  defaultPath: ./.txs
+
 smartContract:
   defaultPath: ./.constracts
   githubID: steve@buzzni.com

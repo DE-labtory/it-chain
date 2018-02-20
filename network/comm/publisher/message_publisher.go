@@ -54,19 +54,20 @@ func (mp *MessagePublisher) ReceivedMessageHandle(message msg.OutterMessage){
 		return
 	}
 
-	_, pub, err := mp.crpyto.GetKey()
+	//todo Verify 부분 추가해야함
+	//_, pub, err := mp.crpyto.GetKey()
 
-	if err != nil{
-		logger_event_publisher.Infof("failed to load key: %s", err.Error())
-		return
-	}
+	//if err != nil{
+	//	logger_event_publisher.Infof("failed to load key: %s", err.Error())
+	//	return
+	//}
 
-	vaild, err := mp.crpyto.Verify(pub,envelope.Signature,envelope.Payload,nil)
-
-	if !vaild || err !=nil{
-		logger_event_publisher.Info("failed to verify message")
-		return
-	}
+	//vaild, err := mp.crpyto.Verify(pub,envelope.Signature,envelope.Payload,nil)
+	//
+	//if !vaild || err !=nil{
+	//	logger_event_publisher.Info("failed to verify message")
+	//	return
+	//}
 
 	msg, err := envelope.GetMessage()
 

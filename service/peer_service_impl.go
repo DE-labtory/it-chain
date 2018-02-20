@@ -10,8 +10,9 @@ import (
 	"google.golang.org/grpc"
 	"golang.org/x/net/context"
 	"it-chain/network/comm/msg"
-	"github.com/gogo/protobuf/proto"
 	"it-chain/common"
+	"github.com/golang/protobuf/proto"
+	"it-chain/network/comm/conn"
 )
 
 type PeerServiceImpl struct {
@@ -20,6 +21,7 @@ type PeerServiceImpl struct {
 }
 
 func NewPeerServiceImpl(peerTable *domain.PeerTable,comm comm.ConnectionManager) PeerService{
+
 	peerService := &PeerServiceImpl{
 		peerTable: peerTable,
 		comm: comm,
@@ -31,10 +33,12 @@ func NewPeerServiceImpl(peerTable *domain.PeerTable,comm comm.ConnectionManager)
 	broadCastPeerTableBatcher.Add("push batching")
 	broadCastPeerTableBatcher.Start()
 
+	//todo 양방향 reference제거하고싶다..
+	comm.SetOnConnectHandler(peerService.HandleOnConnect)
 	comm.Subscribe("EstablishConnection",peerService.handleConnectionEstablish)
+	comm.Subscribe("UpdatePeerTable",peerService.handleUpdatePeerTable)
 
 	return peerService
-
 }
 
 func (ps *PeerServiceImpl) GetPeerTable() domain.PeerTable{
@@ -149,12 +153,15 @@ func (ps *PeerServiceImpl) GetLeader() *domain.Peer{
 	return ps.peerTable.Leader
 }
 
+func (ps *PeerServiceImpl) HandleOnConnect(conn conn.Connection, pp pb.Peer){
+	peer := domain.FromProtoPeer(pp)
+	ps.peerTable.AddPeer(peer)
+}
+
 func (ps *PeerServiceImpl) handleConnectionEstablish(message msg.OutterMessage){
 
-	common.Log.Println("Handling connection establish")
-
 	if establishMsg := message.Message.GetConnectionEstablish(); establishMsg != nil{
-
+		common.Log.Println("Handling connection establish")
 		respondMessage := &pb.StreamMessage{}
 		respondMessage.Content = &pb.StreamMessage_Peer{
 			Peer: domain.ToProtoPeer(ps.peerTable.GetMyInfo()),
@@ -176,6 +183,19 @@ func (ps *PeerServiceImpl) handleConnectionEstablish(message msg.OutterMessage){
 		message.Respond(respondEnv,errCallBack)
 	}
 
-	//ignore
+	return
+}
+
+func (ps *PeerServiceImpl) handleUpdatePeerTable(message msg.OutterMessage){
+
+	if peerTableMsg := message.Message.GetPeerTable(); peerTableMsg != nil{
+		common.Log.Println("Handling peertable update message")
+
+		peerTable := domain.FromProtoPeerTable(*peerTableMsg)
+		ps.UpdatePeerTable(*peerTable)
+
+		common.Log.Println("PeerTable:",ps.peerTable)
+	}
+
 	return
 }

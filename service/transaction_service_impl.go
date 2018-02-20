@@ -18,7 +18,7 @@ type TransactionServiceImpl struct {
 	PeerService PeerService
 }
 
-func CreateNewTransactionService(path string, comm comm.ConnectionManager, ps PeerService) *TransactionServiceImpl {
+func NewTransactionService(path string, comm comm.ConnectionManager, ps PeerService) *TransactionServiceImpl {
 	return &TransactionServiceImpl{DB: leveldbhelper.CreateNewDBProvider(path), Comm: comm, PeerService: ps}
 }
 
