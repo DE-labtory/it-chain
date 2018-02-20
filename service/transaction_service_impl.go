@@ -118,8 +118,10 @@ func (t *TransactionServiceImpl) SendToLeader(interface{}) {
 		common.Log.Println("fail to send message error:", onError.Error())
 	}
 
-	t.Comm.SendStream(message, errorCallBack, t.PeerService.GetLeader().PeerID)
-	t.DeleteTransactions(txs)
+	if t.PeerService.GetLeader() != nil {
+		t.Comm.SendStream(message, errorCallBack, t.PeerService.GetLeader().PeerID)
+		t.DeleteTransactions(txs)
+	}
 }
 
 func (t *TransactionServiceImpl) CreateTransaction(txData *domain.TxData) (*domain.Transaction, error){

@@ -121,6 +121,8 @@ func (n *Node) GetPeer(context.Context, *pb.Empty) (*pb.Peer, error){
 
 func (n *Node) PostTransaction(context context.Context,ptxData *pb.TxData) (*pb.Transaction, error){
 
+	common.Log.Println("Request PostTransaction")
+
 	if ptxData.Params == nil{
 		// error 처리
 	}
