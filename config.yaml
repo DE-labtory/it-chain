@@ -11,7 +11,7 @@ ledger:
   defaultPath: ./.ledger
 
 transactionDatabase:
-  defaultPath: ./.txs
+  defaultPath: ./.tx
 
 smartContract:
   defaultPath: ./.constracts
