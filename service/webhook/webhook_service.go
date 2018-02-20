@@ -1,7 +1,9 @@
 package webhook
 
+import "it-chain/domain"
+
 type WebhookService interface {
 
-	Request() (error)
+	SendConfirmedBlock(block *domain.Block) (error)
 
 }
