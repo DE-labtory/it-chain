@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/viper"
 	"strconv"
 	"time"
+	"github.com/rs/xid"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -118,4 +120,22 @@ func (t *TransactionServiceImpl) SendToLeader(interface{}) {
 
 	t.Comm.SendStream(message, errorCallBack, t.PeerService.GetLeader().PeerID)
 	t.DeleteTransactions(txs)
+}
+
+func (t *TransactionServiceImpl) CreateTransaction(txData *domain.TxData) (*domain.Transaction, error){
+
+	transaction := domain.CreateNewTransaction(
+		t.PeerService.GetPeerTable().MyID,
+		xid.New().String(),
+		domain.General,
+		time.Now(),
+		txData)
+
+	err := t.AddTransaction(transaction)
+
+	if err != nil{
+		return nil, errors.New("faild to add transaction")
+	}
+
+	return transaction, nil
 }

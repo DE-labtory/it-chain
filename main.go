@@ -119,8 +119,26 @@ func (n *Node) GetPeer(context.Context, *pb.Empty) (*pb.Peer, error){
 	return pp,nil
 }
 
-func (n *Node) PostTransaction(context context.Context,txData *pb.TxData) (*pb.Transaction, error){
-	n.transactionService.CreateTransaction(txData)
+func (n *Node) PostTransaction(context context.Context,ptxData *pb.TxData) (*pb.Transaction, error){
+
+	if ptxData.Params == nil{
+		// error 처리
+	}
+
+	if ptxData.ContractID == ""{
+		// error
+	}
+
+	txData := domain.FromProtoTxData(*ptxData)
+	transaction,err := n.transactionService.CreateTransaction(txData)
+
+	if err !=nil{
+		// error
+	}
+
+	t := domain.ToProtoTransaction(*transaction)
+
+	return t, nil
 }
 
 func (n* Node) Run() {
@@ -135,6 +153,7 @@ func (n* Node) Run() {
 	server := grpc.NewServer()
 	pb.RegisterStreamServiceServer(server,n.connectionManager)
 	pb.RegisterPeerServiceServer(server,n)
+	pb.RegisterTransactionServiceServer(server,n)
 
 	reflection.Register(server)
 

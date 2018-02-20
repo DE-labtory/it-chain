@@ -8,11 +8,11 @@ import (
 	pb "it-chain/network/protos"
 )
 
-type Status int
+type Block_Status int
 
 const (
-	Status_BLOCK_UNCONFIRMED Status = 0
-	Status_BLOCK_CONFIRMED   Status = 1
+	Status_BLOCK_UNCONFIRMED Block_Status = 0
+	Status_BLOCK_CONFIRMED   Block_Status = 1
 )
 
 type Block struct {
@@ -32,7 +32,7 @@ type BlockHeader struct {
 	MerkleTreeRootHash string
 	TimeStamp          time.Time
 	BlockHeight        int
-	BlockStatus        Status
+	BlockStatus        Block_Status
 	CreatedPeerID      string
 	Signature          []byte
 	PeerId             string
