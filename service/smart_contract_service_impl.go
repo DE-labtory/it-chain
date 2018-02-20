@@ -377,8 +377,201 @@ func (scs *SmartContractServiceImpl) Invoke() {
 
 }
 
-func (scs *SmartContractServiceImpl) validateTransactionInBlock(block domain.Block) {
+func (scs *SmartContractServiceImpl) ValidateTransactionsInBlock(block domain.Block) error {
+	// 블럭 유효성 검사 필요?
+	if block.TransactionCount <= 0 {
+		return errors.New("No tx in block")
+	}
+	var err error
+	for i := 0; i < block.TransactionCount; i++ {
+		err = scs.ValidateTransaction(block.Transactions[i])
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
+func (scs *SmartContractServiceImpl) ValidateTransaction(transaction *domain.Transaction) (error) {
+	/*** Set Transaction Arg ***/
+	logger.Errorln("validateTransaction start")
+	txBytes, err := json.Marshal(transaction)
+	if err != nil {
+		return errors.New("Tx Marshal Error")
+	}
+
+	sc, ok := scs.SmartContractMap[transaction.TxData.ContractID]
+	if !ok {
+		logger.Errorln("Not exist contract ID")
+		return errors.New("Not exist contract ID")
+	}
+
+	_, err = os.Stat(sc.SmartContractPath)
+	if os.IsNotExist(err) {
+		logger.Errorln("File or Directory Not Exist")
+		return errors.New("File or Directory Not Exist")
+	}
+
+	/*** smartcontract build ***/
+	logger.Errorln("build start")
+	cmd := exec.Command("env", "GOOS=linux", "go", "build", "-o", TMP_DIR + "/" + sc.Name, "./" + sc.Name + ".go")
+	cmd.Dir = sc.SmartContractPath + "/" + transaction.TxData.ContractID
+
+	err = cmd.Run()
+	if err != nil {
+		logger.Errorln("SmartContract build error")
+		return err
+	}
+	cmd = exec.Command("chmod", "777", TMP_DIR + "/" + sc.Name)
+	cmd.Dir = sc.SmartContractPath + "/" + transaction.TxData.ContractID
+	err = cmd.Run()
+	if err != nil {
+		logger.Errorln("Chmod Error")
+		return err
+	}
+
+	logger.Errorln("make tar")
+
+	err = domain.MakeTar(TMP_DIR + "/" + sc.Name, TMP_DIR)
+	if err != nil {
+		logger.Errorln("An error occured while archiving smartcontract file!")
+		return err
+	}
+	err = domain.MakeTar("$GOPATH/src/it-chain/smartcontract/worldstatedb", TMP_DIR)
+	if err != nil {
+		logger.Errorln("An error occured while archiving worldstateDB file!")
+		return err
+	}
+
+	logger.Errorln("exec cmd")
+
+	// tar config file
+	cmd = exec.Command("tar", "-cf", TMP_DIR + "/config.tar", "./it-chain/config.yaml")
+	cmd.Dir = "../../"
+	err = cmd.Run()
+	if err != nil {
+		logger.Errorln("An error occured while archiving config file!")
+		return err
+	}
+
+	logger.Errorln("Pulling image")
+
+	// Docker Code
+	imageName := "docker.io/library/golang:1.9.2-alpine3.6"
+	tarPath := TMP_DIR + "/" + sc.Name + ".tar"
+	tarPath_wsdb := TMP_DIR + "/worldstatedb.tar"
+	tarPath_config := TMP_DIR + "/config.tar"
+
+	ctx := context.Background()
+	cli, err := docker.NewEnvClient()
+	if err != nil {
+		logger.Errorln("An error occured while creating new Docker Client!")
+		return err
+	}
+
+	out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
+	if err != nil {
+		logger.Errorln("An error oeccured while pulling docker image!")
+		return err
+	}
+	io.Copy(os.Stdout, out)
+
+
+	imageName_splited := strings.Split(imageName, "/")
+	image := imageName_splited[len(imageName_splited)-1]
+
+	resp, err := cli.ContainerCreate(ctx, &container.Config{
+		Image: image,
+		Cmd: []string{"/go/src/" + sc.Name, string(txBytes)},
+		Tty: true,
+		AttachStdout: true,
+		AttachStderr: true,
+	}, nil, nil, "")
+	if err != nil {
+		logger.Errorln("An error occured while creating docker container!")
+		return err
+	}
+
+	/*** read tar file ***/
+	file, err := ioutil.ReadFile(tarPath)
+	if err != nil {
+		logger.Errorln("An error occured while reading smartcontract tar file!")
+		return err
+	}
+	wsdb, err := ioutil.ReadFile(tarPath_wsdb)
+	if err != nil {
+		logger.Errorln("An error occured while reading worldstateDB tar file!")
+		return err
+	}
+	config, err := ioutil.ReadFile(tarPath_config)
+	if err != nil {
+		logger.Errorln("An error occured while reading config tar file!")
+		return err
+	}
+
+	/*** copy file to docker ***/
+	err = cli.CopyToContainer(ctx, resp.ID, "/go/src/", bytes.NewReader(file), types.CopyToContainerOptions{
+		AllowOverwriteDirWithFile: false,
+	})
+	if err != nil {
+		logger.Errorln("An error occured while copying the smartcontract to the container!")
+		return err
+	}
+	err = cli.CopyToContainer(ctx, resp.ID, "/go/src/", bytes.NewReader(wsdb), types.CopyToContainerOptions{
+		AllowOverwriteDirWithFile: false,
+	})
+	if err != nil {
+		logger.Errorln("An error occured while copying the worldstateDB to the container!")
+		return err
+	}
+	err = cli.CopyToContainer(ctx, resp.ID, "/go/src/", bytes.NewReader(config), types.CopyToContainerOptions{
+		AllowOverwriteDirWithFile: false,
+	})
+	if err != nil {
+		logger.Errorln("An error occured while copying the config to the container!")
+		return err
+	}
+
+	err = cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
+	if err != nil {
+		logger.Errorln("An error occured while starting the container!")
+		return err
+	}
+
+
+	/* get docker output
+	----------------------*/
+	fmt.Println("============<Docker Output>=============")
+	reader, err := cli.ContainerLogs(context.Background(), resp.ID, types.ContainerLogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Follow:     true,
+		Timestamps: false,
+	})
+	if err != nil {
+		logger.Errorln("An error occured while getting the output!")
+		return err
+	}
+	defer reader.Close()
+
+	var output = ""
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		output += scanner.Text() + "\n"
+	}
+	fmt.Println(output)
+
+	smartContractResponse := &domain.SmartContractResponse{}
+	err = json.Unmarshal([]byte(output), smartContractResponse)
+
+	if smartContractResponse.Result == domain.SUCCESS {
+		logger.Println("Running smartcontract is success")
+		transaction.GenerateHash()
+	} else if smartContractResponse.Result == domain.FAIL {
+		logger.Errorln("An error occured while validating smartcontract!")
+		return errors.New("An error occured while validating smartcontract!")
+	}
+	return nil
 }
 
 
