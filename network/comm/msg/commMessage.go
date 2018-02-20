@@ -1,21 +1,25 @@
-package comm
+package msg
 
 import (
 	"sync"
 	"it-chain/network/protos"
 )
 
-type innerMessage struct{
-	envelope *message.Envelope
-	onErr    func(error)
+type InnerMessage struct{
+	Envelope *message.Envelope
+	OnErr    func(error)
 }
 
 type OutterMessage struct{
 	Envelope *message.Envelope
 	Message *message.StreamMessage
 	ConnectionID string
-	Conn Connection
+	Conn connection
 	sync.Mutex
+}
+
+type connection interface {
+	Send(envelope *message.Envelope, errCallBack func(error))
 }
 
 // Respond sends a msg to the source that sent the ReceivedMessageImpl

@@ -4,7 +4,9 @@ import (
 	"time"
 	"it-chain/common"
 	"errors"
+	pb "it-chain/network/protos"
 )
+
 
 type TransactionStatus int
 type TxDataType string
@@ -13,9 +15,9 @@ type FunctionType string
 
 const (
 
-	Status_TRANSACTION_UNCONFIRMED	Status	= 0
-	Status_TRANSACTION_CONFIRMED	Status	= 1
-	Status_TRANSACTION_UNKNOWN		Status	= 2
+	Status_TRANSACTION_UNCONFIRMED	TransactionStatus	= 0
+	Status_TRANSACTION_CONFIRMED	TransactionStatus	= 1
+	Status_TRANSACTION_UNKNOWN		TransactionStatus	= 2
 
 	Invoke TxDataType = "invoke"
 	Query TxDataType = "query"
@@ -29,7 +31,7 @@ const (
 
 type Params struct {
 	ParamsType	int
-	Function 	FunctionType
+	Function 	string
 	Args     	[]string
 }
 
@@ -43,7 +45,7 @@ type TxData struct {
 type Transaction struct {
 	InvokePeerID      string
 	TransactionID     string
-	TransactionStatus Status
+	TransactionStatus TransactionStatus
 	TransactionType   TransactionType
 	PublicKey         []byte
 	Signature         []byte
@@ -53,10 +55,13 @@ type Transaction struct {
 }
 
 func CreateNewTransaction(peer_id string, tx_id string, tx_type TransactionType, t time.Time, data *TxData) *Transaction{
-	return &Transaction{InvokePeerID:peer_id, TransactionID:tx_id, TransactionStatus:Status_TRANSACTION_UNKNOWN, TransactionType:tx_type, TimeStamp:t, TxData:data}
+
+	transaction := &Transaction{InvokePeerID:peer_id, TransactionID:tx_id, TransactionStatus:Status_TRANSACTION_UNKNOWN, TransactionType:tx_type, TimeStamp:t, TxData:data}
+	transaction.GenerateHash()
+	return transaction
 }
 
-func SetTxMethodParameters(params_type int, function FunctionType, args []string) Params{
+func SetTxMethodParameters(params_type int, function string, args []string) Params{
 	return Params{params_type, function, args}
 }
 
@@ -104,4 +109,65 @@ func (tx *Transaction) SignHash() (ret bool, err error){
 		ret = false
 	}
 	return ret, err
+}
+
+//todo test
+func FromProtoTxData(ptxData pb.TxData) *TxData{
+
+	txData := &TxData{
+		Params: Params{
+			Args:ptxData.Params.Args,
+			Function: ptxData.Params.Function,
+			ParamsType: int(ptxData.Params.ParamsType),
+		},
+		ContractID:ptxData.ContractID,
+		Jsonrpc: ptxData.Jsonrpc,
+	}
+
+	if ptxData.Method == pb.TxData_Invoke{
+		txData.Method = Invoke
+	}
+
+	if ptxData.Method == pb.TxData_Query{
+		txData.Method = Query
+	}
+
+	return txData
+}
+
+//todo test
+func ToProtoTxData(t TxData) *pb.TxData{
+
+	txData := &pb.TxData{
+		Params: &pb.Params{
+			Args:t.Params.Args,
+			Function: t.Params.Function,
+			ParamsType: int32(t.Params.ParamsType),
+		},
+		ContractID:t.ContractID,
+		Jsonrpc: t.Jsonrpc,
+	}
+
+	if t.Method == Invoke{
+		txData.Method =  pb.TxData_Invoke
+	}
+
+	if t.Method == Query{
+		txData.Method = pb.TxData_Invoke
+	}
+
+	return txData
+}
+
+//todo test
+func ToProtoTransaction(t Transaction) *pb.Transaction{
+	transaction := &pb.Transaction{
+		TransactionHash: t.TransactionHash,
+		TransactionStatus: pb.Transaction_Status(t.TransactionStatus),
+		TransactionID: t.TransactionID,
+		InvokePeerID: t.InvokePeerID,
+		TxData: ToProtoTxData(*t.TxData),
+	}
+
+	return transaction
 }

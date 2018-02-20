@@ -2,16 +2,10 @@ syntax = "proto3";
 
 package message;
 
+import "common.proto";
+
 service StreamService{
     rpc Stream (stream Envelope) returns (stream Envelope) {}
-}
-
-service PeerService{
-    rpc GetPeer (Empty) returns (Peer) {}
-}
-
-service TestConsensusService{
-    rpc StartConsensus (Empty) returns (Empty) {}
 }
 
 message Envelope {
@@ -25,8 +19,6 @@ message Envelope {
     // sender's public key
     bytes pubkey = 3;
 }
-
-message Empty {}
 
 message StreamMessage{
 
@@ -44,10 +36,6 @@ message StreamMessage{
 
 message Block{
     bytes data = 1;
-}
-
-message Transaction{
-
 }
 
 message ConnectionEstablish {}
@@ -79,5 +67,8 @@ message View{
     string LeaderID = 2;
     repeated string PeerID = 3;
 }
+
+
+
 
 

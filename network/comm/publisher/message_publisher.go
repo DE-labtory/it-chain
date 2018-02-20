@@ -1,67 +1,51 @@
 package publisher
 
 import (
-	"github.com/asaskevich/EventBus"
 	"it-chain/common"
-	"it-chain/network/comm"
-	pb "it-chain/network/protos"
-	"github.com/golang/protobuf/proto"
+	"it-chain/network/comm/msg"
 	"errors"
 	"it-chain/auth"
+	"sync"
 )
 
 var logger_event_publisher = common.GetLogger("message_publisher.go")
 
 //message를 받으면 관심이 있는 subscriber에게 전달하는 역활을 한다.
-type MessagePublisher struct{
-	bus 		EventBus.Bus
-	topicMap    map[string]string
+type MessagePublisher struct {
+	subscribers map[string]func(message msg.OutterMessage)
 	crpyto      auth.Crypto
+	lock        *sync.Mutex
 }
 
-//todo Message Publisher를 connectionManager가 관리하게 할지 고민
-//todo signer를 받아야함
-//topic의 일치성을 위해 처음에 topic의 list를 받고 이 list에 없는 topic은 등록불가하다.
-func NewMessagePublisher(messageTypes []string, crpyto auth.Crypto) *MessagePublisher{
-
-	topicMap := make(map[string]string)
-
-	for _,messageType := range messageTypes{
-		topicMap[messageType] = messageType
-	}
+func NewMessagePublisher(crpyto auth.Crypto) *MessagePublisher{
 
 	return &MessagePublisher{
-		bus: EventBus.New(),
-		topicMap: topicMap,
+		subscribers: make(map[string]func(message msg.OutterMessage)),
 		crpyto: crpyto,
+		lock: &sync.Mutex{},
 	}
 }
 
 //subscriber를 등록한다.
-func (mp *MessagePublisher) AddSubscriber(topic string, subfunc func(message comm.OutterMessage), transactional bool) error{
+func (mp *MessagePublisher) AddSubscriber(name string, subfunc func(message msg.OutterMessage)) error{
 
-	t, ok := mp.topicMap[topic]
+	mp.lock.Lock()
+	defer mp.lock.Unlock()
 
-	if ok {
-		err := mp.bus.SubscribeAsync(t, subfunc, transactional)
+	_, ok := mp.subscribers[name]
 
-		if err != nil {
-			logger_event_publisher.Error("failed to add subscriber", err.Error())
-			return err
-		}
-
-		logger_event_publisher.Infoln("new message subscriber added")
-		return nil
+	if ok{
+		return errors.New("already subscribed function")
 	}
 
-	logger_event_publisher.Error("failed to add subscriber: invalid topic")
-	return errors.New("invaild topic")
+	mp.subscribers[name] = subfunc
+
+	return nil
 }
 
-//todo invaild message검증 및 전파
-//todo panic으로 부터 recover
-//todo topic을 미리 만들어 놓는 방식에 대해서 고민 해야함
-func (mp *MessagePublisher) ReceivedMessageHandle(message comm.OutterMessage){
+func (mp *MessagePublisher) ReceivedMessageHandle(message msg.OutterMessage){
+
+	defer recover()
 
 	envelope := message.Envelope
 
@@ -70,36 +54,35 @@ func (mp *MessagePublisher) ReceivedMessageHandle(message comm.OutterMessage){
 		return
 	}
 
-	_, pub, err := mp.crpyto.LoadKey()
+	//todo Verify 부분 추가해야함
+	//_, pub, err := mp.crpyto.GetKey()
 
-	if err != nil{
-		logger_event_publisher.Infof("failed to load key: %s", err.Error())
-		return
-	}
+	//if err != nil{
+	//	logger_event_publisher.Infof("failed to load key: %s", err.Error())
+	//	return
+	//}
 
-	vaild, err := mp.crpyto.Verify(pub,envelope.Signature,envelope.Payload,nil)
+	//vaild, err := mp.crpyto.Verify(pub,envelope.Signature,envelope.Payload,nil)
+	//
+	//if !vaild || err !=nil{
+	//	logger_event_publisher.Info("failed to verify message")
+	//	return
+	//}
 
-	if !vaild || err !=nil{
-		logger_event_publisher.Info("failed to verify message")
-		return
-	}
+	msg, err := envelope.GetMessage()
 
-	m := &pb.Message{}
-
-	err = proto.Unmarshal(envelope.Payload,m)
+	message.Message = msg
 
 	if err != nil{
 		logger_event_publisher.Info("failed to Unmarshal message:", message)
 		return
 	}
 
-	message.Message = m
-	messageType := m.GetMessageType()
-	mt, ok := mp.topicMap[messageType]
+	mp.lock.Lock()
+	defer mp.lock.Unlock()
 
-	if ok{
-		mp.bus.Publish(mt,message)
-		logger_event_publisher.Info("message published messageType:", mt)
+	for _, subFunc := range mp.subscribers{
+		subFunc(message)
 	}
 }
 

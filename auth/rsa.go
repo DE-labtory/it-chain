@@ -90,13 +90,12 @@ func (key *rsaPublicKey) SKI() ([]byte) {
 	}
 
 	data, _ := asn1.Marshal(rsaKeyMarshalOpt{
-		key.pub.N, key.pub.E,
+		big.NewInt(123), 57,
 	})
 
 	hash := sha256.New()
 	hash.Write(data)
 	return hash.Sum(nil)
-
 }
 
 func (key *rsaPublicKey) Algorithm() string {

@@ -1,4 +1,4 @@
-package comm
+package conn
 
 import (
 	"testing"
@@ -8,6 +8,7 @@ import (
 	"time"
 	"golang.org/x/net/context"
 	"it-chain/network/comm/mock"
+	"it-chain/network/comm/msg"
 )
 
 const ipaddress = "127.0.0.1:5555"
@@ -26,7 +27,7 @@ func TestNewConnection(t *testing.T) {
 	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
 
 	if err != nil{
-		assert.Fail(t,"fail to create connection")
+		assert.Fail(t,"fail to create conn")
 	}
 
 	ctx, cf := context.WithCancel(context.Background())
@@ -64,7 +65,7 @@ func TestConnection_SendWithStream(t *testing.T) {
 	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
 
 	if err != nil{
-		assert.Fail(t,"fail to create connection")
+		assert.Fail(t,"fail to create conn")
 	}
 
 	ctx, cf := context.WithCancel(context.Background())
@@ -123,7 +124,7 @@ func TestConnectionImpl_ReadStream(t *testing.T) {
 	grpc_conn, err := NewConnectionWithAddress(ipaddress,false,nil)
 
 	if err != nil{
-		assert.Fail(t,"fail to create connection")
+		assert.Fail(t,"fail to create conn")
 	}
 
 	ctx, cf := context.WithCancel(context.Background())
@@ -132,7 +133,7 @@ func TestConnectionImpl_ReadStream(t *testing.T) {
 
 	var receivedMessageCounter = 0
 
-	var MockMessageHandle = func(message OutterMessage){
+	var MockMessageHandle = func(message msg.OutterMessage){
 		receivedMessageCounter ++
 	}
 

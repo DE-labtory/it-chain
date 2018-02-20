@@ -20,14 +20,13 @@ import (
 	"golang.org/x/net/context"
 )
 
-
-
 type Node struct {
 	identity             *domain.Peer
 	blockService         service.BlockService
 	peerService          service.PeerService
 	consensusService     service.ConsensusService
 	smartContractService service.SmartContractService
+	transactionService   service.TransactionService
 	connectionManager    comm.ConnectionManager
 	crypto               auth.Crypto
 }
@@ -36,7 +35,6 @@ type Node struct {
 func NewNode(ip string) *Node{
 
 	//ip format (xxx.xxx.xxx.xxx:pppp)
-
 	node := &Node{}
 
 	////set baisc Info
@@ -56,7 +54,6 @@ func NewNode(ip string) *Node{
 	node.identity.PeerID = node.GenerateID()
 
 	///// comm
-	//todo need to set stream server
 	connectionManager := comm.NewConnectionManagerImpl(crpyto)
 	node.connectionManager = connectionManager
 
@@ -75,6 +72,10 @@ func NewNode(ip string) *Node{
 
 	peerService := service.NewPeerServiceImpl(peerTable,connectionManager)
 	node.peerService = peerService
+
+	///// TransactionService
+	transactionService := service.NewTransactionService(viper.GetString("txDatabase.defaultPath"),connectionManager,peerService)
+	node.transactionService = transactionService
 
 	///// blockService
 	blockService := service.NewLedger(viper.GetString("ledger.defaultPath"))
@@ -118,6 +119,30 @@ func (n *Node) GetPeer(context.Context, *pb.Empty) (*pb.Peer, error){
 	return pp,nil
 }
 
+func (n *Node) PostTransaction(context context.Context,ptxData *pb.TxData) (*pb.Transaction, error){
+
+	common.Log.Println("Request PostTransaction")
+
+	if ptxData.Params == nil{
+		// error 처리
+	}
+
+	if ptxData.ContractID == ""{
+		// error
+	}
+
+	txData := domain.FromProtoTxData(*ptxData)
+	transaction,err := n.transactionService.CreateTransaction(txData)
+
+	if err !=nil{
+		// error
+	}
+
+	t := domain.ToProtoTransaction(*transaction)
+
+	return t, nil
+}
+
 func (n* Node) Run() {
 	common.Log.Println("Run it-chain")
 
@@ -130,6 +155,7 @@ func (n* Node) Run() {
 	server := grpc.NewServer()
 	pb.RegisterStreamServiceServer(server,n.connectionManager)
 	pb.RegisterPeerServiceServer(server,n)
+	pb.RegisterTransactionServiceServer(server,n)
 
 	reflection.Register(server)
 
