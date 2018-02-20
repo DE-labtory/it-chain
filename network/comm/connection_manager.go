@@ -22,4 +22,6 @@ type ConnectionManager interface{
 
 	//Server on function
 	Stream(stream pb.StreamService_StreamServer) (error)
+
+	SetOnConnectHandler(onConnectionHandler OnConnectionHandler)
 }

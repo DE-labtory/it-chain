@@ -15,21 +15,23 @@ var logger_pbftservice = common.GetLogger("pbft_service")
 
 //todo peerID를 어디서 가져올 것인가??
 type PBFTConsensusService struct {
-	consensusStates map[string]*domain.ConsensusState
-	comm            comm.ConnectionManager
-	peerID          string
-	peerService 	PeerService
-	blockService    BlockService
+	consensusStates      map[string]*domain.ConsensusState
+	comm                 comm.ConnectionManager
+	identity                 *domain.Peer
+	peerService          PeerService
+	blockService         BlockService
+	smartContractService SmartContractService
 	sync.RWMutex
 }
 
-func NewPBFTConsensusService(comm comm.ConnectionManager, blockService BlockService,peerID string) ConsensusService{
+func NewPBFTConsensusService(comm comm.ConnectionManager, blockService BlockService,identity *domain.Peer, smartContractService SmartContractService) ConsensusService{
 
 	pbft := &PBFTConsensusService{
 		consensusStates: make(map[string]*domain.ConsensusState),
 		comm:comm,
 		blockService: blockService,
-		peerID: peerID,
+		smartContractService: smartContractService,
+		identity: identity,
 	}
 
 	return pbft
@@ -44,7 +46,7 @@ func (cs *PBFTConsensusService) StartConsensus(view *domain.View, block *domain.
 
 	if len(view.PeerID) <= 1{
 		//ADD block
-		logger_pbftservice.Println("no peer exist, add block")
+		logger_pbftservice.Println("no identity exist, add block")
 		return
 	}
 
@@ -53,7 +55,7 @@ func (cs *PBFTConsensusService) StartConsensus(view *domain.View, block *domain.
 	cs.consensusStates[consensusState.ID] = consensusState
 
 	sequenceID := time.Now().UnixNano()
-	preprepareConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*view,sequenceID,consensusState.Block,cs.peerID,domain.PreprepareMsg)
+	preprepareConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*view,sequenceID,consensusState.Block,cs.identity.PeerID,domain.PreprepareMsg)
 
 	go cs.broadcastMessage(preprepareConsensusMessage)
 
@@ -141,9 +143,12 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 	logger_pbftservice.Infoln("Current Stage is",consensusState.CurrentStage)
 
 	if consensusState.CurrentStage == domain.PrePrepared{
-		logger_pbftservice.Infoln("my id", cs.peerID)
+		logger_pbftservice.Infoln("my id", cs.identity.PeerID)
 		sequenceID := time.Now().UnixNano()
-		preprepareConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.peerID,domain.PrepareMsg)
+
+		logger_pbftservice.Infoln("block", consensusState.Block)
+
+		preprepareConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.identity.PeerID,domain.PrepareMsg)
 		go cs.broadcastMessage(preprepareConsensusMessage)
 		consensusState.CurrentStage = domain.Prepared
 		logger_pbftservice.Infoln("ConsensusState is prepared")
@@ -152,7 +157,7 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 	//1. prepare stage && prepare message가 전체의 2/3이상 -> commitMsg전파
 	if consensusState.CurrentStage == domain.Prepared && consensusState.PrepareReady(){
 		sequenceID := time.Now().UnixNano()
-		commitConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.peerID,domain.CommitMsg)
+		commitConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.identity.PeerID,domain.CommitMsg)
 		go cs.broadcastMessage(commitConsensusMessage)
 		consensusState.CurrentStage = domain.Committed
 		logger_pbftservice.Infoln("ConsensusState is Committed")
@@ -167,6 +172,7 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage comm.Outte
 		if err != nil{
 
 		}
+
 		if flag{
 			cs.blockService.AddBlock(consensusState.Block)
 		}
@@ -193,8 +199,8 @@ func (cs *PBFTConsensusService) broadcastMessage(consensusMsg domain.ConsensusMe
 	logger_pbftservice.Infoln("broadcast Message")
 	peerIDList := consensusMsg.View.PeerID
 
-	message := &pb.Message{}
-	message.Content = &pb.Message_ConsensusMessage{
+	message := &pb.StreamMessage{}
+	message.Content = &pb.StreamMessage_ConsensusMessage{
 		ConsensusMessage: domain.ToConsensusProtoMessage(consensusMsg),
 	}
 

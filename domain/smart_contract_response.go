@@ -1,4 +1,4 @@
-package smartcontract
+package domain
 
 const (
 	FAIL = "FAIL"

@@ -9,7 +9,7 @@ import (
 )
 
 func TestConfig_init_from_file(t *testing.T){
-	assert.Equal(t,"./.leveldb",viper.GetString("database.leveldb.default_path"))
+	assert.Equal(t,"./.leveldb",viper.GetString("database.leveldb.defaultPath"))
 }
 
 func TestConfigInit(t *testing.T){

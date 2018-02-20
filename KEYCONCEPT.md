@@ -148,8 +148,3 @@ To make a block, nodes have to solve a very difficult problem. Since a small num
 
 
 ### POS
-
-
-
-
-

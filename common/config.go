@@ -1,6 +1,6 @@
 package common
 
-import (
+import   (
 	"github.com/spf13/viper"
 	"fmt"
 	"os"

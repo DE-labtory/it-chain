@@ -106,7 +106,8 @@ type ConsensusMessage struct {
 type Stage int
 
 const (
-	PrePrepared   Stage = iota           // The ReqMsgs is processed successfully. The node is ready to head to the Prepare stage.
+	Idle  	Stage = iota
+	PrePrepared             // The ReqMsgs is processed successfully. The node is ready to head to the Prepare stage.
 	Prepared                			 // Same with `prepared` stage explained in the original paper.
 	Committed                			 // Same with `committed-local` stage explained in the original paper.
 )
