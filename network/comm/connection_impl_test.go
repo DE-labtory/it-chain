@@ -8,6 +8,7 @@ import (
 	"time"
 	"golang.org/x/net/context"
 	"it-chain/network/comm/mock"
+	"it-chain/network/comm/msg"
 )
 
 const ipaddress = "127.0.0.1:5555"
@@ -132,7 +133,7 @@ func TestConnectionImpl_ReadStream(t *testing.T) {
 
 	var receivedMessageCounter = 0
 
-	var MockMessageHandle = func(message OutterMessage){
+	var MockMessageHandle = func(message msg.OutterMessage){
 		receivedMessageCounter ++
 	}
 

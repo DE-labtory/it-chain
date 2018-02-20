@@ -11,13 +11,14 @@ import (
 	"time"
 	"google.golang.org/grpc/credentials"
 	pb "it-chain/network/protos"
+	"it-chain/network/comm/msg"
 )
 
 var logger_comm = common.GetLogger("connection.go")
 
 const defaultTimeout = time.Second * 3
 
-type ReceiveMessageHandle func(message OutterMessage)
+type ReceiveMessageHandle func(message msg.OutterMessage)
 
 //직접적으로 grpc를 보내고 받는 역활 수행
 type ConnectionImpl struct {
@@ -29,7 +30,7 @@ type ConnectionImpl struct {
 	stopFlag       int32
 	connectionID   string
 	handle         ReceiveMessageHandle
-	outChannl      chan *innerMessage
+	outChannl      chan *msg.InnerMessage
 	readChannel    chan *message.Envelope
 	stopChannel    chan struct{}
 	sync.RWMutex
@@ -71,7 +72,7 @@ func NewConnection(clientStream pb.StreamService_StreamClient, serverStream pb.S
 		cancel: cf,
 		client: client,
 		conn: conn,
-		outChannl: make(chan *innerMessage,200),
+		outChannl: make(chan *msg.InnerMessage,200),
 		readChannel: make(chan *message.Envelope,200),
 		stopChannel: make(chan struct{},1),
 		handle: handle,
@@ -92,9 +93,9 @@ func (conn *ConnectionImpl) Send(envelope *message.Envelope, errCallBack func(er
 	conn.Lock()
 	defer conn.Unlock()
 
-	m := &innerMessage{
-		envelope: envelope,
-		onErr:    errCallBack,
+	m := &msg.InnerMessage{
+		Envelope: envelope,
+		OnErr:    errCallBack,
 	}
 
 	conn.outChannl <- m
@@ -143,9 +144,9 @@ func (conn *ConnectionImpl) listen() error{
 			return nil
 		case err := <-errChan:
 			return err
-		case msg := <-conn.readChannel:
+		case message := <-conn.readChannel:
 			if conn.handle != nil{
-				conn.handle(OutterMessage{Envelope:msg,Conn:conn,ConnectionID:conn.connectionID})
+				conn.handle(msg.OutterMessage{Envelope:message,Conn:conn,ConnectionID:conn.connectionID})
 			}
 		}
 	}
@@ -213,10 +214,10 @@ func (conn *ConnectionImpl) WriteStream(){
 		}
 		select {
 		case m := <-conn.outChannl:
-			logger_comm.Println("sending", m.envelope)
-			err := stream.Send(m.envelope)
+			logger_comm.Println("sending", m.Envelope)
+			err := stream.Send(m.Envelope)
 			if err != nil {
-				go m.onErr(err)
+				go m.OnErr(err)
 				return
 			}
 		case stop := <-conn.stopChannel:

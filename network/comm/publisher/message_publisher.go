@@ -2,7 +2,7 @@ package publisher
 
 import (
 	"it-chain/common"
-	"it-chain/network/comm"
+	"it-chain/network/comm/msg"
 	"errors"
 	"it-chain/auth"
 	"sync"
@@ -12,24 +12,22 @@ var logger_event_publisher = common.GetLogger("message_publisher.go")
 
 //message를 받으면 관심이 있는 subscriber에게 전달하는 역활을 한다.
 type MessagePublisher struct {
-	subscribers map[string]func(message comm.OutterMessage)
+	subscribers map[string]func(message msg.OutterMessage)
 	crpyto      auth.Crypto
 	lock        *sync.Mutex
 }
 
-//todo Message Publisher를 connectionManager가 관리하게 할지 고민
-//topic의 일치성을 위해 처음에 topic의 list를 받고 이 list에 없는 topic은 등록불가하다.
 func NewMessagePublisher(crpyto auth.Crypto) *MessagePublisher{
 
 	return &MessagePublisher{
-		subscribers: make(map[string]func(message comm.OutterMessage)),
+		subscribers: make(map[string]func(message msg.OutterMessage)),
 		crpyto: crpyto,
 		lock: &sync.Mutex{},
 	}
 }
 
 //subscriber를 등록한다.
-func (mp *MessagePublisher) AddSubscriber(name string, subfunc func(message comm.OutterMessage)) error{
+func (mp *MessagePublisher) AddSubscriber(name string, subfunc func(message msg.OutterMessage)) error{
 
 	mp.lock.Lock()
 	defer mp.lock.Unlock()
@@ -45,7 +43,7 @@ func (mp *MessagePublisher) AddSubscriber(name string, subfunc func(message comm
 	return nil
 }
 
-func (mp *MessagePublisher) ReceivedMessageHandle(message comm.OutterMessage){
+func (mp *MessagePublisher) ReceivedMessageHandle(message msg.OutterMessage){
 
 	defer recover()
 

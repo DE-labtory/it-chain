@@ -3,7 +3,6 @@ package publisher
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"it-chain/network/comm"
 	"time"
 	"fmt"
 	"it-chain/network/protos"
@@ -11,6 +10,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/mock"
 	"it-chain/auth"
+	"it-chain/network/comm/msg"
 )
 
 type MockCrypto struct{
@@ -66,7 +66,7 @@ func TestMessagePublisher_AddSubscriber(t *testing.T) {
 	crpyto := MockCrypto{}
 	messageHandler := NewMessagePublisher(crpyto)
 
-	subfunc := func(message comm.OutterMessage){
+	subfunc := func(message msg.OutterMessage){
 
 	}
 
@@ -82,7 +82,7 @@ func TestMessagePublisher_ReceivedMessageHandle(t *testing.T) {
 	crpyto := MockCrypto{}
 	messageHandler := NewMessagePublisher(crpyto)
 
-	subfunc := func(message comm.OutterMessage){
+	subfunc := func(message msg.OutterMessage){
 		count ++
 		fmt.Println("published")
 	}
@@ -91,7 +91,7 @@ func TestMessagePublisher_ReceivedMessageHandle(t *testing.T) {
 
 	envelop := MakeEnvelopeHavingPeerTable()
 
-	messageHandler.ReceivedMessageHandle(comm.OutterMessage{Envelope:envelop})
+	messageHandler.ReceivedMessageHandle(msg.OutterMessage{Envelope:envelop})
 
 	assert.NoError(t,err)
 
@@ -106,12 +106,12 @@ func TestMessagePublisher_MultipleReceivedMessageHandle(t *testing.T) {
 	crpyto := MockCrypto{}
 	messageHandler := NewMessagePublisher(crpyto)
 
-	subfunc := func(message comm.OutterMessage){
+	subfunc := func(message msg.OutterMessage){
 		count ++
 		fmt.Println("published")
 	}
 
-	subfunc2 := func(message comm.OutterMessage){
+	subfunc2 := func(message msg.OutterMessage){
 		count ++
 		fmt.Println("published")
 	}
@@ -121,7 +121,7 @@ func TestMessagePublisher_MultipleReceivedMessageHandle(t *testing.T) {
 
 	envelop := MakeEnvelopeHavingPeerTable()
 
-	messageHandler.ReceivedMessageHandle(comm.OutterMessage{Envelope:envelop})
+	messageHandler.ReceivedMessageHandle(msg.OutterMessage{Envelope:envelop})
 
 	assert.NoError(t,err)
 
@@ -136,7 +136,7 @@ func TestMessagePublisher_ReceivedMessageHandleError(t *testing.T) {
 	crpyto := MockCrypto{}
 	messageHandler := NewMessagePublisher(crpyto)
 
-	subfunc := func(message comm.OutterMessage){
+	subfunc := func(message msg.OutterMessage){
 		count ++
 		fmt.Println("published")
 	}

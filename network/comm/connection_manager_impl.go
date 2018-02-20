@@ -9,6 +9,8 @@ import (
 	pb "it-chain/network/protos"
 	"google.golang.org/grpc/peer"
 	"github.com/pkg/errors"
+	"it-chain/network/comm/publisher"
+	"it-chain/network/comm/msg"
 )
 
 var commLogger = common.GetLogger("connection_manager_impl.go")
@@ -20,12 +22,14 @@ type ConnectionManagerImpl struct {
 	connectionMap       map[string]Connection
 	crpyto              auth.Crypto
 	onConnectionHandler OnConnectionHandler
+	msgPublisher        *publisher.MessagePublisher
 	sync.RWMutex
 }
 
 func NewConnectionManagerImpl(crpyto auth.Crypto) ConnectionManager{
 	return &ConnectionManagerImpl{
 		connectionMap: make(map[string]Connection),
+		msgPublisher: publisher.NewMessagePublisher(crpyto),
 		crpyto: crpyto,
 	}
 }
@@ -38,7 +42,14 @@ func (comm *ConnectionManagerImpl) SetOnConnectHandler(onConnectionHandler OnCon
 	}
 }
 
-func (comm *ConnectionManagerImpl) CreateStreamClientConn(connectionID string, ip string, handler ReceiveMessageHandle) error{
+func (comm *ConnectionManagerImpl) Subscribe(name string, subfunc func(message msg.OutterMessage)){
+	comm.Lock()
+	defer comm.Unlock()
+
+	comm.msgPublisher.AddSubscriber(name,subfunc)
+}
+
+func (comm *ConnectionManagerImpl) CreateStreamClientConn(connectionID string, ip string) error{
 
 	//Peer의 connectionID로 connection을 연결
 	_, ok := comm.connectionMap[connectionID]
@@ -59,7 +70,7 @@ func (comm *ConnectionManagerImpl) CreateStreamClientConn(connectionID string, i
 
 	//serverStream should be nil
 	conn,err := NewConnection(clientStream,nil,
-		grpcConnection,client,handler,connectionID,cf)
+		grpcConnection,client,comm.msgPublisher.ReceivedMessageHandle,connectionID,cf)
 
 	if err != nil{
 		return err
@@ -164,7 +175,7 @@ func (comm *ConnectionManagerImpl) Stream(stream pb.StreamService_StreamServer) 
 			//todo handler 넣어주기
 			commLogger.Println("creating new connection")
 			conn,err := NewConnection(nil,stream,
-				nil,nil, nil,connectionID,cf)
+				nil,nil, comm.msgPublisher.ReceivedMessageHandle,connectionID,cf)
 
 			if err != nil{
 				return err
