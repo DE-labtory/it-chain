@@ -26,10 +26,5 @@ func main() {
 		log.Fatalf("Failed to register webhook : %v", err)
 	}
 
-	//_, err = client.Remove(context.Background(), &pb.WebhookRequest{payloadURL})
-	//if err != nil {
-	//	log.Fatalf("Failed to remove webhook : %v", err)
-	//}
-
 }
 

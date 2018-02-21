@@ -24,7 +24,7 @@ func main() {
 				log.Fatalf("failed to send confirmed block : %v", err)
 			}
 
-			time.Sleep(1000 * time.Millisecond)
+			time.Sleep(3000 * time.Millisecond)
 		}
 	}()
 

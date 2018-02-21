@@ -129,7 +129,7 @@ func (wi *WebhookServiceImpl) SendConfirmedBlock(block *domain.Block) (error) {
 			log.Printf("PAYLOAD URL : %s", info.payloadURL.String())
 			_, err := http.Post(info.payloadURL.String(), "application/json", buff)
 			if err != nil {
-				log.Fatalf("An error during the sending process : %v", err)
+				log.Printf("An error during the sending process : %v", err)
 			}
 		}
 	}()
