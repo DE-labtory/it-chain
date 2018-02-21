@@ -219,6 +219,6 @@ func (cs *PBFTConsensusService) broadcastMessage(consensusMsg domain.ConsensusMe
 
 	for _, peerID := range peerIDList{
 		logger_pbftservice.Infoln("sending...",peerID)
-		cs.comm.SendStream(message,nil,peerID)
+		cs.comm.SendStream(message,nil,nil,peerID)
 	}
 }

@@ -85,9 +85,9 @@ func TestConnection_SendWithStream(t *testing.T) {
 	envelope := &pb.Envelope{Signature:[]byte("123")}
 
 
-	conn.Send(envelope,nil)
-	conn.Send(envelope, nil)
-	conn.Send(envelope, nil)
+	conn.Send(envelope,nil,nil)
+	conn.Send(envelope, nil,nil)
+	conn.Send(envelope, nil,nil)
 
 	time.Sleep(3*time.Second)
 
@@ -151,9 +151,9 @@ func TestConnectionImpl_ReadStream(t *testing.T) {
 
 	fmt.Println(counter)
 
-	conn.Send(envelope,nil)
-	conn.Send(envelope, nil)
-	conn.Send(envelope, nil)
+	conn.Send(envelope,nil,nil)
+	conn.Send(envelope, nil,nil)
+	conn.Send(envelope, nil,nil)
 
 	time.Sleep(3*time.Second)
 

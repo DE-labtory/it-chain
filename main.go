@@ -106,9 +106,11 @@ func (n *Node) SearchBootNode(bootip string){
 	peer, err := n.peerService.RequestPeer(bootip)
 
 	if err!=nil{
+		n.peerService.SetLeader(n.identity)
 		return
 	}
 
+	n.peerService.SetLeader(peer)
 	n.peerService.AddPeer(peer)
 }
 
@@ -184,7 +186,7 @@ func main() {
 
 	PrintLogo()
 
-	ip := viper.GetString("Node.ip")
+	ip := viper.GetString("node.ip")
 	bootIp := viper.GetString("bootNode.ip")
 
 	n := NewNode(ip)

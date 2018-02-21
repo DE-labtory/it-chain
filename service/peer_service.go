@@ -26,4 +26,6 @@ type PeerService interface{
 	BroadCastPeerTable(interface{})
 
 	GetLeader() *domain.Peer
+
+	SetLeader(peer *domain.Peer)
 }

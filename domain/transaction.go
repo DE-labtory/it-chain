@@ -159,6 +159,7 @@ func ToProtoTxData(t TxData) *pb.TxData{
 
 //todo test
 func ToProtoTransaction(t Transaction) *pb.Transaction{
+
 	transaction := &pb.Transaction{
 		TransactionHash: t.TransactionHash,
 		TransactionStatus: pb.Transaction_Status(t.TransactionStatus),
@@ -172,5 +173,19 @@ func ToProtoTransaction(t Transaction) *pb.Transaction{
 	return transaction
 }
 
-func FromProtoTransaction(t pb.T)
+//todo test
+func FromProtoTransaction(t pb.Transaction) *Transaction{
+
+	transaction := &Transaction{
+		TransactionHash: t.TransactionHash,
+		TransactionStatus: TransactionStatus(t.TransactionStatus),
+		TransactionID: t.TransactionID,
+		InvokePeerID: t.InvokePeerID,
+		TxData: FromProtoTxData(*t.TxData),
+		TransactionType: TransactionType(t.TransactionType),
+		TimeStamp: time.Unix(0, t.TimeStamp),
+	}
+
+	return transaction
+}
 

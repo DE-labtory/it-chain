@@ -25,5 +25,8 @@ batchTimer:
 bootNode:
   ip: 127.0.0.1:4444
 
-Node:
-  ip: 127.0.0.1:5555
+node:
+  ip: 127.0.0.1:4444
+
+leaderNode:
+  ip: 37NUcg96tvwFzwRG_eRSrUYrV_I=

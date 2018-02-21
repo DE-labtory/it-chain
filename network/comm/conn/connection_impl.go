@@ -88,7 +88,7 @@ func (conn *ConnectionImpl) toDie() bool {
 	return atomic.LoadInt32(&(conn.stopFlag)) == int32(1)
 }
 
-func (conn *ConnectionImpl) Send(envelope *message.Envelope, errCallBack func(error)){
+func (conn *ConnectionImpl) Send(envelope *message.Envelope, successCallBack func(interface{}), errCallBack func(error)){
 
 	conn.Lock()
 	defer conn.Unlock()
@@ -96,6 +96,7 @@ func (conn *ConnectionImpl) Send(envelope *message.Envelope, errCallBack func(er
 	m := &msg.InnerMessage{
 		Envelope: envelope,
 		OnErr:    errCallBack,
+		OnSuccess: successCallBack,
 	}
 
 	conn.outChannl <- m
@@ -219,8 +220,14 @@ func (conn *ConnectionImpl) WriteStream(){
 			logger_comm.Println("Sending...")
 			err := stream.Send(m.Envelope)
 			if err != nil {
-				go m.OnErr(err)
+				if m.OnErr != nil{
+					go m.OnErr(err)
+				}
 				return
+			}else{
+				if m.OnSuccess != nil{
+					go m.OnSuccess("")
+				}
 			}
 		case stop := <-conn.stopChannel:
 			logger_comm.Debug("Closing writing to stream")

@@ -74,8 +74,8 @@ func TestCommImpl_Send(t *testing.T) {
 		ConnectionEstablish: &pb.ConnectionEstablish{},
 	}
 
-	comm.SendStream(message,nil, "2")
-	comm.SendStream(message, nil, "2")
+	comm.SendStream(message,nil,nil, "2",)
+	comm.SendStream(message, nil, nil,"2")
 
 	defer func(){
 		server1.Stop()
@@ -211,7 +211,11 @@ func TestConnectionManagerImpl_Stream(t *testing.T) {
 			log.Println(err.Error())
 		}
 
-		message.Respond(envelope,errorCallback)
+		var successCallback = func (interface{}){
+
+		}
+
+		message.Respond(envelope,successCallback,errorCallback)
 		log.Println("respond message")
 	}
 

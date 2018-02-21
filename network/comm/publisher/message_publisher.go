@@ -82,7 +82,8 @@ func (mp *MessagePublisher) ReceivedMessageHandle(message msg.OutterMessage){
 	defer mp.lock.Unlock()
 
 	for _, subFunc := range mp.subscribers{
-		subFunc(message)
+		//todo goroutine 종료 check
+		go subFunc(message)
 	}
 }
 

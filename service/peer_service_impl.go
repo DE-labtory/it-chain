@@ -85,7 +85,7 @@ func (ps *PeerServiceImpl) BroadCastPeerTable(interface{}){
 	}
 
 	for _,Peer := range Peers{
-		ps.comm.SendStream(message,errorCallBack, Peer.PeerID)
+		ps.comm.SendStream(message,nil,errorCallBack, Peer.PeerID)
 	}
 }
 
@@ -180,7 +180,7 @@ func (ps *PeerServiceImpl) handleConnectionEstablish(message msg.OutterMessage){
 			common.Log.Println("Respond error:", err.Error())
 		}
 
-		message.Respond(respondEnv,errCallBack)
+		message.Respond(respondEnv,nil,errCallBack)
 	}
 
 	return
@@ -198,4 +198,8 @@ func (ps *PeerServiceImpl) handleUpdatePeerTable(message msg.OutterMessage){
 	}
 
 	return
+}
+
+func (ps *PeerServiceImpl) SetLeader(peer *domain.Peer){
+	ps.peerTable.Leader = peer
 }

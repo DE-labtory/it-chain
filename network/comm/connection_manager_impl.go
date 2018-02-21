@@ -90,7 +90,7 @@ func (comm *ConnectionManagerImpl) CreateStreamClientConn(connectionID string, i
 }
 
 //todo close 어떻게 할지
-func (comm *ConnectionManagerImpl) SendStream(message *pb.StreamMessage, errorCallBack OnError, connectionID string){
+func (comm *ConnectionManagerImpl) SendStream(message *pb.StreamMessage, successCallBack OnSuccess, errorCallBack OnError, connectionID string){
 
 	//commLogger.Println("Sending data...")
 
@@ -106,7 +106,7 @@ func (comm *ConnectionManagerImpl) SendStream(message *pb.StreamMessage, errorCa
 	conn, ok := comm.connectionMap[connectionID]
 
 	if ok{
-		conn.Send(envelope,errorCallBack)
+		conn.Send(envelope,successCallBack, errorCallBack)
 		//commLogger.Println("Sended Envelope:",envelope)
 		//todo 어떤 error일 경우에 conn을 close 할지 정해야함
 	}else{
