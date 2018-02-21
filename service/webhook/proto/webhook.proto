@@ -10,7 +10,7 @@ service Webhook {
 }
 
 message WebhookRequest {
-    string urls = 1;
+    string payloadURL = 1;
 }
 
 message WebhookResponse {

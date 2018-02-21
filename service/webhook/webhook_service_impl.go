@@ -9,22 +9,45 @@ import (
 	"net/url"
 	"bytes"
 	"net/http"
+	"strings"
+	"google.golang.org/grpc"
+	"net"
+	"log"
+)
+
+const (
+	WEBHOOK_PORT = ":50070"
 )
 
 type WebhookServiceImpl struct {
 
-	urls []url.URL
+	infos []webhookInfo
+
+}
+
+type webhookInfo struct {
+
+	payloadURL url.URL
 
 }
 
 func NewWebhookService() (WebhookService, error) {
 
-	urls := make([]url.URL, 0)
+	infos := make([]webhookInfo, 0)
 
-	// 만약 DB 사용시 로드 하여 urls에 로드하기
 	wi := &WebhookServiceImpl {
-		urls: urls,
+		infos: infos,
 	}
+
+	lis, err := net.Listen("tcp", WEBHOOK_PORT)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterWebhookServer(grpcServer, wi)
+
+	grpcServer.Serve(lis)
 
 	return wi, nil
 
@@ -32,28 +55,34 @@ func NewWebhookService() (WebhookService, error) {
 
 func (wi *WebhookServiceImpl) Register(ctx context.Context, in *pb.WebhookRequest) (*pb.WebhookResponse, error) {
 
-	url, valid := urlValidCheck(in.Urls)
+	parseURL, valid := urlValidCheck(in.PayloadURL)
 	if !valid {
-		return &pb.WebhookResponse{"INVALID URL"}, errors.New("INVALID URL")
+		return &pb.WebhookResponse{"Invalid URL"}, errors.New("Invalid URL")
 	}
 
-	// URL 중복 체크 필요
-	wi.urls = append(wi.urls, *url)
+	_, isExist := wi.urlExistCheck(parseURL)
+	if !isExist {
+		wi.infos = append(wi.infos, webhookInfo{*parseURL})
+	}
 
-	return &pb.WebhookResponse{"SUCCESS TO REGISTER YOUR WEBHOOK URL"}, nil
+	return &pb.WebhookResponse{"Success to register your webhook"}, nil
 
 }
 
 func (wi *WebhookServiceImpl) Remove(ctx context.Context, in *pb.WebhookRequest) (*pb.WebhookResponse, error) {
 
-	url, valid := urlValidCheck(in.Urls)
+	parseURL, valid := urlValidCheck(in.PayloadURL)
 	if !valid {
 		return &pb.WebhookResponse{"INVALID URL"}, errors.New("INVALID URL")
 	}
 
-	// 해당 slice에서 매칭되는 URL 찾아서 지우기
+	index, isExist := wi.urlExistCheck(parseURL)
+	if isExist {
+		// Remove duplicated element
+		wi.infos = append(wi.infos[:index], wi.infos[index+1:]...)
+	}
 
-	return &pb.WebhookResponse{"SUCCESS TO REMOVE YOUR WEBHOOK URL"}, nil
+	return &pb.WebhookResponse{"Success to remove your webhook"}, nil
 
 }
 
@@ -70,14 +99,28 @@ func (wi *WebhookServiceImpl) SendConfirmedBlock(block *domain.Block) (error) {
 
 	buff := bytes.NewBuffer(blockBytes)
 
-	// json, xml? 등의 방식으로 보낼 때 뭐로 보낼지 정할 수 있도록 구현하는게 좋을 것 같다. ( 전송 타입 ? )
 	go func() {
-		for _, url := range wi.urls {
-			res, err := http.Post(url.String(), "application/json", buff)
+		for _, info := range wi.infos {
+			_, err := http.Post(info.payloadURL.String(), "application/json", buff)
+			if err != nil {
+				log.Fatalf("An error during the sending process : %v", err)
+			}
 		}
 	}()
 
 	return nil
+
+}
+
+func (wi *WebhookServiceImpl) urlExistCheck(url *url.URL) (int, bool) {
+
+	for idx, info := range wi.infos {
+		if strings.Compare(info.payloadURL.String(), url.String()) == 0 {
+			return idx, true
+		}
+	}
+
+	return -1, false
 
 }
 
