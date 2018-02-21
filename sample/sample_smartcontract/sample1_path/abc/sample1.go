@@ -4,7 +4,6 @@ import (
 	"it-chain/domain"
 	//"it-chain/common"
 	"it-chain/db/leveldbhelper"
-	"it-chain/smartcontract"
 	"encoding/json"
 	"os"
 	"fmt"
@@ -12,7 +11,7 @@ import (
 //var logger = common.GetLogger("smartcontract")
 
 /*** Set SmartContractResponse ***/
-var smartContractResponse = smartcontract.SmartContractResponse{Data: map[string]string{}}
+var smartContractResponse = domain.SmartContractResponse{Data: map[string]string{}}
 
 type SampleSmartContract struct {
 }
@@ -60,17 +59,17 @@ func (sc *SampleSmartContract) Invoke(tx domain.Transaction, wsDBHandle *leveldb
 func main()  {
 	defer func() {
 		if err := recover(); err != nil {
-			smartContractResponse.Result = smartcontract.FAIL
+			smartContractResponse.Result = domain.FAIL
 			smartContractResponse.Error = "An error occured while running smartcontract!"
 			return
 		} else {
-			smartContractResponse.Result = smartcontract.SUCCESS
+			smartContractResponse.Result = domain.SUCCESS
 		}
 
 		/*** Marshal SmartContractResponse ***/
 		out, err := json.Marshal(smartContractResponse)
 		if err != nil {
-			smartContractResponse.Result = smartcontract.FAIL
+			smartContractResponse.Result = domain.FAIL
 			smartContractResponse.Error = "An error occured while marshaling the response!"
 			return
 		}
