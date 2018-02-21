@@ -21,12 +21,18 @@ func (l *Ledger) Close() {
 func (l *Ledger) CreateBlock(txList []*domain.Transaction, createPeerId string) (*domain.Block, error) {
 
 	lastBlock, err := l.GetLastBlock()
-	if err != nil { return nil, err }
+
+	if err != nil {
+		return nil, err
+	}
+
 	blk := domain.CreateNewBlock(lastBlock, createPeerId)
+
 	for _, tx := range txList {
 		err = blk.PutTranscation(tx)
 		if err != nil{ return nil, err }
 	}
+
 	blk.MakeMerkleTree()
 	err = blk.GenerateBlockHash()
 	if err != nil{ return nil, err }
@@ -71,8 +77,31 @@ func (l *Ledger) VerifyBlock(blk *domain.Block) (bool, error){
 }
 
 func (l *Ledger) GetLastBlock() (*domain.Block, error) {
+
 	blk, err := l.DB.GetLastBlock()
-	if err != nil{ return nil, err }
+
+	if err != nil{
+		return nil, err
+	}
+
+	if blk == nil{
+		genesisBlock, err := l.CreateBlock(nil,"0")
+
+		if err !=nil{
+			return nil, err
+		}
+
+		f, err := l.AddBlock(genesisBlock)
+
+		if err != nil{
+			return nil, err
+		}
+
+		if f{
+			return genesisBlock, nil
+		}
+	}
+
 	return blk, err
 }
 
@@ -89,11 +118,18 @@ func (l *Ledger) LookUpBlock(arg interface{}) (*domain.Block, error) {
 }
 
 func (l *Ledger) AddBlock(blk *domain.Block) (bool, error) {
+
 	lastBlock, err := l.GetLastBlock()
-	if err != nil { return false, err }
+
+	if err != nil {
+
+		return false, err
+	}
 	if blk.Header.BlockStatus != domain.Status_BLOCK_CONFIRMED {
+
 		return false, errors.New("unverified block")
 	}else if lastBlock != nil && lastBlock.Header.BlockHeight > 0 {
+
 		if lastBlock.Header.BlockHash != blk.Header.PreviousHash {
 			return false, errors.New("the hash values ​​of block and last Block are different")
 		}

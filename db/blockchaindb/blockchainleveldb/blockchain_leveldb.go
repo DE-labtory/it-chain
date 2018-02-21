@@ -136,8 +136,13 @@ func (l *BlockchainLevelDB) GetLastBlock() (*domain.Block, error) {
 	utilDB := l.DBProvider.GetDBHandle(UTIL_DB)
 
 	serializedBlock, err := utilDB.Get([]byte(LAST_BLOCK_KEY))
-	if serializedBlock == nil || err != nil {
+
+	if err != nil{
 		return nil, err
+	}
+
+	if serializedBlock == nil{
+		return nil, nil
 	}
 
 	block := &domain.Block{}

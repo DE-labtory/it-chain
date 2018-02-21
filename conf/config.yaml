@@ -21,6 +21,7 @@ smartContract:
 
 batchTimer:
   pushPeerTable: 5
+  sendTransaction: 5
 
 bootNode:
   ip: 127.0.0.1:4444
@@ -28,5 +29,6 @@ bootNode:
 node:
   ip: 127.0.0.1:4444
 
-leaderNode:
-  ip: 37NUcg96tvwFzwRG_eRSrUYrV_I=
+consensus:
+  batchTime: 10
+  maxTransactions: 100

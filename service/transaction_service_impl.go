@@ -25,6 +25,7 @@ type TransactionServiceImpl struct {
 }
 
 func NewTransactionService(path string, comm comm.ConnectionManager, ps PeerService) *TransactionServiceImpl {
+
 	transactionService := &TransactionServiceImpl{DB: leveldbhelper.CreateNewDBProvider(path), Comm: comm, PeerService: ps}
 
 	i, _ := strconv.Atoi(viper.GetString("batchTimer.pushPeerTable"))
@@ -127,8 +128,6 @@ func (t *TransactionServiceImpl) SendToLeader(interface{}) {
 			Transaction: domain.ToProtoTransaction(*tx),
 		}
 
-		common.Log.Println("Sending:", domain.ToProtoTransaction(*tx))
-
 		if err !=nil{
 			common.Log.Println("fail to serialize message")
 		}
@@ -143,11 +142,9 @@ func (t *TransactionServiceImpl) SendToLeader(interface{}) {
 		}
 
 		//todo need leader selection alg
-		//내가 리더가 아니고, 리더가 nil아니면
-		common.Log.Println("Leader ID", t.PeerService.GetLeader().PeerID)
-		common.Log.Println("My ID", t.PeerService.GetPeerTable().MyID)
+		//내가 리더가 아니고, 리더가 nil아니면 보낸다.
 		if t.PeerService.GetLeader() != nil && t.PeerService.GetLeader().PeerID != t.PeerService.GetPeerTable().MyID{
-
+			common.Log.Println("Sending:", domain.ToProtoTransaction(*tx))
 			t.Comm.SendStream(message, successCallBack, errorCallBack, t.PeerService.GetLeader().PeerID)
 		}
 	}

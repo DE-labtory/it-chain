@@ -10,6 +10,8 @@ import (
 	"github.com/rs/xid"
 	pb "it-chain/network/protos"
 	"it-chain/network/comm/msg"
+	"github.com/spf13/viper"
+	"strconv"
 )
 
 var logger_pbftservice = common.GetLogger("pbft_service")
@@ -18,7 +20,7 @@ var logger_pbftservice = common.GetLogger("pbft_service")
 type PBFTConsensusService struct {
 	consensusStates      map[string]*domain.ConsensusState
 	comm                 comm.ConnectionManager
-	identity                 *domain.Peer
+	identity             *domain.Peer
 	peerService          PeerService
 	blockService         BlockService
 	smartContractService SmartContractService
@@ -36,6 +38,14 @@ func NewPBFTConsensusService(comm comm.ConnectionManager, blockService BlockServ
 		transactionService: transactionService,
 		identity: identity,
 	}
+
+	i, _ := strconv.Atoi(viper.GetString("consensus.batchTime"))
+
+	broadCastPeerTableBatcher := NewBatchService(time.Duration(i)*time.Second,pbft.startConsensus,false)
+	broadCastPeerTableBatcher.Add("start consensus")
+	broadCastPeerTableBatcher.Start()
+
+	comm.Subscribe("Handle consensus msg",pbft.ReceiveConsensusMessage)
 
 	return pbft
 }
@@ -60,10 +70,49 @@ func (cs *PBFTConsensusService) StartConsensus(view *domain.View, block *domain.
 	sequenceID := time.Now().UnixNano()
 	preprepareConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*view,sequenceID,consensusState.Block,cs.identity.PeerID,domain.PreprepareMsg)
 
-	go cs.broadcastMessage(preprepareConsensusMessage)
+	cs.broadcastMessage(preprepareConsensusMessage)
 
 	consensusState.CurrentStage = domain.Prepared
 	cs.Unlock()
+}
+
+func (cs *PBFTConsensusService) startConsensus(interface{}){
+
+	transactions, err := cs.transactionService.GetTransactions(100)
+
+	if err !=nil{
+		common.Log.Error("Fail to get transactions",err.Error())
+		return
+	}
+
+	block, err := cs.blockService.CreateBlock(transactions,cs.identity.PeerID)
+
+	if err != nil{
+		common.Log.Error("Fail to create block",err.Error())
+		return
+	}
+
+	err = cs.smartContractService.ValidateTransactionsInBlock(block)
+
+	if err != nil{
+		common.Log.Error("Fail to vaildate transaction")
+		return
+	}
+
+	peerIDs := make([]string,0)
+
+
+	for _, peer := range cs.peerService.GetPeerTable().GetPeerList(){
+		peerIDs = append(peerIDs, peer.PeerID)
+	}
+
+	view := &domain.View{
+		ID: xid.New().String(),
+		LeaderID: cs.identity.PeerID,
+		PeerID: peerIDs,
+	}
+
+	go cs.StartConsensus(view,block)
 }
 
 func (cs *PBFTConsensusService) GetCurrentConsensusState() map[string]*domain.ConsensusState{
@@ -160,7 +209,7 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage msg.Outter
 		logger_pbftservice.Infoln("block", consensusState.Block)
 
 		preprepareConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.identity.PeerID,domain.PrepareMsg)
-		go cs.broadcastMessage(preprepareConsensusMessage)
+		cs.broadcastMessage(preprepareConsensusMessage)
 		consensusState.CurrentStage = domain.Prepared
 		logger_pbftservice.Infoln("ConsensusState is prepared")
 	}
@@ -169,7 +218,7 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage msg.Outter
 	if consensusState.CurrentStage == domain.Prepared && consensusState.PrepareReady(){
 		sequenceID := time.Now().UnixNano()
 		commitConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.identity.PeerID,domain.CommitMsg)
-		go cs.broadcastMessage(commitConsensusMessage)
+		cs.broadcastMessage(commitConsensusMessage)
 		consensusState.CurrentStage = domain.Committed
 		logger_pbftservice.Infoln("ConsensusState is Committed")
 	}

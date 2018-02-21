@@ -8,4 +8,5 @@ type SmartContractService interface{
 	Query(transaction domain.Transaction) (error)
 	Deploy(ReposPath string) (string, error)
 	PullAllSmartContracts(authenticatedGit string, errorHandler func(error), completionHandler func())
+	ValidateTransactionsInBlock(block *domain.Block) error
 }

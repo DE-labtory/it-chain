@@ -41,8 +41,8 @@ func NewPeerServiceImpl(peerTable *domain.PeerTable,comm comm.ConnectionManager)
 	return peerService
 }
 
-func (ps *PeerServiceImpl) GetPeerTable() domain.PeerTable{
-	return *ps.peerTable
+func (ps *PeerServiceImpl) GetPeerTable() *domain.PeerTable{
+	return ps.peerTable
 }
 
 //peer info 찾기
