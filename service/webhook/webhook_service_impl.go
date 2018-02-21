@@ -61,10 +61,11 @@ func (wi *WebhookServiceImpl) Register(ctx context.Context, in *pb.WebhookReques
 	}
 
 	_, isExist := wi.urlExistCheck(parseURL)
-	if !isExist {
-		wi.infos = append(wi.infos, webhookInfo{*parseURL})
+	if isExist {
+		return &pb.WebhookResponse{"Already exists"}, errors.New("Already exist")
 	}
 
+	wi.infos = append(wi.infos, webhookInfo{*parseURL})
 	return &pb.WebhookResponse{"Success to register your webhook"}, nil
 
 }
@@ -73,16 +74,17 @@ func (wi *WebhookServiceImpl) Remove(ctx context.Context, in *pb.WebhookRequest)
 
 	parseURL, valid := urlValidCheck(in.PayloadURL)
 	if !valid {
-		return &pb.WebhookResponse{"INVALID URL"}, errors.New("INVALID URL")
+		return &pb.WebhookResponse{"Invalid URL"}, errors.New("Invalid URL")
 	}
 
 	index, isExist := wi.urlExistCheck(parseURL)
 	if isExist {
 		// Remove duplicated element
 		wi.infos = append(wi.infos[:index], wi.infos[index+1:]...)
+		return &pb.WebhookResponse{"Success to remove your webhook"}, nil
 	}
 
-	return &pb.WebhookResponse{"Success to remove your webhook"}, nil
+	return &pb.WebhookResponse{"Requested URL is not exist"}, errors.New("Requested URL is not exist")
 
 }
 
