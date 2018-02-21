@@ -22,16 +22,18 @@ type PBFTConsensusService struct {
 	peerService          PeerService
 	blockService         BlockService
 	smartContractService SmartContractService
+	transactionService   TransactionService
 	sync.RWMutex
 }
 
-func NewPBFTConsensusService(comm comm.ConnectionManager, blockService BlockService,identity *domain.Peer, smartContractService SmartContractService) ConsensusService{
+func NewPBFTConsensusService(comm comm.ConnectionManager, blockService BlockService,identity *domain.Peer, smartContractService SmartContractService, transactionService TransactionService) ConsensusService{
 
 	pbft := &PBFTConsensusService{
 		consensusStates: make(map[string]*domain.ConsensusState),
 		comm:comm,
 		blockService: blockService,
 		smartContractService: smartContractService,
+		transactionService: transactionService,
 		identity: identity,
 	}
 
@@ -70,6 +72,14 @@ func (cs *PBFTConsensusService) GetCurrentConsensusState() map[string]*domain.Co
 
 func (cs *PBFTConsensusService) StopConsensus(){
 
+	cs.Lock()
+
+	defer cs.Unlock()
+
+	for consensusState := range cs.consensusStates {
+		cs.consensusStates[consensusState].End()
+		delete(cs.consensusStates, consensusState)
+	}
 }
 
 //consensusMessage가 들어옴
@@ -188,9 +198,11 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage msg.Outter
 }
 
 func (cs *PBFTConsensusService) EndConsensusState(consensusState domain.ConsensusState){
+
 	cs.Lock()
 	defer cs.Unlock()
 
+	cs.consensusStates[consensusState.ID].End()
 	delete(cs.consensusStates,consensusState.ID)
 }
 

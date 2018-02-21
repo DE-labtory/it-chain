@@ -3,7 +3,6 @@ package domain
 import (
 	"time"
 	"it-chain/common"
-	"errors"
 	pb "it-chain/network/protos"
 )
 
@@ -47,8 +46,6 @@ type Transaction struct {
 	TransactionID     string
 	TransactionStatus TransactionStatus
 	TransactionType   TransactionType
-	PublicKey         []byte
-	Signature         []byte
 	TransactionHash   string
 	TimeStamp         time.Time
 	TxData            *TxData
@@ -57,7 +54,7 @@ type Transaction struct {
 func CreateNewTransaction(peer_id string, tx_id string, tx_type TransactionType, t time.Time, data *TxData) *Transaction{
 
 	transaction := &Transaction{InvokePeerID:peer_id, TransactionID:tx_id, TransactionStatus:Status_TRANSACTION_UNKNOWN, TransactionType:tx_type, TimeStamp:t, TxData:data}
-	transaction.GenerateHash()
+
 	return transaction
 }
 
@@ -96,20 +93,21 @@ func (tx Transaction) Validate() bool{
 	return true
 }
 
-func (tx *Transaction) SignHash() (ret bool, err error){
-	signature := []byte("temp")
-	tx.PublicKey = []byte("temp")
-
-	if signature != nil {
-		tx.Signature = signature
-		err = nil
-		ret = true
-	} else {
-		err = errors.New("transaction signature fail")
-		ret = false
-	}
-	return ret, err
-}
+//
+//func (tx *Transaction) SignHash() (ret bool, err error){
+//	signature := []byte("temp")
+//	tx.PublicKey = []byte("temp")
+//
+//	if signature != nil {
+//		tx.Signature = signature
+//		err = nil
+//		ret = true
+//	} else {
+//		err = errors.New("transaction signature fail")
+//		ret = false
+//	}
+//	return ret, err
+//}
 
 //todo test
 func FromProtoTxData(ptxData pb.TxData) *TxData{
@@ -167,7 +165,12 @@ func ToProtoTransaction(t Transaction) *pb.Transaction{
 		TransactionID: t.TransactionID,
 		InvokePeerID: t.InvokePeerID,
 		TxData: ToProtoTxData(*t.TxData),
+		TransactionType: int32(t.TransactionType),
+		TimeStamp: t.TimeStamp.UnixNano(),
 	}
 
 	return transaction
 }
+
+func FromProtoTransaction(t pb.T)
+

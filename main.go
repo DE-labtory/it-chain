@@ -85,7 +85,7 @@ func NewNode(ip string) *Node{
 	smartContractService := service.NewSmartContractService(viper.GetString("smartcontract.defaultPath"),viper.GetString("smartContract.githubID"))
 
 	///// consensusService
-	consensusService := service.NewPBFTConsensusService(node.connectionManager,node.blockService,node.identity,smartContractService)
+	consensusService := service.NewPBFTConsensusService(node.connectionManager,node.blockService,node.identity,smartContractService,transactionService)
 	node.consensusService = consensusService
 
 	return node
