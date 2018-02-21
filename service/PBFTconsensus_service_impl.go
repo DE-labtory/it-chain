@@ -78,6 +78,8 @@ func (cs *PBFTConsensusService) StartConsensus(view *domain.View, block *domain.
 
 func (cs *PBFTConsensusService) startConsensus(interface{}){
 
+	common.Log.Println("start Consesnsus")
+
 	transactions, err := cs.transactionService.GetTransactions(100)
 
 	if err !=nil{

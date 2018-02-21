@@ -4,6 +4,7 @@ import (
 	"it-chain/db/blockchaindb"
 	"it-chain/domain"
 	"errors"
+	"it-chain/common"
 )
 
 type Ledger struct {
@@ -30,11 +31,14 @@ func (l *Ledger) CreateBlock(txList []*domain.Transaction, createPeerId string) 
 
 	for _, tx := range txList {
 		err = blk.PutTranscation(tx)
-		if err != nil{ return nil, err }
+		if err != nil{
+			return nil, err
+		}
 	}
 
 	blk.MakeMerkleTree()
 	err = blk.GenerateBlockHash()
+
 	if err != nil{ return nil, err }
 	return blk, nil
 }
@@ -85,7 +89,9 @@ func (l *Ledger) GetLastBlock() (*domain.Block, error) {
 	}
 
 	if blk == nil{
-		genesisBlock, err := l.CreateBlock(nil,"0")
+
+		genesisBlock := domain.CreateNewBlock(nil, "0")
+		genesisBlock.Header.MerkleTreeRootHash = common.ComputeSHA256([]string{""})
 
 		if err !=nil{
 			return nil, err
@@ -122,11 +128,9 @@ func (l *Ledger) AddBlock(blk *domain.Block) (bool, error) {
 	lastBlock, err := l.GetLastBlock()
 
 	if err != nil {
-
 		return false, err
 	}
 	if blk.Header.BlockStatus != domain.Status_BLOCK_CONFIRMED {
-
 		return false, errors.New("unverified block")
 	}else if lastBlock != nil && lastBlock.Header.BlockHeight > 0 {
 
@@ -137,7 +141,9 @@ func (l *Ledger) AddBlock(blk *domain.Block) (bool, error) {
 
 	BlkVarification, _ := blk.VerifyBlock()
 
-	if BlkVarification == false{ return false, errors.New("invalid block") }
+	if BlkVarification == false{
+		return false, errors.New("invalid block")
+	}
 
 	l.DB.AddBlock(blk)
 

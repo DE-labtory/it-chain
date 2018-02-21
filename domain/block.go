@@ -91,7 +91,9 @@ func (s Block) FindTransactionIndex(hash string) (idx int, err error){
 }
 
 func (s *Block) MakeMerkleTree(){
+
 	var mtList []string
+
 	for _, h := range s.Transactions{
 		mtList = append(mtList, h.TransactionHash)
 	}
