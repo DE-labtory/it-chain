@@ -30,11 +30,14 @@ func (l *Ledger) CreateBlock(txList []*domain.Transaction, createPeerId string) 
 	blk := domain.CreateNewBlock(lastBlock, createPeerId)
 
 	for _, tx := range txList {
+		common.Log.Println(tx)
 		err = blk.PutTranscation(tx)
 		if err != nil{
 			return nil, err
 		}
 	}
+
+	common.Log.Println(blk.Transactions)
 
 	blk.MakeMerkleTree()
 	err = blk.GenerateBlockHash()
@@ -92,20 +95,19 @@ func (l *Ledger) GetLastBlock() (*domain.Block, error) {
 
 		genesisBlock := domain.CreateNewBlock(nil, "0")
 		genesisBlock.Header.MerkleTreeRootHash = common.ComputeSHA256([]string{""})
+		BlkVarification, _ := genesisBlock.VerifyBlock()
 
-		if err !=nil{
-			return nil, err
+		if BlkVarification == false{
+			return nil, errors.New("invalid block")
 		}
 
-		f, err := l.AddBlock(genesisBlock)
+		err = l.DB.AddBlock(genesisBlock)
 
-		if err != nil{
-			return nil, err
+		if err != nil {
+			return nil,err
 		}
 
-		if f{
-			return genesisBlock, nil
-		}
+		return genesisBlock, nil
 	}
 
 	return blk, err

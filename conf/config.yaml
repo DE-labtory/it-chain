@@ -30,5 +30,5 @@ node:
   ip: 127.0.0.1:4444
 
 consensus:
-  batchTime: 10
+  batchTime: 3
   maxTransactions: 100
