@@ -14,7 +14,7 @@ type Key interface {
 
 type Crypto interface {
 
-	Sign(digest []byte, opts SignerOpts) ([]byte, error)
+	Sign(data []byte, opts SignerOpts) ([]byte, error)
 
 	Verify(key Key, signature, digest []byte, opts SignerOpts) (bool, error)
 

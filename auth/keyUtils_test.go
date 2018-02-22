@@ -72,7 +72,7 @@ func TestECDSAPrivateKeyToPEM(t *testing.T) {
 
 func TestPEMToPrivatePublicKey(t *testing.T) {
 
-	cryp, err := NewCrypto("", &RSAKeyGenOpts{})
+	cryp, err := NewCryptoImpl("", &RSAKeyGenOpts{})
 	assert.NoError(t, err)
 
 	pri, pub, err := cryp.GetKey()
