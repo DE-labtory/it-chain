@@ -124,15 +124,13 @@ func (wi *WebhookServiceImpl) SendConfirmedBlock(block *domain.Block) (error) {
 
 	buff := bytes.NewBuffer(blockBytes)
 
-	go func() {
-		for _, info := range wi.infos {
-			log.Printf("PAYLOAD URL : %s", info.payloadURL.String())
-			_, err := http.Post(info.payloadURL.String(), "application/json", buff)
-			if err != nil {
-				log.Printf("An error during the sending process : %v", err)
-			}
+	for _, info := range wi.infos {
+		log.Printf("PAYLOAD URL : %s", info.payloadURL.String())
+		_, err := http.Post(info.payloadURL.String(), "application/json", buff)
+		if err != nil {
+			log.Printf("An error during the sending process : %v", err)
 		}
-	}()
+	}
 
 	return nil
 
