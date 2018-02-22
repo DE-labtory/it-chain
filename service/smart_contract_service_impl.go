@@ -189,7 +189,7 @@ func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
  *	6. docker에서 smartcontract 실행
  ****************************************************/
 
-func (scs *SmartContractServiceImpl) ValidateTransactionsOfBlock(block domain.Block) (error) {
+func (scs *SmartContractServiceImpl) ValidateTransactionsOfBlock(block *domain.Block) (error) {
 	// 블럭 유효성 검사 필요?
 	if block.TransactionCount <= 0 {
 		return errors.New("No tx in block")
