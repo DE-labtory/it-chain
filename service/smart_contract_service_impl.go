@@ -22,7 +22,8 @@ import (
 )
 
 const (
-	TMP_DIR string = "/tmp"
+	TmpDir string = "/tmp"
+	WorldStateDB_OnDoker string = "/go/src/worldstatedb"
 )
 
 var logger_s = common.GetLogger("smart_contract_service.go")
@@ -37,6 +38,7 @@ type SmartContractServiceImpl struct {
 	GithubID string
 	SmartContractDirPath string
 	SmartContractMap map[string]SmartContract
+	WorldStateDBPath string
 }
 
 func Init() {
@@ -271,7 +273,7 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 	/*** smartcontract build ***/
 	logger_s.Errorln("build start")
 	fmt.Println(sc.SmartContractPath + "/" + transaction.TxData.ContractID + "/" + sc.Name + ".go")
-	cmd := exec.Command("env", "GOOS=linux", "go", "build", "-o", TMP_DIR + "/" + sc.Name, sc.SmartContractPath + "/" + transaction.TxData.ContractID + "/" + sc.Name + ".go")
+	cmd := exec.Command("env", "GOOS=linux", "go", "build", "-o", TmpDir + "/" + sc.Name, sc.SmartContractPath + "/" + transaction.TxData.ContractID + "/" + sc.Name + ".go")
 	cmd.Dir = sc.SmartContractPath + "/" + transaction.TxData.ContractID
 
 	err = cmd.Run()
@@ -279,7 +281,7 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 		logger_s.Errorln("SmartContract build error")
 		return nil, err
 	}
-	cmd = exec.Command("chmod", "777", TMP_DIR + "/" + sc.Name)
+	cmd = exec.Command("chmod", "777", TmpDir + "/" + sc.Name)
 	cmd.Dir = sc.SmartContractPath + "/" + transaction.TxData.ContractID
 	err = cmd.Run()
 	if err != nil {
@@ -289,12 +291,12 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 
 	logger_s.Errorln("make tar")
 
-	err = domain.MakeTar(TMP_DIR + "/" + sc.Name, TMP_DIR)
+	err = domain.MakeTar(TmpDir + "/" + sc.Name, TmpDir)
 	if err != nil {
 		logger_s.Errorln("An error occurred while archiving smartcontract file!")
 		return nil, err
 	}
-	err = domain.MakeTar("$GOPATH/src/it-chain/smartcontract/worldstatedb", TMP_DIR)
+	err = domain.MakeTar("$GOPATH/src/it-chain/smartcontract/worldstatedb", TmpDir)
 	if err != nil {
 		logger_s.Errorln("An error occurred while archiving worldstateDB file!")
 		return nil, err
@@ -303,7 +305,7 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 	logger_s.Errorln("exec cmd")
 
 	// tar config file
-	cmd = exec.Command("tar", "-cf", TMP_DIR + "/config.tar", "./it-chain/config.yaml")
+	cmd = exec.Command("tar", "-cf", TmpDir + "/config.tar", "./it-chain/config.yaml")
 	cmd.Dir = "../../"
 	err = cmd.Run()
 	if err != nil {
@@ -315,9 +317,9 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 
 	// Docker Code
 	imageName := "docker.io/library/golang:1.9.2-alpine3.6"
-	tarPath := TMP_DIR + "/" + sc.Name + ".tar"
-	tarPath_wsdb := TMP_DIR + "/worldstatedb.tar"
-	tarPath_config := TMP_DIR + "/config.tar"
+	tarPath := TmpDir + "/" + sc.Name + ".tar"
+	tarPath_wsdb := TmpDir + "/worldstatedb.tar"
+	tarPath_config := TmpDir + "/config.tar"
 
 	ctx := context.Background()
 	cli, err := docker.NewEnvClient()
@@ -339,7 +341,7 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: image,
-		Cmd: []string{"/go/src/" + sc.Name, string(txBytes)},
+		Cmd: []string{"/go/src/" + sc.Name, string(txBytes), WorldStateDB_OnDoker},
 		Tty: true,
 		AttachStdout: true,
 		AttachStderr: true,
@@ -434,7 +436,7 @@ func (scs *SmartContractServiceImpl) Query() {
 
 func (scs *SmartContractServiceImpl) Invoke(transaction *domain.Transaction) (*domain.SmartContractResponse, error) {
 	/*** Set Transaction Arg ***/
-	logger_s.Errorln("validateTransaction start")
+	logger_s.Errorln("invoke start")
 	txBytes, err := json.Marshal(transaction)
 	if err != nil {
 		return nil, errors.New("Tx Marshal Error")
@@ -452,7 +454,7 @@ func (scs *SmartContractServiceImpl) Invoke(transaction *domain.Transaction) (*d
 		return nil, errors.New("File or Directory Not Exist")
 	}
 
-	cmd := exec.Command("go", "run", sc.SmartContractPath + "/" + transaction.TxData.ContractID + "/" + sc.Name + ".go", string(txBytes))
+	cmd := exec.Command("go", "run", sc.SmartContractPath + "/" + transaction.TxData.ContractID + "/" + sc.Name + ".go", string(txBytes), scs.WorldStateDBPath)
 	//cmd.Dir = sc.SmartContractPath + "/" + transaction.TxData.ContractID
 
 	output, err := cmd.Output()
@@ -461,12 +463,14 @@ func (scs *SmartContractServiceImpl) Invoke(transaction *domain.Transaction) (*d
 		return nil, err
 	}
 
+	fmt.Println("======== output =========")
+	fmt.Println(string(output))
 	smartContractResponse := &domain.SmartContractResponse{}
-	err = json.Unmarshal(output, smartContractResponse)
-	if err != nil {
-		logger_s.Errorln("An error occurred while unmarshalling the smartContractResponse!")
-		return nil, err
-	}
+	//err = json.Unmarshal(output, smartContractResponse)
+	//if err != nil {
+	//	logger_s.Errorln("An error occurred while unmarshalling the smartContractResponse!")
+	//	return nil, err
+	//}
 
 	return smartContractResponse, nil
 }

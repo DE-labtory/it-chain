@@ -21,7 +21,12 @@ func TestDeploy_Deploy(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	scs := SmartContractServiceImpl{"steve-buzzni", currentDir + "/sample_smartcontract",map[string]SmartContract{}}
+	scs := SmartContractServiceImpl{
+		"steve-buzzni",
+		currentDir + "/sample_smartcontract",
+		map[string]SmartContract{},
+		currentDir + "/smartcontract/worldstatedb",
+	}
 	ContractPath := "junbeomlee/bloom"
 
 	deploy_result, err := scs.Deploy(ContractPath)
@@ -38,6 +43,40 @@ func TestDeploy_Deploy(t *testing.T) {
 
 func TestSmartContractServiceImpl_Invoke(t *testing.T) {
 
+	currentDir, err := filepath.Abs("./")
+	fmt.Println(currentDir)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+	tx := domain.CreateNewTransaction(
+		strconv.Itoa(1),
+		strconv.Itoa(1),
+		0,
+		time.Now(),
+		domain.SetTxData(
+			"",
+			domain.Invoke,
+			domain.SetTxMethodParameters(0, "putA", []string{""}),
+			"abc",
+		),
+	)
+	fmt.Println("tx created")
+	scs := SmartContractServiceImpl{
+		"steve-buzzni",
+		currentDir + "/sample_smartcontract",
+		map[string]SmartContract{
+			"abc": SmartContract{
+				Name:              "sample1",
+				OriginReposPath:   "sample1/path",
+				SmartContractPath: currentDir + "/../sample/sample_smartcontract/sample1_path",
+				//SmartContractPath: "/Users/hackurity/go/src/it-chain-smartcontract/sample1_path",
+			},
+		},
+		currentDir + "/../smartcontract/worldstatedb",
+	}
+
+	fmt.Println("scs created")
+	scs.Invoke(tx)
 }
 
 func TestSmartContractServiceImpl_ValidateTransactionsOfBlock(t *testing.T) {
@@ -94,12 +133,13 @@ func TestSmartContractServiceImpl_ValidateTransactionsOfBlock(t *testing.T) {
 		currentDir + "/sample_smartcontract",
 		map[string]SmartContract{
 			"abc": SmartContract{
-				Name:         "sample1",
+				Name:              "sample1",
 				OriginReposPath:   "sample1/path",
 				SmartContractPath: currentDir + "/../sample/sample_smartcontract/sample1_path",
 				//SmartContractPath: "/Users/hackurity/go/src/it-chain-smartcontract/sample1_path",
 			},
 		},
+		currentDir + "/../smartcontract/worldstatedb",
 	}
 
 	fmt.Println("scs created")
@@ -150,12 +190,13 @@ func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
 		currentDir + "/sample_smartcontract",
 		map[string]SmartContract{
 			"abc": SmartContract{
-				Name:         "sample1",
+				Name:              "sample1",
 				OriginReposPath:   "sample1/path",
 				SmartContractPath: currentDir + "/../sample/sample_smartcontract/sample1_path",
 				//SmartContractPath: "/Users/hackurity/go/src/it-chain-smartcontract/sample1_path",
 			},
 		},
+		currentDir + "/smartcontract/worldstatedb",
 	}
 
 	fmt.Println("scs created")
@@ -191,8 +232,10 @@ func TestSmartContractServiceImpl_pullAllSmartContracts(t *testing.T) {
 
 	scs := SmartContractServiceImpl{
 		"yojkim",
-	currentDir + "/pull_test_repositories",
-	map[string]SmartContract{}}
+		currentDir + "/pull_test_repositories",
+		map[string]SmartContract{},
+		currentDir + "/smartcontract/worldstatedb",
+	}
 
 	scs.PullAllSmartContracts("emperorhan", func(e error) {
 		assert.Fail(t, e.Error())
