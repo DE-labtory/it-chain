@@ -463,15 +463,15 @@ func (scs *SmartContractServiceImpl) Invoke(transaction *domain.Transaction) (*d
 		return nil, err
 	}
 
-	fmt.Println("======== output =========")
+	fmt.Println("========< Output >========")
 	fmt.Println(string(output))
-	smartContractResponse := &domain.SmartContractResponse{}
-	//err = json.Unmarshal(output, smartContractResponse)
-	//if err != nil {
-	//	logger_s.Errorln("An error occurred while unmarshalling the smartContractResponse!")
-	//	return nil, err
-	//}
 
+	smartContractResponse := &domain.SmartContractResponse{}
+	err = json.Unmarshal(output, smartContractResponse)
+	if err != nil {
+		logger_s.Errorln("An error occurred while unmarshalling the smartContractResponse!")
+		return nil, err
+	}
 	return smartContractResponse, nil
 }
 
