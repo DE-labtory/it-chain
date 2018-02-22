@@ -82,7 +82,7 @@ func (wi *WebhookServiceImpl) Serve(port int) error {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("Failed to listen: %v", err)
 		return err
 	}
 
@@ -95,7 +95,7 @@ func (wi *WebhookServiceImpl) Serve(port int) error {
 	reflection.Register(grpcServer)
 
 	if err = grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to launch grpc server : %v", err)
+		log.Fatalf("Failed to launch grpc server : %v", err)
 		grpcServer.Stop()
 		return err
 	}
@@ -109,11 +109,11 @@ func (wi *WebhookServiceImpl) Serve(port int) error {
 func (wi *WebhookServiceImpl) SendConfirmedBlock(block *domain.Block) (error) {
 
 	if block == nil {
-		return errors.New("block should not be nil")
+		return errors.New("Block should not be nil")
 	}
 
 	if len(wi.infos) == 0 {
-		log.Printf("There is no payload URL")
+		log.Printf("The registerd payload URL does not exists.")
 		return nil
 	}
 
