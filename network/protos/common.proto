@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package message;
+
+message Empty {}
+
+message Transaction {
+
+    enum Status {
+        UNCONFIRMED = 0;
+        CONFIRMED = 1;
+        UNKNOWN = 2;
+    }
+
+    string InvokePeerID = 1;
+    string TransactionID = 2;
+    Status TransactionStatus = 3;
+    string TransactionHash = 4;
+    TxData TxData = 5;
+    int32 TransactionType = 6;
+    int64 TimeStamp = 7;
+}
+
+message TxData {
+
+    enum TxDataType{
+        Invoke = 0;
+        Query = 1;
+    }
+
+    string Jsonrpc = 1;
+    TxDataType Method = 2;
+    Params Params = 3;
+    string ContractID = 4;
+}
+
+message Params {
+    int32 ParamsType = 1;
+    string Function = 2;
+    repeated string Args = 3;
+}

@@ -1,0 +1,34 @@
+database:
+  type: leveldb
+  leveldb:
+    defaultPath: ./.leveldb
+
+key:
+  type: RSA
+  defaultPath: ./.
+
+ledger:
+  defaultPath: ./.ledger
+
+txDatabase:
+  defaultPath: ./.tx
+
+smartContract:
+  defaultPath: ./.constracts
+  githubID: steve@buzzni.com
+  githubPassword: itchain123
+  githubAccessToken: 1a8ae688db783f63c2494d59f971b2eed5399b1d
+
+batchTimer:
+  pushPeerTable: 5
+  sendTransaction: 5
+
+bootNode:
+  ip: 127.0.0.1:4444
+
+node:
+  ip: 127.0.0.1:6666
+
+consensus:
+  batchTime: 3
+  maxTransactions: 100
