@@ -189,7 +189,7 @@ func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
  *	6. docker에서 smartcontract 실행
  ****************************************************/
 
-func (scs *SmartContractServiceImpl) ValidateTransactionsOfBlock(block domain.Block) (error) {
+func (scs *SmartContractServiceImpl) ValidateTransactionsOfBlock(block *domain.Block) (error) {
 	// 블럭 유효성 검사 필요?
 	if block.TransactionCount <= 0 {
 		return errors.New("No tx in block")
@@ -205,14 +205,14 @@ func (scs *SmartContractServiceImpl) ValidateTransaction(transaction *domain.Tra
 	if err != nil {
 		logger_s.Errorln("An error occurred while validating smartcontract!")
 		transaction.TransactionStatus = domain.Status_TRANSACTION_UNCONFIRMED
-	}
-
-	if smartContractResponse.Result == domain.SUCCESS {
-		logger_s.Println("Running smartcontract is success")
-		transaction.TransactionStatus = domain.Status_TRANSACTION_CONFIRMED
-	} else if smartContractResponse.Result == domain.FAIL {
-		logger_s.Errorln("An error occurred while validating smartcontract!")
-		transaction.TransactionStatus = domain.Status_TRANSACTION_UNCONFIRMED
+	}else{
+		if smartContractResponse.Result == domain.SUCCESS {
+			logger_s.Println("Running smartcontract is success")
+			transaction.TransactionStatus = domain.Status_TRANSACTION_CONFIRMED
+		} else if smartContractResponse.Result == domain.FAIL {
+			logger_s.Errorln("An error occurred while validating smartcontract!")
+			transaction.TransactionStatus = domain.Status_TRANSACTION_UNCONFIRMED
+		}
 	}
 
 	transaction.GenerateHash()

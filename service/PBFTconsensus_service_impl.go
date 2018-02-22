@@ -28,11 +28,12 @@ type PBFTConsensusService struct {
 	sync.RWMutex
 }
 
-func NewPBFTConsensusService(comm comm.ConnectionManager, blockService BlockService,identity *domain.Peer, smartContractService SmartContractService, transactionService TransactionService) ConsensusService{
+func NewPBFTConsensusService(comm comm.ConnectionManager, peerService PeerService, blockService BlockService,identity *domain.Peer, smartContractService SmartContractService, transactionService TransactionService) ConsensusService{
 
 	pbft := &PBFTConsensusService{
 		consensusStates: make(map[string]*domain.ConsensusState),
 		comm:comm,
+		peerService: peerService,
 		blockService: blockService,
 		smartContractService: smartContractService,
 		transactionService: transactionService,
@@ -56,12 +57,6 @@ func NewPBFTConsensusService(comm comm.ConnectionManager, blockService BlockServ
 //1. Consensus의 state를 추가한다.
 //2. 합의할 block을 consensusMessage에 담고 prepreMsg로 전파한다.
 func (cs *PBFTConsensusService) StartConsensus(view *domain.View, block *domain.Block){
-
-	if len(view.PeerID) <= 1{
-		//ADD block
-		logger_pbftservice.Println("no identity exist, add block")
-		return
-	}
 
 	cs.Lock()
 	consensusState := domain.NewConsensusState(view,xid.New().String(),block,domain.PrePrepared,cs.EndConsensusState,300)
@@ -87,6 +82,11 @@ func (cs *PBFTConsensusService) startConsensus(interface{}){
 		return
 	}
 
+	for i := 0; i < len(transactions); i++ {
+		cs.smartContractService.ValidateTransaction(transactions[i])
+		transactions[i].GenerateHash()
+	}
+
 	block, err := cs.blockService.CreateBlock(transactions,cs.identity.PeerID)
 
 	if err != nil{
@@ -94,15 +94,25 @@ func (cs *PBFTConsensusService) startConsensus(interface{}){
 		return
 	}
 
-	err = cs.smartContractService.ValidateTransactionsInBlock(block)
+	//todo 혼자인경우
+	//common.Log.Error(cs.peerService.GetPeerTable())
+	if len(cs.peerService.GetPeerTable().GetPeerList()) == 0{
 
-	if err != nil{
-		common.Log.Error("Fail to vaildate transaction")
+		flag, err := cs.blockService.VerifyBlock(block)
+
+		if err != nil{
+			common.Log.Error("Verify block error:",err.Error())
+		}
+
+		if flag{
+			common.Log.Error("Add block")
+			cs.blockService.AddBlock(block)
+			//txbuffer제거
+		}
 		return
 	}
 
 	peerIDs := make([]string,0)
-
 
 	for _, peer := range cs.peerService.GetPeerTable().GetPeerList(){
 		peerIDs = append(peerIDs, peer.PeerID)

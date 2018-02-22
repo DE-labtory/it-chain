@@ -30,19 +30,19 @@ func (l *Ledger) CreateBlock(txList []*domain.Transaction, createPeerId string) 
 	blk := domain.CreateNewBlock(lastBlock, createPeerId)
 
 	for _, tx := range txList {
-		common.Log.Println(tx)
 		err = blk.PutTranscation(tx)
 		if err != nil{
 			return nil, err
 		}
 	}
 
-	common.Log.Println(blk.Transactions)
-
 	blk.MakeMerkleTree()
 	err = blk.GenerateBlockHash()
 
-	if err != nil{ return nil, err }
+	if err != nil{
+		return nil, err
+	}
+
 	return blk, nil
 }
 
