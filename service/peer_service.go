@@ -6,7 +6,7 @@ import "it-chain/domain"
 type PeerService interface{
 
 	//peer table 조회
-	GetPeerTable() domain.PeerTable
+	GetPeerTable() *domain.PeerTable
 
 	//peer info 찾기
 	GetPeerByPeerID(peerID string) *domain.Peer
@@ -26,4 +26,6 @@ type PeerService interface{
 	BroadCastPeerTable(interface{})
 
 	GetLeader() *domain.Peer
+
+	SetLeader(peer *domain.Peer)
 }

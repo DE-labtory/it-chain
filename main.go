@@ -43,7 +43,7 @@ func NewNode(ip string) *Node{
 	node.identity.Port = strings.Split(ip,":")[1]
 
 	//// crpyto
-	crpyto, err := auth.NewCrypto(viper.GetString("key.defaultPath"),&auth.RSAKeyGenOpts{})
+	crpyto, err := auth.NewCryptoImpl(viper.GetString("key.defaultPath"),&auth.RSAKeyGenOpts{})
 
 	if err != nil{
 		common.Log.Errorln("crypto create error")
@@ -85,7 +85,7 @@ func NewNode(ip string) *Node{
 	smartContractService := service.NewSmartContractService(viper.GetString("smartcontract.defaultPath"),viper.GetString("smartContract.githubID"))
 
 	///// consensusService
-	consensusService := service.NewPBFTConsensusService(node.connectionManager,node.blockService,node.identity,smartContractService)
+	consensusService := service.NewPBFTConsensusService(node.connectionManager,node.peerService,node.blockService,node.identity,smartContractService,transactionService)
 	node.consensusService = consensusService
 
 	return node
@@ -106,9 +106,11 @@ func (n *Node) SearchBootNode(bootip string){
 	peer, err := n.peerService.RequestPeer(bootip)
 
 	if err!=nil{
+		n.peerService.SetLeader(n.identity)
 		return
 	}
 
+	n.peerService.SetLeader(peer)
 	n.peerService.AddPeer(peer)
 }
 
@@ -184,7 +186,7 @@ func main() {
 
 	PrintLogo()
 
-	ip := viper.GetString("Node.ip")
+	ip := viper.GetString("node.ip")
 	bootIp := viper.GetString("bootNode.ip")
 
 	n := NewNode(ip)

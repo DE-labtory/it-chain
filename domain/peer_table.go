@@ -173,13 +173,13 @@ func (pt *PeerTable) SelectRandomPeers(percent float64) ([]Peer,error){
 
 //tested
 //나자신을 제외한 Peer의 list를 return
-func (pt *PeerTable) GetPeerList() []Peer{
+func (pt *PeerTable) GetPeerList() []*Peer{
 
-	tmp := make([]Peer, 0)
+	tmp := make([]*Peer, 0)
 	for _, peer := range pt.PeerMap{
 		if peer.PeerID != pt.MyID{
 			//내 ID는 삭제
-			tmp = append(tmp, *peer)
+			tmp = append(tmp, peer)
 		}
 	}
 

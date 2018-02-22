@@ -133,7 +133,7 @@ func TestNewPBFTConsensusService(t *testing.T) {
 	view.LeaderID = "1"
 	view.PeerID = []string{"1","2","3"}
 
-	pbftService := NewPBFTConsensusService(comm,nil,&domain.Peer{PeerID:"1"},nil)
+	pbftService := NewPBFTConsensusService(comm,nil,nil,&domain.Peer{PeerID:"1"},nil,nil)
 
 	consensusStates := pbftService.GetCurrentConsensusState()
 	assert.NotNil(t,consensusStates)
@@ -148,7 +148,7 @@ func TestPBFTConsensusService_StartConsensus(t *testing.T) {
 	view.LeaderID = "1"
 	view.PeerID = []string{"1","2"}
 
-	pbftService := NewPBFTConsensusService(connctionManager,nil,&domain.Peer{PeerID:"1"},nil)
+	pbftService := NewPBFTConsensusService(connctionManager,nil,nil,&domain.Peer{PeerID:"1"},nil,nil)
 	block := &domain.Block{}
 
 	connctionManager.On("SendStream", mock.AnythingOfType("*message.StreamMessage"), nil, "1")
@@ -204,7 +204,7 @@ func TestPBFTConsensusService_ReceiveConsensusMessage(t *testing.T) {
 	view.LeaderID = "1"
 	view.PeerID = []string{"1","2","3"}
 
-	pbftService := NewPBFTConsensusService(connctionManager,nil,&domain.Peer{PeerID:"1"},nil)
+	pbftService := NewPBFTConsensusService(connctionManager,nil,nil,&domain.Peer{PeerID:"1"},nil,nil)
 
 	Message := GetMockConsensusMessage("1",domain.PreprepareMsg)
 

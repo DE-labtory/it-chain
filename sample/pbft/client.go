@@ -17,11 +17,11 @@ func main(){
 	}
 
 	defer conn.Close()
-	c := pb.NewTestConsensusServiceClient(conn)
-
-	_, err = c.StartConsensus(context.Background(), &pb.Empty{})
-
-	if err != nil {
-		log.Println("could not greet: %v", err)
+	//c := pb.N
+	//
+	//_, err = c.StartConsensus(context.Background(), &pb.Empty{})
+	//
+	//if err != nil {
+	//	log.Println("could not greet: %v", err)
 	}
 }

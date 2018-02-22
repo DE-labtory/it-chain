@@ -4,19 +4,21 @@ package message;
 
 message Empty {}
 
-message Transaction{
+message Transaction {
 
-    enum Status{
+    enum Status {
         UNCONFIRMED = 0;
         CONFIRMED = 1;
         UNKNOWN = 2;
     }
 
-    string  InvokePeerID = 1;
-    string  TransactionID = 2;
-    Status  TransactionStatus = 3;
-    string  TransactionHash = 4;
-	TxData  TxData = 5;
+    string InvokePeerID = 1;
+    string TransactionID = 2;
+    Status TransactionStatus = 3;
+    string TransactionHash = 4;
+    TxData TxData = 5;
+    int32 TransactionType = 6;
+    int64 TimeStamp = 7;
 }
 
 message TxData {

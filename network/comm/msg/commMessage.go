@@ -8,6 +8,7 @@ import (
 type InnerMessage struct{
 	Envelope *message.Envelope
 	OnErr    func(error)
+	OnSuccess func(interface{})
 }
 
 type OutterMessage struct{
@@ -19,11 +20,11 @@ type OutterMessage struct{
 }
 
 type connection interface {
-	Send(envelope *message.Envelope, errCallBack func(error))
+	Send(envelope *message.Envelope, successCallBack func(interface{}), errCallBack func(error))
 }
 
 // Respond sends a msg to the source that sent the ReceivedMessageImpl
-func (m *OutterMessage) Respond(envelope *message.Envelope, errCallBack func(error)) {
+func (m *OutterMessage) Respond(envelope *message.Envelope, successCallBack func(interface{}), errCallBack func(error)) {
 
-	m.Conn.Send(envelope, errCallBack)
+	m.Conn.Send(envelope, successCallBack, errCallBack)
 }

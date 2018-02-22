@@ -10,6 +10,8 @@ import (
 	"github.com/rs/xid"
 	pb "it-chain/network/protos"
 	"it-chain/network/comm/msg"
+	"github.com/spf13/viper"
+	"strconv"
 )
 
 var logger_pbftservice = common.GetLogger("pbft_service")
@@ -18,22 +20,33 @@ var logger_pbftservice = common.GetLogger("pbft_service")
 type PBFTConsensusService struct {
 	consensusStates      map[string]*domain.ConsensusState
 	comm                 comm.ConnectionManager
-	identity                 *domain.Peer
+	identity             *domain.Peer
 	peerService          PeerService
 	blockService         BlockService
 	smartContractService SmartContractService
+	transactionService   TransactionService
 	sync.RWMutex
 }
 
-func NewPBFTConsensusService(comm comm.ConnectionManager, blockService BlockService,identity *domain.Peer, smartContractService SmartContractService) ConsensusService{
+func NewPBFTConsensusService(comm comm.ConnectionManager, peerService PeerService, blockService BlockService,identity *domain.Peer, smartContractService SmartContractService, transactionService TransactionService) ConsensusService{
 
 	pbft := &PBFTConsensusService{
 		consensusStates: make(map[string]*domain.ConsensusState),
 		comm:comm,
+		peerService: peerService,
 		blockService: blockService,
 		smartContractService: smartContractService,
+		transactionService: transactionService,
 		identity: identity,
 	}
+
+	i, _ := strconv.Atoi(viper.GetString("consensus.batchTime"))
+
+	broadCastPeerTableBatcher := NewBatchService(time.Duration(i)*time.Second,pbft.startConsensus,false)
+	broadCastPeerTableBatcher.Add("start consensus")
+	broadCastPeerTableBatcher.Start()
+
+	comm.Subscribe("Handle consensus msg",pbft.ReceiveConsensusMessage)
 
 	return pbft
 }
@@ -45,12 +58,6 @@ func NewPBFTConsensusService(comm comm.ConnectionManager, blockService BlockServ
 //2. 합의할 block을 consensusMessage에 담고 prepreMsg로 전파한다.
 func (cs *PBFTConsensusService) StartConsensus(view *domain.View, block *domain.Block){
 
-	if len(view.PeerID) <= 1{
-		//ADD block
-		logger_pbftservice.Println("no identity exist, add block")
-		return
-	}
-
 	cs.Lock()
 	consensusState := domain.NewConsensusState(view,xid.New().String(),block,domain.PrePrepared,cs.EndConsensusState,300)
 	cs.consensusStates[consensusState.ID] = consensusState
@@ -58,10 +65,66 @@ func (cs *PBFTConsensusService) StartConsensus(view *domain.View, block *domain.
 	sequenceID := time.Now().UnixNano()
 	preprepareConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*view,sequenceID,consensusState.Block,cs.identity.PeerID,domain.PreprepareMsg)
 
-	go cs.broadcastMessage(preprepareConsensusMessage)
+	cs.broadcastMessage(preprepareConsensusMessage)
 
 	consensusState.CurrentStage = domain.Prepared
 	cs.Unlock()
+}
+
+func (cs *PBFTConsensusService) startConsensus(interface{}){
+
+	common.Log.Println("start Consesnsus")
+
+	transactions, err := cs.transactionService.GetTransactions(100)
+
+	if err !=nil{
+		common.Log.Error("Fail to get transactions",err.Error())
+		return
+	}
+
+	for i := 0; i < len(transactions); i++ {
+		cs.smartContractService.ValidateTransaction(transactions[i])
+		transactions[i].GenerateHash()
+	}
+
+	block, err := cs.blockService.CreateBlock(transactions,cs.identity.PeerID)
+
+	if err != nil{
+		common.Log.Error("Fail to create block",err.Error())
+		return
+	}
+
+	//todo 혼자인경우
+	//common.Log.Error(cs.peerService.GetPeerTable())
+	if len(cs.peerService.GetPeerTable().GetPeerList()) == 0{
+
+		flag, err := cs.blockService.VerifyBlock(block)
+
+		if err != nil{
+			common.Log.Error("Verify block error:",err.Error())
+		}
+
+		if flag{
+			common.Log.Error("Add block")
+			cs.blockService.AddBlock(block)
+			//txbuffer제거
+		}
+		return
+	}
+
+	peerIDs := make([]string,0)
+
+	for _, peer := range cs.peerService.GetPeerTable().GetPeerList(){
+		peerIDs = append(peerIDs, peer.PeerID)
+	}
+
+	view := &domain.View{
+		ID: xid.New().String(),
+		LeaderID: cs.identity.PeerID,
+		PeerID: peerIDs,
+	}
+
+	go cs.StartConsensus(view,block)
 }
 
 func (cs *PBFTConsensusService) GetCurrentConsensusState() map[string]*domain.ConsensusState{
@@ -70,6 +133,14 @@ func (cs *PBFTConsensusService) GetCurrentConsensusState() map[string]*domain.Co
 
 func (cs *PBFTConsensusService) StopConsensus(){
 
+	cs.Lock()
+
+	defer cs.Unlock()
+
+	for consensusState := range cs.consensusStates {
+		cs.consensusStates[consensusState].End()
+		delete(cs.consensusStates, consensusState)
+	}
 }
 
 //consensusMessage가 들어옴
@@ -150,7 +221,7 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage msg.Outter
 		logger_pbftservice.Infoln("block", consensusState.Block)
 
 		preprepareConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.identity.PeerID,domain.PrepareMsg)
-		go cs.broadcastMessage(preprepareConsensusMessage)
+		cs.broadcastMessage(preprepareConsensusMessage)
 		consensusState.CurrentStage = domain.Prepared
 		logger_pbftservice.Infoln("ConsensusState is prepared")
 	}
@@ -159,7 +230,7 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage msg.Outter
 	if consensusState.CurrentStage == domain.Prepared && consensusState.PrepareReady(){
 		sequenceID := time.Now().UnixNano()
 		commitConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.identity.PeerID,domain.CommitMsg)
-		go cs.broadcastMessage(commitConsensusMessage)
+		cs.broadcastMessage(commitConsensusMessage)
 		consensusState.CurrentStage = domain.Committed
 		logger_pbftservice.Infoln("ConsensusState is Committed")
 	}
@@ -188,9 +259,11 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage msg.Outter
 }
 
 func (cs *PBFTConsensusService) EndConsensusState(consensusState domain.ConsensusState){
+
 	cs.Lock()
 	defer cs.Unlock()
 
+	cs.consensusStates[consensusState.ID].End()
 	delete(cs.consensusStates,consensusState.ID)
 }
 
@@ -207,6 +280,6 @@ func (cs *PBFTConsensusService) broadcastMessage(consensusMsg domain.ConsensusMe
 
 	for _, peerID := range peerIDList{
 		logger_pbftservice.Infoln("sending...",peerID)
-		cs.comm.SendStream(message,nil,peerID)
+		cs.comm.SendStream(message,nil,nil,peerID)
 	}
 }

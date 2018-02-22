@@ -4,6 +4,7 @@ import (
 	"it-chain/db/blockchaindb"
 	"it-chain/domain"
 	"errors"
+	"it-chain/common"
 )
 
 type Ledger struct {
@@ -21,15 +22,27 @@ func (l *Ledger) Close() {
 func (l *Ledger) CreateBlock(txList []*domain.Transaction, createPeerId string) (*domain.Block, error) {
 
 	lastBlock, err := l.GetLastBlock()
-	if err != nil { return nil, err }
+
+	if err != nil {
+		return nil, err
+	}
+
 	blk := domain.CreateNewBlock(lastBlock, createPeerId)
+
 	for _, tx := range txList {
 		err = blk.PutTranscation(tx)
-		if err != nil{ return nil, err }
+		if err != nil{
+			return nil, err
+		}
 	}
+
 	blk.MakeMerkleTree()
 	err = blk.GenerateBlockHash()
-	if err != nil{ return nil, err }
+
+	if err != nil{
+		return nil, err
+	}
+
 	return blk, nil
 }
 
@@ -71,8 +84,32 @@ func (l *Ledger) VerifyBlock(blk *domain.Block) (bool, error){
 }
 
 func (l *Ledger) GetLastBlock() (*domain.Block, error) {
+
 	blk, err := l.DB.GetLastBlock()
-	if err != nil{ return nil, err }
+
+	if err != nil{
+		return nil, err
+	}
+
+	if blk == nil{
+
+		genesisBlock := domain.CreateNewBlock(nil, "0")
+		genesisBlock.Header.MerkleTreeRootHash = common.ComputeSHA256([]string{""})
+		BlkVarification, _ := genesisBlock.VerifyBlock()
+
+		if BlkVarification == false{
+			return nil, errors.New("invalid block")
+		}
+
+		err = l.DB.AddBlock(genesisBlock)
+
+		if err != nil {
+			return nil,err
+		}
+
+		return genesisBlock, nil
+	}
+
 	return blk, err
 }
 
@@ -89,11 +126,16 @@ func (l *Ledger) LookUpBlock(arg interface{}) (*domain.Block, error) {
 }
 
 func (l *Ledger) AddBlock(blk *domain.Block) (bool, error) {
+
 	lastBlock, err := l.GetLastBlock()
-	if err != nil { return false, err }
+
+	if err != nil {
+		return false, err
+	}
 	if blk.Header.BlockStatus != domain.Status_BLOCK_CONFIRMED {
 		return false, errors.New("unverified block")
 	}else if lastBlock != nil && lastBlock.Header.BlockHeight > 0 {
+
 		if lastBlock.Header.BlockHash != blk.Header.PreviousHash {
 			return false, errors.New("the hash values ​​of block and last Block are different")
 		}
@@ -101,7 +143,9 @@ func (l *Ledger) AddBlock(blk *domain.Block) (bool, error) {
 
 	BlkVarification, _ := blk.VerifyBlock()
 
-	if BlkVarification == false{ return false, errors.New("invalid block") }
+	if BlkVarification == false{
+		return false, errors.New("invalid block")
+	}
 
 	l.DB.AddBlock(blk)
 

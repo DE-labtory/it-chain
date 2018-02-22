@@ -61,23 +61,29 @@ func CreateNewBlock(prevBlock *Block, createPeerId string) *Block{
 }
 
 func (s *Block) PutTranscation(tx *Transaction) error{
-	if tx.Validate() == false{
-		return errors.New("invalid tx")
-	}
-	if tx.TransactionStatus == Status_TRANSACTION_UNKNOWN {
-		if true { // Docker에서 실행하고 return이 true면 Confirmed 나중에 수정할 것.
-			tx.TransactionStatus = Status_TRANSACTION_CONFIRMED
-		} else {
-			tx.TransactionStatus = Status_TRANSACTION_UNCONFIRMED
-		}
-	}
+
+	//todo 이부분은 아직 보류
+	//if tx.Validate() == false{
+	//	return errors.New("invalid tx")
+	//}
+	//if tx.TransactionStatus == Status_TRANSACTION_UNKNOWN {
+	//	if true { // Docker에서 실행하고 return이 true면 Confirmed 나중에 수정할 것.
+	//		tx.TransactionStatus = Status_TRANSACTION_CONFIRMED
+	//	} else {
+	//		tx.TransactionStatus = Status_TRANSACTION_UNCONFIRMED
+	//	}
+	//}
+
+	//todo 다른경우가 있을 수 있기 때문에 무시하도록 해야함
 	for _, confirmedTx := range s.Transactions{
-		if confirmedTx.TransactionHash == tx.TransactionHash{
-			return errors.New("tx already exists")
+		if confirmedTx.TransactionID == tx.TransactionID{
+			return nil
 		}
 	}
+
 	s.Transactions = append(s.Transactions, tx)
 	s.TransactionCount++
+
 	return nil
 }
 
@@ -91,7 +97,9 @@ func (s Block) FindTransactionIndex(hash string) (idx int, err error){
 }
 
 func (s *Block) MakeMerkleTree(){
+
 	var mtList []string
+
 	for _, h := range s.Transactions{
 		mtList = append(mtList, h.TransactionHash)
 	}

@@ -28,4 +28,4 @@ sample/db/test/*
 .tx
 
 # test
-test/*
+test*/*
