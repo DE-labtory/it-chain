@@ -16,16 +16,16 @@ var smartContractResponse = domain.SmartContractResponse{Data: map[string]string
 type SampleSmartContract struct {
 }
 
-func (sc *SampleSmartContract) Init(args []string) error {
+func (sc *SampleSmartContract) Init(tx_string string, dbPath string, args []string) error {
 	/*** Set Transaction Struct ***/
 	tx := domain.Transaction{}
-	err := json.Unmarshal([]byte(args[0]), &tx)
+	err := json.Unmarshal([]byte(tx_string), &tx)
 	if err != nil {
 		return err
 	}
 
 	/*** Init WorldStateDB ***/
-	path := "/go/src/worldstatedb"
+	path := dbPath
 	dbProvider := leveldbhelper.CreateNewDBProvider(path)
 	defer func(){
 		dbProvider.Close()
@@ -35,7 +35,7 @@ func (sc *SampleSmartContract) Init(args []string) error {
 	wsDBHandle := dbProvider.GetDBHandle(wsDB)
 
 	/*** Mock Data ***/
-	wsDBHandle.Put([]byte("A"), []byte("AAAAAAAA"), true)
+	//wsDBHandle.Put([]byte("A"), []byte("AAAAAAAA"), true)
 
 	if tx.TxData.Method == domain.Query {
 		sc.Query(tx, wsDBHandle)
@@ -53,6 +53,9 @@ func (sc *SampleSmartContract) Query(tx domain.Transaction, wsDBHandle *leveldbh
 }
 
 func (sc *SampleSmartContract) Invoke(tx domain.Transaction, wsDBHandle *leveldbhelper.DBHandle) {
+	if tx.TxData.Params.Function == "putA" {
+		putA(wsDBHandle)
+	}
 	return
 }
 
@@ -76,10 +79,15 @@ func main()  {
 		fmt.Println(string(out))
 	}()
 
-	args := os.Args[1:]
+	tx_string := os.Args[1]
+	dbPath := os.Args[2]
+	var args []string
+	if len(os.Args) > 3 {
+		args = os.Args[3:]
+	}
 	ssc := new(SampleSmartContract)
 
-	ssc.Init(args)
+	ssc.Init(tx_string, dbPath, args)
 }
 
 
@@ -89,4 +97,8 @@ func main()  {
 func getA(wsDBHandle *leveldbhelper.DBHandle) {
 	a, _ := wsDBHandle.Get([]byte("A"))
 	smartContractResponse.Data["A"] = string(a)
+}
+
+func putA(wsDBHandle *leveldbhelper.DBHandle) {
+	wsDBHandle.Put([]byte("A"), []byte("123123"), true)
 }

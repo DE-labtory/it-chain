@@ -7,8 +7,8 @@ import (
 
 func main() {
 
-	path := "./sample/db/test"
-	//path := "./smartcontract/worldstatedb"
+	//path := "./sample/db/test"
+	path := "./smartcontract/worldstatedb"
 	dbProvider := leveldbhelper.CreateNewDBProvider(path)
 	defer func(){
 		dbProvider.Close()
@@ -17,7 +17,7 @@ func main() {
 	wsDB := "worldStateDB"
 	wsDBHandle := dbProvider.GetDBHandle(wsDB)
 	a, _ := wsDBHandle.Get([]byte("A"))
-	wsDBHandle.Put([]byte("A"), []byte("13"), true)
+	wsDBHandle.Put([]byte("A"), []byte("asdasdasd"), true)
 
 	fmt.Println(string(a))
 }
