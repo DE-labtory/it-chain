@@ -47,19 +47,16 @@ func NewSmartContractService(githubID string, smartContractDirPath string) *Smar
 	}
 }
 
-func (scs *SmartContractServiceImpl) PullAllSmartContracts(authenticatedGit string, errorHandler func(error),
-	completionHandler func()) {
-
-	go func() {
-		repoList, err := domain.GetRepositoryList(authenticatedGit)
+func (scs *SmartContractServiceImpl) PullAllSmartContracts(errorHandler func(error), completionHandler func()) {
+	GOPATH := os.Getenv("GOPATH")
+	//go func() {
+		repoList, err := domain.GetRepositoryList(scs.GithubID)
 		if err != nil {
 			errorHandler(errors.New("An error was occurred during getting repository list"))
 			return
 		}
-
 		for _, repo := range repoList {
-			localReposPath := scs.SmartContractHomePath + "/" +
-				strings.Replace(repo.FullName, "/", "_", -1)
+			localReposPath := GOPATH + "/src/it-chain" + scs.SmartContractHomePath + "/" + repo.Name
 
 			err = os.MkdirAll(localReposPath, 0755)
 			if err != nil {
@@ -74,27 +71,24 @@ func (scs *SmartContractServiceImpl) PullAllSmartContracts(authenticatedGit stri
 			}
 
 			for _, commit := range commits {
-				if commit.Author.Login == authenticatedGit {
+				err := domain.CloneReposWithName(repo.FullName, localReposPath, commit.Sha)
+				if err != nil {
+					errorHandler(errors.New("An error was occurred during cloning with name"))
+					return
+				}
 
-					err := domain.CloneReposWithName(repo.FullName, localReposPath, commit.Sha)
-					if err != nil {
-						errorHandler(errors.New("An error was occurred during cloning with name"))
-						return
-					}
-
-					err = domain.ResetWithSHA(localReposPath+"/"+commit.Sha, commit.Sha)
-					if err != nil {
-						errorHandler(errors.New("An error was occurred during resetting with SHA"))
-						return
-					}
-
+				err = domain.ResetWithSHA(localReposPath+"/"+commit.Sha, commit.Sha)
+				if err != nil {
+					errorHandler(errors.New("An error was occurred during resetting with SHA"))
+					return
 				}
 			}
 		}
-
-		completionHandler()
+		if completionHandler != nil {
+			completionHandler()
+		}
 		return
-	}()
+	//}()
 
 }
 

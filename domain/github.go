@@ -91,7 +91,6 @@ func GetRepositoryList(userName string) ([]GithubRepoInfoResponse, error) {
 	}
 
 	return body, nil
-
 }
 
 func GetRepos(repos_path string) (GithubResponse, error) {
