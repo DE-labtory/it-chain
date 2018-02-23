@@ -259,13 +259,9 @@ func (cs *ConsensusState) AddMessage(consensusMessage ConsensusMessage){
 
 	case PrepareMsg:
 		_ ,ok := cs.PrepareMsgs[consensusMessage.SenderID]
-
 		if !ok{
-			common.Log.Infoln("prepareMsg added")
 			cs.PrepareMsgs[consensusMessage.SenderID] = consensusMessage
-			common.Log.Infoln(cs.PrepareMsgs)
 		}
-
 		break
 
 	case CommitMsg:
@@ -285,10 +281,6 @@ func (cs *ConsensusState) PrepareReady() bool{
 	totalVotes := len(cs.View.PeerID)
 	nowVotes := len(cs.PrepareMsgs)
 
-	common.Log.Infoln(cs.PrepareMsgs)
-	common.Log.Infoln(nowVotes)
-	common.Log.Infoln(totalVotes)
-
 	if totalVotes == 0{
 		return true
 	}
@@ -297,13 +289,9 @@ func (cs *ConsensusState) PrepareReady() bool{
 		return true
 	}
 
-	if nowVotes >= int((totalVotes-1)/3) + 1{
+	if nowVotes >= int(totalVotes/3) + 1{
 		return true
 	}
-
-	common.Log.Println(nowVotes)
-	common.Log.Println(int(totalVotes-1/3) + 1)
-	common.Log.Println("not ready")
 
 	return false
 }

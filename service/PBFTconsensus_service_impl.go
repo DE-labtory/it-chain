@@ -78,6 +78,8 @@ func (cs *PBFTConsensusService) startConsensus(interface{}){
 		return
 	}
 
+	common.Log.Println("start Consesnsus")
+
 	transactions, err := cs.transactionService.GetTransactions(100)
 
 	if err !=nil{
@@ -96,7 +98,6 @@ func (cs *PBFTConsensusService) startConsensus(interface{}){
 	}
 
 	cs.transactionService.DeleteTransactions(transactions)
-
 	block, err := cs.blockService.CreateBlock(transactions,cs.identity.PeerID)
 
 	if err != nil{
@@ -117,7 +118,6 @@ func (cs *PBFTConsensusService) startConsensus(interface{}){
 		if flag{
 			common.Log.Error("Add block")
 			cs.blockService.AddBlock(block)
-			//cs.transactionService.DeleteTransactions(block.Transactions)
 		}
 		return
 	}
@@ -195,7 +195,6 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(msg msg.OutterMessage){
 	consensusID := consensusMessage.ConsensusID
 	consensusState, ok := cs.consensusStates[consensusID]
 
-	logger_pbftservice.Infoln("ID:",consensusID)
 	logger_pbftservice.Infoln("Message type is:",consensusMessage.MsgType)
 
 	if !ok{
@@ -231,7 +230,6 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(msg msg.OutterMessage){
 	logger_pbftservice.Infoln("Current Stage is",consensusState.CurrentStage)
 
 	if consensusState.CurrentStage == domain.PrePrepared{
-
 		logger_pbftservice.Infoln("my id", cs.identity.PeerID)
 		sequenceID := time.Now().UnixNano()
 		logger_pbftservice.Infoln("block", consensusState.Block)
@@ -239,7 +237,6 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(msg msg.OutterMessage){
 		consensusState.CurrentStage = domain.Prepared
 		cs.broadcastMessage(preprepareConsensusMessage)
 		logger_pbftservice.Infoln("ConsensusState is prepared")
-
 	}
 
 	//1. prepare stage && prepare message가 전체의 2/3이상 -> commitMsg전파

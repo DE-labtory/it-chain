@@ -31,6 +31,7 @@ message StreamMessage{
         ConsensusMessage consensusMessage = 5;
         Peer peer = 6;
         ConnectionEstablish connectionEstablish = 7;
+        ElectionMessage electionMessage = 8;
     }
 }
 
@@ -68,6 +69,13 @@ message View{
     repeated string PeerID = 3;
 }
 
+message ElectionMessage{
+    string LastBlockHash = 1;
+    string SenderID = 2;
+    int32 MsgType = 3;
+    int64 Term = 4;
+    repeated string PeerIDs = 5;
+}
 
 
 

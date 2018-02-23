@@ -22,6 +22,7 @@ It has these top-level messages:
 	Peer
 	ConsensusMessage
 	View
+	ElectionMessage
 */
 package message
 

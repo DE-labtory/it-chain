@@ -4,7 +4,6 @@ import (
 	"it-chain/db/blockchaindb"
 	"it-chain/domain"
 	"errors"
-	"it-chain/common"
 )
 
 type Ledger struct {
@@ -25,6 +24,10 @@ func (l *Ledger) CreateBlock(txList []*domain.Transaction, createPeerId string) 
 
 	if err != nil {
 		return nil, err
+	}
+
+	if lastBlock == nil {
+		lastBlock, err = l.CreateGenesisBlock()
 	}
 
 	blk := domain.CreateNewBlock(lastBlock, createPeerId)
@@ -65,9 +68,6 @@ func (l *Ledger) VerifyBlock(blk *domain.Block) (bool, error){
 		return false, err
 	}
 
-	common.Log.Println(lastBlock.Header.BlockHeight)
-	common.Log.Println(blk.Header.BlockHeight)
-
 	if lastBlock.Header.BlockHeight + 1 != blk.Header.BlockHeight{
 		return false, errors.New("Block height misMatched")
 	}
@@ -96,27 +96,17 @@ func (l *Ledger) GetLastBlock() (*domain.Block, error) {
 
 	if blk == nil{
 
-		genesisBlock := domain.CreateNewBlock(nil, "0")
-		genesisBlock.Header.MerkleTreeRootHash = common.ComputeSHA256([]string{""})
-		BlkVarification, _ := genesisBlock.VerifyBlock()
-
-		if BlkVarification == false{
-			return nil, errors.New("invalid block")
-		}
-
-		err = l.DB.AddBlock(genesisBlock)
-
-		if err != nil {
-			return nil,err
-		}
-
-		return genesisBlock, nil
+		return l.CreateGenesisBlock()
 	}
 
 	return blk, err
 }
 
 func (l *Ledger) LookUpBlock(arg interface{}) (*domain.Block, error) {
+	_, err := l.GetLastBlock()
+	if err != nil{
+		return nil, errors.New("no block exist")
+	}
 	switch arg.(type)  {
 	case int:
 		arg = uint64(arg.(int))
@@ -129,10 +119,8 @@ func (l *Ledger) LookUpBlock(arg interface{}) (*domain.Block, error) {
 }
 
 func (l *Ledger) AddBlock(blk *domain.Block) (bool, error) {
-
-	if existBlock, _ := l.DB.GetBlockByHash(blk.Header.BlockHash); existBlock != nil{
-		return true,nil
-	}
+	_, err := l.LookUpBlock(blk.Header.BlockHash)
+	if err == nil{ return false, errors.New("already this blk exist") }
 
 	lastBlock, err := l.GetLastBlock()
 
@@ -157,4 +145,19 @@ func (l *Ledger) AddBlock(blk *domain.Block) (bool, error) {
 	l.DB.AddBlock(blk)
 
 	return true, nil
+}
+
+func (l *Ledger) CreateGenesisBlock() (*domain.Block, error) {
+
+	genesisBlock := domain.CreateNewBlock(nil, "0")
+	genesisBlock.MakeMerkleTree()
+	genesisBlock.GenerateBlockHash()
+	BlkVarification, _ := genesisBlock.VerifyBlock()
+
+	if BlkVarification == false{
+		return nil, errors.New("invalid block")
+	}
+
+	l.DB.AddBlock(genesisBlock)
+	return genesisBlock, nil
 }

@@ -98,6 +98,11 @@ func (s Block) FindTransactionIndex(hash string) (idx int, err error){
 
 func (s *Block) MakeMerkleTree(){
 
+	if s.TransactionCount == 0 {
+		s.Header.MerkleTreeRootHash = ""
+		return
+	}
+
 	var mtList []string
 
 	for _, h := range s.Transactions{
@@ -156,6 +161,11 @@ func BlockDeserialize(by []byte) (Block, error) {
 
 // 해당 트랜잭션이 정당한지 머클패스로 검사함
 func (s Block) VerifyTx(tx Transaction) (bool, error) {
+
+	if s.Header.BlockHeight == 0 && s.TransactionCount == 0 {
+		return true, nil;
+	}
+
 	hash := tx.TransactionHash
 	idx, err := s.FindTransactionIndex(hash)
 
@@ -188,7 +198,6 @@ func (s Block) VerifyBlock() (bool, error) {
 	}
 	return true, nil
 }
-
 
 //todo test
 func FromProtoBlock(pb *pb.Block) *Block{
