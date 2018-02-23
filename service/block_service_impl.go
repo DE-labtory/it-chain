@@ -4,7 +4,6 @@ import (
 	"it-chain/db/blockchaindb"
 	"it-chain/domain"
 	"errors"
-	"it-chain/common"
 )
 
 type Ledger struct {

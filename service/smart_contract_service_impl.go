@@ -28,11 +28,11 @@ type SmartContract struct {
 }
 
 type SmartContractServiceImpl struct {
-	GithubID             string
-	SmartContractDirPath string
-	SmartContractMap     map[string]SmartContract
-	WorldStateDBPath     string
-	WorldStateDBName     string
+	GithubID              string
+	SmartContractHomePath string
+	SmartContractMap      map[string]SmartContract
+	WorldStateDBPath      string
+	WorldStateDBName      string
 }
 
 func Init() {
@@ -41,9 +41,9 @@ func Init() {
 
 func NewSmartContractService(githubID string, smartContractDirPath string) *SmartContractServiceImpl {
 	return &SmartContractServiceImpl{
-		GithubID:             githubID,
-		SmartContractDirPath: smartContractDirPath,
-		SmartContractMap:     make(map[string]SmartContract),
+		GithubID:              githubID,
+		SmartContractHomePath: smartContractDirPath,
+		SmartContractMap:      make(map[string]SmartContract),
 	}
 }
 
@@ -58,7 +58,7 @@ func (scs *SmartContractServiceImpl) PullAllSmartContracts(authenticatedGit stri
 		}
 
 		for _, repo := range repoList {
-			localReposPath := scs.SmartContractDirPath + "/" +
+			localReposPath := scs.SmartContractHomePath + "/" +
 				strings.Replace(repo.FullName, "/", "_", -1)
 
 			err = os.MkdirAll(localReposPath, 0755)
@@ -116,13 +116,13 @@ func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
 		return "", errors.New("Not Exist Repos!")
 	}
 
-	err = os.MkdirAll(scs.SmartContractDirPath+"/"+new_repos_name, 0755)
+	err = os.MkdirAll(scs.SmartContractHomePath+"/"+new_repos_name, 0755)
 	if err != nil {
 		return "", errors.New("An error occurred while make repository's directory!")
 	}
 
 	//todo gitpath이미 존재하는지 확인
-	err = domain.CloneRepos(ReposPath, scs.SmartContractDirPath+"/"+new_repos_name)
+	err = domain.CloneRepos(ReposPath, scs.SmartContractHomePath+"/"+new_repos_name)
 	if err != nil {
 		return "", errors.New("An error occurred while cloning repos!")
 	}
@@ -133,14 +133,14 @@ func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
 		return "", errors.New(err.Error()) //"An error occurred while creating repos!")
 	}
 
-	err = domain.ChangeRemote(scs.GithubID+"/"+new_repos_name, scs.SmartContractDirPath+"/"+new_repos_name+"/"+origin_repos_name)
+	err = domain.ChangeRemote(scs.GithubID+"/"+new_repos_name, scs.SmartContractHomePath+"/"+new_repos_name+"/"+origin_repos_name)
 	if err != nil {
 		return "", errors.New("An error occurred while cloning repos!")
 	}
 
 	// 버전 관리를 위한 파일 추가
 	now := time.Now().Format("2006-01-02 15:04:05");
-	file, err := os.OpenFile(scs.SmartContractDirPath+"/"+new_repos_name+"/"+origin_repos_name+"/version", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	file, err := os.OpenFile(scs.SmartContractHomePath+"/"+new_repos_name+"/"+origin_repos_name+"/version", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return "", errors.New("An error occurred while creating or opening file!")
 	}
@@ -154,7 +154,7 @@ func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
 		return "", errors.New("An error occurred while closing file!")
 	}
 
-	err = domain.CommitAndPush(scs.SmartContractDirPath+"/"+new_repos_name+"/"+origin_repos_name, "It-Chain Smart Contract \""+new_repos_name+"\" Deploy")
+	err = domain.CommitAndPush(scs.SmartContractHomePath+"/"+new_repos_name+"/"+origin_repos_name, "It-Chain Smart Contract \""+new_repos_name+"\" Deploy")
 	if err != nil {
 		return "", errors.New(err.Error())
 		//return "", errors.New("An error occurred while committing and pushing!")
@@ -165,8 +165,8 @@ func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
 		return "", errors.New("An error occurred while getting commit log!")
 	}
 
-	reposDirPath := scs.SmartContractDirPath + "/" + new_repos_name + "/" + githubResponseCommits[0].Sha
-	err = os.Rename(scs.SmartContractDirPath+"/"+new_repos_name+"/"+origin_repos_name, reposDirPath)
+	reposDirPath := scs.SmartContractHomePath + "/" + new_repos_name + "/" + githubResponseCommits[0].Sha
+	err = os.Rename(scs.SmartContractHomePath+"/"+new_repos_name+"/"+origin_repos_name, reposDirPath)
 	if err != nil {
 		return "", errors.New("An error occurred while renaming directory!")
 	}
@@ -175,15 +175,6 @@ func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
 
 	return githubResponseCommits[0].Sha, nil
 }
-
-/***************************************************
- *	1. smartcontract 검사
- *	2. smartcontract -> sc.tar : 애초에 풀 받을 때 압축해 둘 수 있음
- *	3. go 버전에 맞는 docker image를 Create
- *	4. sc.tar를 docker container로 복사
- *	5. docker container Start
- *	6. docker에서 smartcontract 실행
- ****************************************************/
 
 func (scs *SmartContractServiceImpl) ValidateTransactionsOfBlock(block *domain.Block) (error) {
 	// 블럭 유효성 검사 필요?
@@ -244,8 +235,7 @@ func (scs *SmartContractServiceImpl) RunTransaction(transaction *domain.Transact
 }
 
 func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.Transaction) (*domain.SmartContractResponse, error) {
-	TmpDir := viper.GetString("smartContract.TmpDir")
-	WorldStateDB_OnDoker := viper.GetString("smartContract.WorldStateDB_OnDoker")
+	GOPATH := os.Getenv("GOPATH")
 
 	/*** Set Transaction Arg ***/
 	logger_s.Errorln("validateTransaction start")
@@ -260,62 +250,14 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 		return nil, errors.New("Not exist contract ID")
 	}
 
-	_, err = os.Stat(sc.SmartContractPath)
+	_, err = os.Stat(GOPATH + "/src/it-chain" + sc.SmartContractPath + "/" + transaction.TxData.ContractID)
 	if os.IsNotExist(err) {
 		logger_s.Errorln("File or Directory Not Exist")
 		return nil, errors.New("File or Directory Not Exist")
 	}
 
-	/*** smartcontract build ***/
-	logger_s.Errorln("build start")
-	fmt.Println(sc.SmartContractPath + "/" + transaction.TxData.ContractID + "/" + sc.Name + ".go")
-	cmd := exec.Command("env", "GOOS=linux", "go", "build", "-o", TmpDir+"/"+sc.Name, sc.SmartContractPath+"/"+transaction.TxData.ContractID+"/"+sc.Name+".go")
-	cmd.Dir = sc.SmartContractPath + "/" + transaction.TxData.ContractID
-
-	err = cmd.Run()
-	if err != nil {
-		logger_s.Errorln("SmartContract build error")
-		return nil, err
-	}
-	cmd = exec.Command("chmod", "777", TmpDir+"/"+sc.Name)
-	cmd.Dir = sc.SmartContractPath + "/" + transaction.TxData.ContractID
-	err = cmd.Run()
-	if err != nil {
-		logger_s.Errorln("Chmod Error")
-		return nil, err
-	}
-
-	logger_s.Errorln("make tar")
-
-	err = domain.MakeTar(TmpDir+"/"+sc.Name, TmpDir)
-	if err != nil {
-		logger_s.Errorln("An error occurred while archiving smartcontract file!")
-		return nil, err
-	}
-	err = domain.MakeTar("$GOPATH/src/it-chain/smartcontract/worldstatedb", TmpDir)
-	if err != nil {
-		logger_s.Errorln("An error occurred while archiving worldstateDB file!")
-		return nil, err
-	}
-
-	logger_s.Errorln("exec cmd")
-
-	// tar config file
-	cmd = exec.Command("tar", "-cf", TmpDir+"/config.tar", "./it-chain/config.yaml")
-	cmd.Dir = "../../"
-	err = cmd.Run()
-	if err != nil {
-		logger_s.Errorln("An error occurred while archiving config file!")
-		return nil, err
-	}
-
-	logger_s.Errorln("Pulling image")
-
 	/* Docker Code */
 	imageName := "docker.io/library/golang:1.9.2-alpine3.6"
-	//tarPath := TmpDir + "/" + sc.Name + ".tar"
-	//tarPath_wsdb := TmpDir + "/worldstatedb.tar"
-	//tarPath_config := TmpDir + "/config.tar"
 
 	ctx := context.Background()
 	cli, err := docker.NewEnvClient()
@@ -324,6 +266,7 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 		return nil, err
 	}
 
+	logger_s.Errorln("Pulling image")
 	out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
 	if err != nil {
 		logger_s.Errorln("An error oeccured while pulling docker image!")
@@ -335,19 +278,23 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 	image := imageName_splited[len(imageName_splited)-1]
 
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image:        image,
-		Cmd:          []string{"/go/src/" + sc.Name, string(txBytes), WorldStateDB_OnDoker},
+		Image: image,
+		Cmd: []string{
+			"go", "run",
+			"/go/src/it-chain" + sc.SmartContractPath + "/" + transaction.TxData.ContractID + "/" + sc.Name + ".go",
+			string(txBytes), "/go/src/it-chain" + scs.WorldStateDBPath + "/" + scs.WorldStateDBName,
+		},
+		//Cmd:          []string{"/go/src/it-chain/smartcontract/sample_smartcontract/" + sc.Name, string(txBytes), GOPATH + "/src" + scs.WorldStateDBPath + "/" + scs.WorldStateDBName},
 		Tty:          true,
 		AttachStdout: true,
 		AttachStderr: true,
 	}, &container.HostConfig{
-		Binds: []string{"/it-chain:/go/src/it-chain"}, // {"/smartcontract/path:/smartcontract", "/worldstatedb/path:/worldstatedb", "/config:/config"},
+		Binds: []string{GOPATH + "/src/it-chain:/go/src/it-chain"}, // {"/smartcontract/path:/smartcontract", "/worldstatedb/path:/worldstatedb", "/config:/config"},
 	}, nil, "")
 	if err != nil {
 		logger_s.Errorln("An error occurred while creating docker container!")
 		return nil, err
 	}
-
 
 	/*** read tar file ***/
 	/*
@@ -436,6 +383,8 @@ func (scs *SmartContractServiceImpl) Query() {
 }
 
 func (scs *SmartContractServiceImpl) Invoke(transaction *domain.Transaction) (*domain.SmartContractResponse, error) {
+	GOPATH := os.Getenv("GOPATH")
+
 	/*** Set Transaction Arg ***/
 	logger_s.Errorln("invoke start")
 	txBytes, err := json.Marshal(transaction)
@@ -449,13 +398,16 @@ func (scs *SmartContractServiceImpl) Invoke(transaction *domain.Transaction) (*d
 		return nil, errors.New("Not exist contract ID")
 	}
 
-	_, err = os.Stat(sc.SmartContractPath)
+	_, err = os.Stat(GOPATH + "/src/it-chain" + sc.SmartContractPath + "/" + transaction.TxData.ContractID)
 	if os.IsNotExist(err) {
 		logger_s.Errorln("File or Directory Not Exist")
 		return nil, errors.New("File or Directory Not Exist")
 	}
 
-	cmd := exec.Command("go", "run", sc.SmartContractPath+"/"+transaction.TxData.ContractID+"/"+sc.Name+".go", string(txBytes), scs.WorldStateDBPath)
+	cmd := exec.Command(
+		"go", "run",
+		GOPATH + "/src/it-chain" + sc.SmartContractPath + "/" + transaction.TxData.ContractID + "/" + sc.Name + ".go",
+		string(txBytes), GOPATH + "/src/it-chain" + scs.WorldStateDBPath + "/" + scs.WorldStateDBName)
 	//cmd.Dir = sc.SmartContractPath + "/" + transaction.TxData.ContractID
 
 	output, err := cmd.Output()

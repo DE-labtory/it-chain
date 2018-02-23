@@ -58,7 +58,7 @@ func TestSmartContractServiceImpl_Invoke(t *testing.T) {
 			"",
 			domain.Invoke,
 			domain.SetTxMethodParameters(0, "putA", []string{""}),
-			"abc",
+			"commithash",
 		),
 	)
 	fmt.Println("tx created")
@@ -66,14 +66,14 @@ func TestSmartContractServiceImpl_Invoke(t *testing.T) {
 		"steve-buzzni",
 		currentDir + "/sample_smartcontract",
 		map[string]SmartContract{
-			"abc": SmartContract{
+			"commithash": SmartContract{
 				Name:              "sample1",
-				OriginReposPath:   "sample1/path",
-				SmartContractPath: currentDir + "/../sample/sample_smartcontract/sample1_path",
+				OriginReposPath:   "userid/reposname",
+				SmartContractPath: "/smartcontract/sample_smartcontract/userid_reposname",
 				//SmartContractPath: "/Users/hackurity/go/src/it-chain-smartcontract/sample1_path",
 			},
 		},
-		currentDir + "/../smartcontract/worldstatedb",
+		"/smartcontract/worldstatedb",
 		"test",
 	}
 
@@ -101,7 +101,7 @@ func TestSmartContractServiceImpl_ValidateTransactionsOfBlock(t *testing.T) {
 			"",
 			domain.Query,
 			domain.SetTxMethodParameters(0, "getA", []string{""}),
-			"abc",
+			"commithash",
 		),
 	)
 	tx.GenerateHash()
@@ -120,7 +120,7 @@ func TestSmartContractServiceImpl_ValidateTransactionsOfBlock(t *testing.T) {
 			"",
 			domain.Query,
 			domain.SetTxMethodParameters(0, "getA", []string{""}),
-			"abc",
+			"commithash",
 		),
 	)
 	tx2.GenerateHash()
@@ -132,16 +132,16 @@ func TestSmartContractServiceImpl_ValidateTransactionsOfBlock(t *testing.T) {
 	fmt.Println("block created with tx")
 	scs := SmartContractServiceImpl{
 		"steve-buzzni",
-		currentDir + "/sample_smartcontract",
+		"/smartcontract/sample_smartcontract",
 		map[string]SmartContract{
-			"abc": SmartContract{
+			"commithash": SmartContract{
 				Name:              "sample1",
-				OriginReposPath:   "sample1/path",
-				SmartContractPath: currentDir + "/../sample/sample_smartcontract/sample1_path",
+				OriginReposPath:   "userid/reposname",
+				SmartContractPath: "/smartcontract/sample_smartcontract/userid_reposname",
 				//SmartContractPath: "/Users/hackurity/go/src/it-chain-smartcontract/sample1_path",
 			},
 		},
-		currentDir + "/../smartcontract/worldstatedb",
+		"/smartcontract/worldstatedb",
 		"test",
 	}
 
@@ -184,22 +184,22 @@ func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
 			"",
 			domain.Query,
 			domain.SetTxMethodParameters(0, "getA", []string{""}),
-			"abc",
+			"commithash",
 		),
 	)
 	fmt.Println("tx created")
 	scs := SmartContractServiceImpl{
 		"steve-buzzni",
-		currentDir + "/sample_smartcontract",
+		"/smartcontract/sample_smartcontract",
 		map[string]SmartContract{
-			"abc": SmartContract{
+			"commithash": SmartContract{
 				Name:              "sample1",
-				OriginReposPath:   "sample1/path",
-				SmartContractPath: currentDir + "/../sample/sample_smartcontract/sample1_path",
+				OriginReposPath:   "userid/reposname",
+				SmartContractPath: "/smartcontract/sample_smartcontract/userid_reposname",
 				//SmartContractPath: "/Users/hackurity/go/src/it-chain-smartcontract/sample1_path",
 			},
 		},
-		currentDir + "/smartcontract/worldstatedb",
+		"/smartcontract/worldstatedb",
 		"test",
 	}
 
@@ -235,7 +235,7 @@ func TestSmartContractServiceImpl_pullAllSmartContracts(t *testing.T) {
 	}
 
 	scs := SmartContractServiceImpl{
-		"yojkim",
+		"steve-buzzni",
 		currentDir + "/pull_test_repositories",
 		map[string]SmartContract{},
 		currentDir + "/smartcontract/worldstatedb",
@@ -250,6 +250,6 @@ func TestSmartContractServiceImpl_pullAllSmartContracts(t *testing.T) {
 		assert.Error(t, e)
 	}, nil)
 
-	defer os.RemoveAll(scs.SmartContractDirPath)
+	defer os.RemoveAll(scs.SmartContractHomePath)
 
 }

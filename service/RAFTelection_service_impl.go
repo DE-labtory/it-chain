@@ -114,7 +114,7 @@ func (r *RAFTelectionService) broadcastMessage(electionMsg domain.ElectionMessag
 	}
 	for _, peerID := range peerIDList{
 		logger_raftservice.Infoln("sending...",peerID)
-		r.comm.SendStream(message,nil,peerID)
+		r.comm.SendStream(message,nil, nil,peerID)
 	}
 }
 
@@ -125,7 +125,7 @@ func (r *RAFTelectionService) sendVoteMsg(peerId string) {
 		Content: &pb.StreamMessage_ElectionMessage{ElectionMessage: domain.ToElectionProtoMessage(voteMsg),},
 	}
 	logger_raftservice.Infoln("sending...", peerId)
-	r.comm.SendStream(message, nil, peerId)
+	r.comm.SendStream(message, nil, nil, peerId)
 }
 
 func (r *RAFTelectionService) AddPeerId() {
@@ -133,5 +133,6 @@ func (r *RAFTelectionService) AddPeerId() {
 }
 
 func (r *RAFTelectionService) GetLastBlockHash() string {
-	BlockService().GetLastBlock()
+	//BlockService().GetLastBlock()
+	return ""
 }

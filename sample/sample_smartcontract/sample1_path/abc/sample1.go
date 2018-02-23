@@ -25,7 +25,7 @@ func (sc *SampleSmartContract) Init(tx_string string, dbPath string, args []stri
 	}
 
 	/*** Init WorldStateDB ***/
-	path := dbPath
+	path := "/go/src" + dbPath	// "/go/src/it-chain/smartcontract/worldstatedb/test"
 	dbProvider := leveldbhelper.CreateNewDBProvider(path)
 	defer func(){
 		dbProvider.Close()

@@ -3,12 +3,14 @@ package main
 import (
 	"it-chain/db/leveldbhelper"
 	"fmt"
+	"os"
 )
 
 func main() {
+	GOPATH := os.Getenv("GOPATH")
 
 	//path := "./sample/db/test"
-	path := "./smartcontract/worldstatedb"
+	path := GOPATH + "/src/it-chain/smartcontract/worldstatedb/test"
 	dbProvider := leveldbhelper.CreateNewDBProvider(path)
 	defer func(){
 		dbProvider.Close()
