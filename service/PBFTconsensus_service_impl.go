@@ -231,15 +231,15 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(msg msg.OutterMessage){
 	logger_pbftservice.Infoln("Current Stage is",consensusState.CurrentStage)
 
 	if consensusState.CurrentStage == domain.PrePrepared{
+
 		logger_pbftservice.Infoln("my id", cs.identity.PeerID)
 		sequenceID := time.Now().UnixNano()
-
 		logger_pbftservice.Infoln("block", consensusState.Block)
-
 		preprepareConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.identity.PeerID,domain.PrepareMsg)
 		consensusState.CurrentStage = domain.Prepared
 		cs.broadcastMessage(preprepareConsensusMessage)
 		logger_pbftservice.Infoln("ConsensusState is prepared")
+
 	}
 
 	//1. prepare stage && prepare message가 전체의 2/3이상 -> commitMsg전파

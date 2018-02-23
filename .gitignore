@@ -1,0 +1,31 @@
+bnaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# goland
+.idea
+
+#
+.DS_Store
+
+# worldstatedb
+smartcontract/worldstatedb/*
+sample/db/test/*
+
+# key
+.keys
+
+# ledger
+.ledger
+.tx
+
+# test
+test*/*

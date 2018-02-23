@@ -65,6 +65,9 @@ func (l *Ledger) VerifyBlock(blk *domain.Block) (bool, error){
 		return false, err
 	}
 
+	common.Log.Println(lastBlock.Header.BlockHeight)
+	common.Log.Println(blk.Header.BlockHeight)
+
 	if lastBlock.Header.BlockHeight + 1 != blk.Header.BlockHeight{
 		return false, errors.New("Block height misMatched")
 	}
@@ -126,6 +129,10 @@ func (l *Ledger) LookUpBlock(arg interface{}) (*domain.Block, error) {
 }
 
 func (l *Ledger) AddBlock(blk *domain.Block) (bool, error) {
+
+	if existBlock, _ := l.DB.GetBlockByHash(blk.Header.BlockHash); existBlock != nil{
+		return true,nil
+	}
 
 	lastBlock, err := l.GetLastBlock()
 
