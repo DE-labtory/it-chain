@@ -26,6 +26,7 @@ func TestDeploy_Deploy(t *testing.T) {
 		currentDir + "/sample_smartcontract",
 		map[string]SmartContract{},
 		currentDir + "/smartcontract/worldstatedb",
+		"test",
 	}
 	ContractPath := "junbeomlee/bloom"
 
@@ -73,6 +74,7 @@ func TestSmartContractServiceImpl_Invoke(t *testing.T) {
 			},
 		},
 		currentDir + "/../smartcontract/worldstatedb",
+		"test",
 	}
 
 	fmt.Println("scs created")
@@ -140,6 +142,7 @@ func TestSmartContractServiceImpl_ValidateTransactionsOfBlock(t *testing.T) {
 			},
 		},
 		currentDir + "/../smartcontract/worldstatedb",
+		"test",
 	}
 
 	fmt.Println("scs created")
@@ -197,6 +200,7 @@ func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
 			},
 		},
 		currentDir + "/smartcontract/worldstatedb",
+		"test",
 	}
 
 	fmt.Println("scs created")
@@ -235,6 +239,7 @@ func TestSmartContractServiceImpl_pullAllSmartContracts(t *testing.T) {
 		currentDir + "/pull_test_repositories",
 		map[string]SmartContract{},
 		currentDir + "/smartcontract/worldstatedb",
+		"test",
 	}
 
 	scs.PullAllSmartContracts("emperorhan", func(e error) {
