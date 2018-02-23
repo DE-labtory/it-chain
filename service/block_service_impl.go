@@ -27,6 +27,10 @@ func (l *Ledger) CreateBlock(txList []*domain.Transaction, createPeerId string) 
 		return nil, err
 	}
 
+	if lastBlock == nil {
+		lastBlock, err = l.CreateGenesisBlock()
+	}
+
 	blk := domain.CreateNewBlock(lastBlock, createPeerId)
 
 	for _, tx := range txList {
@@ -84,7 +88,6 @@ func (l *Ledger) VerifyBlock(blk *domain.Block) (bool, error){
 }
 
 func (l *Ledger) GetLastBlock() (*domain.Block, error) {
-
 	blk, err := l.DB.GetLastBlock()
 
 	if err != nil{
@@ -92,28 +95,17 @@ func (l *Ledger) GetLastBlock() (*domain.Block, error) {
 	}
 
 	if blk == nil{
-
-		genesisBlock := domain.CreateNewBlock(nil, "0")
-		genesisBlock.Header.MerkleTreeRootHash = common.ComputeSHA256([]string{""})
-		BlkVarification, _ := genesisBlock.VerifyBlock()
-
-		if BlkVarification == false{
-			return nil, errors.New("invalid block")
-		}
-
-		err = l.DB.AddBlock(genesisBlock)
-
-		if err != nil {
-			return nil,err
-		}
-
-		return genesisBlock, nil
+		return l.CreateGenesisBlock()
 	}
 
 	return blk, err
 }
 
 func (l *Ledger) LookUpBlock(arg interface{}) (*domain.Block, error) {
+	_, err := l.GetLastBlock()
+	if err != nil{
+		return nil, errors.New("no block exist")
+	}
 	switch arg.(type)  {
 	case int:
 		arg = uint64(arg.(int))
@@ -126,6 +118,8 @@ func (l *Ledger) LookUpBlock(arg interface{}) (*domain.Block, error) {
 }
 
 func (l *Ledger) AddBlock(blk *domain.Block) (bool, error) {
+	_, err := l.LookUpBlock(blk.Header.BlockHash)
+	if err == nil{ return false, errors.New("already this blk exist") }
 
 	lastBlock, err := l.GetLastBlock()
 
@@ -150,4 +144,18 @@ func (l *Ledger) AddBlock(blk *domain.Block) (bool, error) {
 	l.DB.AddBlock(blk)
 
 	return true, nil
+}
+
+func (l *Ledger) CreateGenesisBlock() (*domain.Block, error) {
+	genesisBlock := domain.CreateNewBlock(nil, "0")
+	genesisBlock.MakeMerkleTree()
+	genesisBlock.GenerateBlockHash()
+	BlkVarification, _ := genesisBlock.VerifyBlock()
+
+	if BlkVarification == false{
+		return nil, errors.New("invalid block")
+	}
+
+	l.DB.AddBlock(genesisBlock)
+	return genesisBlock, nil
 }

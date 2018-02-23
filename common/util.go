@@ -27,6 +27,8 @@ import (
 	"sort"
 	"it-chain/network/protos"
 	"it-chain/auth"
+	"math/big"
+	"crypto/rand"
 )
 
 var logger = GetLogger("util.go")
@@ -121,3 +123,10 @@ func ToEnvelope(data interface {}, crpyto auth.Crypto, pubkey []byte) message.En
 
 	return envelope
 }
+
+func CryptoRandomGeneration(min int64, max int64) int64 {
+	n, _ := rand.Int(rand.Reader, big.NewInt(max + 1 - min))
+	ret := n.Int64() + min
+	return ret
+}
+
