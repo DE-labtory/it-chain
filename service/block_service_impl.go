@@ -87,6 +87,7 @@ func (l *Ledger) VerifyBlock(blk *domain.Block) (bool, error){
 }
 
 func (l *Ledger) GetLastBlock() (*domain.Block, error) {
+
 	blk, err := l.DB.GetLastBlock()
 
 	if err != nil{
@@ -94,6 +95,7 @@ func (l *Ledger) GetLastBlock() (*domain.Block, error) {
 	}
 
 	if blk == nil{
+
 		return l.CreateGenesisBlock()
 	}
 
@@ -146,6 +148,7 @@ func (l *Ledger) AddBlock(blk *domain.Block) (bool, error) {
 }
 
 func (l *Ledger) CreateGenesisBlock() (*domain.Block, error) {
+
 	genesisBlock := domain.CreateNewBlock(nil, "0")
 	genesisBlock.MakeMerkleTree()
 	genesisBlock.GenerateBlockHash()

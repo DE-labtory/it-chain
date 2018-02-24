@@ -80,6 +80,8 @@ func (wi *WebhookServiceImpl) Remove(ctx context.Context, in *pb.WebhookRequest)
 
 func (wi *WebhookServiceImpl) Serve(port int) error {
 
+	log.Println("webhook service is on:",port)
+
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)

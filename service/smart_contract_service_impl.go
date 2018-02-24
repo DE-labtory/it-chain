@@ -170,6 +170,14 @@ func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
 	return githubResponseCommits[0].Sha, nil
 }
 
+/***************************************************
+ *	1. smartcontract 검사
+ *	2. smartcontract -> sc.tar : 애초에 풀 받을 때 압축해 둘 수 있음
+ *	3. go 버전에 맞는 docker image를 Create
+ *	4. sc.tar를 docker container로 복사
+ *	5. docker container Start
+ *	6. docker에서 smartcontract 실행
+ ****************************************************/
 func (scs *SmartContractServiceImpl) ValidateTransactionsOfBlock(block *domain.Block) (error) {
 	// 블럭 유효성 검사 필요?
 	if block.TransactionCount <= 0 {
@@ -391,6 +399,8 @@ func (scs *SmartContractServiceImpl) Invoke(transaction *domain.Transaction) (*d
 		logger_s.Errorln("Not exist contract ID")
 		return nil, errors.New("Not exist contract ID")
 	}
+
+	fmt.Println(GOPATH + "/src/it-chain" + sc.SmartContractPath + "/" + transaction.TxData.ContractID)
 
 	_, err = os.Stat(GOPATH + "/src/it-chain" + sc.SmartContractPath + "/" + transaction.TxData.ContractID)
 	if os.IsNotExist(err) {

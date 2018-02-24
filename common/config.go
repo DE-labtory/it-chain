@@ -10,7 +10,6 @@ func init(){
 }
 
 func initConfig(){
-	//pathSeparator := string(os.PathSeparator)
 
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("config")

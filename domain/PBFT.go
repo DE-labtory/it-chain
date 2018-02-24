@@ -5,6 +5,7 @@ import (
 	pb "it-chain/network/protos"
 	"sync"
 	"sync/atomic"
+	"it-chain/common"
 )
 
 type MsgType int
@@ -112,7 +113,7 @@ const (
 	Committed                			 // Same with `committed-local` stage explained in the original paper.
 )
 
-type EndConsensusHandle func(ConsensusState)
+type EndConsensusHandle func(*ConsensusState)
 
 //동시에 여러개의 consensus가 진행될 수 있다.
 //한개의 consensus는 1개의 state를 갖는다.
@@ -233,7 +234,7 @@ func (cs *ConsensusState) start(){
 	//consensus did not end
 	//need to delete
 	if cs.IsEnd == 0{
-		cs.endConsensusHandler(*cs)
+		cs.endConsensusHandler(cs)
 	}
 }
 
@@ -265,6 +266,7 @@ func (cs *ConsensusState) AddMessage(consensusMessage ConsensusMessage){
 
 	case CommitMsg:
 		_ ,ok := cs.CommitMsgs[consensusMessage.SenderID]
+
 		if !ok{
 			cs.CommitMsgs[consensusMessage.SenderID] = consensusMessage
 		}
@@ -280,7 +282,7 @@ func (cs *ConsensusState) PrepareReady() bool{
 	nowVotes := len(cs.PrepareMsgs)
 
 	if totalVotes == 0{
-		return false
+		return true
 	}
 
 	if totalVotes == 1{
@@ -306,9 +308,15 @@ func (cs *ConsensusState) CommitReady() bool{
 		return true
 	}
 
-	if nowVotes >= int(totalVotes/3) + 1{
+	if nowVotes >= int((totalVotes-1)/3) + 1{
 		return true
 	}
+
+	common.Log.Println(totalVotes)
+	common.Log.Println(nowVotes)
+	common.Log.Println(int((totalVotes-1)/3) + 1)
+	common.Log.Println("not ready")
+
 	return false
 }
 

@@ -23,6 +23,8 @@ type Block struct {
 	Transactions	 	[]*Transaction
 }
 
+func (s *Block) Reset() { *s = Block{} }
+
 type BlockHeader struct {
 	Number             uint64
 	PreviousHash       string
@@ -95,11 +97,12 @@ func (s Block) FindTransactionIndex(hash string) (idx int, err error){
 }
 
 func (s *Block) MakeMerkleTree(){
-	// genesis block일 경우 txlist가 없기때문에 머클트리가 없다
+
 	if s.TransactionCount == 0 {
 		s.Header.MerkleTreeRootHash = ""
 		return
 	}
+
 	var mtList []string
 
 	for _, h := range s.Transactions{
@@ -195,7 +198,6 @@ func (s Block) VerifyBlock() (bool, error) {
 	}
 	return true, nil
 }
-
 
 //todo test
 func FromProtoBlock(pb *pb.Block) *Block{

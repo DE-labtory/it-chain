@@ -186,6 +186,16 @@ func (pt *PeerTable) GetPeerList() []*Peer{
 	return tmp
 }
 
+func (pt *PeerTable) GetAllPeerList() []*Peer{
+
+	tmp := make([]*Peer, 0)
+	for _, peer := range pt.PeerMap{
+		tmp = append(tmp, peer)
+	}
+
+	return tmp
+}
+
 //tested
 func (pt *PeerTable) GetMyInfo() Peer{
 	Peer, ok := pt.PeerMap[pt.MyID]

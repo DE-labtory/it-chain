@@ -129,4 +129,3 @@ func CryptoRandomGeneration(min int64, max int64) int64 {
 	ret := n.Int64() + min
 	return ret
 }
-

@@ -62,6 +62,7 @@ func TestSmartContractServiceImpl_Invoke(t *testing.T) {
 			"ffef47f2bb6fdfa19320237553d1cc3099960b8d",
 		),
 	)
+
 	fmt.Println("tx created")
 	scs := SmartContractServiceImpl{
 		"steve-buzzni",
@@ -78,8 +79,12 @@ func TestSmartContractServiceImpl_Invoke(t *testing.T) {
 		"test",
 	}
 
+	fmt.Println(currentDir + "/../smartcontract/worldstatedb")
+
 	fmt.Println("scs created")
-	scs.Invoke(tx)
+	_, err= scs.Invoke(tx)
+
+	fmt.Println(err)
 }
 
 func TestSmartContractServiceImpl_ValidateTransactionsOfBlock(t *testing.T) {
@@ -133,7 +138,7 @@ func TestSmartContractServiceImpl_ValidateTransactionsOfBlock(t *testing.T) {
 	fmt.Println("block created with tx")
 	scs := SmartContractServiceImpl{
 		"steve-buzzni",
-		"/smartcontract/sample_smartcontract",
+		"./smartcontract/sample_smartcontract",
 		map[string]SmartContract{
 			"ffef47f2bb6fdfa19320237553d1cc3099960b8d": SmartContract{
 				Name:              "sample1",
@@ -176,6 +181,7 @@ func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
 	if err != nil {
 		assert.Fail(t, err.Error())
 	}
+
 	tx := domain.CreateNewTransaction(
 		strconv.Itoa(1),
 		strconv.Itoa(1),
@@ -188,6 +194,7 @@ func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
 			"ffef47f2bb6fdfa19320237553d1cc3099960b8d",
 		),
 	)
+
 	fmt.Println("tx created")
 	scs := SmartContractServiceImpl{
 		"steve-buzzni",

@@ -165,7 +165,7 @@ func TestDB_WriteBatch(t *testing.T) {
 	assert.Equal(t,string(byteValue),"jun")
 }
 
-func TestDB_Snapshot(t *testing.T) {
+func TestDB_snapSnapshot(t *testing.T) {
 	path := "./test_db_path"
 	db := getDB(path)
 	db.Open()
@@ -180,6 +180,7 @@ func TestDB_Snapshot(t *testing.T) {
 	batch.Put([]byte("key3"), []byte("val3"))
 	db.WriteBatch(batch,true)
 
+	
 	snap, err := db.Snapshot()
 	assert.NoError(t, err)
 

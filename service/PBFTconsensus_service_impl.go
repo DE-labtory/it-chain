@@ -12,6 +12,7 @@ import (
 	"it-chain/network/comm/msg"
 	"github.com/spf13/viper"
 	"strconv"
+	"it-chain/service/webhook"
 )
 
 var logger_pbftservice = common.GetLogger("pbft_service")
@@ -24,11 +25,12 @@ type PBFTConsensusService struct {
 	peerService          PeerService
 	blockService         BlockService
 	smartContractService SmartContractService
+	webHookService       webhook.WebhookService
 	transactionService   TransactionService
 	sync.RWMutex
 }
 
-func NewPBFTConsensusService(comm comm.ConnectionManager, peerService PeerService, blockService BlockService,identity *domain.Peer, smartContractService SmartContractService, transactionService TransactionService) ConsensusService{
+func NewPBFTConsensusService(comm comm.ConnectionManager,webHookService webhook.WebhookService, peerService PeerService, blockService BlockService,identity *domain.Peer, smartContractService SmartContractService, transactionService TransactionService) ConsensusService{
 
 	pbft := &PBFTConsensusService{
 		consensusStates: make(map[string]*domain.ConsensusState),
@@ -37,6 +39,7 @@ func NewPBFTConsensusService(comm comm.ConnectionManager, peerService PeerServic
 		blockService: blockService,
 		smartContractService: smartContractService,
 		transactionService: transactionService,
+		webHookService: webHookService,
 		identity: identity,
 	}
 
@@ -73,6 +76,14 @@ func (cs *PBFTConsensusService) StartConsensus(view *domain.View, block *domain.
 
 func (cs *PBFTConsensusService) startConsensus(interface{}){
 
+	//1. 혼자인경우
+	//2. leader아닌경우
+
+	if (cs.peerService.GetLeader() == nil || cs.identity.PeerID != cs.peerService.GetLeader().PeerID) && len(cs.peerService.GetPeerTable().GetPeerList()) != 0{
+		common.Log.Println("Not leader")
+		return
+	}
+
 	common.Log.Println("start Consesnsus")
 
 	transactions, err := cs.transactionService.GetTransactions(100)
@@ -82,11 +93,17 @@ func (cs *PBFTConsensusService) startConsensus(interface{}){
 		return
 	}
 
+	if len(transactions) == 0{
+		common.Log.Println("No tx to consesnsus")
+		return
+	}
+
 	for i := 0; i < len(transactions); i++ {
 		cs.smartContractService.ValidateTransaction(transactions[i])
 		transactions[i].GenerateHash()
 	}
 
+	cs.transactionService.DeleteTransactions(transactions)
 	block, err := cs.blockService.CreateBlock(transactions,cs.identity.PeerID)
 
 	if err != nil{
@@ -106,15 +123,18 @@ func (cs *PBFTConsensusService) startConsensus(interface{}){
 
 		if flag{
 			common.Log.Error("Add block")
-			cs.blockService.AddBlock(block)
-			//txbuffer제거
+			_, err := cs.blockService.AddBlock(block)
+
+			if err !=nil{
+				cs.webHookService.SendConfirmedBlock(block)
+			}
 		}
 		return
 	}
 
 	peerIDs := make([]string,0)
 
-	for _, peer := range cs.peerService.GetPeerTable().GetPeerList(){
+	for _, peer := range cs.peerService.GetPeerTable().GetAllPeerList(){
 		peerIDs = append(peerIDs, peer.PeerID)
 	}
 
@@ -124,7 +144,7 @@ func (cs *PBFTConsensusService) startConsensus(interface{}){
 		PeerID: peerIDs,
 	}
 
-	go cs.StartConsensus(view,block)
+	cs.StartConsensus(view,block)
 }
 
 func (cs *PBFTConsensusService) GetCurrentConsensusState() map[string]*domain.ConsensusState{
@@ -148,11 +168,15 @@ func (cs *PBFTConsensusService) StopConsensus(){
 //todo time을 config로 부터 읽어야함
 //todo 다음 block이 먼저 들어올 경우 고려해야함,
 //todo 블록의 높이와 이전 블록 해시가 올바른지 확인
-func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage msg.OutterMessage){
+func (cs *PBFTConsensusService) ReceiveConsensusMessage(msg msg.OutterMessage){
 
-	logger_pbftservice.Infoln("Received message: ",outterMessage)
+	if consensusMsg := msg.Message.GetConsensusMessage(); consensusMsg ==nil{
+		return
+	}
 
-	message := outterMessage.Message
+	common.Log.Println("Received Consensus Msg")
+
+	message := msg.Message
 	cm:= message.GetConsensusMessage()
 
 	if cm == nil{
@@ -174,6 +198,7 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage msg.Outter
 
 	//2 consensus id check
 	cs.Lock()
+	defer cs.Unlock()
 
 	logger_pbftservice.Infoln(consensusMessage.SenderID)
 
@@ -217,48 +242,42 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(outterMessage msg.Outter
 	if consensusState.CurrentStage == domain.PrePrepared{
 		logger_pbftservice.Infoln("my id", cs.identity.PeerID)
 		sequenceID := time.Now().UnixNano()
-
 		logger_pbftservice.Infoln("block", consensusState.Block)
-
 		preprepareConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.identity.PeerID,domain.PrepareMsg)
-		cs.broadcastMessage(preprepareConsensusMessage)
 		consensusState.CurrentStage = domain.Prepared
-		logger_pbftservice.Infoln("ConsensusState is prepared")
+		cs.broadcastMessage(preprepareConsensusMessage)
 	}
 
 	//1. prepare stage && prepare message가 전체의 2/3이상 -> commitMsg전파
 	if consensusState.CurrentStage == domain.Prepared && consensusState.PrepareReady(){
 		sequenceID := time.Now().UnixNano()
 		commitConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.identity.PeerID,domain.CommitMsg)
-		cs.broadcastMessage(commitConsensusMessage)
 		consensusState.CurrentStage = domain.Committed
-		logger_pbftservice.Infoln("ConsensusState is Committed")
+		cs.broadcastMessage(commitConsensusMessage)
 	}
 
 	//2. commit state && commit message가 전체의 2/3이상 -> 블록저장
 	if consensusState.CurrentStage == domain.Committed && consensusState.CommitReady(){
+		logger_pbftservice.Infoln("ConsensusState is End")
+		cs.EndConsensusState(consensusState)
 		//block 저장
 		//todo block에 저장
 		flag, err := cs.blockService.VerifyBlock(consensusState.Block)
 
 		if err != nil{
-
+			common.Log.Error("Verify block error:",err.Error())
 		}
 
 		if flag{
+			common.Log.Error("Add block")
 			cs.blockService.AddBlock(consensusState.Block)
+			cs.transactionService.DeleteTransactions(consensusState.Block.Transactions)
 		}
-
-		logger_pbftservice.Infoln("ConsesnsusState is End")
+		return
 	}
-
-	//logger_pbftservice.Infoln(consensusState.CommitMsgs)
-	//logger_pbftservice.Infoln(consensusState.PrepareMsgs)
-
-	cs.Unlock()
 }
 
-func (cs *PBFTConsensusService) EndConsensusState(consensusState domain.ConsensusState){
+func (cs *PBFTConsensusService) EndConsensusState(consensusState *domain.ConsensusState){
 
 	cs.Lock()
 	defer cs.Unlock()

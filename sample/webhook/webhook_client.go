@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	address := "127.0.0.1:50070"
+	address := "127.0.0.1:44444"
 	payloadURL := "http://localhost:9000"
 
 	conn, err := grpc.Dial(address, grpc.WithInsecure())

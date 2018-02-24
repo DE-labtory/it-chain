@@ -194,6 +194,7 @@ func NewElectionMessage(r *Raft) ElectionMessage {
 			return -1
 		}
 	}
+
 	return ElectionMessage{
 		LastBlockHash: r.GetLastBlockHash(),
 		SenderID:      r.GetNodeId(),

@@ -172,11 +172,16 @@ func (db *DB) GetIteratorWithPrefix(prefix []byte) iterator.Iterator {
 }
 
 func (db *DB) Snapshot() (map[string][]byte, error) {
+	db.mux.Lock()
+	defer db.mux.Unlock()
+
 	snap, err := db.db.GetSnapshot()
+
 	if err != nil {
 		logger.Error("Error while taking snapshot")
 		return nil, err
 	}
+
 	data := make(map[string][]byte)
 	iter := snap.NewIterator(nil, nil)
 	for iter.Next() {

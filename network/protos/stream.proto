@@ -38,6 +38,7 @@ message StreamMessage{
 message Block{
     bytes data = 1;
 }
+
 message ConnectionEstablish {}
 
 message PeerTable{
@@ -75,7 +76,6 @@ message ElectionMessage{
     int64 Term = 4;
     repeated string PeerIDs = 5;
 }
-
 
 
 
