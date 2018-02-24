@@ -134,5 +134,5 @@ func (r *RAFTelectionService) AddPeerId() {
 
 func (r *RAFTelectionService) GetLastBlockHash() string {
 	//BlockService().GetLastBlock()
-	return "tmp"
+	return ""
 }

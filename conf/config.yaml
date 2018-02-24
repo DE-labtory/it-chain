@@ -18,6 +18,8 @@ smartContract:
   githubID: steve@buzzni.com
   githubPassword: itchain123
   githubAccessToken: 1a8ae688db783f63c2494d59f971b2eed5399b1d
+  TmpDir: /tmp
+  WorldStateDB_OnDoker: /go/src/worldstatedb
 
 batchTimer:
   pushPeerTable: 5
