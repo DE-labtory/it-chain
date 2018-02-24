@@ -239,9 +239,8 @@ func TestSmartContractServiceImpl_pullAllSmartContracts(t *testing.T) {
 		},
 	)
 
-	//defer func() {
-	//	GOPATH := os.Getenv("GOPATH")
-	//	os.RemoveAll(GOPATH + "/src/it-chain" + scs.SmartContractHomePath + "/.")
-	//}()
-
+	defer func() {
+		GOPATH := os.Getenv("GOPATH")
+		os.Remove(GOPATH + "/src/it-chain" + scs.SmartContractHomePath + "/*")
+	}()
 }
