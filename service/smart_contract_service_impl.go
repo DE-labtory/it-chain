@@ -298,50 +298,6 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 		return nil, err
 	}
 
-	/*** read tar file ***/
-	/*
-	file, err := ioutil.ReadFile(tarPath)
-	if err != nil {
-		logger_s.Errorln("An error occurred while reading smartcontract tar file!")
-		return nil, err
-	}
-	wsdb, err := ioutil.ReadFile(tarPath_wsdb)
-	if err != nil {
-		logger_s.Errorln("An error occurred while reading worldstateDB tar file!")
-		return nil, err
-	}
-	config, err := ioutil.ReadFile(tarPath_config)
-	if err != nil {
-		logger_s.Errorln("An error occurred while reading config tar file!")
-		return nil, err
-	}
-	*/
-
-	/*** copy file to docker ***/
-	/*
-	err = cli.CopyToContainer(ctx, resp.ID, "/go/src/", bytes.NewReader(file), types.CopyToContainerOptions{
-		AllowOverwriteDirWithFile: false,
-	})
-	if err != nil {
-		logger_s.Errorln("An error occurred while copying the smartcontract to the container!")
-		return nil, err
-	}
-	err = cli.CopyToContainer(ctx, resp.ID, "/go/src/", bytes.NewReader(wsdb), types.CopyToContainerOptions{
-		AllowOverwriteDirWithFile: false,
-	})
-	if err != nil {
-		logger_s.Errorln("An error occurred while copying the worldstateDB to the container!")
-		return nil, err
-	}
-	err = cli.CopyToContainer(ctx, resp.ID, "/go/src/", bytes.NewReader(config), types.CopyToContainerOptions{
-		AllowOverwriteDirWithFile: false,
-	})
-	if err != nil {
-		logger_s.Errorln("An error occurred while copying the config to the container!")
-		return nil, err
-	}
-	*/
-
 	err = cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
 	if err != nil {
 		logger_s.Errorln("An error occurred while starting the container!")
