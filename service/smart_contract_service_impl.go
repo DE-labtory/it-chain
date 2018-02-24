@@ -400,6 +400,8 @@ func (scs *SmartContractServiceImpl) Invoke(transaction *domain.Transaction) (*d
 		return nil, errors.New("Not exist contract ID")
 	}
 
+	fmt.Println(GOPATH + "/src/it-chain" + sc.SmartContractPath + "/" + transaction.TxData.ContractID)
+
 	_, err = os.Stat(GOPATH + "/src/it-chain" + sc.SmartContractPath + "/" + transaction.TxData.ContractID)
 	if os.IsNotExist(err) {
 		logger_s.Errorln("File or Directory Not Exist")

@@ -82,7 +82,9 @@ func TestSmartContractServiceImpl_Invoke(t *testing.T) {
 	fmt.Println(currentDir + "/../smartcontract/worldstatedb")
 
 	fmt.Println("scs created")
-	scs.Invoke(tx)
+	_, err= scs.Invoke(tx)
+
+	fmt.Println(err)
 }
 
 func TestSmartContractServiceImpl_ValidateTransactionsOfBlock(t *testing.T) {
@@ -136,7 +138,7 @@ func TestSmartContractServiceImpl_ValidateTransactionsOfBlock(t *testing.T) {
 	fmt.Println("block created with tx")
 	scs := SmartContractServiceImpl{
 		"steve-buzzni",
-		"/smartcontract/sample_smartcontract",
+		"./smartcontract/sample_smartcontract",
 		map[string]SmartContract{
 			"ffef47f2bb6fdfa19320237553d1cc3099960b8d": SmartContract{
 				Name:              "sample1",
