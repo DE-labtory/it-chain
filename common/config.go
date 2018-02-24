@@ -14,7 +14,7 @@ func initConfig(){
 
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("config")
-	viper.AddConfigPath("./conf")
+	viper.AddConfigPath("$GOPATH/src/it-chain/conf")
 
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil { // Handle errors reading the config file
