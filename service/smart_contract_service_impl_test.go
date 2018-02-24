@@ -189,8 +189,8 @@ func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
 		time.Now(),
 		domain.SetTxData(
 			"",
-			domain.Query,
-			domain.SetTxMethodParameters(0, "getA", []string{""}),
+			domain.Invoke,
+			domain.SetTxMethodParameters(0, "putA", []string{""}),
 			"ffef47f2bb6fdfa19320237553d1cc3099960b8d",
 		),
 	)
