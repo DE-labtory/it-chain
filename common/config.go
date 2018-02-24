@@ -3,6 +3,7 @@ package common
 import   (
 	"github.com/spf13/viper"
 	"fmt"
+	"os"
 )
 
 func init(){
@@ -10,11 +11,11 @@ func init(){
 }
 
 func initConfig(){
-	//pathSeparator := string(os.PathSeparator)
+	pathSeparator := string(os.PathSeparator)
 
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("config")
-	viper.AddConfigPath("./conf")
+	viper.AddConfigPath("$GOPATH"+pathSeparator+"src"+pathSeparator+"it-chain"+pathSeparator+"conf")
 
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil { // Handle errors reading the config file

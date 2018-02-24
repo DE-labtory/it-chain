@@ -28,8 +28,7 @@ sample/db/test/*
 .tx
 
 # test
-<<<<<<< HEAD
 test*/*
-=======
-test*/*
->>>>>>> d090e4697a530e1eddc09e2363f60c33679bb1e0
+
+# main program
+main

@@ -8,7 +8,7 @@ import (
 func main() {
 
 	//path := "./sample/db/test"
-	path := "./smartcontract/worldstatedb"
+	path := "../smartcontract/worldstatedb"
 	dbProvider := leveldbhelper.CreateNewDBProvider(path)
 	defer func(){
 		dbProvider.Close()

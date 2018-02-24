@@ -12,6 +12,7 @@ import (
 	"it-chain/network/comm/msg"
 	"github.com/spf13/viper"
 	"strconv"
+	"it-chain/service/webhook"
 )
 
 var logger_pbftservice = common.GetLogger("pbft_service")
@@ -24,11 +25,12 @@ type PBFTConsensusService struct {
 	peerService          PeerService
 	blockService         BlockService
 	smartContractService SmartContractService
+	webHookService       webhook.WebhookService
 	transactionService   TransactionService
 	sync.RWMutex
 }
 
-func NewPBFTConsensusService(comm comm.ConnectionManager, peerService PeerService, blockService BlockService,identity *domain.Peer, smartContractService SmartContractService, transactionService TransactionService) ConsensusService{
+func NewPBFTConsensusService(comm comm.ConnectionManager,webHookService webhook.WebhookService, peerService PeerService, blockService BlockService,identity *domain.Peer, smartContractService SmartContractService, transactionService TransactionService) ConsensusService{
 
 	pbft := &PBFTConsensusService{
 		consensusStates: make(map[string]*domain.ConsensusState),
@@ -37,6 +39,7 @@ func NewPBFTConsensusService(comm comm.ConnectionManager, peerService PeerServic
 		blockService: blockService,
 		smartContractService: smartContractService,
 		transactionService: transactionService,
+		webHookService: webHookService,
 		identity: identity,
 	}
 
@@ -73,7 +76,10 @@ func (cs *PBFTConsensusService) StartConsensus(view *domain.View, block *domain.
 
 func (cs *PBFTConsensusService) startConsensus(interface{}){
 
-	if cs.peerService.GetLeader() == nil || cs.identity.PeerID != cs.peerService.GetLeader().PeerID{
+	//1. 혼자인경우
+	//2. leader아닌경우
+
+	if (cs.peerService.GetLeader() == nil || cs.identity.PeerID != cs.peerService.GetLeader().PeerID) && len(cs.peerService.GetPeerTable().GetPeerList()) != 0{
 		common.Log.Println("Not leader")
 		return
 	}
@@ -117,7 +123,11 @@ func (cs *PBFTConsensusService) startConsensus(interface{}){
 
 		if flag{
 			common.Log.Error("Add block")
-			cs.blockService.AddBlock(block)
+			_, err := cs.blockService.AddBlock(block)
+
+			if err !=nil{
+				cs.webHookService.SendConfirmedBlock(block)
+			}
 		}
 		return
 	}
@@ -236,7 +246,6 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(msg msg.OutterMessage){
 		preprepareConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.identity.PeerID,domain.PrepareMsg)
 		consensusState.CurrentStage = domain.Prepared
 		cs.broadcastMessage(preprepareConsensusMessage)
-		logger_pbftservice.Infoln("ConsensusState is prepared")
 	}
 
 	//1. prepare stage && prepare message가 전체의 2/3이상 -> commitMsg전파
@@ -245,12 +254,12 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(msg msg.OutterMessage){
 		commitConsensusMessage := domain.NewConsesnsusMessage(consensusState.ID,*consensusState.View,sequenceID,consensusState.Block,cs.identity.PeerID,domain.CommitMsg)
 		consensusState.CurrentStage = domain.Committed
 		cs.broadcastMessage(commitConsensusMessage)
-		logger_pbftservice.Infoln("ConsensusState is Committed")
 	}
 
 	//2. commit state && commit message가 전체의 2/3이상 -> 블록저장
 	if consensusState.CurrentStage == domain.Committed && consensusState.CommitReady(){
 		logger_pbftservice.Infoln("ConsensusState is End")
+		cs.EndConsensusState(consensusState)
 		//block 저장
 		//todo block에 저장
 		flag, err := cs.blockService.VerifyBlock(consensusState.Block)
@@ -268,7 +277,7 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(msg msg.OutterMessage){
 	}
 }
 
-func (cs *PBFTConsensusService) EndConsensusState(consensusState domain.ConsensusState){
+func (cs *PBFTConsensusService) EndConsensusState(consensusState *domain.ConsensusState){
 
 	cs.Lock()
 	defer cs.Unlock()

@@ -60,6 +60,7 @@ func TestSmartContractServiceImpl_Invoke(t *testing.T) {
 			"abc",
 		),
 	)
+
 	fmt.Println("tx created")
 	scs := SmartContractServiceImpl{
 		"steve-buzzni",
@@ -74,6 +75,8 @@ func TestSmartContractServiceImpl_Invoke(t *testing.T) {
 		},
 		currentDir + "/../smartcontract/worldstatedb",
 	}
+
+	fmt.Println(currentDir + "/../smartcontract/worldstatedb")
 
 	fmt.Println("scs created")
 	scs.Invoke(tx)
@@ -172,6 +175,7 @@ func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
 	if err != nil {
 		assert.Fail(t, err.Error())
 	}
+
 	tx := domain.CreateNewTransaction(
 		strconv.Itoa(1),
 		strconv.Itoa(1),
@@ -184,6 +188,7 @@ func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
 			"abc",
 		),
 	)
+
 	fmt.Println("tx created")
 	scs := SmartContractServiceImpl{
 		"steve-buzzni",

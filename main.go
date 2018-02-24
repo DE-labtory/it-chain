@@ -18,6 +18,7 @@ import (
 	"google.golang.org/grpc"
 	pb "it-chain/network/protos"
 	"golang.org/x/net/context"
+	"it-chain/service/webhook"
 )
 
 type Node struct {
@@ -27,6 +28,7 @@ type Node struct {
 	consensusService     service.ConsensusService
 	smartContractService service.SmartContractService
 	transactionService   service.TransactionService
+	webHookService 		 webhook.WebhookService
 	connectionManager    comm.ConnectionManager
 	crypto               auth.Crypto
 }
@@ -84,9 +86,16 @@ func NewNode(ip string) *Node{
 	///// smartContractService
 	smartContractService := service.NewSmartContractService(viper.GetString("smartcontract.defaultPath"),viper.GetString("smartContract.githubID"))
 
+	//// webHookService
+	webHookService,err  := webhook.NewWebhookService()
+	node.webHookService = webHookService
+
+	go webHookService.Serve(44444)
+
 	///// consensusService
-	consensusService := service.NewPBFTConsensusService(node.connectionManager,node.peerService,node.blockService,node.identity,smartContractService,transactionService)
+	consensusService := service.NewPBFTConsensusService(node.connectionManager,node.webHookService, node.peerService,node.blockService,node.identity,smartContractService,transactionService)
 	node.consensusService = consensusService
+
 
 	return node
 }

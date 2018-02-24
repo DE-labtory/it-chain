@@ -113,7 +113,7 @@ const (
 	Committed                			 // Same with `committed-local` stage explained in the original paper.
 )
 
-type EndConsensusHandle func(ConsensusState)
+type EndConsensusHandle func(*ConsensusState)
 
 //동시에 여러개의 consensus가 진행될 수 있다.
 //한개의 consensus는 1개의 state를 갖는다.
@@ -234,7 +234,7 @@ func (cs *ConsensusState) start(){
 	//consensus did not end
 	//need to delete
 	if cs.IsEnd == 0{
-		cs.endConsensusHandler(*cs)
+		cs.endConsensusHandler(cs)
 	}
 }
 

@@ -19,7 +19,7 @@ type MockConnectionManager struct{
 	mock.Mock
 }
 
-func (mcm MockConnectionManager) SendStream(data *pb.StreamMessage, errorCallBack comm.OnError, connectionID string){
+func (mcm MockConnectionManager) SendStream(data *pb.StreamMessage, successCallBack comm.OnSuccess, errorCallBack comm.OnError, connectionID string){
 	mcm.MethodCalled("SendStream",data,nil,connectionID)
 }
 
