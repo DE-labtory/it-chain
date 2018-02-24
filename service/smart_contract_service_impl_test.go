@@ -44,12 +44,6 @@ func TestDeploy_Deploy(t *testing.T) {
 }
 
 func TestSmartContractServiceImpl_Invoke(t *testing.T) {
-
-	currentDir, err := filepath.Abs("./")
-	fmt.Println(currentDir)
-	if err != nil {
-		assert.Fail(t, err.Error())
-	}
 	tx := domain.CreateNewTransaction(
 		strconv.Itoa(1),
 		strconv.Itoa(1),
@@ -66,7 +60,7 @@ func TestSmartContractServiceImpl_Invoke(t *testing.T) {
 	fmt.Println("tx created")
 	scs := SmartContractServiceImpl{
 		"steve-buzzni",
-		currentDir + "/sample_smartcontract",
+		"/smartcontract/sample_smartcontract",
 		map[string]SmartContract{
 			"ffef47f2bb6fdfa19320237553d1cc3099960b8d": SmartContract{
 				Name:              "sample1",
@@ -79,10 +73,9 @@ func TestSmartContractServiceImpl_Invoke(t *testing.T) {
 		"test",
 	}
 
-	fmt.Println(currentDir + "/../smartcontract/worldstatedb")
 
 	fmt.Println("scs created")
-	_, err= scs.Invoke(tx)
+	_, err := scs.Invoke(tx)
 
 	fmt.Println(err)
 }
@@ -176,12 +169,6 @@ func TestSmartContractServiceImpl_ValidateTransactionsOfBlock(t *testing.T) {
 }
 
 func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
-	currentDir, err := filepath.Abs("./")
-	fmt.Println(currentDir)
-	if err != nil {
-		assert.Fail(t, err.Error())
-	}
-
 	tx := domain.CreateNewTransaction(
 		strconv.Itoa(1),
 		strconv.Itoa(1),
@@ -252,6 +239,9 @@ func TestSmartContractServiceImpl_pullAllSmartContracts(t *testing.T) {
 		},
 	)
 
-	defer os.RemoveAll(scs.SmartContractHomePath)
+	//defer func() {
+	//	GOPATH := os.Getenv("GOPATH")
+	//	os.RemoveAll(GOPATH + "/src/it-chain" + scs.SmartContractHomePath + "/.")
+	//}()
 
 }
