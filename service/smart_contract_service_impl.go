@@ -170,16 +170,7 @@ func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
 	return githubResponseCommits[0].Sha, nil
 }
 
-/***************************************************
- *	1. smartcontract 검사
- *	2. smartcontract -> sc.tar : 애초에 풀 받을 때 압축해 둘 수 있음
- *	3. go 버전에 맞는 docker image를 Create
- *	4. sc.tar를 docker container로 복사
- *	5. docker container Start
- *	6. docker에서 smartcontract 실행
- ****************************************************/
 func (scs *SmartContractServiceImpl) ValidateTransactionsOfBlock(block *domain.Block) (error) {
-	// 블럭 유효성 검사 필요?
 	if block.TransactionCount <= 0 {
 		return errors.New("No tx in block")
 	}
@@ -258,7 +249,25 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 		return nil, errors.New("File or Directory Not Exist")
 	}
 
-	/* Docker Code */
+
+	/*** world state DB copy ***/
+	origin_wsDB := GOPATH + "/src/it-chain/" + scs.WorldStateDBPath + "/" + scs.WorldStateDBName
+	copied_wsDB := GOPATH + "/src/it-chain/" + scs.WorldStateDBPath + "/" + scs.WorldStateDBName + "_copied"
+
+	_, err = os.Stat(origin_wsDB)
+	if err != nil {
+		logger_s.Errorln("World State DB Not Exist")
+		return nil, errors.New("World State DB Not Exist")
+	}
+
+	err = common.CopyDir(origin_wsDB, copied_wsDB)
+	if err != nil {
+		logger_s.Errorln("An error occured while copying wsDB")
+		return nil, errors.New("An error occured while copying wsDB")
+	}
+	defer os.Remove(GOPATH + "/src/it-chain/" + scs.WorldStateDBPath + "/" + scs.WorldStateDBName + "_copied")
+
+	/*** Docker Code ***/
 	imageName := "docker.io/library/golang:1.9.2-alpine3.6"
 
 	ctx := context.Background()
@@ -271,7 +280,7 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 	logger_s.Errorln("Pulling image")
 	out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
 	if err != nil {
-		logger_s.Errorln("An error oeccured while pulling docker image!")
+		logger_s.Errorln("An error occurred while pulling docker image!")
 		return nil, err
 	}
 	io.Copy(os.Stdout, out)
@@ -284,14 +293,14 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 		Cmd: []string{
 			"go", "run",
 			"/go/src/it-chain" + sc.SmartContractPath + "/" + transaction.TxData.ContractID + "/" + sc.Name + ".go",
-			string(txBytes), "/go/src/it-chain" + scs.WorldStateDBPath + "/" + scs.WorldStateDBName,
+			string(txBytes), "/go/src/it-chain" + scs.WorldStateDBPath + "/" + scs.WorldStateDBName + "_copied",
 		},
 		//Cmd:          []string{"/go/src/it-chain/smartcontract/sample_smartcontract/" + sc.Name, string(txBytes), GOPATH + "/src" + scs.WorldStateDBPath + "/" + scs.WorldStateDBName},
 		Tty:          true,
 		AttachStdout: true,
 		AttachStderr: true,
 	}, &container.HostConfig{
-		Binds: []string{GOPATH + "/src/it-chain:/go/src/it-chain"}, // {"/smartcontract/path:/smartcontract", "/worldstatedb/path:/worldstatedb", "/config:/config"},
+		Binds: []string{GOPATH + "/src/it-chain:/go/src/it-chain"},
 	}, nil, "")
 	if err != nil {
 		logger_s.Errorln("An error occurred while creating docker container!")
