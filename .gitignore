@@ -32,3 +32,6 @@ test*/*
 
 # main program
 main
+
+# it-chain-datasource-path
+.it-chain
