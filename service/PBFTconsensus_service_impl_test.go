@@ -2,17 +2,17 @@ package service
 
 import (
 	"testing"
-	"it-chain/network/comm"
+	"github.com/it-chain/it-chain-Engine/network/comm"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
-	"it-chain/auth"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/auth"
+	"github.com/it-chain/it-chain-Engine/domain"
 	"github.com/stretchr/testify/assert"
-	pb "it-chain/network/protos"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
 	"time"
 	"fmt"
 	"sync"
-	"it-chain/network/comm/msg"
+	"github.com/it-chain/it-chain-Engine/network/comm/msg"
 )
 
 type MockConnectionManager struct{

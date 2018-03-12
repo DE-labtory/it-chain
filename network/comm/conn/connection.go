@@ -1,6 +1,6 @@
 package conn
 
-import "it-chain/network/protos"
+import "github.com/it-chain/it-chain-Engine/network/protos"
 
 type Connection interface{
 	Send(envelope *message.Envelope, successCallBack func(interface{}),errCallBack func(error))

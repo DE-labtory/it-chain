@@ -2,8 +2,8 @@ package main
 
 import (
 	"gopkg.in/jeevatkm/go-model.v1"
-	"it-chain/domain"
-	pb "it-chain/network/protos"
+	"github.com/it-chain/it-chain-Engine/domain"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
 	"fmt"
 )
 

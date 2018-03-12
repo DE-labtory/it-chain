@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"google.golang.org/grpc"
-	pb "it-chain/network/protos"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
 	"context"
 )
 

@@ -1,7 +1,7 @@
 package blockchaindb
 
 import (
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/domain"
 )
 
 type BlockChainDB interface {

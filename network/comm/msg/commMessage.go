@@ -2,7 +2,7 @@ package msg
 
 import (
 	"sync"
-	"it-chain/network/protos"
+	"github.com/it-chain/it-chain-Engine/network/protos"
 )
 
 type InnerMessage struct{

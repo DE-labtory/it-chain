@@ -3,12 +3,12 @@ package conn
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	pb "it-chain/network/protos"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
 	"fmt"
 	"time"
 	"golang.org/x/net/context"
-	"it-chain/network/comm/mock"
-	"it-chain/network/comm/msg"
+	"github.com/it-chain/it-chain-Engine/network/comm/mock"
+	"github.com/it-chain/it-chain-Engine/network/comm/msg"
 )
 
 const ipaddress = "127.0.0.1:5555"

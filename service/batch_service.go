@@ -13,7 +13,7 @@ limitations under the License.
 
 package service
 
-import "it-chain/common"
+import "github.com/it-chain/it-chain-Engine/common"
 
 var batchlogger = common.GetLogger("batch")
 

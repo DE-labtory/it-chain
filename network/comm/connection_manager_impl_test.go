@@ -3,15 +3,15 @@ package comm
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	pb "it-chain/network/protos"
-	"it-chain/auth"
-	"it-chain/network/comm/mock"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
+	"github.com/it-chain/it-chain-Engine/auth"
+	"github.com/it-chain/it-chain-Engine/network/comm/mock"
 	"os"
 	"time"
 	"log"
 	"github.com/golang/protobuf/proto"
-	"it-chain/network/comm/msg"
-	"it-chain/network/comm/conn"
+	"github.com/it-chain/it-chain-Engine/network/comm/msg"
+	"github.com/it-chain/it-chain-Engine/network/comm/conn"
 )
 
 //todo conn manager_impl test 모두 수정

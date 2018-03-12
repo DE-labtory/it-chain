@@ -1,11 +1,11 @@
 package blockchainleveldb
 
 import (
-	"it-chain/db/leveldbhelper"
-	"it-chain/common"
+	"github.com/it-chain/it-chain-Engine/db/leveldbhelper"
+	"github.com/it-chain/it-chain-Engine/common"
 	"fmt"
 	"github.com/spf13/viper"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/domain"
 )
 
 var logger = common.GetLogger("blockchain_leveldb.go")

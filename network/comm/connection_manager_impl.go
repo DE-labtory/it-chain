@@ -2,16 +2,16 @@ package comm
 
 import (
 	"sync"
-	"it-chain/common"
-	"it-chain/auth"
+	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/auth"
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/net/context"
-	pb "it-chain/network/protos"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
 	"google.golang.org/grpc/peer"
 	"github.com/pkg/errors"
-	"it-chain/network/comm/publisher"
-	"it-chain/network/comm/msg"
-	"it-chain/network/comm/conn"
+	"github.com/it-chain/it-chain-Engine/network/comm/publisher"
+	"github.com/it-chain/it-chain-Engine/network/comm/msg"
+	"github.com/it-chain/it-chain-Engine/network/comm/conn"
 )
 
 var commLogger = common.GetLogger("connection_manager_impl.go")

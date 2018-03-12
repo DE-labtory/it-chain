@@ -2,9 +2,9 @@ package domain
 
 import (
 	"time"
-	"it-chain/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/pkg/errors"
-	pb "it-chain/network/protos"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
 	"sync"
 )
 

@@ -5,7 +5,7 @@ import (
 	"time"
 	"github.com/stretchr/testify/assert"
 	"os"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/domain"
 	"fmt"
 )
 

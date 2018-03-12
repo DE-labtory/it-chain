@@ -5,7 +5,7 @@ import (
 	"log"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	pb "it-chain/sample/grpc/proto"
+	pb "github.com/it-chain/it-chain-Engine/sample/grpc/proto"
 	"os"
 )
 

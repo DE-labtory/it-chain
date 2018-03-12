@@ -5,12 +5,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"time"
 	"fmt"
-	"it-chain/network/protos"
-	pb "it-chain/network/protos"
+	"github.com/it-chain/it-chain-Engine/network/protos"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/mock"
-	"it-chain/auth"
-	"it-chain/network/comm/msg"
+	"github.com/it-chain/it-chain-Engine/auth"
+	"github.com/it-chain/it-chain-Engine/network/comm/msg"
 )
 
 type MockCrypto struct{

@@ -1,6 +1,6 @@
 package webhook
 
-import "it-chain/domain"
+import "github.com/it-chain/it-chain-Engine/domain"
 
 type WebhookService interface {
 

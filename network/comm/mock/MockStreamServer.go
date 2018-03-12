@@ -3,7 +3,7 @@ package mock
 import (
 	"net"
 	"google.golang.org/grpc/reflection"
-	pb "it-chain/network/protos"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
 	"io"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"

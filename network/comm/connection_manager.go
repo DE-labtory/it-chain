@@ -1,8 +1,8 @@
 package comm
 
 import (
-	pb "it-chain/network/protos"
-	"it-chain/network/comm/msg"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
+	"github.com/it-chain/it-chain-Engine/network/comm/msg"
 )
 
 type OnError func(error)

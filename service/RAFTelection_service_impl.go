@@ -1,12 +1,12 @@
 package service
 
 import (
-	"it-chain/network/comm"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/network/comm"
+	"github.com/it-chain/it-chain-Engine/domain"
 	"sync"
-	pb "it-chain/network/protos"
-	"it-chain/common"
-	"it-chain/network/comm/msg"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
+	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/network/comm/msg"
 )
 
 var logger_raftservice = common.GetLogger("raft_service")

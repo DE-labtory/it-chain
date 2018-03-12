@@ -1,18 +1,18 @@
 package service
 
 import (
-	"it-chain/network/comm"
-	pb "it-chain/network/protos"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/network/comm"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
+	"github.com/it-chain/it-chain-Engine/domain"
 	"strconv"
 	"time"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"golang.org/x/net/context"
-	"it-chain/network/comm/msg"
-	"it-chain/common"
+	"github.com/it-chain/it-chain-Engine/network/comm/msg"
+	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/golang/protobuf/proto"
-	"it-chain/network/comm/conn"
+	"github.com/it-chain/it-chain-Engine/network/comm/conn"
 )
 
 type PeerServiceImpl struct {

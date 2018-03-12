@@ -1,8 +1,8 @@
 package service
 
 import (
-	"it-chain/db/blockchaindb"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/db/blockchaindb"
+	"github.com/it-chain/it-chain-Engine/domain"
 	"errors"
 )
 

@@ -2,9 +2,9 @@ package webhook
 
 import (
 	"errors"
-	pb "it-chain/service/webhook/proto"
+	pb "github.com/it-chain/it-chain-Engine/service/webhook/proto"
 	"context"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/domain"
 	"encoding/json"
 	"net/url"
 	"bytes"

@@ -1,10 +1,10 @@
 package publisher
 
 import (
-	"it-chain/common"
-	"it-chain/network/comm/msg"
+	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/network/comm/msg"
 	"errors"
-	"it-chain/auth"
+	"github.com/it-chain/it-chain-Engine/auth"
 	"sync"
 )
 

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"encoding/json"
 	"math/rand"
-	pb "it-chain/network/protos"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
 )
 
 type Peer struct {

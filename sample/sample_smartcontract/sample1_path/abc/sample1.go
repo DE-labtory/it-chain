@@ -1,9 +1,9 @@
 package main
 
 import (
-	"it-chain/domain"
-	//"it-chain/common"
-	"it-chain/db/leveldbhelper"
+	"github.com/it-chain/it-chain-Engine/domain"
+	//"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/db/leveldbhelper"
 	"encoding/json"
 	"os"
 	"fmt"

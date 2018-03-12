@@ -2,9 +2,9 @@ package blockchaindb
 
 import (
 	"github.com/spf13/viper"
-	"it-chain/db/blockchaindb/blockchainleveldb"
+	"github.com/it-chain/it-chain-Engine/db/blockchaindb/blockchainleveldb"
 	"fmt"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/domain"
 )
 
 type BlockchainDBImpl struct {

@@ -1,6 +1,6 @@
 package service
 
-import "it-chain/domain"
+import "github.com/it-chain/it-chain-Engine/domain"
 
 type BlockService interface{
 	// Confirmed 된 블록 추가

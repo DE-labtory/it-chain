@@ -6,7 +6,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	pb "it-chain/sample/gossip/grpc"
+	pb "github.com/it-chain/it-chain-Engine/sample/gossip/grpc"
 )
 
 const (

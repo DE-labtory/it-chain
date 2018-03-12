@@ -1,6 +1,6 @@
 package service
 
-import "it-chain/domain"
+import "github.com/it-chain/it-chain-Engine/domain"
 
 //peer 최상위 service
 type PeerService interface{

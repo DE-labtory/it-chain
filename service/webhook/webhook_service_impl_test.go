@@ -3,7 +3,7 @@ package webhook
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/domain"
 )
 
 func TestNewWebhookService(t *testing.T) {

@@ -1,8 +1,8 @@
 package service
 
 import (
-	"it-chain/domain"
-	"it-chain/network/comm/msg"
+	"github.com/it-chain/it-chain-Engine/domain"
+	"github.com/it-chain/it-chain-Engine/network/comm/msg"
 )
 
 type ConsensusService interface{

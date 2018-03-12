@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/domain"
 	"strings"
 	"os"
 	"time"
@@ -14,7 +14,7 @@ import (
 	"encoding/json"
 	"bufio"
 	"os/exec"
-	"it-chain/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"fmt"
 	"github.com/spf13/viper"
 )

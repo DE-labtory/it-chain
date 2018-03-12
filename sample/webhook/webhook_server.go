@@ -1,9 +1,9 @@
 package main
 
 import (
-	"it-chain/service/webhook"
+	"github.com/it-chain/it-chain-Engine/service/webhook"
 	"log"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/domain"
 	"time"
 )
 

@@ -3,10 +3,10 @@ package service
 import (
 	"testing"
 	"os"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/domain"
 	"time"
 	"github.com/stretchr/testify/assert"
-	"it-chain/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"fmt"
 )
 

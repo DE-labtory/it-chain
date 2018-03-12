@@ -25,8 +25,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"sort"
-	"it-chain/network/protos"
-	"it-chain/auth"
+	"github.com/it-chain/it-chain-Engine/network/protos"
+	"github.com/it-chain/it-chain-Engine/auth"
 	"math/big"
 	"crypto/rand"
 )

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/domain"
 )
 
 type TransactionService interface {

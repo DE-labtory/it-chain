@@ -2,10 +2,10 @@ package domain
 
 import (
 	"time"
-	pb "it-chain/network/protos"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
 	"sync"
 	"sync/atomic"
-	"it-chain/common"
+	"github.com/it-chain/it-chain-Engine/common"
 )
 
 type MsgType int

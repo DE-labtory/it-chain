@@ -1,7 +1,7 @@
 package main
 
 import (
-	pb "it-chain/service/webhook/proto"
+	pb "github.com/it-chain/it-chain-Engine/service/webhook/proto"
 	"google.golang.org/grpc"
 	"log"
 	"context"

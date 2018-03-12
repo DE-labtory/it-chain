@@ -5,7 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"os"
 	"time"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/domain"
 )
 
 func TestBlockchainLevelDB_AddBlock(t *testing.T) {

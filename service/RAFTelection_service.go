@@ -1,7 +1,7 @@
 package service
 
 import (
-	"it-chain/network/comm/msg"
+	"github.com/it-chain/it-chain-Engine/network/comm/msg"
 )
 
 type LeaderElectionService interface{

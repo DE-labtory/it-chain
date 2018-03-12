@@ -1,13 +1,13 @@
 package main
 
 import (
-	"it-chain/service"
-	"it-chain/network/comm"
-	"it-chain/auth"
+	"github.com/it-chain/it-chain-Engine/service"
+	"github.com/it-chain/it-chain-Engine/network/comm"
+	"github.com/it-chain/it-chain-Engine/auth"
 	"github.com/spf13/viper"
-	"it-chain/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"strings"
-	"it-chain/domain"
+	"github.com/it-chain/it-chain-Engine/domain"
 	"time"
 	"encoding/base64"
 	"crypto/sha1"
@@ -16,9 +16,9 @@ import (
 	"net"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc"
-	pb "it-chain/network/protos"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
 	"golang.org/x/net/context"
-	"it-chain/service/webhook"
+	"github.com/it-chain/it-chain-Engine/service/webhook"
 )
 
 type Node struct {

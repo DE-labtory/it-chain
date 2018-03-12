@@ -3,9 +3,9 @@ package domain
 import (
 	"time"
 	"errors"
-	"it-chain/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"strconv"
-	pb "it-chain/network/protos"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
 )
 
 type Block_Status int

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"it-chain/service/blockchain"
+	"github.com/it-chain/it-chain-Engine/service/blockchain"
 	"fmt"
 )
 

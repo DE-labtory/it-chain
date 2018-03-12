@@ -2,16 +2,16 @@ package conn
 
 import (
 	"google.golang.org/grpc"
-	"it-chain/network/protos"
+	"github.com/it-chain/it-chain-Engine/network/protos"
 	"sync"
 	"golang.org/x/net/context"
 	"sync/atomic"
 	"errors"
-	"it-chain/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"time"
 	"google.golang.org/grpc/credentials"
-	pb "it-chain/network/protos"
-	"it-chain/network/comm/msg"
+	pb "github.com/it-chain/it-chain-Engine/network/protos"
+	"github.com/it-chain/it-chain-Engine/network/comm/msg"
 )
 
 var logger_comm = common.GetLogger("conn.go")
