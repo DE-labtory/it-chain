@@ -27,7 +27,7 @@ Core implementation decisions can be found in the Project Implementation Details
 [PROJECT IMPLEMENTATION DETAILS](PROJECT-IMPLEMENTATION-DETAILS.md)
 
 ## Contribution
-Contribution Guide
+Contribution Guide <br>
 [CONTRIBUTION](CONTRIBUTION.md)
 
 ## License
