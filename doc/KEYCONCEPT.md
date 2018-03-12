@@ -56,7 +56,7 @@ The use of a consensus algorithm is essential because anyone participating in a 
 - Protocols for synchronizing state machines between multiple replicas
 - Even though (N-1) / 3 participants try to fake at the same time, it can withstand.
 
-![consensus-keyconecpt-pbft](./images/consensus-keyconecpt-pbft.png)
+![consensus-keyconecpt-pbft](../images/consensus-keyconecpt-pbft.png)
 
 #### Process
 
