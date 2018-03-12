@@ -26,6 +26,10 @@ The key concept of blockchain can be found in the KEYCONEPT. <br>
 Core implementation decisions can be found in the Project Implementation Details. <br>
 [PROJECT IMPLEMENTATION DETAILS](PROJECT-IMPLEMENTATION-DETAILS.md)
 
+## Contribution
+Contribution Guide
+[CONTRIBUTION](CONTRIBUTION.md)
+
 ## License
 
 It-Chain Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the [LICENSE](LICENSE) file.
