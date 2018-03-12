@@ -8,4 +8,4 @@
    1. 포맷 브런치 예시: feature/consensus, feature/blockchain 등등
    2. 서비스별 브런치를 구성하는 것으로 추천
 6. 개발 후 develop브런치에 PullRequest
-7. master는 모든 테스트 케이스를 통과하며 빌드 에러가 없고 miilstone지점에 merge
+7. master는 모든 테스트 케이스를 통과하며 빌드 에러가 없고 milestone지점에 merge
