@@ -20,11 +20,11 @@ For the time being, email leebduk@gmail.com
 
 ## Blockchain Key Concept
 The key concept of blockchain can be found in the KEYCONEPT. <br>
-[KEYCONCEPT](KEYCONCEPT.md)
+[KEYCONCEPT](doc/KEYCONCEPT.md)
 
 ## Implementation Details
 Core implementation decisions can be found in the Project Implementation Details. <br>
-[PROJECT IMPLEMENTATION DETAILS](PROJECT-IMPLEMENTATION-DETAILS.md)
+[PROJECT IMPLEMENTATION DETAILS](doc/PROJECT-IMPLEMENTATION-DETAILS.md)
 
 ## Contribution
 Contribution Guide <br>
