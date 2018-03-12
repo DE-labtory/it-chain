@@ -120,13 +120,17 @@ func (l *Ledger) LookUpBlock(arg interface{}) (*domain.Block, error) {
 
 func (l *Ledger) AddBlock(blk *domain.Block) (bool, error) {
 	_, err := l.LookUpBlock(blk.Header.BlockHash)
-	if err == nil{ return false, errors.New("already this blk exist") }
+
+	if err != nil{
+		return false, errors.New("already this blk exist")
+	}
 
 	lastBlock, err := l.GetLastBlock()
 
 	if err != nil {
 		return false, err
 	}
+
 	if blk.Header.BlockStatus != domain.Status_BLOCK_CONFIRMED {
 		return false, errors.New("unverified block")
 	}else if lastBlock != nil && lastBlock.Header.BlockHeight > 0 {

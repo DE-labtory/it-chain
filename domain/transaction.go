@@ -151,7 +151,7 @@ func ToProtoTxData(t TxData) *pb.TxData{
 	}
 
 	if t.Method == Query{
-		txData.Method = pb.TxData_Invoke
+		txData.Method = pb.TxData_Query
 	}
 
 	return txData

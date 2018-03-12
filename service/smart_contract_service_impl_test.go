@@ -12,7 +12,6 @@ import (
 	"os/exec"
 	"bytes"
 	"io"
-	"os"
 )
 
 //todo deploy
@@ -191,7 +190,6 @@ func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
 				Name:              "sample1",
 				OriginReposPath:   "userid/reposname",
 				SmartContractPath: "/smartcontract/sample_smartcontract/userid_reposname",
-				//SmartContractPath: "/Users/hackurity/go/src/it-chain-smartcontract/sample1_path",
 			},
 		},
 		"/smartcontract/worldstatedb",

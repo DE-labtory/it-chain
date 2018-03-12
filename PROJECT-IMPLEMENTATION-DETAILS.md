@@ -222,6 +222,11 @@ Database config is defined in config.yaml as database section
 ### World State DB
 World State DB stores final state after all transaction executed. World state DB is copied when running SmartContract.
 
+| DB name              | Key             | Value                  | Description                                                |
+| -------------------- | --------------- | ---------------------- | ---------------------------------------------------------- |
+| WorldStateDB         | UserDefined Key | UserDefined Value      | Save all the information about the result of smartContract |
+| WaitingTransactionDB | Transaction ID  | Serialized Transaction | Save transactions                                          |
+
 ### LevelDB
 Blocks are totally stored in key-value storage leveldb.
 
@@ -253,7 +258,7 @@ Blocks are totally stored in key-value storage leveldb.
 - Snapshot
 
 LevelDB snapshot is added for copying world state db which is stored in leveldb.
-  
+
 ### File
 Block's metadata is saved in leveldb or other key-value database. Block body is saved in file.
 

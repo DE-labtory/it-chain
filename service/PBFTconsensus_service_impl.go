@@ -122,12 +122,16 @@ func (cs *PBFTConsensusService) startConsensus(interface{}){
 		}
 
 		if flag{
-			common.Log.Error("Add block")
-			_, err := cs.blockService.AddBlock(block)
+			common.Log.Println("Add block")
+			asd, err := cs.blockService.AddBlock(block)
+
+			common.Log.Println(asd)
 
 			if err !=nil{
-				cs.webHookService.SendConfirmedBlock(block)
+				common.Log.Println(err.Error())
 			}
+			cs.webHookService.SendConfirmedBlock(block)
+			common.Log.Println("Add block2")
 		}
 		return
 	}
@@ -259,7 +263,7 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(msg msg.OutterMessage){
 	//2. commit state && commit message가 전체의 2/3이상 -> 블록저장
 	if consensusState.CurrentStage == domain.Committed && consensusState.CommitReady(){
 		logger_pbftservice.Infoln("ConsensusState is End")
-		cs.EndConsensusState(consensusState)
+
 		//block 저장
 		//todo block에 저장
 		flag, err := cs.blockService.VerifyBlock(consensusState.Block)
@@ -269,10 +273,16 @@ func (cs *PBFTConsensusService) ReceiveConsensusMessage(msg msg.OutterMessage){
 		}
 
 		if flag{
-			common.Log.Error("Add block")
-			cs.blockService.AddBlock(consensusState.Block)
+			common.Log.Debugln("Add block")
+			_, err := cs.blockService.AddBlock(consensusState.Block)
+
+			if err !=nil{
+				common.Log.Error(err.Error())
+			}
 			cs.transactionService.DeleteTransactions(consensusState.Block.Transactions)
 		}
+
+		cs.EndConsensusState(consensusState)
 		return
 	}
 }
