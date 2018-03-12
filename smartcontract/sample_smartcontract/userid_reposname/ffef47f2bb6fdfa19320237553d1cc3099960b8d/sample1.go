@@ -14,6 +14,7 @@ import (
 var smartContractResponse = domain.SmartContractResponse{Data: map[string]string{}}
 
 type SampleSmartContract struct {
+
 }
 
 func (sc *SampleSmartContract) Init(tx_string string, dbPath string, args []string) error {

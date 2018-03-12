@@ -40,11 +40,27 @@ func Init() {
 }
 
 func NewSmartContractService(githubID string, smartContractDirPath string) *SmartContractServiceImpl {
+
+	//todo 데모용 setup
 	return &SmartContractServiceImpl{
-		GithubID:              githubID,
-		SmartContractHomePath: smartContractDirPath,
-		SmartContractMap:      make(map[string]SmartContract),
+		"steve-buzzni",
+		"/smartcontract/sample_smartcontract",
+		map[string]SmartContract{
+			"ffef47f2bb6fdfa19320237553d1cc3099960b8d": SmartContract{
+				Name:              "sample1",
+				OriginReposPath:   "userid/reposname",
+				SmartContractPath: "/smartcontract/sample_smartcontract/userid_reposname",
+			},
+		},
+		"/smartcontract/worldstatedb",
+		"test",
 	}
+	//
+	//return &SmartContractServiceImpl{
+	//	GithubID:              githubID,
+	//	SmartContractHomePath: smartContractDirPath,
+	//	SmartContractMap:      make(map[string]SmartContract),
+	//}
 }
 
 func (scs *SmartContractServiceImpl) PullAllSmartContracts(errorHandler func(error), completionHandler func()) {
@@ -240,7 +256,7 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 	GOPATH := os.Getenv("GOPATH")
 
 	/*** Set Transaction Arg ***/
-	logger_s.Errorln("validateTransaction start")
+	logger_s.Println("validateTransaction start")
 	txBytes, err := json.Marshal(transaction)
 	if err != nil {
 		return nil, errors.New("Tx Marshal Error")
@@ -268,7 +284,7 @@ func (scs *SmartContractServiceImpl) RunTransactionOnDocker(transaction *domain.
 		return nil, err
 	}
 
-	logger_s.Errorln("Pulling image")
+	logger_s.Println("Pulling image")
 	out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
 	if err != nil {
 		logger_s.Errorln("An error oeccured while pulling docker image!")

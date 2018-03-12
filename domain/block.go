@@ -141,9 +141,11 @@ func (s Block) MakeMerklePath(idx int) (path []string){
 }
 
 func (s *Block) GenerateBlockHash() error{
+
 	if s.Header.MerkleTreeRootHash == "" {
 		return errors.New("no merkle tree root hash")
 	}
+
 	str := []string{s.Header.MerkleTreeRootHash, s.Header.TimeStamp.String(), s.Header.PreviousHash}
 	s.Header.BlockHash = common.ComputeSHA256(str)
 	return nil

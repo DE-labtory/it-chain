@@ -12,7 +12,6 @@ import (
 	"os/exec"
 	"bytes"
 	"io"
-	"os"
 )
 
 //todo deploy
@@ -176,8 +175,8 @@ func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
 		time.Now(),
 		domain.SetTxData(
 			"",
-			domain.Invoke,
-			domain.SetTxMethodParameters(0, "putA", []string{""}),
+			domain.Query,
+			domain.SetTxMethodParameters(0, "getA", []string{""}),
 			"ffef47f2bb6fdfa19320237553d1cc3099960b8d",
 		),
 	)
@@ -191,7 +190,6 @@ func TestSmartContractServiceImpl_ValidateTransaction(t *testing.T) {
 				Name:              "sample1",
 				OriginReposPath:   "userid/reposname",
 				SmartContractPath: "/smartcontract/sample_smartcontract/userid_reposname",
-				//SmartContractPath: "/Users/hackurity/go/src/it-chain-smartcontract/sample1_path",
 			},
 		},
 		"/smartcontract/worldstatedb",

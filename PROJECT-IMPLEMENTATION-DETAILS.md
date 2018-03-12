@@ -252,7 +252,7 @@ Blocks are totally stored in key-value storage leveldb.
 - Snapshot
 
 LevelDB snapshot is added for copying world state db which is stored in leveldb.
-  
+
 ### File
 Block's metadata is saved in leveldb or other key-value database. Block body is saved in file.
 
@@ -299,3 +299,14 @@ This propose can be different with the detail implementation.
 [@Junbeomlee](https://github.com/junbeomlee)
 
 [@Hwi Ahn](https://github.com/byron1st)
+
+
+
+
+
+
+
+| DB name              | Key             | Value                  | Description                                                |
+| -------------------- | --------------- | ---------------------- | ---------------------------------------------------------- |
+| WorldStateDB         | UserDefined Key | UserDefined Value      | Save all the information about the result of smartContract |
+| WaitingTransactionDB | Transaction ID  | Serialized Transaction | Save transactions                                          |

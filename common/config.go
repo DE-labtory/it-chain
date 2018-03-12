@@ -15,6 +15,9 @@ func initConfig(){
 	viper.SetConfigName("config")
 	viper.AddConfigPath("$GOPATH/src/it-chain/conf")
 
+	//todo 데모용
+	//viper.AddConfigPath("./conf")
+
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil { // Handle errors reading the config file
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))

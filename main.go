@@ -19,6 +19,7 @@ import (
 	pb "it-chain/network/protos"
 	"golang.org/x/net/context"
 	"it-chain/service/webhook"
+	"strconv"
 )
 
 type Node struct {
@@ -85,12 +86,15 @@ func NewNode(ip string) *Node{
 
 	///// smartContractService
 	smartContractService := service.NewSmartContractService(viper.GetString("smartcontract.defaultPath"),viper.GetString("smartContract.githubID"))
+	node.smartContractService = smartContractService
 
 	//// webHookService
 	webHookService,err  := webhook.NewWebhookService()
 	node.webHookService = webHookService
 
-	go webHookService.Serve(44444)
+	p , _ :=strconv.Atoi(viper.GetString("webhook.port"))
+
+	go webHookService.Serve(p)
 
 	///// consensusService
 	consensusService := service.NewPBFTConsensusService(node.connectionManager,node.webHookService, node.peerService,node.blockService,node.identity,smartContractService,transactionService)

@@ -34,3 +34,6 @@ node:
 consensus:
   batchTime: 3
   maxTransactions: 100
+
+webhook:
+  port: 44444
