@@ -22,7 +22,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 
 ## BlockChain <a name="BlockChain"></a>
 
-![blockchain-implemeneation-logical](./images/blockchain-implemeneation-logical.png)
+![blockchain-implemeneation-logical](../images/blockchain-implemeneation-logical.png)
 
 - BlockChain
 
@@ -42,7 +42,7 @@ It describes the important implementation decisions of the it-chain. Sample code
   The Merkle Tree consists of a binary tree, and the leaf node is the hash value of the transactions in the transaction list of the block. The root node is a hash value representing the entire transaction that hashes the transaction hash value pair from the leaf node to the end. 
    Merkle Tree is able to check in constant time whether transaction information has changed through merkle tree root hash. In addition, Merkle Tree can effectively manage the validity of all transactions in the ledger because the block header has the Merkle Tree root hash value and the next block has hash value from hashed the block header. And since Merkle Tree can provide the Merkle Path (the Sibling node to the root node of tx), it has the advantage of being able to check the validity of a particular transaction at log time.
 
-  ![blockchain-implementation-merkletree](./images/blockchain-implementation-merkletree.png)
+  ![blockchain-implementation-merkletree](../images/blockchain-implementation-merkletree.png)
 
 ### Author
 
@@ -50,7 +50,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 
 ## SmartContract <a name="SmartContract"></a>
 
-![smartContract-implementation-deploy](./images/smartContract-implementation-deploy.png)
+![smartContract-implementation-deploy](../images/smartContract-implementation-deploy.png)
 
 SmartContract is stored on git repository and is executed by the smart contract service. After testing Smart Contract in a Docker-based virtual environment, it is reflected in the actual database.
 
@@ -70,7 +70,7 @@ SmartContract is stored on git repository and is executed by the smart contract 
 
 #### Deploy Smart Contract Sequence Diagram
 
-![smartContract-implementation-seq](./images/smartContract-implementation-seq.png)
+![smartContract-implementation-seq](../images/smartContract-implementation-seq.png)
 
 The deployed user's repository is stored and managed in the Authenticated Smart Contract Repository as shown below.
 
@@ -86,7 +86,7 @@ The deployed user's repository is stored and managed in the Authenticated Smart 
 
 ## Grpc Communication <a name="Communication"></a>
 
-<img src="./images/grpc implementation.png"></img>
+<img src="../images/grpc implementation.png"></img>
 
 Since it is complex to handle the reception and transmission of the peers' messages while maintaining the connection between the peers, the message handler is used to separate the reception and transmission and obtain the processing service using the message type.
 
@@ -114,7 +114,7 @@ It-chain의 각각의 Node들이 어떻게 같은 네트워크의 다른 Node들
 
 #### Overall View
 
-![connection_overall_architecture](./images/connection_overall_architecture.png)
+![connection_overall_architecture](../images/connection_overall_architecture.png)
 
 - ConnectionManager
 
@@ -128,7 +128,7 @@ Connection은 Peer간의 통신의 추상화이며 구현체는 Grpc Bi-Stream�
 
 #### Connection Implementation details
 
-![connection_class_diagram](./images/connection_class_diagram.png)
+![connection_class_diagram](../images/connection_class_diagram.png)
 
 Connection Class의 중요한 메소드와 속성들을 나타낸 Class Diagram이다. Connection 은 크게 2개의 종류로 분리된다. Connection에서 clientStream와 serverStream은 서로 동시에 존재 할 수 없다. Connection이 clientStream을 가지고 있으면 ClientConnection, serverStream을 가지고 있으면 ServerConnection으로 간주한다. 나머지 모든 로직은 동일하며 단순히 어느 Stream을 사용할지가 차이점이다. 
 
@@ -144,7 +144,7 @@ Peer가 다른 Peer로 부터 Stream 요청을 받게 되는 순간 Connection�
 
 #### ClientConnection Sequence Diagram
 
-![clientConnection_sequence_diagram](./images/clientConnection_sequence_diagram.png)
+![clientConnection_sequence_diagram](../images/clientConnection_sequence_diagram.png)
 
 새로운 Connection연결을 위해 ConnectionManager에게 ip와 connectionID를 전달하면, ConnectionManager는 grpcClient를 사용하여 Stream을 통해 연결을 확인한다. 연결이 될 경우 StreamClient객체를 전달받는다. Connection객체를 생성하고 StreamClient를 와 기타 여러 정보들을 Connection객체에 저장후 Connection객체를 ConnectionManager의 ConnectionMap에 저장한다.
 
@@ -152,7 +152,7 @@ Peer가 다른 Peer로 부터 Stream 요청을 받게 되는 순간 Connection�
 
 #### ServerConnection Sequence Diagram
 
-![serverConnection_sequence_diagram](./images/serverConnection_sequence_diagram.png)
+![serverConnection_sequence_diagram](../images/serverConnection_sequence_diagram.png)
 
 다른 Peer로 부터 Connection연결 요청이 들어오면 StreamServer를 받게 된다. 나에게 Connection을 요청한 Peer가 Valid한 Peer인지를 확인하기 위해 Peer정보를 요청하고 알맞은 Peer정보가 오게 되면 기타 여러 정보들을 Connection객체에 저장후 Connection객체를 ConnectionManager의 ConnectionMap에 저장한다. 그 후에 Connection 생성 이벤트를 전송한다.
 
@@ -163,7 +163,7 @@ Peer가 다른 Peer로 부터 Stream 요청을 받게 되는 순간 Connection�
 
 ## Crpyto <a name="Crypto"></a>
 
-![crpyto-implemenation-module](./images/crpyto-implemenation-module.png)
+![crpyto-implemenation-module](../images/crpyto-implemenation-module.png)
 
 Crypto signs and verifies the data used in the block-chain platform and manages the keys used in the process. *it-chain* supports `RSA` and `ECDSA` encryption method.
 
@@ -278,23 +278,23 @@ Block's metadata is saved in leveldb or other key-value database. Block body is 
 
 ## Consensus <a name="Consensus"></a>
 
-![consensus-implementation-messagetype](./images/consensus-implementation-messagetype.png)
+![consensus-implementation-messagetype](../images/consensus-implementation-messagetype.png)
 
 
 
-![consensus-implementation-seq](./images/consensus-implementation-seq.png)
+![consensus-implementation-seq](../images/consensus-implementation-seq.png)
 
 ### Proposed architecture for the PBFT consensus
 
-![pbft-proposed-statechart](./images/pbft-proposed-statechart.png)
+![pbft-proposed-statechart](../images/pbft-proposed-statechart.png)
 
 The consensus process starts when the request message (if the node is the primary) or the pre-prepare message arrives. Then, the state is changed to `Ready` and the node starts the consensus (e.g. create required structs and goroutines.). When it is done, the node checks the message buffer if there is any message arrived earlier and proceeds to the `Preparing` state. In the `Preparing` state, the node resolves prepare messages until `isPrepared` is true. If then, same as in the previous state, the node checks the message buffer and proceeds to the `Committing` state. `Committing` state is same with `Preparing` state. Then, if `isCommitted` is true, the node's state is changed to `Committed`, executes the request's operation and replies the result of the operation to the client.
 
-![pbft-proposed-code-view](./images/pbft-proposed-code-view.png)
+![pbft-proposed-code-view](../images/pbft-proposed-code-view.png)
 
 To do the PBFT consensus, the proposed code structure is like this diagram. The `routeIncomingMsg` goroutine is a daemon goroutine to take incoming consensus-related messages and route them to the appropriate location in the buffer. The `resolveMsg` goroutine reads messages from the buffer and call the appropriate consensus-related functions. If needed, this goroutine changes the state of the consensus like `Preparing` or `Committing`.
 
-![pbft-proposed-code-view-orders](./images/pbft-proposed-code-view-orders.png)
+![pbft-proposed-code-view-orders](../images/pbft-proposed-code-view-orders.png)
 
 Overall behaviors are like the above diagram. When the `routeIncomingMsg` goroutine takes an incoming message, it first checks the state of the consensus. If the state is not correct, it saves the message to the buffer. If the state is correct, it send a signal to resolve the buffered messages to the `resolveMsg` goroutine. Then, the `resolveMsg` goroutine reads buffered messages and calls consensus-related functions. If needed, this goroutine change the current state. If the current state is changed, the `resolveMsg` goroutine checks buffered messages for the new state immediately without waiting the resolving signal.
 
@@ -308,7 +308,7 @@ This propose can be different with the detail implementation.
 
 ## Logical View Architecture <a name="LogicalView"></a>
 
-![Logical View Architecture](./images/it-chain-logical-view-architecture.png)
+![Logical View Architecture](../images/it-chain-logical-view-architecture.png)
 
 Components: A component in this diagram represents a logical component(i.e. a runtime entity such as process, thread, goroutine, database, and so forth.).
 
