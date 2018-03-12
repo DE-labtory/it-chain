@@ -22,6 +22,10 @@ For the time being, email leebduk@gmail.com
 The key concept of blockchain can be found in the KEYCONEPT. <br>
 [KEYCONCEPT](doc/KEYCONCEPT.md)
 
+## Logical Architecture of `it-chain`
+Overview of the logical architecture of `it-chain` can be found in the following link. At this point, only the Korean version is provided.<br>
+[LOGICAL ARCHITECTURE KR](doc/LOGICAL-ARCHITECTURE-KR.md)
+
 ## Implementation Details
 Core implementation decisions can be found in the Project Implementation Details. <br>
 [PROJECT IMPLEMENTATION DETAILS](doc/PROJECT-IMPLEMENTATION-DETAILS.md)
