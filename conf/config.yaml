@@ -1,20 +1,20 @@
 database:
   type: leveldb
   leveldb:
-    defaultPath: ./.leveldb
+    defaultPath: .it-chain/leveldb
 
 key:
   type: RSA
-  defaultPath: ./.
+  defaultPath: .it-chain/
 
 ledger:
-  defaultPath: ./.ledger
+  defaultPath: .it-chain/ledger
 
 txDatabase:
-  defaultPath: ./.tx
+  defaultPath: .it-chain/tx
 
 smartContract:
-  defaultPath: ./.constracts
+  defaultPath: .it-chain/.constracts
   githubID: steve@buzzni.com
   githubPassword: itchain123
   githubAccessToken: 1a8ae688db783f63c2494d59f971b2eed5399b1d
