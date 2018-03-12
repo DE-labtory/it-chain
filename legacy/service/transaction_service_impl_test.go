@@ -6,7 +6,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/legacy/domain"
 	"time"
 	"github.com/stretchr/testify/assert"
-	"github.com/it-chain/it-chain-Engine/legacy/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"fmt"
 )
 

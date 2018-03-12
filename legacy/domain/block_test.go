@@ -6,7 +6,7 @@ import (
 	"time"
 	"strconv"
 	"fmt"
-	"github.com/it-chain/it-chain-Engine/legacy/common"
+	"github.com/it-chain/it-chain-Engine/common"
 )
 
 const txsize = 999

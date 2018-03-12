@@ -14,7 +14,7 @@ import (
 	"encoding/json"
 	"bufio"
 	"os/exec"
-	"github.com/it-chain/it-chain-Engine/legacy/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"fmt"
 	"github.com/spf13/viper"
 )

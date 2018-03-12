@@ -2,7 +2,7 @@ package blockchainleveldb
 
 import (
 	"github.com/it-chain/it-chain-Engine/legacy/db/leveldbhelper"
-	"github.com/it-chain/it-chain-Engine/legacy/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"fmt"
 	"github.com/spf13/viper"
 	"github.com/it-chain/it-chain-Engine/legacy/domain"

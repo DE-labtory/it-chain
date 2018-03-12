@@ -5,7 +5,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/legacy/network/comm"
 	"github.com/it-chain/it-chain-Engine/legacy/auth"
 	"github.com/spf13/viper"
-	"github.com/it-chain/it-chain-Engine/legacy/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"strings"
 	"github.com/it-chain/it-chain-Engine/legacy/domain"
 	"time"

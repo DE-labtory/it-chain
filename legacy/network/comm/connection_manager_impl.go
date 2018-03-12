@@ -2,7 +2,7 @@ package comm
 
 import (
 	"sync"
-	"github.com/it-chain/it-chain-Engine/legacy/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/legacy/auth"
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/net/context"

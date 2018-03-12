@@ -32,18 +32,6 @@
   version = "v0.4.7"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/asaskevich/EventBus"
-  packages = ["."]
-  revision = "68a521d7cbbb7a859c2608b06342f384b3bd5f5a"
-
-[[projects]]
-  name = "github.com/bshuster-repo/logrus-logstash-hook"
-  packages = ["."]
-  revision = "dbc1e22735aa6ed7bd9579a407c17bc7c4a4e046"
-  version = "v0.4.1"
-
-[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -283,6 +271,12 @@
   ]
   revision = "f187355171c936ac84a82793659ebb4936bc1c23"
   version = "v1.3.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/streadway/amqp"
+  packages = ["."]
+  revision = "d27ae102b8892a98ca4edb74539436af62577379"
 
 [[projects]]
   name = "github.com/stretchr/objx"
@@ -544,6 +538,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0085da610fb6c61cac00306a975574d864dca37383c93f8c2bbf959bf2294dd5"
+  inputs-digest = "3b2a60a457408a173be43467b4533595d2962ab2eff7749ba69b1e35dfeda8de"
   solver-name = "gps-cdcl"
   solver-version = 1

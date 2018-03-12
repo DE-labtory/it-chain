@@ -81,3 +81,7 @@
 [[constraint]]
   name = "github.com/bshuster-repo/logrus-logstash-hook"
   version = "0.4.1"
+
+[[override]]
+  branch = "master"
+  name = "github.com/streadway/amqp"

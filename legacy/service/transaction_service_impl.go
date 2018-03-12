@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/it-chain/it-chain-Engine/legacy/db/leveldbhelper"
 	"github.com/it-chain/it-chain-Engine/legacy/domain"
-	"github.com/it-chain/it-chain-Engine/legacy/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/legacy/network/comm"
 	pb "github.com/it-chain/it-chain-Engine/legacy/network/protos"
 	"github.com/spf13/viper"

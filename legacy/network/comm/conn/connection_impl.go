@@ -7,7 +7,7 @@ import (
 	"golang.org/x/net/context"
 	"sync/atomic"
 	"errors"
-	"github.com/it-chain/it-chain-Engine/legacy/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"time"
 	"google.golang.org/grpc/credentials"
 	pb "github.com/it-chain/it-chain-Engine/legacy/network/protos"

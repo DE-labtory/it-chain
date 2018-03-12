@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package protos;
+
+message PreprepareMessage{
+    bytes data = 1;
+}
+
+message PrepareMessage{
+    bytes data = 1;
+}
+
+message CommitMessage{
+    bytes data = 1;
+}

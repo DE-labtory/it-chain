@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc"
 	"golang.org/x/net/context"
 	"github.com/it-chain/it-chain-Engine/legacy/network/comm/msg"
-	"github.com/it-chain/it-chain-Engine/legacy/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/golang/protobuf/proto"
 	"github.com/it-chain/it-chain-Engine/legacy/network/comm/conn"
 )

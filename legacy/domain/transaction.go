@@ -2,7 +2,7 @@ package domain
 
 import (
 	"time"
-	"github.com/it-chain/it-chain-Engine/legacy/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	pb "github.com/it-chain/it-chain-Engine/legacy/network/protos"
 )
 

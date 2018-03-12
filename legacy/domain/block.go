@@ -3,7 +3,7 @@ package domain
 import (
 	"time"
 	"errors"
-	"github.com/it-chain/it-chain-Engine/legacy/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"strconv"
 	pb "github.com/it-chain/it-chain-Engine/legacy/network/protos"
 )

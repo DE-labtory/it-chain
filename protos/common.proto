@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package protos;
+
+import "consensusMsg.proto";
+
+service StreamService{
+    rpc Stream (stream Envelope) returns (stream Envelope) {}
+}
+
+message Envelope {
+    //marshalled Message
+    bytes payload = 1;
+
+    // signed Message
+    bytes signature = 2;
+
+    // sender's public key
+    bytes pubkey = 3;
+}
+
+message StreamMsg {
+    bytes channel = 1;
+
+    oneof content{
+        PreprepareMessage preprepareMessage = 2;
+        PrepareMessage prepareMessage = 3;
+        CommitMessage commitMessage = 4;
+    }
+}

@@ -2,7 +2,7 @@ package service
 
 import (
 	"time"
-	"github.com/it-chain/it-chain-Engine/legacy/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"math"
 	"github.com/it-chain/it-chain-Engine/legacy/domain"
 	"github.com/it-chain/it-chain-Engine/legacy/network/comm"

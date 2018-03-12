@@ -14,7 +14,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/legacy/network/comm"
 	"github.com/urfave/cli"
 	"os"
-	"github.com/it-chain/it-chain-Engine/legacy/common"
+	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/golang/protobuf/proto"
 )
 
