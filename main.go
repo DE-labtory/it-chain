@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/it-chain/it-chain-Engine/service"
-	"github.com/it-chain/it-chain-Engine/network/comm"
-	"github.com/it-chain/it-chain-Engine/auth"
+	"github.com/it-chain/it-chain-Engine/legacy/service"
+	"github.com/it-chain/it-chain-Engine/legacy/network/comm"
+	"github.com/it-chain/it-chain-Engine/legacy/auth"
 	"github.com/spf13/viper"
-	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/legacy/common"
 	"strings"
-	"github.com/it-chain/it-chain-Engine/domain"
+	"github.com/it-chain/it-chain-Engine/legacy/domain"
 	"time"
 	"encoding/base64"
 	"crypto/sha1"
@@ -16,9 +16,9 @@ import (
 	"net"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc"
-	pb "github.com/it-chain/it-chain-Engine/network/protos"
+	pb "github.com/it-chain/it-chain-Engine/legacy/network/protos"
 	"golang.org/x/net/context"
-	"github.com/it-chain/it-chain-Engine/service/webhook"
+	"github.com/it-chain/it-chain-Engine/legacy/service/webhook"
 	"strconv"
 )
 
