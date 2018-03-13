@@ -12,6 +12,72 @@ it-chain makes it easy for anyone to have their own block chain platform
 Use Smart-Contract to create your own Dapp
 
 
+
+## Requirements
+
+- Go-lang 1.9
+
+
+
+## Config
+
+location : ./conf/config.yaml
+
+```
+database:
+  type: leveldb
+  leveldb:
+    defaultPath: .it-chain/leveldb
+
+key:
+  type: RSA
+  defaultPath: .it-chain/
+
+ledger:
+  defaultPath: .it-chain/ledger
+
+txDatabase:
+  defaultPath: .it-chain/tx
+
+smartContract:
+  defaultPath: .it-chain/.constracts
+  githubID: {GithubID}
+  githubPassword: {GithubPassword}
+  githubAccessToken: {GithubAccessToken}
+  TmpDir: /tmp
+  WorldStateDB_OnDoker: /go/src/worldstatedb
+
+batchTimer:
+  pushPeerTable: 5
+  sendTransaction: 5
+
+//The IP of the BootNode becomes the leader.
+bootNode:
+  ip: 127.0.0.1:4444
+
+//The node is deployed to the IP of the node. 
+node:
+  ip: 127.0.0.1:4444
+
+consensus:
+  batchTime: 3
+  maxTransactions: 100
+
+webhook:
+  port: 44444
+```
+
+
+
+## Usage
+
+```
+go run main.go
+```
+
+
+
+
 ## Contribution
 
 Contribution documents will be updated shortly. 
