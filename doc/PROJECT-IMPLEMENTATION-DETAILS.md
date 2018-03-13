@@ -4,7 +4,7 @@
 
 ## Overview
 
-It describes the important implementation decisions of the it-chain. Sample code for each detailed implementation can be found in the sample folder. 
+It describes the important implementation decisions of the it-chain. Sample code for each detailed implementation can be found in the sample folder.
 
 
 
@@ -30,7 +30,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 
 - Block
 
-  The block consists of a block header and block data, and the next block has a value obtained by hashing the block header for the block structure of the Ledger. 
+  The block consists of a block header and block data, and the next block has a value obtained by hashing the block header for the block structure of the Ledger.
   The block header has the previous block hash value and the merkle tree root hash value. The block data has a transaction list and has a merkle tree To efficiently manage forgery and tampering of transactions.
 
 - Transaction
@@ -39,7 +39,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 
 - MerkleTree
 
-  The Merkle Tree consists of a binary tree, and the leaf node is the hash value of the transactions in the transaction list of the block. The root node is a hash value representing the entire transaction that hashes the transaction hash value pair from the leaf node to the end. 
+  The Merkle Tree consists of a binary tree, and the leaf node is the hash value of the transactions in the transaction list of the block. The root node is a hash value representing the entire transaction that hashes the transaction hash value pair from the leaf node to the end.
    Merkle Tree is able to check in constant time whether transaction information has changed through merkle tree root hash. In addition, Merkle Tree can effectively manage the validity of all transactions in the ledger because the block header has the Merkle Tree root hash value and the next block has hash value from hashed the block header. And since Merkle Tree can provide the Merkle Path (the Sibling node to the root node of tx), it has the advantage of being able to check the validity of a particular transaction at log time.
 
   ![blockchain-implementation-merkletree](../images/blockchain-implementation-merkletree.png)
@@ -48,34 +48,33 @@ It describes the important implementation decisions of the it-chain. Sample code
 
 [@emperorhan](https://github.com/emperorhan)
 
-## SmartContract <a name="SmartContract"></a>
+## 스마트 컨트랙트 <a name="SmartContract"></a>
 
 ![smartContract-implementation-deploy](../images/smartContract-implementation-deploy.png)
 
-SmartContract is stored on git repository and is executed by the smart contract service. After testing Smart Contract in a Docker-based virtual environment, it is reflected in the actual database.
+스마트 컨트랙트는 깃 저장소에 저장되어 있으며, 스마트 컨트랙트 서비스에 의해 실행됩니다. 안정성 및 보안을 위해 Docker 기반의 가상환경에서 테스트한 후, 문제가 없을 경우 실제 데이터 베이스에 반영됩니다.
 
-- Git
+- 깃
 
-  Each Smart Contract is stored as a Git Repository.
+  각 스마트 컨트랙트는 깃 저장소에 저장됩니다.
 
-- Docker VM
+- 도커 가상머신
 
-  It is a virtual environment that executes smart contracts. After the smart contract and the world state db are copied to the Docker vm, they are executed and verified virtually.
+  스마트 컨트랙트를 실행하는 가상환경입니다. 도커 가상머신에 스마트 컨트랙트와 데이터베이스가 검증되면 복사되면, 가상환경에서 실행되어 검증과정을 거칩니다.
 
-- SmartContractService
+- 스마트 컨트랙트 서비스
 
-  It is a service that manages git and Docker VM. After pushing and cloning the smart contract on the git, it copies the world state DB and smart contract to Docker VM and executes it.
-
+  깃과 도커 가상머신을 관리하는 서비스입니다. 깃에 스마트 컨트랙트를 푸시/클론하면 해당 서비스가 데이터베이스와 스마트 컨트랙트를 복사하여 도커 가상머신에서 실행합니다.
   ​
 
-#### Deploy Smart Contract Sequence Diagram
+#### 스마트 컨트랙트 배포 순서도
 
 ![smartContract-implementation-seq](../images/smartContract-implementation-seq.png)
 
-The deployed user's repository is stored and managed in the Authenticated Smart Contract Repository as shown below.
+배포된 유저의 저장소는 검증된 스마트 컨트랙트 저장소에 저장되고 관리되어집니다. (아래 그림 참조)
 
-| User <br />Repository <br />Path | Smart Contract <br />Repository <br />Path | Smart Contract File Path                 |
-| -------------------------------- | ---------------------------------------- | ---------------------------------------- |
+| 유저 <br />저장소 <br />경로      | 스마트 컨트랙트 <br />저장소 <br />주소    | 스마트 컨트랙트 파일 경로                   |
+| -------------------------------- | ---------------------------------------- | ----------------------------------------- |
 | A/a                              | {authenticated_git_id}/A_a               | It-chain/SmartContracts/A_a/{commit_hash} |
 | B/b                              | {authenticated_git_id}/B_b               | It-chain/SmartContracts/B_b/{commit_hash} |
 | C/c                              | {authenticated_git_id}/C_c               | It-chain/SmartContracts/C_c/{commit_hash} |
@@ -83,6 +82,7 @@ The deployed user's repository is stored and managed in the Authenticated Smart 
 ### Author
 
 [@hackurity01](https://github.com/hackurity01)
+[@codeblv](https://github.com/codeblv)
 
 ## Grpc Communication <a name="Communication"></a>
 
@@ -130,7 +130,7 @@ Connection은 Peer간의 통신의 추상화이며 구현체는 Grpc Bi-Stream�
 
 ![connection_class_diagram](../images/connection_class_diagram.png)
 
-Connection Class의 중요한 메소드와 속성들을 나타낸 Class Diagram이다. Connection 은 크게 2개의 종류로 분리된다. Connection에서 clientStream와 serverStream은 서로 동시에 존재 할 수 없다. Connection이 clientStream을 가지고 있으면 ClientConnection, serverStream을 가지고 있으면 ServerConnection으로 간주한다. 나머지 모든 로직은 동일하며 단순히 어느 Stream을 사용할지가 차이점이다. 
+Connection Class의 중요한 메소드와 속성들을 나타낸 Class Diagram이다. Connection 은 크게 2개의 종류로 분리된다. Connection에서 clientStream와 serverStream은 서로 동시에 존재 할 수 없다. Connection이 clientStream을 가지고 있으면 ClientConnection, serverStream을 가지고 있으면 ServerConnection으로 간주한다. 나머지 모든 로직은 동일하며 단순히 어느 Stream을 사용할지가 차이점이다.
 
 - ClientConnection
 
@@ -218,7 +218,7 @@ Database config is defined in config.yaml as database section
   | key          | description                              |
   | ------------ | ---------------------------------------- |
   | default_path | If no other path for leveldb is provided, leveldb data is stored in this path |
-  
+
 ### World State DB
 World State DB stores final state after all transaction executed. World state DB is copied when running SmartContract.
 
@@ -254,7 +254,7 @@ Blocks are totally stored in key-value storage leveldb.
   1) Key : last_block, Value : Serialized last block
   2) Key : unconfirmed_block, Value : Serialized unconfirmed block
   3) Key : transaction ID, Value : Blockhash of block that transaction is stored
-  
+
 - Snapshot
 
 LevelDB snapshot is added for copying world state db which is stored in leveldb.
