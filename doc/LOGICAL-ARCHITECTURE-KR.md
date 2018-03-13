@@ -14,7 +14,7 @@
 * TxPool 서비스: 트랜잭션을 임시로 저장하고 관리하는 서비스로, 합의되어 블록에 저장되지 않은 트랜잭션들을 모아둔다.
 * Consensus 서비스: 합의를 담당하는 서비스이며, 현재는 PBFT(Practical Byzantine Fault Tolerance) 알고리즘을 따른다.
 * BlockChain 서비스: 블록을 생성하고 관리하는 서비스이다.
-* Peer 서비스: 하위 레벨의 P2P 네트워크를 담당하는 서비스이다. 
+* Peer 서비스: 네트워크의 참여하는 Peer들을 찾고, 유지하고 서비스이다. 
 * Authentication 서비스: 각종 인증을 담당한다.
 * SmartContract 서비스: 스마트 컨트랙트 관련 기능을 담당한다.
 
