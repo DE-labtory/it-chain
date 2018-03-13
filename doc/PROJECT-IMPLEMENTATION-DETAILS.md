@@ -305,26 +305,3 @@ This propose can be different with the detail implementation.
 [@Junbeomlee](https://github.com/junbeomlee)
 
 [@Hwi Ahn](https://github.com/byron1st)
-
-## Logical View Architecture <a name="LogicalView"></a>
-
-![Logical View Architecture](../images/it-chain-logical-view-architecture.png)
-
-Components: A component in this diagram represents a logical component(i.e. a runtime entity such as process, thread, goroutine, database, and so forth.).
-
-* API Proxy Server: Every connection from the outside of it-chain node will be passed through this component. This component is like an entry point for exported API used by other it-chain nodes or 3rd party clients.
-* Event Dispatcher: Event Dispatcher parses every request from API Proxy Server and converts it to an event that will be digested by services. Then, Event Dispatcher broadcasts this event to every service that subscribes an event channel of the same event type. It is similar with Dispatcher in the [Flux Architecture](https://facebook.github.io/flux/) or an event bus.
-* Service component: Each service component is an isolated and independent runtime entity (kinda sandbox). They will be implemented as a set of goroutines or an independent process. Each service serves a single important job such as the consensus, the block management, the authentication/authorization, and so forth.
-  * Transaction Pool Service: This component will manage transactions that are not packaged in a block. These transactions are saved in the temporary storage.
-  * Block Service: This component will handle the creation of a block.
-  * Consensus Service: After the block has been created or the created block has been delivered, this component will manage the whole process of the consensus.
-  * Peer Service: This component will handle the low-level P2P network stuff.
-  * Auth Service: This component will manage the authentication and authorization of the node, users, transactions, and so forth. Every key-related stuff will be handled here.
-  * Smart Contract Service: This component will handle the deployment, upgrade, and execution of the smart contract.
-
-Connector: Technically, every connector in this diagram is one of IPC(REST or gRPC) and go channels between goroutines. At this point, we do not define every detail of these connectors. IPC call between outside it-chain nodes and API Proxy Server will both gRPC and REST. Call between API Proxy Server and Event Dispatcher will be a go channel.
-
-* Publisher-Subscriber Pattern: A connector between services and Event Dispatcher will follow the publisher and subscriber pattern. Basically, every subscriber(i.e. a service) subscribe an event channel of Event Dispatcher. When an event occurs, Event Dispatcher delivers it to the correct subscriber. We don't decide yet the specific technical solution for this connector, but a good implementation of Message Queue will be selected.
-
-### TODO
-The separation of services is not easy in terms of the implementation because there are many overlaps of data that each service needs. So, we need to define required data for each servie and structure the sharing mechanism for these data.
