@@ -48,33 +48,34 @@ It describes the important implementation decisions of the it-chain. Sample code
 
 [@emperorhan](https://github.com/emperorhan)
 
-## 스마트 컨트랙트 <a name="SmartContract"></a>
+## SmartContract <a name="SmartContract"></a>
 
 ![smartContract-implementation-deploy](../images/smartContract-implementation-deploy.png)
 
-스마트 컨트랙트는 깃 저장소에 저장되어 있으며, 스마트 컨트랙트 서비스에 의해 실행됩니다. 안정성 및 보안을 위해 Docker 기반의 가상환경에서 테스트한 후, 문제가 없을 경우 실제 데이터 베이스에 반영됩니다.
+SmartContract is stored on git repository and is executed by the smart contract service. After testing Smart Contract in a Docker-based virtual environment, it is reflected in the actual database.
 
-- 깃
+- Git
 
-  각 스마트 컨트랙트는 깃 저장소에 저장됩니다.
+  Each Smart Contract is stored as a Git Repository.
 
-- 도커 가상머신
+- Docker VM
 
-  스마트 컨트랙트를 실행하는 가상환경입니다. 도커 가상머신에 스마트 컨트랙트와 데이터베이스가 검증되면 복사되면, 가상환경에서 실행되어 검증과정을 거칩니다.
+  It is a virtual environment that executes smart contracts. After the smart contract and the world state db are copied to the Docker vm, they are executed and verified virtually.
 
-- 스마트 컨트랙트 서비스
+- SmartContractService
 
-  깃과 도커 가상머신을 관리하는 서비스입니다. 깃에 스마트 컨트랙트를 푸시/클론하면 해당 서비스가 데이터베이스와 스마트 컨트랙트를 복사하여 도커 가상머신에서 실행합니다.
+  It is a service that manages git and Docker VM. After pushing and cloning the smart contract on the git, it copies the world state DB and smart contract to Docker VM and executes it.
+
   ​
 
-#### 스마트 컨트랙트 배포 순서도
+#### Deploy Smart Contract Sequence Diagram
 
 ![smartContract-implementation-seq](../images/smartContract-implementation-seq.png)
 
-배포된 유저의 저장소는 검증된 스마트 컨트랙트 저장소에 저장되고 관리되어집니다. (아래 그림 참조)
+The deployed user's repository is stored and managed in the Authenticated Smart Contract Repository as shown below.
 
-| 유저 <br />저장소 <br />경로      | 스마트 컨트랙트 <br />저장소 <br />주소    | 스마트 컨트랙트 파일 경로                   |
-| -------------------------------- | ---------------------------------------- | ----------------------------------------- |
+| User <br />Repository <br />Path | Smart Contract <br />Repository <br />Path | Smart Contract File Path                 |
+| -------------------------------- | ---------------------------------------- | ---------------------------------------- |
 | A/a                              | {authenticated_git_id}/A_a               | It-chain/SmartContracts/A_a/{commit_hash} |
 | B/b                              | {authenticated_git_id}/B_b               | It-chain/SmartContracts/B_b/{commit_hash} |
 | C/c                              | {authenticated_git_id}/C_c               | It-chain/SmartContracts/C_c/{commit_hash} |
@@ -82,7 +83,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 ### Author
 
 [@hackurity01](https://github.com/hackurity01)
-[@codeblv](https://github.com/codeblv)
+
 
 ## Grpc Communication <a name="Communication"></a>
 
