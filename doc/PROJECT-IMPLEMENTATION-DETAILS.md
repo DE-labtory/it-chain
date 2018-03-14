@@ -119,7 +119,7 @@ It-chain의 각각의 Node들이 어떻게 같은 네트워크의 다른 Node들
 
 - ConnectionManager
 
-ConnectionManager는 Connection들을 관리한다. Connection을 생성, 관리, 종료한다. ConnectionManager를 통해 다른 Peer들과 Connection이 연결되면 Connection을 유지한채로 연결된 Connection을 통해 데이터를 송신, 수신한다. Connection을 연결시겨 놓는 이유는 합의알고리즘과 Transaction을 송,수신의 비용을 줄이기 위함이다.
+ConnectionManager는 Connection들을 관리한다. Connection을 생성, 관리, 종료한다. ConnectionManager를 통해 다른 Peer들과 Connection이 연결되면 Connection을 유지한채로 연결된 Connection을 통해 데이터를 송신, 수신한다. Connection을 연결시겨 놓는 이유는 합의알고리즘과 Transaction의 송,수신 비용을 줄이기 위함이다.
 
 - Connection
 
@@ -147,7 +147,7 @@ Peer가 다른 Peer로 부터 Stream 요청을 받게 되는 순간 Connection�
 
 ![clientConnection_sequence_diagram](../images/clientConnection_sequence_diagram.png)
 
-새로운 Connection연결을 위해 ConnectionManager에게 ip와 connectionID를 전달하면, ConnectionManager는 grpcClient를 사용하여 Stream을 통해 연결을 확인한다. 연결이 될 경우 StreamClient객체를 전달받는다. Connection객체를 생성하고 StreamClient를 와 기타 여러 정보들을 Connection객체에 저장후 Connection객체를 ConnectionManager의 ConnectionMap에 저장한다.
+새로운 Connection연결을 위해 ConnectionManager에게 ip와 connectionID를 전달하면, ConnectionManager는 grpcClient를 사용하여 Stream을 통해 연결을 확인한다. 연결이 될 경우 StreamClient객체를 전달받는다. Connection객체를 생성하고 StreamClient와 기타 여러 정보들을 Connection객체에 저장후 Connection객체를 ConnectionManager의 ConnectionMap에 저장한다.
 
 
 
@@ -202,7 +202,7 @@ Crypto signs and verifies the data used in the block-chain platform and manages 
 [@yojkim](https://github.com/yojkim)
 
 ## Database <a name="DB"></a>
-Blockchain can be stored in multiple types of database depend on configuration. For now leveldbhepler and fileheper functions are added. Basic DB implementation uses leveldb. Blocks can be retrieved by block hash and block number and transaction ID. Transactions can be retrieved by transaction ID.
+Blockchain can be stored in multiple types of database depend on configuration. For now leveldbhepler and filehelper functions are added. Basic DB implementation uses leveldb. Blocks can be retrieved by block hash and block number and transaction ID. Transactions can be retrieved by transaction ID.
 If you want to use other database, implement it under blockchainleveldb and edit blockchain_db_interface.
 
 ### Related config
