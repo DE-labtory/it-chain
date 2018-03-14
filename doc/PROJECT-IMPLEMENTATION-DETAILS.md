@@ -4,7 +4,7 @@
 
 ## Overview
 
-It describes the important implementation decisions of the it-chain. Sample code for each detailed implementation can be found in the sample folder. 
+It describes the important implementation decisions of the it-chain. Sample code for each detailed implementation can be found in the sample folder.
 
 
 
@@ -30,7 +30,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 
 - Block
 
-  The block consists of a block header and block data, and the next block has a value obtained by hashing the block header for the block structure of the Ledger. 
+  The block consists of a block header and block data, and the next block has a value obtained by hashing the block header for the block structure of the Ledger.
   The block header has the previous block hash value and the merkle tree root hash value. The block data has a transaction list and has a merkle tree To efficiently manage forgery and tampering of transactions.
 
 - Transaction
@@ -39,7 +39,7 @@ It describes the important implementation decisions of the it-chain. Sample code
 
 - MerkleTree
 
-  The Merkle Tree consists of a binary tree, and the leaf node is the hash value of the transactions in the transaction list of the block. The root node is a hash value representing the entire transaction that hashes the transaction hash value pair from the leaf node to the end. 
+  The Merkle Tree consists of a binary tree, and the leaf node is the hash value of the transactions in the transaction list of the block. The root node is a hash value representing the entire transaction that hashes the transaction hash value pair from the leaf node to the end.
    Merkle Tree is able to check in constant time whether transaction information has changed through merkle tree root hash. In addition, Merkle Tree can effectively manage the validity of all transactions in the ledger because the block header has the Merkle Tree root hash value and the next block has hash value from hashed the block header. And since Merkle Tree can provide the Merkle Path (the Sibling node to the root node of tx), it has the advantage of being able to check the validity of a particular transaction at log time.
 
   ![blockchain-implementation-merkletree](../images/blockchain-implementation-merkletree.png)
@@ -83,6 +83,7 @@ The deployed user's repository is stored and managed in the Authenticated Smart 
 ### Author
 
 [@hackurity01](https://github.com/hackurity01)
+
 
 ## Grpc Communication <a name="Communication"></a>
 
@@ -130,7 +131,7 @@ Connection은 Peer간의 통신의 추상화이며 구현체는 Grpc Bi-Stream�
 
 ![connection_class_diagram](../images/connection_class_diagram.png)
 
-Connection Class의 중요한 메소드와 속성들을 나타낸 Class Diagram이다. Connection 은 크게 2개의 종류로 분리된다. Connection에서 clientStream와 serverStream은 서로 동시에 존재 할 수 없다. Connection이 clientStream을 가지고 있으면 ClientConnection, serverStream을 가지고 있으면 ServerConnection으로 간주한다. 나머지 모든 로직은 동일하며 단순히 어느 Stream을 사용할지가 차이점이다. 
+Connection Class의 중요한 메소드와 속성들을 나타낸 Class Diagram이다. Connection 은 크게 2개의 종류로 분리된다. Connection에서 clientStream와 serverStream은 서로 동시에 존재 할 수 없다. Connection이 clientStream을 가지고 있으면 ClientConnection, serverStream을 가지고 있으면 ServerConnection으로 간주한다. 나머지 모든 로직은 동일하며 단순히 어느 Stream을 사용할지가 차이점이다.
 
 - ClientConnection
 
@@ -218,7 +219,7 @@ Database config is defined in config.yaml as database section
   | key          | description                              |
   | ------------ | ---------------------------------------- |
   | default_path | If no other path for leveldb is provided, leveldb data is stored in this path |
-  
+
 ### World State DB
 World State DB stores final state after all transaction executed. World state DB is copied when running SmartContract.
 
@@ -254,7 +255,7 @@ Blocks are totally stored in key-value storage leveldb.
   1) Key : last_block, Value : Serialized last block
   2) Key : unconfirmed_block, Value : Serialized unconfirmed block
   3) Key : transaction ID, Value : Blockhash of block that transaction is stored
-  
+
 - Snapshot
 
 LevelDB snapshot is added for copying world state db which is stored in leveldb.
