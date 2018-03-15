@@ -157,31 +157,31 @@ Crypto <a name="Crypto"></a>
 
 ![crypto-implementation-module](../images/crypto-implementation-module.png)
 
-Crypto signs and verifies the data used in the block-chain platform and manages the keys used in the process. *it-chain* supports `RSA` and `ECDSA` encryption method.
+Crypto contains signing and verification related functions that is used for data in blockchain platform and contains key management functions for the keys used in the process. *it-chain* supports `RSA` and `ECDSA` as signature scheme.
 
 -	KeyGenerator
 
-The node generates a key that matches the encryption scheme that you want to use for signing.
+KeyGenerator generates a key that matches the signature scheme which is selected for signature process.
 
 -	KeyManager
 
-Stores the generated key, and loads the stored key.
+KeyManager stores generated key, and loads stored key.
 
 -	Signer
 
-Performs data signature.
+Signer performs data signature.
 
 -	Verifier
 
-Verify the signed data.
+Verifier verifies the signed data.
 
 -	KeyUtils
 
-Perform the necessary processing tasks in the process of storing and loading the key such as converting key data to `PEM` file.
+KeyUtils performs necessary processing tasks in the process of storing and loading a key such as converting key data to `PEM` file.
 
 -	Key
 
-Provides attribute values related to the interface of key data required in the signature or verification process.
+Key provides attribute values related to the interface of key data required in the signature or verification process.
 
 <br>
 
