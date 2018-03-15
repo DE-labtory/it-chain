@@ -1,5 +1,9 @@
 ## Consensus <a name="Consensus"></a>
 
+### PBFT consensus
+
+Reference the PBFT section in [KEYCONCEPT](../doc/KEYCONCEP.md).
+
 ### Proposed architecture for the PBFT consensus
 
 ![pbft-proposed-statechart](../images/pbft-proposed-statechart.png)

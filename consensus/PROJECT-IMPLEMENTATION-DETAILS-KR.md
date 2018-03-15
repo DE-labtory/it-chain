@@ -1,5 +1,9 @@
 ## 합의(Consensus) <a name="Consensus"></a>
 
+### PBFT consensus
+
+[KEYCONCEPT](../doc/KEYCONCEP.md)의 PBFT 항목을 참조.
+
 ### Proposed architecture for the PBFT consensus
 
 ![pbft-proposed-statechart](../images/pbft-proposed-statechart.png)
