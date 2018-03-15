@@ -40,7 +40,7 @@ Database config is defined in config.yaml as database section
   | ------------ | ---------------------------------------- |
   | default_path | If no other path for leveldb is provided, leveldb data is stored in this path |
   
-  ### LevelDB
+### LevelDB
 Blocks are totally stored in key-value storage leveldb.
 
 - Blocks
