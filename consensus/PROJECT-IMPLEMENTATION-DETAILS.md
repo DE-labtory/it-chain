@@ -1,9 +1,5 @@
 ## Consensus <a name="Consensus"></a>
 
-![consensus-implementation-messagetype](../images/consensus-implementation-messagetype.png)
-
-![consensus-implementation-seq](../images/consensus-implementation-seq.png)
-
 ### Proposed architecture for the PBFT consensus
 
 ![pbft-proposed-statechart](../images/pbft-proposed-statechart.png)
