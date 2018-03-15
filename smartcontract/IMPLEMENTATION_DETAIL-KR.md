@@ -29,14 +29,13 @@ Smart Contract는 깃 저장소에 저장되어 있으며, 스마트 컨트랙�
 | B/b                              | {authenticated_git_id}/B_b               | It-chain/SmartContracts/B_b/{commit_hash} |
 | C/c                              | {authenticated_git_id}/C_c               | It-chain/SmartContracts/C_c/{commit_hash} |
 
-## World State DB
-World State DB stores final state after all transaction executed. World state DB is copied when running SmartContract.
+### World State DB
+World State DB는 모든 트랜잭션이 실행된 후 마지막 상태에 대해서 저장합니다. 스마트컨트랙트(SmartContract)가 실행될 때 World state DB를 복사하여 이용한다.
 
-| DB name              | Key             | Value                  | Description                                                |
-| -------------------- | --------------- | ---------------------- | ---------------------------------------------------------- |
-| WorldStateDB         | UserDefined Key | UserDefined Value      | Save all the information about the result of smartContract |
-| WaitingTransactionDB | Transaction ID  | Serialized Transaction | Save transactions                                          |
-
+| DB 이름              | 키              | 값                      | 설명                                                         |
+| -------------------- | --------------- | ---------------------- | ------------------------------------------------------------ |
+| WorldStateDB         | UserDefined Key | UserDefined Value      | 스마트컨트랙트 실행결과에 대한 정보를 저장                      |
+| WaitingTransactionDB | Transaction ID  | Serialized Transaction | 트랜잭션 저장                                                 | 
 
 ### Author
 
