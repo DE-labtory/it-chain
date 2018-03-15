@@ -161,33 +161,33 @@ Crypto contains signing and verification related functions that is used for data
 
 -	KeyGenerator
 
-KeyGenerator generates a key that matches the signature scheme which is selected for signature process.
+	KeyGenerator generates a key that matches the signature scheme which is selected for signature process.
 
 -	KeyManager
 
-KeyManager stores generated key, and loads stored key.
+	KeyManager stores generated key, and loads stored key.
 
 -	Signer
 
-Signer performs data signature.
+	Signer performs data signature.
 
 -	Verifier
 
-Verifier verifies the signed data.
+	Verifier verifies the signed data.
 
 -	KeyUtils
 
-KeyUtils performs necessary processing tasks in the process of storing and loading a key such as converting key data to `PEM` file.
+	KeyUtils performs necessary processing tasks in the process of storing and loading a key such as converting key data to `PEM` file.
 
 -	Key
 
-Key provides attribute values related to the interface of key data required in the signature or verification process.
+	Key provides attribute values related to the interface of key data required in the signature or verification process.
 
 <br>
 
 ### Signing process of data
 
-![crypto-implementaion-seq](../images/crypto-implementaion-seq.png) ​
+![crypto-implementation-seq](../images/crypto-implementation-seq.png) ​
 
 ### Author
 
