@@ -8,7 +8,7 @@
 
 ![pbft-proposed-statechart](../images/pbft-proposed-statechart.png)
 
-합의 절차는 요청 메세지(request message)가 도착하거나, Pre-prepare 메세지가 도착했을 때 시작된다. 만약 노드가 리더 노드(leader node or primary node)일 경우, 요청 메세지가 도착했을 때 합의 절차를 시작하고, 일반 노드일 경우 `pre-prepare` 메세지가 도착했을 때 합의 절차를 시작한다. 합의 절차가 시작되면 노드의 합의 상태(Consensus status)는 `Ready`가 되고 노드는 합의와 관련된 요소들(예: 관련 struct 들, 고루틴들, 채널들 등)을 생성 및 실행한다. 시작 행위과 완료될 경우, 노드는 미리 도착한 메세지가 없는지 메세지 버퍼를 살펴본 후 `Preparing` 상태로 나아간다. `Preparing` 상태에서는 노드는 `isPrepared`가 참이 될 때까지 `prepare` 메세지를 처리한다. 그 후, 이전 상태 때와 마찬가지로, 노드는 그 사이 도착한 메세지가 없는지 메세지 버퍼를 확인하고, `Committing` 상태로 나아간다. `Committing` 상태는 `Preparing` 상태와 동일하게 진행한다. 그리고 만약 `isCommitted`가 참이 된다면, 노드는 `Committed` 상태로 변경되고, 요청 메세지에서 실행해주길 요청한 기능(Operation)을 수행한다. 그리고 그 수행 결과를 처음 요청을 보낸 클라이언트에게 개별적으로 전송한다.
+합의 절차는 요청 메세지(request message)가 도착하거나, Pre-prepare 메세지가 도착했을 때 시작된다. 만약 노드가 리더 노드(leader node or primary node)일 경우, 요청 메세지가 도착했을 때 합의 절차를 시작하고, 일반 노드일 경우 `pre-prepare` 메세지가 도착했을 때 합의 절차를 시작한다. 합의 절차가 시작되면 노드의 합의 상태(Consensus status)는 `Ready`가 되고 노드는 합의와 관련된 요소들(예: 관련 struct 들, 고루틴들, 채널들 등)을 생성 및 실행한다. 시작 행위가 완료될 경우, 노드는 미리 도착한 메세지가 없는지 메세지 버퍼를 살펴본 후 `Preparing` 상태로 나아간다. `Preparing` 상태에서는 노드는 `isPrepared`가 참이 될 때까지 `prepare` 메세지를 처리한다. 그 후, 이전 상태 때와 마찬가지로, 노드는 그 사이 도착한 메세지가 없는지 메세지 버퍼를 확인하고, `Committing` 상태로 나아간다. `Committing` 상태는 `Preparing` 상태와 동일하게 진행한다. 그리고 만약 `isCommitted`가 참이 된다면, 노드는 `Committed` 상태로 변경되고, 요청 메세지에서 실행해주길 요청한 기능(Operation)을 수행한다. 그리고 그 수행 결과를 처음 요청을 보낸 클라이언트에게 개별적으로 전송한다.
 
 ![pbft-proposed-code-view](../images/pbft-proposed-code-view.png)
 
