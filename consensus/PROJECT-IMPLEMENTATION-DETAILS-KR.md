@@ -16,8 +16,6 @@ PBFT 합의를 수행하기 위해, 위의 다이어그램과 같은 코드 구�
 
 ![pbft-proposed-code-view-orders](../images/pbft-proposed-code-view-orders.png)
 
-Overall behaviors are like the above diagram. When the `routeIncomingMsg` goroutine takes an incoming message, it first checks the state of the consensus. If the state is not correct, it saves the message to the buffer. If the state is correct, it send a signal to resolve the buffered messages to the `resolveMsg` goroutine. Then, the `resolveMsg` goroutine reads buffered messages and calls consensus-related functions. If needed, this goroutine change the current state. If the current state is changed, the `resolveMsg` goroutine checks buffered messages for the new state immediately without waiting the resolving signal.
-
 전반적인 행위 모습은 위 다이어그램과 같다. `routeIncomingMsg` 고루틴이 들어오는 메세지를 받을 경우, 우선 합의 상태를 체크한다. 만약 들어온 메세지가 현재 합의 상태에 맞는 메세지라면(예: `ConsensusStatus`가 `Preparing`일 때, 들어온 메세지가 `prepare` 메세지인 경우), 이 고루틴은 `resolveMsg` 고루틴에게 버퍼 메세지를 처리하라는 시그널을 보낸다. 만약 메세지와 현재 합의 상태가 맞지 않는다면, `MsgBuffer`에 해당 메세지를 일단 저장해둔다.
 
 `resolveMsg` 고루틴은 버퍼 메세지를 읽어들여 이를 처리하기 위한 관련 합의 함수들을 호출한다. 만약 필요하다면, 현재의 합의 상태를 변경한다. 만약 합의 상태를 변경했다면, 이 고루틴은 `MsgBuffer`를 다시 한번 체크하여 새 합의 상태에 맞는 저장된 메세지를 다시 읽어들여 처리한다.
