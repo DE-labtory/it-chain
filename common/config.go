@@ -1,8 +1,11 @@
 package common
 
 import   (
-	"github.com/spf13/viper"
 	"fmt"
+	"go/build"
+	"path/filepath"
+
+	"github.com/spf13/viper"
 )
 
 func init(){
@@ -13,7 +16,7 @@ func initConfig(){
 
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("config")
-	viper.AddConfigPath("$GOPATH/src/github.com/it-chain/it-chain-Engine/conf")
+	viper.AddConfigPath(filepath.Join(build.Default.GOPATH, "/src/github.com/it-chain/it-chain-Engine/conf"))
 
 	//todo 데모용
 	//viper.AddConfigPath("./conf")
