@@ -2,13 +2,14 @@ package domain
 
 import (
 	"testing"
-	"github.com/stretchr/testify/assert"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var endFlag = false
 
-var mockHandler = func (consensusState ConsensusState){
+var mockHandler = func(consensusState *ConsensusState) {
 	endFlag = true
 }
 
@@ -20,15 +21,15 @@ func TestNewConsensusState(t *testing.T) {
 
 	view.ID = "123"
 	view.LeaderID = "1"
-	view.PeerID = []string{"1","2","3"}
+	view.PeerID = []string{"1", "2", "3"}
 
-	consensusState := NewConsensusState(view,consensusID,block,PrePrepared,mockHandler,5)
+	consensusState := NewConsensusState(view, consensusID, block, PrePrepared, mockHandler, 5)
 
-	assert.Equal(t,consensusState.View,view)
-	assert.Equal(t,consensusState.ID,consensusID)
-	assert.Equal(t,consensusState.CurrentStage,PrePrepared)
-	assert.NotNil(t,consensusState.CommitMsgs)
-	assert.NotNil(t,consensusState.PrepareMsgs)
+	assert.Equal(t, consensusState.View, view)
+	assert.Equal(t, consensusState.ID, consensusID)
+	assert.Equal(t, consensusState.CurrentStage, PrePrepared)
+	assert.NotNil(t, consensusState.CommitMsgs)
+	assert.NotNil(t, consensusState.PrepareMsgs)
 }
 
 func TestNewConsesnsusMessage(t *testing.T) {
@@ -39,15 +40,14 @@ func TestNewConsesnsusMessage(t *testing.T) {
 	view := View{}
 	view.ID = "123"
 	view.LeaderID = "1"
-	view.PeerID = []string{"1","2","3"}
+	view.PeerID = []string{"1", "2", "3"}
 
-	message:= NewConsesnsusMessage(consensusID,view,1,block,"peer1",PrepareMsg)
+	message := NewConsesnsusMessage(consensusID, view, 1, block, "peer1", PrepareMsg)
 
-	assert.Equal(t,message.SequenceID,int64(1))
-	assert.Equal(t,message.MsgType,PrepareMsg)
-	assert.Equal(t,message.Block,block)
+	assert.Equal(t, message.SequenceID, int64(1))
+	assert.Equal(t, message.MsgType, PrepareMsg)
+	assert.Equal(t, message.Block, block)
 }
-
 
 func TestFromConsensusProtoMessage(t *testing.T) {
 
@@ -60,14 +60,14 @@ func TestConsensusState_start(t *testing.T) {
 	view := &View{}
 	view.ID = "123"
 	view.LeaderID = "1"
-	view.PeerID = []string{"1","2","3"}
+	view.PeerID = []string{"1", "2", "3"}
 
-	NewConsensusState(view,consensusID,block,PrePrepared,mockHandler,3)
+	NewConsensusState(view, consensusID, block, PrePrepared, mockHandler, 3)
 
 	//var period float32 = 0.2
-	time.Sleep(6*time.Second)
+	time.Sleep(6 * time.Second)
 
-	assert.True(t,endFlag)
+	assert.True(t, endFlag)
 
 	endFlag = false
 }
@@ -79,14 +79,14 @@ func TestConsensusState_start2(t *testing.T) {
 	view := &View{}
 	view.ID = "123"
 	view.LeaderID = "1"
-	view.PeerID = []string{"1","2","3"}
+	view.PeerID = []string{"1", "2", "3"}
 
-	NewConsensusState(view,consensusID,block,PrePrepared,mockHandler,6)
+	NewConsensusState(view, consensusID, block, PrePrepared, mockHandler, 6)
 
 	//var period float32 = 0.2
-	time.Sleep(3*time.Second)
+	time.Sleep(3 * time.Second)
 
-	assert.False(t,endFlag)
+	assert.False(t, endFlag)
 	endFlag = false
 }
 
@@ -96,12 +96,12 @@ func TestConsensusState_End(t *testing.T) {
 	view := &View{}
 	view.ID = "123"
 	view.LeaderID = "1"
-	view.PeerID = []string{"1","2","3"}
+	view.PeerID = []string{"1", "2", "3"}
 
-	cs := NewConsensusState(view,consensusID,block,PrePrepared,mockHandler,3)
+	cs := NewConsensusState(view, consensusID, block, PrePrepared, mockHandler, 3)
 
 	cs.End()
 
-	time.Sleep(6*time.Second)
-	assert.False(t,endFlag)
+	time.Sleep(6 * time.Second)
+	assert.False(t, endFlag)
 }
