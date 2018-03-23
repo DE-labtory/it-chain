@@ -4,9 +4,9 @@
 2.  Pull Request 후 최소 3 명의 Reviewer 지정
 3.  구현한 기능에 관하여 문서작성 필수
 4.  작성한 함수의 모든 단위테스트 작성
-5.  서비스별 브런치에서 작업
-    1.  포맷 브런치 예시: `feature/consensus`, `feature/blockchain` 등등
-    2.  서비스별 브런치를 구성하는 것으로 추천
+5.  서비스별 브랜치에서 작업
+    1.  포맷 브랜치 예시: `feature/consensus`, `feature/blockchain` 등등
+    2.  서비스별 브랜치를 구성하는 것으로 추천
 6.  개발 후 `develop` 브랜치에 Pull Request
 7.  `master` 는 모든 테스트 케이스를 통과하며 빌드 에러가 없고 milestone 지점에 merge
 
