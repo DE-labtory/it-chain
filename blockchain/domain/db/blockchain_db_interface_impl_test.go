@@ -56,4 +56,5 @@ func TestBlockchainDBImpl_GetBlockByHash(t *testing.T) {
 	retrievedBlock, err := b.GetBlockByHash(blockHash)
 	assert.NoError(t, err)
 	assert.Equal(t, block, retrievedBlock)
+
 }

@@ -11,4 +11,5 @@ type BlockChainDB interface {
 	GetLastBlock() (*model.Block, error)
 	GetTransactionByTxID(txid string) (*model.Transaction, error)
 	GetBlockByTxID(txid string) (*model.Block, error)
+
 }

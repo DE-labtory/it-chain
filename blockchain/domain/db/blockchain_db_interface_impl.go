@@ -22,6 +22,7 @@ func CreateNewBlockchainDB(dbPath string) BlockChainDB {
 	default :
 		panic(fmt.Sprint("Unsupported db type"))
 	}
+
 	return &BlockchainDBImpl{dbType: dbType, db: db}
 }
 
