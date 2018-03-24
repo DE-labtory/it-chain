@@ -1,17 +1,18 @@
 package service
 
 import (
-	"github.com/it-chain/it-chain-Engine/legacy/db/leveldbhelper"
-	"github.com/it-chain/it-chain-Engine/legacy/domain"
-	"github.com/it-chain/it-chain-Engine/common"
-	"github.com/it-chain/it-chain-Engine/legacy/network/comm"
-	pb "github.com/it-chain/it-chain-Engine/legacy/network/protos"
-	"github.com/spf13/viper"
 	"strconv"
 	"time"
-	"github.com/rs/xid"
-	"github.com/pkg/errors"
+
+	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/legacy/db/leveldbhelper"
+	"github.com/it-chain/it-chain-Engine/legacy/domain"
+	"github.com/it-chain/it-chain-Engine/legacy/network/comm"
 	"github.com/it-chain/it-chain-Engine/legacy/network/comm/msg"
+	pb "github.com/it-chain/it-chain-Engine/legacy/network/protos"
+	"github.com/pkg/errors"
+	"github.com/rs/xid"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -19,8 +20,8 @@ const (
 )
 
 type TransactionServiceImpl struct {
-	DB *leveldbhelper.DBProvider
-	Comm comm.ConnectionManager
+	DB          *leveldbhelper.DBProvider
+	Comm        comm.ConnectionManager
 	PeerService PeerService
 }
 
@@ -30,11 +31,11 @@ func NewTransactionService(path string, comm comm.ConnectionManager, ps PeerServ
 
 	i, _ := strconv.Atoi(viper.GetString("batchTimer.pushPeerTable"))
 
-	broadCastPeerTableBatcher := NewBatchService(time.Duration(i)*time.Second,transactionService.SendToLeader,false)
+	broadCastPeerTableBatcher := NewBatchService(time.Duration(i)*time.Second, transactionService.SendToLeader, false)
 	broadCastPeerTableBatcher.Add("Send tx to leader")
 	broadCastPeerTableBatcher.Start()
 
-	comm.Subscribe("receive transactions",transactionService.handleTransaction)
+	comm.Subscribe("receive transactions", transactionService.handleTransaction)
 
 	return transactionService
 }
@@ -93,11 +94,11 @@ func (t *TransactionServiceImpl) GetTransactions(limit int) ([]*domain.Transacti
 	return ret, nil
 }
 
-func (t *TransactionServiceImpl) handleTransaction(msg msg.OutterMessage){
+func (t *TransactionServiceImpl) handleTransaction(msg msg.OutterMessage) {
 
 	common.Log.Println("Received Transaction1")
 
-	if txMsg := msg.Message.GetTransaction(); txMsg !=nil{
+	if txMsg := msg.Message.GetTransaction(); txMsg != nil {
 		common.Log.Println("Received Transaction")
 		transaction := domain.FromProtoTransaction(*txMsg)
 		t.AddTransaction(transaction)
@@ -122,13 +123,12 @@ func (t *TransactionServiceImpl) SendToLeader(interface{}) {
 
 	for _, tx := range txs {
 
-
 		message := &pb.StreamMessage{}
 		message.Content = &pb.StreamMessage_Transaction{
 			Transaction: domain.ToProtoTransaction(*tx),
 		}
 
-		if err !=nil{
+		if err != nil {
 			common.Log.Println("fail to serialize message")
 		}
 
@@ -136,21 +136,21 @@ func (t *TransactionServiceImpl) SendToLeader(interface{}) {
 			common.Log.Println("fail to send message error:", onError.Error())
 		}
 
-		successCallBack := func(interface{}){
+		successCallBack := func(interface{}) {
 			common.Log.Println("success to send tx")
 			t.DeleteTransactions(txs)
 		}
 
 		//todo need leader selection alg
 		//내가 리더가 아니고, 리더가 nil아니면 보낸다.
-		if t.PeerService.GetLeader() != nil && t.PeerService.GetLeader().PeerID != t.PeerService.GetPeerTable().MyID{
+		if t.PeerService.GetLeader() != nil && t.PeerService.GetLeader().PeerID != t.PeerService.GetPeerTable().MyID {
 			common.Log.Println("Sending:", domain.ToProtoTransaction(*tx))
 			t.Comm.SendStream(message, successCallBack, errorCallBack, t.PeerService.GetLeader().PeerID)
 		}
 	}
 }
 
-func (t *TransactionServiceImpl) CreateTransaction(txData *domain.TxData) (*domain.Transaction, error){
+func (t *TransactionServiceImpl) CreateTransaction(txData *domain.TxData) (*domain.Transaction, error) {
 
 	transaction := domain.CreateNewTransaction(
 		t.PeerService.GetPeerTable().MyID,
@@ -161,7 +161,7 @@ func (t *TransactionServiceImpl) CreateTransaction(txData *domain.TxData) (*doma
 
 	err := t.AddTransaction(transaction)
 
-	if err != nil{
+	if err != nil {
 		return nil, errors.New("faild to add transaction")
 	}
 
