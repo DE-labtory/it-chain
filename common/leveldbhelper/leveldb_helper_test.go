@@ -179,7 +179,6 @@ func TestDB_snapSnapshot(t *testing.T) {
 	batch.Put([]byte("key2"), []byte("val2"))
 	batch.Put([]byte("key3"), []byte("val3"))
 	db.WriteBatch(batch,true)
-
 	
 	snap, err := db.Snapshot()
 	assert.NoError(t, err)

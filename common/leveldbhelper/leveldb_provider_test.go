@@ -14,7 +14,6 @@ func TestCreateNewDBProvider(t *testing.T) {
 		dbProvider.Close()
 		os.RemoveAll(path)
 	}()
-
 	assert.Equal(t, dbProvider.db.dbState, opened)
 }
 

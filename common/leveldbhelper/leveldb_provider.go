@@ -36,7 +36,6 @@ func (p *DBProvider) GetDBHandle(dbName string) *DBHandle {
 		dbHandle = &DBHandle{dbName, p.db}
 		p.dbHandles[dbName] = dbHandle
 	}
-
 	return dbHandle
 }
 
