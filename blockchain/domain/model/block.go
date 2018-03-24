@@ -65,11 +65,26 @@ func CreateNewBlock(prevBlock *Block) *Block{
 	return &Block{BlockHeader:&header, BlockData:&data}
 }
 
-func (block *Block) PutTranscation(txList []*Transaction) {
-	for _, tx := range txList{
-		block.BlockData.Transactions = append(block.BlockData.Transactions, tx)
-		block.BlockData.TxIdx[tx.TransactionHash] = block.BlockData.TransactionCount
+//func (block *Block) PutTranscation(txList []*Transaction) {
+//	for _, tx := range txList{
+//		block.BlockData.Transactions = append(block.BlockData.Transactions, tx)
+//		block.BlockData.TxIdx[tx.TransactionHash] = block.BlockData.TransactionCount
+//		block.BlockData.TransactionCount++
+//	}
+//}
+
+func (block *Block) PutTranscation(input interface{}) {
+	switch v := input.(type) {
+	case *Transaction:
+		block.BlockData.Transactions = append(block.BlockData.Transactions, v)
+		block.BlockData.TxIdx[v.TransactionHash] = block.BlockData.TransactionCount
 		block.BlockData.TransactionCount++
+	case []*Transaction:
+		for _, tx := range v{
+			block.BlockData.Transactions = append(block.BlockData.Transactions, tx)
+			block.BlockData.TxIdx[tx.TransactionHash] = block.BlockData.TransactionCount
+			block.BlockData.TransactionCount++
+		}
 	}
 }
 
