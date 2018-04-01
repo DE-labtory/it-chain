@@ -1,5 +1,3 @@
 package consensus
 
-type Block struct{
-	
-}
+type Block []byte
