@@ -1,38 +1,32 @@
 package consensus
 
-type State interface{
+type State interface {
 	Process()
 }
 
-type IdleState struct{
+type IdleState struct {
+}
+
+func (IdleState) Process() {
 
 }
 
-func (IdleState) Process(){
+type PreprepareState struct {
+}
+
+func (PreprepareState) Process() {
 
 }
 
-type PreprepareState struct{
+type PrepareState struct {
+}
+
+func (PrepareState) Process() {
 
 }
 
-func (PreprepareState) Process(){
-
+type CommitState struct {
 }
 
-type PrepareState struct{
-
-}
-
-func (PrepareState) Process(){
-
-}
-
-
-type CommitState struct{
-
-}
-
-type EndState struct{
-
+type EndState struct {
 }

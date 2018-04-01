@@ -1,10 +1,10 @@
 package consensus
 
-type ConsensusID struct{
+type ConsensusID struct {
 	ID string
 }
 
-func NewConsensusID (id string) ConsensusID{
+func NewConsensusID(id string) ConsensusID {
 	return ConsensusID{
 		ID: id,
 	}
@@ -19,6 +19,6 @@ type Consensus struct {
 	CurrentState    State
 }
 
-func (c *Consensus) Start(){
+func (c *Consensus) Start() {
 	c.CurrentState = new(PrepareState)
 }

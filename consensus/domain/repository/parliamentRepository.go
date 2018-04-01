@@ -1,9 +1,10 @@
 package repository
 
 import (
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/parliament"
-	"sync"
 	"errors"
+	"sync"
+
+	"github.com/it-chain/it-chain-Engine/consensus/domain/model/parliament"
 )
 
 type ParlimentRepository interface {
@@ -11,12 +12,12 @@ type ParlimentRepository interface {
 	Insert(*parliament.Parliament) error
 }
 
-type ParlimentRepository_impl struct{
-	lock sync.Mutex
+type ParlimentRepository_impl struct {
+	lock       sync.Mutex
 	parliament *parliament.Parliament
 }
 
-func (pr *ParlimentRepository_impl) Get() *parliament.Parliament{
+func (pr *ParlimentRepository_impl) Get() *parliament.Parliament {
 	pr.lock.Lock()
 	defer pr.lock.Unlock()
 
@@ -27,11 +28,11 @@ func (pr *ParlimentRepository_impl) Insert(parliament *parliament.Parliament) er
 	pr.lock.Lock()
 	defer pr.lock.Unlock()
 
-	if parliament == nil{
+	if parliament == nil {
 		return errors.New("nil parliament")
 	}
 
-	if parliament.Leader == nil{
+	if parliament.Leader == nil {
 		return errors.New("need leader")
 	}
 

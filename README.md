@@ -76,14 +76,6 @@ go run main.go
 ```
 
 
-
-
-## Contribution
-
-Contribution documents will be updated shortly. 
-
-For the time being, email leebduk@gmail.com
-
 ## Blockchain Key Concept
 The key concept of blockchain can be found in the KEYCONEPT. <br>
 [KEYCONCEPT](doc/KEYCONCEPT.md)

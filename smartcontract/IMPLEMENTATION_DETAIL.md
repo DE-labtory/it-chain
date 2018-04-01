@@ -30,7 +30,13 @@ The deployed user's repository is stored and managed in the Authenticated Smart 
 | B/b                              | {authenticated_git_id}/B_b               | It-chain/SmartContracts/B_b/{commit_hash} |
 | C/c                              | {authenticated_git_id}/C_c               | It-chain/SmartContracts/C_c/{commit_hash} |
 
-### Author
-[@hackurity01](https://github.com/hackurity01)
+### World State DB
+World State DB stores final state after all transaction executed. World state DB is copied when running SmartContract.
 
+| DB name              | Key             | Value                  | Description                                                |
+| -------------------- | --------------- | ---------------------- | ---------------------------------------------------------- |
+| WorldStateDB         | UserDefined Key | UserDefined Value      | Save all the information about the result of smartContract |
+| WaitingTransactionDB | Transaction ID  | Serialized Transaction | Save transactions                                          |
+
+### Author
 [@hackurity01](https://github.com/hackurity01)

@@ -1,9 +1,9 @@
 package parliament
 
-type Leader struct{
+type Leader struct {
 	ID PeerID
 }
 
-func (l Leader) GetStringID() string{
+func (l Leader) GetStringID() string {
 	return l.ID.ID
 }

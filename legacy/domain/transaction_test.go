@@ -1,13 +1,14 @@
 package domain
 
 import (
-	"github.com/stretchr/testify/assert"
+	"strconv"
 	"testing"
 	"time"
-	"strconv"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateNewTransactionTest(t *testing.T){
+func TestCreateNewTransactionTest(t *testing.T) {
 	tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), General, time.Now(), SetTxData("", Invoke, SetTxMethodParameters(0, "", []string{""}), ""))
 	assert.Equal(t, Status_TRANSACTION_UNKNOWN, tx.TransactionStatus)
 }
@@ -28,10 +29,8 @@ func TestTransaction_Validate(t *testing.T) {
 	assert.Equal(t, true, tx.Validate())
 }
 
-func TestTransaction_SignHash(t *testing.T) {
-	tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), General, time.Now(), SetTxData("", Invoke, SetTxMethodParameters(0, "", []string{""}), ""))
-	_, err := tx.SignHash()
-	assert.NoError(t, err)
-}
-
-
+//func TestTransaction_SignHash(t *testing.T) {
+//	tx := CreateNewTransaction(strconv.Itoa(1), strconv.Itoa(1), General, time.Now(), SetTxData("", Invoke, SetTxMethodParameters(0, "", []string{""}), ""))
+//	_, err := tx.SignHash()
+//	assert.NoError(t, err)
+//}
