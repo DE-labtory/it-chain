@@ -1,8 +1,9 @@
 package msg
 
 import (
-	cs "github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
 	"sync"
+
+	cs "github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
 )
 
 type MsgPool struct {
@@ -11,21 +12,21 @@ type MsgPool struct {
 	lock           sync.RWMutex
 }
 
-func (mp MsgPool) InsertPrepareMsg(prepareMsg PrepareMsg){
+func (mp MsgPool) InsertPrepareMsg(prepareMsg PrepareMsg) {
 
 	mp.lock.Lock()
 	defer mp.lock.Unlock()
 
 	prepareMsgPool := mp.PrepareMsgPool[prepareMsg.ConsensusID]
 
-	if prepareMsgPool == nil{
-		mp.PrepareMsgPool[prepareMsg.ConsensusID] = make([]PrepareMsg,0)
+	if prepareMsgPool == nil {
+		mp.PrepareMsgPool[prepareMsg.ConsensusID] = make([]PrepareMsg, 0)
 	}
 
 	mp.PrepareMsgPool[prepareMsg.ConsensusID] = append(mp.PrepareMsgPool[prepareMsg.ConsensusID], prepareMsg)
 }
 
-func (mp MsgPool) FindPrepareMsgsByConsensusID(id cs.ConsensusID) []PrepareMsg{
+func (mp MsgPool) FindPrepareMsgsByConsensusID(id cs.ConsensusID) []PrepareMsg {
 
 	return mp.PrepareMsgPool[id]
 }

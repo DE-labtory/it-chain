@@ -5,7 +5,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/consensus/domain/model/msg"
 )
 
-func CheckPreparePolicy(consensus cs.Consensus,msgPool msg.MsgPool) bool{
+func CheckPreparePolicy(consensus cs.Consensus, msgPool msg.MsgPool) bool {
 	//NumberOfRepresentatives := len(consensus.Representatives)
 	//
 	//msgPool.FindPrepareMsgsByConsensusID()
