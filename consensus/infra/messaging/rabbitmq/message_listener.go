@@ -6,26 +6,9 @@ import (
 	"github.com/it-chain/it-chain-Engine/consensus/api"
 	"github.com/it-chain/it-chain-Engine/consensus/domain/model/msg"
 	"github.com/it-chain/it-chain-Engine/consensus/domain/model/parliament"
+	"github.com/it-chain/it-chain-Engine/messaging/event_message"
 	"github.com/streadway/amqp"
 )
-
-type ConsensusMessageType int
-
-const (
-	PREPREPARE ConsensusMessageType = 0
-	PREPARE    ConsensusMessageType = 1
-	COMMIT     ConsensusMessageType = 2
-)
-
-type StartConsensusEvent struct {
-	block  []byte
-	userID string
-}
-
-type ReceviedConsensusMessageEvent struct {
-	messageType ConsensusMessageType
-	messageBody []byte
-}
 
 type MessageConsumer struct {
 	consensusApi api.ConsensusApi
@@ -37,7 +20,7 @@ func (mc MessageConsumer) ListenStartConsensusEvent(amqpMessage <-chan amqp.Deli
 	go func() {
 		for message := range amqpMessage {
 
-			eventMessage := &StartConsensusEvent{}
+			eventMessage := &event_message.StartConsensusEvent{}
 			err := json.Unmarshal(message.Body, &eventMessage)
 
 			if err != nil {
@@ -58,15 +41,15 @@ func (mc MessageConsumer) ListenReceviedConsensusMessageEvent(amqpMessage <-chan
 	go func() {
 		for message := range amqpMessage {
 
-			eventMessage := &ReceviedConsensusMessageEvent{}
-			err := json.Unmarshal(message.Body, &eventMessage)
+			consensusMsg := &event_message.ReceviedConsensusMessageEvent{}
+			err := json.Unmarshal(message.Body, &consensusMsg)
 
 			if err != nil {
 				//error
 			}
 
-			switch eventMessage.messageType {
-			case PREPREPARE:
+			switch consensusMsg.MessageType {
+			case event_message.PREPREPARE:
 
 				preprepareMsg := msg.PreprepareMsg{}
 				err := json.Unmarshal(message.Body, &preprepareMsg)
@@ -78,7 +61,7 @@ func (mc MessageConsumer) ListenReceviedConsensusMessageEvent(amqpMessage <-chan
 				mc.consensusApi.ReceivePreprepareMsg(preprepareMsg)
 				break
 
-			case PREPARE:
+			case event_message.PREPARE:
 
 				prepareMsg := msg.PrepareMsg{}
 				err := json.Unmarshal(message.Body, &prepareMsg)
@@ -90,7 +73,7 @@ func (mc MessageConsumer) ListenReceviedConsensusMessageEvent(amqpMessage <-chan
 				mc.consensusApi.ReceivePrepareMsg(prepareMsg)
 				break
 
-			case COMMIT:
+			case event_message.COMMIT:
 
 				commitMsg := msg.CommitMsg{}
 				err := json.Unmarshal(message.Body, &commitMsg)
