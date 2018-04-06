@@ -60,12 +60,11 @@ func (cApi ConsensusApi) ReceivePrepareMsg(msg msg.PrepareMsg) {
 }
 
 func (cApi ConsensusApi) ReceiveCommitMsg(msg msg.CommitMsg) {
-	cApi.msgPool.InsertPrepareMsg(msg)
+	cApi.msgPool.InsertCommitMsg(msg)
 	consensus := cApi.consensusRepository.FindById(msg.ConsensusID)
 
-	if service.CheckPreparePolicy(*consensus, cApi.msgPool) {
-		CommitMsg := factory.CreateCommitMsg(*consensus)
-		cApi.messageApi.BroadCastMsg(CommitMsg, consensus.Representatives)
+	if service.CheckCommitPolicy(*consensus, cApi.msgPool) {
+		cApi.messageApi.ConfirmedBlock(consensus.Block)
 	} else {
 		return
 	}

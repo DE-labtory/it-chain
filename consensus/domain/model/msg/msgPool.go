@@ -14,6 +14,7 @@ type MsgPool struct {
 }
 
 func (mp MsgPool) DeletePrepareMsg(id cs.ConsensusID) {
+
 	mp.lock.Lock()
 	defer mp.lock.Unlock()
 
@@ -21,6 +22,7 @@ func (mp MsgPool) DeletePrepareMsg(id cs.ConsensusID) {
 }
 
 func (mp MsgPool) DeleteCommitMsg(id cs.ConsensusID) {
+
 	mp.lock.Lock()
 	defer mp.lock.Unlock()
 
@@ -58,4 +60,9 @@ func (mp MsgPool) InsertCommitMsg(commitMsg CommitMsg) {
 func (mp MsgPool) FindPrepareMsgsByConsensusID(id cs.ConsensusID) []PrepareMsg {
 
 	return mp.PrepareMsgPool[id]
+}
+
+func (mp MsgPool) FindCommitMsgsByConsensusID(id cs.ConsensusID) []CommitMsg {
+
+	return mp.CommitMsgPool[id]
 }
