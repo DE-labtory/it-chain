@@ -47,3 +47,7 @@ func (c *Consensus) IsCommitState() bool {
 	}
 	return false
 }
+
+func (c *Consensus) ToCommitState() {
+	c.CurrentState = COMMIT_STATE
+}
