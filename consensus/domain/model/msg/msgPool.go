@@ -1,3 +1,4 @@
+//Msgpool manage voting messages from other peer
 package msg
 
 import (
@@ -12,6 +13,20 @@ type MsgPool struct {
 	lock           sync.RWMutex
 }
 
+func (mp MsgPool) DeletePrepareMsg(id cs.ConsensusID) {
+	mp.lock.Lock()
+	defer mp.lock.Unlock()
+
+	delete(mp.PrepareMsgPool, id)
+}
+
+func (mp MsgPool) DeleteCommitMsg(id cs.ConsensusID) {
+	mp.lock.Lock()
+	defer mp.lock.Unlock()
+
+	delete(mp.CommitMsgPool, id)
+}
+
 func (mp MsgPool) InsertPrepareMsg(prepareMsg PrepareMsg) {
 
 	mp.lock.Lock()
@@ -24,6 +39,20 @@ func (mp MsgPool) InsertPrepareMsg(prepareMsg PrepareMsg) {
 	}
 
 	mp.PrepareMsgPool[prepareMsg.ConsensusID] = append(mp.PrepareMsgPool[prepareMsg.ConsensusID], prepareMsg)
+}
+
+func (mp MsgPool) InsertCommitMsg(commitMsg CommitMsg) {
+
+	mp.lock.Lock()
+	defer mp.lock.Unlock()
+
+	commitMsgPool := mp.CommitMsgPool[commitMsg.ConsensusID]
+
+	if commitMsgPool == nil {
+		mp.CommitMsgPool[commitMsg.ConsensusID] = make([]CommitMsg, 0)
+	}
+
+	mp.CommitMsgPool[commitMsg.ConsensusID] = append(mp.CommitMsgPool[commitMsg.ConsensusID], commitMsg)
 }
 
 func (mp MsgPool) FindPrepareMsgsByConsensusID(id cs.ConsensusID) []PrepareMsg {

@@ -60,7 +60,15 @@ func (cApi ConsensusApi) ReceivePrepareMsg(msg msg.PrepareMsg) {
 }
 
 func (cApi ConsensusApi) ReceiveCommitMsg(msg msg.CommitMsg) {
+	cApi.msgPool.InsertPrepareMsg(msg)
+	consensus := cApi.consensusRepository.FindById(msg.ConsensusID)
 
+	if service.CheckPreparePolicy(*consensus, cApi.msgPool) {
+		CommitMsg := factory.CreateCommitMsg(*consensus)
+		cApi.messageApi.BroadCastMsg(CommitMsg, consensus.Representatives)
+	} else {
+		return
+	}
 }
 
 func (cApi ConsensusApi) ReceivePreprepareMsg(msg msg.PreprepareMsg) {
