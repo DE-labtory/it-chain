@@ -5,7 +5,7 @@
 
 ## Overview
 
-Generalized Private Chain For All 
+Lightweight Customizable Chain For All
 
 it-chain makes it easy for anyone to have their own block chain platform
 
