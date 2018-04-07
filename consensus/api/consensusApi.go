@@ -20,6 +20,7 @@ type ConsensusApi struct {
 
 func (cApi ConsensusApi) StartConsensus(userId parliament.PeerID, block cs.Block) error {
 
+	//todo start consensus timeout batcher
 	//Paliament의 Validate Check
 	parliament := cApi.parlimentRepository.Get()
 
@@ -53,6 +54,7 @@ func (cApi ConsensusApi) ReceivePrepareMsg(msg msg.PrepareMsg) {
 
 	if service.CheckPreparePolicy(*consensus, cApi.msgPool) {
 		CommitMsg := factory.CreateCommitMsg(*consensus)
+		consensus.ToCommitState()
 		cApi.messageApi.BroadCastMsg(CommitMsg, consensus.Representatives)
 	} else {
 		return
@@ -60,7 +62,15 @@ func (cApi ConsensusApi) ReceivePrepareMsg(msg msg.PrepareMsg) {
 }
 
 func (cApi ConsensusApi) ReceiveCommitMsg(msg msg.CommitMsg) {
+	cApi.msgPool.InsertCommitMsg(msg)
+	consensus := cApi.consensusRepository.FindById(msg.ConsensusID)
 
+	if service.CheckCommitPolicy(*consensus, cApi.msgPool) {
+		cApi.messageApi.ConfirmedBlock(consensus.Block)
+		//todo delete consensus and remove all message
+	} else {
+		return
+	}
 }
 
 func (cApi ConsensusApi) ReceivePreprepareMsg(msg msg.PreprepareMsg) {

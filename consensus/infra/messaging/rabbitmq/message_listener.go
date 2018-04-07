@@ -27,7 +27,7 @@ func (mc MessageConsumer) ListenStartConsensusEvent(amqpMessage <-chan amqp.Deli
 				//error
 			}
 
-			err = mc.consensusApi.StartConsensus(parliament.PeerID{eventMessage.userID}, eventMessage.block)
+			err = mc.consensusApi.StartConsensus(parliament.PeerID{eventMessage.UserID}, eventMessage.Block)
 
 			if err != nil {
 				//error
