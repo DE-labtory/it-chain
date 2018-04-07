@@ -1,32 +1,22 @@
 package msg
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
-	"github.com/it-chain/it-chain-Engine/protos"
-	"github.com/it-chain/it-chain-Engine/common"
-	"github.com/golang/protobuf/proto"
 )
 
 type CommitMsg struct {
-	ConsensusID  consensus.ConsensusID
+	ConsensusID consensus.ConsensusID
+	SenderID    string
 }
 
-func (c CommitMsg) ToByte() ([]byte,error){
-	data, err := common.Serialize(c)
+func (c CommitMsg) ToByte() ([]byte, error) {
 
-	if err != nil{
-		return nil, err
+	data, err := json.Marshal(c)
+	if err != nil {
+		panic(fmt.Sprintf("Error encoding : %s", err))
 	}
-
-	streamMsg := &protos.StreamMsg{}
-	streamMsg.Content = &protos.StreamMsg_CommitMessage{
-		CommitMessage:&protos.CommitMessage{Data:data}}
-
-	streamData,err := proto.Marshal(streamMsg)
-
-	if err != nil{
-		return nil, err
-	}
-
-	return streamData, nil
+	return data, nil
 }

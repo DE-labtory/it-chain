@@ -1,5 +1,5 @@
 package parliament
 
-type PeerID struct{
+type PeerID struct {
 	ID string
 }
