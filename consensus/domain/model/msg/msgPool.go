@@ -4,7 +4,10 @@ package msg
 import (
 	"sync"
 
+	"fmt"
+
 	cs "github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
+	"github.com/pkg/errors"
 )
 
 type MsgPool struct {
@@ -29,10 +32,16 @@ func (mp MsgPool) DeleteCommitMsg(id cs.ConsensusID) {
 	delete(mp.CommitMsgPool, id)
 }
 
+//ConsensusID로 PrepareMsg리스트를 찾는다.
+//SenderID로 중복 투표를 확인한다.
 func (mp MsgPool) InsertPrepareMsg(prepareMsg PrepareMsg) {
 
 	mp.lock.Lock()
 	defer mp.lock.Unlock()
+
+	if prepareMsg.SenderID == "" {
+		return
+	}
 
 	prepareMsgPool := mp.PrepareMsgPool[prepareMsg.ConsensusID]
 
@@ -40,13 +49,30 @@ func (mp MsgPool) InsertPrepareMsg(prepareMsg PrepareMsg) {
 		mp.PrepareMsgPool[prepareMsg.ConsensusID] = make([]PrepareMsg, 0)
 	}
 
+	var hasItem = func(prepareMsgPool []PrepareMsg, prepareMsg PrepareMsg) bool {
+		for _, msg := range prepareMsgPool {
+			if msg.SenderID == prepareMsg.SenderID {
+				return true
+			}
+		}
+		return false
+	}(prepareMsgPool, prepareMsg)
+
+	if hasItem {
+		return
+	}
+
 	mp.PrepareMsgPool[prepareMsg.ConsensusID] = append(mp.PrepareMsgPool[prepareMsg.ConsensusID], prepareMsg)
 }
 
-func (mp MsgPool) InsertCommitMsg(commitMsg CommitMsg) {
+func (mp MsgPool) InsertCommitMsg(commitMsg CommitMsg) error {
 
 	mp.lock.Lock()
 	defer mp.lock.Unlock()
+
+	if commitMsg.SenderID == "" {
+		return errors.New(fmt.Sprint("Need SenderID [%s]", commitMsg.SenderID))
+	}
 
 	commitMsgPool := mp.CommitMsgPool[commitMsg.ConsensusID]
 
@@ -54,7 +80,22 @@ func (mp MsgPool) InsertCommitMsg(commitMsg CommitMsg) {
 		mp.CommitMsgPool[commitMsg.ConsensusID] = make([]CommitMsg, 0)
 	}
 
+	var hasItem = func(prepareMsgPool []CommitMsg, commitMsg CommitMsg) bool {
+		for _, msg := range prepareMsgPool {
+			if msg.SenderID == commitMsg.SenderID {
+				return true
+			}
+		}
+		return false
+	}(commitMsgPool, commitMsg)
+
+	if hasItem {
+		return errors.New(fmt.Sprint("Already has SenderID [%s]", commitMsg.SenderID))
+	}
+
 	mp.CommitMsgPool[commitMsg.ConsensusID] = append(mp.CommitMsgPool[commitMsg.ConsensusID], commitMsg)
+
+	return nil
 }
 
 func (mp MsgPool) FindPrepareMsgsByConsensusID(id cs.ConsensusID) []PrepareMsg {

@@ -10,6 +10,7 @@ import (
 type PrepareMsg struct {
 	ConsensusID consensus.ConsensusID
 	Block       consensus.Block
+	SenderID    string
 }
 
 func (p PrepareMsg) ToByte() ([]byte, error) {

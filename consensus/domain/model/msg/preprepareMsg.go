@@ -9,6 +9,7 @@ import (
 
 type PreprepareMsg struct {
 	Consensus consensus.Consensus
+	SenderID  string
 }
 
 func (pm PreprepareMsg) ToByte() ([]byte, error) {
