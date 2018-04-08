@@ -1,4 +1,4 @@
-package event
+package topic
 
 type Event int
 

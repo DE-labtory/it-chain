@@ -1,4 +1,4 @@
-package event_message
+package event
 
 type Sendable struct {
 	Ids  []string
@@ -13,12 +13,13 @@ const (
 	COMMIT     ConsensusMessageType = 2
 )
 
-type StartConsensusEvent struct {
-	Block  []byte
-	UserID string
+type ConsensusMessagePublishEvent struct {
+	MessageType ConsensusMessageType
+	Ids         []string
+	Data        []byte
 }
 
-type ReceviedConsensusMessageEvent struct {
-	MessageType ConsensusMessageType
-	MessageBody []byte
+//todo define event
+type BlockConfirmEvent struct {
+	Block []byte
 }
