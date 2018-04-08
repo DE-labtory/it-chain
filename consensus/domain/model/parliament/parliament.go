@@ -77,7 +77,7 @@ func (p *Parliament) RemoveMember(memberID PeerID) {
 func (p *Parliament) ValidateRepresentative(representatives []*consensus.Representative) bool {
 
 	for _, representatives := range representatives {
-		index := p.findIndexOfMember(PeerID{string(representatives.Id)})
+		index := p.findIndexOfMember(PeerID{representatives.GetIdString()})
 
 		if index == -1 {
 			return false
