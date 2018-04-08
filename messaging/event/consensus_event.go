@@ -1,9 +1,9 @@
 package event
 
-type Sendable struct {
-	Ids  []string
-	Data []byte
-}
+//type Sendable struct {
+//	Ids  []string
+//	Data []byte
+//}
 
 type ConsensusMessageType int
 
@@ -14,9 +14,8 @@ const (
 )
 
 type ConsensusMessagePublishEvent struct {
-	MessageType ConsensusMessageType
-	Ids         []string
-	Data        []byte
+	Ids  []string
+	Data []byte
 }
 
 //todo define event

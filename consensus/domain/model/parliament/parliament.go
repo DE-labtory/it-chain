@@ -47,11 +47,21 @@ func (p Parliament) HasLeader() bool {
 	return true
 }
 
-func (p *Parliament) SetLeader(leader *Leader) {
+func (p *Parliament) SetLeader(leader *Leader) error {
+
+	if leader == nil {
+		return errors.New("Leader is nil")
+	}
 	p.Leader = leader
+
+	return nil
 }
 
 func (p *Parliament) AddMember(member *Member) error {
+
+	if member == nil {
+		return errors.New("Member is nil")
+	}
 
 	if member.ID.ID == "" {
 		return errors.New(fmt.Sprintf("Need Valid PeerID [%s]", member.ID.ID))

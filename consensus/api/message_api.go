@@ -5,8 +5,8 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/common"
 	cs "github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
-	"github.com/it-chain/it-chain-Engine/messaging"
 	"github.com/it-chain/it-chain-Engine/messaging/event"
+	"github.com/it-chain/it-chain-Engine/messaging/topic"
 )
 
 type Serializable interface {
@@ -43,14 +43,14 @@ func (mApi *MessageApi) BroadCastMsg(Msg Serializable, representatives []*cs.Rep
 		return
 	}
 
-	serializedData, err := common.Serialize(messaging.Sendable{Ids: IDs, Data: data})
+	serializedData, err := common.Serialize(event.ConsensusMessagePublishEvent{Ids: IDs, Data: data})
 
 	if err != nil {
 		fmt.Errorf(err.Error())
 		return
 	}
 
-	err = mApi.Publish(event.MessageCreated.String(), serializedData)
+	err = mApi.Publish(topic.ConsensusMessagePublishEvent.String(), serializedData)
 
 	if err != nil {
 		fmt.Errorf(err.Error())
@@ -60,4 +60,10 @@ func (mApi *MessageApi) BroadCastMsg(Msg Serializable, representatives []*cs.Rep
 
 func (mApi *MessageApi) ConfirmedBlock(block cs.Block) {
 
+	err := mApi.Publish(topic.BlockConfirmEvent.String(), block)
+
+	if err != nil {
+		fmt.Errorf(err.Error())
+		return
+	}
 }
