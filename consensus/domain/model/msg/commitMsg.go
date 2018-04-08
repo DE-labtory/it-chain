@@ -2,7 +2,6 @@ package msg
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
 )
@@ -16,7 +15,7 @@ func (c CommitMsg) ToByte() ([]byte, error) {
 
 	data, err := json.Marshal(c)
 	if err != nil {
-		panic(fmt.Sprintf("Error encoding : %s", err))
+		return nil, err
 	}
 	return data, nil
 }

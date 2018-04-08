@@ -1,10 +1,9 @@
 package msg
 
 import (
-	"github.com/golang/protobuf/proto"
-	"github.com/it-chain/it-chain-Engine/common"
+	"encoding/json"
+
 	"github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
-	"github.com/it-chain/it-chain-Engine/protos"
 )
 
 type PreprepareMsg struct {
@@ -13,21 +12,9 @@ type PreprepareMsg struct {
 }
 
 func (pm PreprepareMsg) ToByte() ([]byte, error) {
-	data, err := common.Serialize(pm)
-
+	data, err := json.Marshal(pm)
 	if err != nil {
 		return nil, err
 	}
-
-	streamMsg := &protos.StreamMsg{}
-	streamMsg.Content = &protos.StreamMsg_PreprepareMessage{
-		PreprepareMessage: &protos.PreprepareMessage{Data: data}}
-
-	streamData, err := proto.Marshal(streamMsg)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return streamData, nil
+	return data, nil
 }
