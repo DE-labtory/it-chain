@@ -20,6 +20,6 @@ func CreateConsensus(parliament parliament.Parliament, block consensus.Block) (*
 		ConsensusID:     consensus.NewConsensusID(xid.New().String()),
 		Representatives: representatives,
 		Block:           block,
-		CurrentState:    new(consensus.IdleState),
+		CurrentState:    consensus.IDLE_STATE,
 	}, nil
 }

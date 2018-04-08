@@ -2,9 +2,8 @@
 package msg
 
 import (
-	"sync"
-
 	"fmt"
+	"sync"
 
 	cs "github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
 	"github.com/pkg/errors"

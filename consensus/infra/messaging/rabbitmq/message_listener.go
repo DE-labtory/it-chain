@@ -6,7 +6,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/consensus/api"
 	"github.com/it-chain/it-chain-Engine/consensus/domain/model/msg"
 	"github.com/it-chain/it-chain-Engine/consensus/domain/model/parliament"
-	"github.com/it-chain/it-chain-Engine/messaging/event_message"
+	"github.com/it-chain/it-chain-Engine/messaging/event"
 	"github.com/streadway/amqp"
 )
 
@@ -20,7 +20,7 @@ func (mc MessageConsumer) ListenStartConsensusEvent(amqpMessage <-chan amqp.Deli
 	go func() {
 		for message := range amqpMessage {
 
-			eventMessage := &event_message.StartConsensusEvent{}
+			eventMessage := &event.ConsensusStartEvent{}
 			err := json.Unmarshal(message.Body, &eventMessage)
 
 			if err != nil {
@@ -41,7 +41,7 @@ func (mc MessageConsumer) ListenReceviedConsensusMessageEvent(amqpMessage <-chan
 	go func() {
 		for message := range amqpMessage {
 
-			consensusMsg := &event_message.ReceviedConsensusMessageEvent{}
+			consensusMsg := &event.ConsensusMessageArriveEvent{}
 			err := json.Unmarshal(message.Body, &consensusMsg)
 
 			if err != nil {
@@ -49,7 +49,7 @@ func (mc MessageConsumer) ListenReceviedConsensusMessageEvent(amqpMessage <-chan
 			}
 
 			switch consensusMsg.MessageType {
-			case event_message.PREPREPARE:
+			case event.PREPREPARE:
 
 				preprepareMsg := msg.PreprepareMsg{}
 				err := json.Unmarshal(message.Body, &preprepareMsg)
@@ -61,7 +61,7 @@ func (mc MessageConsumer) ListenReceviedConsensusMessageEvent(amqpMessage <-chan
 				mc.consensusApi.ReceivePreprepareMsg(preprepareMsg)
 				break
 
-			case event_message.PREPARE:
+			case event.PREPARE:
 
 				prepareMsg := msg.PrepareMsg{}
 				err := json.Unmarshal(message.Body, &prepareMsg)
@@ -73,7 +73,7 @@ func (mc MessageConsumer) ListenReceviedConsensusMessageEvent(amqpMessage <-chan
 				mc.consensusApi.ReceivePrepareMsg(prepareMsg)
 				break
 
-			case event_message.COMMIT:
+			case event.COMMIT:
 
 				commitMsg := msg.CommitMsg{}
 				err := json.Unmarshal(message.Body, &commitMsg)

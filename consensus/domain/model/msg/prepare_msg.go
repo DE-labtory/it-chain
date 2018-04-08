@@ -2,21 +2,20 @@ package msg
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
 )
 
-type CommitMsg struct {
+type PrepareMsg struct {
 	ConsensusID consensus.ConsensusID
+	Block       consensus.Block
 	SenderID    string
 }
 
-func (c CommitMsg) ToByte() ([]byte, error) {
-
-	data, err := json.Marshal(c)
+func (p PrepareMsg) ToByte() ([]byte, error) {
+	data, err := json.Marshal(p)
 	if err != nil {
-		panic(fmt.Sprintf("Error encoding : %s", err))
+		return nil, err
 	}
 	return data, nil
 }
