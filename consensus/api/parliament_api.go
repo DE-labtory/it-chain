@@ -9,12 +9,22 @@ type ParliamentApi struct {
 	parlimentRepository repository.ParlimentRepository
 }
 
+func NewParliamentApi(parlimentRepository repository.ParlimentRepository) ParliamentApi {
+	return ParliamentApi{
+		parlimentRepository: parlimentRepository,
+	}
+}
+
 func (pApi ParliamentApi) ChangeLeader(leader parliament.Leader) error {
 
 	parliament := pApi.parlimentRepository.Get()
 	parliament.SetLeader(&leader)
 
-	pApi.parlimentRepository.Save(parliament)
+	err := pApi.parlimentRepository.Save(parliament)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -28,7 +38,11 @@ func (pApi ParliamentApi) AddMember(member parliament.Member) error {
 		return err
 	}
 
-	pApi.parlimentRepository.Save(parliament)
+	err = pApi.parlimentRepository.Save(parliament)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -38,7 +52,11 @@ func (pApi ParliamentApi) RemoveMember(memberID parliament.PeerID) error {
 	parliament := pApi.parlimentRepository.Get()
 	parliament.RemoveMember(memberID)
 
-	pApi.parlimentRepository.Save(parliament)
+	err := pApi.parlimentRepository.Save(parliament)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

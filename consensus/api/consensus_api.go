@@ -1,8 +1,6 @@
 package api
 
 import (
-	"errors"
-
 	"github.com/it-chain/it-chain-Engine/consensus/domain/factory"
 	cs "github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
 	"github.com/it-chain/it-chain-Engine/consensus/domain/model/msg"
@@ -24,12 +22,8 @@ func (cApi ConsensusApi) StartConsensus(userId parliament.PeerID, block cs.Block
 	//Paliament의 Validate Check
 	parliament := cApi.parlimentRepository.Get()
 
-	if parliament == nil {
-		return errors.New("No parliament")
-	}
-
 	if parliament.IsNeedConsensus() {
-		consensus, err := factory.CreateConsensus(*parliament, block)
+		consensus, err := factory.CreateConsensus(parliament, block)
 
 		if err != nil {
 			return err

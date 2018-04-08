@@ -16,6 +16,7 @@ import (
 
 func TestMessageApi_BroadCastMsg(t *testing.T) {
 
+	//given
 	messaging := m.NewMessaging("amqp://guest:guest@localhost:5672/")
 	messaging.Start()
 
@@ -29,6 +30,8 @@ func TestMessageApi_BroadCastMsg(t *testing.T) {
 		for data := range msgs {
 			ReceivedMsg := &event.ConsensusMessagePublishEvent{}
 			json.Unmarshal(data.Body, ReceivedMsg)
+
+			//then
 			assert.Equal(t, []string{"1", "2"}, ReceivedMsg.Ids)
 			wg.Done()
 		}
@@ -39,6 +42,7 @@ func TestMessageApi_BroadCastMsg(t *testing.T) {
 	message := msg.PreprepareMsg{}
 	representatives := []*consensus.Representative{&consensus.Representative{"1"}, &consensus.Representative{"2"}}
 
+	//when
 	mApi.BroadCastMsg(message, representatives)
 
 	wg.Wait()
@@ -46,6 +50,7 @@ func TestMessageApi_BroadCastMsg(t *testing.T) {
 
 func TestMessageApi_ConfirmedBlock(t *testing.T) {
 
+	//given
 	messaging := m.NewMessaging("amqp://guest:guest@localhost:5672/")
 	messaging.Start()
 
@@ -61,11 +66,15 @@ func TestMessageApi_ConfirmedBlock(t *testing.T) {
 		for data := range msgs {
 			blockConfirmEvent := &event.BlockConfirmEvent{}
 			json.Unmarshal(data.Body, blockConfirmEvent)
+
+			//then
 			assert.Equal(t, blockData, blockConfirmEvent.Block)
 			wg.Done()
 		}
 	}()
 
 	mApi := NewMessageApi(messaging.Publish)
+
+	//when
 	mApi.ConfirmedBlock(blockData)
 }

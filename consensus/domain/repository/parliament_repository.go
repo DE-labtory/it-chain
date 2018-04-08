@@ -12,8 +12,15 @@ type ParlimentRepository interface {
 }
 
 type ParlimentRepository_impl struct {
-	lock       sync.Mutex
+	lock       *sync.RWMutex
 	parliament parliament.Parliament
+}
+
+func NewPaliamentRepository() ParlimentRepository {
+	return &ParlimentRepository_impl{
+		lock:       &sync.RWMutex{},
+		parliament: parliament.NewParliament(),
+	}
 }
 
 func (pr *ParlimentRepository_impl) Get() parliament.Parliament {
@@ -23,7 +30,7 @@ func (pr *ParlimentRepository_impl) Get() parliament.Parliament {
 	return pr.parliament
 }
 
-func (pr *ParlimentRepository_impl) Insert(parliament parliament.Parliament) error {
+func (pr *ParlimentRepository_impl) Save(parliament parliament.Parliament) error {
 	pr.lock.Lock()
 	defer pr.lock.Unlock()
 

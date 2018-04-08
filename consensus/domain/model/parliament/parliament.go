@@ -14,8 +14,8 @@ type Parliament struct {
 	Members []*Member
 }
 
-func NewParliament() *Parliament {
-	return &Parliament{
+func NewParliament() Parliament {
+	return Parliament{
 		Members: make([]*Member, 0),
 		Leader:  nil,
 	}
@@ -67,6 +67,12 @@ func (p *Parliament) AddMember(member *Member) error {
 		return errors.New(fmt.Sprintf("Need Valid PeerID [%s]", member.ID.ID))
 	}
 
+	index := p.findIndexOfMember(member.GetStringID())
+
+	if index != -1 {
+		return errors.New(fmt.Sprintf("Already exist member [%s]", member.ID))
+	}
+
 	p.Members = append(p.Members, member)
 
 	return nil
@@ -74,7 +80,7 @@ func (p *Parliament) AddMember(member *Member) error {
 
 func (p *Parliament) RemoveMember(memberID PeerID) {
 
-	index := p.findIndexOfMember(memberID)
+	index := p.findIndexOfMember(memberID.ID)
 
 	if index == -1 {
 		return
@@ -87,7 +93,7 @@ func (p *Parliament) RemoveMember(memberID PeerID) {
 func (p *Parliament) ValidateRepresentative(representatives []*consensus.Representative) bool {
 
 	for _, representatives := range representatives {
-		index := p.findIndexOfMember(PeerID{representatives.GetIdString()})
+		index := p.findIndexOfMember(representatives.GetIdString())
 
 		if index == -1 {
 			return false
@@ -97,13 +103,28 @@ func (p *Parliament) ValidateRepresentative(representatives []*consensus.Represe
 	return true
 }
 
-func (p *Parliament) findIndexOfMember(memberID PeerID) int {
+func (p *Parliament) findIndexOfMember(memberID string) int {
 
 	for i, member := range p.Members {
-		if member.ID == memberID {
+		if member.ID.ID == memberID {
 			return i
 		}
 	}
 
 	return -1
+}
+
+func (p *Parliament) FindByPeerID(memberID string) *Member {
+
+	index := p.findIndexOfMember(memberID)
+
+	if index == -1 {
+		return nil
+	}
+
+	return p.Members[index]
+}
+
+func (p *Parliament) GetLeader() *Leader {
+	return p.Leader
 }

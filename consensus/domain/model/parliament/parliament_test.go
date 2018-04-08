@@ -51,6 +51,12 @@ func TestParliament_AddMember(t *testing.T) {
 
 	//then
 	assert.Error(t, err)
+
+	//when
+	err = p.AddMember(m)
+
+	//then
+	assert.Error(t, err)
 }
 
 func TestParliament_IsNeedConsensus(t *testing.T) {
@@ -77,6 +83,17 @@ func TestParliament_IsNeedConsensus(t *testing.T) {
 	assert.True(t, flag)
 }
 
+func TestParliament_FindByPeerID(t *testing.T) {
+	p := NewParliament()
+	m := &Member{ID: PeerID{"member1"}}
+	err := p.AddMember(m)
+	assert.Nil(t, err)
+
+	member := p.FindByPeerID(PeerID{"member1"}.ID)
+
+	assert.Equal(t, member.ID, PeerID{"member1"})
+}
+
 func TestParliament_RemoveMember(t *testing.T) {
 
 	//given
@@ -96,6 +113,29 @@ func TestParliament_RemoveMember(t *testing.T) {
 
 	//then
 	assert.Equal(t, 0, len(p.Members))
+}
+
+func TestParliament_RemoveMember2(t *testing.T) {
+
+	//given
+	p := NewParliament()
+	m := &Member{ID: PeerID{"member1"}}
+	m2 := &Member{ID: PeerID{"member2"}}
+	m3 := &Member{ID: PeerID{"member3"}}
+
+	err := p.AddMember(m)
+	assert.Nil(t, err)
+	err = p.AddMember(m2)
+	assert.Nil(t, err)
+	err = p.AddMember(m3)
+	assert.Nil(t, err)
+
+	//when
+	p.RemoveMember(PeerID{"member2"})
+
+	//then
+	assert.Equal(t, 2, len(p.Members))
+	assert.Nil(t, p.FindByPeerID(PeerID{"member2"}.ID))
 }
 
 func TestParliament_SetLeader(t *testing.T) {
