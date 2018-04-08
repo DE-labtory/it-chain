@@ -28,18 +28,18 @@ Consensus Module에서 다루는 핵심 데이터
 ## Consume Event
 
 - Parliament변경
-  - ChangeLeader 
-  -  AddPeer
-  -  DeletePeer
+  - LeaderChangeEvent 
+  -  PeerConnectEvent
+  -  PeerDisConnectEvent
 - 합의할 Block 준비완료
-- ConsensusMessage
-  - ReceivePreprepareMsg 
-  - ReceivePrepareMsg 
-  - ReceiveCommitMsg 
+- ConsensusMessageArriveEvent(3 type)
+  - PreprepareMsg
+  - PrepareMsg 
+  - CommitMsg 
 
 
 
 ## Publish Event
 
-- ConfirmBlock
-- SendConsensusMessage
+- BlockConfirmEvent
+- ConsensusMessagePublishEvent
