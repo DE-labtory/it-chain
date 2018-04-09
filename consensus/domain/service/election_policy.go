@@ -11,11 +11,11 @@ func Elect(parliament parliament.Parliament) ([]*consensus.Representative, error
 
 	Representatives := make([]*consensus.Representative, 0)
 
-	if parliament.Leader == nil {
+	if parliament.GetLeader() == nil {
 		return nil, errors.New("No Leader")
 	}
 
-	Representatives = append(Representatives, consensus.NewRepresentative(parliament.Leader.GetStringID()))
+	Representatives = append(Representatives, consensus.NewRepresentative(parliament.GetLeader().GetStringID()))
 
 	for _, member := range parliament.Members {
 		Representatives = append(Representatives, consensus.NewRepresentative(member.GetStringID()))
