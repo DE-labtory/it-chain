@@ -44,9 +44,12 @@ func (g GitApi) Clone(gitUrl string) (*smartContract.SmartContract, error) {
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 	})
 
-	committer, err := r.CommitObjects()
-	lastCommit, err := committer.Next()
-	commitHash := lastCommit.Hash.String()
+	head, err := r.Head()
+	if err != nil {
+		return nil, err
+	}
+	lastHeadCommit, err := r.CommitObject(head.Hash())
+	commitHash := lastHeadCommit.Hash.String()
 
 	if err != nil {
 		return nil, err
