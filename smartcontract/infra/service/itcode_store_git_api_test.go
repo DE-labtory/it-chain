@@ -1,10 +1,8 @@
-package git
+package service
 
 import (
 	"os"
 	"testing"
-
-	"fmt"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -28,5 +26,7 @@ func TestClone(t *testing.T) {
 }
 
 func TestGetNameFromGitUrl(t *testing.T) {
-	fmt.Print(getNameFromGitUrl(gitUrl))
+	name := getNameFromGitUrl(gitUrl)
+
+	assert.Equal(t, "tesseract.git", name)
 }

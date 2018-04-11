@@ -1,9 +1,8 @@
-package git
+package service
 
 import (
 	"fmt"
 	"os/user"
-
 	"strings"
 
 	"github.com/it-chain/it-chain-Engine/smartcontract/domain/smartContract"
