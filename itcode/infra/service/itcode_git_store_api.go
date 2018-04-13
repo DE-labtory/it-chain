@@ -90,7 +90,13 @@ func (g GitApi) Push(itCode *itcode.ItCode) error {
 		return errors.New(fmt.Sprintf("Invalid itCode Path [%s]", itCodePath))
 	}
 
-	err := g.ChangeRemote(itCodePath, g.defaultBackUpGitUrl+itCode.RepositoryName)
+	_, _, err := CreateRepository(itCode.RepositoryName)
+
+	if err != nil {
+		return err
+	}
+
+	err = g.ChangeRemote(itCodePath, g.defaultBackUpGitUrl+itCode.RepositoryName)
 
 	if err != nil {
 		return err

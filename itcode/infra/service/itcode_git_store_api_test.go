@@ -55,7 +55,6 @@ func TestGitApi_Push(t *testing.T) {
 	api := NewGitApi()
 	itCode, err := api.Clone(gitUrl)
 	assert.NoError(t, err)
-	_, _, err = CreateRepository(itCode.RepositoryName)
 	defer func() {
 		os.RemoveAll(tmp)
 		ctx := context.Background()
