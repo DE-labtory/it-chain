@@ -10,15 +10,19 @@ import (
 	"github.com/it-chain/it-chain-Engine/smartcontract/domain/itcode"
 	"github.com/pkg/errors"
 	git "gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/config"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
 var tmp = "./.tmp"
 
 type GitApi struct {
-	sshAuth *ssh.PublicKeys
+	sshAuth             *ssh.PublicKeys
+	defaultBackUpGitUrl string
 }
 
+//todo get defaultBackUpGitUrl from config
 func NewGitApi() GitApi {
 
 	currentUser, err := user.Current()
@@ -34,7 +38,8 @@ func NewGitApi() GitApi {
 	}
 
 	return GitApi{
-		sshAuth: sshAuth,
+		sshAuth:             sshAuth,
+		defaultBackUpGitUrl: "https://github.com/steve-buzzni/",
 	}
 }
 
@@ -42,12 +47,19 @@ func NewGitApi() GitApi {
 //todo SSH ENV로 ssh key 불러오기
 func (g GitApi) Clone(gitUrl string) (*itcode.ItCode, error) {
 
-	r, err := git.PlainClone(tmp, false, &git.CloneOptions{
+	name := getNameFromGitUrl(gitUrl)
+
+	if name == "" {
+		return nil, errors.New(fmt.Sprintf("Invalid url name [%s]", gitUrl))
+	}
+
+	r, err := git.PlainClone(tmp+"/"+name, false, &git.CloneOptions{
 		URL:               gitUrl,
 		Auth:              g.sshAuth,
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 	})
 
+	r.Worktree()
 	head, err := r.Head()
 
 	if err != nil {
@@ -62,7 +74,6 @@ func (g GitApi) Clone(gitUrl string) (*itcode.ItCode, error) {
 	}
 
 	//todo os separator
-	name := getNameFromGitUrl(gitUrl)
 	sc := itcode.NewItCode(name, gitUrl, tmp+"/"+name, commitHash)
 
 	return sc, nil
@@ -76,6 +87,66 @@ func (g GitApi) Push(itCode itcode.ItCode) error {
 		return errors.New(fmt.Sprintf("Invalid itCode Path [%s]", itCodePath))
 	}
 
+	err := g.ChangeRemote(itCodePath, g.defaultBackUpGitUrl+itCode.RepositoryName)
+
+	if err != nil {
+		return err
+	}
+
+	err = g.push(itCodePath)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g GitApi) ChangeRemote(path string, originUrl string) error {
+
+	r, err := git.PlainOpen(path)
+
+	if err != nil {
+		return err
+	}
+
+	err = r.DeleteRemote(git.DefaultRemoteName)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = r.CreateRemote(&config.RemoteConfig{
+		Name: git.DefaultRemoteName,
+		URLs: []string{originUrl},
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g GitApi) push(path string) error {
+
+	au := &http.BasicAuth{Username: "steve@buzzni.com", Password: "itchain123"}
+
+	r, err := git.PlainOpen(path)
+
+	if err != nil {
+		return err
+	}
+
+	err = r.Push(&git.PushOptions{
+		RemoteName: git.DefaultRemoteName,
+		Auth:       au,
+	})
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -87,9 +158,13 @@ func getNameFromGitUrl(gitUrl string) string {
 		return ""
 	}
 
-	name := parsed[len(parsed)-1]
+	name := strings.Split(parsed[len(parsed)-1], ".")
 
-	return name
+	if len(name) == 0 {
+		return ""
+	}
+
+	return name[0]
 }
 
 func dirExists(path string) bool {
