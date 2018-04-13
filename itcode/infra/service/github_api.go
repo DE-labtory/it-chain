@@ -43,7 +43,7 @@ func CreateRepository(name string) (*github.Repository, *github.Response, error)
 	})
 
 	if err != nil {
-		return repo, res, err
+		return nil, nil, err
 	}
 
 	return repo, res, nil

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -50,14 +51,27 @@ func TestChangeRemote(t *testing.T) {
 
 func TestGitApi_Push(t *testing.T) {
 
-	repoName := "test-chain"
+	//given
 	api := NewGitApi()
 	itCode, err := api.Clone(gitUrl)
 	assert.NoError(t, err)
+	_, _, err = CreateRepository(itCode.RepositoryName)
+	defer func() {
+		os.RemoveAll(tmp)
+		ctx := context.Background()
 
-	_, _, err := CreateRepository(repoName)
+		//then
+		_, err := client.Repositories.Delete(ctx, "steve-buzzni", itCode.RepositoryName)
+		assert.NoError(t, err)
+	}()
+
 	assert.NoError(t, err)
 
+	//when
+	err = api.Push(itCode)
+
+	//then
+	assert.NoError(t, err)
 }
 
 func TestGetNameFromGitUrl(t *testing.T) {

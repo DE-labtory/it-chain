@@ -7,7 +7,7 @@ import (
 
 	"os"
 
-	"github.com/it-chain/it-chain-Engine/smartcontract/domain/itcode"
+	"github.com/it-chain/it-chain-Engine/itcode/domain/itcode"
 	"github.com/pkg/errors"
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/config"
@@ -59,7 +59,10 @@ func (g GitApi) Clone(gitUrl string) (*itcode.ItCode, error) {
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 	})
 
-	r.Worktree()
+	if err != nil {
+		return nil, err
+	}
+
 	head, err := r.Head()
 
 	if err != nil {
@@ -79,8 +82,8 @@ func (g GitApi) Clone(gitUrl string) (*itcode.ItCode, error) {
 	return sc, nil
 }
 
-//push code to auth repo
-func (g GitApi) Push(itCode itcode.ItCode) error {
+//change remote origin and push code to auth/backup repo
+func (g GitApi) Push(itCode *itcode.ItCode) error {
 	itCodePath := itCode.Path
 
 	if !dirExists(itCodePath) {
@@ -102,6 +105,7 @@ func (g GitApi) Push(itCode itcode.ItCode) error {
 	return nil
 }
 
+//change origin remote
 func (g GitApi) ChangeRemote(path string, originUrl string) error {
 
 	r, err := git.PlainOpen(path)
@@ -128,6 +132,8 @@ func (g GitApi) ChangeRemote(path string, originUrl string) error {
 	return nil
 }
 
+//push to backup server
+//todo get username and password from config
 func (g GitApi) push(path string) error {
 
 	au := &http.BasicAuth{Username: "steve@buzzni.com", Password: "itchain123"}
@@ -150,7 +156,7 @@ func (g GitApi) push(path string) error {
 	return nil
 }
 
-//
+//get repo name from git url
 func getNameFromGitUrl(gitUrl string) string {
 	parsed := strings.Split(gitUrl, "/")
 
@@ -167,6 +173,7 @@ func getNameFromGitUrl(gitUrl string) string {
 	return name[0]
 }
 
+//check whetehr dir is exist or not
 func dirExists(path string) bool {
 	if stat, err := os.Stat(path); err == nil && stat.IsDir() {
 		return true
