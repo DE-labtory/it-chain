@@ -1,25 +1,26 @@
 package main
 
 import (
-	"github.com/it-chain/it-chain-Engine/legacy/service"
-	"github.com/it-chain/it-chain-Engine/legacy/network/comm"
-	"github.com/it-chain/it-chain-Engine/legacy/auth"
-	"github.com/spf13/viper"
-	"github.com/it-chain/it-chain-Engine/common"
-	"strings"
-	"github.com/it-chain/it-chain-Engine/legacy/domain"
-	"time"
-	"encoding/base64"
 	"crypto/sha1"
-	"sync"
+	"encoding/base64"
 	"fmt"
 	"net"
-	"google.golang.org/grpc/reflection"
-	"google.golang.org/grpc"
-	pb "github.com/it-chain/it-chain-Engine/legacy/network/protos"
-	"golang.org/x/net/context"
-	"github.com/it-chain/it-chain-Engine/legacy/service/webhook"
 	"strconv"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/legacy/auth"
+	"github.com/it-chain/it-chain-Engine/legacy/domain"
+	"github.com/it-chain/it-chain-Engine/legacy/network/comm"
+	pb "github.com/it-chain/it-chain-Engine/legacy/network/protos"
+	"github.com/it-chain/it-chain-Engine/legacy/service"
+	"github.com/it-chain/it-chain-Engine/legacy/service/webhook"
+	"github.com/spf13/viper"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type Node struct {
@@ -29,26 +30,26 @@ type Node struct {
 	consensusService     service.ConsensusService
 	smartContractService service.SmartContractService
 	transactionService   service.TransactionService
-	webHookService 		 webhook.WebhookService
+	webHookService       webhook.WebhookService
 	connectionManager    comm.ConnectionManager
 	crypto               auth.Crypto
 }
 
 //todo msg publisher를 통한 receive Message분배 로직 추가
-func NewNode(ip string) *Node{
+func NewNode(ip string) *Node {
 
 	//ip format (xxx.xxx.xxx.xxx:pppp)
 	node := &Node{}
 
 	////set baisc Info
 	node.identity = &domain.Peer{}
-	node.identity.IpAddress = strings.Split(ip,":")[0]
-	node.identity.Port = strings.Split(ip,":")[1]
+	node.identity.IpAddress = strings.Split(ip, ":")[0]
+	node.identity.Port = strings.Split(ip, ":")[1]
 
 	//// crpyto
-	crpyto, err := auth.NewCryptoImpl(viper.GetString("key.defaultPath"),&auth.RSAKeyGenOpts{})
+	crpyto, err := auth.NewCryptoImpl(viper.GetString("key.defaultPath"), &auth.RSAKeyGenOpts{})
 
-	if err != nil{
+	if err != nil {
 		common.Log.Errorln("crypto create error")
 		return nil
 	}
@@ -66,18 +67,18 @@ func NewNode(ip string) *Node{
 	node.identity.HeartBeat = 0
 	node.identity.TimeStamp = time.Now()
 
-	peerTable ,err := domain.NewPeerTable(node.identity)
+	peerTable, err := domain.NewPeerTable(node.identity)
 
-	if err != nil{
+	if err != nil {
 		common.Log.Errorln("peerTable create error")
 		return nil
 	}
 
-	peerService := service.NewPeerServiceImpl(peerTable,connectionManager)
+	peerService := service.NewPeerServiceImpl(peerTable, connectionManager)
 	node.peerService = peerService
 
 	///// TransactionService
-	transactionService := service.NewTransactionService(viper.GetString("txDatabase.defaultPath"),connectionManager,peerService)
+	transactionService := service.NewTransactionService(viper.GetString("txDatabase.defaultPath"), connectionManager, peerService)
 	node.transactionService = transactionService
 
 	///// blockService
@@ -85,26 +86,25 @@ func NewNode(ip string) *Node{
 	node.blockService = blockService
 
 	///// smartContractService
-	smartContractService := service.NewSmartContractService(viper.GetString("smartcontract.defaultPath"),viper.GetString("smartContract.githubID"))
+	smartContractService := service.NewSmartContractService(viper.GetString("smartcontract.defaultPath"), viper.GetString("itcode.githubID"))
 	node.smartContractService = smartContractService
 
 	//// webHookService
-	webHookService,err  := webhook.NewWebhookService()
+	webHookService, err := webhook.NewWebhookService()
 	node.webHookService = webHookService
 
-	p , _ :=strconv.Atoi(viper.GetString("webhook.port"))
+	p, _ := strconv.Atoi(viper.GetString("webhook.port"))
 
 	go webHookService.Serve(p)
 
 	///// consensusService
-	consensusService := service.NewPBFTConsensusService(node.connectionManager,node.webHookService, node.peerService,node.blockService,node.identity,smartContractService,transactionService)
+	consensusService := service.NewPBFTConsensusService(node.connectionManager, node.webHookService, node.peerService, node.blockService, node.identity, smartContractService, transactionService)
 	node.consensusService = consensusService
-
 
 	return node
 }
 
-func (n *Node) GenerateID() string{
+func (n *Node) GenerateID() string {
 
 	pri, _, _ := n.crypto.GetKey()
 	h := sha1.New()
@@ -113,12 +113,12 @@ func (n *Node) GenerateID() string{
 	return base64.URLEncoding.EncodeToString(h.Sum(nil))
 }
 
-func (n *Node) SearchBootNode(bootip string){
+func (n *Node) SearchBootNode(bootip string) {
 
 	common.Log.Println("Searching peer", bootip)
 	peer, err := n.peerService.RequestPeer(bootip)
 
-	if err!=nil{
+	if err != nil {
 		n.peerService.SetLeader(n.identity)
 		return
 	}
@@ -127,29 +127,29 @@ func (n *Node) SearchBootNode(bootip string){
 	n.peerService.AddPeer(peer)
 }
 
-func (n *Node) GetPeer(context.Context, *pb.Empty) (*pb.Peer, error){
+func (n *Node) GetPeer(context.Context, *pb.Empty) (*pb.Peer, error) {
 
 	pp := domain.ToProtoPeer(*n.identity)
 
-	return pp,nil
+	return pp, nil
 }
 
-func (n *Node) PostTransaction(context context.Context,ptxData *pb.TxData) (*pb.Transaction, error){
+func (n *Node) PostTransaction(context context.Context, ptxData *pb.TxData) (*pb.Transaction, error) {
 
 	common.Log.Println("Request PostTransaction")
 
-	if ptxData.Params == nil{
+	if ptxData.Params == nil {
 		// error 처리
 	}
 
-	if ptxData.ContractID == ""{
+	if ptxData.ContractID == "" {
 		// error
 	}
 
 	txData := domain.FromProtoTxData(*ptxData)
-	transaction,err := n.transactionService.CreateTransaction(txData)
+	transaction, err := n.transactionService.CreateTransaction(txData)
 
-	if err !=nil{
+	if err != nil {
 		// error
 	}
 
@@ -158,7 +158,7 @@ func (n *Node) PostTransaction(context context.Context,ptxData *pb.TxData) (*pb.
 	return t, nil
 }
 
-func (n* Node) Run() {
+func (n *Node) Run() {
 	common.Log.Println("Run it-chain")
 
 	lis, err := net.Listen("tcp", n.identity.GetEndPoint())
@@ -168,13 +168,13 @@ func (n* Node) Run() {
 	}
 
 	server := grpc.NewServer()
-	pb.RegisterStreamServiceServer(server,n.connectionManager)
-	pb.RegisterPeerServiceServer(server,n)
-	pb.RegisterTransactionServiceServer(server,n)
+	pb.RegisterStreamServiceServer(server, n.connectionManager)
+	pb.RegisterPeerServiceServer(server, n)
+	pb.RegisterTransactionServiceServer(server, n)
 
 	reflection.Register(server)
 
-	common.Log.Println("It-chain peer is on:",n.identity.Port)
+	common.Log.Println("It-chain peer is on:", n.identity.Port)
 
 	if err := server.Serve(lis); err != nil {
 		common.Log.Fatalf("failed to serve: %v", err)
@@ -183,7 +183,7 @@ func (n* Node) Run() {
 	}
 }
 
-func PrintLogo(){
+func PrintLogo() {
 	fmt.Println(`
 	___  _________               ________  ___  ___  ________  ___  ________
 	|\  \|\___   ___\            |\   ____\|\  \|\  \|\   __  \|\  \|\   ___  \

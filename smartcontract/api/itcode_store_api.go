@@ -1,16 +1,13 @@
 package api
 
-import "github.com/it-chain/it-chain-Engine/smartcontract/domain/smartContract"
+import "github.com/it-chain/it-chain-Engine/smartcontract/domain/itcode"
 
 //Api to import or store itcode from outside
 type ItCodeStoreApi interface {
 
-	//get all itcode from repostories
-	Init(repositorysUrl string) ([]*smartContract.SmartContract, error)
-
 	//get itcode from outside
-	Clone(repositoryUrl string) (*smartContract.SmartContract, error)
+	Clone(repositoryUrl string) (*itcode.ItCode, error)
 
 	//push code to auth repo
-	Push(smartContract.SmartContract) error
+	Push(itcode.ItCode) error
 }

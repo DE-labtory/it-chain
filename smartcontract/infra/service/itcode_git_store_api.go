@@ -5,7 +5,10 @@ import (
 	"os/user"
 	"strings"
 
-	"github.com/it-chain/it-chain-Engine/smartcontract/domain/smartContract"
+	"os"
+
+	"github.com/it-chain/it-chain-Engine/smartcontract/domain/itcode"
+	"github.com/pkg/errors"
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
@@ -35,8 +38,9 @@ func NewGitApi() GitApi {
 	}
 }
 
+//get itcode from outside
 //todo SSH ENV로 ssh key 불러오기
-func (g GitApi) Clone(gitUrl string) (*smartContract.SmartContract, error) {
+func (g GitApi) Clone(gitUrl string) (*itcode.ItCode, error) {
 
 	r, err := git.PlainClone(tmp, false, &git.CloneOptions{
 		URL:               gitUrl,
@@ -45,9 +49,11 @@ func (g GitApi) Clone(gitUrl string) (*smartContract.SmartContract, error) {
 	})
 
 	head, err := r.Head()
+
 	if err != nil {
 		return nil, err
 	}
+
 	lastHeadCommit, err := r.CommitObject(head.Hash())
 	commitHash := lastHeadCommit.Hash.String()
 
@@ -57,9 +63,20 @@ func (g GitApi) Clone(gitUrl string) (*smartContract.SmartContract, error) {
 
 	//todo os separator
 	name := getNameFromGitUrl(gitUrl)
-	sc := smartContract.NewSmartContract(name, gitUrl, tmp+"/"+name, commitHash)
+	sc := itcode.NewItCode(name, gitUrl, tmp+"/"+name, commitHash)
 
 	return sc, nil
+}
+
+//push code to auth repo
+func (g GitApi) Push(itCode itcode.ItCode) error {
+	itCodePath := itCode.Path
+
+	if !dirExists(itCodePath) {
+		return errors.New(fmt.Sprintf("Invalid itCode Path [%s]", itCodePath))
+	}
+
+	return nil
 }
 
 //
@@ -73,4 +90,11 @@ func getNameFromGitUrl(gitUrl string) string {
 	name := parsed[len(parsed)-1]
 
 	return name
+}
+
+func dirExists(path string) bool {
+	if stat, err := os.Stat(path); err == nil && stat.IsDir() {
+		return true
+	}
+	return false
 }

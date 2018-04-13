@@ -1,9 +1,9 @@
-package smartContract
+package itcode
 
 type Version struct {
 }
 
-type SmartContract struct {
+type ItCode struct {
 	RepositoryName string
 	GitUrl         string
 	Path           string
@@ -11,9 +11,9 @@ type SmartContract struct {
 	Version        Version
 }
 
-func NewSmartContract(repositoryName string, gitUrl string, path string, commitHash string) *SmartContract {
+func NewItCode(repositoryName string, gitUrl string, path string, commitHash string) *ItCode {
 
-	return &SmartContract{
+	return &ItCode{
 		RepositoryName: repositoryName,
 		CommitHash:     commitHash,
 		GitUrl:         gitUrl,
