@@ -30,5 +30,5 @@ func TestNewBackupGithubStoreApi(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, "https://github.com/steve-buzzni", b.homepageUrl)
-	assert.Equal(t, "steve-buzzni", b.name)
+	assert.Equal(t, "steve-buzzni", b.storename)
 }

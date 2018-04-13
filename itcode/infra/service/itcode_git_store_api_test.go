@@ -78,7 +78,7 @@ func TestGitApi_Push(t *testing.T) {
 func TestGetNameFromGitUrl(t *testing.T) {
 	name := getNameFromGitUrl(gitUrl)
 
-	assert.Equal(t, "tesseract.git", name)
+	assert.Equal(t, "tesseract", name)
 }
 
 func TestDirExist(t *testing.T) {

@@ -7,4 +7,5 @@ type BackupStoreApi interface {
 	GetRepositoryList() []string
 	GetHomepageUrl() string
 	GetName() string
+	PushRepository(repositoryPath string) error
 }

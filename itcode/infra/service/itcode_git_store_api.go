@@ -10,7 +10,6 @@ import (
 	"github.com/pkg/errors"
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/config"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
@@ -102,7 +101,7 @@ func (g GitApi) Push(itCode *itcode.ItCode) error {
 		return err
 	}
 
-	err = g.push(itCodePath)
+	err = g.backupStoreApi.PushRepository(itCodePath)
 
 	if err != nil {
 		return err
@@ -129,30 +128,6 @@ func (g GitApi) ChangeRemote(path string, originUrl string) error {
 	_, err = r.CreateRemote(&config.RemoteConfig{
 		Name: git.DefaultRemoteName,
 		URLs: []string{originUrl},
-	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-//push to backup server
-//todo get username and password from config
-func (g GitApi) push(path string) error {
-
-	au := &http.BasicAuth{Username: "steve@buzzni.com", Password: "itchain123"}
-
-	r, err := git.PlainOpen(path)
-
-	if err != nil {
-		return err
-	}
-
-	err = r.Push(&git.PushOptions{
-		RemoteName: git.DefaultRemoteName,
-		Auth:       au,
 	})
 
 	if err != nil {

@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
+	git "gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 )
 
 var homepage = "https://github.com"
@@ -13,11 +15,12 @@ var client *github.Client
 
 //todo read from config
 //todo private public from config
-
 type BackupGithubStoreApi struct {
 	client      *github.Client
 	homepageUrl string
-	name        string
+	storename   string
+	username    string
+	password    string
 }
 
 func NewBackupGithubStoreApi(username string, password string) (*BackupGithubStoreApi, error) {
@@ -47,18 +50,21 @@ func NewBackupGithubStoreApi(username string, password string) (*BackupGithubSto
 	return &BackupGithubStoreApi{
 		client:      client,
 		homepageUrl: user.GetHTMLURL(),
-		name:        user.GetLogin(),
+		storename:   user.GetLogin(),
+		username:    username,
+		password:    password,
 	}, nil
 }
 
 func (bgs BackupGithubStoreApi) GetName() string {
-	return bgs.name
+	return bgs.username
 }
 
 func (bgs BackupGithubStoreApi) GetHomepageUrl() string {
 	return bgs.homepageUrl
 }
 
+//create backup repo
 func (bgs BackupGithubStoreApi) CreateRepository(name string) (*github.Repository, error) {
 
 	ctx := context.Background()
@@ -77,5 +83,28 @@ func (bgs BackupGithubStoreApi) CreateRepository(name string) (*github.Repositor
 
 func (bgs BackupGithubStoreApi) GetRepositoryList() []string {
 	//todo
+	return nil
+}
+
+//push to backup server
+func (bgs BackupGithubStoreApi) PushRepository(repositoryPath string) error {
+
+	au := &http.BasicAuth{Username: bgs.username, Password: bgs.password}
+
+	r, err := git.PlainOpen(repositoryPath)
+
+	if err != nil {
+		return err
+	}
+
+	err = r.Push(&git.PushOptions{
+		RemoteName: git.DefaultRemoteName,
+		Auth:       au,
+	})
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
