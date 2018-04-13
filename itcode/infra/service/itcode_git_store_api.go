@@ -2,10 +2,9 @@ package service
 
 import (
 	"fmt"
+	"os"
 	"os/user"
 	"strings"
-
-	"os"
 
 	"github.com/it-chain/it-chain-Engine/itcode/domain/itcode"
 	"github.com/pkg/errors"
@@ -18,12 +17,12 @@ import (
 var tmp = "./.tmp"
 
 type GitApi struct {
-	sshAuth             *ssh.PublicKeys
-	defaultBackUpGitUrl string
+	sshAuth        *ssh.PublicKeys
+	backupStoreApi BackupStoreApi
 }
 
 //todo get defaultBackUpGitUrl from config
-func NewGitApi() GitApi {
+func NewGitApi(backupStoreApi BackupStoreApi) GitApi {
 
 	currentUser, err := user.Current()
 
@@ -38,8 +37,8 @@ func NewGitApi() GitApi {
 	}
 
 	return GitApi{
-		sshAuth:             sshAuth,
-		defaultBackUpGitUrl: "https://github.com/steve-buzzni/",
+		sshAuth:        sshAuth,
+		backupStoreApi: backupStoreApi,
 	}
 }
 
@@ -83,6 +82,7 @@ func (g GitApi) Clone(gitUrl string) (*itcode.ItCode, error) {
 }
 
 //change remote origin and push code to auth/backup repo
+//todo asyncly push
 func (g GitApi) Push(itCode *itcode.ItCode) error {
 	itCodePath := itCode.Path
 
@@ -90,13 +90,13 @@ func (g GitApi) Push(itCode *itcode.ItCode) error {
 		return errors.New(fmt.Sprintf("Invalid itCode Path [%s]", itCodePath))
 	}
 
-	_, _, err := CreateRepository(itCode.RepositoryName)
+	_, err := g.backupStoreApi.CreateRepository(itCode.RepositoryName)
 
 	if err != nil {
 		return err
 	}
 
-	err = g.ChangeRemote(itCodePath, g.defaultBackUpGitUrl+itCode.RepositoryName)
+	err = g.ChangeRemote(itCodePath, g.backupStoreApi.GetHomepageUrl()+"/"+itCode.RepositoryName)
 
 	if err != nil {
 		return err

@@ -15,7 +15,7 @@ func TestClone(t *testing.T) {
 
 	os.RemoveAll("./.tmp")
 	defer os.RemoveAll("./.tmp")
-	api := NewGitApi()
+	api := NewGitApi(nil)
 
 	sc, err := api.Clone(gitUrl)
 
@@ -33,7 +33,7 @@ func TestChangeRemote(t *testing.T) {
 	//given
 	os.RemoveAll("./.tmp")
 	defer os.RemoveAll("./.tmp")
-	api := NewGitApi()
+	api := NewGitApi(nil)
 	itCode, err := api.Clone(gitUrl)
 	assert.NoError(t, err)
 
@@ -52,7 +52,9 @@ func TestChangeRemote(t *testing.T) {
 func TestGitApi_Push(t *testing.T) {
 
 	//given
-	api := NewGitApi()
+	b, err := NewBackupGithubStoreApi("", "")
+	assert.NoError(t, err)
+	api := NewGitApi(b)
 	itCode, err := api.Clone(gitUrl)
 	assert.NoError(t, err)
 	defer func() {
