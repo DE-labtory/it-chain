@@ -6,7 +6,7 @@ import (
 	"os/user"
 	"strings"
 
-	"github.com/it-chain/it-chain-Engine/itcode/domain/itcode"
+	"github.com/it-chain/it-chain-Engine/icode/domain/icodeMeta"
 	"github.com/pkg/errors"
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/config"
@@ -41,9 +41,9 @@ func NewGitApi(backupStoreApi BackupStoreApi) GitApi {
 	}
 }
 
-//get itcode from outside
+//get icode from outside
 //todo SSH ENV로 ssh key 불러오기
-func (g GitApi) Clone(gitUrl string) (*itcode.ItCode, error) {
+func (g GitApi) Clone(gitUrl string) (*icodeMeta.ICodeMeta, error) {
 
 	name := getNameFromGitUrl(gitUrl)
 
@@ -75,27 +75,27 @@ func (g GitApi) Clone(gitUrl string) (*itcode.ItCode, error) {
 	}
 
 	//todo os separator
-	sc := itcode.NewItCode(name, gitUrl, tmp+"/"+name, commitHash)
+	sc := icodeMeta.NewItCode(name, gitUrl, tmp+"/"+name, commitHash)
 
 	return sc, nil
 }
 
 //change remote origin and push code to auth/backup repo
 //todo asyncly push
-func (g GitApi) Push(itCode *itcode.ItCode) error {
-	itCodePath := itCode.Path
+func (g GitApi) Push(iCodeMeta *icodeMeta.ICodeMeta) error {
+	itCodePath := iCodeMeta.Path
 
 	if !dirExists(itCodePath) {
-		return errors.New(fmt.Sprintf("Invalid itCode Path [%s]", itCodePath))
+		return errors.New(fmt.Sprintf("Invalid iCodeMeta Path [%s]", itCodePath))
 	}
 
-	_, err := g.backupStoreApi.CreateRepository(itCode.RepositoryName)
+	_, err := g.backupStoreApi.CreateRepository(iCodeMeta.RepositoryName)
 
 	if err != nil {
 		return err
 	}
 
-	err = g.ChangeRemote(itCodePath, g.backupStoreApi.GetHomepageUrl()+"/"+itCode.RepositoryName)
+	err = g.ChangeRemote(itCodePath, g.backupStoreApi.GetHomepageUrl()+"/"+iCodeMeta.RepositoryName)
 
 	if err != nil {
 		return err

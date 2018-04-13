@@ -138,8 +138,8 @@ func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
 		return "", errors.New("An error occurred while cloning repos!")
 	}
 
-	common.Log.Println(viper.GetString("itcode.githubID"))
-	_, err = domain.CreateRepos(new_repos_name, viper.GetString("itcode.githubAccessToken"))
+	common.Log.Println(viper.GetString("icode.githubID"))
+	_, err = domain.CreateRepos(new_repos_name, viper.GetString("icode.githubAccessToken"))
 	if err != nil {
 		return "", errors.New(err.Error()) //"An error occurred while creating repos!")
 	}

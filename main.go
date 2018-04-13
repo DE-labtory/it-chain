@@ -86,7 +86,7 @@ func NewNode(ip string) *Node {
 	node.blockService = blockService
 
 	///// smartContractService
-	smartContractService := service.NewSmartContractService(viper.GetString("smartcontract.defaultPath"), viper.GetString("itcode.githubID"))
+	smartContractService := service.NewSmartContractService(viper.GetString("smartcontract.defaultPath"), viper.GetString("icode.githubID"))
 	node.smartContractService = smartContractService
 
 	//// webHookService

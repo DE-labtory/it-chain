@@ -34,19 +34,19 @@ func TestChangeRemote(t *testing.T) {
 	os.RemoveAll("./.tmp")
 	defer os.RemoveAll("./.tmp")
 	api := NewGitApi(nil)
-	itCode, err := api.Clone(gitUrl)
+	iCodeMeta, err := api.Clone(gitUrl)
 	assert.NoError(t, err)
 
 	//when
-	err = api.ChangeRemote(itCode.Path, "https://github.com/steve-buzzni"+"/"+itCode.RepositoryName)
+	err = api.ChangeRemote(iCodeMeta.Path, "https://github.com/steve-buzzni"+"/"+iCodeMeta.RepositoryName)
 	assert.NoError(t, err)
 
 	//then
-	r, err := git.PlainOpen(itCode.Path)
+	r, err := git.PlainOpen(iCodeMeta.Path)
 	assert.NoError(t, err)
 	remote, err := r.Remote(git.DefaultRemoteName)
 	assert.NoError(t, err)
-	assert.Equal(t, "https://github.com/steve-buzzni"+"/"+itCode.RepositoryName, remote.Config().URLs[0])
+	assert.Equal(t, "https://github.com/steve-buzzni"+"/"+iCodeMeta.RepositoryName, remote.Config().URLs[0])
 }
 
 func TestGitApi_Push(t *testing.T) {
@@ -55,21 +55,21 @@ func TestGitApi_Push(t *testing.T) {
 	b, err := NewBackupGithubStoreApi("", "")
 	assert.NoError(t, err)
 	api := NewGitApi(b)
-	itCode, err := api.Clone(gitUrl)
+	iCodeMeta, err := api.Clone(gitUrl)
 	assert.NoError(t, err)
 	defer func() {
 		os.RemoveAll(tmp)
 		ctx := context.Background()
 
 		//then
-		_, err := client.Repositories.Delete(ctx, "steve-buzzni", itCode.RepositoryName)
+		_, err := client.Repositories.Delete(ctx, "steve-buzzni", iCodeMeta.RepositoryName)
 		assert.NoError(t, err)
 	}()
 
 	assert.NoError(t, err)
 
 	//when
-	err = api.Push(itCode)
+	err = api.Push(iCodeMeta)
 
 	//then
 	assert.NoError(t, err)
