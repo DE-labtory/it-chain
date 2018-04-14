@@ -25,14 +25,6 @@ type BackupGithubStoreApi struct {
 
 func NewBackupGithubStoreApi(username string, password string) (*BackupGithubStoreApi, error) {
 
-	if username == "" {
-		username = "steve@buzzni.com"
-	}
-
-	if password == "" {
-		password = "itchain123"
-	}
-
 	tp := github.BasicAuthTransport{
 		Username: strings.TrimSpace(username),
 		Password: strings.TrimSpace(password),

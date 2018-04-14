@@ -10,7 +10,7 @@ import (
 func TestCreateRepository(t *testing.T) {
 
 	repoName := "test-chain"
-	b, err := NewBackupGithubStoreApi("", "")
+	b, err := NewBackupGithubStoreApi("steve@buzzni.com", "itchain123")
 	assert.NoError(t, err)
 
 	defer func() {
@@ -26,7 +26,7 @@ func TestCreateRepository(t *testing.T) {
 }
 
 func TestNewBackupGithubStoreApi(t *testing.T) {
-	b, err := NewBackupGithubStoreApi("", "")
+	b, err := NewBackupGithubStoreApi("steve@buzzni.com", "itchain123")
 	assert.NoError(t, err)
 
 	assert.Equal(t, "https://github.com/steve-buzzni", b.homepageUrl)
