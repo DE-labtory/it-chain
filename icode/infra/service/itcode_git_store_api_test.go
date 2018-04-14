@@ -69,7 +69,8 @@ func TestGitApi_Push(t *testing.T) {
 	assert.NoError(t, err)
 
 	//when
-	err = api.Push(iCodeMeta)
+	testPushChan := api.Push(iCodeMeta)
+	err = <-testPushChan
 
 	//then
 	assert.NoError(t, err)

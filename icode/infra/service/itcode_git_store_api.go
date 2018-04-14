@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/user"
 	"strings"
-
+	"path/filepath"
 	"github.com/it-chain/it-chain-Engine/icode/domain/icodeMeta"
 	"github.com/pkg/errors"
 	git "gopkg.in/src-d/go-git.v4"
@@ -74,40 +74,42 @@ func (g GitApi) Clone(gitUrl string) (*icodeMeta.ICodeMeta, error) {
 		return nil, err
 	}
 
-	//todo os separator
-	sc := icodeMeta.NewItCode(name, gitUrl, tmp+"/"+name, commitHash)
+	sc := icodeMeta.NewItCode(name, gitUrl, filepath.FromSlash(tmp+"/"+name), commitHash)
 
 	return sc, nil
 }
 
 //change remote origin and push code to auth/backup repo
-//todo asyncly push
-func (g GitApi) Push(iCodeMeta *icodeMeta.ICodeMeta) error {
+func (g GitApi) Push(iCodeMeta *icodeMeta.ICodeMeta) <-chan error{
+	asyncResultChan := make(chan error)
+
 	itCodePath := iCodeMeta.Path
 
 	if !dirExists(itCodePath) {
-		return errors.New(fmt.Sprintf("Invalid iCodeMeta Path [%s]", itCodePath))
+		asyncResultChan <- errors.New(fmt.Sprintf("Invalid iCodeMeta Path [%s]", itCodePath))
+		return asyncResultChan
 	}
 
 	_, err := g.backupStoreApi.CreateRepository(iCodeMeta.RepositoryName)
 
 	if err != nil {
-		return err
+		asyncResultChan<-err
+		return asyncResultChan
 	}
 
 	err = g.ChangeRemote(itCodePath, g.backupStoreApi.GetHomepageUrl()+"/"+iCodeMeta.RepositoryName)
 
 	if err != nil {
-		return err
+		asyncResultChan<-err
+		return asyncResultChan
 	}
 
-	err = g.backupStoreApi.PushRepository(itCodePath)
+	go func() {
+		err = g.backupStoreApi.PushRepository(itCodePath)
+		asyncResultChan <- err
+	}()
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return asyncResultChan
 }
 
 //change origin remote
