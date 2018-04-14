@@ -52,7 +52,7 @@ func TestChangeRemote(t *testing.T) {
 func TestGitApi_Push(t *testing.T) {
 
 	//given
-	b, err := NewBackupGithubStoreApi("", "")
+	b, err := NewBackupGithubStoreApi("steve@buzzni.com", "itchain123")
 	assert.NoError(t, err)
 	api := NewGitApi(b)
 	iCodeMeta, err := api.Clone(gitUrl)
@@ -69,7 +69,8 @@ func TestGitApi_Push(t *testing.T) {
 	assert.NoError(t, err)
 
 	//when
-	err = api.Push(iCodeMeta)
+	testPushChan := api.Push(iCodeMeta)
+	err = <-testPushChan
 
 	//then
 	assert.NoError(t, err)
