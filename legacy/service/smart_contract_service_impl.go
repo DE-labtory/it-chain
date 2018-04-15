@@ -1,21 +1,22 @@
 package service
 
 import (
-	"errors"
-	"github.com/it-chain/it-chain-Engine/legacy/domain"
-	"strings"
-	"os"
-	"time"
+	"bufio"
 	"context"
-	"docker.io/go-docker"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
+	"os"
+	"os/exec"
+	"strings"
+	"time"
+
+	"docker.io/go-docker"
 	"docker.io/go-docker/api/types"
 	"docker.io/go-docker/api/types/container"
-	"encoding/json"
-	"bufio"
-	"os/exec"
 	"github.com/it-chain/it-chain-Engine/common"
-	"fmt"
+	"github.com/it-chain/it-chain-Engine/legacy/domain"
 	"github.com/spf13/viper"
 )
 
@@ -66,44 +67,44 @@ func NewSmartContractService(githubID string, smartContractDirPath string) *Smar
 func (scs *SmartContractServiceImpl) PullAllSmartContracts(errorHandler func(error), completionHandler func()) {
 	GOPATH := os.Getenv("GOPATH")
 	//go func() {
-		repoList, err := domain.GetRepositoryList(scs.GithubID)
+	repoList, err := domain.GetRepositoryList(scs.GithubID)
+	if err != nil {
+		errorHandler(errors.New("An error was occurred during getting repository list"))
+		return
+	}
+	for _, repo := range repoList {
+		localReposPath := GOPATH + "/src/it-chain" + scs.SmartContractHomePath + "/" + repo.Name
+
+		err = os.MkdirAll(localReposPath, 0755)
 		if err != nil {
-			errorHandler(errors.New("An error was occurred during getting repository list"))
+			errorHandler(errors.New("An error was occurred during making repository path"))
 			return
 		}
-		for _, repo := range repoList {
-			localReposPath := GOPATH + "/src/it-chain" + scs.SmartContractHomePath + "/" + repo.Name
 
-			err = os.MkdirAll(localReposPath, 0755)
+		commits, err := domain.GetReposCommits(repo.FullName)
+		if err != nil {
+			errorHandler(errors.New("An error was occurred during getting commit logs"))
+			return
+		}
+
+		for _, commit := range commits {
+			err := domain.CloneReposWithName(repo.FullName, localReposPath, commit.Sha)
 			if err != nil {
-				errorHandler(errors.New("An error was occurred during making repository path"))
+				errorHandler(errors.New("An error was occurred during cloning with name"))
 				return
 			}
 
-			commits, err := domain.GetReposCommits(repo.FullName)
+			err = domain.ResetWithSHA(localReposPath+"/"+commit.Sha, commit.Sha)
 			if err != nil {
-				errorHandler(errors.New("An error was occurred during getting commit logs"))
+				errorHandler(errors.New("An error was occurred during resetting with SHA"))
 				return
 			}
-
-			for _, commit := range commits {
-				err := domain.CloneReposWithName(repo.FullName, localReposPath, commit.Sha)
-				if err != nil {
-					errorHandler(errors.New("An error was occurred during cloning with name"))
-					return
-				}
-
-				err = domain.ResetWithSHA(localReposPath+"/"+commit.Sha, commit.Sha)
-				if err != nil {
-					errorHandler(errors.New("An error was occurred during resetting with SHA"))
-					return
-				}
-			}
 		}
-		if completionHandler != nil {
-			completionHandler()
-		}
-		return
+	}
+	if completionHandler != nil {
+		completionHandler()
+	}
+	return
 	//}()
 
 }
@@ -137,8 +138,8 @@ func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
 		return "", errors.New("An error occurred while cloning repos!")
 	}
 
-	common.Log.Println(viper.GetString("smartContract.githubID"))
-	_, err = domain.CreateRepos(new_repos_name, viper.GetString("smartContract.githubAccessToken"))
+	common.Log.Println(viper.GetString("icode.githubID"))
+	_, err = domain.CreateRepos(new_repos_name, viper.GetString("icode.githubAccessToken"))
 	if err != nil {
 		return "", errors.New(err.Error()) //"An error occurred while creating repos!")
 	}
@@ -149,7 +150,7 @@ func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
 	}
 
 	// 버전 관리를 위한 파일 추가
-	now := time.Now().Format("2006-01-02 15:04:05");
+	now := time.Now().Format("2006-01-02 15:04:05")
 	file, err := os.OpenFile(scs.SmartContractHomePath+"/"+new_repos_name+"/"+origin_repos_name+"/version", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return "", errors.New("An error occurred while creating or opening file!")
@@ -194,7 +195,7 @@ func (scs *SmartContractServiceImpl) Deploy(ReposPath string) (string, error) {
  *	5. docker container Start
  *	6. docker에서 smartcontract 실행
  ****************************************************/
-func (scs *SmartContractServiceImpl) ValidateTransactionsOfBlock(block *domain.Block) (error) {
+func (scs *SmartContractServiceImpl) ValidateTransactionsOfBlock(block *domain.Block) error {
 	// 블럭 유효성 검사 필요?
 	if block.TransactionCount <= 0 {
 		return errors.New("No tx in block")
@@ -223,7 +224,7 @@ func (scs *SmartContractServiceImpl) ValidateTransaction(transaction *domain.Tra
 	transaction.GenerateHash()
 }
 
-func (scs *SmartContractServiceImpl) RunTransactionsOfBlock(block domain.Block) (error) {
+func (scs *SmartContractServiceImpl) RunTransactionsOfBlock(block domain.Block) error {
 	if block.TransactionCount <= 0 {
 		return errors.New("No tx in block")
 	}
@@ -237,7 +238,7 @@ func (scs *SmartContractServiceImpl) RunTransactionsOfBlock(block domain.Block) 
 	return nil
 }
 
-func (scs *SmartContractServiceImpl) RunTransaction(transaction *domain.Transaction) (error) {
+func (scs *SmartContractServiceImpl) RunTransaction(transaction *domain.Transaction) error {
 	if transaction.TxData.Method == domain.Query {
 		//smartContractResponse, err := scs.RunTransactionOnDocker(transaction)
 		_, err := scs.RunTransactionOnDocker(transaction)
@@ -382,8 +383,8 @@ func (scs *SmartContractServiceImpl) Invoke(transaction *domain.Transaction) (*d
 
 	cmd := exec.Command(
 		"go", "run",
-		GOPATH + "/src/it-chain" + sc.SmartContractPath + "/" + transaction.TxData.ContractID + "/" + sc.Name + ".go",
-		string(txBytes), GOPATH + "/src/it-chain" + scs.WorldStateDBPath + "/" + scs.WorldStateDBName)
+		GOPATH+"/src/it-chain"+sc.SmartContractPath+"/"+transaction.TxData.ContractID+"/"+sc.Name+".go",
+		string(txBytes), GOPATH+"/src/it-chain"+scs.WorldStateDBPath+"/"+scs.WorldStateDBName)
 	//cmd.Dir = sc.SmartContractPath + "/" + transaction.TxData.ContractID
 
 	output, err := cmd.Output()
