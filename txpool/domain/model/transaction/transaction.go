@@ -1,12 +1,15 @@
 package transaction
 
-import "time"
+import (
+	"time"
+	"github.com/rs/xid"
+)
 
 const (
 	//Tx 상태 Const
 	STATUS_TX_UNCONFIRM TxStatus = iota
 	STATUS_TX_CONFIRM
-	STATUS_TX_UNKNOWN
+	STATUS_TX_INVALID
 
 	//Tx 타입 Const
 	TYPE_DEPLOY TxType = iota
@@ -30,4 +33,15 @@ type Transaction struct {
 	TxData        *TxData
 }
 
+func NewTransaction(publishPeerId string, txType TxType, txData *TxData) *Transaction{
+	return &Transaction{
+		TxId:          TransactionId(xid.New().String()),
+		PublishPeerId: publishPeerId,
+		TxStatus:      STATUS_TX_UNCONFIRM,
+		TxType:        txType,
+		TxHash:        HASH_NEED_CALC,
+		TimeStamp:     time.Now(),
+		TxData:        txData,
+	}
+}
 
