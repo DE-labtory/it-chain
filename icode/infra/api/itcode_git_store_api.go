@@ -43,6 +43,7 @@ func NewGitApi(backupStoreApi BackupStoreApi) GitApi {
 
 //get icode from outside
 //todo SSH ENV로 ssh key 불러오기
+//todo get Icode save folder from config
 func (g GitApi) Clone(gitUrl string) (*model.ICodeMeta, error) {
 
 	name := getNameFromGitUrl(gitUrl)

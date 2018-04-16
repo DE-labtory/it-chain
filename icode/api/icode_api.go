@@ -3,25 +3,52 @@ package api
 import (
 	"github.com/it-chain/it-chain-Engine/icode/domain/model"
 	"github.com/it-chain/it-chain-Engine/icode/domain/repository"
+	"github.com/it-chain/it-chain-Engine/icode/domain/service"
 )
 
 //ICode의 Invoke, Query, 검증 수행
 type ICodeApi struct {
-	ICodeMetaRepository repository.ICodeMetaRepository
+	iCodeMetaRepository repository.ICodeMetaRepository
+	containerService    service.ContainerService
+	itCodeStoreApi      ItCodeStoreApi
 }
 
 //Deploy ICode from git and push to backup server
-func Deploy(ICodeMeta model.ICodeMeta) error {
+func (iApi ICodeApi) Deploy(gitUrl string) error {
+
+	//clone from git
+	iCodeMeta, err := iApi.itCodeStoreApi.Clone(gitUrl)
+
+	if err != nil {
+		return err
+	}
+
+	//start ICode with container
+	if err = iApi.containerService.Start(*iCodeMeta); err != nil {
+		return err
+	}
+
+	//save ICode meta
+	if err = iApi.iCodeMetaRepository.Save(*iCodeMeta); err != nil {
+		return err
+	}
+
+	//push to backup server
+	err = iApi.itCodeStoreApi.Push(iCodeMeta)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 //Invoke transactions on ICode
-func Invoke(txs []model.Transaction) {
+func (iApi ICodeApi) Invoke(txs []model.Transaction) {
 
 }
 
 //Query transactions on ICode (Read Only transaction request on ICode)
-func Query(tx model.Transaction) {
+func (iApi ICodeApi) Query(tx model.Transaction) {
 
 }
