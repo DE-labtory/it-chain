@@ -1,4 +1,4 @@
-package icodeMeta
+package model
 
 type Version struct {
 }
@@ -11,7 +11,7 @@ type ICodeMeta struct {
 	Version        Version
 }
 
-func NewItCode(repositoryName string, gitUrl string, path string, commitHash string) *ICodeMeta {
+func NewICodeMeta(repositoryName string, gitUrl string, path string, commitHash string) *ICodeMeta {
 
 	return &ICodeMeta{
 		RepositoryName: repositoryName,
