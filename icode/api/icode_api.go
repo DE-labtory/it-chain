@@ -13,7 +13,7 @@ type ICodeApi struct {
 	itCodeStoreApi      ItCodeStoreApi
 }
 
-//Deploy ICode from git and push to backup server
+//Get ICode from git and start ICode container, push to backup server
 func (iApi ICodeApi) Deploy(gitUrl string) error {
 
 	//clone from git
@@ -35,6 +35,24 @@ func (iApi ICodeApi) Deploy(gitUrl string) error {
 
 	//push to backup server
 	err = iApi.itCodeStoreApi.Push(iCodeMeta)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//UnDeploy ICode
+func (iApi ICodeApi) UnDeploy(id model.ICodeID) error {
+
+	err := iApi.containerService.Stop(id)
+
+	if err != nil {
+		return err
+	}
+
+	err = iApi.iCodeMetaRepository.Remove(id)
 
 	if err != nil {
 		return err
