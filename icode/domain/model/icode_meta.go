@@ -1,6 +1,10 @@
 package model
 
-import "github.com/rs/xid"
+import (
+	"encoding/json"
+
+	"github.com/rs/xid"
+)
 
 type Version struct {
 }
@@ -25,4 +29,14 @@ func NewICodeMeta(repositoryName string, gitUrl string, path string, commitHash 
 		GitUrl:         gitUrl,
 		Path:           path,
 	}
+}
+
+func (i ICodeMeta) Serialize() ([]byte, error) {
+	b, err := json.Marshal(i)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }
