@@ -11,6 +11,10 @@ type Version struct {
 
 type ICodeID string
 
+func (i ICodeID) ToString() string {
+	return string(i)
+}
+
 type ICodeMeta struct {
 	ID             ICodeID
 	RepositoryName string
