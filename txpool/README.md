@@ -13,15 +13,14 @@ TxPool에서 다루는 데이터
 
 # Consume Event
 
-- transaction 추가/삭제
+- transaction 추가
     - CreateTxEvent
-    - DeleteTxEvent
 
 - Parliament 변경
     - LeaderChangeEvent
-    - PeerDisconnectEvent
 
 # PublishEvent
 
-- TxReadyToBlockEvent
-- TxSendToLeaderEvent
+- TransactionSendEvent
+- TransactionReceiveEvent
+- BlockProposeEvent

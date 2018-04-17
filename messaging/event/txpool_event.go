@@ -1,11 +1,16 @@
 package event
 
 // todo define event
-type TxMakeBlockEvent struct{
+type TransactionReceiveEvent struct{
 
 }
 
 // todo define event
-type TxSendToLeaderEvent struct {
+type TransactionSendEvent struct {
+
+}
+
+// todo define event
+type BlockProposeEvent struct {
 
 }
