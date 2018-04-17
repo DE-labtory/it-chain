@@ -1,17 +1,30 @@
 package transaction
 
+const (
+	Invoke TxDataType = "invoke"
+	Query  TxDataType = "query"
+)
+
+type TxDataType string
 type TxData struct {
 	Jsonrpc string
-	Method  string
-	Params  []string
-	ICodeId string `json:"id"`
+	Method  TxDataType
+	Params  Param
+	ID      string
+	ICodeID string
 }
 
-func NewTxData(jsonrpc string, method string, params []string, iCodeId string) *TxData{
+type Param struct {
+	Function string
+	Args     []string
+}
+
+func NewTxData(jsonrpc string, method TxDataType, params Param, iCodeId string, id string) *TxData {
 	return &TxData{
 		Jsonrpc: jsonrpc,
 		Method:  method,
 		Params:  params,
-		ICodeId: iCodeId,
+		ID:      id,
+		ICodeID: iCodeId,
 	}
 }
