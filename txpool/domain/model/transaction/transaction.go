@@ -2,8 +2,9 @@ package transaction
 
 import (
 	"time"
-	"github.com/rs/xid"
+
 	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/rs/xid"
 )
 
 const (
@@ -36,8 +37,10 @@ func NewTransaction(publishPeerId string, txType TxDataType, txData *TxData) *Tr
 		TimeStamp:     time.Now(),
 		TxData:        txData,
 	}
-	hashArgs := []string{txData.Jsonrpc,string(txData.Method),string(txData.Params.Function),txData.ICodeID,publishPeerId,tx.TimeStamp.String(),string(tx.TxId),string(tx.TxType)}
-	for _,str := range txData.Params.Args{hashArgs = append(hashArgs,str)}
+	hashArgs := []string{txData.Jsonrpc, string(txData.Method), string(txData.Params.Function), txData.ICodeID, publishPeerId, tx.TimeStamp.String(), string(tx.TxId), string(tx.TxType)}
+	for _, str := range txData.Params.Args {
+		hashArgs = append(hashArgs, str)
+	}
 	tx.TxHash = common.ComputeSHA256(hashArgs)
 	return &tx
 }
