@@ -67,6 +67,13 @@ func (iApi ICodeApi) Invoke(txs []model.Transaction) {
 }
 
 //Query transactions on ICode (Read Only transaction request on ICode)
-func (iApi ICodeApi) Query(tx model.Transaction) {
+func (iApi ICodeApi) Query(tx model.Transaction) (*model.Result, error) {
 
+	result, err := iApi.containerService.Run(tx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
