@@ -13,8 +13,9 @@ TxPool에서 다루는 데이터
 
 # Consume Event
 
-- transaction 추가
-    - CreateTxEvent
+- transaction 관련
+    - TransactionCreateEvent
+    - TransactionReceiveEvent
 
 - Parliament 변경
     - LeaderChangeEvent
@@ -22,5 +23,4 @@ TxPool에서 다루는 데이터
 # PublishEvent
 
 - TransactionSendEvent
-- TransactionReceiveEvent
 - BlockProposeEvent
