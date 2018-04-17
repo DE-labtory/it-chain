@@ -62,6 +62,7 @@ func (iApi ICodeApi) UnDeploy(id model.ICodeID) error {
 }
 
 //Invoke transactions on ICode
+//todo async parallel execute
 func (iApi ICodeApi) Invoke(txs []model.Transaction) {
 
 }
