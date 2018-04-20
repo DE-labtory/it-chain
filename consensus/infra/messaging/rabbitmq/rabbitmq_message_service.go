@@ -1,29 +1,26 @@
-package api
+package rabbitmq
 
 import (
 	"fmt"
 
 	"github.com/it-chain/it-chain-Engine/common"
-	cs "github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
+	"github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
+	"github.com/it-chain/it-chain-Engine/consensus/domain/service"
 	"github.com/it-chain/it-chain-Engine/messaging/event"
 	"github.com/it-chain/it-chain-Engine/messaging/topic"
 )
 
-type Serializable interface {
-	ToByte() ([]byte, error)
-}
-
 type Publish func(topic string, data []byte) error
 
-type MessageApi struct {
+type MessageService struct {
 	Publish Publish
 }
 
-func NewMessageApi(publish Publish) *MessageApi {
-	return &MessageApi{Publish: publish}
+func NewRabbitmqMessageService(publish Publish) *MessageService {
+	return &MessageService{Publish: publish}
 }
 
-func (mApi *MessageApi) BroadCastMsg(Msg Serializable, representatives []*cs.Representative) {
+func (mApi *MessageService) BroadCastMsg(Msg service.Serializable, representatives []*consensus.Representative) {
 
 	data, err := Msg.ToByte()
 
@@ -58,7 +55,7 @@ func (mApi *MessageApi) BroadCastMsg(Msg Serializable, representatives []*cs.Rep
 	}
 }
 
-func (mApi *MessageApi) ConfirmedBlock(block cs.Block) {
+func (mApi *MessageService) ConfirmedBlock(block consensus.Block) {
 
 	err := mApi.Publish(topic.BlockConfirmEvent.String(), block)
 

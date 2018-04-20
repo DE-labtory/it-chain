@@ -12,7 +12,6 @@ import (
 
 type MessageConsumer struct {
 	consensusApi api.ConsensusApi
-	messageApi   api.MessageApi
 }
 
 func (mc MessageConsumer) ListenStartConsensusEvent(amqpMessage <-chan amqp.Delivery) {
