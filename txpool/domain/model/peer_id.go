@@ -1,5 +1,9 @@
 package model
 
 type PeerID struct {
-	ID string
+	id string
+}
+
+func (p PeerID) ToString() string {
+	return string(p.id)
 }

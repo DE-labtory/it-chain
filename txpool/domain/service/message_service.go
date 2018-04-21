@@ -23,7 +23,7 @@ func (mApi *MessageService) SendTransaction(transaction transaction.Transaction,
 		return err
 	}
 	common.Serialize(event.TransactionSendEvent{
-		LeaderId:    leader.GetStringID(),
+		LeaderId:    leader.StringPeerId(),
 		Transaction: txData,
 	})
 	return nil
