@@ -12,5 +12,5 @@ type TxpoolApi struct {
 	txRepository  repository.TransactionRepository
 	timeoutTicker *time.Ticker
 	maxTxNum      int
-	messageApi    service.MessageService
+	messageApi    service.MessageProducer
 }
