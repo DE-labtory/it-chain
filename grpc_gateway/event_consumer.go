@@ -8,9 +8,10 @@ import (
 )
 
 type EventConsumer struct {
+	messageDeliver MessageDeliver
 }
 
-func (mc EventConsumer) MessageDeliveryEvent(amqpMessage <-chan amqp.Delivery) {
+func (ec EventConsumer) MessageDeliveryEvent(amqpMessage <-chan amqp.Delivery) {
 
 	go func() {
 		for message := range amqpMessage {
@@ -21,7 +22,7 @@ func (mc EventConsumer) MessageDeliveryEvent(amqpMessage <-chan amqp.Delivery) {
 				return
 			}
 
-			BuildEnvelope(MessageDelivery.Body)
+			ec.messageDeliver.Deliver(MessageDelivery.Recipients, MessageDelivery.Protocol, MessageDelivery.Body)
 		}
 	}()
 }

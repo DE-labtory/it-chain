@@ -5,3 +5,8 @@ type MessageDeliveryEvent struct {
 	Body       []byte
 	Protocol   string
 }
+
+type ConnectionCreated struct {
+	Id      string
+	Address string
+}

@@ -8,17 +8,23 @@ import (
 	"github.com/it-chain/heimdall/key"
 )
 
-type SingingService struct {
-	au auth.Auth
+type Signer struct {
+	au  auth.Auth
+	pri key.PriKey
 }
 
-func (s SingingService) Sign(envelope *pb.Envelope, priKey key.PriKey) *pb.Envelope {
+func (s Signer) SignEnvelope(envelope *pb.Envelope) *pb.Envelope {
 
 	hash := sha512.New()
 	hash.Write(envelope.Payload)
 	digest := hash.Sum(nil)
 
-	sig, _ := s.au.Sign(priKey, digest, auth.EQUAL_SHA512.SignerOptsToPSSOptions())
+	sig, err := s.au.Sign(s.pri, digest, auth.EQUAL_SHA512.SignerOptsToPSSOptions())
+
+	if err != nil {
+		//signing error
+		return nil
+	}
 	envelope.Signature = sig
 
 	return envelope

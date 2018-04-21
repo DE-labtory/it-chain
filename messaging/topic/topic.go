@@ -6,6 +6,7 @@ const (
 	MessageCreated Event = iota
 	ConsensusMessagePublishEvent
 	BlockConfirmEvent
+	ConnectionCreated
 )
 
 func (e Event) String() string {
@@ -16,6 +17,8 @@ func (e Event) String() string {
 		return "ConsensusMessagePublishEvent"
 	case BlockConfirmEvent:
 		return "BlockConfirmEvent"
+	case ConnectionCreated:
+		return "ConnectionCreated"
 	}
 
 	return "error"
