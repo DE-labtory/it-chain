@@ -16,3 +16,7 @@ type TransactionSendEvent struct {
 type BlockProposeEvent struct {
 	TransactionList []byte
 }
+
+type TransactionCreateEvent struct {
+	TransactionData []byte
+}
