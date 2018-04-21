@@ -23,7 +23,7 @@ func NewTransactionRepository(path string) *TransactionRepository {
 
 func (tr TransactionRepository) Save(transaction transaction.Transaction) error {
 	if transaction.TxId.ToString() == "" {
-		return errors.New("ICodeMeta ID is empty")
+		return errors.New("transaction ID is empty")
 	}
 
 	b, err := transaction.Serialize()
