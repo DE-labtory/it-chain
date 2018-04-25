@@ -9,5 +9,5 @@ type Publish func(topic string, data []byte) error
 
 type MessageProducer interface {
 	SendTransactions(transactions []transaction.Transaction, leader model.Leader) error
-	BlockProposeEvent(transactions []transaction.Transaction) error
+	ProposeBlock(transactions []transaction.Transaction) error
 }

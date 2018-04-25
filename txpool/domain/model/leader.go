@@ -1,9 +1,17 @@
 package model
 
 type Leader struct {
-	peerId PeerID
+	leaderId LeaderId
 }
 
-func (l *Leader) StringPeerId() string {
-	return l.peerId.ToString()
+func (l *Leader) StringLeaderId() string {
+	return l.leaderId.ToString()
+}
+
+type LeaderId struct {
+	id string
+}
+
+func (lid LeaderId) ToString() string {
+	return string(lid.id)
 }

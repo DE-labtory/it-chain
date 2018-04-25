@@ -23,7 +23,7 @@ func (mp *MessageProducer) SendTransactions(transaction []transaction.Transactio
 	panic("implement me")
 }
 
-// todo impl BlockProposeEvent
-func (mp *MessageProducer) BlockProposeEvent(transactions []transaction.Transaction) error {
+// todo impl ProposeBlock
+func (mp *MessageProducer) ProposeBlock(transactions []transaction.Transaction) error {
 	panic("implement me")
 }
