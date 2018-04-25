@@ -1,4 +1,4 @@
-package service
+package api
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"os/user"
 	"strings"
 
-	"github.com/it-chain/it-chain-Engine/icode/domain/icodeMeta"
+	"github.com/it-chain/it-chain-Engine/icode/domain/model"
 	"github.com/pkg/errors"
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/config"
@@ -43,7 +43,8 @@ func NewGitApi(backupStoreApi BackupStoreApi) GitApi {
 
 //get icode from outside
 //todo SSH ENV로 ssh key 불러오기
-func (g GitApi) Clone(gitUrl string) (*icodeMeta.ICodeMeta, error) {
+//todo get Icode save folder from config
+func (g GitApi) Clone(gitUrl string) (*model.ICodeMeta, error) {
 
 	name := getNameFromGitUrl(gitUrl)
 
@@ -75,14 +76,14 @@ func (g GitApi) Clone(gitUrl string) (*icodeMeta.ICodeMeta, error) {
 	}
 
 	//todo os separator
-	sc := icodeMeta.NewItCode(name, gitUrl, tmp+"/"+name, commitHash)
+	sc := model.NewICodeMeta(name, gitUrl, tmp+"/"+name, commitHash)
 
 	return sc, nil
 }
 
 //change remote origin and push code to auth/backup repo
 //todo asyncly push
-func (g GitApi) Push(iCodeMeta *icodeMeta.ICodeMeta) error {
+func (g GitApi) Push(iCodeMeta *model.ICodeMeta) error {
 	itCodePath := iCodeMeta.Path
 
 	if !dirExists(itCodePath) {

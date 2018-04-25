@@ -7,6 +7,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
+//Subscribe event and do some logic
 type EventConsumer struct {
 	messageDeliver MessageDeliver
 }
@@ -26,3 +27,5 @@ func (ec EventConsumer) MessageDeliveryEvent(amqpMessage <-chan amqp.Delivery) {
 		}
 	}()
 }
+
+func (ec)
