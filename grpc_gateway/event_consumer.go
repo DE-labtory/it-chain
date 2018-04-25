@@ -27,5 +27,3 @@ func (ec EventConsumer) MessageDeliveryEvent(amqpMessage <-chan amqp.Delivery) {
 		}
 	}()
 }
-
-func (ec)
