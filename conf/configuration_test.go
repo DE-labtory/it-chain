@@ -1,8 +1,12 @@
 package conf
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
+//todo : need testing code
 func TestGetConfiguration(t *testing.T) {
-	conf,err :=GetConfiguration()
-	conf.Common.
+	conf := GetConfiguration()
+	fmt.Println(conf.Common.BootNodeIp)
 }

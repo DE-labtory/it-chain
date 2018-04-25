@@ -2,11 +2,15 @@ package conf
 
 import (
 	"os"
+	"sync"
 
 	"github.com/it-chain/it-chain-Engine/conf/model"
 	"github.com/it-chain/it-chain-Engine/conf/model/common"
 	"github.com/spf13/viper"
 )
+
+var instance *Configuration
+var once sync.Once
 
 type Configuration struct {
 	Common         common.CommonConfiguration
@@ -18,17 +22,19 @@ type Configuration struct {
 	Icode          model.ICodeConfiguration
 }
 
-func GetConfiguration() (*Configuration, error) {
-	path, _ := os.Getwd()
-	viper.SetConfigName("config")
-	viper.AddConfigPath(path + "/conf")
-	var configuration = Configuration{}
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
-	}
-	err := viper.Unmarshal(&configuration)
-	if err != nil {
-		return nil, err
-	}
-	return &configuration, nil
+func GetConfiguration() *Configuration {
+	once.Do(func() {
+		instance = &Configuration{}
+		path, _ := os.Getwd()
+		viper.SetConfigName("config")
+		viper.AddConfigPath(path)
+		if err := viper.ReadInConfig(); err != nil {
+			panic("cannot read config")
+		}
+		err := viper.Unmarshal(&instance)
+		if err != nil {
+			panic("error in read config")
+		}
+	})
+	return instance
 }
