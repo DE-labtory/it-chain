@@ -1,7 +1,7 @@
 if [ -f main/GeneratorBuildFile ]; then
 	echo "GeneratorBuildFile already exist"
 	echo "Trying to remove old generator file"
-	rm -rf GeneratorBuildFile
+	rm -rf main/GeneratorBuildFile
 fi
 
 if [ ! -f main/conf_file_generator.go ]; then
@@ -13,7 +13,7 @@ go build -o main/GeneratorBuildFile main/conf_file_generator.go
 echo "trying to excute generator..."
 ./main/GeneratorBuildFile
 echo "trying to remove excuted generator..."
-rm -rf GeneratorBuildFile
+rm -rf main/GeneratorBuildFile
 echo "conf file generate finish!!!"
 
 
