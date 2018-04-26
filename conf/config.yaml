@@ -37,3 +37,6 @@ consensus:
 
 webhook:
   port: 44444
+
+genesisblock:
+  defaultPath: .it-chain/genesisblock

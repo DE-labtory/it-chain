@@ -196,7 +196,6 @@ func PrintLogo(){
 }
 
 func main() {
-
 	PrintLogo()
 
 	ip := viper.GetString("node.ip")
