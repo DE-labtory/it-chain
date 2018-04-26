@@ -6,8 +6,8 @@ import "github.com/it-chain/it-chain-Engine/icode/domain/icodeMeta"
 type ItCodeStoreApi interface {
 
 	//get icode from outside
-	Clone(repositoryUrl string) (*icodeMeta.ItCode, error)
+	Clone(repositoryUrl string) (*icodeMeta.ICodeMeta, error)
 
 	//push code to auth repo
-	Push(icodeMeta.ItCode) error
+	Push(meta icodeMeta.ICodeMeta) error
 }
