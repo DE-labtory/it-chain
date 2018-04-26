@@ -26,11 +26,20 @@ Config 에 들어갈 데이터 모델들이 정의되어있다.
 ## Generator
 config 모델을 생성/변경 후 **Config.yaml** 파일을 생성/변경 하기 위한 모듈이다.
 
-./conf/main 에 있는 conf_file_generator.go를 빌드하여 실행하면
+config 모델을 생성/변경 후 개발 환경에 맞는 스크립트 파일을 실행해주면 된다
 
-현재 있는 config.yaml 파일을 config_bak(index).yaml 로 백업하고
+example)
 
-새로운 config.yaml 파일을 생성한다.
+Linux/Unix(Mac OS)
+
+     user:~/go/src/github.com/it-chain/it-chain-Engine/conf$ sh generate_conf.sh
+
+Windows
+
+    c:/~~~/go/src/github.com/it-chain/it-chain-Engine/conf> generate_conf.bat
+    또는
+    generate_conf.bat 을 클릭하여 실행
+
 
 ## Configuration (config usage)
 다른 패키지에서 conf를 임포트하여 사용할 수 있다.
