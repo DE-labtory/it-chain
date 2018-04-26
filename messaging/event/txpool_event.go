@@ -5,6 +5,7 @@ type TransactionReceiveEvent struct {
 	Transaction []byte
 }
 
+//todo issue #165 에 따른 변경필요
 type TransactionSendEvent struct {
 	LeaderId    string
 	Transaction []byte
