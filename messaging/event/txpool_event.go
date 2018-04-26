@@ -1,16 +1,20 @@
 package event
 
-// todo define event
-type TransactionReceiveEvent struct{
-
+type TransactionReceiveEvent struct {
+	PeerId      string
+	Transaction []byte
 }
 
-// todo define event
+//todo issue #165 에 따른 변경필요
 type TransactionSendEvent struct {
-
+	LeaderId    string
+	Transaction []byte
 }
 
-// todo define event
 type BlockProposeEvent struct {
+	TransactionList []byte
+}
 
+type TransactionCreateEvent struct {
+	TransactionData []byte
 }
