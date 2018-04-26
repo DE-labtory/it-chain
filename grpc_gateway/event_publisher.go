@@ -13,15 +13,15 @@ type EventPublisher struct {
 	messaging *messaging.Messaging
 }
 
-func (ep EventPublisher) PublishConnectionCreatedEvent(connection conn.Connection) error {
+func (ep EventPublisher) PublishNewConnEvent(connection conn.Connection) error {
 
 	connInfo := connection.GetConnInfo()
 
-	connCreatedEvent := event.ConnectionCreated{}
-	connCreatedEvent.Id = string(connInfo.Id)
-	connCreatedEvent.Address = connInfo.Address.IP
+	newConnEvent := event.NewConn{}
+	newConnEvent.Id = string(connInfo.Id)
+	newConnEvent.Address = connInfo.Address.IP
 
-	b, err := json.Marshal(connCreatedEvent)
+	b, err := json.Marshal(newConnEvent)
 
 	if err != nil {
 		return err
