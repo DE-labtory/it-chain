@@ -38,3 +38,8 @@ main
 
 # tmp
 .tmp
+
+# ignore backup config file
+conf/config_bak[0-9]*.yaml
+# add conf generator main
+!conf/main
