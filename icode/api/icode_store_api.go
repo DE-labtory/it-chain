@@ -7,5 +7,5 @@ type ItCodeStoreApi interface {
 	Clone(repositoryUrl string) (*model.ICodeMeta, error)
 
 	//push code to auth repo
-	Push(icodeMeta *model.ICodeMeta) error
+	Push(meta model.ICodeMeta) error
 }
