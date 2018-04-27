@@ -12,9 +12,9 @@ type EventConsumer struct {
 	messageDeliver MessageDeliver
 }
 
-func (ec EventConsumer) HandleMessageDelivery(amqpMessage amqp.Delivery) {
+func (ec EventConsumer) HandleMessageDeliverEvent(amqpMessage amqp.Delivery) {
 
-	MessageDelivery := &event.MessageDeliveryEvent{}
+	MessageDelivery := &event.MessageDeliverEvent{}
 	if err := json.Unmarshal(amqpMessage.Body, MessageDelivery); err != nil {
 		// fail to unmarshal event
 		return

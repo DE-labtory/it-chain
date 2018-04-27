@@ -11,7 +11,7 @@ import (
 
 func TestMessaging_Start(t *testing.T) {
 
-	message := NewMessaging("amqp://guest:guest@localhost:5672/")
+	message := NewRabbitmq("amqp://guest:guest@localhost:5672/")
 	defer message.Close()
 	assert.NotPanics(t, message.Start)
 
@@ -19,7 +19,7 @@ func TestMessaging_Start(t *testing.T) {
 
 func TestMessaging_Start2(t *testing.T) {
 
-	message := NewMessaging("amqp://guest:guest@localhost:5672/")
+	message := NewRabbitmq("amqp://guest:guest@localhost:5672/")
 	assert.NotPanics(t, message.Start)
 
 	defer message.Close()
@@ -32,7 +32,7 @@ func TestMessaging_Start2(t *testing.T) {
 
 func TestMessaging_Publish(t *testing.T) {
 
-	message := NewMessaging("amqp://guest:guest@localhost:5672/")
+	message := NewRabbitmq("amqp://guest:guest@localhost:5672/")
 	message.Start()
 	defer message.Close()
 
@@ -58,7 +58,7 @@ func TestMessaging_Publish(t *testing.T) {
 
 func TestMessaging_MultiPublishAndConsume(t *testing.T) {
 
-	message := NewMessaging("amqp://guest:guest@localhost:5672/")
+	message := NewRabbitmq("amqp://guest:guest@localhost:5672/")
 	message.Start()
 	defer message.Close()
 

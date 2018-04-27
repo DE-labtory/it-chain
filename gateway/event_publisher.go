@@ -17,7 +17,7 @@ func (ep EventPublisher) PublishNewConnEvent(connection conn.Connection) error {
 
 	connInfo := connection.GetConnInfo()
 
-	newConnEvent := event.NewConn{}
+	newConnEvent := event.NewConnEvent{}
 	newConnEvent.Id = string(connInfo.Id)
 	newConnEvent.Address = connInfo.Address.IP
 
