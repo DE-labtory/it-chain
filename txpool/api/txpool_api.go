@@ -26,7 +26,10 @@ func NewTxpoolApi (txpoolRepo *repository.TransactionRepository, messageProducer
 	}
 }
 
-// TODO impl
 func (txpoolApi TxpoolApi) SaveTransaction(transaction transaction.Transaction) error {
 	return (*txpoolApi.txRepository).Save(transaction)
+}
+
+func (txpoolApi TxpoolApi) RemoveTransaction(transactionId transaction.TransactionId) error {
+	return (*txpoolApi.txRepository).Remove(transactionId)
 }
