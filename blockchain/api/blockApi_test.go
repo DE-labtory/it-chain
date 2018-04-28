@@ -3,15 +3,11 @@ package api
 import (
 	"testing"
 
-	"fmt"
-
 	"github.com/it-chain/it-chain-Engine/blockchain/domain/model/block"
 	"github.com/it-chain/it-chain-Engine/blockchain/domain/repository"
 	"github.com/it-chain/yggdrasill"
-	ygg "github.com/it-chain/yggdrasill"
 	b "github.com/it-chain/yggdrasill/block"
 	tx "github.com/it-chain/yggdrasill/transaction"
-	"github.com/magiconair/properties/assert"
 )
 
 /*
@@ -55,7 +51,7 @@ func (b *BlockImpl) IsPrev(serializedBlock []byte) bool {
 	BlockRepositoryImpl
 */
 type BlockRepositoryImpl struct {
-	Yggdrasill *blockchainleveldb.YggDrasill
+	Yggdrasill *blockchaindb.Yggdrasill
 }
 
 func (br *BlockRepositoryImpl) Close() {
@@ -64,46 +60,18 @@ func (br *BlockRepositoryImpl) Close() {
 func (br *BlockRepositoryImpl) AddBlock(block block.Block) error {
 	return nil
 }
-func (br *BlockRepositoryImpl) GetLastBlock(block block.Block) {
-
+func (br *BlockRepositoryImpl) GetLastBlock() block.Block {
+	return nil
 }
-func (br *BlockRepositoryImpl) GetTransactionsById(id int) { // block과 관련된 정보 조회 예시
-
+func (br *BlockRepositoryImpl) GetTransactionsById(id string) tx.Transaction {
+	return nil
 }
-func NewBlockRepository(yggdrasill *blockchainleveldb.YggDrasill) repository.BlockRepository {
+func NewBlockRepository(yggdrasill *blockchaindb.Yggdrasill) repository.BlockRepository {
 	return &BlockRepositoryImpl{
 		Yggdrasill: yggdrasill,
 	}
 }
 
 func TestBlockApi_AddBlock_DefaultBlock_basic(t *testing.T) {
-	// given
-	dbPath := "./db"
 
-	y := ygg.NewYggdrasil(dbPath, nil)
-	br := NewBlockRepository(y)
-	bApi := NewBlockApi(br)
-	block1 := BlockImpl{
-		Header: b.BlockHeader{
-			Height:    0,
-			CreatorID: "zf",
-		},
-	}
-	block2 := BlockImpl{}
-
-	// when
-	err1 := bApi.AddBlock(&block1)
-	err2 := bApi.AddBlock(&block2)
-
-	// then
-	if err1 != nil {
-		fmt.Print(err1.Error())
-	}
-	if err2 != nil {
-		fmt.Print(err2.Error())
-	}
-	assert.Equal(t, block1.GetHeight(), block2.GetHeight())
-	assert.Equal(t, uint64(0), block1.GetHeight())
-	assert.Equal(t, uint64(0), block2.GetHeight())
-	assert.Equal(t, "zf", block1.Header.CreatorID)
 }
