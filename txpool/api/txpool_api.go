@@ -8,27 +8,25 @@ import (
 	"github.com/it-chain/it-chain-Engine/conf"
 )
 
-// todo api 만들어라 준희야
 type TxpoolApi struct {
-	txRepository  repository.TransactionRepository
+	txRepository  *repository.TransactionRepository
 	timeoutTicker *timeout.TimeoutTicker
 	maxTxByte     int
-	messageApi    service.MessageProducer
+	messageApi    *service.MessageProducer
 }
 
-// TODO assign txRepo, msgApi
-func NewTxpoolApi () *TxpoolApi{
+func NewTxpoolApi (txpoolRepo *repository.TransactionRepository, messageProducer *service.MessageProducer) *TxpoolApi{
 	txpConfig := conf.GetConfiguration().Txpool
 
 	return &TxpoolApi{
-		txRepository:  nil,
+		txRepository:  txpoolRepo,
 		timeoutTicker: timeout.NewTimeoutTicker(txpConfig.TimoutMs),
 		maxTxByte:     txpConfig.MaxTransactionByte,
-		messageApi:    nil,
+		messageApi:    messageProducer,
 	}
 }
 
 // TODO impl
 func (txpoolApi TxpoolApi) SaveTransaction(transaction transaction.Transaction) error {
-	return txpoolApi.txRepository.Save(transaction)
+	return (*txpoolApi.txRepository).Save(transaction)
 }
