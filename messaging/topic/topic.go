@@ -6,7 +6,11 @@ const (
 	MessageCreated Event = iota
 	ConsensusMessagePublishEvent
 	BlockConfirmEvent
-	ConnectionCreated
+  ConnectionCreated
+	//txpool Event
+	TransactionReceiveEvent
+	TransactionSendEvent
+	BlockProposeEvent
 )
 
 func (e Event) String() string {
@@ -17,6 +21,12 @@ func (e Event) String() string {
 		return "ConsensusMessagePublishEvent"
 	case BlockConfirmEvent:
 		return "BlockConfirmEvent"
+	case TransactionReceiveEvent:
+		return "TransactionReceiveEvent"
+	case TransactionSendEvent:
+		return "TransactionSendEvent"
+	case BlockProposeEvent:
+		return "BlockProposeEvent"
 	case ConnectionCreated:
 		return "ConnectionCreated"
 	}
