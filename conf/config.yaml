@@ -13,7 +13,7 @@ consensus:
 blockchain:
   repositorypath: empty
 peer:
-  empty: empty
+  leaderelection: RAFT
 authentication:
   keytype: RSA
   keypath: .it-chain/
