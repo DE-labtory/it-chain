@@ -1,17 +1,18 @@
 package service
 
 import (
-	"os"
-	"io/ioutil"
 	"go/build"
-	"github.com/spf13/viper"
+	"io/ioutil"
+	"os"
+
 	_ "github.com/it-chain/it-chain-Engine/common"
+	"github.com/spf13/viper"
 )
 
 func ConfigFromJson(filename string) ([]uint8, error) {
 
 	enginePath := build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/"
-	folderPath := viper.GetString("genesisblock.defaultPath")+"/"
+	folderPath := viper.GetString("genesisblock.defaultPath") + "/"
 	filePath := enginePath + folderPath + filename
 	jsonFile, err := os.Open(filePath)
 	defer jsonFile.Close()

@@ -1,42 +1,23 @@
-database:
-  type: leveldb
-  leveldb:
-    defaultPath: .it-chain/leveldb
-
-key:
-  type: RSA
-  defaultPath: .it-chain/
-
-ledger:
-  defaultPath: .it-chain/ledger
-
-txDatabase:
-  defaultPath: .it-chain/tx
-
-smartContract:
-  defaultPath: .it-chain/.constracts
-  githubID: steve@buzzni.com
-  githubPassword: itchain123
-  githubAccessToken: 1a8ae688db783f63c2494d59f971b2eed5399b1d
-  TmpDir: /tmp
-  WorldStateDB_OnDoker: /go/src/worldstatedb
-
-batchTimer:
-  pushPeerTable: 5
-  sendTransaction: 5
-
-bootNode:
-  ip: 127.0.0.1:4444
-
-node:
-  ip: 127.0.0.1:4444
-
+common:
+  bootnodeip: 127.0.0.1:4444
+  nodeip: 127.0.0.1:4444
+  messaging:
+    url: amqp://guest:guest@localhost:5672/
+txpool:
+  timeoutms: 100
+  maxtransactionbyte: 1024
+  repositorypath: empty
 consensus:
-  batchTime: 3
-  maxTransactions: 100
-
-webhook:
-  port: 44444
-
+  batchtime: 3
+  maxtransactions: 100
+blockchain:
+  repositorypath: empty
+peer:
+  empty: empty
+authentication:
+  keytype: RSA
+  keypath: .it-chain/
+icode:
+  repositorypath: empty
 genesisblock:
   defaultPath: .it-chain/genesisblock

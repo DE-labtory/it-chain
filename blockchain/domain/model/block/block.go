@@ -2,9 +2,10 @@ package block
 
 import (
 	"encoding/json"
-	"github.com/it-chain/yggdrasill/block"
 	"time"
+
 	"github.com/it-chain/it-chain-Engine/blockchain/domain/service"
+	"github.com/it-chain/yggdrasill/block"
 )
 
 func CreateGenesisBlock() (*block.DefaultBlock, error) {

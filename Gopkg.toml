@@ -85,3 +85,7 @@
 [[override]]
   branch = "master"
   name = "github.com/streadway/amqp"
+
+[[constraint]]
+  name = "github.com/google/go-github"
+  version = "15.0.0"

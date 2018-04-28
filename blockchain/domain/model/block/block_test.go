@@ -2,10 +2,10 @@ package block
 
 import (
 	"testing"
-	"github.com/stretchr/testify/assert"
 	"time"
-	tx "github.com/it-chain/yggdrasill/transaction"
 
+	tx "github.com/it-chain/yggdrasill/transaction"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateGenesisBlock(t *testing.T) {
