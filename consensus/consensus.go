@@ -12,10 +12,7 @@ func Init() {
 	message := messaging.NewMessaging("amqp://guest:guest@localhost:5672/")
 	message.Start()
 
-	event, err := message.Consume("ConsensusStartEvent")
-	mc.ListenReceviedConsensusMessageEvent(event)
-
-	if err != nil {
-
+	if err := message.Consume("ConsensusStartEvent", mc.HandleStartConsensusEvent); err != nil {
+		panic(err.Error())
 	}
 }

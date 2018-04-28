@@ -1,4 +1,4 @@
-package api
+package rabbitmq
 
 import (
 	"encoding/json"
@@ -37,7 +37,7 @@ func TestMessageApi_BroadCastMsg(t *testing.T) {
 		}
 	}()
 
-	mApi := NewMessageApi(messaging.Publish)
+	mApi := NewRabbitmqMessageService(messaging.Publish)
 
 	message := msg.PreprepareMsg{}
 	representatives := []*consensus.Representative{&consensus.Representative{"1"}, &consensus.Representative{"2"}}
@@ -73,7 +73,7 @@ func TestMessageApi_ConfirmedBlock(t *testing.T) {
 		}
 	}()
 
-	mApi := NewMessageApi(messaging.Publish)
+	mApi := NewRabbitmqMessageService(messaging.Publish)
 
 	//when
 	mApi.ConfirmedBlock(blockData)
