@@ -20,7 +20,7 @@ func NewTxpoolApi (txpoolRepo *repository.TransactionRepository, messageProducer
 
 	return &TxpoolApi{
 		txRepository:  txpoolRepo,
-		timeoutTicker: timeout.NewTimeoutTicker(txpConfig.TimoutMs),
+		timeoutTicker: timeout.NewTimeoutTicker(txpConfig.TimeoutMs),
 		maxTxByte:     txpConfig.MaxTransactionByte,
 		messageApi:    messageProducer,
 	}
