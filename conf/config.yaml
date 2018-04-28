@@ -19,5 +19,3 @@ authentication:
   keypath: .it-chain/
 icode:
   repositorypath: empty
-genesisblock:
-  defaultPath: .it-chain/genesisblock

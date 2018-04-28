@@ -1,6 +1,7 @@
-package block
+package service
 
 import (
+	"go/build"
 	"testing"
 	"time"
 
@@ -9,8 +10,13 @@ import (
 )
 
 func TestCreateGenesisBlock(t *testing.T) {
-	GenesisBlock, err := CreateGenesisBlock()
-	assert.NoError(t, err)
+	genesisconfPath := build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/.it-chain/genesisconf/"
+	rightFilePath := genesisconfPath + "GenesisBlockConfig.json"
+	wrongFilePath := genesisconfPath + "WrongFileName.json"
+	GenesisBlock, err1 := CreateGenesisBlock(rightFilePath)
+	_, err2 := CreateGenesisBlock(wrongFilePath)
+	assert.NoError(t, err1)
+	assert.Error(t, err2)
 	assert.Equal(t, uint64(0), GenesisBlock.Header.Height)
 	assert.Equal(t, "", GenesisBlock.Header.PreviousHash)
 	assert.Equal(t, "", GenesisBlock.Header.Version)
