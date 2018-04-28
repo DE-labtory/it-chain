@@ -8,10 +8,6 @@ import (
 )
 
 func ConfigFromJson(filePath string) ([]uint8, error) {
-
-	//enginePath := build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/"
-	//folderPath := viper.GetString("genesisconf.defaultPath") + "/"
-	//filePath := enginePath + folderPath + filename
 	jsonFile, err := os.Open(filePath)
 	defer jsonFile.Close()
 	if err != nil {
