@@ -18,7 +18,7 @@ import (
 
 func TestCreateGenesisBlock(t *testing.T) {
 	genesisconfPath := build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/.it-chain/genesisconf/"
-	rightFilePath := genesisconfPath + "GenesisBlockConfig.json"
+	genesisConfFilePath := genesisconfPath + "GenesisBlockConfig.json"
 	tempFilePath := genesisconfPath + "TempBlockConfig.json"
 	wrongFilePath := genesisconfPath + "WrongFileName.json"
 	tempBlockConfigJson := []byte(`{"Header": {
@@ -42,7 +42,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 	tempBlockConfigByte, _ := json.Marshal(tempBlock)
 	_ = ioutil.WriteFile(tempFilePath, tempBlockConfigByte, 0644)
 	defer os.Remove(tempFilePath)
-	rightFilePaths := []string{rightFilePath, tempFilePath}
+	rightFilePaths := []string{genesisConfFilePath, tempFilePath}
 	for _, rightFilePath := range rightFilePaths{
 		GenesisBlock, err1 := CreateGenesisBlock(rightFilePath)
 		assert.NoError(t, err1)
