@@ -18,7 +18,8 @@ import (
 
 func TestCreateGenesisBlock(t *testing.T) {
 	genesisconfPath := build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/.it-chain/genesisconf/"
-	rightFilePath := genesisconfPath + "TempBlockConfig.json"
+	rightFilePath := genesisconfPath + "GenesisBlockConfig.json"
+	tempFilePath := genesisconfPath + "TempBlockConfig.json"
 	wrongFilePath := genesisconfPath + "WrongFileName.json"
 	tempBlockConfigJson := []byte(`{"Header": {
 										  "Height":0,
@@ -39,23 +40,26 @@ func TestCreateGenesisBlock(t *testing.T) {
 	var tempBlock block.DefaultBlock
 	_ = json.Unmarshal(tempBlockConfigJson, &tempBlock)
 	tempBlockConfigByte, _ := json.Marshal(tempBlock)
-	_ = ioutil.WriteFile(rightFilePath, tempBlockConfigByte, 0644)
-	defer os.Remove(rightFilePath)
+	_ = ioutil.WriteFile(tempFilePath, tempBlockConfigByte, 0644)
+	defer os.Remove(tempFilePath)
+	rightFilePaths := []string{rightFilePath, tempFilePath}
+	for _, rightFilePath := range rightFilePaths{
+		GenesisBlock, err1 := CreateGenesisBlock(rightFilePath)
+		assert.NoError(t, err1)
+		assert.Equal(t, uint64(0), GenesisBlock.Header.Height)
+		assert.Equal(t, "", GenesisBlock.Header.PreviousHash)
+		assert.Equal(t, "", GenesisBlock.Header.Version)
+		assert.Equal(t, "", GenesisBlock.Header.MerkleTreeRootHash)
+		assert.Equal(t, time.Now().String()[:19], GenesisBlock.Header.TimeStamp.String()[:19])
+		assert.Equal(t, "Genesis", GenesisBlock.Header.CreatorID)
+		assert.Equal(t, make([]byte, 0), GenesisBlock.Header.Signature)
+		assert.Equal(t, "", GenesisBlock.Header.BlockHash)
+		assert.Equal(t, 0, GenesisBlock.Header.MerkleTreeHeight)
+		assert.Equal(t, 0, GenesisBlock.Header.TransactionCount)
+		assert.Equal(t, make([][]byte, 0), GenesisBlock.Proof)
+		assert.Equal(t, make([]*tx.DefaultTransaction, 0), GenesisBlock.Transactions)
 
-	GenesisBlock, err1 := CreateGenesisBlock(rightFilePath)
+	}
 	_, err2 := CreateGenesisBlock(wrongFilePath)
-	assert.NoError(t, err1)
 	assert.Error(t, err2)
-	assert.Equal(t, uint64(0), GenesisBlock.Header.Height)
-	assert.Equal(t, "", GenesisBlock.Header.PreviousHash)
-	assert.Equal(t, "", GenesisBlock.Header.Version)
-	assert.Equal(t, "", GenesisBlock.Header.MerkleTreeRootHash)
-	assert.Equal(t, time.Now().String()[:19], GenesisBlock.Header.TimeStamp.String()[:19])
-	assert.Equal(t, "Genesis", GenesisBlock.Header.CreatorID)
-	assert.Equal(t, make([]byte, 0), GenesisBlock.Header.Signature)
-	assert.Equal(t, "", GenesisBlock.Header.BlockHash)
-	assert.Equal(t, 0, GenesisBlock.Header.MerkleTreeHeight)
-	assert.Equal(t, 0, GenesisBlock.Header.TransactionCount)
-	assert.Equal(t, make([][]byte, 0), GenesisBlock.Proof)
-	assert.Equal(t, make([]*tx.DefaultTransaction, 0), GenesisBlock.Transactions)
 }
