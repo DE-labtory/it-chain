@@ -6,13 +6,14 @@ import (
 	"github.com/it-chain/it-chain-Engine/txpool/domain/model/transaction"
 	"github.com/it-chain/it-chain-Engine/txpool/domain/model/timeout"
 	"github.com/it-chain/it-chain-Engine/conf"
+	"errors"
 )
 
 type TxpoolApi struct {
 	txRepository  *repository.TransactionRepository
 	timeoutTicker *timeout.TimeoutTicker
 	maxTxByte     int
-	messageApi    *service.MessageProducer
+	msgProducer   *service.MessageProducer
 }
 
 func NewTxpoolApi (txpoolRepo *repository.TransactionRepository, messageProducer *service.MessageProducer) *TxpoolApi{
@@ -22,12 +23,16 @@ func NewTxpoolApi (txpoolRepo *repository.TransactionRepository, messageProducer
 		txRepository:  txpoolRepo,
 		timeoutTicker: timeout.NewTimeoutTicker(txpConfig.TimeoutMs),
 		maxTxByte:     txpConfig.MaxTransactionByte,
-		messageApi:    messageProducer,
+		msgProducer:   messageProducer,
 	}
 }
 
-func (txpoolApi TxpoolApi) SaveTransaction(transaction transaction.Transaction) error {
-	return (*txpoolApi.txRepository).Save(transaction)
+func (txpoolApi TxpoolApi) SaveTransaction(tx transaction.Transaction) error {
+	if tx.TxStatus == transaction.VALID {
+		return (*txpoolApi.txRepository).Save(tx)
+
+	}
+	return errors.New("Transaction is not valid")
 }
 
 func (txpoolApi TxpoolApi) RemoveTransaction(transactionId transaction.TransactionId) error {
