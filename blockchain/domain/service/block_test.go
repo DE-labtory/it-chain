@@ -5,14 +5,43 @@ import (
 	"testing"
 	"time"
 
+	"encoding/json"
+
+	"io/ioutil"
+
+	"os"
+
+	"github.com/it-chain/yggdrasill/block"
 	tx "github.com/it-chain/yggdrasill/transaction"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateGenesisBlock(t *testing.T) {
 	genesisconfPath := build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/.it-chain/genesisconf/"
-	rightFilePath := genesisconfPath + "GenesisBlockConfig.json"
+	rightFilePath := genesisconfPath + "TempBlockConfig.json"
 	wrongFilePath := genesisconfPath + "WrongFileName.json"
+	tempBlockConfigJson := []byte(`{"Header": {
+										  "Height":0,
+										  "PreviousHash":"",
+										  "Version":"",
+										  "MerkleTreeRootHash":"",
+										  "TimeStamp":"0001-01-01T00:00:00-00:00",
+										  "CreatorID":"Genesis",
+										  "Signature":[],
+										  "BlockHash":"",
+										  "MerkleTreeHeight":0,
+										  "TransactionCount":0
+										},
+							  "Proof": [],
+							  "Transactions":[]
+							}`)
+
+	var tempBlock block.DefaultBlock
+	_ = json.Unmarshal(tempBlockConfigJson, &tempBlock)
+	tempBlockConfigByte, _ := json.Marshal(tempBlock)
+	_ = ioutil.WriteFile(rightFilePath, tempBlockConfigByte, 0644)
+	defer os.Remove(rightFilePath)
+
 	GenesisBlock, err1 := CreateGenesisBlock(rightFilePath)
 	_, err2 := CreateGenesisBlock(wrongFilePath)
 	assert.NoError(t, err1)
