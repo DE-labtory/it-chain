@@ -32,7 +32,7 @@ func (txpoolApi TxpoolApi) SaveTransaction(tx transaction.Transaction) error {
 		return (*txpoolApi.txRepository).Save(tx)
 
 	}
-	return errors.New("Transaction is not valid")
+	return errors.New("transaction is not valid")
 }
 
 func (txpoolApi TxpoolApi) RemoveTransaction(transactionId transaction.TransactionId) error {

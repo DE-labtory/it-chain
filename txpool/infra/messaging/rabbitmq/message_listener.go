@@ -6,6 +6,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/messaging/event"
 	"github.com/it-chain/it-chain-Engine/txpool/api"
 	"github.com/streadway/amqp"
+	"github.com/it-chain/it-chain-Engine/txpool/domain/model/transaction"
 )
 
 type MessageListener struct {
@@ -23,7 +24,9 @@ func (ml MessageListener) ListenTransactionCreateEvent(messageChannel <-chan amq
 				// TODO 에러처리하기
 			}
 
-			//TODO event 메세지 처리하기
+			var transactionMessage transaction.Transaction
+			json.Unmarshal(eventMessage.TransactionData, &transactionMessage)
+			ml.txpoolApi.SaveTransaction(transactionMessage)
 		}
 	}()
 }
