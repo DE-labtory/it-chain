@@ -38,3 +38,10 @@ main
 
 # tmp
 .tmp
+
+# leveldb output
+*.log
+CURRENT
+LOCK
+LOG
+MANIFEST-*
