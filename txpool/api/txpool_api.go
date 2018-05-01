@@ -7,7 +7,6 @@ import (
 	"github.com/it-chain/it-chain-Engine/txpool/domain/model/timeout"
 	"github.com/it-chain/it-chain-Engine/conf"
 	"errors"
-	"github.com/it-chain/it-chain-Engine/common"
 )
 
 type TxpoolApi struct {
@@ -33,14 +32,7 @@ func (txpoolApi TxpoolApi) SaveTransaction(tx transaction.Transaction) error {
 		return errors.New("transaction is not valid")
 	}
 
-	txData := tx.TxData
-	hashArgs := []string{txData.Jsonrpc, string(txData.Method), string(txData.Params.Function), txData.ICodeID, tx.PublishPeerId, tx.TimeStamp.String(), string(tx.TxId), string(tx.TxType)}
-	for _, str := range txData.Params.Args {
-		hashArgs = append(hashArgs, str)
-	}
-	resultHash := common.ComputeSHA256(hashArgs)
-
-	if resultHash != tx.TxHash {
+	if tx.TxHash != tx.CalcHash() {
 		return errors.New("hash value is incorrect")
 	}
 
