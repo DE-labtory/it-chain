@@ -39,6 +39,12 @@ func (txpoolApi TxpoolApi) SaveTransaction(tx transaction.Transaction) error {
 	return (*txpoolApi.txRepository).Save(tx)
 }
 
+func (txpoolApi TxpoolApi) SaveTxData(publishPeerId string, txType transaction.TxDataType, txData transaction.TxData) error {
+	tx := transaction.NewTransaction(publishPeerId, txType, &txData)
+
+	return txpoolApi.SaveTransaction(*tx)
+}
+
 func (txpoolApi TxpoolApi) RemoveTransaction(transactionId transaction.TransactionId) error {
 	return (*txpoolApi.txRepository).Remove(transactionId)
 }
