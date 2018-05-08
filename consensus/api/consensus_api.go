@@ -13,7 +13,7 @@ type ConsensusApi struct {
 	consensusRepository repository.ConsensusRepository
 	parlimentRepository repository.ParlimentRepository
 	msgPool             msg.MsgPool
-	messageApi          MessageApi
+	messageService      service.MessageService
 }
 
 func (cApi ConsensusApi) StartConsensus(userId parliament.PeerID, block cs.Block) error {
@@ -33,9 +33,9 @@ func (cApi ConsensusApi) StartConsensus(userId parliament.PeerID, block cs.Block
 		cApi.consensusRepository.Save(*consensus)
 
 		PreprepareMessage := factory.CreatePreprepareMsg(*consensus)
-		cApi.messageApi.BroadCastMsg(PreprepareMessage, consensus.Representatives)
+		cApi.messageService.BroadCastMsg(PreprepareMessage, consensus.Representatives)
 	} else {
-		cApi.messageApi.ConfirmedBlock(block)
+		cApi.messageService.ConfirmedBlock(block)
 	}
 
 	return nil
@@ -49,7 +49,7 @@ func (cApi ConsensusApi) ReceivePrepareMsg(msg msg.PrepareMsg) {
 	if service.CheckPreparePolicy(*consensus, cApi.msgPool) {
 		CommitMsg := factory.CreateCommitMsg(*consensus)
 		consensus.ToCommitState()
-		cApi.messageApi.BroadCastMsg(CommitMsg, consensus.Representatives)
+		cApi.messageService.BroadCastMsg(CommitMsg, consensus.Representatives)
 	} else {
 		return
 	}
@@ -60,7 +60,7 @@ func (cApi ConsensusApi) ReceiveCommitMsg(msg msg.CommitMsg) {
 	consensus := cApi.consensusRepository.FindById(msg.ConsensusID)
 
 	if service.CheckCommitPolicy(*consensus, cApi.msgPool) {
-		cApi.messageApi.ConfirmedBlock(consensus.Block)
+		cApi.messageService.ConfirmedBlock(consensus.Block)
 		//todo delete consensus and remove all message
 	} else {
 		return
@@ -81,5 +81,5 @@ func (cApi ConsensusApi) ReceivePreprepareMsg(msg msg.PreprepareMsg) {
 	consensus.Start()
 	cApi.consensusRepository.Save(consensus)
 	PrepareMsg := factory.CreatePrepareMsg(consensus)
-	cApi.messageApi.BroadCastMsg(PrepareMsg, consensus.Representatives)
+	cApi.messageService.BroadCastMsg(PrepareMsg, consensus.Representatives)
 }

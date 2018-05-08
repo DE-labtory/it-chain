@@ -1,11 +1,12 @@
 package event
 
-type ConsensusStartEvent struct {
-	Block  []byte
-	UserID string
+type MessageDeliveryEvent struct {
+	Recipients []string
+	Body       []byte
+	Protocol   string
 }
 
-type ConsensusMessageArriveEvent struct {
-	MessageType ConsensusMessageType
-	MessageBody []byte
+type NewConn struct {
+	Id      string
+	Address string
 }
