@@ -20,6 +20,7 @@ type Configuration struct {
 	Peer           model.PeerConfiguration
 	Authentication model.AuthenticationConfiguration
 	Icode          model.ICodeConfiguration
+	GrpcGateway    model.GrpcGatewayConfiguration
 }
 
 func GetConfiguration() *Configuration {

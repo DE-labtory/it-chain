@@ -40,6 +40,7 @@ func main() {
 		Peer:           model.NewPeerConfiguration(),
 		Authentication: model.NewAuthenticationConfiguration(),
 		Icode:          model.NewIcodeConfiguration(),
+		GrpcGateway:    model.NewGrpcGatewayConfiguration(),
 	}
 	output, _ := yaml.Marshal(&confInfo)
 	err := ioutil.WriteFile(path+"/config.yaml", output, 0644)

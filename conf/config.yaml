@@ -15,7 +15,10 @@ blockchain:
 peer:
   empty: empty
 authentication:
-  keytype: RSA
+  keytype: 0
   keypath: .it-chain/
 icode:
   repositorypath: empty
+grpcgateway:
+  empty: ""
+  ip: ""
