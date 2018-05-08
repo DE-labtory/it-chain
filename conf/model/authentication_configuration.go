@@ -1,13 +1,13 @@
 package model
 
 type AuthenticationConfiguration struct {
-	KeyType string
+	KeyType int
 	KeyPath string
 }
 
 func NewAuthenticationConfiguration() AuthenticationConfiguration {
 	return AuthenticationConfiguration{
-		KeyType: "RSA",
+		KeyType: 0,
 		KeyPath: ".it-chain/",
 	}
 }
