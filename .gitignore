@@ -38,3 +38,6 @@ main
 
 # tmp
 .tmp
+
+#vendor
+vendor
