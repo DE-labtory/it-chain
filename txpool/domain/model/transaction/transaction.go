@@ -3,6 +3,8 @@ package transaction
 import (
 	"time"
 
+	"encoding/json"
+
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/rs/xid"
 )
@@ -15,6 +17,11 @@ const (
 )
 
 type TransactionId string
+
+func (tId TransactionId) ToString() string {
+	return string(tId)
+}
+
 type TransactionStatus int
 type TransactionType int
 type Transaction struct {
@@ -51,4 +58,14 @@ func (t Transaction) Serialize() ([]byte, error) {
 
 func (t Transaction) GetID() string {
 	return string(t.TxId)
+}
+
+func Deserialize(b []byte, transaction *Transaction) error {
+	err := json.Unmarshal(b, transaction)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
