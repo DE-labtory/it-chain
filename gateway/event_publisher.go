@@ -10,7 +10,13 @@ import (
 )
 
 type EventPublisher struct {
-	messaging *messaging.Messaging
+	messaging *messaging.Rabbitmq
+}
+
+func NewEventPublisher(messaging *messaging.Rabbitmq) *EventPublisher {
+	return &EventPublisher{
+		messaging: messaging,
+	}
 }
 
 func (ep EventPublisher) PublishNewConnEvent(connection conn.Connection) error {

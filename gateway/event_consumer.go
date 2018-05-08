@@ -12,6 +12,12 @@ type EventConsumer struct {
 	messageDeliver MessageDeliver
 }
 
+func NewEventConsumer(messageDeliver MessageDeliver) *EventConsumer {
+	return &EventConsumer{
+		messageDeliver: messageDeliver,
+	}
+}
+
 func (ec EventConsumer) HandleMessageDeliverEvent(amqpMessage amqp.Delivery) {
 
 	MessageDelivery := &event.MessageDeliverEvent{}

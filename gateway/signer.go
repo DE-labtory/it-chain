@@ -9,8 +9,13 @@ import (
 )
 
 type Signer struct {
-	au  auth.Auth
 	pri key.PriKey
+}
+
+func NewSigner(pri key.PriKey) *Signer {
+	return &Signer{
+		pri: pri,
+	}
 }
 
 func (s Signer) SignEnvelope(envelope *pb.Envelope) *pb.Envelope {
@@ -19,7 +24,7 @@ func (s Signer) SignEnvelope(envelope *pb.Envelope) *pb.Envelope {
 	hash.Write(envelope.Payload)
 	digest := hash.Sum(nil)
 
-	sig, err := s.au.Sign(s.pri, digest, auth.EQUAL_SHA512.SignerOptsToPSSOptions())
+	sig, err := auth.Sign(s.pri, digest, auth.EQUAL_SHA512.SignerOptsToPSSOptions())
 
 	if err != nil {
 		//signing error

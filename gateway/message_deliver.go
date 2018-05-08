@@ -16,6 +16,13 @@ type MessageDeliver struct {
 	connectionStore conn.ConnectionStore
 }
 
+func NewMessageDeliver(signer Signer, connectionStore conn.ConnectionStore) *MessageDeliver {
+	return &MessageDeliver{
+		signer:          signer,
+		connectionStore: connectionStore,
+	}
+}
+
 func (m MessageDeliver) Deliver(recipients []string, protocol string, data []byte) error {
 
 	envelope := BuildEnvelope(mux.Protocol(protocol), data)
