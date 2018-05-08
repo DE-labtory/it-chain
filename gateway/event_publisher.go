@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 
-	"github.com/it-chain/bifrost/conn"
+	"github.com/it-chain/bifrost"
 	"github.com/it-chain/it-chain-Engine/messaging"
 	"github.com/it-chain/it-chain-Engine/messaging/event"
 	"github.com/it-chain/it-chain-Engine/messaging/topic"
@@ -19,13 +19,11 @@ func NewEventPublisher(messaging *messaging.Rabbitmq) *EventPublisher {
 	}
 }
 
-func (ep EventPublisher) PublishNewConnEvent(connection conn.Connection) error {
-
-	connInfo := connection.GetConnInfo()
+func (ep EventPublisher) PublishNewConnEvent(connection bifrost.Connection) error {
 
 	newConnEvent := event.NewConnEvent{}
-	newConnEvent.Id = string(connInfo.Id)
-	newConnEvent.Address = connInfo.Address.IP
+	newConnEvent.Id = string(connection.GetID())
+	newConnEvent.Address = connection.GetIP()
 
 	b, err := json.Marshal(newConnEvent)
 

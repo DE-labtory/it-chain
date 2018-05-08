@@ -9,9 +9,11 @@ import (
 	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/it-chain-Engine/messaging"
+	"github.com/it-chain/it-chain-Engine/messaging/topic"
 )
 
 var DefaultMux *mux.DefaultMux
+var ConnectionStore *bifrost.ConnectionStore
 
 //set mux for connection
 func init() {
@@ -25,11 +27,20 @@ func init() {
 	DefaultMux.Handle("join", func(message bifrost.Message) {
 		log.Printf("%s", message.Data)
 	})
+
+	ConnectionStore = bifrost.NewConnectionStore()
 }
 
 func Start() error {
 
 	config := conf.GetConfiguration()
+
+	mq := messaging.NewRabbitmq(config.Common.Messaging.Url)
+	mq.Start()
+
+	eventConsumer := NewEventConsumer(ConnectionStore)
+
+	mq.Consume(topic.MessageDeliverEvent.String(), eventConsumer.HandleMessageDeliverEvent)
 
 	pri, pub := loadKeyPair(config.Authentication.KeyPath)
 
@@ -38,15 +49,16 @@ func Start() error {
 	s.OnConnection(OnConnection)
 	s.OnError(OnError)
 
-	s.Listen(ip)
+	s.Listen(config.GrpcGateway.Ip)
 
-	mq := messaging.NewRabbitmq(config.Common.Messaging.Url)
 	return nil
 }
 
 func OnConnection(connection bifrost.Connection) {
 
 	connection.Handle(DefaultMux)
+	ConnectionStore.AddConnection(connection)
+
 	defer connection.Close()
 
 	if err := connection.Start(); err != nil {

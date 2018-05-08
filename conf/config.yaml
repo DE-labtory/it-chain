@@ -20,5 +20,5 @@ authentication:
 icode:
   repositorypath: empty
 grpcgateway:
-  empty: ""
-  ip: ""
+  empty: empty
+  ip: 127.0.0.1:13579
