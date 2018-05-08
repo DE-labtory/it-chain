@@ -121,6 +121,54 @@
   revision = "23c074d0eceb2b8a5bfdbb271ab780cde70f05a8"
 
 [[projects]]
+  branch = "develop"
+  name = "github.com/it-chain/bifrost"
+  packages = [
+    ".",
+    "conn",
+    "mux",
+    "pb",
+    "stream"
+  ]
+  revision = "f5126d96adf3ea667ee98da90014ebbcb19cbd8d"
+
+[[projects]]
+  name = "github.com/it-chain/heimdall"
+  packages = [
+    "auth",
+    "key"
+  ]
+  revision = "22a61e64e211c0f603126e4b520979c469c2e8a8"
+  version = "v0.1.2"
+
+[[projects]]
+  name = "github.com/it-chain/leveldb-wrapper"
+  packages = [
+    ".",
+    "key_value_db"
+  ]
+  revision = "3ece449cc1f7b3b934d322e39543485021dabbf0"
+  version = "v1.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/it-chain/yggdrasill"
+  packages = [
+    ".",
+    "block",
+    "transaction",
+    "util",
+    "validator"
+  ]
+  revision = "996ca765f5c7c14088aa864795447eb0e74cda7c"
+
+[[projects]]
+  name = "github.com/jbenet/go-base58"
+  packages = ["."]
+  revision = "6237cf65f3a6f7111cd8a42be3590df99a66bc7d"
+  version = "1.0.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/jbenet/go-context"
   packages = ["io"]
@@ -538,6 +586,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e2c15068e64bff1fbd3f522be7939937dc2759b2ebf5eff54ec27a6b1e418e5d"
+  inputs-digest = "1d0ccff9aafb2438be9c305622e3492e18c4af325e8b15516ca4e4774442d463"
   solver-name = "gps-cdcl"
   solver-version = 1
