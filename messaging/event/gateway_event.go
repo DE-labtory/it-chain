@@ -1,12 +1,12 @@
 package event
 
-type MessageDeliveryEvent struct {
+type MessageDeliverEvent struct {
 	Recipients []string
 	Body       []byte
 	Protocol   string
 }
 
-type NewConn struct {
+type NewConnEvent struct {
 	Id      string
 	Address string
 }
