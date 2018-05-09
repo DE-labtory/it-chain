@@ -44,11 +44,8 @@ func NewTransaction(publishPeerId string, txType TxDataType, txData *TxData) *Tr
 		TimeStamp:     time.Now(),
 		TxData:        txData,
 	}
-	hashArgs := []string{txData.Jsonrpc, string(txData.Method), string(txData.Params.Function), txData.ICodeID, publishPeerId, tx.TimeStamp.String(), string(tx.TxId), string(tx.TxType)}
-	for _, str := range txData.Params.Args {
-		hashArgs = append(hashArgs, str)
-	}
-	tx.TxHash = common.ComputeSHA256(hashArgs)
+
+	tx.TxHash = tx.CalcHash()
 	return &tx
 }
 
@@ -68,4 +65,12 @@ func Deserialize(b []byte, transaction *Transaction) error {
 	}
 
 	return nil
+}
+
+func (t Transaction) CalcHash() string {
+	hashArgs := []string{t.TxData.Jsonrpc, string(t.TxData.Method), string(t.TxData.Params.Function), t.TxData.ICodeID, t.PublishPeerId, t.TimeStamp.String(), string(t.TxId), string(t.TxType)}
+	for _, str := range t.TxData.Params.Args {
+		hashArgs = append(hashArgs, str)
+	}
+	return common.ComputeSHA256(hashArgs)
 }
