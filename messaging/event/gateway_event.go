@@ -10,3 +10,7 @@ type NewConnEvent struct {
 	Id      string
 	Address string
 }
+
+type ConnCmdCreate struct {
+	Address string
+}

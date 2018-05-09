@@ -1,25 +1,18 @@
+//Subscribe event and do corresponding logic
+
 package main
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/it-chain-Engine/messaging/event"
 	"github.com/streadway/amqp"
 )
 
-//Subscribe event and do corresponding logic
-type EventConsumer struct {
-	connectionStore *bifrost.ConnectionStore
-}
-
-func NewEventConsumer(connectionStore *bifrost.ConnectionStore) *EventConsumer {
-	return &EventConsumer{
-		connectionStore: connectionStore,
-	}
-}
-
-func (ec EventConsumer) HandleMessageDeliverEvent(amqpMessage amqp.Delivery) {
+func HandleMessageDeliverEvent(amqpMessage amqp.Delivery) {
 
 	MessageDelivery := &event.MessageDeliverEvent{}
 	if err := json.Unmarshal(amqpMessage.Body, MessageDelivery); err != nil {
@@ -27,17 +20,42 @@ func (ec EventConsumer) HandleMessageDeliverEvent(amqpMessage amqp.Delivery) {
 		return
 	}
 
-	ec.deliver(MessageDelivery.Recipients, MessageDelivery.Protocol, MessageDelivery.Body)
+	deliver(MessageDelivery.Recipients, MessageDelivery.Protocol, MessageDelivery.Body)
 }
 
-func (ec EventConsumer) HandleDialEvent(amqpMessage amqp.Delivery) {
+func HandleConnCmdCreate(amqpMessage amqp.Delivery) {
 
+	ConnCmdCreate := &event.ConnCmdCreate{}
+	if err := json.Unmarshal(amqpMessage.Body, ConnCmdCreate); err != nil {
+		// fail to unmarshal event
+		return
+	}
+
+	clientOpt := client.ClientOpts{
+		Ip:     ConnCmdCreate.Address,
+		PriKey: pri,
+		PubKey: pub,
+	}
+
+	grpcOpt := client.GrpcOpts{
+		TlsEnabled: false,
+		Creds:      nil,
+	}
+
+	conn, err := client.Dial(ConnCmdCreate.Address, clientOpt, grpcOpt)
+
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	OnConnection(conn)
 }
 
-func (ec EventConsumer) deliver(recipients []string, protocol string, data []byte) error {
+func deliver(recipients []string, protocol string, data []byte) error {
 
 	for _, recipient := range recipients {
-		connection := ec.connectionStore.GetConnection(bifrost.ConnID(recipient))
+		connection := ConnectionStore.GetConnection(bifrost.ConnID(recipient))
 
 		if connection != nil {
 			connection.Send(data, protocol, nil, nil)

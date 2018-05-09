@@ -4,26 +4,16 @@ import (
 	"encoding/json"
 
 	"github.com/it-chain/bifrost"
-	"github.com/it-chain/it-chain-Engine/messaging"
 	"github.com/it-chain/it-chain-Engine/messaging/event"
 	"github.com/it-chain/it-chain-Engine/messaging/topic"
 )
 
-type EventPublisher struct {
-	messaging *messaging.Rabbitmq
-}
+func PublishNewConnEvent(connection bifrost.Connection) error {
 
-func NewEventPublisher(messaging *messaging.Rabbitmq) *EventPublisher {
-	return &EventPublisher{
-		messaging: messaging,
+	newConnEvent := event.NewConnEvent{
+		Id:      string(connection.GetID()),
+		Address: connection.GetIP(),
 	}
-}
-
-func (ep EventPublisher) PublishNewConnEvent(connection bifrost.Connection) error {
-
-	newConnEvent := event.NewConnEvent{}
-	newConnEvent.Id = string(connection.GetID())
-	newConnEvent.Address = connection.GetIP()
 
 	b, err := json.Marshal(newConnEvent)
 
@@ -31,7 +21,7 @@ func (ep EventPublisher) PublishNewConnEvent(connection bifrost.Connection) erro
 		return err
 	}
 
-	err = ep.messaging.Publish(topic.NewConnEvent.String(), b)
+	err = mq.Publish(topic.NewConnEvent.String(), b)
 
 	if err != nil {
 		return err

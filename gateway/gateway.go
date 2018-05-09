@@ -14,9 +14,15 @@ import (
 
 var DefaultMux *mux.DefaultMux
 var ConnectionStore *bifrost.ConnectionStore
+var pri key.PriKey
+var pub key.PubKey
+var config *conf.Configuration
+var mq *messaging.Rabbitmq
 
 //set mux for connection
 func init() {
+
+	config := conf.GetConfiguration()
 
 	DefaultMux = mux.New()
 
@@ -29,20 +35,15 @@ func init() {
 	})
 
 	ConnectionStore = bifrost.NewConnectionStore()
+	pri, pub = loadKeyPair(config.Authentication.KeyPath)
+	mq = messaging.NewRabbitmq(config.Common.Messaging.Url)
+	mq.Start()
 }
 
 func Start() error {
 
-	config := conf.GetConfiguration()
-
-	mq := messaging.NewRabbitmq(config.Common.Messaging.Url)
-	mq.Start()
-
-	eventConsumer := NewEventConsumer(ConnectionStore)
-
-	mq.Consume(topic.MessageDeliverEvent.String(), eventConsumer.HandleMessageDeliverEvent)
-
-	pri, pub := loadKeyPair(config.Authentication.KeyPath)
+	mq.Consume(topic.MessageDeliverEvent.String(), HandleMessageDeliverEvent)
+	mq.Consume(topic.ConnCmdCreate.String(), HandleConnCmdCreate)
 
 	s := server.New(bifrost.KeyOpts{PriKey: pri, PubKey: pub})
 
@@ -58,6 +59,8 @@ func OnConnection(connection bifrost.Connection) {
 
 	connection.Handle(DefaultMux)
 	ConnectionStore.AddConnection(connection)
+
+	PublishNewConnEvent(connection)
 
 	defer connection.Close()
 
