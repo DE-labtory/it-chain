@@ -30,6 +30,10 @@ func (ec EventConsumer) HandleMessageDeliverEvent(amqpMessage amqp.Delivery) {
 	ec.deliver(MessageDelivery.Recipients, MessageDelivery.Protocol, MessageDelivery.Body)
 }
 
+func (ec EventConsumer) HandleDialEvent(amqpMessage amqp.Delivery) {
+
+}
+
 func (ec EventConsumer) deliver(recipients []string, protocol string, data []byte) error {
 
 	for _, recipient := range recipients {

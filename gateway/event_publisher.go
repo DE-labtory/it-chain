@@ -31,7 +31,7 @@ func (ep EventPublisher) PublishNewConnEvent(connection bifrost.Connection) erro
 		return err
 	}
 
-	err = ep.messaging.Publish(topic.MessageCreated.String(), b)
+	err = ep.messaging.Publish(topic.NewConnEvent.String(), b)
 
 	if err != nil {
 		return err

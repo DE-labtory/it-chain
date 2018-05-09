@@ -8,6 +8,7 @@ const (
 	BlockConfirmEvent
 	MessageDeliverEvent
 	NewConnEvent
+	ConnCmdCreate
 
 	//txpool Event
 	TransactionReceiveEvent
@@ -33,6 +34,8 @@ func (e Event) String() string {
 		return "TransactionSendEvent"
 	case BlockProposeEvent:
 		return "BlockProposeEvent"
+	case ConnCmdCreate:
+		return "DialRequestEvent"
 	}
 
 	return "error"
