@@ -9,6 +9,7 @@ const (
 	MessageDeliverEvent
 	NewConnEvent
 	ConnCreateCmd
+	ConsensusCreateCmd
 
 	//txpool Event
 	TransactionReceiveEvent
@@ -36,6 +37,8 @@ func (e Event) String() string {
 		return "BlockProposeEvent"
 	case ConnCreateCmd:
 		return "ConnCreateCmd"
+	case ConsensusCreateCmd:
+		return "ConsensusCreateCmd"
 	}
 
 	return "error"

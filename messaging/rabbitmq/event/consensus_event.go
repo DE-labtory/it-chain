@@ -22,3 +22,8 @@ type ConsensusMessagePublishEvent struct {
 type BlockConfirmEvent struct {
 	Block []byte
 }
+
+type ConsensusCreateCmd struct {
+	UserID string
+	Block  []byte
+}
