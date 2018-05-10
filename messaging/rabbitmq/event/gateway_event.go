@@ -11,6 +11,6 @@ type NewConnEvent struct {
 	Address string
 }
 
-type ConnCmdCreate struct {
+type ConnCreateCmd struct {
 	Address string
 }

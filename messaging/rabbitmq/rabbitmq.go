@@ -1,4 +1,4 @@
-package messaging
+package rabbitmq
 
 import (
 	"github.com/streadway/amqp"
@@ -9,19 +9,22 @@ var (
 	QUEUE_NAME     = "it-chain-queue"
 )
 
-type Rabbitmq struct {
+type MessageQueue struct {
 	url  string
 	conn *amqp.Connection
 	ch   *amqp.Channel
 	q    amqp.Queue
 }
 
-func NewRabbitmq(rabbitmqUrl string) *Rabbitmq {
+func Connect(rabbitmqUrl string) *MessageQueue {
 
-	return &Rabbitmq{url: rabbitmqUrl}
+	mq := &MessageQueue{url: rabbitmqUrl}
+	mq.Start()
+
+	return mq
 }
 
-func (m *Rabbitmq) Start() {
+func (m *MessageQueue) Start() {
 
 	//connection
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
@@ -67,12 +70,12 @@ func (m *Rabbitmq) Start() {
 	m.q = q
 }
 
-func (m *Rabbitmq) Close() {
+func (m *MessageQueue) Close() {
 	m.conn.Close()
 	m.ch.Close()
 }
 
-func (m *Rabbitmq) Publish(topic string, data []byte) error {
+func (m *MessageQueue) Publish(topic string, data []byte) error {
 
 	err := m.ch.Publish(
 		EX_CHANGE_NAME, // exchange
@@ -91,7 +94,7 @@ func (m *Rabbitmq) Publish(topic string, data []byte) error {
 	return nil
 }
 
-func (m *Rabbitmq) consume(topic string) (<-chan amqp.Delivery, error) {
+func (m *MessageQueue) consume(topic string) (<-chan amqp.Delivery, error) {
 
 	err := m.ch.QueueBind(
 		m.q.Name,       // queue name
@@ -123,7 +126,7 @@ func (m *Rabbitmq) consume(topic string) (<-chan amqp.Delivery, error) {
 
 type Handler func(delivery amqp.Delivery)
 
-func (m *Rabbitmq) Consume(topic string, handler Handler) error {
+func (m *MessageQueue) Consume(topic string, handler Handler) error {
 
 	chanDelivery, err := m.consume(topic)
 

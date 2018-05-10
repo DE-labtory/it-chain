@@ -1,4 +1,4 @@
-package messaging
+package rabbitmq
 
 import (
 	"fmt"
@@ -11,29 +11,13 @@ import (
 
 func TestMessaging_Start(t *testing.T) {
 
-	message := NewRabbitmq("amqp://guest:guest@localhost:5672/")
+	message := Connect("amqp://guest:guest@localhost:5672/")
 	defer message.Close()
-	assert.NotPanics(t, message.Start)
-
-}
-
-func TestMessaging_Start2(t *testing.T) {
-
-	message := NewRabbitmq("amqp://guest:guest@localhost:5672/")
-	assert.NotPanics(t, message.Start)
-
-	defer message.Close()
-	err := message.Publish("asd", []byte("zxc"))
-
-	if err != nil {
-		assert.NoError(t, err)
-	}
 }
 
 func TestMessaging_Publish(t *testing.T) {
 
-	message := NewRabbitmq("amqp://guest:guest@localhost:5672/")
-	message.Start()
+	message := Connect("amqp://guest:guest@localhost:5672/")
 	defer message.Close()
 
 	wg := sync.WaitGroup{}
@@ -58,8 +42,7 @@ func TestMessaging_Publish(t *testing.T) {
 
 func TestMessaging_MultiPublishAndConsume(t *testing.T) {
 
-	message := NewRabbitmq("amqp://guest:guest@localhost:5672/")
-	message.Start()
+	message := Connect("amqp://guest:guest@localhost:5672/")
 	defer message.Close()
 
 	wg := sync.WaitGroup{}

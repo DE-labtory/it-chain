@@ -2,12 +2,11 @@ package main
 
 import (
 	"log"
+
 	"google.golang.org/grpc"
-	pb "github.com/it-chain/it-chain-Engine/legacy/network/protos"
-	"context"
 )
 
-func main(){
+func main() {
 
 	address := "127.0.0.1:4444"
 
@@ -23,5 +22,5 @@ func main(){
 	//
 	//if err != nil {
 	//	log.Println("could not greet: %v", err)
-	}
+	//}
 }
