@@ -19,7 +19,7 @@ var (
 	config          *conf.Configuration
 	mq              *rabbitmq.MessageQueue
 	s               *Server
-	consumer        *AMQPConsumer
+	consumer        *Consumer
 )
 
 func init() {
@@ -34,17 +34,9 @@ func init() {
 	//publisher
 	publisher := NewEventPublisher(mq)
 
-	//muxer
-	muxer := NewGatewayMux(publisher)
-	s = NewServer(muxer, pri, pub)
-
-	publisher = NewEventPublisher(mq)
-
-	//muxer
-	muxer = NewGatewayMux(publisher)
-
 	//amqp event consumer
-	consumer = NewAMQPConsumer(ConnectionStore, muxer, publisher, pri, pub)
+	consumer = NewAMQPConsumer(ConnectionStore, publisher, pri, pub)
+	s = NewServer(consumer, publisher, ConnectionStore, pri, pub)
 }
 
 func Start() error {

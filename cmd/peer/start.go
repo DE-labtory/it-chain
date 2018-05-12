@@ -37,6 +37,11 @@ func StartCmd() cli.Command {
 	}
 }
 
+var (
+	ErrPidExists = errors.New("pid file exists.")
+	Debug        bool
+)
+
 //start peer
 func start(damon bool) {
 
@@ -93,11 +98,6 @@ func start(damon bool) {
 		os.Exit(1)
 	}
 }
-
-var (
-	ErrPidExists = errors.New("pid file exists.")
-	Debug        bool
-)
 
 func Create(pidfile string) (int, error) {
 

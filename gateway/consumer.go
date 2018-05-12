@@ -14,17 +14,15 @@ import (
 	"github.com/streadway/amqp"
 )
 
-type AMQPConsumer struct {
+type Consumer struct {
 	ConnectionStore *bifrost.ConnectionStore
-	mux             *Muxer
 	publisher       *EventPublisher
 	priKey          key.PriKey
 	pubKey          key.PubKey
 }
 
-func NewAMQPConsumer(ConnectionStore *bifrost.ConnectionStore, mux *Muxer, publisher *EventPublisher, pri key.PriKey, pub key.PubKey) *AMQPConsumer {
-	return &AMQPConsumer{
-		mux:             mux,
+func NewAMQPConsumer(ConnectionStore *bifrost.ConnectionStore, publisher *EventPublisher, pri key.PriKey, pub key.PubKey) *Consumer {
+	return &Consumer{
 		ConnectionStore: ConnectionStore,
 		publisher:       publisher,
 		priKey:          pri,
@@ -32,7 +30,7 @@ func NewAMQPConsumer(ConnectionStore *bifrost.ConnectionStore, mux *Muxer, publi
 	}
 }
 
-func (c AMQPConsumer) HandleMessageDeliverEvent(amqpMessage amqp.Delivery) {
+func (c Consumer) HandleMessageDeliverEvent(amqpMessage amqp.Delivery) {
 
 	MessageDelivery := &event.MessageDeliverEvent{}
 	if err := json.Unmarshal(amqpMessage.Body, MessageDelivery); err != nil {
@@ -49,7 +47,15 @@ func (c AMQPConsumer) HandleMessageDeliverEvent(amqpMessage amqp.Delivery) {
 	}
 }
 
-func (c AMQPConsumer) HandleConnCreateCmd(amqpMessage amqp.Delivery) {
+func (c Consumer) ServeRequest(msg bifrost.Message) {
+
+}
+
+func (c Consumer) ServeError(conn bifrost.Connection, err error) {
+
+}
+
+func (c Consumer) HandleConnCreateCmd(amqpMessage amqp.Delivery) {
 
 	log.Println("ConnCreatedCmd")
 	ConnCreateCmd := &event.ConnCreateCmd{}
@@ -77,7 +83,7 @@ func (c AMQPConsumer) HandleConnCreateCmd(amqpMessage amqp.Delivery) {
 		return
 	}
 
-	connection.Handle(c.mux)
+	connection.Handle(c)
 	c.ConnectionStore.AddConnection(connection)
 
 	c.publisher.PublishConnCreatedEvent(connection)

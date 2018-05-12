@@ -9,19 +9,21 @@ import (
 )
 
 type Server struct {
-	mux             *Muxer
+	handler         bifrost.Handler
 	server          *server.Server
-	ConnectionStore *bifrost.ConnectionStore
+	connectionStore *bifrost.ConnectionStore
 	publisher       *EventPublisher
 }
 
-func NewServer(mux *Muxer, priKey key.PriKey, pubKey key.PubKey) *Server {
+func NewServer(handler bifrost.Handler, publisher *EventPublisher, connectionStore *bifrost.ConnectionStore, priKey key.PriKey, pubKey key.PubKey) *Server {
 
 	s := server.New(bifrost.KeyOpts{PriKey: priKey, PubKey: pubKey})
 
 	server := &Server{
-		mux:    mux,
-		server: s,
+		handler:         handler,
+		server:          s,
+		connectionStore: connectionStore,
+		publisher:       publisher,
 	}
 
 	s.OnConnection(server.onConnection)
@@ -32,8 +34,8 @@ func NewServer(mux *Muxer, priKey key.PriKey, pubKey key.PubKey) *Server {
 
 func (s Server) onConnection(connection bifrost.Connection) {
 
-	connection.Handle(s.mux)
-	s.ConnectionStore.AddConnection(connection)
+	connection.Handle(s.handler)
+	s.connectionStore.AddConnection(connection)
 
 	s.publisher.PublishConnCreatedEvent(connection)
 
@@ -53,5 +55,5 @@ func (s Server) onError(err error) {
 }
 
 func (s Server) Stop() {
-
+	s.server.Stop()
 }
