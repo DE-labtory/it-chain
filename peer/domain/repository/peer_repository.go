@@ -8,6 +8,7 @@ import (
 
 var PeerNotFoundErr = errors.New("PeerNotFound")
 var DuplicatePeerErr = errors.New("PeerAlreadyExist")
+var PeerIdEmptyErr = errors.New("PeerIdEmpty")
 
 type Peer interface {
 	Save(peer model.Peer) error
