@@ -1,6 +1,10 @@
 package gateway
 
 import (
+	"os"
+
+	"log"
+
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/conf"
@@ -8,38 +12,62 @@ import (
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/topic"
 )
 
-var quit chan bool
+var (
+	ConnectionStore *bifrost.ConnectionStore
+	pri             key.PriKey
+	pub             key.PubKey
+	config          *conf.Configuration
+	mq              *rabbitmq.MessageQueue
+	s               *Server
+	consumer        *AMQPConsumer
+)
 
-func Start() error {
-
-	var (
-		ConnectionStore *bifrost.ConnectionStore
-		pri             key.PriKey
-		pub             key.PubKey
-		config          *conf.Configuration
-		mq              *rabbitmq.MessageQueue
-	)
+func init() {
 
 	config = conf.GetConfiguration()
+	mq = rabbitmq.Connect(config.Common.Messaging.Url)
+
 	ConnectionStore = bifrost.NewConnectionStore()
 	pri, pub = loadKeyPair(config.Authentication.KeyPath)
-	mq = rabbitmq.Connect(config.Common.Messaging.Url)
+	//mq = rabbitmq.Connect(config.Common.Messaging.Url)
 
 	//publisher
 	publisher := NewEventPublisher(mq)
 
 	//muxer
 	muxer := NewGatewayMux(publisher)
+	s = NewServer(muxer, pri, pub)
+
+	publisher = NewEventPublisher(mq)
+
+	//muxer
+	muxer = NewGatewayMux(publisher)
 
 	//amqp event consumer
-	consumer := NewAMQPConsumer(ConnectionStore, muxer, publisher, pri, pub)
+	consumer = NewAMQPConsumer(ConnectionStore, muxer, publisher, pri, pub)
+}
+
+func Start() error {
 
 	mq.Consume(topic.MessageDeliverEvent.String(), consumer.HandleMessageDeliverEvent)
 	mq.Consume(topic.ConnCreateCmd.String(), consumer.HandleConnCreateCmd)
 
-	//server
-	server := NewServer(muxer, pri, pub)
-	server.Listen(config.GrpcGateway.Ip)
+	s.Listen(config.GrpcGateway.Ip)
 
 	return nil
+}
+
+func Stop() {
+	//fmt.Print(mq)
+
+	if mq != nil {
+		mq.Close()
+	}
+
+	if s != nil {
+		s.Stop()
+	}
+
+	log.Printf("gateway is closing")
+	os.Exit(1)
 }

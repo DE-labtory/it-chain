@@ -35,7 +35,7 @@ func (s Server) onConnection(connection bifrost.Connection) {
 	connection.Handle(s.mux)
 	s.ConnectionStore.AddConnection(connection)
 
-	s.publisher.ConnCreatedEvent(connection)
+	s.publisher.PublishConnCreatedEvent(connection)
 
 	defer connection.Close()
 
@@ -50,4 +50,8 @@ func (s Server) Listen(ip string) {
 
 func (s Server) onError(err error) {
 	log.Fatalln(err.Error())
+}
+
+func (s Server) Stop() {
+
 }

@@ -1,5 +1,5 @@
 package block
 
-import b "github.com/it-chain/yggdrasill/block"
+import "github.com/it-chain/yggdrasill/impl"
 
-type Block = b.Block
+type Block = impl.DefaultBlock

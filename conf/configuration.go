@@ -27,12 +27,11 @@ type Configuration struct {
 func GetConfiguration() *Configuration {
 	once.Do(func() {
 		instance = &Configuration{}
-		path, _ := os.Getwd()
-
-		path = path + "/conf"
+		path := os.Getenv("GOPATH") + "/src/github.com/it-chain/it-chain-Engine/conf"
 
 		viper.SetConfigName("config")
 		viper.AddConfigPath(path)
+
 		if err := viper.ReadInConfig(); err != nil {
 			panic("cannot read config")
 		}

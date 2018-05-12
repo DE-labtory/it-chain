@@ -7,14 +7,14 @@ import (
 	"github.com/it-chain/it-chain-Engine/blockchain/domain/model/transaction"
 	"github.com/it-chain/leveldb-wrapper/key_value_db"
 	"github.com/it-chain/yggdrasill"
-	"github.com/it-chain/yggdrasill/common"
+	"github.com/it-chain/yggdrasill/impl"
 )
 
 type BlockRepository struct {
 	yggdrasill *yggdrasill.Yggdrasill
 }
 
-func NewBlockRepository(keyValueDB key_value_db.KeyValueDB, validator common.Validator, opts map[string]interface{}) *BlockRepository {
+func NewBlockRepository(keyValueDB key_value_db.KeyValueDB, validator impl.DefaultValidator, opts map[string]interface{}) *BlockRepository {
 	ygg, err := yggdrasill.NewYggdrasill(keyValueDB, validator, opts)
 
 	if err != nil {

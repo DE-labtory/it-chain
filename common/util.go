@@ -16,24 +16,22 @@ limitations under the License.
 package common
 
 import (
-	"strings"
-	"os"
-	"path"
-	"io"
-	"fmt"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"sort"
-	"github.com/it-chain/it-chain-Engine/legacy/network/protos"
-	"github.com/it-chain/it-chain-Engine/legacy/auth"
+	"fmt"
+	"io"
 	"math/big"
-	"crypto/rand"
+	"os"
+	"path"
+	"sort"
+	"strings"
 )
 
 var logger = GetLogger("util.go")
 
-func CreateDirIfMissing(dirPath string) (error){
+func CreateDirIfMissing(dirPath string) error {
 
 	if !strings.HasSuffix(dirPath, "/") {
 		dirPath = dirPath + "/"
@@ -81,7 +79,7 @@ gob encoder로 인코딩했을 때 문제점
 ㄴ json marshal로 바꾸면서 해결
 2. time.Time 값들은 뒤에 monotonic 파트가 없어짐.
 2번은 문제가 안 될수도 있는데 테스트 실패의 원인..
- */
+*/
 func Serialize(object interface{}) ([]byte, error) {
 	data, err := json.Marshal(object)
 	if err != nil {
@@ -101,31 +99,8 @@ func Deserialize(serializedBytes []byte, object interface{}) error {
 	return err
 }
 
-//이렇게 하는것이 과연 최선일까?..
-func ToEnvelope(data interface {}, crpyto auth.Crypto, pubkey []byte) message.Envelope{
-
-	byte,err := json.Marshal(data)
-
-	if err != nil {
-		panic(fmt.Sprintf("Error encoding : %s", err))
-	}
-
-	envelope := message.Envelope{}
-	signed, err :=crpyto.Sign(byte,nil)
-
-	if err != nil {
-		logger.Println("Fail to sign : %s", err)
-	}
-
-	envelope.Payload = byte
-	envelope.Signature = signed
-	envelope.Pubkey = pubkey
-
-	return envelope
-}
-
 func CryptoRandomGeneration(min int64, max int64) int64 {
-	n, _ := rand.Int(rand.Reader, big.NewInt(max + 1 - min))
+	n, _ := rand.Int(rand.Reader, big.NewInt(max+1-min))
 	ret := n.Int64() + min
 	return ret
 }

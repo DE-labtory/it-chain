@@ -14,5 +14,6 @@ var peerCmd = cli.Command{
 func PeerCmd() cli.Command {
 	peerCmd.Subcommands = append(peerCmd.Subcommands, StartCmd())
 	peerCmd.Subcommands = append(peerCmd.Subcommands, DialCmd())
+	peerCmd.Subcommands = append(peerCmd.Subcommands, StopCmd())
 	return peerCmd
 }

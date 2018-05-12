@@ -91,5 +91,5 @@
   version = "15.0.0"
 
 [[constraint]]
-  branch = "develop"
-  name = "github.com/it-chain/bifrost"
+  branch = "master"
+  name = "github.com/syossan27/tebata"

@@ -77,7 +77,7 @@ func (c AMQPConsumer) HandleConnCreateCmd(amqpMessage amqp.Delivery) {
 	connection.Handle(c.mux)
 	c.ConnectionStore.AddConnection(connection)
 
-	c.publisher.ConnCreatedEvent(connection)
+	c.publisher.PublishConnCreatedEvent(connection)
 
 	go func() {
 		defer connection.Close()

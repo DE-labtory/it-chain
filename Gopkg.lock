@@ -2,64 +2,10 @@
 
 
 [[projects]]
-  name = "docker.io/go-docker"
-  packages = [
-    ".",
-    "api",
-    "api/types",
-    "api/types/blkiodev",
-    "api/types/container",
-    "api/types/events",
-    "api/types/filters",
-    "api/types/image",
-    "api/types/mount",
-    "api/types/network",
-    "api/types/registry",
-    "api/types/strslice",
-    "api/types/swarm",
-    "api/types/swarm/runtime",
-    "api/types/time",
-    "api/types/versions",
-    "api/types/volume"
-  ]
-  revision = "b3f5b5de7bbce0acc6a7fc0a4c2b88db678e262e"
-  version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/Microsoft/go-winio"
-  packages = ["."]
-  revision = "7da180ee92d8bd8bb8c37fc560e673e6557c392f"
-  version = "v0.4.7"
-
-[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
-
-[[projects]]
-  name = "github.com/docker/distribution"
-  packages = [
-    "digestset",
-    "reference"
-  ]
-  revision = "edc3ab29cdff8694dd6feb85cfeb4b5f1b38ed9c"
-
-[[projects]]
-  name = "github.com/docker/go-connections"
-  packages = [
-    "nat",
-    "sockets",
-    "tlsconfig"
-  ]
-  revision = "3ede32e2033de7505e6500d6c868c2b9ed9f169d"
-  version = "v0.3.0"
-
-[[projects]]
-  name = "github.com/docker/go-units"
-  packages = ["."]
-  revision = "47565b4f722fb6ceae66b95f853feed578a4a51c"
-  version = "v0.3.3"
 
 [[projects]]
   name = "github.com/emirpasic/gods"
@@ -79,12 +25,6 @@
   packages = ["."]
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
   version = "v1.4.7"
-
-[[projects]]
-  name = "github.com/gogo/protobuf"
-  packages = ["proto"]
-  revision = "100ba4e885062801d56799d78530b73b178a78f3"
-  version = "v0.4"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -135,15 +75,16 @@
   revision = "ef8a98b0bbce4a65b5aa4c368430a80ddc533168"
 
 [[projects]]
-  branch = "develop"
   name = "github.com/it-chain/bifrost"
   packages = [
-    "conn",
+    ".",
+    "client",
     "mux",
     "pb",
-    "stream"
+    "server"
   ]
-  revision = "f5126d96adf3ea667ee98da90014ebbcb19cbd8d"
+  revision = "ab55b9194eee34657a7e7b4db683b1afa4f60f36"
+  version = "v0.1.1"
 
 [[projects]]
   name = "github.com/it-chain/heimdall"
@@ -164,16 +105,20 @@
   version = "v1.1"
 
 [[projects]]
-  branch = "master"
+  branch = "develop"
   name = "github.com/it-chain/yggdrasill"
   packages = [
     ".",
-    "block",
-    "transaction",
-    "util",
-    "validator"
+    "common",
+    "impl"
   ]
-  revision = "996ca765f5c7c14088aa864795447eb0e74cda7c"
+  revision = "1c1373f9d63d86399e3cf31a49973bb38e7318c2"
+
+[[projects]]
+  name = "github.com/jbenet/go-base58"
+  packages = ["."]
+  revision = "6237cf65f3a6f7111cd8a42be3590df99a66bc7d"
+  version = "1.0.0"
 
 [[projects]]
   branch = "master"
@@ -189,10 +134,7 @@
 
 [[projects]]
   name = "github.com/magiconair/properties"
-  packages = [
-    ".",
-    "assert"
-  ]
+  packages = ["."]
   revision = "c3beff4c2358b44d0493c7dda585e7db7ff28ae6"
   version = "v1.7.6"
 
@@ -225,21 +167,6 @@
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
   revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
-
-[[projects]]
-  name = "github.com/opencontainers/go-digest"
-  packages = ["."]
-  revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
-  version = "v1.0.0-rc1"
-
-[[projects]]
-  name = "github.com/opencontainers/image-spec"
-  packages = [
-    "specs-go",
-    "specs-go/v1"
-  ]
-  revision = "d60099175f88c47cd379c4738d158884749ed235"
-  version = "v1.0.1"
 
 [[projects]]
   name = "github.com/pelletier/go-buffruneio"
@@ -334,17 +261,8 @@
   revision = "8e4aba63da9fc5571e01c6a45dc809a58cbc5a68"
 
 [[projects]]
-  name = "github.com/stretchr/objx"
-  packages = ["."]
-  revision = "facf9a85c22f48d2f52f2380e4efce1768749a89"
-  version = "v0.1"
-
-[[projects]]
   name = "github.com/stretchr/testify"
-  packages = [
-    "assert",
-    "mock"
-  ]
+  packages = ["assert"]
   revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
   version = "v1.2.1"
 
@@ -366,6 +284,12 @@
     "leveldb/util"
   ]
   revision = "ae970a0732be3a1f5311da86118d37b9f4bd2a5a"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/syossan27/tebata"
+  packages = ["."]
+  revision = "a31f6c2caec0202898558dce1305fe84c95797c0"
 
 [[projects]]
   name = "github.com/urfave/cli"
@@ -413,26 +337,14 @@
   name = "golang.org/x/net"
   packages = [
     "context",
-    "context/ctxhttp",
     "http/httpguts",
     "http2",
     "http2/hpack",
     "idna",
-    "internal/socks",
     "internal/timeseries",
-    "proxy",
     "trace"
   ]
   revision = "d11bb6cd8e3c4e60239c9cb20ef68586d74500d0"
-
-[[projects]]
-  branch = "master"
-  name = "golang.org/x/oauth2"
-  packages = [
-    ".",
-    "internal"
-  ]
-  revision = "cdc340f7c179dbbfa4afd43b7614e8fcadde4269"
 
 [[projects]]
   branch = "master"
@@ -463,20 +375,6 @@
   ]
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
-
-[[projects]]
-  name = "google.golang.org/appengine"
-  packages = [
-    "internal",
-    "internal/base",
-    "internal/datastore",
-    "internal/log",
-    "internal/remote_api",
-    "internal/urlfetch",
-    "urlfetch"
-  ]
-  revision = "150dc57a1b433e64154302bdc40b6bb8aefa313a"
-  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -515,12 +413,6 @@
   ]
   revision = "d11072e7ca9811b1100b80ca0269ac831f06d024"
   version = "v1.11.3"
-
-[[projects]]
-  name = "gopkg.in/jeevatkm/go-model.v1"
-  packages = ["."]
-  revision = "00bcf69e10573c4ba261c9842194d07e6d4b50e9"
-  version = "v1.0"
 
 [[projects]]
   name = "gopkg.in/src-d/go-billy.v4"
@@ -596,6 +488,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4a152696fbeb22089c2f75253da7616d90be18e0dd2263b7052b606f4520b5d6"
+  inputs-digest = "617451ff5fe3b0a9825ed4ed4b6dc272f7fa3e3cd3019b14349c188ac764459f"
   solver-name = "gps-cdcl"
   solver-version = 1
