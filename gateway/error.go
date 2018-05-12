@@ -1,6 +1,6 @@
 package gateway
 
 type ErrorEvent struct {
-	event string
-	err   string
+	Event string
+	Err   string
 }

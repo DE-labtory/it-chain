@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/it-chain/it-chain-Engine/conf"
+	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/topic"
@@ -38,15 +39,34 @@ func dial(peerAddress string) {
 	config := conf.GetConfiguration()
 	mq := rabbitmq.Connect(config.Common.Messaging.Url)
 
+	defer mq.Close()
+
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
-	var tmpReceiver = func(delivery amqp.Delivery) {
+	var tmpConnCmdCreateReceiver = func(delivery amqp.Delivery) {
 		fmt.Println(delivery.Body)
 		wg.Done()
 	}
 
-	mq.Consume(topic.ConnCreateEvent.String(), tmpReceiver)
+	var tmpGatewayErrorEventReceiver = func(delivery amqp.Delivery) {
+
+		gatewayErrorEvent := &gateway.ErrorEvent{}
+
+		err := json.Unmarshal(delivery.Body, gatewayErrorEvent)
+
+		if err != nil {
+
+		}
+
+		if gatewayErrorEvent.Event == "ConnCreateCmd" {
+			fmt.Printf("fail to dial peer [%s]", gatewayErrorEvent.Err)
+			wg.Done()
+		}
+	}
+
+	mq.Consume(topic.ConnCreateEvent.String(), tmpConnCmdCreateReceiver)
+	mq.Consume("GatewayErrorEvent", tmpGatewayErrorEventReceiver)
 
 	ConnCreatedCmd := event.ConnCreateCmd{}
 	ConnCreatedCmd.Address = peerAddress

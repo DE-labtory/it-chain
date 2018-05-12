@@ -51,7 +51,9 @@ func (c AMQPConsumer) HandleMessageDeliverEvent(amqpMessage amqp.Delivery) {
 
 func (c AMQPConsumer) HandleConnCreateCmd(amqpMessage amqp.Delivery) {
 
+	log.Println("ConnCreatedCmd")
 	ConnCreateCmd := &event.ConnCreateCmd{}
+
 	if err := json.Unmarshal(amqpMessage.Body, ConnCreateCmd); err != nil {
 		c.publisher.PublishGatewayErrorEvent(topic.ConnCreateCmd.String(), err.Error())
 		return
