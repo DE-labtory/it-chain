@@ -3,16 +3,15 @@ package rabbitmq
 import (
 	"github.com/it-chain/it-chain-Engine/txpool/domain/model"
 	"github.com/it-chain/it-chain-Engine/txpool/domain/model/transaction"
+	"github.com/it-chain/it-chain-Engine/txpool/domain/service"
 )
-
-type Publish func(topic string, data []byte) error
 
 // todo need test code
 type MessageProducer struct {
-	Publish Publish
+	Publish service.Publish
 }
 
-func NewMessageProducer(publish Publish) *MessageProducer {
+func NewMessageProducer(publish service.Publish) *MessageProducer {
 	return &MessageProducer{
 		Publish: publish,
 	}
