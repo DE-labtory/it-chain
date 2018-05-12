@@ -21,9 +21,10 @@ func NewPeerTableService(peerRepo repository.Peer, myinfo *model.Peer) *PeerTabl
 }
 
 func (pts *PeerTable) SetLeader(peer *model.Peer) error {
-	find, err := pts.repository.FindById(peer.Id)
-	if err != nil {
-		return err
+	// todo err handle
+	find, _ := pts.repository.FindById(peer.Id)
+	if find == nil {
+
 	}
 	pts.leader = find
 	return nil

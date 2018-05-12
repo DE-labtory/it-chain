@@ -31,10 +31,6 @@ func (ls *LeaderSelection) RequestChangeLeader() error {
 	panic("implement please")
 }
 
-func (ls *LeaderSelection) RequestLeaderInfoTo(peer model.Peer) error {
-	return ls.messageProducer.RequestLeaderInfo(peer)
-}
-
 func (ls *LeaderSelection) changeLeader(peer *model.Peer) error {
 	err := ls.peerTableService.SetLeader(peer)
 	if err != nil {
