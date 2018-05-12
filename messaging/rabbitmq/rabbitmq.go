@@ -40,8 +40,33 @@ func (m *MessageQueue) Start() {
 		panic("Failed to open a channel" + err.Error())
 	}
 
-	//exchange
 	err = ch.ExchangeDeclare(
+		EX_CHANGE_NAME, // name
+		"topic",        // type
+		true,           // durable
+		false,          // auto-deleted
+		false,          // internal
+		false,          // no-wait
+		nil,            // arguments
+	)
+
+	if err != nil {
+		panic("Failed to open a channel" + err.Error())
+	}
+
+	m.conn = conn
+	m.ch = ch
+}
+
+func (m *MessageQueue) Close() {
+	m.conn.Close()
+	m.ch.Close()
+}
+
+func (m *MessageQueue) Publish(topic string, data []byte) error {
+
+	//exchange
+	err := m.ch.ExchangeDeclare(
 		EX_CHANGE_NAME, // name
 		"topic",        // type
 		true,           // durable
@@ -55,29 +80,7 @@ func (m *MessageQueue) Start() {
 		panic("Failed to open exchange" + err.Error())
 	}
 
-	//queue
-	q, err := ch.QueueDeclare(
-		QUEUE_NAME, // name
-		false,      // durable
-		false,      // delete when usused
-		true,       // exclusive
-		false,      // no-wait
-		nil,        // arguments
-	)
-
-	m.conn = conn
-	m.ch = ch
-	m.q = q
-}
-
-func (m *MessageQueue) Close() {
-	m.conn.Close()
-	m.ch.Close()
-}
-
-func (m *MessageQueue) Publish(topic string, data []byte) error {
-
-	err := m.ch.Publish(
+	err = m.ch.Publish(
 		EX_CHANGE_NAME, // exchange
 		topic,          // routing key
 		false,          // mandatory
@@ -96,8 +99,21 @@ func (m *MessageQueue) Publish(topic string, data []byte) error {
 
 func (m *MessageQueue) consume(topic string) (<-chan amqp.Delivery, error) {
 
-	err := m.ch.QueueBind(
-		m.q.Name,       // queue name
+	q, err := m.ch.QueueDeclare(
+		"",    // name
+		false, // durable
+		false, // delete when usused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+
+	if err != nil {
+		panic("Failed to open a channel" + err.Error())
+	}
+
+	err = m.ch.QueueBind(
+		q.Name,         // queue name
 		topic,          // routing key
 		EX_CHANGE_NAME, // exchange
 		false,
@@ -108,13 +124,13 @@ func (m *MessageQueue) consume(topic string) (<-chan amqp.Delivery, error) {
 	}
 
 	msgs, err := m.ch.Consume(
-		m.q.Name, // queue
-		"",       // consumer
-		true,     // auto ack
-		false,    // exclusive
-		false,    // no local
-		false,    // no wait
-		nil,      // args
+		q.Name, // queue
+		"",     // consumer
+		true,   // auto ack
+		false,  // exclusive
+		false,  // no local
+		false,  // no wait
+		nil,    // args
 	)
 
 	if err != nil {
