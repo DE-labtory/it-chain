@@ -1,5 +1,8 @@
 package event
 
+var LeaderInfoRequestProtocol string = "LeaderInfoRequestProtocol"
+var LeaderInfoDeliverProtocol string = "LeaderInfoDeliverProtocol"
+
 //todo define event
 type LeaderChangeEvent struct {
 	PeerId string
@@ -16,12 +19,12 @@ type PeerConnectEvent struct {
 }
 
 //todo define event
-type LeaderInfoDeliverCmd struct {
-	timeUnix int64
+type LeaderInfoRequestCmd struct {
+	TimeUnix int64
 }
 
 //todo define event
-type LeaderInfoReceiveEvent struct {
-	PeerId  string
-	Address string
+type LeaderInfoPublishEvent struct {
+	LeaderId string
+	Address  string
 }
