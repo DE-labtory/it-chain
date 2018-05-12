@@ -7,6 +7,7 @@ const (
 	ConsensusMessagePublishEvent
 	BlockConfirmEvent
 	MessageDeliverEvent
+	MessageReceiveEvent
 	NewConnEvent
 	ConnCreateCmd
 	ConsensusCreateCmd
@@ -15,6 +16,13 @@ const (
 	TransactionReceiveEvent
 	TransactionSendEvent
 	BlockProposeEvent
+
+	//peer Event
+	LeaderInfoPublishEvent
+	LeaderInfoRequestCmd
+	LeaderChangeEvent
+	PeerConnectEvent
+	PeerDisconnectEvent
 )
 
 func (e Event) String() string {
@@ -27,6 +35,8 @@ func (e Event) String() string {
 		return "BlockConfirmEvent"
 	case MessageDeliverEvent:
 		return "MessageDeliverEvent"
+	case MessageReceiveEvent:
+		return "MessageReceiveEvent"
 	case NewConnEvent:
 		return "NewConnEvent"
 	case TransactionReceiveEvent:
@@ -39,6 +49,17 @@ func (e Event) String() string {
 		return "ConnCreateCmd"
 	case ConsensusCreateCmd:
 		return "ConsensusCreateCmd"
+	//peer
+	case LeaderInfoPublishEvent:
+		return "LeaderInfoPublishEvent"
+	case LeaderInfoRequestCmd:
+		return "LeaderInfoRequestCmd"
+	case LeaderChangeEvent:
+		return "LeaderChangeEvent"
+	case PeerConnectEvent:
+		return "PeerConnectEvent"
+	case PeerDisconnectEvent:
+		return "PeerDisconnectEvent"
 	}
 
 	return "error"
