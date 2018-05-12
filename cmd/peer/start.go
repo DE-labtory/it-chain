@@ -3,6 +3,7 @@ package peer
 import (
 	"fmt"
 
+	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/urfave/cli"
 )
 
@@ -22,5 +23,5 @@ func StartCmd() cli.Command {
 
 //start peer
 func start() {
-
+	gateway.Start()
 }

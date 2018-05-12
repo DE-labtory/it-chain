@@ -16,12 +16,12 @@ import (
 type AMQPConsumer struct {
 	ConnectionStore *bifrost.ConnectionStore
 	mux             *Muxer
-	publisher       *AMQPPublisher
+	publisher       *EventPublisher
 	priKey          key.PriKey
 	pubKey          key.PubKey
 }
 
-func NewAMQPConsumer(ConnectionStore *bifrost.ConnectionStore, mux *Muxer, publisher *AMQPPublisher, pri key.PriKey, pub key.PubKey) *AMQPConsumer {
+func NewAMQPConsumer(ConnectionStore *bifrost.ConnectionStore, mux *Muxer, publisher *EventPublisher, pri key.PriKey, pub key.PubKey) *AMQPConsumer {
 	return &AMQPConsumer{
 		mux:             mux,
 		ConnectionStore: ConnectionStore,

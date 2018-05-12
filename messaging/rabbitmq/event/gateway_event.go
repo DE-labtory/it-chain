@@ -6,7 +6,7 @@ type MessageDeliverEvent struct {
 	Protocol   string
 }
 
-type NewConnEvent struct {
+type ConnCreateEvent struct {
 	Id      string
 	Address string
 }

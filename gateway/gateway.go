@@ -8,6 +8,8 @@ import (
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/topic"
 )
 
+var quit chan bool
+
 func Start() error {
 
 	var (
@@ -24,7 +26,7 @@ func Start() error {
 	mq = rabbitmq.Connect(config.Common.Messaging.Url)
 
 	//publisher
-	publisher := NewAMQPPublisher(mq)
+	publisher := NewEventPublisher(mq)
 
 	//muxer
 	muxer := NewGatewayMux(publisher)

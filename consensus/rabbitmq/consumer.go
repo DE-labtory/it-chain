@@ -13,7 +13,7 @@ type MessageConsumer struct {
 	consensusApi api.ConsensusApi
 }
 
-func (mc MessageConsumer) HandleSConsensusCreateCmd(amqpMessage amqp.Delivery) {
+func (mc MessageConsumer) HandleConsensusCreateCmd(amqpMessage amqp.Delivery) {
 
 	consensusCreatedCmd := &event.ConsensusCreateCmd{}
 	err := json.Unmarshal(amqpMessage.Body, &consensusCreatedCmd)
@@ -29,7 +29,7 @@ func (mc MessageConsumer) HandleSConsensusCreateCmd(amqpMessage amqp.Delivery) {
 	}
 }
 
-func (mc MessageConsumer) HandleReceviedConsensusMessageEvent(amqpMessage amqp.Delivery) {
+func (mc MessageConsumer) HandleReceivedConsensusMessageEvent(amqpMessage amqp.Delivery) {
 
 	//consensusMsg := &event.ConsensusMessageArriveEvent{}
 	//err := json.Unmarshal(amqpMessage.Body, &consensusMsg)

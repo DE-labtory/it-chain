@@ -7,11 +7,11 @@ import (
 
 type Muxer struct {
 	*mux.DefaultMux
-	amqpPublisher *AMQPPublisher
+	publisher *EventPublisher
 }
 
-func NewGatewayMux(amqpPublisher *AMQPPublisher) *Muxer {
-	muxer := &Muxer{mux.New(), amqpPublisher}
+func NewGatewayMux(publisher *EventPublisher) *Muxer {
+	muxer := &Muxer{mux.New(), publisher}
 
 	muxer.Handle("chat", muxer.HandleXXXProtocol)
 

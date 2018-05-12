@@ -12,7 +12,7 @@ type Server struct {
 	mux             *Muxer
 	server          *server.Server
 	ConnectionStore *bifrost.ConnectionStore
-	publisher       *AMQPPublisher
+	publisher       *EventPublisher
 }
 
 func NewServer(mux *Muxer, priKey key.PriKey, pubKey key.PubKey) *Server {
