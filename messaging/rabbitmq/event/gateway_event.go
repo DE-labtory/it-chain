@@ -11,6 +11,12 @@ type ConnCreateEvent struct {
 	Address string
 }
 
+//todo @junbeomlee grpc-gateway가 이벤트 발행해야함
+type ConnDisconnectEvent struct {
+	Id      string
+	Address string
+}
+
 type ConnCreateCmd struct {
 	Address string
 }
