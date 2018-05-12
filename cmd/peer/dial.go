@@ -18,22 +18,15 @@ import (
 
 func DialCmd() cli.Command {
 
-	var peerAddress string
-
 	return cli.Command{
 		Name:  "dial",
-		Usage: "dial to peer",
-		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name:        "address",
-				Usage:       "peer address",
-				Destination: &peerAddress,
-			},
-		},
+		Usage: "it-chain peer dial [ip]",
 		Action: func(c *cli.Context) error {
-			fmt.Println(c.String("address"))
-			fmt.Println("peer is dialing...")
-			dial(peerAddress)
+
+			address := c.Args().Get(0)
+			fmt.Printf("peer is dialing on [%s]", address)
+			dial(address)
+
 			return nil
 		},
 	}

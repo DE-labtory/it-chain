@@ -43,3 +43,25 @@ func (p EventPublisher) PublishConnCreatedEvent(connection bifrost.Connection) e
 
 	return nil
 }
+
+func (p EventPublisher) PublishGatewayErrorEvent(event string, error string) error {
+
+	errorEvent := &ErrorEvent{
+		err:   error,
+		event: event,
+	}
+
+	b, err := json.Marshal(errorEvent)
+
+	if err != nil {
+		return err
+	}
+
+	err = p.publisher.Publish("GatewayErrorEvent", b)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

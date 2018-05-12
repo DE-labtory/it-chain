@@ -10,6 +10,7 @@ import (
 	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
+	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/topic"
 	"github.com/streadway/amqp"
 )
 
@@ -52,7 +53,7 @@ func (c AMQPConsumer) HandleConnCreateCmd(amqpMessage amqp.Delivery) {
 
 	ConnCreateCmd := &event.ConnCreateCmd{}
 	if err := json.Unmarshal(amqpMessage.Body, ConnCreateCmd); err != nil {
-		// fail to unmarshal event
+		c.publisher.PublishGatewayErrorEvent(topic.ConnCreateCmd.String(), err.Error())
 		return
 	}
 
@@ -70,7 +71,7 @@ func (c AMQPConsumer) HandleConnCreateCmd(amqpMessage amqp.Delivery) {
 	connection, err := client.Dial(ConnCreateCmd.Address, clientOpt, grpcOpt)
 
 	if err != nil {
-		log.Println(err.Error())
+		c.publisher.PublishGatewayErrorEvent(topic.ConnCreateCmd.String(), err.Error())
 		return
 	}
 
