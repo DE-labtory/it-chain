@@ -1,4 +1,4 @@
-package rabiitmq
+package rabbitmq
 
 import "github.com/it-chain/it-chain-Engine/peer/domain/service"
 
