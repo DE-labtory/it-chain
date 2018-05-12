@@ -23,6 +23,7 @@ func StopCmd() cli.Command {
 	}
 }
 
+//todo delete my.pid?
 func stop() {
 
 	pid, err := GetValue("my.pid")
