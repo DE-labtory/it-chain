@@ -9,6 +9,7 @@ const (
 	MessageDeliverEvent
 	NewConnEvent
 	ConnCreateCmd
+	ConnCreateEvent
 	ConsensusCreateCmd
 
 	//txpool Event
@@ -39,6 +40,8 @@ func (e Event) String() string {
 		return "ConnCreateCmd"
 	case ConsensusCreateCmd:
 		return "ConsensusCreateCmd"
+	case ConnCreateEvent:
+		return "ConnCreateEvent"
 	}
 
 	return "error"
