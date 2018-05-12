@@ -3,7 +3,7 @@ package rabbitmq
 import (
 	"encoding/json"
 
-	"github.com/it-chain/it-chain-Engine/messaging/event"
+	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
 	"github.com/it-chain/it-chain-Engine/txpool/api"
 	"github.com/streadway/amqp"
 )

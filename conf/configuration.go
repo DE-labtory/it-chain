@@ -20,12 +20,17 @@ type Configuration struct {
 	Peer           model.PeerConfiguration
 	Authentication model.AuthenticationConfiguration
 	Icode          model.ICodeConfiguration
+	GrpcGateway    model.GrpcGatewayConfiguration
 }
 
+//todo
 func GetConfiguration() *Configuration {
 	once.Do(func() {
 		instance = &Configuration{}
 		path, _ := os.Getwd()
+
+		path = path + "/conf"
+
 		viper.SetConfigName("config")
 		viper.AddConfigPath(path)
 		if err := viper.ReadInConfig(); err != nil {
