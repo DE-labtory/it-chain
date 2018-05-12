@@ -1,5 +1,7 @@
 package transaction
 
-import "github.com/it-chain/yggdrasill/transaction"
+import (
+	"github.com/it-chain/yggdrasill/impl"
+)
 
-type Trasaction = transaction.Transaction
+type Trasaction = impl.DefaultTransaction
