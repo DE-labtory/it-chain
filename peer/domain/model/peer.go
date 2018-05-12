@@ -11,6 +11,13 @@ type Peer struct {
 	Id        PeerId
 }
 
+func NewPeer(ipAddress string, id PeerId) *Peer {
+	return &Peer{
+		IpAddress: ipAddress,
+		Id:        id,
+	}
+}
+
 func (p Peer) Serialize() ([]byte, error) {
 	return common.Serialize(p)
 }
