@@ -26,6 +26,8 @@ Overview of the logical architecture of `it-chain` can be found in the following
 - Go-lang >= 1.9
 - Docker >= 17.12.0
 
+<br/>
+
 ## Implementation Details
 Core implementation decisions can be found in the Project Implementation Details. <br>
 [PROJECT IMPLEMENTATION DETAILS](doc/PROJECT-IMPLEMENTATION-DETAILS.md)
