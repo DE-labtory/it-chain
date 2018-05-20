@@ -80,7 +80,13 @@ gob encoder로 인코딩했을 때 문제점
 2. time.Time 값들은 뒤에 monotonic 파트가 없어짐.
 2번은 문제가 안 될수도 있는데 테스트 실패의 원인..
 */
-func Serialize(object interface{}) ([]byte, error) {
+
+// encoding/json 패키지에 대한 설명
+// json data를 json으로 인코딩 하기 위한 encoding/json 패키지의 Marshal() 을 사용한다.
+// json.Marshal(_struct_) 을 하면 (json 인코딩 바이트배열, 에러객체) 를 리턴한다.
+// decode를 위해서는 json.Unmarshal(_jsonBytes_, 받을 구조체 포인터) 를 사용한다.
+
+func Serialize(object interface{}) ([]byte, error) { //모든 stuct 받기 위해 interface{} 타입의 입력으로 선언
 	data, err := json.Marshal(object)
 	if err != nil {
 		panic(fmt.Sprintf("Error encoding : %s", err))
