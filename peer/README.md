@@ -9,12 +9,16 @@ peerTableService, messageProducer, peerRepository, myInfo 속성을 가지며 �
 
 ## Functions of LeaderSelection Structure
 ### NewLeaderSelectionApi()
+리더 선출 관련 api 인 leaderSelectionApi 구조체를 생성한다.
 
 **input**
-`repo repository.Peer, messageProducer service.MessageProducer, myInfo *model.Peer`
+`repo repository.Peer`
+`messageProducer service.MessageProducer`
+`myInfo *model.Peer`
 
 **output**
-`leaderSelectionApi, nil`
+`leaderSelectionApi`
+`nil`
 
 
 ### RequestChangeLeader()

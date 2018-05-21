@@ -26,6 +26,11 @@
 
 ![Strategic Model Design](../images/StrategicModelDesign.png)
 
+위 그림과 같이 Strategic Design은 Onion Architecture 형태를 띄며, 여기서 핵심의 외곽에 있는 layer만이 안에 있는 layer를 import 할 수 있고 내부 layer는 바깥쪽 layer를 import 할 수 없다는 점이다.
+
+하지만 Domain 과 API 의 많은 기능들은 infra가 제공하는 기능을 사용해햐 하는데 이것이 어떻게 가능할까라는 문제점이 제기된다.
+이것은 바로 domain 내에서 infra 내의 기능들에 대한 interface를 구현에 둠으로써 해결되고, 이를 통해 infra를 완벽하게 숨기고 로직을 처리할 수 있게 된다.
+
 ## API
 API 레이어는 다른 bounded context와 협력을 위한 다양한 api를 제공한다.
 다른 bonded context 내의 서비스들을 오직 api를 통해서만 해당 서비스에 접근이 가능하다.
@@ -38,6 +43,10 @@ model 은 해당 bounded context 에서 주로 사용되는 entity와 이를 구
 
 ### factory
 factory는 model의 entity를 생성해 주는 역할을 담당하며, 다양한 값을 받아 value object를 구현하고 이를 조합하여 entity를 생성해 반환해 주는 역할을 수행한다.
+
+### Service
+service는 해당 subcontext 내의 다양한 기능을 수행하며, infra의 기능들에 대한 interface를 만들어 준다.
+api 와 service 내에서 infra layer에 접근하지 않기 위해서 이 service 단에서 interface를 구현해 두고 필요한 경우 사용한다.
 
 ### repository
 repository는 entity 및 value object 를 기준으로 하여 db와의 입출력을 담당하며, it-chain에서는 levelDB와의 통신을 수행한다.

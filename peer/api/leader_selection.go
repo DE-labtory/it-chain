@@ -17,10 +17,10 @@ import (
 //todo 예를들어, peerTableService 는 Leader 를 변경했는데 messageProduce 에 실패한경우?
 //todo 이경우 rabbitMQ 에러 핸들링이라 어쩔 수 없다는 @junbeomlee 의 의견. issue 로 확인필요할듯
 type LeaderSelection struct {
-	peerTableService *service.PeerTable
-	messageProducer  service.MessageProducer
-	peerRepository   repository.Peer
-	myInfo           *model.Peer
+	peerTableService *service.PeerTable  // 참여 피어에 대한 주관적인 정보를 담고 있는 peerTableService를 필드로 가짐
+	messageProducer  service.MessageProducer  // 메세지를 전달할 수 있는 messageProducer를 필드로 가짐
+	peerRepository   repository.Peer  // leveldb에 접근이 가능하도록 peerRepository를 가짐
+	myInfo           *model.Peer  // 내 피어 정보를 가짐.
 }
 
 func NewLeaderSelectionApi(repo repository.Peer, messageProducer service.MessageProducer, myInfo *model.Peer) (*LeaderSelection, error) {
