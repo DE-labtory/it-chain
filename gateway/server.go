@@ -6,21 +6,20 @@ import (
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/server"
 	"github.com/it-chain/heimdall/key"
+	"github.com/it-chain/midgard"
 )
 
 type Server struct {
-	handler         bifrost.Handler
 	server          *server.Server
 	connectionStore *bifrost.ConnectionStore
-	publisher       *EventPublisher
+	publisher       midgard.Publisher
 }
 
-func NewServer(handler bifrost.Handler, publisher *EventPublisher, connectionStore *bifrost.ConnectionStore, priKey key.PriKey, pubKey key.PubKey) *Server {
+func NewServer(publisher midgard.Publisher, connectionStore *bifrost.ConnectionStore, priKey key.PriKey, pubKey key.PubKey) *Server {
 
 	s := server.New(bifrost.KeyOpts{PriKey: priKey, PubKey: pubKey})
 
 	server := &Server{
-		handler:         handler,
 		server:          s,
 		connectionStore: connectionStore,
 		publisher:       publisher,
@@ -34,12 +33,22 @@ func NewServer(handler bifrost.Handler, publisher *EventPublisher, connectionSto
 
 func (s Server) onConnection(connection bifrost.Connection) {
 
-	connection.Handle(s.handler)
+	connection.Handle(NewRequestHandler(s.publisher))
 	s.connectionStore.AddConnection(connection)
 
-	s.publisher.PublishConnCreatedEvent(connection)
-
 	defer connection.Close()
+
+	err := s.publisher.Publish("Event", "Connection", ConnectionCreatedEvent{
+		Address: connection.GetIP(),
+		EventModel: midgard.EventModel{
+			AggregateID: connection.GetID(),
+		},
+	})
+
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
 
 	if err := connection.Start(); err != nil {
 		connection.Close()

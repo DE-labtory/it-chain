@@ -1,65 +1,48 @@
 package gateway
 
 import (
-	"os"
-
-	"log"
-
 	"github.com/it-chain/bifrost"
-	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/conf"
-	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq"
-	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/topic"
+	"github.com/it-chain/midgard/bus/rabbitmq"
 )
-
-var (
-	ConnectionStore *bifrost.ConnectionStore
-	pri             key.PriKey
-	pub             key.PubKey
-	config          *conf.Configuration
-	mq              *rabbitmq.MessageQueue
-	s               *Server
-	consumer        *Consumer
-)
-
-func init() {
-
-	config = conf.GetConfiguration()
-	mq = rabbitmq.Connect(config.Common.Messaging.Url)
-
-	ConnectionStore = bifrost.NewConnectionStore()
-	pri, pub = loadKeyPair(config.Authentication.KeyPath)
-	//mq = rabbitmq.Connect(config.Common.Messaging.Url)
-
-	//publisher
-	publisher := NewEventPublisher(mq)
-
-	//amqp event consumer
-	consumer = NewAMQPConsumer(ConnectionStore, publisher, pri, pub)
-	s = NewServer(consumer, publisher, ConnectionStore, pri, pub)
-}
 
 func Start() error {
 
-	mq.Consume(topic.MessageDeliverEvent.String(), consumer.HandleMessageDeliverEvent)
-	mq.Consume(topic.ConnCreateCmd.String(), consumer.HandleConnCreateCmd)
+	config := conf.GetConfiguration()
 
-	s.Listen(config.GrpcGateway.Ip)
+	//create rabbitmq client
+	rabbitmqClient := rabbitmq.Connect(config.Common.Messaging.Url)
+
+	//create connection store
+	ConnectionStore := bifrost.NewConnectionStore()
+
+	//load key
+	pri, pub := loadKeyPair(config.Authentication.KeyPath)
+
+	//createHandler
+	commandHandler := NewConnectionCommandHandler(ConnectionStore, pri, pub, rabbitmqClient)
+	messageHandler := NewMessageCommandHandler(ConnectionStore, rabbitmqClient)
+
+	//create server
+	server := NewServer(rabbitmqClient, ConnectionStore, pri, pub)
+
+	err := rabbitmqClient.Subscribe("Command", "Connection", commandHandler)
+
+	if err != nil {
+		panic(err)
+	}
+
+	err = rabbitmqClient.Subscribe("Command", "Messasge", messageHandler)
+
+	if err != nil {
+		panic(err)
+	}
+
+	server.Listen(config.GrpcGateway.Ip)
 
 	return nil
 }
 
 func Stop() {
-	//fmt.Print(mq)
 
-	if mq != nil {
-		mq.Close()
-	}
-
-	if s != nil {
-		s.Stop()
-	}
-
-	log.Printf("gateway is closing")
-	os.Exit(1)
 }

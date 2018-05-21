@@ -13,8 +13,13 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/it-chain-Engine/gateway"
-	"github.com/syossan27/tebata"
 	"github.com/urfave/cli"
+)
+
+var (
+	ErrPidExists = errors.New("pid file exists.")
+	Debug        bool
+	pidFile      string
 )
 
 func StartCmd() cli.Command {
@@ -37,16 +42,11 @@ func StartCmd() cli.Command {
 	}
 }
 
-var (
-	ErrPidExists = errors.New("pid file exists.")
-	Debug        bool
-)
-
 //start peer
 func start(damon bool) {
 
-	t := tebata.New(syscall.SIGINT, syscall.SIGTERM)
-	err := t.Reserve(stopGateway)
+	//t := tebata.New(syscall.SIGINT, syscall.SIGTERM)
+	//err := t.Reserve(stopGateway)
 
 	fmt.Println(conf.GetConfiguration().GrpcGateway.Ip)
 
@@ -66,7 +66,6 @@ func start(damon bool) {
 	}
 
 	if damon {
-
 		args := os.Args[1:]
 		args = append(args, "-d=false")
 

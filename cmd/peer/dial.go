@@ -5,15 +5,13 @@ import (
 
 	"sync"
 
-	"encoding/json"
 	"log"
+
+	"reflect"
 
 	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/it-chain-Engine/gateway"
-	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq"
-	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
-	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/topic"
-	"github.com/streadway/amqp"
+	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/urfave/cli"
 )
 
@@ -33,51 +31,43 @@ func DialCmd() cli.Command {
 	}
 }
 
+var wg = sync.WaitGroup{}
+
+type ErrorEventHandler struct {
+}
+
+func (e ErrorEventHandler) ErrorCreated(error gateway.ErrorCreatedEvent) {
+	fmt.Println(error)
+	wg.Done()
+}
+
+type ConnectionEventHandler struct {
+}
+
+func (e ErrorEventHandler) ConnectionCreated(event gateway.ConnectionCreatedEvent) {
+	fmt.Println(event)
+	wg.Done()
+}
+
 //start peer
 func dial(peerAddress string) {
 
 	config := conf.GetConfiguration()
-	mq := rabbitmq.Connect(config.Common.Messaging.Url)
+	client := rabbitmq.Connect(config.Common.Messaging.Url)
 
-	defer mq.Close()
+	defer client.Close()
 
-	wg := sync.WaitGroup{}
+	client.Subscribe("Event", "Error", &ErrorEventHandler{})
+	client.Subscribe("Event", "Connection", &ConnectionEventHandler{})
+
+	command := gateway.ConnectionCreateCommand{
+		Address: peerAddress,
+	}
+
+	log.Println(reflect.TypeOf(command))
+
 	wg.Add(1)
-
-	var tmpConnCmdCreateReceiver = func(delivery amqp.Delivery) {
-		fmt.Println(delivery.Body)
-		wg.Done()
-	}
-
-	var tmpGatewayErrorEventReceiver = func(delivery amqp.Delivery) {
-
-		gatewayErrorEvent := &gateway.ErrorEvent{}
-
-		err := json.Unmarshal(delivery.Body, gatewayErrorEvent)
-
-		if err != nil {
-
-		}
-
-		if gatewayErrorEvent.Event == "ConnCreateCmd" {
-			fmt.Printf("fail to dial peer [%s]", gatewayErrorEvent.Err)
-			wg.Done()
-		}
-	}
-
-	mq.Consume(topic.ConnCreateEvent.String(), tmpConnCmdCreateReceiver)
-	mq.Consume("GatewayErrorEvent", tmpGatewayErrorEventReceiver)
-
-	ConnCreatedCmd := event.ConnCreateCmd{}
-	ConnCreatedCmd.Address = peerAddress
-
-	b, err := json.Marshal(ConnCreatedCmd)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = mq.Publish(topic.ConnCreateCmd.String(), b)
+	err := client.Publish("Command", "Connection", command)
 
 	if err != nil {
 		log.Fatal(err)
