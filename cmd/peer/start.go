@@ -43,6 +43,7 @@ func StartCmd() cli.Command {
 }
 
 //start peer
+//todo need way to kill this process
 func start(damon bool) {
 
 	//t := tebata.New(syscall.SIGINT, syscall.SIGTERM)

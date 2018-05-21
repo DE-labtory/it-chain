@@ -6,6 +6,7 @@ import (
 	"github.com/it-chain/midgard/bus/rabbitmq"
 )
 
+// todo bifrost server kill방법
 func Start() error {
 
 	config := conf.GetConfiguration()
