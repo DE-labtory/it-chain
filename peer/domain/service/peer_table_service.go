@@ -14,7 +14,6 @@ type PeerTable struct {
 	myInfo     *model.Peer
 	repository repository.Peer
 }
-
 func NewPeerTableService(peerRepo repository.Peer, myinfo *model.Peer) *PeerTable {
 	peerRepo.Save(*myinfo)
 	return &PeerTable{
