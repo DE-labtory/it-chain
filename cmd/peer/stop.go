@@ -6,6 +6,8 @@ import (
 
 	"log"
 
+	"os"
+
 	"github.com/urfave/cli"
 )
 
@@ -33,6 +35,12 @@ func stop() {
 	}
 
 	err = syscall.Kill(pid, syscall.SIGKILL)
+
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	err = os.RemoveAll("my.pid")
 
 	if err != nil {
 		log.Fatalln(err.Error())
