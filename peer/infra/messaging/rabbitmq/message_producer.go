@@ -6,20 +6,20 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/topic"
+	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq"
 	"github.com/it-chain/it-chain-Engine/peer/domain/model"
 	"github.com/it-chain/it-chain-Engine/peer/domain/service"
 )
 
-type MessageProducer struct {
-	Publish service.Publish
-}
+type MessageProducer struct
 
-func NewMessageProducer(publish service.Publish) *MessageProducer {
-	return &MessageProducer{
-		Publish: publish,
-	}
-}
+func NewMessageProducer(publish service.Publish) *MessageProducer {}
 
+// publish 함수 정의
+func Publish(topic string, data []byte) error{
+	mq := rabbitmq.Connect("url") // connect 함수 호출로 귀찮은 연결 등 여타 다 처리해줌
+	return mq.Publish(topic, data)
+}
 
 // 새로운 리더 정보를 받아오는 메서드이다.
 func (mp *MessageProducer) RequestLeaderInfo(peer model.Peer) error {

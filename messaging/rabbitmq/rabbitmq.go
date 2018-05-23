@@ -26,6 +26,7 @@ func NewMessageQueue(url string, conn *amqp.Connection, ch *amqp.Channel, amqp.Q
 	}
 }
 
+// Connect 만 호출하면 아래의 start 등의 귀찮은 내용을 다 처리해줌
 func Connect(rabbitmqUrl string) *MessageQueue {
 
 	mq := &MessageQueue{url: rabbitmqUrl}
