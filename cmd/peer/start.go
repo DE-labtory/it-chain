@@ -5,14 +5,21 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"strconv"
 	"syscall"
 
+	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/it-chain-Engine/gateway"
-	"github.com/syossan27/tebata"
 	"github.com/urfave/cli"
+)
+
+var (
+	ErrPidExists = errors.New("pid file exists.")
+	Debug        bool
+	pidFile      string
 )
 
 func StartCmd() cli.Command {
@@ -36,7 +43,28 @@ func StartCmd() cli.Command {
 }
 
 //start peer
+//todo need way to kill this process
 func start(damon bool) {
+
+	//t := tebata.New(syscall.SIGINT, syscall.SIGTERM)
+	//err := t.Reserve(stopGateway)
+
+	fmt.Println(conf.GetConfiguration().GrpcGateway.Ip)
+
+	//grpc gate way
+	ln, err := net.Listen("tcp", conf.GetConfiguration().GrpcGateway.Ip)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Can't listen on %q: %s\n", conf.GetConfiguration().GrpcGateway.Ip, err)
+		os.Exit(1)
+	}
+
+	err = ln.Close()
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Couldn't stop listening on %q: %s\n", conf.GetConfiguration().GrpcGateway.Ip, err)
+		os.Exit(1)
+	}
 
 	if damon {
 		args := os.Args[1:]
@@ -54,17 +82,14 @@ func start(damon bool) {
 		os.Exit(0)
 	}
 
-	t := tebata.New(syscall.SIGINT, syscall.SIGTERM)
-	err := t.Reserve(stopGateway)
-
 	pidValue, err := Create("my.pid")
-
-	fmt.Println(pidValue)
 
 	if err != nil {
 		log.Fatalf("fail to write pid [%s]", err.Error())
 		os.Exit(1)
 	}
+
+	fmt.Println(pidValue)
 
 	err = gateway.Start()
 
@@ -73,11 +98,6 @@ func start(damon bool) {
 		os.Exit(1)
 	}
 }
-
-var (
-	ErrPidExists = errors.New("pid file exists.")
-	Debug        bool
-)
 
 func Create(pidfile string) (int, error) {
 
