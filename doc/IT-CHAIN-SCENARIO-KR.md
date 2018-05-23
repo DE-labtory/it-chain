@@ -1,7 +1,9 @@
-# 최초의 peer에서 블록체인 초기화
+# requirement
+rabbitmq 설치 및 서버 가동
 
+# 최초의 peer에서 블록체인 초기화
 1. peer 생성
-2. AMQP 서버 개통
+2. AMQP 서버 연결
 ```
 messaging/rabbitmq
 MessageQueue.start()
@@ -16,6 +18,8 @@ gateway.init()
 2. 다른 피어에게 알림
 3. 기존 피어목록 생신
 4. 내 피어 생성
+
+
 # 트랜잭션 발생
 1. 사용자가 tx 생성 요청
 2. txpool 에 저장

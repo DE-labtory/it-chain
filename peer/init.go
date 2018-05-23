@@ -1,6 +1,7 @@
 package peer
 
 // 임의로 명칭을 붙였습니다.
+// 기존의 peer.go 는 모델명으로 활용해야 하기에 이런이름을 임의로 붙였습니다
 
 import (
 	"github.com/it-chain/it-chain-Engine/conf"
