@@ -3,9 +3,9 @@ package leveldb
 import (
 	"encoding/json"
 
-	"github.com/it-chain/it-chain-Engine/peer/domain/model"
-	"github.com/it-chain/it-chain-Engine/peer/domain/repository"
 	"github.com/it-chain/leveldb-wrapper"
+	"github.com/it-chain/it-chain-Engine/peer"
+
 )
 
 type PeerRepository struct {
@@ -14,20 +14,20 @@ type PeerRepository struct {
 
 // 새로운 peer repo 생성
 func NewPeerRepository(path string) *PeerRepository {
-	db := leveldbwrapper.CreateNewDB(path)
-	db.Open()
+	// path := "./leveldb"
+	dbProvider := leveldbwrapper.CreateNewDBProvider(path)
+	dbHandle := dbProvider.getDBHandle("Peer")
 	return &PeerRepository{
-		leveldb: db,
+		leveldb: dbHandle.db,
 	}
 }
 
-
 // 새로운 peer 를 leveldb에 저장
-func (pr *PeerRepository) Save(peer model.Peer) error {
+func (pr *PeerRepository) Save(peer Peer) error {
 
 	// return empty peerID error if peerID is null
 	if peer.Id.ToString() == "" {
-		return repository.PeerIdEmptyErr
+		return PeerIdEmptyErr
 	}
 
 	// serialize peer and allocate to b or err if err occured
@@ -46,15 +46,13 @@ func (pr *PeerRepository) Save(peer model.Peer) error {
 	return nil
 }
 
-
 // peer 삭제
-func (pr *PeerRepository) Remove(id model.PeerId) error {
+func (pr *PeerRepository) Remove(id PeerId) error {
 	return pr.leveldb.Delete([]byte(id), true)
 }
 
-
 // peer 읽어옴
-func (pr *PeerRepository) FindById(id model.PeerId) (*model.Peer, error) {
+func (pr *PeerRepository) FindById(id PeerId) (*Peer, error) {
 	b, err := pr.leveldb.Get([]byte(id))
 
 	if err != nil {
@@ -66,7 +64,7 @@ func (pr *PeerRepository) FindById(id model.PeerId) (*model.Peer, error) {
 	}
 
 	// model.Peer 에 읽어온 peer 를 할당
-	peer := &model.Peer{}
+	peer := &Peer{}
 
 	err = json.Unmarshal(b, peer)
 
@@ -77,15 +75,14 @@ func (pr *PeerRepository) FindById(id model.PeerId) (*model.Peer, error) {
 	return peer, nil
 }
 
-
 // 모든 피어 검색
-func (pr *PeerRepository) FindAll() ([]*model.Peer, error) {
+func (pr *PeerRepository) FindAll() ([]*Peer, error) {
 	iter := pr.leveldb.GetIteratorWithPrefix([]byte(""))
-	peers := []*model.Peer{}
+	peers := []*Peer{}
 	for iter.Next() {
 		val := iter.Value()
-		peer := &model.Peer{}
-		err := model.Deserialize(val, peer)
+		peer := &Peer{}
+		err := Deserialize(val, peer)
 
 		if err != nil {
 			return nil, err

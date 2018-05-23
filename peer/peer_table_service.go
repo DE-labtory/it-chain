@@ -1,4 +1,4 @@
-package service
+package peer
 
 import (
 	"github.com/it-chain/it-chain-Engine/peer/domain/model"
@@ -14,6 +14,7 @@ type PeerTable struct {
 	myInfo     *model.Peer
 	repository repository.Peer
 }
+
 func NewPeerTableService(peerRepo repository.Peer, myinfo *model.Peer) *PeerTable {
 	peerRepo.Save(*myinfo)
 	return &PeerTable{
@@ -22,7 +23,6 @@ func NewPeerTableService(peerRepo repository.Peer, myinfo *model.Peer) *PeerTabl
 		repository: peerRepo,
 	}
 }
-
 
 func (pts *PeerTable) SetLeader(peer *model.Peer) error {
 	find, err := pts.repository.FindById(peer.Id)
