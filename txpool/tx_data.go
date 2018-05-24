@@ -1,4 +1,4 @@
-package transaction
+package txpool
 
 const (
 	Invoke TxDataType = "invoke"

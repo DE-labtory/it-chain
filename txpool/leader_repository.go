@@ -1,33 +1,31 @@
-package repository
+package txpool
 
 import (
 	"sync"
-
-	"github.com/it-chain/it-chain-Engine/txpool/domain/model"
 )
 
 type LeaderRepository interface {
-	GetLeader() model.Leader
-	SetLeader(leader model.Leader)
+	GetLeader() Leader
+	SetLeader(leader Leader)
 }
 
 type LeaderRepositoryImpl struct {
 	lock          *sync.RWMutex
-	currentLeader model.Leader
+	currentLeader Leader
 }
 
 func NewLeaderRepository() LeaderRepository {
 	return &LeaderRepositoryImpl{
 		lock:          &sync.RWMutex{},
-		currentLeader: model.Leader{},
+		currentLeader: Leader{},
 	}
 }
 
-func (lr *LeaderRepositoryImpl) GetLeader() model.Leader {
+func (lr *LeaderRepositoryImpl) GetLeader() Leader {
 	return lr.currentLeader
 }
 
-func (lr *LeaderRepositoryImpl) SetLeader(leader model.Leader) {
+func (lr *LeaderRepositoryImpl) SetLeader(leader Leader) {
 	lr.lock.Lock()
 	defer lr.lock.Unlock()
 

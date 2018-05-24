@@ -1,18 +1,18 @@
-package timeout
+package txpool
 
 import (
 	"time"
 )
 
-type TimeoutTicker struct{
-	T *time.Ticker
+type TimeoutTicker struct {
+	T         *time.Ticker
 	TimeoutMs time.Duration
 }
 
-func NewTimeoutTicker(timeoutMs int64) *TimeoutTicker{
+func NewTimeoutTicker(timeoutMs int64) *TimeoutTicker {
 	tTicker := time.NewTicker(time.Duration(timeoutMs))
 	// Duration represents the time as int64 nanosecond count.
-	tMs := time.Duration(timeoutMs*100000)
+	tMs := time.Duration(timeoutMs * 100000)
 
 	tTicker.Stop()
 

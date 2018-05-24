@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/it-chain/it-chain-Engine/txpool/domain/model/transaction"
+	"github.com/it-chain/it-chain-Engine/txpool"
 	"github.com/it-chain/leveldb-wrapper"
 )
 
@@ -21,7 +21,7 @@ func NewTransactionRepository(path string) *TransactionRepository {
 	}
 }
 
-func (tr TransactionRepository) Save(transaction transaction.Transaction) error {
+func (tr TransactionRepository) Save(transaction txpool.Transaction) error {
 	if transaction.TxId.ToString() == "" {
 		return errors.New("transaction ID is empty")
 	}
@@ -39,11 +39,11 @@ func (tr TransactionRepository) Save(transaction transaction.Transaction) error 
 	return nil
 }
 
-func (tr TransactionRepository) Remove(id transaction.TransactionId) error {
+func (tr TransactionRepository) Remove(id txpool.TransactionId) error {
 	return tr.leveldb.Delete([]byte(id), true)
 }
 
-func (tr TransactionRepository) FindById(id transaction.TransactionId) (*transaction.Transaction, error) {
+func (tr TransactionRepository) FindById(id txpool.TransactionId) (*txpool.Transaction, error) {
 	b, err := tr.leveldb.Get([]byte(id))
 
 	if err != nil {
@@ -54,7 +54,7 @@ func (tr TransactionRepository) FindById(id transaction.TransactionId) (*transac
 		return nil, nil
 	}
 
-	tx := &transaction.Transaction{}
+	tx := &txpool.Transaction{}
 
 	err = json.Unmarshal(b, tx)
 
@@ -65,13 +65,13 @@ func (tr TransactionRepository) FindById(id transaction.TransactionId) (*transac
 	return tx, nil
 }
 
-func (tr TransactionRepository) FindAll() ([]*transaction.Transaction, error) {
+func (tr TransactionRepository) FindAll() ([]*txpool.Transaction, error) {
 	iter := tr.leveldb.GetIteratorWithPrefix([]byte(""))
-	transactions := []*transaction.Transaction{}
+	transactions := []*txpool.Transaction{}
 	for iter.Next() {
 		val := iter.Value()
-		tx := &transaction.Transaction{}
-		err := transaction.Deserialize(val, tx)
+		tx := &txpool.Transaction{}
+		err := txpool.Deserialize(val, tx)
 
 		if err != nil {
 			return nil, err

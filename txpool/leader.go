@@ -1,4 +1,4 @@
-package model
+package txpool
 
 type Leader struct {
 	leaderId LeaderId

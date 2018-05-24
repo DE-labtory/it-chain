@@ -1,34 +1,32 @@
 package api
 
 import (
-	"github.com/it-chain/it-chain-Engine/txpool/domain/repository"
-	"github.com/it-chain/it-chain-Engine/txpool/domain/service"
-	"github.com/it-chain/it-chain-Engine/txpool/domain/model/transaction"
-	"github.com/it-chain/it-chain-Engine/txpool/domain/model/timeout"
-	"github.com/it-chain/it-chain-Engine/conf"
 	"errors"
+
+	"github.com/it-chain/it-chain-Engine/conf"
+	"github.com/it-chain/it-chain-Engine/txpool"
 )
 
 type TxpoolApi struct {
-	txRepository  *repository.TransactionRepository
-	timeoutTicker *timeout.TimeoutTicker
+	txRepository  *txpool.TransactionRepository
+	timeoutTicker *txpool.TimeoutTicker
 	maxTxByte     int
-	msgProducer   *service.MessageProducer
+	msgProducer   *txpool.MessageProducer
 }
 
-func NewTxpoolApi (txpoolRepo *repository.TransactionRepository, messageProducer *service.MessageProducer) *TxpoolApi{
+func NewTxpoolApi(txpoolRepo *txpool.TransactionRepository, messageProducer *txpool.MessageProducer) *TxpoolApi {
 	txpConfig := conf.GetConfiguration().Txpool
 
 	return &TxpoolApi{
 		txRepository:  txpoolRepo,
-		timeoutTicker: timeout.NewTimeoutTicker(txpConfig.TimeoutMs),
+		timeoutTicker: txpool.NewTimeoutTicker(txpConfig.TimeoutMs),
 		maxTxByte:     txpConfig.MaxTransactionByte,
 		msgProducer:   messageProducer,
 	}
 }
 
-func (txpoolApi TxpoolApi) SaveTransaction(tx transaction.Transaction) error {
-	if tx.TxStatus != transaction.VALID {
+func (txpoolApi TxpoolApi) SaveTransaction(tx txpool.Transaction) error {
+	if tx.TxStatus != txpool.VALID {
 		return errors.New("transaction is not valid")
 	}
 
@@ -39,12 +37,12 @@ func (txpoolApi TxpoolApi) SaveTransaction(tx transaction.Transaction) error {
 	return (*txpoolApi.txRepository).Save(tx)
 }
 
-func (txpoolApi TxpoolApi) SaveTxData(publishPeerId string, txType transaction.TxDataType, txData transaction.TxData) error {
-	tx := transaction.NewTransaction(publishPeerId, txType, &txData)
+func (txpoolApi TxpoolApi) SaveTxData(publishPeerId string, txType txpool.TxDataType, txData txpool.TxData) error {
+	tx := txpool.NewTransaction(publishPeerId, txType, &txData)
 
 	return txpoolApi.SaveTransaction(*tx)
 }
 
-func (txpoolApi TxpoolApi) RemoveTransaction(transactionId transaction.TransactionId) error {
+func (txpoolApi TxpoolApi) RemoveTransaction(transactionId txpool.TransactionId) error {
 	return (*txpoolApi.txRepository).Remove(transactionId)
 }
