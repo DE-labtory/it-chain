@@ -24,7 +24,7 @@ func (tx TxCreatedEvent) GetTransaction() Transaction {
 		TxStatus:      tx.TxStatus,
 		TxType:        tx.TxType,
 		TxHash:        tx.TxHash,
-		TxData:        &tx.TxData,
+		TxData:        tx.TxData,
 	}
 }
 

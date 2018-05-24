@@ -1,6 +1,12 @@
 package txpool
 
-import "sync"
+import (
+	"errors"
+	"fmt"
+	"sync"
+
+	"github.com/it-chain/midgard"
+)
 
 type LeaderId struct {
 	id string
@@ -15,8 +21,24 @@ type Leader struct {
 	leaderId LeaderId
 }
 
+// must implement id method
 func (l Leader) GetID() string {
 	return l.StringLeaderId()
+}
+
+// must implement on method
+func (l *Leader) On(event midgard.Event) error {
+
+	switch v := event.(type) {
+
+	case *LeaderChangedEvent:
+		l.leaderId = LeaderId{v.GetID()}
+
+	default:
+		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
+	}
+
+	return nil
 }
 
 func (l *Leader) StringLeaderId() string {

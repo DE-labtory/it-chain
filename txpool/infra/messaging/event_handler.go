@@ -44,7 +44,7 @@ func (t TxEventHandler) HandleTxDeletedEvent(txDeletedEvent txpool.TxDeletedEven
 	}
 }
 
-//update leadaer
+//update leader
 func (t TxEventHandler) HandleLeaderChangedEvent(leaderChangedEvent txpool.LeaderChangedEvent) {
 
 	leaderID := leaderChangedEvent.ID

@@ -1,12 +1,14 @@
 package txpool
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"encoding/json"
 
+	"github.com/altairsix/eventsource"
 	"github.com/it-chain/it-chain-Engine/common"
-	"github.com/rs/xid"
 )
 
 const (
@@ -33,30 +35,36 @@ type Transaction struct {
 	TxType        TxDataType
 	TxHash        string
 	TimeStamp     time.Time
-	TxData        *TxData
+	TxData        TxData
 }
 
-func NewTransaction(publishPeerId string, txType TxDataType, txData *TxData) *Transaction {
-	tx := Transaction{
-		TxId:          TransactionId(xid.New().String()),
-		PublishPeerId: publishPeerId,
-		TxStatus:      VALID,
-		TxType:        txType,
-		TxHash:        "",
-		TimeStamp:     time.Now(),
-		TxData:        txData,
+// must implement id method
+func (t Transaction) GetID() string {
+	return string(t.TxId)
+}
+
+// must implement on method
+func (t *Transaction) On(event eventsource.Event) error {
+
+	switch v := event.(type) {
+
+	case *TxCreatedEvent:
+		t.TxId = TransactionId(v.ID)
+		t.PublishPeerId = v.PublishPeerId
+		t.TxStatus = v.TxStatus
+		t.TxHash = v.TxHash
+		t.TimeStamp = v.TimeStamp
+		t.TxData = v.TxData
+
+	default:
+		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
 	}
 
-	tx.TxHash = tx.CalcHash()
-	return &tx
+	return nil
 }
 
 func (t Transaction) Serialize() ([]byte, error) {
 	return common.Serialize(t)
-}
-
-func (t Transaction) GetID() string {
-	return string(t.TxId)
 }
 
 func Deserialize(b []byte, transaction *Transaction) error {
@@ -70,9 +78,9 @@ func Deserialize(b []byte, transaction *Transaction) error {
 	return nil
 }
 
-func (t Transaction) CalcHash() string {
-	hashArgs := []string{t.TxData.Jsonrpc, string(t.TxData.Method), string(t.TxData.Params.Function), t.TxData.ICodeID, t.PublishPeerId, t.TimeStamp.String(), string(t.TxId), string(t.TxType)}
-	for _, str := range t.TxData.Params.Args {
+func CalTxHash(txData TxData, publishPeerId string, txId TransactionId, dataType TxDataType, timeStamp time.Time) string {
+	hashArgs := []string{txData.Jsonrpc, string(txData.Method), string(txData.Params.Function), txData.ICodeID, publishPeerId, timeStamp.String(), string(txId), string(dataType)}
+	for _, str := range txData.Params.Args {
 		hashArgs = append(hashArgs, str)
 	}
 	return common.ComputeSHA256(hashArgs)
