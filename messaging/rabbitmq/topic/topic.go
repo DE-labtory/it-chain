@@ -10,6 +10,7 @@ const (
 	MessageReceiveEvent
 	NewConnEvent
 	ConnCreateCmd
+	ConnCreateEvent
 	ConsensusCreateCmd
 
 	//txpool Event

@@ -76,3 +76,40 @@ func TestMessaging_MultiPublishAndConsume(t *testing.T) {
 
 	wg.Wait()
 }
+
+func TestMultiConsumer(t *testing.T) {
+
+	message := Connect("amqp://guest:guest@localhost:5672/")
+	defer message.Close()
+
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	err := message.Consume("asd", func(delivery amqp.Delivery) {
+		fmt.Println("1")
+		wg.Done()
+	})
+
+	assert.NoError(t, err)
+
+	message2 := Connect("amqp://guest:guest@localhost:5672/")
+	defer message2.Close()
+
+	wg.Add(1)
+	err = message2.Consume("asd", func(delivery amqp.Delivery) {
+		fmt.Println("2")
+		wg.Done()
+	})
+
+	assert.NoError(t, err)
+
+	message3 := Connect("amqp://guest:guest@localhost:5672/")
+	defer message3.Close()
+
+	err = message3.Publish("asd", []byte("asd"))
+
+	assert.NoError(t, err)
+
+	wg.Wait()
+
+}

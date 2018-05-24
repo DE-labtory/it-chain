@@ -3,7 +3,6 @@ package service
 import (
 	"go/build"
 	"testing"
-	"time"
 
 	"encoding/json"
 
@@ -11,9 +10,9 @@ import (
 
 	"os"
 
-	"github.com/it-chain/yggdrasill/block"
-	tx "github.com/it-chain/yggdrasill/transaction"
+	"github.com/it-chain/yggdrasill/impl"
 	"github.com/stretchr/testify/assert"
+	"time"
 )
 
 func TestCreateGenesisBlock(t *testing.T) {
@@ -21,44 +20,32 @@ func TestCreateGenesisBlock(t *testing.T) {
 	genesisConfFilePath := genesisconfPath + "GenesisBlockConfig.json"
 	tempFilePath := genesisconfPath + "TempBlockConfig.json"
 	wrongFilePath := genesisconfPath + "WrongFileName.json"
-	tempBlockConfigJson := []byte(`{"Header": {
-										  "Height":0,
-										  "PreviousHash":"",
-										  "Version":"",
-										  "MerkleTreeRootHash":"",
-										  "TimeStamp":"0001-01-01T00:00:00-00:00",
-										  "CreatorID":"Genesis",
-										  "Signature":[],
-										  "BlockHash":"",
-										  "MerkleTreeHeight":0,
-										  "TransactionCount":0
-										},
-							  "Proof": [],
-							  "Transactions":[]
-							}`)
+	tempBlockConfigJson := []byte(`{
+								  "Seal":[],
+								  "PrevSeal":[],
+								  "Height":0,
+								  "TxList":[],
+								  "TxSeal":[],
+								  "TimeStamp":"0001-01-01T00:00:00-00:00",
+								  "Creator":[]
+								}`)
 
-	var tempBlock block.DefaultBlock
+	var tempBlock impl.DefaultBlock
 	_ = json.Unmarshal(tempBlockConfigJson, &tempBlock)
 	tempBlockConfigByte, _ := json.Marshal(tempBlock)
 	_ = ioutil.WriteFile(tempFilePath, tempBlockConfigByte, 0644)
 	defer os.Remove(tempFilePath)
 	rightFilePaths := []string{genesisConfFilePath, tempFilePath}
-	for _, rightFilePath := range rightFilePaths{
+	for _, rightFilePath := range rightFilePaths {
 		GenesisBlock, err1 := CreateGenesisBlock(rightFilePath)
 		assert.NoError(t, err1)
-		assert.Equal(t, uint64(0), GenesisBlock.Header.Height)
-		assert.Equal(t, "", GenesisBlock.Header.PreviousHash)
-		assert.Equal(t, "", GenesisBlock.Header.Version)
-		assert.Equal(t, "", GenesisBlock.Header.MerkleTreeRootHash)
-		assert.Equal(t, time.Now().String()[:19], GenesisBlock.Header.TimeStamp.String()[:19])
-		assert.Equal(t, "Genesis", GenesisBlock.Header.CreatorID)
-		assert.Equal(t, make([]byte, 0), GenesisBlock.Header.Signature)
-		assert.Equal(t, "", GenesisBlock.Header.BlockHash)
-		assert.Equal(t, 0, GenesisBlock.Header.MerkleTreeHeight)
-		assert.Equal(t, 0, GenesisBlock.Header.TransactionCount)
-		assert.Equal(t, make([][]byte, 0), GenesisBlock.Proof)
-		assert.Equal(t, make([]*tx.DefaultTransaction, 0), GenesisBlock.Transactions)
-
+		assert.Equal(t, make([]byte,0),GenesisBlock.Seal)
+		assert.Equal(t, make([]byte,0), GenesisBlock.PrevSeal)
+		assert.Equal(t, uint64(0), GenesisBlock.Height)
+		assert.Equal(t, make([]*impl.DefaultTransaction,0),GenesisBlock.TxList)
+		assert.Equal(t, make([][]byte,0),GenesisBlock.TxSeal)
+		assert.Equal(t, time.Now().String()[:19], GenesisBlock.Timestamp.String()[:19])
+		assert.Equal(t, make([]byte,0), GenesisBlock.Creator)
 	}
 	_, err2 := CreateGenesisBlock(wrongFilePath)
 	assert.Error(t, err2)

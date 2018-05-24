@@ -21,6 +21,7 @@ type MessageListener struct {
 }
 
 func NewMessageListener(leaderSelectionApi *api.LeaderSelection, repository *repository.Peer, table *service.PeerTable, producer *service.MessageProducer) *MessageListener {
+
 	return &MessageListener{
 		leaderSelectionApi: leaderSelectionApi,
 		peerRepository:     repository,
@@ -29,6 +30,7 @@ func NewMessageListener(leaderSelectionApi *api.LeaderSelection, repository *rep
 	}
 }
 
+// connection이 발생하면 처리하는 메소드이다.
 func (ml MessageListener) HandleConnCreateEvent(amqpMessage amqp.Delivery) {
 	connCreateEevent := &event.ConnCreateEvent{}
 	err := json.Unmarshal(amqpMessage.Body, connCreateEevent)

@@ -2,44 +2,48 @@ package gateway
 
 import (
 	"github.com/it-chain/bifrost"
-	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/conf"
-	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq"
-	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/topic"
+	"github.com/it-chain/midgard/bus/rabbitmq"
 )
 
-var quit chan bool
-
+// todo bifrost server kill방법
 func Start() error {
 
-	var (
-		ConnectionStore *bifrost.ConnectionStore
-		pri             key.PriKey
-		pub             key.PubKey
-		config          *conf.Configuration
-		mq              *rabbitmq.MessageQueue
-	)
+	config := conf.GetConfiguration()
 
-	config = conf.GetConfiguration()
-	ConnectionStore = bifrost.NewConnectionStore()
-	pri, pub = loadKeyPair(config.Authentication.KeyPath)
-	mq = rabbitmq.Connect(config.Common.Messaging.Url)
+	//create rabbitmq client
+	rabbitmqClient := rabbitmq.Connect(config.Common.Messaging.Url)
 
-	//publisher
-	publisher := NewEventPublisher(mq)
+	//create connection store
+	ConnectionStore := bifrost.NewConnectionStore()
 
-	//muxer
-	muxer := NewGatewayMux(publisher)
+	//load key
+	pri, pub := loadKeyPair(config.Authentication.KeyPath)
 
-	//amqp event consumer
-	consumer := NewAMQPConsumer(ConnectionStore, muxer, publisher, pri, pub)
+	//createHandler
+	commandHandler := NewConnectionCommandHandler(ConnectionStore, pri, pub, rabbitmqClient)
+	messageHandler := NewMessageCommandHandler(ConnectionStore, rabbitmqClient)
 
-	mq.Consume(topic.MessageDeliverEvent.String(), consumer.HandleMessageDeliverEvent)
-	mq.Consume(topic.ConnCreateCmd.String(), consumer.HandleConnCreateCmd)
+	//create server
+	server := NewServer(rabbitmqClient, ConnectionStore, pri, pub)
 
-	//server
-	server := NewServer(muxer, pri, pub)
+	err := rabbitmqClient.Subscribe("Command", "Connection", commandHandler)
+
+	if err != nil {
+		panic(err)
+	}
+
+	err = rabbitmqClient.Subscribe("Command", "Messasge", messageHandler)
+
+	if err != nil {
+		panic(err)
+	}
+
 	server.Listen(config.GrpcGateway.Ip)
 
 	return nil
+}
+
+func Stop() {
+
 }
