@@ -74,3 +74,10 @@ func (t Transaction) CalcHash() string {
 	}
 	return common.ComputeSHA256(hashArgs)
 }
+
+type TransactionRepository interface {
+	Save(transaction Transaction) error
+	Remove(id TransactionId) error
+	FindById(id TransactionId) (*Transaction, error)
+	FindAll() ([]*Transaction, error)
+}
