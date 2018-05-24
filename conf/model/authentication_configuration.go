@@ -7,7 +7,7 @@ type AuthenticationConfiguration struct {
 
 func NewAuthenticationConfiguration() AuthenticationConfiguration {
 	return AuthenticationConfiguration{
-		KeyType: "RSA",
+		KeyType: "RSA1024",
 		KeyPath: ".it-chain/",
 	}
 }

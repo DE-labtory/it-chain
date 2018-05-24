@@ -89,3 +89,7 @@
 [[constraint]]
   name = "github.com/google/go-github"
   version = "15.0.0"
+
+[[constraint]]
+  branch = "develop"
+  name = "github.com/it-chain/bifrost"

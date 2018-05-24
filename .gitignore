@@ -39,7 +39,18 @@ main
 # tmp
 .tmp
 
+#vendor
+vendor
+
+# leveldb output
+*.log
+CURRENT
+LOCK
+LOG
+MANIFEST-*
+
 # ignore backup config file
 conf/config_bak[0-9]*.yaml
+
 # add conf generator main
 !conf/main
