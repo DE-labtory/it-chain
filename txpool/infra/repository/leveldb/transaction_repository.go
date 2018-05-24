@@ -66,6 +66,7 @@ func (tr TransactionRepository) FindById(id txpool.TransactionId) (*txpool.Trans
 }
 
 func (tr TransactionRepository) FindAll() ([]*txpool.Transaction, error) {
+
 	iter := tr.leveldb.GetIteratorWithPrefix([]byte(""))
 	transactions := []*txpool.Transaction{}
 	for iter.Next() {

@@ -24,6 +24,8 @@ func (tId TransactionId) ToString() string {
 
 type TransactionStatus int
 type TransactionType int
+
+//Aggregate root must implement aggregate interface
 type Transaction struct {
 	TxId          TransactionId
 	PublishPeerId string
@@ -58,6 +60,7 @@ func (t Transaction) GetID() string {
 }
 
 func Deserialize(b []byte, transaction *Transaction) error {
+
 	err := json.Unmarshal(b, transaction)
 
 	if err != nil {

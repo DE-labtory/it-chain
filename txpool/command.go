@@ -1,4 +1,3 @@
 package txpool
 
-type TxCreateCommand struct {
-}
+type TxCreateCommand = TxData

@@ -2,20 +2,25 @@ package txpool
 
 import "sync"
 
-type Leader struct {
-	leaderId LeaderId
-}
-
-func (l *Leader) StringLeaderId() string {
-	return l.leaderId.ToString()
-}
-
 type LeaderId struct {
 	id string
 }
 
 func (lid LeaderId) ToString() string {
 	return string(lid.id)
+}
+
+//Aggregate root must implement aggregate interface
+type Leader struct {
+	leaderId LeaderId
+}
+
+func (l Leader) GetID() string {
+	return l.StringLeaderId()
+}
+
+func (l *Leader) StringLeaderId() string {
+	return l.leaderId.ToString()
 }
 
 type LeaderRepository interface {
