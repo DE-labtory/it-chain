@@ -82,6 +82,7 @@ const (
 )
 
 type TxDataType string
+
 type TxData struct {
 	Jsonrpc string
 	Method  TxDataType
