@@ -6,6 +6,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
 	"github.com/it-chain/it-chain-Engine/txpool/api"
 	"github.com/streadway/amqp"
+	"github.com/it-chain/it-chain-Engine/txpool/domain/model/transaction"
 )
 
 type MessageListener struct {
@@ -23,7 +24,9 @@ func (ml MessageListener) ListenTransactionCreateEvent(messageChannel <-chan amq
 				// TODO 에러처리하기
 			}
 
-			//TODO event 메세지 처리하기
+			var txDataMessage transaction.TxData
+			json.Unmarshal(eventMessage.TransactionData, &txDataMessage)
+			ml.txpoolApi.SaveTxData(eventMessage.PeerId, transaction.TxDataType(eventMessage.TxDataType), txDataMessage)
 		}
 	}()
 }
@@ -31,7 +34,7 @@ func (ml MessageListener) ListenTransactionCreateEvent(messageChannel <-chan amq
 func (ml MessageListener) ListenTransactionReceiveEvent(messageChannel <-chan amqp.Delivery) {
 	go func() {
 		for message := range messageChannel {
-			eventMessage := &event.TransactionCreateEvent{}
+			eventMessage := &event.TransactionReceiveEvent{}
 			err := json.Unmarshal(message.Body, &eventMessage)
 
 			if err != nil {
@@ -39,7 +42,9 @@ func (ml MessageListener) ListenTransactionReceiveEvent(messageChannel <-chan am
 				// TODO 에러처리하기
 			}
 
-			//TODO event 메세지 처리하기
+			var txMessage transaction.Transaction
+			json.Unmarshal(eventMessage.Transaction, &txMessage)
+			ml.txpoolApi.SaveTransaction(txMessage)
 		}
 	}()
 }
