@@ -15,12 +15,12 @@ import (
 
 type MessageListener struct {
 	leaderSelectionApi *api.LeaderSelection
-	peerRepository     *repository.Peer
+	peerRepository     *repository.PeerRepository
 	peerTable          *service.PeerTable
 	messageProducer    *service.MessageProducer
 }
 
-func NewMessageListener(leaderSelectionApi *api.LeaderSelection, repository *repository.Peer, table *service.PeerTable, producer *service.MessageProducer) *MessageListener {
+func NewMessageListener(leaderSelectionApi *api.LeaderSelection, repository *repository.PeerRepository, table *service.PeerTable, producer *service.MessageProducer) *MessageListener {
 
 	return &MessageListener{
 		leaderSelectionApi: leaderSelectionApi,

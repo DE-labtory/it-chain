@@ -8,8 +8,7 @@ package api
 // by frontalnh(namhoon)
 
 import (
-	"github.com/it-chain/it-chain-Engine/peer/domain/model"
-	"github.com/it-chain/it-chain-Engine/peer/domain/repository"
+	"github.com/it-chain/it-chain-Engine/peer"
 	"github.com/it-chain/it-chain-Engine/peer/domain/service"
 )
 
@@ -17,15 +16,15 @@ import (
 //todo 예를들어, peerTableService 는 Leader 를 변경했는데 messageProduce 에 실패한경우?
 //todo 이경우 rabbitMQ 에러 핸들링이라 어쩔 수 없다는 @junbeomlee 의 의견. issue 로 확인필요할듯
 type LeaderSelection struct {
-	peerTableService *service.PeerTable      // 참여 피어에 대한 주관적인 정보를 담고 있는 peerTableService를 필드로 가짐
+	peerTableService *peer.NodeTable         // 참여 피어에 대한 주관적인 정보를 담고 있는 peerTableService를 필드로 가짐
 	messageProducer  service.MessageProducer // 메세지를 전달할 수 있는 messageProducer를 필드로 가짐
-	peerRepository   repository.Peer         // leveldb에 접근이 가능하도록 peerRepository를 가짐
-	myInfo           *model.Peer             // 내 피어 정보를 가짐.
+	peerRepository   peer.NodeRepository     // leveldb에 접근이 가능하도록 peerRepository를 가짐
+	myInfo           *peer.Node              // 내 피어 정보를 가짐.
 }
 
-func NewLeaderSelectionApi(repo repository.Peer, messageProducer service.MessageProducer, myInfo *model.Peer) (*LeaderSelection, error) {
+func NewLeaderSelectionApi(repo peer.NodeRepository, messageProducer service.MessageProducer, myInfo *peer.Node) (*LeaderSelection, error) {
 	leaderSelectionApi := &LeaderSelection{
-		peerTableService: service.NewPeerTableService(repo, myInfo),
+		peerTableService: peer.NewNodeTableService(repo, myInfo),
 		messageProducer:  messageProducer,
 		peerRepository:   repo,
 		myInfo:           myInfo,
@@ -38,12 +37,12 @@ func (ls *LeaderSelection) RequestChangeLeader() error {
 	panic("implement please")
 }
 
-func (ls *LeaderSelection) RequestLeaderInfoTo(peer model.Peer) error {
+func (ls *LeaderSelection) RequestLeaderInfoTo(peer peer.Node) error {
 	return ls.messageProducer.RequestLeaderInfo(peer)
 }
 
 // 리더를 바꾸기 위한 api
-func (ls *LeaderSelection) changeLeader(peer *model.Peer) error {
+func (ls *LeaderSelection) changeLeader(peer *peer.Node) error {
 	err := ls.peerTableService.SetLeader(peer)
 	if err != nil {
 		return err
