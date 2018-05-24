@@ -75,6 +75,37 @@ func (t Transaction) CalcHash() string {
 	return common.ComputeSHA256(hashArgs)
 }
 
+//TxData Declaration
+const (
+	Invoke TxDataType = "invoke"
+	Query  TxDataType = "query"
+)
+
+type TxDataType string
+type TxData struct {
+	Jsonrpc string
+	Method  TxDataType
+	Params  Param
+	ID      string
+	ICodeID string
+}
+
+type Param struct {
+	Function string
+	Args     []string
+}
+
+func NewTxData(jsonrpc string, method TxDataType, params Param, iCodeId string, id string) *TxData {
+	return &TxData{
+		Jsonrpc: jsonrpc,
+		Method:  method,
+		Params:  params,
+		ID:      id,
+		ICodeID: iCodeId,
+	}
+}
+
+//Transaction Repository interface
 type TransactionRepository interface {
 	Save(transaction Transaction) error
 	Remove(id TransactionId) error
