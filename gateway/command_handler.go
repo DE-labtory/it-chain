@@ -25,6 +25,7 @@ func NewConnectionCommandHandler(store *bifrost.ConnectionStore, priKey key.PriK
 	}
 }
 
+// 새로운 connection 이 생성되면 처리하는 함수이다.
 func (c ConnectionCommandHandler) HandleConnectionCreate(command ConnectionCreateCommand) {
 
 	log.Println(command)

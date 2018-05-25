@@ -14,7 +14,7 @@ func Start() error {
 	//create rabbitmq client
 	rabbitmqClient := rabbitmq.Connect(config.Common.Messaging.Url)
 
-	//create connection store
+	//create connection store by bifrost which is it-chain's own lib for implementing p2p network
 	ConnectionStore := bifrost.NewConnectionStore()
 
 	//load key

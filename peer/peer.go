@@ -1,4 +1,4 @@
-package model
+package peer
 
 import (
 	"encoding/json"

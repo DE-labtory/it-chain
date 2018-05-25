@@ -4,31 +4,40 @@
 -frontalnh(namhoon)
 ---
 
-# requirement
-rabbitmq 설치 및 서버 가동
+# 최초 노드 boot 시의 시나리오
+최초의 노드를 bootnode로 하는 최초의 p2p 네트워크를 형성하는 시나리오이다.
+이 경우 it-chain의 bootnode가 반드시 해당 pc 의 ip로 설정되어 있어야 한다.
 
-# 최초의 peer에서 블록체인 초기화
-## 부트 노드 환경 설정
-**자신이 부트노드인 경우**
-peer/init.go 에서 init() 함수 호출시 부트노드 및 나의 노드에 대한 정보를 설정하고 해당 노드가 부트노드인 경우 자신을 리더로 선정함.
+개략적인 프로세스는 다음과 같다.
+
+1. 추가될 노드와의 통신을 위한 준비
+2. 노드 내 컴포넌트간 통신을 위한 AMQP 준비
+3. p2p 네트워크 초기 세팅
+
+## 추가될 노드와의 통신을 위한 준비
+현재 boot 된 최초의 노드를 bootnode로 하여 최초의 p2p 네트워크를 형성하기 위해 다른 노드와 gRPC를 사용한 통신망을 구축하며, 실제적인 gateway 컴포넌트에서 이루어 진다. gateway 패키지의 `start()` 함수호출을 통해 gRPC interface를 구축한다.
+
+이러한 함수호출을 통해 다음과 같은 작업들이 수행되게 된다.
+1. gRPC interface 구축
+2. amqp server 환경 세팅
+
+이 과정에서 gRPC 인터페이스를 구축함에 있어 grpc lib을 사용하는 것이 일반적이지만, it-chain 에서는 이를 보다 쉽게 구현하기 위해 별도로 p2p 네트워크 라이브러리인 `bifrost` 라이브러리를 자체 제작하여 사용하고있다. `bifrost` 를 통해 gRPC 인터페이스를 보다 쉽게 구축 할 수 있을 뿐만 아니라 해당 p2p 네트워크의 전체 연결정보를 쉽게 관리하고 정보를 열람할 수 있다.
+
+## 노드 내 컴포넌트간 통신을 위한 AMQP 세팅
+노드 내의 각 컴포넌트들은 AMQP 를 사용하여 통신하며 rabbitmq 를 통해 구현되며, 이를 위해 amqp 서버를 구동이 필요하다.
+amqp 서버 구동의 경우 앞의 gRPC 인터페이스를 구축함에 있어 gateway 패키지의 start() 함수를 호출하는 시점에서 amqp 서버의 구동까지 같이 수행하므로 별도로 다른 조작은 필요하지 않다.
 
 
-**자신이 부트 노드가 아닌 경우**
-별도의 authenticate 절차 거침
+## peer 를 생성하고 leader를 선언
+peer 패키지의 init 호출 시점에서 해당 노드의 피어 정보를 db에 저장하고 해당 노드가 부트노드인 경우 해당 피어를 리더로 선출한다.
 
-## grpc 서버 개통 및 p2p 네트워크 연결
-gateway 컴포넌트에서 Start() 호출하여 p2p 네트워크에 연결한다.
-## amqp 서버 연결
-```
-messaging/rabbitmq
-MessageQueue.start()
-```
-## Gateway 연결
-gateway.init()
+리더로 선출 과정은 amqp 에 리더 선출 사실을 알리고 gateway 에서 해당 이벤틀르 받아 다른 노드들에게 해당 사실을 알려야 하지만 현재는 단일 노드로 구성된 p2p 네트워크 이므로 이 과정이 생략될 수 있으나, 다른 노드가 없으므로 형식적으로 수행해도 무방하다.
+
+이러한 leader의 정보는 peer의 peer table의 형태로 leveldb에 저장된다.
+> peer table 은 현재 state 상태로 저장되어 있는데 별도로 model을 정의하고 이에 대한 repository를 두어 저장하는 것이 좋을 듯 하다. - frontalnh(namhoon)
 
 
-
-# 두번째 피어 등록
+# 두번째 노드가 네트워크에 연결되는 시나리오
 자신이 부트노드가 아니므로
 1. 피어 생성
 2. 다른 피어에게 알림
@@ -41,7 +50,7 @@ gateway.init()
 ---
 
 
-# 트랜잭션 발생
+# 트랜잭션 발생 시나리오
 1. 사용자가 tx 생성 요청
 2. txpool 에 저장
 3. txpool에서 consume
@@ -52,6 +61,8 @@ createtx
 7. create event 객체생성
 8. pool에서 tx 생성
 9. leveldb 저장
+
+
 # 블록 생성
 # 합의과정
 # 블록 저장
