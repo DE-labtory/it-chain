@@ -25,12 +25,15 @@ func NewServer(publisher midgard.Publisher, connectionStore *bifrost.ConnectionS
 		publisher:       publisher,
 	}
 
+	// 최초로 서버를 생성하는 경우 connection이 형성되었음을 알리고 해당 함수를 실행시킨다.
 	s.OnConnection(server.onConnection)
 	s.OnError(server.onError)
 
 	return server
 }
 
+
+// connection이 형성되는 경우 실행하는 코드이다.
 func (s Server) onConnection(connection bifrost.Connection) {
 
 	connection.Handle(NewRequestHandler(s.publisher))

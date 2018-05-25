@@ -11,12 +11,10 @@ import (
 	"github.com/it-chain/it-chain-Engine/peer/domain/service"
 )
 
-type MessageProducer struct
-
-func NewMessageProducer(publish service.Publish) *MessageProducer {}
+func NewMessageProducer() *MessageProducer {}
 
 // publish 함수 정의
-func Publish(topic string, data []byte) error{
+func (mp *MessageProducer) Publish(topic string, data []byte) error{
 	mq := rabbitmq.Connect("url") // connect 함수 호출로 귀찮은 연결 등 여타 다 처리해줌
 	return mq.Publish(topic, data)
 }

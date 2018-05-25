@@ -24,9 +24,10 @@ func Start() error {
 	commandHandler := NewConnectionCommandHandler(ConnectionStore, pri, pub, rabbitmqClient)
 	messageHandler := NewMessageCommandHandler(ConnectionStore, rabbitmqClient)
 
-	//create server
+	//create gRPC server
 	server := NewServer(rabbitmqClient, ConnectionStore, pri, pub)
 
+	// Subscribe amqp server
 	err := rabbitmqClient.Subscribe("Command", "Connection", commandHandler)
 
 	if err != nil {
@@ -39,6 +40,8 @@ func Start() error {
 		panic(err)
 	}
 
+	// config의 config.yaml에 설정된 grpc gateway의 ip를 서버로 설정한다.
+	// 추후 다른 노드에서 실행하는 경우 해당 부분의 ip를 해당 pc의 ip로 바꾸어 주어야 한다.
 	server.Listen(config.GrpcGateway.Ip)
 
 	return nil
