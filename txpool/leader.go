@@ -9,16 +9,16 @@ import (
 )
 
 type LeaderId struct {
-	id string
+	Id string
 }
 
 func (lid LeaderId) ToString() string {
-	return string(lid.id)
+	return string(lid.Id)
 }
 
 //Aggregate root must implement aggregate interface
 type Leader struct {
-	leaderId LeaderId
+	LeaderId LeaderId
 }
 
 // must implement id method
@@ -32,7 +32,7 @@ func (l *Leader) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *LeaderChangedEvent:
-		l.leaderId = LeaderId{v.GetID()}
+		l.LeaderId = LeaderId{v.GetID()}
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
@@ -42,7 +42,7 @@ func (l *Leader) On(event midgard.Event) error {
 }
 
 func (l *Leader) StringLeaderId() string {
-	return l.leaderId.ToString()
+	return l.LeaderId.ToString()
 }
 
 type LeaderRepository interface {

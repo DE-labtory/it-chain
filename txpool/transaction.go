@@ -7,8 +7,8 @@ import (
 
 	"encoding/json"
 
-	"github.com/altairsix/eventsource"
 	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/midgard"
 )
 
 const (
@@ -32,7 +32,6 @@ type Transaction struct {
 	TxId          TransactionId
 	PublishPeerId string
 	TxStatus      TransactionStatus
-	TxType        TxDataType
 	TxHash        string
 	TimeStamp     time.Time
 	TxData        TxData
@@ -44,7 +43,7 @@ func (t Transaction) GetID() string {
 }
 
 // must implement on method
-func (t *Transaction) On(event eventsource.Event) error {
+func (t *Transaction) On(event midgard.Event) error {
 
 	switch v := event.(type) {
 
@@ -78,8 +77,8 @@ func Deserialize(b []byte, transaction *Transaction) error {
 	return nil
 }
 
-func CalTxHash(txData TxData, publishPeerId string, txId TransactionId, dataType TxDataType, timeStamp time.Time) string {
-	hashArgs := []string{txData.Jsonrpc, string(txData.Method), string(txData.Params.Function), txData.ICodeID, publishPeerId, timeStamp.String(), string(txId), string(dataType)}
+func CalTxHash(txData TxData, publishPeerId string, txId TransactionId, timeStamp time.Time) string {
+	hashArgs := []string{txData.Jsonrpc, string(txData.Method), string(txData.Params.Function), txData.ICodeID, publishPeerId, timeStamp.String(), string(txId)}
 	for _, str := range txData.Params.Args {
 		hashArgs = append(hashArgs, str)
 	}

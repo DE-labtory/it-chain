@@ -1,8 +1,6 @@
-package txpool
+package infra
 
-import (
-	"time"
-)
+import "time"
 
 type TimeoutTicker struct {
 	T         *time.Ticker

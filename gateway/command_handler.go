@@ -59,7 +59,7 @@ func (c ConnectionCommandHandler) HandleConnectionCreate(command ConnectionCreat
 	err = c.publisher.Publish("Event", "Connection", ConnectionCreatedEvent{
 		Address: connection.GetIP(),
 		EventModel: midgard.EventModel{
-			AggregateID: connection.GetID(),
+			ID: connection.GetID(),
 		},
 	})
 

@@ -10,7 +10,6 @@ type TxCreatedEvent struct {
 	midgard.EventModel
 	PublishPeerId string
 	TxStatus      TransactionStatus
-	TxType        TxDataType
 	TxHash        string
 	TimeStamp     time.Time
 	TxData        TxData
@@ -22,7 +21,6 @@ func (tx TxCreatedEvent) GetTransaction() Transaction {
 		TxId:          TransactionId(tx.ID),
 		PublishPeerId: tx.PublishPeerId,
 		TxStatus:      tx.TxStatus,
-		TxType:        tx.TxType,
 		TxHash:        tx.TxHash,
 		TxData:        tx.TxData,
 	}
