@@ -41,7 +41,7 @@ func (s Server) onConnection(connection bifrost.Connection) {
 	err := s.publisher.Publish("Event", "Connection", ConnectionCreatedEvent{
 		Address: connection.GetIP(),
 		EventModel: midgard.EventModel{
-			AggregateID: connection.GetID(),
+			ID: connection.GetID(),
 		},
 	})
 
