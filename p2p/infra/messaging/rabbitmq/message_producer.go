@@ -6,8 +6,8 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/topic"
-	"github.com/it-chain/it-chain-Engine/peer/domain/model"
-	"github.com/it-chain/it-chain-Engine/peer/domain/service"
+	"github.com/it-chain/it-chain-Engine/p2p/domain/model"
+	"github.com/it-chain/it-chain-Engine/p2p/domain/service"
 )
 
 type MessageProducer struct {
@@ -19,7 +19,6 @@ func NewMessageProducer(publish service.Publish) *MessageProducer {
 		Publish: publish,
 	}
 }
-
 
 // 새로운 리더 정보를 받아오는 메서드이다.
 func (mp *MessageProducer) RequestLeaderInfo(peer model.Peer) error {
@@ -38,7 +37,6 @@ func (mp *MessageProducer) RequestLeaderInfo(peer model.Peer) error {
 	deliverSerialize, _ := common.Serialize(deliverEvent)
 	return mp.Publish(topic.MessageDeliverEvent.String(), deliverSerialize)
 }
-
 
 // 단일 피어에게 새로운 리더 정보를 전달하는 메서드이다.
 func (mp *MessageProducer) DeliverLeaderInfo(toPeer model.Peer, leader model.Peer) error {

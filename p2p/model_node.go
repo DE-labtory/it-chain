@@ -1,4 +1,4 @@
-package peer
+package p2p
 
 import (
 	"encoding/json"
@@ -25,12 +25,12 @@ func NewPeer(ipAddress string, id NodeId) *Node {
 	}
 }
 
-// peer 구조체를 json 으로 인코딩한다.
+// p2p 구조체를 json 으로 인코딩한다.
 func (n Node) Serialize() ([]byte, error) {
 	return common.Serialize(n)
 }
 
-// 입력받은 peer 구조체에 해당 json 인코딩 바이트 배열을 deserialize 해서 저장한다.
+// 입력받은 p2p 구조체에 해당 json 인코딩 바이트 배열을 deserialize 해서 저장한다.
 func Deserialize(b []byte, peer *Node) error {
 	err := json.Unmarshal(b, peer)
 
@@ -49,7 +49,7 @@ func (nodeId NodeId) ToString() string {
 	return string(nodeId)
 }
 
-// peer repository 인터페이스를 정의한다.
+// p2p repository 인터페이스를 정의한다.
 // NodeRepository 가 아니라 NodeRepository 로 정의하는 것이 맞을것 같습니다. - 남훈
 type NodeRepository interface {
 	Save(node Node) error

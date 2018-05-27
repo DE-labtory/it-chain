@@ -6,10 +6,10 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/topic"
-	"github.com/it-chain/it-chain-Engine/peer/api"
-	"github.com/it-chain/it-chain-Engine/peer/domain/model"
-	"github.com/it-chain/it-chain-Engine/peer/domain/repository"
-	"github.com/it-chain/it-chain-Engine/peer/domain/service"
+	"github.com/it-chain/it-chain-Engine/p2p/api"
+	"github.com/it-chain/it-chain-Engine/p2p/domain/model"
+	"github.com/it-chain/it-chain-Engine/p2p/domain/repository"
+	"github.com/it-chain/it-chain-Engine/p2p/domain/service"
 	"github.com/streadway/amqp"
 )
 

@@ -3,7 +3,6 @@ package leveldb
 import (
 	"encoding/json"
 
-	"github.com/it-chain/it-chain-Engine/peer"
 	"github.com/it-chain/leveldb-wrapper"
 )
 
@@ -11,7 +10,7 @@ type NodeRepository struct {
 	leveldb *leveldbwrapper.DB
 }
 
-// 새로운 peer repo 생성
+// 새로운 p2p repo 생성
 func NewNodeRepository(path string) *NodeRepository {
 	db := leveldbwrapper.CreateNewDB(path)
 	db.Open()
@@ -20,15 +19,15 @@ func NewNodeRepository(path string) *NodeRepository {
 	}
 }
 
-// 새로운 peer 를 leveldb에 저장
-func (pr *NodeRepository) Save(data peer.Node) error {
+// 새로운 p2p 를 leveldb에 저장
+func (pr *NodeRepository) Save(data p2p.Node) error {
 
 	// return empty peerID error if peerID is null
 	if data.Id.ToString() == "" {
-		return peer.NodeIdEmptyErr
+		return p2p.NodeIdEmptyErr
 	}
 
-	// serialize peer and allocate to b or err if err occured
+	// serialize p2p and allocate to b or err if err occured
 	b, err := data.Serialize()
 
 	// return err if occured
@@ -44,13 +43,13 @@ func (pr *NodeRepository) Save(data peer.Node) error {
 	return nil
 }
 
-// peer 삭제
-func (pr *NodeRepository) Remove(id peer.NodeId) error {
+// p2p 삭제
+func (pr *NodeRepository) Remove(id p2p.NodeId) error {
 	return pr.leveldb.Delete([]byte(id), true)
 }
 
-// peer 읽어옴
-func (pr *NodeRepository) FindById(id peer.NodeId) (*peer.Node, error) {
+// p2p 읽어옴
+func (pr *NodeRepository) FindById(id p2p.NodeId) (*p2p.Node, error) {
 	b, err := pr.leveldb.Get([]byte(id))
 
 	if err != nil {
@@ -61,8 +60,8 @@ func (pr *NodeRepository) FindById(id peer.NodeId) (*peer.Node, error) {
 		return nil, nil
 	}
 
-	// model.NodeRepository 에 읽어온 peer 를 할당
-	node := &peer.Node{}
+	// model.NodeRepository 에 읽어온 p2p 를 할당
+	node := &p2p.Node{}
 
 	err = json.Unmarshal(b, node)
 
@@ -74,13 +73,13 @@ func (pr *NodeRepository) FindById(id peer.NodeId) (*peer.Node, error) {
 }
 
 // 모든 피어 검색
-func (pr *NodeRepository) FindAll() ([]*peer.Node, error) {
+func (pr *NodeRepository) FindAll() ([]*p2p.Node, error) {
 	iter := pr.leveldb.GetIteratorWithPrefix([]byte(""))
-	var nodes []*peer.Node
+	var nodes []*p2p.Node
 	for iter.Next() {
 		val := iter.Value()
-		data := &peer.Node{}
-		err := peer.Deserialize(val, data)
+		data := &p2p.Node{}
+		err := p2p.Deserialize(val, data)
 
 		if err != nil {
 			return nil, err
