@@ -7,9 +7,7 @@
 
 Lightweight Customizable Chain For All
 
-it-chain makes it easy for anyone to have their own block chain platform
-
-Use Smart-Contract to create your own Dapp
+The it-chain is an easily modifiable block chain that can fit into any domain. To make it easier to customize, we have divided the it-chain into several independent components and minimized dependencies between them.
 
 **The development is not completed yet. The beta version will be released in August.** 
 
