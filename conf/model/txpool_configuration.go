@@ -1,7 +1,7 @@
 package model
 
 type TxpoolConfiguration struct {
-	TimeoutMs          int
+	TimeoutMs          int64
 	MaxTransactionByte int
 	RepositoryPath     string
 }
