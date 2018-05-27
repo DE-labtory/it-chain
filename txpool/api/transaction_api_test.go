@@ -1,14 +1,12 @@
-package messaging_test
+package api_test
 
 import (
 	"testing"
 
 	"os"
 
-	"log"
-
 	"github.com/it-chain/it-chain-Engine/txpool"
-	"github.com/it-chain/it-chain-Engine/txpool/infra/messaging"
+	"github.com/it-chain/it-chain-Engine/txpool/api"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/it-chain/midgard/store/leveldb"
@@ -23,13 +21,14 @@ func TestTxCommandHandler_HandleTxCreate(t *testing.T) {
 	path := "test"
 	store := leveldb.NewEventStore(path, leveldb.NewSerializer(txpool.TxCreatedEvent{}, txpool.TxDeletedEvent{}))
 
-	os.RemoveAll(path)
+	defer os.RemoveAll(path)
 
 	repo := midgard.NewRepo(store, client)
 
-	txCommandHandler := messaging.NewTxCommandHandler(*repo, "1")
+	txCommandHandler := api.NewTransactionApi(repo, "1")
 
 	//when
+	txID := "123"
 	txCreatedCommand := txpool.TxCreateCommand{
 		TxData: txpool.TxData{
 			ID:      "1",
@@ -41,15 +40,19 @@ func TestTxCommandHandler_HandleTxCreate(t *testing.T) {
 			Method:  "invoke",
 			Jsonrpc: "json1.0",
 		},
+		CommandModel: midgard.CommandModel{
+			ID: txID,
+		},
 	}
 
 	//when
-	txCommandHandler.HandleTxCreate(txCreatedCommand)
+	txCommandHandler.CreateTransaction(txCreatedCommand)
 
 	//then
 	tx := &txpool.Transaction{}
-	err := repo.Load(tx, "1")
+	err := repo.Load(tx, txID)
 	assert.NoError(t, err)
 
-	log.Println(tx)
+	assert.Equal(t, tx.TxData, txCreatedCommand.TxData)
+	assert.Equal(t, tx.TxId, tx.TxId)
 }

@@ -6,7 +6,3 @@ type TxCreateCommand struct {
 	midgard.CommandModel
 	TxData
 }
-
-func (t TxCreateCommand) GetID() string {
-	return t.TxData.ID
-}

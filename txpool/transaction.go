@@ -78,10 +78,21 @@ func Deserialize(b []byte, transaction *Transaction) error {
 }
 
 func CalTxHash(txData TxData, publishPeerId string, txId TransactionId, timeStamp time.Time) string {
-	hashArgs := []string{txData.Jsonrpc, string(txData.Method), string(txData.Params.Function), txData.ICodeID, publishPeerId, timeStamp.String(), string(txId)}
+
+	hashArgs := []string{
+		txData.Jsonrpc,
+		string(txData.Method),
+		string(txData.Params.Function),
+		txData.ICodeID,
+		publishPeerId,
+		timeStamp.String(),
+		string(txId),
+	}
+
 	for _, str := range txData.Params.Args {
 		hashArgs = append(hashArgs, str)
 	}
+
 	return common.ComputeSHA256(hashArgs)
 }
 

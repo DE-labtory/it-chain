@@ -1,28 +1,26 @@
-package messaging
+package api
 
 import (
 	"log"
-
 	"time"
 
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"github.com/it-chain/midgard"
-	"github.com/rs/xid"
 )
 
-type TxCommandHandler struct {
-	eventRepository midgard.Repository
+type TransactionApi struct {
+	eventRepository *midgard.Repository
 	publisherId     string
 }
 
-func NewTxCommandHandler(eventRepository midgard.Repository, publisherId string) TxCommandHandler {
-	return TxCommandHandler{
+func NewTransactionApi(eventRepository *midgard.Repository, publisherId string) TransactionApi {
+	return TransactionApi{
 		publisherId:     publisherId,
 		eventRepository: eventRepository,
 	}
 }
 
-func (t TxCommandHandler) HandleTxCreate(txCreateCommand txpool.TxCreateCommand) {
+func (t TransactionApi) CreateTransaction(txCreateCommand txpool.TxCreateCommand) {
 
 	events := make([]midgard.Event, 0)
 
@@ -31,7 +29,7 @@ func (t TxCommandHandler) HandleTxCreate(txCreateCommand txpool.TxCreateCommand)
 		return
 	}
 
-	id := string(txpool.TransactionId(xid.New().String()))
+	id := txCreateCommand.GetID()
 	timeStamp := time.Now()
 	hash := txpool.CalTxHash(txCreateCommand.TxData, t.publisherId, txpool.TransactionId(id), timeStamp)
 

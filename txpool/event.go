@@ -37,3 +37,7 @@ type LeaderChangedEvent struct {
 type TxDeletedEvent struct {
 	midgard.EventModel
 }
+
+type EventRepository interface {
+	Load(aggregate midgard.Aggregate, aggregateID string) error
+}
