@@ -6,7 +6,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/topic"
-	"github.com/it-chain/it-chain-Engine/p2p/domain/model"
+	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/p2p/domain/service"
 )
 
@@ -21,7 +21,7 @@ func NewMessageProducer(publish service.Publish) *MessageProducer {
 }
 
 // 새로운 리더 정보를 받아오는 메서드이다.
-func (mp *MessageProducer) RequestLeaderInfo(peer model.Peer) error {
+func (mp *MessageProducer) RequestLeaderInfo(peer p2p.Node) error {
 	requestBody := event.LeaderInfoRequestCmd{
 		TimeUnix: time.Now().Unix(),
 	}
@@ -39,7 +39,7 @@ func (mp *MessageProducer) RequestLeaderInfo(peer model.Peer) error {
 }
 
 // 단일 피어에게 새로운 리더 정보를 전달하는 메서드이다.
-func (mp *MessageProducer) DeliverLeaderInfo(toPeer model.Peer, leader model.Peer) error {
+func (mp *MessageProducer) DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node) error {
 
 	// 리더 정보를 leaderInfoBody에 담아줌
 	leaderInfoBody := event.LeaderInfoPublishEvent{
@@ -67,6 +67,6 @@ func (mp *MessageProducer) DeliverLeaderInfo(toPeer model.Peer, leader model.Pee
 }
 
 // 새로운 리더를 업데이트하는 메서드이다.
-func (mp *MessageProducer) LeaderUpdateEvent(leader model.Peer) error {
+func (mp *MessageProducer) LeaderUpdateEvent(leader p2p.Node) error {
 	panic("implement me")
 }

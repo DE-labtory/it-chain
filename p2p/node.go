@@ -5,16 +5,32 @@ import (
 	"errors"
 
 	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/midgard"
+	"fmt"
 )
 
-var NodeNotFoundErr = errors.New("NodeNotFound")
-var DuplicateNodeErr = errors.New("NodeAlreadyExist")
-var NodeIdEmptyErr = errors.New("NodeIdEmpty")
+// NodeId 선언
+type NodeId string
 
 // 피어 구조체를 선언한다.
 type Node struct {
 	IpAddress string
 	Id        NodeId
+}
+
+func (n Node) On(event midgard.Event) error {
+	switch v := event.(type) {
+	case :
+
+	default:
+		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
+	}
+
+	return nil
+}
+
+func (n Node) GetID() string {
+	return n.Id.ToString()
 }
 
 // 해당 피어의 ip와 peerId로 새로운 피어를 생성한다.
@@ -41,16 +57,13 @@ func Deserialize(b []byte, peer *Node) error {
 	return nil
 }
 
-// peerId 선언
-type NodeId string
 
 // conver peerId to String
 func (nodeId NodeId) ToString() string {
 	return string(nodeId)
 }
 
-// p2p repository 인터페이스를 정의한다.
-// NodeRepository 가 아니라 NodeRepository 로 정의하는 것이 맞을것 같습니다. - 남훈
+// node repository 인터페이스를 정의한다.
 type NodeRepository interface {
 	Save(node Node) error
 	Remove(id NodeId) error

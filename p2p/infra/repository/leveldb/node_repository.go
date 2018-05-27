@@ -3,6 +3,9 @@ package leveldb
 import (
 	"encoding/json"
 
+	"errors"
+
+	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/leveldb-wrapper"
 )
 
@@ -24,7 +27,7 @@ func (pr *NodeRepository) Save(data p2p.Node) error {
 
 	// return empty peerID error if peerID is null
 	if data.Id.ToString() == "" {
-		return p2p.NodeIdEmptyErr
+		return errors.New("node Id empty")
 	}
 
 	// serialize p2p and allocate to b or err if err occured
