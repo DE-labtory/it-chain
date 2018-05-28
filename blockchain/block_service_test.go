@@ -1,4 +1,4 @@
-package service
+package blockchain
 
 import (
 	"go/build"
@@ -10,9 +10,10 @@ import (
 
 	"os"
 
+	"time"
+
 	"github.com/it-chain/yggdrasill/impl"
 	"github.com/stretchr/testify/assert"
-	"time"
 )
 
 func TestCreateGenesisBlock(t *testing.T) {
@@ -29,7 +30,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 								  "TimeStamp":"0001-01-01T00:00:00-00:00",
 								  "Creator":[]
 								}`)
-
+	validator := new(impl.DefaultValidator)
 	var tempBlock impl.DefaultBlock
 	_ = json.Unmarshal(tempBlockConfigJson, &tempBlock)
 	tempBlockConfigByte, _ := json.Marshal(tempBlock)
@@ -38,14 +39,15 @@ func TestCreateGenesisBlock(t *testing.T) {
 	rightFilePaths := []string{genesisConfFilePath, tempFilePath}
 	for _, rightFilePath := range rightFilePaths {
 		GenesisBlock, err1 := CreateGenesisBlock(rightFilePath)
+		expectedSeal, _ := validator.BuildSeal(GenesisBlock)
 		assert.NoError(t, err1)
-		assert.Equal(t, make([]byte,0),GenesisBlock.Seal)
-		assert.Equal(t, make([]byte,0), GenesisBlock.PrevSeal)
+		assert.Equal(t, expectedSeal, GenesisBlock.Seal)
+		assert.Equal(t, make([]byte, 0), GenesisBlock.PrevSeal)
 		assert.Equal(t, uint64(0), GenesisBlock.Height)
-		assert.Equal(t, make([]*impl.DefaultTransaction,0),GenesisBlock.TxList)
-		assert.Equal(t, make([][]byte,0),GenesisBlock.TxSeal)
+		assert.Equal(t, make([]*impl.DefaultTransaction, 0), GenesisBlock.TxList)
+		assert.Equal(t, make([][]byte, 0), GenesisBlock.TxSeal)
 		assert.Equal(t, time.Now().String()[:19], GenesisBlock.Timestamp.String()[:19])
-		assert.Equal(t, make([]byte,0), GenesisBlock.Creator)
+		assert.Equal(t, make([]byte, 0), GenesisBlock.Creator)
 	}
 	_, err2 := CreateGenesisBlock(wrongFilePath)
 	assert.Error(t, err2)
