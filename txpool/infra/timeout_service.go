@@ -24,12 +24,13 @@ func NewTimeoutTicker(timeoutMs int64) *TimeoutTicker {
 	}
 }
 
-func (t *TimeoutTicker) Start() {
+func (t *TimeoutTicker) TransferTxStart() {
 	t.T = time.NewTicker(t.TimeoutMs)
+	txService := txpool.TxPeriodicTransferService{}
+
 	go func() {
 		for _ := range t.T.C {
-			// todo : Run "TransferTxToLeader()"
-			txpool.TxPeriodicTransferService.TransferTxToLeader()
+			txService.TransferTxToLeader()
 		}
 	}()
 }
