@@ -1,4 +1,4 @@
-package rabbitmq
+package messaging
 
 import (
 	"time"
@@ -7,16 +7,16 @@ import (
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/topic"
 	"github.com/it-chain/it-chain-Engine/p2p"
-	"github.com/it-chain/it-chain-Engine/p2p/domain/service"
 )
 
+type Publisher func(exchange string, topic string, data interface{}) (err error)
 type MessageProducer struct {
-	Publish service.Publish
+	publisher Publisher
 }
 
-func NewMessageProducer(publish service.Publish) *MessageProducer {
+func NewMessageProducer(publisher Publisher) *MessageProducer {
 	return &MessageProducer{
-		Publish: publish,
+		publisher: publisher,
 	}
 }
 
