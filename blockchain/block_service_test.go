@@ -35,7 +35,9 @@ func TestCreateGenesisBlock(t *testing.T) {
 	_ = json.Unmarshal(tempBlockConfigJson, &tempBlock)
 	tempBlockConfigByte, _ := json.Marshal(tempBlock)
 	_ = ioutil.WriteFile(tempFilePath, tempBlockConfigByte, 0644)
+
 	defer os.Remove(tempFilePath)
+
 	rightFilePaths := []string{genesisConfFilePath, tempFilePath}
 	for _, rightFilePath := range rightFilePaths {
 		GenesisBlock, err1 := CreateGenesisBlock(rightFilePath)
