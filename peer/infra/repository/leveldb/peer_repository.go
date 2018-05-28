@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/it-chain/leveldb-wrapper"
-	"github.com/it-chain/it-chain-Engine/peer"
 
 )
 

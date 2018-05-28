@@ -19,6 +19,7 @@ const (
 	BlockProposeEvent
 
 	//peer Event
+	//todo mq 관련 메세지 아닌것 ( rpc 관련) 분리하기
 	LeaderInfoPublishEvent
 	LeaderInfoRequestCmd
 	LeaderChangeEvent

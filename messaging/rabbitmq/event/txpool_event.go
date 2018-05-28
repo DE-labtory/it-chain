@@ -16,5 +16,7 @@ type BlockProposeEvent struct {
 }
 
 type TransactionCreateEvent struct {
+	PeerId			string
+	TxDataType		string
 	TransactionData []byte
 }
