@@ -1,4 +1,4 @@
-package repository
+package blockchain
 
 import (
 	"github.com/it-chain/it-chain-Engine/blockchain/domain/model/block"
