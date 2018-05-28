@@ -3,10 +3,10 @@ package repository
 import (
 	"log"
 
-	"github.com/it-chain/it-chain-Engine/blockchain/domain/model/transaction"
 	"github.com/it-chain/leveldb-wrapper/key_value_db"
 	"github.com/it-chain/yggdrasill"
 	"github.com/it-chain/yggdrasill/impl"
+	"github.com/it-chain/it-chain-Engine/blockchain"
 )
 
 type BlockRepository struct {
@@ -68,7 +68,7 @@ func (br BlockRepository) GetLastBlock() (*impl.DefaultBlock, error) {
 	return &retrievedBlock, err
 }
 
-func (br BlockRepository) GetTransactionByTxID(txid string) (*transaction.Trasaction, error) {
+func (br BlockRepository) GetTransactionByTxID(txid string) (*blockchain.Transaction, error) {
 	var retrievedTx impl.DefaultTransaction
 	err := br.yggdrasill.GetTransactionByTxID(&retrievedTx, txid)
 	if err != nil {

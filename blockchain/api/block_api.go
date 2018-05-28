@@ -1,20 +1,19 @@
 package api
 
 import (
-	"github.com/it-chain/it-chain-Engine/blockchain/domain/model/block"
-	"github.com/it-chain/it-chain-Engine/blockchain/domain/repository"
+	"github.com/it-chain/it-chain-Engine/blockchain"
 )
 
 type BlockApi struct {
-	blockRepository repository.BlockRepository
+	blockRepository blockchain.BlockRepository
 }
 
-func NewBlockApi(br repository.BlockRepository) BlockApi {
+func NewBlockApi(br blockchain.BlockRepository) BlockApi {
 	return BlockApi{
 		blockRepository: br,
 	}
 }
 
-func (bApi BlockApi) AddBlock(block block.Block) error {
+func (bApi BlockApi) AddBlock(block blockchain.Block) error {
 	return nil
 }
