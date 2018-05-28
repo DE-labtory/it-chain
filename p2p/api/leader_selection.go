@@ -21,9 +21,6 @@ import (
 	"github.com/it-chain/midgard/bus/rabbitmq"
 )
 
-//todo peerTableService 안에서 messageProduce 까지해줘야할듯? transaction 문제생김
-//todo 예를들어, peerTableService 는 Leader 를 변경했는데 messageProduce 에 실패한경우?
-//todo 이경우 rabbitMQ 에러 핸들링이라 어쩔 수 없다는 @junbeomlee 의 의견. issue 로 확인필요할듯
 type LeaderSelection struct {
 	client           rabbitmq.Client
 	eventRepository  *midgard.Repository
@@ -48,6 +45,7 @@ func (ls *LeaderSelection) RequestChangeLeader() error {
 	panic("implement please")
 }
 
+// todo dispatcher service 로 publish 옮기기
 func (ls *LeaderSelection) RequestLeaderInfoTo(node p2p.Node) error {
 	requestBody := p2p.TableRequestMessage{
 		TimeUnix: time.Now().Unix(),

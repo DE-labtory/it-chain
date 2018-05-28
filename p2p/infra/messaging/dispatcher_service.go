@@ -5,8 +5,9 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
-	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/topic"
 	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/midgard"
+	"github.com/rs/xid"
 )
 
 type Publisher func(exchange string, topic string, data interface{}) (err error)
@@ -21,28 +22,29 @@ func NewDispatcher(publisher Publisher) *Dispatcher {
 }
 
 // 새로운 리더 정보를 받아오는 메서드이다.
-func (mp *Dispatcher) RequestLeaderInfo(peer p2p.Node) error {
-	requestBody := event.LeaderInfoRequestCmd{
+func (d *Dispatcher) RequestLeaderInfo(peer p2p.Node) error {
+	requestBody := p2p.LeaderInfoRequestMessage{
 		TimeUnix: time.Now().Unix(),
 	}
 	requestBodyByte, _ := common.Serialize(requestBody)
 
-	deliverEvent := &event.MessageDeliverEvent{
+	deliverCom := &p2p.MessageDeliverCommand{
+		CommandModel: midgard.CommandModel{
+			ID: xid.New().String(),
+		},
 		Recipients: make([]string, 0),
 		Body:       requestBodyByte,
-		Protocol:   event.LeaderInfoRequestProtocol,
+		Protocol:   "LeaderInfoRequestMessage",
 	}
-	deliverEvent.Recipients = append(deliverEvent.Recipients, peer.Id.ToString())
-
-	deliverSerialize, _ := common.Serialize(deliverEvent)
-	return mp.publisher(topic.MessageDeliverEvent.String(), deliverSerialize)
+	deliverCom.Recipients = append(deliverCom.Recipients, peer.Id.ToString())
+	return d.publisher("Command", "MessageDeliverCommand", deliverCom)
 }
 
 // 단일 피어에게 새로운 리더 정보를 전달하는 메서드이다.
-func (mp *Dispatcher) DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node) error {
+func (d *Dispatcher) DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node) error {
 
 	// 리더 정보를 leaderInfoBody에 담아줌
-	leaderInfoBody := event.LeaderInfoPublishEvent{
+	leaderInfoBody := p2p.LeaderInfoResponseMessage{
 		LeaderId: leader.Id.ToString(),
 		Address:  leader.IpAddress,
 	}
@@ -51,19 +53,28 @@ func (mp *Dispatcher) DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node) error 
 	leaderInfoBodyByte, _ := common.Serialize(leaderInfoBody)
 
 	// 메세지 전달 이벤트 구조를 담는다.
-	deliverEvent := event.MessageDeliverEvent{
+	deliverCommand := p2p.MessageDeliverCommand{
+		CommandModel: midgard.CommandModel{
+			ID: xid.New().String(),
+		},
 		Recipients: make([]string, 0),
 		Body:       leaderInfoBodyByte,
 		Protocol:   event.LeaderInfoDeliverProtocol,
 	}
 
 	// 메세지를 수신할 수신자들을 지정해 준다.
-	deliverEvent.Recipients = append(deliverEvent.Recipients, toPeer.Id.ToString())
-
-	deliverSerialize, _ := common.Serialize(deliverEvent)
+	deliverCommand.Recipients = append(deliverCommand.Recipients, toPeer.Id.ToString())
 
 	// topic 과 serilized data를 받아 publish 한다.
-	return mp.Publish(topic.MessageDeliverEvent.String(), deliverSerialize)
+	return d.publisher("Command", "MessageDeliverCommand", deliverCommand)
+}
+
+func (d *Dispatcher) RequestTable(toNode p2p.Node) error {
+	panic("implement me")
+}
+
+func (d *Dispatcher) ResponseTable(toNode p2p.Node, nodes []p2p.Node) {
+	panic("implement me")
 }
 
 // 새로운 리더를 업데이트하는 메서드이다.

@@ -7,3 +7,10 @@ type GrpcRequestCommand struct {
 	Data         []byte
 	ConnectionID string
 }
+
+type MessageDeliverCommand struct {
+	midgard.CommandModel
+	Recipients []string
+	Body       []byte
+	Protocol   string
+}
