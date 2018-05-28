@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 
+	"fmt"
+
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/midgard"
-	"fmt"
 )
 
 // NodeId 선언
@@ -20,8 +21,6 @@ type Node struct {
 
 func (n Node) On(event midgard.Event) error {
 	switch v := event.(type) {
-	case :
-
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
 	}
@@ -34,7 +33,7 @@ func (n Node) GetID() string {
 }
 
 // 해당 피어의 ip와 peerId로 새로운 피어를 생성한다.
-func NewPeer(ipAddress string, id NodeId) *Node {
+func NewNode(ipAddress string, id NodeId) *Node {
 	return &Node{
 		IpAddress: ipAddress,
 		Id:        id,
@@ -56,7 +55,6 @@ func Deserialize(b []byte, peer *Node) error {
 
 	return nil
 }
-
 
 // conver peerId to String
 func (nodeId NodeId) ToString() string {
