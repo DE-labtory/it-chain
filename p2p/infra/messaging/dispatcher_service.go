@@ -10,18 +10,18 @@ import (
 )
 
 type Publisher func(exchange string, topic string, data interface{}) (err error)
-type MessageProducer struct {
+type Dispatcher struct {
 	publisher Publisher
 }
 
-func NewMessageProducer(publisher Publisher) *MessageProducer {
-	return &MessageProducer{
+func NewDispatcher(publisher Publisher) *Dispatcher {
+	return &Dispatcher{
 		publisher: publisher,
 	}
 }
 
 // 새로운 리더 정보를 받아오는 메서드이다.
-func (mp *MessageProducer) RequestLeaderInfo(peer p2p.Node) error {
+func (mp *Dispatcher) RequestLeaderInfo(peer p2p.Node) error {
 	requestBody := event.LeaderInfoRequestCmd{
 		TimeUnix: time.Now().Unix(),
 	}
@@ -35,11 +35,11 @@ func (mp *MessageProducer) RequestLeaderInfo(peer p2p.Node) error {
 	deliverEvent.Recipients = append(deliverEvent.Recipients, peer.Id.ToString())
 
 	deliverSerialize, _ := common.Serialize(deliverEvent)
-	return mp.Publish(topic.MessageDeliverEvent.String(), deliverSerialize)
+	return mp.publisher(topic.MessageDeliverEvent.String(), deliverSerialize)
 }
 
 // 단일 피어에게 새로운 리더 정보를 전달하는 메서드이다.
-func (mp *MessageProducer) DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node) error {
+func (mp *Dispatcher) DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node) error {
 
 	// 리더 정보를 leaderInfoBody에 담아줌
 	leaderInfoBody := event.LeaderInfoPublishEvent{
@@ -67,6 +67,6 @@ func (mp *MessageProducer) DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node) e
 }
 
 // 새로운 리더를 업데이트하는 메서드이다.
-func (mp *MessageProducer) LeaderUpdateEvent(leader p2p.Node) error {
+func (mp *Dispatcher) LeaderUpdateEvent(leader p2p.Node) error {
 	panic("implement me")
 }

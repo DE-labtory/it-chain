@@ -30,24 +30,6 @@ func NewMessageListener(leaderSelectionApi *api.LeaderSelection, repository *rep
 	}
 }
 
-// connection이 발생하면 처리하는 메소드이다.
-func (ml MessageListener) HandleConnCreateEvent(amqpMessage amqp.Delivery) {
-	connCreateEevent := &event.ConnCreateEvent{}
-	err := json.Unmarshal(amqpMessage.Body, connCreateEevent)
-
-	if err != nil {
-		// todo amqp error handle
-	}
-	newPeer := model.NewPeer(connCreateEevent.Address, model.PeerId(connCreateEevent.Id))
-	(*ml.peerRepository).Save(*newPeer)
-	if ml.peerTable.GetLeader() == nil {
-		err = (*ml.messageProducer).RequestLeaderInfo(*newPeer)
-		if err != nil {
-			// todo amqp error handle
-		}
-	}
-}
-
 func (ml MessageListener) HandleMessageReceiveEvent(amqpMessage amqp.Delivery) {
 	receiveEvent := &event.MessageReceiveEvent{}
 	err := json.Unmarshal(amqpMessage.Body, receiveEvent)

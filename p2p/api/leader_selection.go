@@ -8,26 +8,37 @@ package api
 // by frontalnh(namhoon)
 
 import (
-	"github.com/it-chain/it-chain-Engine/p2p/"
-	"github.com/it-chain/it-chain-Engine/txpool/domain/service"
+	"time"
+
+	"log"
+
+	"errors"
+
+	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/gateway"
+	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/midgard"
+	"github.com/it-chain/midgard/bus/rabbitmq"
 )
 
 //todo peerTableService 안에서 messageProduce 까지해줘야할듯? transaction 문제생김
 //todo 예를들어, peerTableService 는 Leader 를 변경했는데 messageProduce 에 실패한경우?
 //todo 이경우 rabbitMQ 에러 핸들링이라 어쩔 수 없다는 @junbeomlee 의 의견. issue 로 확인필요할듯
 type LeaderSelection struct {
-	peerTableService *p2p.NodeTable          // 참여 피어에 대한 주관적인 정보를 담고 있는 peerTableService를 필드로 가짐
-	messageProducer  service.MessageProducer // 메세지를 전달할 수 있는 messageProducer를 필드로 가짐
-	peerRepository   p2p.NodeRepository      // leveldb에 접근이 가능하도록 peerRepository를 가짐
-	myInfo           *p2p.Node               // 내 피어 정보를 가짐.
+	client           rabbitmq.Client
+	eventRepository  *midgard.Repository
+	nodeRepository   p2p.NodeRepository // leveldb에 접근이 가능하도록 nodeRepository를 가짐
+	leaderRepository p2p.LeaderRepository
+	myInfo           *p2p.Node // 내 node 정보를 가짐.
 }
 
-func NewLeaderSelectionApi(repo p2p.NodeRepository, messageProducer service.MessageProducer, myInfo *p2p.Node) (*LeaderSelection, error) {
+func NewLeaderSelectionApi(eventRepository *midgard.Repository, repo p2p.NodeRepository, leaderRepository p2p.LeaderRepository, client rabbitmq.Client, myInfo *p2p.Node) (*LeaderSelection, error) {
 	leaderSelectionApi := &LeaderSelection{
-		peerTableService: p2p.NewNodeTableService(repo, myInfo),
-		messageProducer:  messageProducer,
-		peerRepository:   repo,
+		client:           client,
+		nodeRepository:   repo,
+		leaderRepository: leaderRepository,
 		myInfo:           myInfo,
+		eventRepository:  eventRepository,
 	}
 
 	return leaderSelectionApi, nil
@@ -37,15 +48,48 @@ func (ls *LeaderSelection) RequestChangeLeader() error {
 	panic("implement please")
 }
 
-func (ls *LeaderSelection) RequestLeaderInfoTo(peer p2p.Node) error {
-	return ls.messageProducer.RequestLeaderInfo(peer)
+func (ls *LeaderSelection) RequestLeaderInfoTo(node p2p.Node) error {
+	requestBody := p2p.TableRequestMessage{
+		TimeUnix: time.Now().Unix(),
+	}
+	requestBodyByte, _ := common.Serialize(requestBody)
+	deliverCommand := gateway.MessageDeliverCommand{
+		CommandModel: midgard.CommandModel{},
+		Recipients:   make([]string, 0),
+		Body:         requestBodyByte,
+		Protocol:     "MessageDeliverCommand",
+	}
+	deliverCommand.Recipients = append(deliverCommand.Recipients, node.Id.ToString())
+	return ls.client.Publish("Command", "Messasge", deliverCommand)
 }
 
 // 리더를 바꾸기 위한 api
 func (ls *LeaderSelection) changeLeader(peer *p2p.Node) error {
-	err := ls.peerTableService.SetLeader(peer)
+	events := make([]midgard.Event, 0)
+	if peer.GetID() == "" {
+		log.Println("need id")
+		return errors.New("need Id")
+	}
+
+	events = append(events, p2p.LeaderChangeEvent{
+		EventModel: midgard.EventModel{
+			ID:   peer.GetID(),
+			Type: "Leader",
+		},
+	})
+	err := ls.eventRepository.Save(peer.GetID(), events...)
+
 	if err != nil {
 		return err
+		log.Println(err.Error())
 	}
-	return ls.messageProducer.LeaderUpdateEvent(*peer)
+
+	// todo repo(levelDB) 반영 오류시 event revert 고려 해야할 것 같음.
+	ls.leaderRepository.SetLeader(p2p.Leader{
+		LeaderId: p2p.LeaderId{
+			Id: peer.GetID(),
+		},
+	})
+
+	return nil
 }
