@@ -7,16 +7,16 @@ import (
 )
 
 type NodeEventHandler struct {
-	nodeRepository   p2p.NodeRepository
-	leaderRepository p2p.LeaderRepository
-	dispatcher       *MessageDispatcher
+	nodeRepository   			p2p.NodeRepository
+	leaderRepository 			p2p.LeaderRepository
+	messageDispatcher       	*MessageDispatcher
 }
 
-func NewNodeEventHandler(nodeRepo *p2p.NodeRepository, leaderRepo *p2p.LeaderRepository, dispatcher *MessageDispatcher) *NodeEventHandler {
+func NewNodeEventHandler(nodeRepo *p2p.NodeRepository, leaderRepo *p2p.LeaderRepository, messageDispatcher *MessageDispatcher) *NodeEventHandler {
 	return &NodeEventHandler{
-		nodeRepository:   nodeRepo,
-		leaderRepository: leaderRepo,
-		dispatcher:       dispatcher,
+		nodeRepository:   			nodeRepo,
+		leaderRepository: 			leaderRepo,
+		messageDispatcher:     	  	messageDispatcher,
 	}
 }
 
@@ -27,7 +27,7 @@ func (neh *NodeEventHandler) HandleConnCreateEvent(event p2p.ConnectionCreatedEv
 	node := p2p.NewNode(address, id)
 	neh.nodeRepository.Save(*node)
 	if neh.leaderRepository.GetLeader() == nil {
-		err := neh.dispatcher.RequestLeaderInfo(*node)
+		err := neh.messageDispatcher.RequestLeaderInfo(*node)
 		if err != nil {
 			log.Println(err.Error())
 		}

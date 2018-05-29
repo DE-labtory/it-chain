@@ -18,7 +18,7 @@ type ConnectionCommandHandler struct {
 
 func NewConnectionCommandHandler(store *bifrost.ConnectionStore, priKey key.PriKey, pubKey key.PubKey, publisher midgard.Publisher) *ConnectionCommandHandler {
 	return &ConnectionCommandHandler{
-		publisher: publisher,
+		publisher: publisher, //grpc 인터페이스에서 이벤트를 발생시키기 위해 필요하다.
 		store:     store,
 		pubKey:    pubKey,
 		priKey:    priKey,

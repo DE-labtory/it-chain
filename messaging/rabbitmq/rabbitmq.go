@@ -17,12 +17,12 @@ type MessageQueue struct {
 }
 
 // 새로운 메세지 큐 만들어서 반환
-func NewMessageQueue(url string, conn *amqp.Connection, ch *amqp.Channel, amqp.Queue) *MessageQueue {
+func NewMessageQueue(url string, conn *amqp.Connection, ch *amqp.Channel, q amqp.Queue) *MessageQueue {
 	return &MessageQueue{
 		url: url,
 		conn: conn,
 		ch: ch,
-		q: q
+		q: q,
 	}
 }
 

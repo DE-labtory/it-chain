@@ -21,19 +21,21 @@ func Start() error {
 	pri, pub := loadKeyPair(config.Authentication.KeyPath)
 
 	//createHandler
-	commandHandler := NewConnectionCommandHandler(ConnectionStore, pri, pub, rabbitmqClient)
+	connectionHandler := NewConnectionCommandHandler(ConnectionStore, pri, pub, rabbitmqClient) // message handler와 구별하기 위해 connection handler로 rename
 	messageHandler := NewMessageCommandHandler(ConnectionStore, rabbitmqClient)
 
 	//create gRPC server
 	server := NewServer(rabbitmqClient, ConnectionStore, pri, pub)
 
 	// Subscribe amqp server
-	err := rabbitmqClient.Subscribe("Command", "Connection", commandHandler)
+	// midgard를 사용하여 새 노드 연결 관련 이벤트 구독
+	err := rabbitmqClient.Subscribe("Command", "Connection", connectionHandler)
 
 	if err != nil {
 		panic(err)
 	}
 
+	//메세지 관련 이벤트 구독
 	err = rabbitmqClient.Subscribe("Command", "Messasge", messageHandler)
 
 	if err != nil {
