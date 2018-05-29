@@ -28,7 +28,7 @@ peerTableService, messageProducer, peerRepository, myInfo 속성을 가지며 �
 특정 피어를 입력으로 전달하여 해당 피어에게 리더의 정보를 가르쳐 준다.
 
 **input**
-`peer model.Peer`
+`p2p model.Peer`
 
 
 **output**
@@ -39,7 +39,7 @@ error
 peerTableService의 setLeader를 호출한다.
 
 **input**
-`peer *model.Peer`
+`p2p *model.Peer`
 
 **output**
 error if exist
@@ -54,7 +54,7 @@ model의 구조체를 정의하고 value 체크가 가능한 수준의 validate 
 infra repository에 대한 interface만 구현
 
 ## service
-peer 와 관련된 다양한 기능 수행
+p2p 와 관련된 다양한 기능 수행
 실제 구현까지 이루어져야 함.
 
 # infra

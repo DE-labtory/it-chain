@@ -11,14 +11,14 @@
 
 `it-chain CLI`는 `it-chain core`를 부트스트래핑 하는데 사용된다. 처음 프로세스 생성을 제외하면, `it-chain CLI`도 AMQP를 통해 `it-chain core`에 명령을 내릴 수 있다.
 
-`it-chain core`의 각 서비스는 동작에 필요한 데이터를 직접 갖고 있다 (Micro Service Architecture 구조에서 참조). 그렇기 때문에 경우에 따라선 데이터가 서로 다른 서비스에 중복되서 저장될 수 있으며, 이를 허용한다.
+`it-chain core`의 각 컴포넌트는 동작에 필요한 데이터를 직접 갖고 있다 (Micro Service Architecture 구조에서 참조). 그렇기 때문에 경우에 따라선 데이터가 서로 다른 서비스에 중복되서 저장될 수 있으며, 이를 허용한다.
 
-* TxPool 서비스: 트랜잭션을 임시로 저장하고 관리하는 서비스로, 합의되어 블록에 저장되지 않은 트랜잭션들을 모아둔다.
-* Consensus 서비스: 합의를 담당하는 서비스이며, 현재는 PBFT(Practical Byzantine Fault Tolerance) 알고리즘을 따른다.
-* BlockChain 서비스: 블록을 생성하고 관리하는 서비스이다.
-* Peer 서비스: 네트워크의 참여하는 Peer들을 찾고, 유지하는 서비스이다.
-* Auth 서비스: 각종 인증을 담당한다.
-* iCode 서비스: it-chain의 스마트 컨트랙트인 iCode 관련 기능을 담당한다.
+* TxPool 컴포넌트: 트랜잭션을 임시로 저장하고 관리하는 컴포넌트로, 합의되어 블록에 저장되지 않은 트랜잭션들을 모아둔다.
+* Consensus 컴포넌트: 합의를 담당하는 컴포넌트이며, 현재는 PBFT(Practical Byzantine Fault Tolerance) 알고리즘을 따른다.
+* BlockChain 컴포넌트: 블록을 생성하고 관리하는 컴포넌트이다.
+* P2P 컴포넌트: 네트워크의 참여하는 Peer들을 찾고, 유지하는 컴포넌트이다.
+* Auth 컴포넌트: 각종 인증을 담당한다.
+* iCode 컴포넌트: it-chain의 스마트 컨트랙트인 iCode 관련 기능을 담당한다.
 
 
 # Strategic Model Design

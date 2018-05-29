@@ -1,11 +1,11 @@
 package model
 
 type PeerConfiguration struct {
-	Empty string
+	LeaderElection string
 }
 
 func NewPeerConfiguration() PeerConfiguration {
 	return PeerConfiguration{
-		Empty: "empty",
+		LeaderElection: "RAFT",
 	}
 }

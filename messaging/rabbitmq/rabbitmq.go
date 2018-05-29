@@ -16,6 +16,17 @@ type MessageQueue struct {
 	q    amqp.Queue
 }
 
+// 새로운 메세지 큐 만들어서 반환
+func NewMessageQueue(url string, conn *amqp.Connection, ch *amqp.Channel, q amqp.Queue) *MessageQueue {
+	return &MessageQueue{
+		url: url,
+		conn: conn,
+		ch: ch,
+		q: q,
+	}
+}
+
+// Connect 만 호출하면 아래의 start 등의 귀찮은 내용을 다 처리해줌
 func Connect(rabbitmqUrl string) *MessageQueue {
 
 	mq := &MessageQueue{url: rabbitmqUrl}
