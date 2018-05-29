@@ -16,7 +16,7 @@ type NodeId string
 // 노드 구조체 선언.
 type Node struct {
 	IpAddress string
-	NodeId        NodeId
+	NodeId    NodeId
 }
 
 func (n Node) On(event midgard.Event) error {
@@ -36,7 +36,7 @@ func (n Node) GetID() string {
 func NewNode(ipAddress string, id NodeId) *Node {
 	return &Node{
 		IpAddress: ipAddress,
-		NodeId:        id,
+		NodeId:    id,
 	}
 }
 

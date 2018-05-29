@@ -23,9 +23,11 @@ func NewMessageDispatcher(publisher Publisher) *MessageDispatcher {
 
 // 새로운 리더 정보를 받아오는 메서드이다.
 func (md *MessageDispatcher) RequestLeaderInfo(peer p2p.Node) error {
+
 	requestBody := p2p.LeaderInfoRequestMessage{
 		TimeUnix: time.Now().Unix(),
 	}
+
 	requestBodyByte, _ := common.Serialize(requestBody)
 
 	deliverCom := &p2p.MessageDeliverCommand{
@@ -36,8 +38,9 @@ func (md *MessageDispatcher) RequestLeaderInfo(peer p2p.Node) error {
 		Body:       requestBodyByte,
 		Protocol:   "LeaderInfoRequestMessage",
 	}
-	deliverCom.Recipients = append(deliverCom.Recipients, peer.Id.ToString())
-	return md.publisher("Command", "MessageDeliverCommand", deliverCom)
+	deliverCom.Recipients = append(deliverCom.Recipients, peer.NodeId.ToString())
+
+	return md.publisher("Command", "GrpcMessage", deliverCom)
 }
 
 // 단일 피어에게 새로운 리더 정보를 전달하는 메서드이다.
@@ -45,7 +48,7 @@ func (md *MessageDispatcher) DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node)
 
 	// 리더 정보를 leaderInfoBody에 담아줌
 	leaderInfoBody := p2p.LeaderInfoResponseMessage{
-		LeaderId: leader.Id.ToString(),
+		LeaderId: leader.NodeId.ToString(),
 		Address:  leader.IpAddress,
 	}
 
@@ -63,7 +66,7 @@ func (md *MessageDispatcher) DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node)
 	}
 
 	// 메세지를 수신할 수신자들을 지정해 준다.
-	deliverCommand.Recipients = append(deliverCommand.Recipients, toPeer.Id.ToString())
+	deliverCommand.Recipients = append(deliverCommand.Recipients, toPeer.NodeId.ToString())
 
 	// topic 과 serilized data를 받아 publisher 한다.
 	return md.publisher("Command", "MessageDeliverCommand", deliverCommand)

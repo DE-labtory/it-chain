@@ -3,6 +3,7 @@ package leveldb
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/leveldb-wrapper"
 )
@@ -36,7 +37,7 @@ func NewNodeRepository(path string) *NodeRepository {
 func (pr *NodeRepository) Save(data p2p.Node) error {
 
 	// return empty peerID error if peerID is null
-	if data.Id.ToString() == "" {
+	if data.NodeId.ToString() == "" {
 		return errors.New("node Id empty")
 	}
 
@@ -49,7 +50,7 @@ func (pr *NodeRepository) Save(data p2p.Node) error {
 	}
 
 	// leveldb에 peerId 저장 중 에러가 나면 에러 리턴
-	if err = pr.leveldb.Put([]byte(data.Id), b, true); err != nil {
+	if err = pr.leveldb.Put([]byte(data.NodeId), b, true); err != nil {
 		return err
 	}
 
