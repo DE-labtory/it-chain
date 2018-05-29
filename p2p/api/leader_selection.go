@@ -30,11 +30,11 @@ type LeaderSelection struct {
 
 func NewLeaderSelectionApi(eventRepository *midgard.Repository, repo p2p.NodeRepository, leaderRepository p2p.LeaderRepository, messageDispatcher p2p.MessageDispatcher, myInfo *p2p.Node) (*LeaderSelection, error) {
 	leaderSelectionApi := &LeaderSelection{
-		messageDispatcher:           messageDispatcher,
-		nodeRepository:   repo,
-		leaderRepository: leaderRepository,
-		myInfo:           myInfo,
-		eventRepository:  eventRepository,
+		messageDispatcher:           	messageDispatcher,
+		nodeRepository:   				repo,
+		leaderRepository: 				leaderRepository,
+		myInfo:           				myInfo,
+		eventRepository:  				eventRepository,
 	}
 
 	return leaderSelectionApi, nil
@@ -45,6 +45,7 @@ func (ls *LeaderSelection) RequestChangeLeader() error {
 }
 
 // todo dispatcher service 로 publish 옮기기
+// - 완료
 func (ls *LeaderSelection) RequestLeaderInfoTo(node p2p.Node) error {
 	requestBody := p2p.TableRequestMessage{
 		TimeUnix: time.Now().Unix(),
@@ -57,24 +58,25 @@ func (ls *LeaderSelection) RequestLeaderInfoTo(node p2p.Node) error {
 		Protocol:     "MessageDeliverCommand",
 	}
 	deliverCommand.Recipients = append(deliverCommand.Recipients, node.Id.ToString())
-	return ls.messageDispatcher.Publisher("Command", "Messasge", deliverCommand)
+	
+	return ls.messageDispatcher.Publisher("Command", "Messasge", deliverCommand) //message dispatcher에 midgard 주입되지 않아서 보류
 }
 
 // 리더를 바꾸기 위한 api
-func (ls *LeaderSelection) changeLeader(peer *p2p.Node) error {
+func (ls *LeaderSelection) changeLeader(node *p2p.Node) error {
 	events := make([]midgard.Event, 0)
-	if peer.GetID() == "" {
+	if node.GetID() == "" {
 		log.Println("need id")
 		return errors.New("need Id")
 	}
 
 	events = append(events, p2p.LeaderChangeEvent{
 		EventModel: midgard.EventModel{
-			ID:   peer.GetID(),
+			ID:   node.GetID(),
 			Type: "Leader",
 		},
 	})
-	err := ls.eventRepository.Save(peer.GetID(), events...)
+	err := ls.eventRepository.Save(node.GetID(), events...)
 
 	if err != nil {
 		return err
@@ -84,7 +86,7 @@ func (ls *LeaderSelection) changeLeader(peer *p2p.Node) error {
 	// todo repo(levelDB) 반영 오류시 event revert 고려 해야할 것 같음.
 	ls.leaderRepository.SetLeader(p2p.Leader{
 		LeaderId: p2p.LeaderId{
-			Id: peer.GetID(),
+			Id: node.GetID(),
 		},
 	})
 

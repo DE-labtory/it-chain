@@ -20,6 +20,8 @@ func NewLeaderRepository(path string) *LeaderRepository {
 		leveldb: db,
 	}
 }
+
+// get leader method
 func (lr *LeaderRepository) GetLeader() *p2p.Leader {
 	b, err := lr.leveldb.Get([]byte("leader"))
 	if err != nil {
@@ -37,6 +39,7 @@ func (lr *LeaderRepository) GetLeader() *p2p.Leader {
 	return leader
 }
 
+// set leader method
 func (lr *LeaderRepository) SetLeader(leader p2p.Leader) {
 	bytes, err := common.Serialize(leader)
 	if err != nil {
