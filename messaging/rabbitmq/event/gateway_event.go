@@ -9,7 +9,7 @@ type MessageDeliverEvent struct {
 }
 
 type MessageReceiveEvent struct {
-	SenderID string
+	SenderId string
 	Body     []byte
 	Protocol string
 }
