@@ -1,14 +1,11 @@
-package repository
+package blockchain
 
 import (
-	"go/build"
-	"testing"
-
 	"os"
-
-	"github.com/it-chain/it-chain-Engine/blockchain"
+	"testing"
 	"github.com/it-chain/leveldb-wrapper"
 	"github.com/it-chain/yggdrasill/impl"
+	"go/build"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +19,7 @@ func TestBlockRepository_AddBlock(t *testing.T) {
 		os.RemoveAll(dbPath)
 	}()
 
-	genesisBlock, _ := blockchain.CreateGenesisBlock(genesisConfFilePath)
+	genesisBlock, _ := CreateGenesisBlock(genesisConfFilePath)
 	validator := new(impl.DefaultValidator)
 	opts := map[string]interface{}{
 		"db_path": dbPath,
@@ -30,6 +27,8 @@ func TestBlockRepository_AddBlock(t *testing.T) {
 	br := NewBlockRepository(db, *validator, opts)
 	err := br.AddBlock(*genesisBlock)
 	assert.NoError(t, err)
+
+
 }
 
 func TestBlockRepository_GetBlockByHeight(t *testing.T) {
@@ -47,7 +46,7 @@ func TestBlockRepository_GetBlockByHeight(t *testing.T) {
 		"db_path": dbPath,
 	}
 	br := NewBlockRepository(db, *validator, opts)
-	genesisBlock, _ := blockchain.CreateGenesisBlock(genesisConfFilePath)
+	genesisBlock, _ := CreateGenesisBlock(genesisConfFilePath)
 	br.AddBlock(*genesisBlock)
 	retrievedBlock, err := br.GetBlockByHeight(0)
 	assert.NoError(t, err)
@@ -69,7 +68,7 @@ func TestBlockRepository_GetBlockBySeal(t *testing.T) {
 		"db_path": dbPath,
 	}
 	br := NewBlockRepository(db, *validator, opts)
-	genesisBlock, _ := blockchain.CreateGenesisBlock(genesisConfFilePath)
+	genesisBlock, _ := CreateGenesisBlock(genesisConfFilePath)
 	br.AddBlock(*genesisBlock)
 	retrievedBlock, err := br.GetBlockBySeal(genesisBlock.Seal)
 	assert.NoError(t, err)
@@ -91,7 +90,7 @@ func TestBlockRepository_GetLastBlock(t *testing.T) {
 		"db_path": dbPath,
 	}
 	br := NewBlockRepository(db, *validator, opts)
-	genesisBlock, _ := blockchain.CreateGenesisBlock(genesisConfFilePath)
+	genesisBlock, _ := CreateGenesisBlock(genesisConfFilePath)
 	br.AddBlock(*genesisBlock)
 	retrievedBlock, err := br.GetLastBlock()
 	assert.NoError(t, err)

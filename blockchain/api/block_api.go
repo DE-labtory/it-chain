@@ -2,15 +2,20 @@ package api
 
 import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/midgard"
 )
 
 type BlockApi struct {
-	blockRepository blockchain.BlockRepository
+	blockchainRepository blockchain.BlockRepository
+	eventRepository *midgard.Repository
+	publisherId string
 }
 
-func NewBlockApi(br blockchain.BlockRepository) BlockApi {
+func NewBlockApi(blockchainRepository blockchain.BlockRepository, eventRepository *midgard.Repository, publisherId string) BlockApi {
 	return BlockApi{
-		blockRepository: br,
+		blockchainRepository: blockchainRepository,
+		eventRepository: eventRepository,
+		publisherId: publisherId,
 	}
 }
 
