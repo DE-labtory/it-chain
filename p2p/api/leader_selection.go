@@ -18,20 +18,19 @@ import (
 	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/midgard/bus/rabbitmq"
 )
 
 type LeaderSelection struct {
-	client           rabbitmq.Client
-	eventRepository  *midgard.Repository
-	nodeRepository   NodeRepository // leveldb에 접근이 가능하도록 nodeRepository를 가짐
-	leaderRepository p2p.LeaderRepository //leveldb의 leader 정보에 접근하기 위한 leaderRepository를 가짐
-	myInfo           *p2p.Node // 내 node 정보를 가짐.
+	messageDispatcher           p2p.MessageDispatcher
+	eventRepository  			*midgard.Repository
+	nodeRepository   			NodeRepository // leveldb에 접근이 가능하도록 nodeRepository를 가짐
+	leaderRepository 			p2p.LeaderRepository //leveldb의 leader 정보에 접근하기 위한 leaderRepository를 가짐
+	myInfo           			*p2p.Node // 내 node 정보를 가짐.
 }
 
-func NewLeaderSelectionApi(eventRepository *midgard.Repository, repo p2p.NodeRepository, leaderRepository p2p.LeaderRepository, client rabbitmq.Client, myInfo *p2p.Node) (*LeaderSelection, error) {
+func NewLeaderSelectionApi(eventRepository *midgard.Repository, repo p2p.NodeRepository, leaderRepository p2p.LeaderRepository, messageDispatcher p2p.MessageDispatcher, myInfo *p2p.Node) (*LeaderSelection, error) {
 	leaderSelectionApi := &LeaderSelection{
-		client:           client,
+		messageDispatcher:           messageDispatcher,
 		nodeRepository:   repo,
 		leaderRepository: leaderRepository,
 		myInfo:           myInfo,
@@ -58,7 +57,7 @@ func (ls *LeaderSelection) RequestLeaderInfoTo(node p2p.Node) error {
 		Protocol:     "MessageDeliverCommand",
 	}
 	deliverCommand.Recipients = append(deliverCommand.Recipients, node.Id.ToString())
-	return ls.client.Publish("Command", "Messasge", deliverCommand)
+	return ls.messageDispatcher.Publisher("Command", "Messasge", deliverCommand)
 }
 
 // 리더를 바꾸기 위한 api

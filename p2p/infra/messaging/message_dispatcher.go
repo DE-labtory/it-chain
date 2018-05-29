@@ -10,18 +10,16 @@ import (
 	"github.com/rs/xid"
 )
 
-type Publisher func(exchange string, topic string, data interface{}) (err error)
+type Publish func(exchange string, topic string, data interface{}) (err error)
 type MessageDispatcher struct {
-	publisher Publisher
+	publish Publish
 }
 
-func NewMessageDispatcher(publisher Publisher) *MessageDispatcher {
+func NewMessageDispatcher(publish Publish) *MessageDispatcher {
 	return &MessageDispatcher{
-		publisher: publisher,
+		publish: publish,
 	}
 }
-
-
 
 // 새로운 리더 정보를 받아오는 메서드이다.
 func (md *MessageDispatcher) RequestLeaderInfo(peer p2p.Node) error {
@@ -39,7 +37,7 @@ func (md *MessageDispatcher) RequestLeaderInfo(peer p2p.Node) error {
 		Protocol:   "LeaderInfoRequestMessage",
 	}
 	deliverCom.Recipients = append(deliverCom.Recipients, peer.Id.ToString())
-	return md.publisher("Command", "MessageDeliverCommand", deliverCom)
+	return md.publish("Command", "MessageDeliverCommand", deliverCom)
 }
 
 // 단일 피어에게 새로운 리더 정보를 전달하는 메서드이다.
@@ -68,7 +66,7 @@ func (md *MessageDispatcher) DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node)
 	deliverCommand.Recipients = append(deliverCommand.Recipients, toPeer.Id.ToString())
 
 	// topic 과 serilized data를 받아 publish 한다.
-	return md.publisher("Command", "MessageDeliverCommand", deliverCommand)
+	return md.publish("Command", "MessageDeliverCommand", deliverCommand)
 }
 
 func (md *MessageDispatcher) RequestTable(toNode p2p.Node) error {
