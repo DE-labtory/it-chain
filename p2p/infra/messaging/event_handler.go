@@ -9,10 +9,10 @@ import (
 type NodeEventHandler struct {
 	nodeRepository   p2p.NodeRepository
 	leaderRepository p2p.LeaderRepository
-	dispatcher       *Dispatcher
+	dispatcher       *MessageDispatcher
 }
 
-func NewNodeEventHandler(nodeRepo *p2p.NodeRepository, leaderRepo *p2p.LeaderRepository, dispatcher *Dispatcher) *NodeEventHandler {
+func NewNodeEventHandler(nodeRepo *p2p.NodeRepository, leaderRepo *p2p.LeaderRepository, dispatcher *MessageDispatcher) *NodeEventHandler {
 	return &NodeEventHandler{
 		nodeRepository:   nodeRepo,
 		leaderRepository: leaderRepo,

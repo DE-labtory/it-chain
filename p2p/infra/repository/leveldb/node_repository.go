@@ -20,6 +20,18 @@ func NewNodeRepository(path string) *NodeRepository {
 	}
 }
 
+// 새로운 node repo 생성
+// 원래 코드가 임의 코드인 것 같아서 leveldb wrapper usage 참고하여 수정하였습니다.
+// leveldb에 적합한 db를 제공하여 기존의 다른 함수들은 잘 동작할 것으로 예상되며 leveldbwrapper 참고해주시면 될 것 같습니다
+//func NewNodeRepository(path string) *PeerRepository {
+//	// path := "./leveldb"
+//	dbProvider := leveldbwrapper.CreateNewDBProvider(path)
+//	peerDb := dbProvider.getDBHandle("Peer")
+//	return &PeerRepository{
+//		leveldb: peerDb.db,
+//	}
+//}
+
 // 새로운 p2p 를 leveldb에 저장
 func (pr *NodeRepository) Save(data p2p.Node) error {
 
