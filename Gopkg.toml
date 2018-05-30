@@ -1,15 +1,9 @@
-
 # Gopkg.toml example
 #
 # Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
 # for detailed Gopkg.toml documentation.
 #
-required = [
-  "github.com/user/thing/cmd/thing",
-  "docker.io/go-docker","github.com/asaskevich/EventBus","github.com/x-cray/logrus-prefixed-formatter",
-  "github.com/golang/mock","github.com/golang/protobuf","github.com/magiconair/properties",
-  "github.com/syndtr/goleveldb"
-]
+# required = ["github.com/user/thing/cmd/thing"]
 # ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
 #
 # [[constraint]]
@@ -27,6 +21,18 @@ required = [
 
 
 [[constraint]]
+  name = "docker.io/go-docker"
+
+[[constraint]]
+  name = "github.com/asaskevich/EventBus"
+
+[[constraint]]
+  name = "github.com/golang/protobuf"
+
+[[constraint]]
+  name = "github.com/magiconair/properties"
+
+[[constraint]]
   name = "github.com/sirupsen/logrus"
   version = "1.0.4"
 
@@ -38,13 +44,15 @@ required = [
   name = "github.com/stretchr/testify"
   version = "1.2.0"
 
+[[constraint]]
+  name = "github.com/syndtr/goleveldb"
 
 [[constraint]]
   name = "github.com/urfave/cli"
   version = "1.20.0"
 
 [[constraint]]
-  name =
+  name = "github.com/x-cray/logrus-prefixed-formatter"
   version = "0.5.2"
 
 [[constraint]]
@@ -57,6 +65,9 @@ required = [
 [[constraint]]
   name = "gopkg.in/jeevatkm/go-model.v1"
 
+[[constraint]]
+  name = "github.com/golang/mock"
+  version = "1.0.0"
 
 [[override]]
   name = "github.com/stretchr/objx"

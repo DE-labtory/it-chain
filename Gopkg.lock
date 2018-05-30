@@ -109,7 +109,8 @@
   packages = [
     ".",
     "bus",
-    "bus/rabbitmq"
+    "bus/rabbitmq",
+    "store/leveldb"
   ]
   revision = "3df242cebc6b0b60d8759956ddf310594000223a"
 
@@ -491,6 +492,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f2ac100dc352af55942a2b1a1183dd6a89afa8ddfa2d0ad0e5d12388ee45185c"
+  inputs-digest = "cc07208ae19e8228337f3fc1f8f26fe1411bd31e4d29e5e939d8ca1e094618e1"
   solver-name = "gps-cdcl"
   solver-version = 1
