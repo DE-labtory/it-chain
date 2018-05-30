@@ -4,6 +4,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
+	"errors"
 )
 
 type Publisher func(exchange string, topic string, data interface{}) (err error)
@@ -29,11 +30,15 @@ func (m MessageDispatcher) SendTransactions(transactions []txpool.Transaction, l
 
 //todo implement proposeBlockCommand 정의 해야함
 func (m MessageDispatcher) ProposeBlock(transactions []txpool.Transaction) error {
+	if (len(transactions) == 0) {
+		return errors.New("Empty transaction list proposed")
+	}
+
 	deliverCommand := txpool.ProposeBlockCommand{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
 		Transactions: transactions,
 	}
-	return m.publisher("Command", "ProposeBlockCommand", deliverCommand)
+	return m.publisher("Command", "Block", deliverCommand)
 }
