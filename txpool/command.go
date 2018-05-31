@@ -11,3 +11,9 @@ type ProposeBlockCommand struct {
 	midgard.CommandModel
 	Transactions []Transaction
 }
+
+type SendTransactionsCommand struct {
+	midgard.CommandModel
+	Transactions []*Transaction
+	Leader
+}

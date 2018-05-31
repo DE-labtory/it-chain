@@ -24,11 +24,22 @@ func NewDispatcher(publisher Publisher) *MessageDispatcher {
 
 
 //todo implement sendTransactionCommand 정의 해야함
-func (m MessageDispatcher) SendTransactions(transactions []txpool.Transaction, leader txpool.Leader) error {
-	return nil
+func (m MessageDispatcher) SendTransactions(transactions []*txpool.Transaction, leader txpool.Leader) error {
+	if (len(transactions) == 0) {
+		return errors.New("Empty transaction list proposed")
+	}
+
+	deliverCommand := txpool.SendTransactionsCommand{
+		CommandModel: midgard.CommandModel{
+			ID: xid.New().String(),
+		},
+		Transactions: transactions,
+		Leader: leader,
+	}
+
+	return m.publisher("Command", "Transactions", deliverCommand)
 }
 
-//todo implement proposeBlockCommand 정의 해야함
 func (m MessageDispatcher) ProposeBlock(transactions []txpool.Transaction) error {
 	if (len(transactions) == 0) {
 		return errors.New("Empty transaction list proposed")
@@ -40,5 +51,8 @@ func (m MessageDispatcher) ProposeBlock(transactions []txpool.Transaction) error
 		},
 		Transactions: transactions,
 	}
+
 	return m.publisher("Command", "Block", deliverCommand)
 }
+
+
