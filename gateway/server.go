@@ -3,8 +3,6 @@ package gateway
 import (
 	"log"
 
-	"fmt"
-
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/server"
 	"github.com/it-chain/heimdall/key"
@@ -44,7 +42,6 @@ func (s Server) onConnection(connection bifrost.Connection) {
 		connection.Close()
 		return
 	}
-	fmt.Println("hello")
 
 	connection.Handle(NewRequestHandler(s.publisher))
 	s.connectionStore.AddConnection(connection)
@@ -58,15 +55,12 @@ func (s Server) onConnection(connection bifrost.Connection) {
 		},
 	})
 
-	fmt.Println("hello", s.connectionStore)
-
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
 
 	if err := connection.Start(); err != nil {
-		fmt.Println(err)
 		connection.Close()
 		s.connectionStore.DeleteConnection(connection.GetID())
 	}
