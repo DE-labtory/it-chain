@@ -20,4 +20,5 @@ type GrpcRequestCommand struct {
 	midgard.CommandModel
 	Data         []byte
 	ConnectionID string
+	Protocol     string
 }

@@ -13,7 +13,7 @@ type RequestHandler struct {
 
 func (r RequestHandler) ServeRequest(msg bifrost.Message) {
 
-	err := r.publisher.Publish("Command", "Grpc", GrpcRequestCommand{
+	err := r.publisher.Publish("Command", "Message", GrpcRequestCommand{
 		Data:         msg.Data,
 		ConnectionID: msg.Conn.GetID(),
 	})

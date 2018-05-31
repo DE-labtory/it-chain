@@ -7,7 +7,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/conf/model"
 	"github.com/it-chain/it-chain-Engine/conf/model/common"
 	"github.com/spf13/viper" //viper는 go 어플리케이션의 각종 설정을 담당하는 lib이다.
-													 // 각종 형태의 설정파일을 찾고, 로드하는 것이 주 역할이다.
+	// 각종 형태의 설정파일을 찾고, 로드하는 것이 주 역할이다.
 )
 
 // it-chain 설정을 저장하는 구조체에 대한 포인터 instance를 선언한다.

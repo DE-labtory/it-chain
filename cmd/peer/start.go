@@ -20,6 +20,7 @@ var (
 	ErrPidExists = errors.New("pid file exists.")
 	Debug        bool
 	pidFile      string
+	address      string
 )
 
 func StartCmd() cli.Command {
@@ -27,7 +28,7 @@ func StartCmd() cli.Command {
 	return cli.Command{
 		Name:    "start",
 		Aliases: []string{"s"},
-		Usage:   "start peer as background",
+		Usage:   "it-chain peer start [ip]",
 		Flags: []cli.Flag{
 			cli.BoolTFlag{
 				Name:  "damon, d",
@@ -36,6 +37,12 @@ func StartCmd() cli.Command {
 		},
 		Action: func(c *cli.Context) error {
 			fmt.Println("peer is starting...")
+			address = c.Args().Get(0)
+
+			if address != "" {
+				conf.GetConfiguration().GrpcGateway.Ip = address
+			}
+
 			start(c.Bool("damon"))
 			return nil
 		},
@@ -49,10 +56,10 @@ func start(damon bool) {
 	//t := tebata.New(syscall.SIGINT, syscall.SIGTERM)
 	//err := t.Reserve(stopGateway)
 
-	fmt.Println(conf.GetConfiguration().GrpcGateway.Ip)
+	fmt.Println(address)
 
 	//grpc gate way
-	ln, err := net.Listen("tcp", conf.GetConfiguration().GrpcGateway.Ip)
+	ln, err := net.Listen("tcp", address)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Can't listen on %q: %s\n", conf.GetConfiguration().GrpcGateway.Ip, err)
@@ -78,7 +85,6 @@ func start(damon bool) {
 		}
 
 		fmt.Println("[PID]", cmd.Process.Pid)
-
 		os.Exit(0)
 	}
 
@@ -163,5 +169,6 @@ func GetValue(pidfile string) (int, error) {
 
 func stopGateway() {
 	gateway.Stop()
+	os.RemoveAll("my.pid")
 	log.Println("stopped by signal")
 }

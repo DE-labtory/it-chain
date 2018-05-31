@@ -2,23 +2,22 @@ package gateway
 
 import (
 	"github.com/it-chain/bifrost"
-	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/midgard/bus/rabbitmq"
 )
 
-// todo bifrost server kill방법
-func Start() error {
+var quit = make(chan bool)
 
-	config := conf.GetConfiguration()
+// todo bifrost server kill방법
+func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 
 	//create rabbitmq client
-	rabbitmqClient := rabbitmq.Connect(config.Common.Messaging.Url)
+	rabbitmqClient := rabbitmq.Connect(ampqUrl)
 
 	//create connection store by bifrost which is it-chain's own lib for implementing p2p network
 	ConnectionStore := bifrost.NewConnectionStore()
 
+	pri, pub := LoadKeyPair(keyPath)
 	//load key
-	pri, pub := loadKeyPair(config.Authentication.KeyPath)
 
 	//createHandler
 	connectionHandler := NewConnectionCommandHandler(ConnectionStore, pri, pub, rabbitmqClient) // message handler와 구별하기 위해 connection handler로 rename
@@ -42,13 +41,27 @@ func Start() error {
 		panic(err)
 	}
 
+	//shutdown gateway
+	go func() {
+		for {
+			select {
+			case <-quit:
+				server.Stop()
+				rabbitmqClient.Close()
+				return
+			default:
+				// Do other stuff
+			}
+		}
+	}()
+
 	// config의 config.yaml에 설정된 grpc gateway의 ip를 서버로 설정한다.
 	// 추후 다른 노드에서 실행하는 경우 해당 부분의 ip를 해당 pc의 ip로 바꾸어 주어야 한다.
-	server.Listen(config.GrpcGateway.Ip)
+	server.Listen(grpcUrl)
 
 	return nil
 }
 
 func Stop() {
-
+	quit <- true
 }

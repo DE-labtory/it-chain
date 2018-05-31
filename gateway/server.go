@@ -3,6 +3,8 @@ package gateway
 import (
 	"log"
 
+	"fmt"
+
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/server"
 	"github.com/it-chain/heimdall/key"
@@ -32,9 +34,17 @@ func NewServer(publisher midgard.Publisher, connectionStore *bifrost.ConnectionS
 	return server
 }
 
-
 // connection이 형성되는 경우 실행하는 코드이다.
 func (s Server) onConnection(connection bifrost.Connection) {
+
+	conn := s.connectionStore.GetConnection(connection.GetID())
+
+	//conn이 이미 존재
+	if conn != nil {
+		connection.Close()
+		return
+	}
+	fmt.Println("hello")
 
 	connection.Handle(NewRequestHandler(s.publisher))
 	s.connectionStore.AddConnection(connection)
@@ -48,13 +58,17 @@ func (s Server) onConnection(connection bifrost.Connection) {
 		},
 	})
 
+	fmt.Println("hello", s.connectionStore)
+
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
 
 	if err := connection.Start(); err != nil {
+		fmt.Println(err)
 		connection.Close()
+		s.connectionStore.DeleteConnection(connection.GetID())
 	}
 }
 

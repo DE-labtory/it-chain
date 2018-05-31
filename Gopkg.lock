@@ -109,7 +109,8 @@
   packages = [
     ".",
     "bus",
-    "bus/rabbitmq"
+    "bus/rabbitmq",
+    "store/leveldb"
   ]
   revision = "3df242cebc6b0b60d8759956ddf310594000223a"
 
@@ -293,6 +294,12 @@
     "leveldb/util"
   ]
   revision = "ae970a0732be3a1f5311da86118d37b9f4bd2a5a"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/syossan27/tebata"
+  packages = ["."]
+  revision = "a31f6c2caec0202898558dce1305fe84c95797c0"
 
 [[projects]]
   name = "github.com/urfave/cli"
@@ -491,6 +498,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f2ac100dc352af55942a2b1a1183dd6a89afa8ddfa2d0ad0e5d12388ee45185c"
+  inputs-digest = "f22e9059a3e72f4664ddf3a5fec5cc0b1c20dfb99f7f15426a380ac42299cbdb"
   solver-name = "gps-cdcl"
   solver-version = 1
