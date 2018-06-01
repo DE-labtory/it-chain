@@ -1,4 +1,4 @@
-package gateway
+package api
 
 import (
 	"log"
@@ -6,6 +6,7 @@ import (
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/heimdall/key"
+	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/it-chain/midgard"
 )
 
@@ -26,13 +27,13 @@ func NewConnectionCommandHandler(store *bifrost.ConnectionStore, priKey key.PriK
 }
 
 // 새로운 connection 이 생성되면 처리하는 함수이다.
-func (c ConnectionCommandHandler) HandleConnectionCreate(command ConnectionCreateCommand) {
-
-	log.Println(command)
+func (c ConnectionCommandHandler) HandleConnectionCreate(command gateway.ConnectionCreateCommand) {
 
 	if command.Address == "" {
 		return
 	}
+
+	log.Printf("dialing [%s]", command.Address)
 
 	clientOpt := client.ClientOpts{
 		Ip:     command.Address,
@@ -49,7 +50,7 @@ func (c ConnectionCommandHandler) HandleConnectionCreate(command ConnectionCreat
 
 	if err != nil {
 
-		c.publisher.Publish("Event", "Error", ErrorCreatedEvent{
+		c.publisher.Publish("Event", "Error", gateway.ErrorCreatedEvent{
 			Err:   err.Error(),
 			Event: "Connection fail to create",
 		})
@@ -57,7 +58,12 @@ func (c ConnectionCommandHandler) HandleConnectionCreate(command ConnectionCreat
 		return
 	}
 
-	err = c.publisher.Publish("Event", "Connection", ConnectionCreatedEvent{
+	if c.store.GetConnection(connection.GetID()) != nil {
+		log.Printf("same connection is existed")
+		return
+	}
+
+	err = c.publisher.Publish("Event", "Connection", gateway.ConnectionCreatedEvent{
 		Address: connection.GetIP(),
 		EventModel: midgard.EventModel{
 			ID: connection.GetID(),
@@ -79,7 +85,8 @@ func (c ConnectionCommandHandler) HandleConnectionCreate(command ConnectionCreat
 			connection.Close()
 		}
 
-		log.Printf("connection are deleted")
+		log.Printf("connections are closing")
+		c.store.DeleteConnection(connection.GetID())
 	}()
 }
 
@@ -95,7 +102,7 @@ func NewMessageCommandHandler(store *bifrost.ConnectionStore, publisher midgard.
 	}
 }
 
-func (m MessageCommandHandler) HandleMessageDeliver(command MessageDeliverCommand) {
+func (m MessageCommandHandler) HandleMessageDeliver(command gateway.MessageDeliverCommand) {
 
 	for _, recipient := range command.Recipients {
 		connection := m.store.GetConnection(bifrost.ConnID(recipient))
