@@ -1,9 +1,8 @@
 package gateway
 
 import (
-	"log"
-
 	"fmt"
+	"log"
 
 	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/conf"

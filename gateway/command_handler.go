@@ -78,6 +78,7 @@ func (c ConnectionCommandHandler) HandleConnectionCreate(command ConnectionCreat
 		if err := connection.Start(); err != nil {
 			connection.Close()
 		}
+
 		log.Printf("connection are deleted")
 	}()
 }

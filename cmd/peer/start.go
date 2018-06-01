@@ -97,7 +97,9 @@ func start(damon bool) {
 
 	fmt.Println(pidValue)
 
-	err = gateway.Start()
+	config := conf.GetConfiguration()
+
+	err = gateway.Start(config.Common.Messaging.Url, config.GrpcGateway.Ip, config.Authentication.KeyPath)
 
 	if err != nil {
 		fmt.Println(err.Error())

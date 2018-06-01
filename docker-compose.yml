@@ -1,0 +1,17 @@
+version: '3'
+services:
+  it-chain:
+    build: .
+    ports:
+     - "13759:13759"
+    depends_on:
+     - rabbitmq
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+      - "15672:15672"
+      - "5672:5672"

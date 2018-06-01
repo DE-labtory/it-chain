@@ -43,7 +43,7 @@
   branch = "master"
   name = "github.com/golang/snappy"
   packages = ["."]
-  revision = "553a641470496b2327abcac10b36396bd98e45c9"
+  revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
 
 [[projects]]
   name = "github.com/google/go-github"
@@ -82,8 +82,8 @@
     "pb",
     "server"
   ]
-  revision = "ab55b9194eee34657a7e7b4db683b1afa4f60f36"
-  version = "v0.1.1"
+  revision = "119a07762cb5df44cbdaa35bfbd14ec2206291e5"
+  version = "v0.1.3"
 
 [[projects]]
   name = "github.com/it-chain/heimdall"
@@ -104,7 +104,6 @@
   version = "v1.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/it-chain/midgard"
   packages = [
     ".",
@@ -112,7 +111,8 @@
     "bus/rabbitmq",
     "store/leveldb"
   ]
-  revision = "3df242cebc6b0b60d8759956ddf310594000223a"
+  revision = "7650c4bd32e3ea0cef37303ce523a478fc20e4ee"
+  version = "v0.0.1"
 
 [[projects]]
   branch = "develop"
@@ -122,7 +122,7 @@
     "common",
     "impl"
   ]
-  revision = "1c1373f9d63d86399e3cf31a49973bb38e7318c2"
+  revision = "d1a2c1591660b77bc5df6d26d60cd2c3b4992d79"
 
 [[projects]]
   name = "github.com/jbenet/go-base58"
@@ -145,8 +145,8 @@
 [[projects]]
   name = "github.com/magiconair/properties"
   packages = ["."]
-  revision = "c3beff4c2358b44d0493c7dda585e7db7ff28ae6"
-  version = "v1.7.6"
+  revision = "c2353362d570a7bfa228149c62842019201cfb71"
+  version = "v1.8.0"
 
 [[projects]]
   name = "github.com/mattn/go-colorable"
@@ -170,13 +170,13 @@
   branch = "master"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
-  revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
+  revision = "3864e76763d94a6df2f9960b16a20a33da9f9a66"
 
 [[projects]]
   branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
-  revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
+  revision = "bb74f1db0675b241733089d5a1faa5dd8b0ef57b"
 
 [[projects]]
   name = "github.com/pelletier/go-buffruneio"
@@ -205,8 +205,8 @@
 [[projects]]
   name = "github.com/rs/xid"
   packages = ["."]
-  revision = "02dd45c33376f85d1064355dc790dcc4850596b1"
-  version = "v1.1"
+  revision = "2c7e97ce663ff82c49656bca3048df0fdd83c5f9"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/sergi/go-diff"
@@ -268,7 +268,7 @@
   branch = "master"
   name = "github.com/streadway/amqp"
   packages = ["."]
-  revision = "8e4aba63da9fc5571e01c6a45dc809a58cbc5a68"
+  revision = "e5adc2ada8b8efff032bf61173a233d143e9318e"
 
 [[projects]]
   name = "github.com/stretchr/testify"
@@ -293,13 +293,7 @@
     "leveldb/table",
     "leveldb/util"
   ]
-  revision = "ae970a0732be3a1f5311da86118d37b9f4bd2a5a"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/syossan27/tebata"
-  packages = ["."]
-  revision = "a31f6c2caec0202898558dce1305fe84c95797c0"
+  revision = "5d6fca44a948d2be89a9702de7717f0168403d3d"
 
 [[projects]]
   name = "github.com/urfave/cli"
@@ -340,7 +334,7 @@
     "ssh/knownhosts",
     "ssh/terminal"
   ]
-  revision = "4ec37c66abab2c7e02ae775328b2ff001c3f025a"
+  revision = "5ba7f63082460102a45837dbd1827e10f9479ac0"
 
 [[projects]]
   branch = "master"
@@ -354,7 +348,7 @@
     "internal/timeseries",
     "trace"
   ]
-  revision = "d11bb6cd8e3c4e60239c9cb20ef68586d74500d0"
+  revision = "1e491301e022f8f977054da4c2d852decd59571f"
 
 [[projects]]
   branch = "master"
@@ -363,7 +357,7 @@
     "unix",
     "windows"
   ]
-  revision = "7db1c3b1a98089d0071c84f646ff5c96aad43682"
+  revision = "c11f84a56e43e20a78cee75a7c034031ecf57d1f"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -390,7 +384,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "86e600f69ee4704c6efbf6a2a40a5c10700e76c2"
+  revision = "4065a77fc542a455295382a23a996a08ed18813a"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -399,6 +393,7 @@
     "balancer",
     "balancer/base",
     "balancer/roundrobin",
+    "channelz",
     "codes",
     "connectivity",
     "credentials",
@@ -421,8 +416,8 @@
     "tap",
     "transport"
   ]
-  revision = "d11072e7ca9811b1100b80ca0269ac831f06d024"
-  version = "v1.11.3"
+  revision = "41344da2231b913fa3d983840a57a6b1b7b631a1"
+  version = "v1.12.0"
 
 [[projects]]
   name = "gopkg.in/src-d/go-billy.v4"
@@ -480,8 +475,8 @@
     "utils/merkletrie/internal/frame",
     "utils/merkletrie/noder"
   ]
-  revision = "b30763cb64afa91c016b23e905af0a378eb1b76d"
-  version = "v4.3.1"
+  revision = "57570e84f8c5739f0f4a59387493e590e709dde9"
+  version = "v4.4.0"
 
 [[projects]]
   name = "gopkg.in/warnings.v0"
@@ -498,6 +493,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f22e9059a3e72f4664ddf3a5fec5cc0b1c20dfb99f7f15426a380ac42299cbdb"
+  inputs-digest = "0ce9fef5c699a1ce776945ae56ec1a2d0b24a0c919764a55e428574d0d863c3f"
   solver-name = "gps-cdcl"
   solver-version = 1
