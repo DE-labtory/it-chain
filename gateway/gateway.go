@@ -2,6 +2,8 @@ package gateway
 
 import (
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/it-chain-Engine/gateway/api"
+	"github.com/it-chain/it-chain-Engine/gateway/infra"
 	"github.com/it-chain/midgard/bus/rabbitmq"
 )
 
@@ -16,15 +18,15 @@ func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 	//create connection store by bifrost which is it-chain's own lib for implementing p2p network
 	ConnectionStore := bifrost.NewConnectionStore()
 
-	pri, pub := LoadKeyPair(keyPath)
+	pri, pub := infra.LoadKeyPair(keyPath)
 	//load key
 
 	//createHandler
-	connectionHandler := NewConnectionCommandHandler(ConnectionStore, pri, pub, rabbitmqClient) // message handler와 구별하기 위해 connection handler로 rename
-	messageHandler := NewMessageCommandHandler(ConnectionStore, rabbitmqClient)
+	connectionHandler := api.NewConnectionApi(ConnectionStore, pri, pub, rabbitmqClient) // message handler와 구별하기 위해 connection handler로 rename
+	messageHandler := api.NewMessageApi(ConnectionStore, rabbitmqClient)
 
 	//create gRPC server
-	server := NewServer(rabbitmqClient, ConnectionStore, pri, pub)
+	server := infra.NewServer(rabbitmqClient, ConnectionStore, pri, pub)
 
 	// Subscribe amqp server
 	// midgard를 사용하여 새 노드 연결 관련 이벤트 구독

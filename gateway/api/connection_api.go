@@ -3,31 +3,25 @@ package api
 import (
 	"log"
 
-	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
-	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/it-chain/midgard"
 )
 
-type ConnectionCommandHandler struct {
-	store     *bifrost.ConnectionStore
-	priKey    key.PriKey
-	pubKey    key.PubKey
-	publisher midgard.Publisher
+type ConnectionApi struct {
+	eventRepository midgard.Repository
+	dialService     gateway.DialService
 }
 
-func NewConnectionCommandHandler(store *bifrost.ConnectionStore, priKey key.PriKey, pubKey key.PubKey, publisher midgard.Publisher) *ConnectionCommandHandler {
-	return &ConnectionCommandHandler{
-		publisher: publisher, //grpc 인터페이스에서 이벤트를 발생시키기 위해 필요하다.
-		store:     store,
-		pubKey:    pubKey,
-		priKey:    priKey,
+func NewConnectionApi(eventRepository midgard.Repository, dialService gateway.DialService) *ConnectionApi {
+	return &ConnectionApi{
+		eventRepository: eventRepository,
+		dialService:     dialService,
 	}
 }
 
 // 새로운 connection 이 생성되면 처리하는 함수이다.
-func (c ConnectionCommandHandler) HandleConnectionCreate(command gateway.ConnectionCreateCommand) {
+func (c ConnectionApi) CreateConnection(command gateway.ConnectionCreateCommand) {
 
 	if command.Address == "" {
 		return
@@ -88,27 +82,4 @@ func (c ConnectionCommandHandler) HandleConnectionCreate(command gateway.Connect
 		log.Printf("connections are closing")
 		c.store.DeleteConnection(connection.GetID())
 	}()
-}
-
-type MessageCommandHandler struct {
-	store     *bifrost.ConnectionStore
-	publisher midgard.Publisher
-}
-
-func NewMessageCommandHandler(store *bifrost.ConnectionStore, publisher midgard.Publisher) *MessageCommandHandler {
-	return &MessageCommandHandler{
-		store:     store,
-		publisher: publisher,
-	}
-}
-
-func (m MessageCommandHandler) HandleMessageDeliver(command gateway.MessageDeliverCommand) {
-
-	for _, recipient := range command.Recipients {
-		connection := m.store.GetConnection(bifrost.ConnID(recipient))
-
-		if connection != nil {
-			connection.Send(command.Body, command.Protocol, nil, nil)
-		}
-	}
 }

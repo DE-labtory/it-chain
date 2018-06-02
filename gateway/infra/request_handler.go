@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/it-chain/midgard"
 )
 
@@ -13,7 +14,7 @@ type RequestHandler struct {
 
 func (r RequestHandler) ServeRequest(msg bifrost.Message) {
 
-	err := r.publisher.Publish("Command", "Message", GrpcRequestCommand{
+	err := r.publisher.Publish("Command", "Message", gateway.GrpcRequestCommand{
 		Data:         msg.Data,
 		ConnectionID: msg.Conn.GetID(),
 	})
