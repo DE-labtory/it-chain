@@ -50,10 +50,12 @@ func (c ConnectionApi) CreateConnection(command gateway.ConnectionCreateCommand)
 	}
 }
 
+//todo
 func (c ConnectionApi) CloseConnection(connection gateway.Connection) {
 
 }
 
+//todo
 func (c ConnectionApi) DeliverMessage(command gateway.MessageDeliverCommand) {
 
 	//validation rule add
@@ -81,6 +83,7 @@ func (c ConnectionApi) OnConnection(connection gateway.Connection) {
 	}
 }
 
+//todo
 func (c ConnectionApi) OnDisconnection(connection gateway.Connection) {
 
 }

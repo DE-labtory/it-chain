@@ -1,10 +1,12 @@
 package gateway
 
 import (
-	"github.com/it-chain/bifrost"
+	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/it-chain-Engine/gateway/api"
 	"github.com/it-chain/it-chain-Engine/gateway/infra"
+	"github.com/it-chain/midgard"
 	"github.com/it-chain/midgard/bus/rabbitmq"
+	"github.com/it-chain/midgard/store/leveldb"
 )
 
 var quit = make(chan bool)
@@ -15,29 +17,24 @@ func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 	//create rabbitmq client
 	rabbitmqClient := rabbitmq.Connect(ampqUrl)
 
-	//create connection store by bifrost which is it-chain's own lib for implementing p2p network
-	ConnectionStore := bifrost.NewConnectionStore()
-
-	pri, pub := infra.LoadKeyPair(keyPath)
 	//load key
-
-	//createHandler
-	connectionHandler := api.NewConnectionApi(ConnectionStore, pri, pub, rabbitmqClient) // message handler와 구별하기 위해 connection handler로 rename
-	messageHandler := api.NewMessageApi(ConnectionStore, rabbitmqClient)
+	pri, pub := infra.LoadKeyPair(keyPath, conf.GetConfiguration().Authentication.KeyType)
 
 	//create gRPC server
-	server := infra.NewServer(rabbitmqClient, ConnectionStore, pri, pub)
+	hostService := infra.NewGrpcHostService(pri, pub, rabbitmqClient)
+
+	//midgard EventStore
+	repository := midgard.NewRepo(leveldb.NewEventStore(
+		".gateway/eventStore",
+		leveldb.NewSerializer(ConnectionCreatedEvent{}, ConnectionDisconnectedEvent{}, ErrorCreatedEvent{}),
+	), rabbitmqClient)
+
+	//createHandler
+	connectionApi := api.NewConnectionApi(*repository, hostService) // message handler와 구별하기 위해 connection handler로 rename
 
 	// Subscribe amqp server
 	// midgard를 사용하여 새 노드 연결 관련 이벤트 구독
-	err := rabbitmqClient.Subscribe("Command", "Connection", connectionHandler)
-
-	if err != nil {
-		panic(err)
-	}
-
-	//메세지 관련 이벤트 구독
-	err = rabbitmqClient.Subscribe("Command", "Messasge", messageHandler)
+	err := rabbitmqClient.Subscribe("Command", "Connection", connectionApi)
 
 	if err != nil {
 		panic(err)
@@ -48,7 +45,7 @@ func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 		for {
 			select {
 			case <-quit:
-				server.Stop()
+				hostService.Stop()
 				rabbitmqClient.Close()
 				return
 			default:
@@ -59,7 +56,7 @@ func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 
 	// config의 config.yaml에 설정된 grpc gateway의 ip를 서버로 설정한다.
 	// 추후 다른 노드에서 실행하는 경우 해당 부분의 ip를 해당 pc의 ip로 바꾸어 주어야 한다.
-	server.Listen(grpcUrl)
+	hostService.Listen(grpcUrl)
 
 	return nil
 }

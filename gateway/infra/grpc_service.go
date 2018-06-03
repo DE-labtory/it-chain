@@ -30,23 +30,26 @@ type GrpcHostService struct {
 	connectionHandler ConnectionHandler
 }
 
-func NewGrpcDialService(priKey key.PriKey, pubKey key.PubKey, publisher midgard.Publisher, connectionHandler ConnectionHandler) *GrpcHostService {
+func NewGrpcHostService(priKey key.PriKey, pubKey key.PubKey, publisher midgard.Publisher) *GrpcHostService {
 
 	s := server.New(bifrost.KeyOpts{PriKey: priKey, PubKey: pubKey})
 
 	grpcHostService := &GrpcHostService{
-		connStore:         NewMemConnectionStore(),
-		bifrostServer:     s,
-		publisher:         publisher,
-		priKey:            priKey,
-		pubKey:            pubKey,
-		connectionHandler: connectionHandler,
+		connStore:     NewMemConnectionStore(),
+		bifrostServer: s,
+		publisher:     publisher,
+		priKey:        priKey,
+		pubKey:        pubKey,
 	}
 
 	s.OnConnection(grpcHostService.onConnection)
 	s.OnError(grpcHostService.onError)
 
 	return grpcHostService
+}
+
+func (g GrpcHostService) SetHandler(connectionHandler ConnectionHandler) {
+	g.connectionHandler = connectionHandler
 }
 
 func (g GrpcHostService) Dial(address string) (gateway.Connection, error) {
@@ -66,10 +69,16 @@ func (g GrpcHostService) Dial(address string) (gateway.Connection, error) {
 
 	go g.startConnectionUntilClose(connection)
 
+	return toGatewayConnectionModel(connection), nil
+}
+
+func toGatewayConnectionModel(connection bifrost.Connection) gateway.Connection {
 	return gateway.Connection{
-		ID:      connection.GetID(),
+		AggregateModel: midgard.AggregateModel{
+			ID: connection.GetID(),
+		},
 		Address: connection.GetIP(),
-	}, nil
+	}
 }
 
 // connection이 형성되는 경우 실행하는 코드이다.
@@ -81,10 +90,7 @@ func (g GrpcHostService) onConnection(connection bifrost.Connection) {
 	}
 
 	g.connStore.Add(connection)
-	g.connectionHandler.OnConnection(gateway.Connection{
-		ID:      connection.GetID(),
-		Address: connection.GetIP(),
-	})
+	g.connectionHandler.OnConnection(toGatewayConnectionModel(connection))
 
 	g.startConnectionUntilClose(connection)
 }
@@ -96,10 +102,7 @@ func (g GrpcHostService) startConnectionUntilClose(connection bifrost.Connection
 	if err := connection.Start(); err != nil {
 		connection.Close()
 		g.connStore.Delete(connection.GetID())
-		g.connectionHandler.OnDisconnection(gateway.Connection{
-			ID:      connection.GetID(),
-			Address: connection.GetIP(),
-		})
+		g.connectionHandler.OnDisconnection(toGatewayConnectionModel(connection))
 	}
 }
 
