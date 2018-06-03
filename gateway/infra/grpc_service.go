@@ -8,6 +8,7 @@ import (
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
+	"github.com/it-chain/bifrost/server"
 	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/it-chain/midgard"
@@ -15,18 +16,40 @@ import (
 
 var ErrConnAlreadyExist = errors.New("connection is already exist")
 
-type GrpcService struct {
-	connStore ConnectionStore
-	publisher midgard.Publisher
-	priKey    key.PriKey
-	pubKey    key.PubKey
+type ConnectionHandler interface {
+	OnConnection(connection gateway.Connection)
+	OnDisconnection(connection gateway.Connection)
 }
 
-func NewGrpcDialService(priKey key.PriKey, pubKey key.PubKey) *GrpcService {
-	return &GrpcService{}
+type GrpcHostService struct {
+	connStore         ConnectionStore
+	bifrostServer     *server.Server
+	publisher         midgard.Publisher
+	priKey            key.PriKey
+	pubKey            key.PubKey
+	connectionHandler ConnectionHandler
 }
 
-func (g GrpcService) Dial(address string) (gateway.Connection, error) {
+func NewGrpcDialService(priKey key.PriKey, pubKey key.PubKey, publisher midgard.Publisher, connectionHandler ConnectionHandler) *GrpcHostService {
+
+	s := server.New(bifrost.KeyOpts{PriKey: priKey, PubKey: pubKey})
+
+	grpcHostService := &GrpcHostService{
+		connStore:         NewMemConnectionStore(),
+		bifrostServer:     s,
+		publisher:         publisher,
+		priKey:            priKey,
+		pubKey:            pubKey,
+		connectionHandler: connectionHandler,
+	}
+
+	s.OnConnection(grpcHostService.onConnection)
+	s.OnError(grpcHostService.onError)
+
+	return grpcHostService
+}
+
+func (g GrpcHostService) Dial(address string) (gateway.Connection, error) {
 
 	connection, err := client.Dial(g.buildDialOption(address))
 
@@ -39,21 +62,9 @@ func (g GrpcService) Dial(address string) (gateway.Connection, error) {
 		return gateway.Connection{}, ErrConnAlreadyExist
 	}
 
-	connection.Handle(NewMessageHandler(g.publisher))
-
-	go func() {
-		defer connection.Close()
-
-		if err := connection.Start(); err != nil {
-			connection.Close()
-			log.Printf("connections are closing [%s]", err)
-		}
-
-		g.connStore.Delete(connection.GetID())
-		return
-	}()
-
 	g.connStore.Add(connection)
+
+	go g.startConnectionUntilClose(connection)
 
 	return gateway.Connection{
 		ID:      connection.GetID(),
@@ -61,7 +72,39 @@ func (g GrpcService) Dial(address string) (gateway.Connection, error) {
 	}, nil
 }
 
-func (g GrpcService) CloseConnection(connID string) {
+// connection이 형성되는 경우 실행하는 코드이다.
+func (g GrpcHostService) onConnection(connection bifrost.Connection) {
+
+	if g.connStore.Exist(connection.GetID()) {
+		connection.Close()
+		return
+	}
+
+	g.connStore.Add(connection)
+	g.connectionHandler.OnConnection(gateway.Connection{
+		ID:      connection.GetID(),
+		Address: connection.GetIP(),
+	})
+
+	g.startConnectionUntilClose(connection)
+}
+
+func (g GrpcHostService) startConnectionUntilClose(connection bifrost.Connection) {
+
+	connection.Handle(NewMessageHandler(g.publisher))
+
+	if err := connection.Start(); err != nil {
+		connection.Close()
+		g.connStore.Delete(connection.GetID())
+		g.connectionHandler.OnDisconnection(gateway.Connection{
+			ID:      connection.GetID(),
+			Address: connection.GetIP(),
+		})
+	}
+}
+
+func (g GrpcHostService) CloseConnection(connID string) {
+
 	connection := g.connStore.Find(connID)
 
 	if connection == nil {
@@ -72,7 +115,7 @@ func (g GrpcService) CloseConnection(connID string) {
 	g.connStore.Delete(connection.GetID())
 }
 
-func (g GrpcService) SendMessages(message []byte, protocol string, connIDs ...string) {
+func (g GrpcHostService) SendMessages(message []byte, protocol string, connIDs ...string) {
 
 	for _, connID := range connIDs {
 		connection := g.connStore.Find(connID)
@@ -83,7 +126,7 @@ func (g GrpcService) SendMessages(message []byte, protocol string, connIDs ...st
 	}
 }
 
-func (g GrpcService) buildDialOption(address string) (string, client.ClientOpts, client.GrpcOpts) {
+func (g GrpcHostService) buildDialOption(address string) (string, client.ClientOpts, client.GrpcOpts) {
 
 	clientOpt := client.ClientOpts{
 		Ip:     address,
@@ -97,6 +140,18 @@ func (g GrpcService) buildDialOption(address string) (string, client.ClientOpts,
 	}
 
 	return address, clientOpt, grpcOpt
+}
+
+func (s GrpcHostService) Listen(ip string) {
+	s.bifrostServer.Listen(ip)
+}
+
+func (s GrpcHostService) onError(err error) {
+	log.Fatalln(err.Error())
+}
+
+func (s GrpcHostService) Stop() {
+	s.bifrostServer.Stop()
 }
 
 type ConnectionStore interface {

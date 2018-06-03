@@ -49,3 +49,38 @@ func (c ConnectionApi) CreateConnection(command gateway.ConnectionCreateCommand)
 		log.Println(err.Error())
 	}
 }
+
+func (c ConnectionApi) CloseConnection(connection gateway.Connection) {
+
+}
+
+func (c ConnectionApi) DeliverMessage(command gateway.MessageDeliverCommand) {
+
+	//validation rule add
+
+	//
+	c.grpcService.SendMessages(command.Body, command.Protocol, command.Recipients...)
+}
+
+//
+func (c ConnectionApi) OnConnection(connection gateway.Connection) {
+
+	events := make([]midgard.Event, 0)
+
+	events = append(events, gateway.ConnectionCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID: connection.ID,
+		},
+		Address: connection.Address,
+	})
+
+	err := c.eventRepository.Save(connection.ID, events...)
+
+	if err != nil {
+		log.Println(err.Error())
+	}
+}
+
+func (c ConnectionApi) OnDisconnection(connection gateway.Connection) {
+
+}

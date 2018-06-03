@@ -1,14 +1,12 @@
 package infra
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/it-chain/heimdall/key"
-	"github.com/it-chain/it-chain-Engine/conf"
 )
 
-func LoadKeyPair(keyPath string) (key.PriKey, key.PubKey) {
+func LoadKeyPair(keyPath string, keyType string) (key.PriKey, key.PubKey) {
 
 	km, err := key.NewKeyManager(keyPath)
 
@@ -22,8 +20,7 @@ func LoadKeyPair(keyPath string) (key.PriKey, key.PubKey) {
 		return pri, pub
 	}
 
-	fmt.Println(conf.GetConfiguration().Authentication.KeyType)
-	pri, pub, err = km.GenerateKey(ConvertToKeyGenOpts(conf.GetConfiguration().Authentication.KeyType))
+	pri, pub, err = km.GenerateKey(ConvertToKeyGenOpts(keyType))
 
 	if err != nil {
 		log.Fatal(err.Error())

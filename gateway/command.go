@@ -10,6 +10,11 @@ type ConnectionCreateCommand struct {
 	Address string
 }
 
+//Connection close command
+type ConnectionCloseCommand struct {
+	midgard.CommandModel
+}
+
 //다른 Peer에게 Message전송 command
 type MessageDeliverCommand struct {
 	midgard.CommandModel
