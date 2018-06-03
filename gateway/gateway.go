@@ -20,7 +20,7 @@ func Start() error {
 	//load key
 	pri, pub := loadKeyPair(config.Authentication.KeyPath)
 
-	//createHandler
+	//create amqp Handler
 	connectionHandler := NewConnectionCommandHandler(ConnectionStore, pri, pub, rabbitmqClient) // message handler와 구별하기 위해 connection handler로 rename
 	messageHandler := NewMessageCommandHandler(ConnectionStore, rabbitmqClient)
 
@@ -29,6 +29,7 @@ func Start() error {
 
 	// Subscribe amqp server
 	// midgard를 사용하여 새 노드 연결 관련 이벤트 구독
+	// connectionHandler가 갖는 모든 함수를 실행.
 	err := rabbitmqClient.Subscribe("Command", "Connection", connectionHandler)
 
 	if err != nil {
@@ -43,6 +44,7 @@ func Start() error {
 	}
 
 	// config의 config.yaml에 설정된 grpc gateway의 ip를 서버로 설정한다.
+	//bifrost 의 listen 호출을 통해 gRPC 서버를 동작시킨다.
 	// 추후 다른 노드에서 실행하는 경우 해당 부분의 ip를 해당 pc의 ip로 바꾸어 주어야 한다.
 	server.Listen(config.GrpcGateway.Ip)
 
