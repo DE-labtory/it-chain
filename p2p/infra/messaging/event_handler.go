@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/leveldb"
 )
 
 type NodeEventHandler struct {
@@ -12,7 +13,7 @@ type NodeEventHandler struct {
 	messageDispatcher       	*MessageDispatcher
 }
 
-func NewNodeEventHandler(nodeRepo *p2p.NodeRepository, leaderRepo *p2p.LeaderRepository, messageDispatcher *MessageDispatcher) *NodeEventHandler {
+func NewNodeEventHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository, messageDispatcher *MessageDispatcher) *NodeEventHandler {
 	return &NodeEventHandler{
 		nodeRepository:   			nodeRepo,
 		leaderRepository: 			leaderRepo,
