@@ -31,7 +31,7 @@ func (md *MessageDispatcher) RequestLeaderInfo(peer p2p.Node) error {
 
 	deliverCom := &p2p.MessageDeliverCommand{
 		CommandModel: midgard.CommandModel{
-			AggregateID: xid.New().String(),
+			ID: xid.New().String(),
 		},
 		Recipients: make([]string, 0),
 		Body:       requestBodyByte,
@@ -83,3 +83,4 @@ func (md *MessageDispatcher) ResponseTable(toNode p2p.Node, nodes []p2p.Node) er
 func (md *MessageDispatcher) LeaderUpdateEvent(leader p2p.Node) error {
 	panic("implement me")
 }
+
