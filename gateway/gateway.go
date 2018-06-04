@@ -31,12 +31,15 @@ func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 
 	//createHandler
 	connectionApi := api.NewConnectionApi(*repository, hostService) // message handler와 구별하기 위해 connection handler로 rename
+	messageApi := api.NewMessageApi(hostService)
 
 	// Subscribe amqp server
 	// midgard를 사용하여 새 노드 연결 관련 이벤트 구독
-	err := rabbitmqClient.Subscribe("Command", "Connection", connectionApi)
+	if err := rabbitmqClient.Subscribe("Command", "connection.*", connectionApi); err != nil {
+		panic(err)
+	}
 
-	if err != nil {
+	if err := rabbitmqClient.Subscribe("Command", "connection.*", messageApi); err != nil {
 		panic(err)
 	}
 

@@ -38,7 +38,8 @@ func (c ConnectionApi) CreateConnection(command gateway.ConnectionCreateCommand)
 
 	events = append(events, gateway.ConnectionCreatedEvent{
 		EventModel: midgard.EventModel{
-			ID: connection.ID,
+			ID:   connection.ID,
+			Type: "connection.created",
 		},
 		Address: connection.Address,
 	})
@@ -53,15 +54,6 @@ func (c ConnectionApi) CreateConnection(command gateway.ConnectionCreateCommand)
 //todo
 func (c ConnectionApi) CloseConnection(connection gateway.Connection) {
 
-}
-
-//todo
-func (c ConnectionApi) DeliverMessage(command gateway.MessageDeliverCommand) {
-
-	//validation rule add
-
-	//
-	c.grpcService.SendMessages(command.Body, command.Protocol, command.Recipients...)
 }
 
 //
