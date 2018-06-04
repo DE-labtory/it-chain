@@ -7,6 +7,8 @@ import (
 	"errors"
 )
 
+func Test
+
 func TestMessageDispatcher_ProposeBlock_TransactionEmpty(t *testing.T) {
 	// Given
 	publisher := Publisher(func(exchange string, topic string, data interface{}) error {

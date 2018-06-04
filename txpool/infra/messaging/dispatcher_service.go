@@ -20,7 +20,7 @@ func NewDispatcher(publisher Publisher) *MessageDispatcher {
 }
 
 
-func (m MessageDispatcher) SendGrpcTransactions(transactions []*txpool.Transaction, leader txpool.Leader) error {
+func (m MessageDispatcher) SendLeaderTransactions(transactions []*txpool.Transaction, leader txpool.Leader) error {
 	if (len(transactions) == 0) {
 		return errors.New("Empty transaction list proposed")
 	}
