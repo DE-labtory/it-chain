@@ -28,7 +28,7 @@ func (t TxPeriodicTransferService) TransferTxToLeader() {
 		log.Println(errors.New("there is no leader"))
 	}
 
-	err = t.messageDispatcher.SendTransactions(transactions, leader)
+	err = t.messageDispatcher.SendGrpcTransactions(transactions, leader)
 
 	if err != nil {
 		log.Println(err.Error())

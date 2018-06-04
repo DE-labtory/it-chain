@@ -9,9 +9,6 @@ import (
 
 type Publisher func(exchange string, topic string, data interface{}) (err error)
 
-
-
-//todo implement create command using transaction and leader and send to rabbitmq
 type MessageDispatcher struct {
 	publisher Publisher // midgard.client
 }
@@ -23,13 +20,12 @@ func NewDispatcher(publisher Publisher) *MessageDispatcher {
 }
 
 
-//todo implement sendTransactionCommand 정의 해야함
-func (m MessageDispatcher) SendTransactions(transactions []*txpool.Transaction, leader txpool.Leader) error {
+func (m MessageDispatcher) SendGrpcTransactions(transactions []*txpool.Transaction, leader txpool.Leader) error {
 	if (len(transactions) == 0) {
 		return errors.New("Empty transaction list proposed")
 	}
 
-	deliverCommand := txpool.SendTransactionsCommand{
+	deliverCommand := txpool.MessageDeliverCommand{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
@@ -37,7 +33,7 @@ func (m MessageDispatcher) SendTransactions(transactions []*txpool.Transaction, 
 		Leader: leader,
 	}
 
-	return m.publisher("Command", "Transactions", deliverCommand)
+	return m.publisher("Command", "GrpcMessage", deliverCommand)
 }
 
 func (m MessageDispatcher) ProposeBlock(transactions []txpool.Transaction) error {

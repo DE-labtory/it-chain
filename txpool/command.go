@@ -17,3 +17,9 @@ type SendTransactionsCommand struct {
 	Transactions []*Transaction
 	Leader
 }
+
+type MessageDeliverCommand struct {
+	midgard.CommandModel
+	Transactions []*Transaction
+	Leader
+}
