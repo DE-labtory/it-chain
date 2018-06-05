@@ -5,6 +5,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"github.com/magiconair/properties/assert"
 	"errors"
+	"reflect"
 )
 
 func TestMessageDispatcher_SendLeaderTransactions_TransactionsEmpty(t *testing.T) {
@@ -26,13 +27,17 @@ func TestMessageDispatcher_SendLeaderTransactions_TransactionsEmpty(t *testing.T
 	err := md.SendLeaderTransactions(transactions, leader)
 
 	// Then
-	assert.Equal(t, errors.New("Empty transaction list proposed"), err)
+	assert.Equal(t, err, errors.New("Empty transaction list proposed"))
 
 }
 
 func TestMessageDispatcher_SendLeaderTransactions(t *testing.T) {
 	// Given
 	publisher := Publisher(func(exchange string, topic string, data interface{}) error {
+		assert.Equal(t, exchange, "Command");
+		assert.Equal(t, topic, "GrpcMessage");
+		assert.Equal(t, reflect.TypeOf(data).String(), "txpool.MessageDeliverCommand")
+
 		return nil
 	})
 	md := MessageDispatcher{
@@ -53,7 +58,7 @@ func TestMessageDispatcher_SendLeaderTransactions(t *testing.T) {
 	err := md.SendLeaderTransactions(transactions, leader)
 
 	// Then
-	assert.Equal(t, nil, err);
+	assert.Equal(t, err, nil);
 }
 
 func TestMessageDispatcher_ProposeBlock_TransactionsEmpty(t *testing.T) {
@@ -70,12 +75,16 @@ func TestMessageDispatcher_ProposeBlock_TransactionsEmpty(t *testing.T) {
 	err := md.ProposeBlock(transactions)
 
 	// Then
-	assert.Equal(t, errors.New("Empty transaction list proposed"), err)
+	assert.Equal(t, err, errors.New("Empty transaction list proposed"))
 }
 
 func TestMessageDispatcher_ProposeBlock(t *testing.T) {
 	// Given
 	publisher := Publisher(func(exchange string, topic string, data interface{}) error {
+		assert.Equal(t, exchange, "Command");
+		assert.Equal(t, topic, "Block");
+		assert.Equal(t, reflect.TypeOf(data).String(), "txpool.ProposeBlockCommand")
+
 		return nil
 	})
 	md := MessageDispatcher{
@@ -91,5 +100,5 @@ func TestMessageDispatcher_ProposeBlock(t *testing.T) {
 	err := md.ProposeBlock(transactions)
 
 	// Then
-	assert.Equal(t, nil, err)
+	assert.Equal(t, err, nil)
 }
