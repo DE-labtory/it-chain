@@ -16,6 +16,8 @@ import (
 
 var ErrConnAlreadyExist = errors.New("connection is already exist")
 
+type Publish func(exchange string, topic string, data interface{}) (err error)
+
 type ConnectionHandler interface {
 	OnConnection(connection gateway.Connection)
 	OnDisconnection(connection gateway.Connection)
@@ -24,20 +26,20 @@ type ConnectionHandler interface {
 type GrpcHostService struct {
 	connStore         ConnectionStore
 	bifrostServer     *server.Server
-	publisher         midgard.Publisher
+	publish           Publish
 	priKey            key.PriKey
 	pubKey            key.PubKey
 	connectionHandler ConnectionHandler
 }
 
-func NewGrpcHostService(priKey key.PriKey, pubKey key.PubKey, publisher midgard.Publisher) *GrpcHostService {
+func NewGrpcHostService(priKey key.PriKey, pubKey key.PubKey, publish Publish) *GrpcHostService {
 
 	s := server.New(bifrost.KeyOpts{PriKey: priKey, PubKey: pubKey})
 
 	grpcHostService := &GrpcHostService{
 		connStore:     NewMemConnectionStore(),
 		bifrostServer: s,
-		publisher:     publisher,
+		publish:       publish,
 		priKey:        priKey,
 		pubKey:        pubKey,
 	}
@@ -97,7 +99,7 @@ func (g GrpcHostService) onConnection(connection bifrost.Connection) {
 
 func (g GrpcHostService) startConnectionUntilClose(connection bifrost.Connection) {
 
-	connection.Handle(NewMessageHandler(g.publisher))
+	connection.Handle(NewMessageHandler(g.publish))
 
 	if err := connection.Start(); err != nil {
 		connection.Close()
@@ -224,12 +226,12 @@ func (connStore MemConnectionStore) Find(connID bifrost.ConnID) bifrost.Connecti
 }
 
 type MessageHandler struct {
-	publisher midgard.Publisher
+	publish Publish
 }
 
 func (r MessageHandler) ServeRequest(msg bifrost.Message) {
 
-	err := r.publisher.Publish("Command", "Message", gateway.MessageReceiveCommand{
+	err := r.publish("Command", "message.receive", gateway.MessageReceiveCommand{
 		Data:         msg.Data,
 		ConnectionID: msg.Conn.GetID(),
 	})
@@ -239,8 +241,8 @@ func (r MessageHandler) ServeRequest(msg bifrost.Message) {
 	}
 }
 
-func NewMessageHandler(publisher midgard.Publisher) MessageHandler {
+func NewMessageHandler(publish Publish) MessageHandler {
 	return MessageHandler{
-		publisher: publisher,
+		publish: publish,
 	}
 }
