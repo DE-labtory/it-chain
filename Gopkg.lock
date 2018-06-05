@@ -91,8 +91,8 @@
     "auth",
     "key"
   ]
-  revision = "22a61e64e211c0f603126e4b520979c469c2e8a8"
-  version = "v0.1.2"
+  revision = "1998b05cb4fa963aa082271fb40c2e6892af75cf"
+  version = "v0.1.3"
 
 [[projects]]
   name = "github.com/it-chain/leveldb-wrapper"

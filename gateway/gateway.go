@@ -19,7 +19,6 @@ func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 
 	//load key
 	pri, pub := infra.LoadKeyPair(keyPath, conf.GetConfiguration().Authentication.KeyType)
-
 	//create gRPC server
 	hostService := infra.NewGrpcHostService(pri, pub, rabbitmqClient)
 
@@ -58,6 +57,7 @@ func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 	}()
 
 	// config의 config.yaml에 설정된 grpc gateway의 ip를 서버로 설정한다.
+	//bifrost 의 listen 호출을 통해 gRPC 서버를 동작시킨다.
 	// 추후 다른 노드에서 실행하는 경우 해당 부분의 ip를 해당 pc의 ip로 바꾸어 주어야 한다.
 	hostService.Listen(grpcUrl)
 

@@ -17,3 +17,8 @@ type ConnectionCreatedEvent struct {
 type ConnectionDisconnectedEvent struct {
 	midgard.EventModel
 }
+
+// node created event
+type NodeCreatedEvent struct {
+	midgard.EventModel
+}
