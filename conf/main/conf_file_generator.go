@@ -42,6 +42,7 @@ func main() {
 		Icode:          model.NewIcodeConfiguration(),
 		GrpcGateway:    model.NewGrpcGatewayConfiguration(),
 	}
+
 	output, _ := yaml.Marshal(&confInfo)
 	err := ioutil.WriteFile(path+"/config.yaml", output, 0644)
 

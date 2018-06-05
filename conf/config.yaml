@@ -2,7 +2,7 @@ common:
   bootnodeip: 127.0.0.1:4444
   nodeip: 127.0.0.1:4444
   messaging:
-    url: amqp://guest:guest@localhost:5672/
+    url: amqp://guest:guest@localhost:5671/
 txpool:
   timeoutms: 100
   maxtransactionbyte: 1024
@@ -15,10 +15,10 @@ blockchain:
 peer:
   leaderelection: RAFT
 authentication:
-  keytype: RSA1024
+  keytype: ECDSA256
   keypath: .it-chain/
 icode:
   repositorypath: empty
 grpcgateway:
   empty: empty
-  ip: 127.0.0.1:13579
+  ip: 127.0.0.1:13571

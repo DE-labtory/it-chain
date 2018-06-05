@@ -38,7 +38,7 @@ type ErrorEventHandler struct {
 
 func (e ErrorEventHandler) ErrorCreated(error gateway.ErrorCreatedEvent) {
 	fmt.Println(error)
-	wg.Done()
+	//wg.Done()
 }
 
 type ConnectionEventHandler struct {
@@ -46,7 +46,7 @@ type ConnectionEventHandler struct {
 
 func (e ErrorEventHandler) ConnectionCreated(event gateway.ConnectionCreatedEvent) {
 	fmt.Println(event)
-	wg.Done()
+	//wg.Done()
 }
 
 //start peer
