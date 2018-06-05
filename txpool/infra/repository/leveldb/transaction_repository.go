@@ -8,7 +8,6 @@ import (
 	"github.com/it-chain/leveldb-wrapper"
 )
 
-//todo generate test code
 type TransactionRepository struct {
 	leveldb *leveldbwrapper.DB
 }
