@@ -161,7 +161,7 @@ func (s GrpcHostService) Stop() {
 
 type ConnectionStore interface {
 	Exist(connID bifrost.ConnID) bool
-	Add(conn bifrost.Connection)
+	Add(conn bifrost.Connection) error
 	Delete(connID bifrost.ConnID)
 	Find(connID bifrost.ConnID) bifrost.Connection
 }
@@ -189,7 +189,7 @@ func (connStore MemConnectionStore) Exist(connID bifrost.ConnID) bool {
 	return false
 }
 
-func (connStore MemConnectionStore) Add(conn bifrost.Connection) {
+func (connStore MemConnectionStore) Add(conn bifrost.Connection) error {
 
 	connStore.Lock()
 	defer connStore.Unlock()
@@ -197,9 +197,12 @@ func (connStore MemConnectionStore) Add(conn bifrost.Connection) {
 	connID := conn.GetID()
 
 	if connStore.Exist(connID) {
-		return
+		return ErrConnAlreadyExist
 	}
+
 	connStore.connMap[connID] = conn
+
+	return nil
 }
 
 func (connStore MemConnectionStore) Delete(connID bifrost.ConnID) {
@@ -207,7 +210,9 @@ func (connStore MemConnectionStore) Delete(connID bifrost.ConnID) {
 	connStore.Lock()
 	defer connStore.Unlock()
 
-	delete(connStore.connMap, connID)
+	if connStore.Exist(connID) {
+		delete(connStore.connMap, connID)
+	}
 }
 
 func (connStore MemConnectionStore) Find(connID bifrost.ConnID) bifrost.Connection {
