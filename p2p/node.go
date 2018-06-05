@@ -33,6 +33,7 @@ func (n Node) GetID() string {
 }
 
 // 해당 노드의 ip와 Id로 새로운 피어를 생성한다.
+// tested
 func NewNode(ipAddress string, id NodeId) *Node {
 	return &Node{
 		IpAddress: ipAddress,

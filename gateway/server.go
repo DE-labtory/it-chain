@@ -26,6 +26,8 @@ func NewServer(publisher midgard.Publisher, connectionStore *bifrost.ConnectionS
 	}
 
 	// 최초로 서버를 생성하는 경우 connection이 형성되었음을 알리고 해당 함수를 실행시킨다.
+	// bifrost onconnection 함수에 server의 onconnection 함수를 전달.
+	// bifrost에서 onconnection 함수 실행하도록 위임
 	s.OnConnection(server.onConnection)
 	s.OnError(server.onError)
 
@@ -33,7 +35,8 @@ func NewServer(publisher midgard.Publisher, connectionStore *bifrost.ConnectionS
 }
 
 
-// connection이 형성되는 경우 실행하는 코드이다.
+// gRPC connection이 생성되면 실행되는 함수를 정의한다.
+// 서버 생성 시점에 bifrost에 함수가 전달되고 실행이 위임된다.
 func (s Server) onConnection(connection bifrost.Connection) {
 
 	connection.Handle(NewRequestHandler(s.publisher))
@@ -41,6 +44,7 @@ func (s Server) onConnection(connection bifrost.Connection) {
 
 	defer connection.Close()
 
+	// connection이 생성되면 ConnectionCreatedEvent 전파!
 	err := s.publisher.Publish("Event", "Connection", ConnectionCreatedEvent{
 		Address: connection.GetIP(),
 		EventModel: midgard.EventModel{

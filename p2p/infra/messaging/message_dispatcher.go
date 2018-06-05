@@ -10,12 +10,11 @@ import (
 	"github.com/rs/xid"
 )
 
-type Publisher func(exchange string, topic string, data interface{}) (err error)
 type MessageDispatcher struct {
-	publisher Publisher
+	publisher midgard.Publisher
 }
 
-func NewMessageDispatcher(publisher Publisher) *MessageDispatcher {
+func NewMessageDispatcher(publisher midgard.Publisher) *MessageDispatcher {
 	return &MessageDispatcher{
 		publisher: publisher,
 	}
@@ -40,7 +39,7 @@ func (md *MessageDispatcher) RequestLeaderInfo(peer p2p.Node) error {
 	}
 	deliverCom.Recipients = append(deliverCom.Recipients, peer.NodeId.ToString())
 
-	return md.publisher("Command", "GrpcMessage", deliverCom)
+	return md.publisher.Publish("Command", "GrpcMessage", deliverCom)
 }
 
 // 단일 피어에게 새로운 리더 정보를 전달하는 메서드이다.
@@ -69,7 +68,7 @@ func (md *MessageDispatcher) DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node)
 	deliverCommand.Recipients = append(deliverCommand.Recipients, toPeer.NodeId.ToString())
 
 	// topic 과 serilized data를 받아 publisher 한다.
-	return md.publisher("Command", "MessageDeliverCommand", deliverCommand)
+	return md.publisher.Publish("Command", "MessageDeliverCommand", deliverCommand)
 }
 
 func (md *MessageDispatcher) RequestTable(toNode p2p.Node) error {
@@ -84,3 +83,4 @@ func (md *MessageDispatcher) ResponseTable(toNode p2p.Node, nodes []p2p.Node) er
 func (md *MessageDispatcher) LeaderUpdateEvent(leader p2p.Node) error {
 	panic("implement me")
 }
+

@@ -16,6 +16,7 @@ type ConnectionCommandHandler struct {
 	publisher midgard.Publisher
 }
 
+//amqp subscribe를 통해 다른 노드에게 새로운 connection 정보를 전달하는 handler
 func NewConnectionCommandHandler(store *bifrost.ConnectionStore, priKey key.PriKey, pubKey key.PubKey, publisher midgard.Publisher) *ConnectionCommandHandler {
 	return &ConnectionCommandHandler{
 		publisher: publisher, //grpc 인터페이스에서 이벤트를 발생시키기 위해 필요하다.
@@ -26,6 +27,7 @@ func NewConnectionCommandHandler(store *bifrost.ConnectionStore, priKey key.PriK
 }
 
 // 새로운 connection 이 생성되면 처리하는 함수이다.
+// midgard client 가 connection topic을 subscribe 하는 시점에 실행된다.
 func (c ConnectionCommandHandler) HandleConnectionCreate(command ConnectionCreateCommand) {
 
 	log.Println(command)
@@ -45,6 +47,7 @@ func (c ConnectionCommandHandler) HandleConnectionCreate(command ConnectionCreat
 		Creds:      nil,
 	}
 
+	// dial with bifrost
 	connection, err := client.Dial(command.Address, clientOpt, grpcOpt)
 
 	if err != nil {
@@ -60,7 +63,7 @@ func (c ConnectionCommandHandler) HandleConnectionCreate(command ConnectionCreat
 	err = c.publisher.Publish("Event", "Connection", ConnectionCreatedEvent{
 		Address: connection.GetIP(),
 		EventModel: midgard.EventModel{
-			ID: connection.GetID(),
+			AggregateID: connection.GetID(),
 		},
 	})
 

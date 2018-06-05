@@ -7,26 +7,20 @@ GrpcGateway는 노드끼리의 통신을 담당한다. GrpcGateway는 bifrost(ht
 - 다른 노드로 부터 데이터를 받아 관련된 데이터 Event를 발생 시킨다.
 
 이를 위해서는 grpc client 및 server의 생성 및 관리, protocol buffer 관리와 구체적인 grpc 서비스를 구현해야 하는데 이 모든 작업은 **bifrost** 라이브러리를 통해 구현한다.
+## Usage
+### Start() method
+gateway.go 의 `start()` 함수 호출을 통해 gRPC 서버를 구동하고, 다른 컴포넌트와 메세지를 주고받기 위한 AMQP 서버를 세팅한다.
 
-# Methods
-## start()
-in gateway.go
 
-## stop()
-in gateway.go
-
-# Structures
-## Server
+## Structures
+### Server
 in server.go
 
 gRPC 의 서버의 모든 기능을 수행한다.
 응답을 대기하고, 새로운 서버를 생성하고, rpc connection이 생겼을 때에 대한 handler 역할을 수행한다.
 
-### Server Structure
-### onConnection
-### Listen(ip string)
-### onError(error error)
-### Stop()
+
+
 # Consume Event
 
 - MessageDeliveryEvent
