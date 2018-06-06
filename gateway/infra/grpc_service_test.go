@@ -343,3 +343,59 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 		clientHostService.SendMessages(test.input.Message, test.input.Protocol, conn.ID)
 	}
 }
+
+func TestGrpcHostService_Close(t *testing.T) {
+
+	//given
+	tests := map[string]struct {
+		input  string
+		output string
+		err    error
+	}{
+		"dial success": {
+			input:  "127.0.0.1:7777",
+			output: "127.0.0.1:7777",
+			err:    nil,
+		},
+		"dial exist connection": {
+			input:  "127.0.0.1:7777",
+			output: "",
+			err:    infra.ErrConnAlreadyExist,
+		},
+	}
+
+	var publish = func(exchange string, topic string, data interface{}) (err error) {
+
+		return nil
+	}
+
+	serverHostService, tearDown1 := setupGrpcHostService(t, "127.0.0.1:7777", "server", publish)
+	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client", publish)
+
+	defer tearDown1()
+	defer tearDown2()
+
+	var connID string
+
+	handler := &MockHandler{}
+	handler.OnConnectionFunc = func(connection gateway.Connection) {
+		fmt.Println(connection)
+		connID = connection.ID
+	}
+
+	handler.OnDisconnectionFunc = func(connection gateway.Connection) {
+		fmt.Println("connection is closing", connection)
+		assert.Equal(t, connID, connection.ID)
+	}
+
+	serverHostService.SetHandler(handler)
+	clientHostService.SetHandler(handler)
+
+	for testName, test := range tests {
+		t.Logf("Running test case %s", testName)
+
+		conn, err := clientHostService.Dial(test.input)
+		assert.NoError(t, err)
+		clientHostService.CloseConnection(conn.ID)
+	}
+}
