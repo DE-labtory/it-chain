@@ -24,14 +24,14 @@ type NodeCreatedEvent struct {
 }
 
 // handle leader received event
-type LeaderReceivedEvent struct {
+type LeaderUpdatedEvent struct {
 	midgard.EventModel
 	Leader Leader
 }
 
 //handle
 //node list received
-type NodeListReceivedEvent struct {
+type NodeListUpdatedEvent struct {
 	midgard.EventModel
 	NodeList []Node
 }

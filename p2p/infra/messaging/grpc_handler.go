@@ -9,14 +9,14 @@ import (
 type GrpcMessageHandler struct {
 	nodeRepository   p2p.NodeRepository
 	leaderRepository p2p.LeaderRepository
-	dispatcher       *MessageDispatcher
+	messageDispatcher       *MessageDispatcher
 }
 
-func NewGrpcMessageHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository, dispatcher *MessageDispatcher) *GrpcMessageHandler {
+func NewGrpcMessageHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository, messageDispatcher *MessageDispatcher) *GrpcMessageHandler {
 	return &GrpcMessageHandler{
 		nodeRepository:   nodeRepo,
 		leaderRepository: leaderRepo,
-		dispatcher:       dispatcher,
+		messageDispatcher:       messageDispatcher,
 	}
 }
 
@@ -31,6 +31,8 @@ func (gmh *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestComma
 			panic(err)
 		}
 		gmh.leaderRepository.SetLeader(*leader)
+		gmh.messageDispatcher.publisher.Publish("event", "leader.update", p2p.LeaderUpdatedEvent{})
+
 	case command.Protocol=="NodeListDeliver":
 		nodeList := make([]p2p.Node,0)
 		err := common.Deserialize(command.Data, nodeList)
@@ -40,6 +42,7 @@ func (gmh *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestComma
 		for _, node := range nodeList{
 			gmh.nodeRepository.Save(node)
 		}
+		gmh.messageDispatcher.publisher.Publish("event", "node.update", p2p.NodeListUpdatedEvent{})
 	}
 	/*receiveEvent := &event.MessageReceiveEvent{}
 	err := json.Unmarshal(amqpMessage.Body, receiveEvent)
