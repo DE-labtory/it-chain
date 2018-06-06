@@ -5,5 +5,6 @@ type MessageDispatcher interface {
 	DeliverLeaderInfo(toPeer Node, leader Node) error
 	RequestTable(toNode Node) error
 	ResponseTable(toNode Node, nodes []Node) error
-	LeaderUpdateEvent(leader Node) error
+	SendLeaderUpdateMessage(leader Node) error
+	SendDeliverNodeListMessage(toNode Node) error // update node repository in specific node
 }

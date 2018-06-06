@@ -22,3 +22,16 @@ type ConnectionDisconnectedEvent struct {
 type NodeCreatedEvent struct {
 	midgard.EventModel
 }
+
+// handle leader received event
+type LeaderUpdatedEvent struct {
+	midgard.EventModel
+	Leader Leader
+}
+
+//handle
+//node list received
+type NodeListUpdatedEvent struct {
+	midgard.EventModel
+	NodeList []Node
+}
