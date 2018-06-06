@@ -3,6 +3,10 @@ package infra_test
 import (
 	"testing"
 
+	"os"
+
+	"fmt"
+
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/gateway"
@@ -187,5 +191,84 @@ func TestMemConnectionStore_Delete(t *testing.T) {
 
 		//then
 		assert.Equal(t, connectionStore.Find(test.input), test.output)
+	}
+}
+
+type MockHandler struct {
+	OnConnectionFunc    func(connection gateway.Connection)
+	OnDisconnectionFunc func(connection gateway.Connection)
+}
+
+func (m *MockHandler) OnConnection(connection gateway.Connection) {
+	m.OnConnectionFunc(connection)
+}
+
+func (m *MockHandler) OnDisconnection(connection gateway.Connection) {
+	m.OnDisconnectionFunc(connection)
+}
+
+var setupGrpcHostService = func(t *testing.T, ip string, keyPath string) (*infra.GrpcHostService, func()) {
+
+	pri, pub := infra.LoadKeyPair(keyPath, "ECDSA256")
+
+	var publish = func(exchange string, topic string, data interface{}) (err error) {
+
+		return nil
+	}
+
+	hostService := infra.NewGrpcHostService(pri, pub, publish)
+
+	go hostService.Listen(ip)
+
+	return hostService, func() {
+		hostService.Stop()
+		os.RemoveAll(keyPath)
+	}
+}
+
+func TestGrpcHostService_Dial(t *testing.T) {
+
+	//given
+	tests := map[string]struct {
+		input  string
+		output string
+		err    error
+	}{
+		"dial success": {
+			input:  "127.0.0.1:7777",
+			output: "127.0.0.1:7777",
+			err:    nil,
+		},
+		"dial exist connection": {
+			input:  "127.0.0.1:7777",
+			output: "",
+			err:    infra.ErrConnAlreadyExist,
+		},
+	}
+
+	serverHostService, tearDown1 := setupGrpcHostService(t, "127.0.0.1:7777", "server")
+	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client")
+
+	defer tearDown1()
+	defer tearDown2()
+
+	handler := &MockHandler{}
+	handler.OnConnectionFunc = func(connection gateway.Connection) {
+		fmt.Println(connection)
+	}
+
+	handler.OnDisconnectionFunc = func(connection gateway.Connection) {
+		fmt.Println("connection is closing", connection)
+	}
+
+	serverHostService.SetHandler(handler)
+	clientHostService.SetHandler(handler)
+
+	for testName, test := range tests {
+		t.Logf("Running test case %s", testName)
+
+		conn, err := clientHostService.Dial(test.input)
+		assert.Equal(t, err, test.err)
+		assert.Equal(t, conn.Address, test.output)
 	}
 }

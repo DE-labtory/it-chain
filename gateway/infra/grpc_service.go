@@ -50,11 +50,11 @@ func NewGrpcHostService(priKey key.PriKey, pubKey key.PubKey, publish Publish) *
 	return grpcHostService
 }
 
-func (g GrpcHostService) SetHandler(connectionHandler ConnectionHandler) {
+func (g *GrpcHostService) SetHandler(connectionHandler ConnectionHandler) {
 	g.connectionHandler = connectionHandler
 }
 
-func (g GrpcHostService) Dial(address string) (gateway.Connection, error) {
+func (g *GrpcHostService) Dial(address string) (gateway.Connection, error) {
 
 	connection, err := client.Dial(g.buildDialOption(address))
 
@@ -84,7 +84,7 @@ func toGatewayConnectionModel(connection bifrost.Connection) gateway.Connection 
 }
 
 // connection이 형성되는 경우 실행하는 코드이다.
-func (g GrpcHostService) onConnection(connection bifrost.Connection) {
+func (g *GrpcHostService) onConnection(connection bifrost.Connection) {
 
 	if g.connStore.Exist(connection.GetID()) {
 		connection.Close()
@@ -97,7 +97,7 @@ func (g GrpcHostService) onConnection(connection bifrost.Connection) {
 	g.startConnectionUntilClose(connection)
 }
 
-func (g GrpcHostService) startConnectionUntilClose(connection bifrost.Connection) {
+func (g *GrpcHostService) startConnectionUntilClose(connection bifrost.Connection) {
 
 	connection.Handle(NewMessageHandler(g.publish))
 
@@ -108,7 +108,7 @@ func (g GrpcHostService) startConnectionUntilClose(connection bifrost.Connection
 	}
 }
 
-func (g GrpcHostService) CloseConnection(connID string) {
+func (g *GrpcHostService) CloseConnection(connID string) {
 
 	connection := g.connStore.Find(connID)
 
@@ -120,7 +120,7 @@ func (g GrpcHostService) CloseConnection(connID string) {
 	g.connStore.Delete(connection.GetID())
 }
 
-func (g GrpcHostService) SendMessages(message []byte, protocol string, connIDs ...string) {
+func (g *GrpcHostService) SendMessages(message []byte, protocol string, connIDs ...string) {
 
 	for _, connID := range connIDs {
 		connection := g.connStore.Find(connID)
@@ -147,15 +147,15 @@ func (g GrpcHostService) buildDialOption(address string) (string, client.ClientO
 	return address, clientOpt, grpcOpt
 }
 
-func (s GrpcHostService) Listen(ip string) {
+func (s *GrpcHostService) Listen(ip string) {
 	s.bifrostServer.Listen(ip)
 }
 
-func (s GrpcHostService) onError(err error) {
+func (s *GrpcHostService) onError(err error) {
 	log.Fatalln(err.Error())
 }
 
-func (s GrpcHostService) Stop() {
+func (s *GrpcHostService) Stop() {
 	s.bifrostServer.Stop()
 }
 
