@@ -207,14 +207,9 @@ func (m *MockHandler) OnDisconnection(connection gateway.Connection) {
 	m.OnDisconnectionFunc(connection)
 }
 
-var setupGrpcHostService = func(t *testing.T, ip string, keyPath string) (*infra.GrpcHostService, func()) {
+var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish func(exchange string, topic string, data interface{}) error) (*infra.GrpcHostService, func()) {
 
 	pri, pub := infra.LoadKeyPair(keyPath, "ECDSA256")
-
-	var publish = func(exchange string, topic string, data interface{}) (err error) {
-
-		return nil
-	}
 
 	hostService := infra.NewGrpcHostService(pri, pub, publish)
 
@@ -246,8 +241,13 @@ func TestGrpcHostService_Dial(t *testing.T) {
 		},
 	}
 
-	serverHostService, tearDown1 := setupGrpcHostService(t, "127.0.0.1:7777", "server")
-	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client")
+	var publish = func(exchange string, topic string, data interface{}) (err error) {
+
+		return nil
+	}
+
+	serverHostService, tearDown1 := setupGrpcHostService(t, "127.0.0.1:7777", "server", publish)
+	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client", publish)
 
 	defer tearDown1()
 	defer tearDown2()
@@ -270,5 +270,76 @@ func TestGrpcHostService_Dial(t *testing.T) {
 		conn, err := clientHostService.Dial(test.input)
 		assert.Equal(t, err, test.err)
 		assert.Equal(t, conn.Address, test.output)
+	}
+}
+
+func TestGrpcHostService_SendMessages(t *testing.T) {
+
+	//given
+	tests := map[string]struct {
+		input struct {
+			Ip       string
+			Message  []byte
+			Protocol string
+		}
+		output string
+		err    error
+	}{
+		"send message success": {
+			input: struct {
+				Ip       string
+				Message  []byte
+				Protocol string
+			}{
+				Ip:       "127.0.0.1:7777",
+				Message:  []byte("hello"),
+				Protocol: "testProtocol",
+			},
+			output: "127.0.0.1:7777",
+			err:    nil,
+		},
+	}
+
+	var publishedData []byte
+	var connID string
+
+	var publish = func(exchange string, topic string, data interface{}) (err error) {
+
+		assert.Equal(t, exchange, "Command")
+		assert.Equal(t, topic, "message.receive")
+		assert.Equal(t, data, gateway.MessageReceiveCommand{
+			Data:         publishedData,
+			ConnectionID: connID,
+		})
+		return nil
+	}
+
+	serverHostService, tearDown1 := setupGrpcHostService(t, "127.0.0.1:7777", "server", publish)
+	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client", publish)
+
+	defer tearDown1()
+	defer tearDown2()
+
+	handler := &MockHandler{}
+	handler.OnConnectionFunc = func(connection gateway.Connection) {
+		connID = connection.ID
+	}
+
+	handler.OnDisconnectionFunc = func(connection gateway.Connection) {
+		fmt.Println("connection is closing", connection)
+	}
+
+	serverHostService.SetHandler(handler)
+	clientHostService.SetHandler(handler)
+
+	for testName, test := range tests {
+		t.Logf("Running test case %s", testName)
+
+		conn, err := clientHostService.Dial(test.input.Ip)
+		assert.NoError(t, err)
+
+		publishedData = test.input.Message
+
+		clientHostService.SendMessages(test.input.Message, test.input.Protocol, conn.ID)
 	}
 }
