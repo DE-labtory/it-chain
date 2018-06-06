@@ -77,7 +77,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 		assert.Equal(t, topic, "message.receive")
 		assert.Equal(t, data, gateway.MessageReceiveCommand{
 			Data:         []byte("hello world"),
-			ConnectionID: "1",
+			ConnectionID: "123",
 		})
 		return nil
 	}
@@ -107,7 +107,7 @@ func TestMemConnectionStore_Add(t *testing.T) {
 		},
 		"add same id": {
 			input:  MockConn{ID: "123"},
-			output: MockConn{},
+			output: MockConn{ID: "123"},
 			err:    infra.ErrConnAlreadyExist,
 		},
 	}
