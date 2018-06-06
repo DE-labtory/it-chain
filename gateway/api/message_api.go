@@ -8,8 +8,8 @@ type MessageApi struct {
 	grpcService gateway.GrpcService
 }
 
-func NewMessageApi(grpcService gateway.GrpcService) *ConnectionApi {
-	return &ConnectionApi{
+func NewMessageApi(grpcService gateway.GrpcService) *MessageApi {
+	return &MessageApi{
 		grpcService: grpcService,
 	}
 }

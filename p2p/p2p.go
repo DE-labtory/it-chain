@@ -21,11 +21,19 @@ func init() {
 
 	//create amqp Handler
 	eventHandler := messaging.NewNodeEventHandler(nodeRepository, leaderRepository, messageDispatcher)
+	commandHandler := messaging.NewGrpcMessageHandler(nodeRepository, leaderRepository, messageDispatcher)
 
 	// Subscribe amqp server
-	err := rabbitmqClient.Subscribe("Command", "Connection", eventHandler)
+	err1 := rabbitmqClient.Subscribe("Command", "Connection", eventHandler)
 
-	if err != nil {
-		panic(err)
+	if err1 != nil {
+		panic(err1)
+	}
+
+
+	err2 := rabbitmqClient.Subscribe("Command", "message.receive", commandHandler)
+
+	if err2 != nil {
+		panic(err2)
 	}
 }

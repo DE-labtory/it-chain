@@ -1,14 +1,18 @@
 package messaging
 
-import "github.com/it-chain/it-chain-Engine/p2p"
+import (
+	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/leveldb"
+	"github.com/it-chain/it-chain-Engine/common"
+)
 
 type GrpcMessageHandler struct {
 	nodeRepository   p2p.NodeRepository
 	leaderRepository p2p.LeaderRepository
-	dispatcher       *Dispatcher
+	dispatcher       *MessageDispatcher
 }
 
-func NewGrpcMessageHandler(nodeRepo *p2p.NodeRepository, leaderRepo *p2p.LeaderRepository, dispatcher *Dispatcher) *GrpcMessageHandler {
+func NewGrpcMessageHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository, dispatcher *MessageDispatcher) *GrpcMessageHandler {
 	return &GrpcMessageHandler{
 		nodeRepository:   nodeRepo,
 		leaderRepository: leaderRepo,
@@ -19,7 +23,24 @@ func NewGrpcMessageHandler(nodeRepo *p2p.NodeRepository, leaderRepo *p2p.LeaderR
 //todo implement
 func (gmh *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand) {
 	panic("need to implement")
-
+	switch {
+	case command.Protocol=="LeaderInfoUpdate":
+		leader := &p2p.Leader{}
+		err := common.Deserialize(command.Data, leader)
+		if err != nil{
+			panic(err)
+		}
+		gmh.leaderRepository.SetLeader(*leader)
+	case command.Protocol=="NodeListDeliver":
+		nodeList := make([]p2p.Node,0)
+		err := common.Deserialize(command.Data, nodeList)
+		if err != nil{
+			panic(err)
+		}
+		for _, node := range nodeList{
+			gmh.nodeRepository.Save(node)
+		}
+	}
 	/*receiveEvent := &event.MessageReceiveEvent{}
 	err := json.Unmarshal(amqpMessage.Body, receiveEvent)
 	if err != nil {

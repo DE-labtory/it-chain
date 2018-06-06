@@ -38,7 +38,7 @@ func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 		panic(err)
 	}
 
-	if err := rabbitmqClient.Subscribe("Command", "connection.*", messageApi); err != nil {
+	if err := rabbitmqClient.Subscribe("Command", "message.*", messageApi); err != nil {
 		panic(err)
 	}
 
