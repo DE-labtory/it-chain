@@ -51,6 +51,7 @@ func (c ConnectionApi) CreateConnection(command gateway.ConnectionCreateCommand)
 	}
 }
 
+//다른 node와의 연결 close
 //todo close connection event 발생
 func (c ConnectionApi) CloseConnection(connection gateway.Connection) {
 
