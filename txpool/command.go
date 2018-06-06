@@ -6,3 +6,20 @@ type TxCreateCommand struct {
 	midgard.CommandModel
 	TxData
 }
+
+type ProposeBlockCommand struct {
+	midgard.CommandModel
+	Transactions []Transaction
+}
+
+type SendTransactionsCommand struct {
+	midgard.CommandModel
+	Transactions []*Transaction
+	Leader
+}
+
+type MessageDeliverCommand struct {
+	midgard.CommandModel
+	Transactions []*Transaction
+	Leader
+}
