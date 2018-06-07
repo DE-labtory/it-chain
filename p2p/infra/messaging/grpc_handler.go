@@ -4,12 +4,15 @@ import (
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/leveldb"
 	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/midgard"
+	"log"
 )
 
 type GrpcMessageHandler struct {
-	nodeRepository   p2p.NodeRepository
-	leaderRepository p2p.LeaderRepository
+	nodeRepository   		p2p.NodeRepository
+	leaderRepository 		p2p.LeaderRepository
 	messageDispatcher       *MessageDispatcher
+	eventRepository 		midgard.Repository
 }
 
 func NewGrpcMessageHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository, messageDispatcher *MessageDispatcher) *GrpcMessageHandler {
@@ -25,24 +28,58 @@ func (gmh *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestComma
 	panic("need to implement")
 	switch {
 	case command.Protocol=="LeaderInfoUpdate":
+		if command.GetID() == ""{
+			return
+		}
+		id := command.GetID()
 		leader := &p2p.Leader{}
 		err := common.Deserialize(command.Data, leader)
 		if err != nil{
 			panic(err)
 		}
-		gmh.leaderRepository.SetLeader(*leader)
-		gmh.messageDispatcher.publisher.Publish("event", "leader.update", p2p.LeaderUpdatedEvent{})
+
+		events := make([]midgard.Event, 0)
+		leaderUpdatedEvent := p2p.LeaderUpdatedEvent{
+			EventModel: midgard.EventModel{
+				ID: 	id,
+				Type:	"Leader",
+			},
+			Leader: *leader,
+		}
+
+		events = append(events, leaderUpdatedEvent)
+		err2 := gmh.eventRepository.Save(command.GetID(), events...)
+
+		if err2 != nil {
+			log.Println(err2.Error())
+		}
+
+		//gmh.leaderRepository.SetLeader(*leader)
+		gmh.messageDispatcher.publisher.Publish("event", "leader.update", leaderUpdatedEvent)
 
 	case command.Protocol=="NodeListDeliver":
+		if command.GetID() ==""{
+			return
+		}
+
+		id := command.GetID()
+
 		nodeList := make([]p2p.Node,0)
 		err := common.Deserialize(command.Data, nodeList)
+
 		if err != nil{
-			panic(err)
+			err.Error()
 		}
-		for _, node := range nodeList{
-			gmh.nodeRepository.Save(node)
+
+		event := p2p.NodeListUpdatedEvent{
+			EventModel: midgard.EventModel{
+				ID:id,
+				Type:"Node",
+			},
+			NodeList:nodeList,
 		}
-		gmh.messageDispatcher.publisher.Publish("event", "node.update", p2p.NodeListUpdatedEvent{})
+
+		gmh.messageDispatcher.publisher.Publish("event", "node.update", event)
 	}
 	/*receiveEvent := &event.MessageReceiveEvent{}
 	err := json.Unmarshal(amqpMessage.Body, receiveEvent)

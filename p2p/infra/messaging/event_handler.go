@@ -60,11 +60,13 @@ func (neh *NodeEventHandler) HandleConnDisconnectEvent(event p2p.ConnectionDisco
 }
 
 //save Leader when LeaderReceivedEvent Detected
-func (neh *NodeEventHandler) HandleLeaderReceivedEvent(event p2p.LeaderReceivedEvent){
-	panic("implement!")
+func (neh *NodeEventHandler) HandleLeaderUpdatedEvent(event p2p.LeaderUpdatedEvent){
+	neh.leaderRepository.SetLeader(event.Leader)
 }
 
 //save all nodes when NodeListReceivedEvent Detected
-func (neh *NodeEventHandler) HandleNodeListReceivedEvent(event p2p.NodeListReceivedEvent){
-	panic("implement!")
+func (neh *NodeEventHandler) HandleNodeListUpdatedEvent(event p2p.NodeListUpdatedEvent){
+	for _, node := range event.NodeList{
+		neh.nodeRepository.Save(node);
+	}
 }
