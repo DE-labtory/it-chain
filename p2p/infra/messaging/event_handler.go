@@ -67,6 +67,6 @@ func (neh *NodeEventHandler) HandleLeaderUpdatedEvent(event p2p.LeaderUpdatedEve
 //save all nodes when NodeListReceivedEvent Detected
 func (neh *NodeEventHandler) HandleNodeListUpdatedEvent(event p2p.NodeListUpdatedEvent){
 	for _, node := range event.NodeList{
-		neh.nodeRepository.Save(node);
+		neh.nodeRepository.Save(node)
 	}
 }
