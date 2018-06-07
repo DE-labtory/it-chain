@@ -6,7 +6,6 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/midgard"
 	"log"
-	"github.com/it-chain/it-chain-Engine/gateway/api"
 )
 
 type GrpcMessageHandler struct {
@@ -111,5 +110,5 @@ func (gmh *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestComma
 }
 
 func (gmh *GrpcMessageHandler) HandlerMessageDeliver(command p2p.MessageDeliverCommand){
-	messageApi = api.NewMessageApi()
+	panic("implement me!")
 }
