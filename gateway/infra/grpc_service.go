@@ -16,6 +16,8 @@ import (
 
 var ErrConnAlreadyExist = errors.New("connection is already exist")
 
+type Publish func(exchange string, topic string, data interface{}) (err error)
+
 type ConnectionHandler interface {
 	OnConnection(connection gateway.Connection)
 	OnDisconnection(connection gateway.Connection)
@@ -24,20 +26,20 @@ type ConnectionHandler interface {
 type GrpcHostService struct {
 	connStore         ConnectionStore
 	bifrostServer     *server.Server
-	publisher         midgard.Publisher
+	publish           Publish
 	priKey            key.PriKey
 	pubKey            key.PubKey
 	connectionHandler ConnectionHandler
 }
 
-func NewGrpcHostService(priKey key.PriKey, pubKey key.PubKey, publisher midgard.Publisher) *GrpcHostService {
+func NewGrpcHostService(priKey key.PriKey, pubKey key.PubKey, publish Publish) *GrpcHostService {
 
 	s := server.New(bifrost.KeyOpts{PriKey: priKey, PubKey: pubKey})
 
 	grpcHostService := &GrpcHostService{
 		connStore:     NewMemConnectionStore(),
 		bifrostServer: s,
-		publisher:     publisher,
+		publish:       publish,
 		priKey:        priKey,
 		pubKey:        pubKey,
 	}
@@ -48,11 +50,11 @@ func NewGrpcHostService(priKey key.PriKey, pubKey key.PubKey, publisher midgard.
 	return grpcHostService
 }
 
-func (g GrpcHostService) SetHandler(connectionHandler ConnectionHandler) {
+func (g *GrpcHostService) SetHandler(connectionHandler ConnectionHandler) {
 	g.connectionHandler = connectionHandler
 }
 
-func (g GrpcHostService) Dial(address string) (gateway.Connection, error) {
+func (g *GrpcHostService) Dial(address string) (gateway.Connection, error) {
 
 	connection, err := client.Dial(g.buildDialOption(address))
 
@@ -82,7 +84,7 @@ func toGatewayConnectionModel(connection bifrost.Connection) gateway.Connection 
 }
 
 // connection이 형성되는 경우 실행하는 코드이다.
-func (g GrpcHostService) onConnection(connection bifrost.Connection) {
+func (g *GrpcHostService) onConnection(connection bifrost.Connection) {
 
 	if g.connStore.Exist(connection.GetID()) {
 		connection.Close()
@@ -95,9 +97,9 @@ func (g GrpcHostService) onConnection(connection bifrost.Connection) {
 	g.startConnectionUntilClose(connection)
 }
 
-func (g GrpcHostService) startConnectionUntilClose(connection bifrost.Connection) {
+func (g *GrpcHostService) startConnectionUntilClose(connection bifrost.Connection) {
 
-	connection.Handle(NewMessageHandler(g.publisher))
+	connection.Handle(NewMessageHandler(g.publish))
 
 	if err := connection.Start(); err != nil {
 		connection.Close()
@@ -106,7 +108,7 @@ func (g GrpcHostService) startConnectionUntilClose(connection bifrost.Connection
 	}
 }
 
-func (g GrpcHostService) CloseConnection(connID string) {
+func (g *GrpcHostService) CloseConnection(connID string) {
 
 	connection := g.connStore.Find(connID)
 
@@ -118,7 +120,7 @@ func (g GrpcHostService) CloseConnection(connID string) {
 	g.connStore.Delete(connection.GetID())
 }
 
-func (g GrpcHostService) SendMessages(message []byte, protocol string, connIDs ...string) {
+func (g *GrpcHostService) SendMessages(message []byte, protocol string, connIDs ...string) {
 
 	for _, connID := range connIDs {
 		connection := g.connStore.Find(connID)
@@ -145,21 +147,21 @@ func (g GrpcHostService) buildDialOption(address string) (string, client.ClientO
 	return address, clientOpt, grpcOpt
 }
 
-func (s GrpcHostService) Listen(ip string) {
+func (s *GrpcHostService) Listen(ip string) {
 	s.bifrostServer.Listen(ip)
 }
 
-func (s GrpcHostService) onError(err error) {
+func (s *GrpcHostService) onError(err error) {
 	log.Fatalln(err.Error())
 }
 
-func (s GrpcHostService) Stop() {
+func (s *GrpcHostService) Stop() {
 	s.bifrostServer.Stop()
 }
 
 type ConnectionStore interface {
 	Exist(connID bifrost.ConnID) bool
-	Add(conn bifrost.Connection)
+	Add(conn bifrost.Connection) error
 	Delete(connID bifrost.ConnID)
 	Find(connID bifrost.ConnID) bifrost.Connection
 }
@@ -187,7 +189,7 @@ func (connStore MemConnectionStore) Exist(connID bifrost.ConnID) bool {
 	return false
 }
 
-func (connStore MemConnectionStore) Add(conn bifrost.Connection) {
+func (connStore MemConnectionStore) Add(conn bifrost.Connection) error {
 
 	connStore.Lock()
 	defer connStore.Unlock()
@@ -195,9 +197,12 @@ func (connStore MemConnectionStore) Add(conn bifrost.Connection) {
 	connID := conn.GetID()
 
 	if connStore.Exist(connID) {
-		return
+		return ErrConnAlreadyExist
 	}
+
 	connStore.connMap[connID] = conn
+
+	return nil
 }
 
 func (connStore MemConnectionStore) Delete(connID bifrost.ConnID) {
@@ -205,7 +210,9 @@ func (connStore MemConnectionStore) Delete(connID bifrost.ConnID) {
 	connStore.Lock()
 	defer connStore.Unlock()
 
-	delete(connStore.connMap, connID)
+	if connStore.Exist(connID) {
+		delete(connStore.connMap, connID)
+	}
 }
 
 func (connStore MemConnectionStore) Find(connID bifrost.ConnID) bifrost.Connection {
@@ -224,12 +231,12 @@ func (connStore MemConnectionStore) Find(connID bifrost.ConnID) bifrost.Connecti
 }
 
 type MessageHandler struct {
-	publisher midgard.Publisher
+	publish Publish
 }
 
 func (r MessageHandler) ServeRequest(msg bifrost.Message) {
 
-	err := r.publisher.Publish("Command", "Message", gateway.MessageReceiveCommand{
+	err := r.publish("Command", "message.receive", gateway.MessageReceiveCommand{
 		Data:         msg.Data,
 		ConnectionID: msg.Conn.GetID(),
 	})
@@ -239,8 +246,8 @@ func (r MessageHandler) ServeRequest(msg bifrost.Message) {
 	}
 }
 
-func NewMessageHandler(publisher midgard.Publisher) MessageHandler {
+func NewMessageHandler(publish Publish) MessageHandler {
 	return MessageHandler{
-		publisher: publisher,
+		publish: publish,
 	}
 }
