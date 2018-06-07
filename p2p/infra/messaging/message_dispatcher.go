@@ -8,7 +8,6 @@ import (
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
-	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/leveldb"
 )
 
 type MessageDispatcher struct {
@@ -116,9 +115,7 @@ func (md *MessageDispatcher) SendLeaderUpdateMessage(leader p2p.Node) error {
 }
 
 // deliver content of node repository to new node
-func (md *MessageDispatcher) SendDeliverNodeListMessage(toNode p2p.Node) error{
-	nodeRepository := leveldb.NewNodeRepository("node_repo")
-	nodeList, _ := nodeRepository.FindAll()
+func (md *MessageDispatcher) SendDeliverNodeListMessage(nodeId p2p.NodeId, nodeList []p2p.Node) error{
 	nodeListByte, _ := common.Serialize(nodeList)
 
 	deliverCommand := p2p.MessageDeliverCommand{

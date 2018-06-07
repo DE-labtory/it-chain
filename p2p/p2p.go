@@ -24,7 +24,7 @@ func init() {
 	grpcMessageHandler := messaging.NewGrpcMessageHandler(nodeRepository, leaderRepository, messageDispatcher)
 
 	// Subscribe amqp server
-	err1 := rabbitmqClient.Subscribe("Command", "Connection", eventHandler)
+	err1 := rabbitmqClient.Subscribe("Command", "connection.*", eventHandler)
 
 	if err1 != nil {
 		panic(err1)
