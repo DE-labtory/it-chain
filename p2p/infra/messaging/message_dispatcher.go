@@ -112,7 +112,7 @@ func (md *MessageDispatcher) SendLeaderUpdateMessage(leader p2p.Node) error {
 		Body:       leaderByte,
 		Protocol:   "LeaderInfoUpdate",
 	}
-	return md.publisher.Publish("Command", "leader.update", deliverCommand)
+	return md.publisher.Publish("Command", "message.*", deliverCommand)
 }
 
 // deliver content of node repository to new node
@@ -127,6 +127,6 @@ func (md *MessageDispatcher) SendDeliverNodeListMessage(nodeId p2p.NodeId, nodeL
 		Body:       nodeListByte,
 		Protocol:   "NodeListDeliver",
 	}
-	return md.publisher.Publish("Command", "node.deliver", deliverCommand)
+	return md.publisher.Publish("Command", "message.*", deliverCommand)
 }
 
