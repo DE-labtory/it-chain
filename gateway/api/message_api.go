@@ -14,7 +14,7 @@ func NewMessageApi(grpcService gateway.GrpcService) *MessageApi {
 	}
 }
 
-//todo
+//todo validation rule added example( check length of recipent)
 func (c MessageApi) DeliverMessage(command gateway.MessageDeliverCommand) {
 
 	//validation rule add
