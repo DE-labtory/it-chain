@@ -11,7 +11,7 @@ Peer 서비스는 피어노드의 생성, 삭제, 열람, 리더 노드의 선�
 send contents of node repository to specific node
 
 
-### LeaderInfoUpdate
+### UpdateLeader
 update leader info in specific node
 
 

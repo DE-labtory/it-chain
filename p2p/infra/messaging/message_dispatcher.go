@@ -101,7 +101,7 @@ func (md *MessageDispatcher) ResponseTable(toNode p2p.Node, nodes []p2p.Node) er
 // 새로운 리더를 업데이트하는 메서드이다.
 // todo 추후 리더 변경 알고리즘이 구상된다면 해당 내용을 반영하여 복수의 수신자가 되어야 한다.
 //todo fix path
-func (md *MessageDispatcher) SendLeaderUpdateMessage(leader p2p.Node) error {
+func (md *MessageDispatcher) SendLeaderUpdateMessage(nodeId p2p.NodeId, leader p2p.Node) error {
 
 	leaderByte, _ := common.Serialize(leader)
 	deliverCommand := p2p.MessageDeliverCommand{
@@ -110,8 +110,10 @@ func (md *MessageDispatcher) SendLeaderUpdateMessage(leader p2p.Node) error {
 		},
 		Recipients: make([]string, 0),
 		Body:       leaderByte,
-		Protocol:   "LeaderInfoUpdate",
+		Protocol:   "UpdateLeader",
 	}
+	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
+
 	return md.publisher.Publish("Command", "message.*", deliverCommand)
 }
 
@@ -127,6 +129,8 @@ func (md *MessageDispatcher) SendDeliverNodeListMessage(nodeId p2p.NodeId, nodeL
 		Body:       nodeListByte,
 		Protocol:   "NodeListDeliver",
 	}
+	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
+
 	return md.publisher.Publish("Command", "message.*", deliverCommand)
 }
 

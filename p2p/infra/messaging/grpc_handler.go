@@ -5,13 +5,13 @@ import (
 	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/leveldb"
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/midgard"
-	"log"
+	"github.com/it-chain/it-chain-Engine/p2p/api"
 )
 
 type GrpcMessageHandler struct {
 	nodeRepository   		p2p.NodeRepository
 	leaderRepository 		p2p.LeaderRepository
-	messageDispatcher       *MessageDispatcher
+	messageDispatcher       p2p.MessageDispatcher
 	eventRepository 		midgard.Repository
 }
 
@@ -27,59 +27,13 @@ func NewGrpcMessageHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb
 func (gmh *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand) {
 	panic("need to implement")
 	switch {
-	case command.Protocol=="LeaderInfoUpdate":
-		if command.GetID() == ""{
-			return
-		}
-		id := command.GetID()
-		leader := &p2p.Leader{}
-		err := common.Deserialize(command.Data, leader)
-		if err != nil{
-			panic(err)
-		}
-
-		events := make([]midgard.Event, 0)
-		leaderUpdatedEvent := p2p.LeaderUpdatedEvent{
-			EventModel: midgard.EventModel{
-				ID: 	id,
-				Type:	"Leader",
-			},
-			Leader: *leader,
-		}
-
-		events = append(events, leaderUpdatedEvent)
-		err2 := gmh.eventRepository.Save(command.GetID(), events...)
-
-		if err2 != nil {
-			log.Println(err2.Error())
-		}
-
-		//gmh.leaderRepository.SetLeader(*leader)
-		gmh.messageDispatcher.publisher.Publish("event", "leader.update", leaderUpdatedEvent)
+	case command.Protocol=="UpdateLeader":
+		leaderApi := api.NewLeaderApi(gmh.nodeRepository, gmh.leaderRepository, gmh.eventRepository, gmh.messageDispatcher)
+		leaderApi.UpdateLeader(command)
 
 	case command.Protocol=="NodeListDeliver":
-		if command.GetID() ==""{
-			return
-		}
-
-		id := command.GetID()
-
-		nodeList := make([]p2p.Node,0)
-		err := common.Deserialize(command.Data, nodeList)
-
-		if err != nil{
-			err.Error()
-		}
-
-		event := p2p.NodeListUpdatedEvent{
-			EventModel: midgard.EventModel{
-				ID:id,
-				Type:"Node",
-			},
-			NodeList:nodeList,
-		}
-
-		gmh.messageDispatcher.publisher.Publish("event", "node.update", event)
+		nodeApi := api.NewNodeApi(gmh.nodeRepository, gmh.leaderRepository, gmh.eventRepository, gmh.messageDispatcher)
+		nodeApi.UpdateNodeList(command)
 	}
 	/*receiveEvent := &event.MessageReceiveEvent{}
 	err := json.Unmarshal(amqpMessage.Body, receiveEvent)
