@@ -27,7 +27,7 @@ func (l *Leader) On(event midgard.Event) error {
 
 	switch v := event.(type) {
 
-	case LeaderChangeEvent:
+	case LeaderChangedEvent:
 		l.LeaderId = LeaderId{v.GetID()}
 
 	default:

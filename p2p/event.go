@@ -3,7 +3,7 @@ package p2p
 import "github.com/it-chain/midgard"
 
 //publish
-type LeaderChangeEvent struct {
+type LeaderChangedEvent struct {
 	midgard.EventModel
 }
 
@@ -21,17 +21,14 @@ type ConnectionDisconnectedEvent struct {
 // node created event
 type NodeCreatedEvent struct {
 	midgard.EventModel
+	IpAddress string
+}
+
+type NodeDeletedEvent struct {
+	midgard.EventModel
 }
 
 // handle leader received event
 type LeaderUpdatedEvent struct {
 	midgard.EventModel
-	Leader Leader
-}
-
-//handle
-//node list received
-type NodeListUpdatedEvent struct {
-	midgard.EventModel
-	NodeList []Node
 }
