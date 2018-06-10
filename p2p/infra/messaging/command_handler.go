@@ -1,71 +1,70 @@
 package messaging
 
 import (
+	"encoding/json"
+
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/leveldb"
-	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/p2p/api"
 	"github.com/it-chain/it-chain-Engine/gateway"
 )
 
 type GrpcMessageHandler struct {
-	nodeRepository   		p2p.NodeRepository
-	leaderRepository 		p2p.LeaderRepository
-	messageDispatcher       p2p.MessageDispatcher
-	eventRepository 		midgard.Repository
+	leaderApi api.LeaderApi
+	nodeApi   api.NodeApi
 }
 
-func NewGrpcMessageHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository, messageDispatcher *p2p.MessageDispatcher) *GrpcMessageHandler {
+
+func NewGrpcMessageHandler(leaderApi api.LeaderApi, nodeApi api.NodeApi) *GrpcMessageHandler {
 	return &GrpcMessageHandler{
-		nodeRepository:   nodeRepo,
-		leaderRepository: leaderRepo,
-		messageDispatcher:       messageDispatcher,
+		leaderApi: leaderApi,
+		nodeApi:   nodeApi,
 	}
 }
 
 //todo implement
-func (gmh *GrpcMessageHandler) HandleMessageReceive(command gateway.MessageReceiveCommand) {
-	leaderApi := api.NewLeaderApi(*gmh.nodeRepository, gmh.leaderRepository, gmh.eventRepository, gmh.messageDispatcher)
-	nodeApi := api.NewNodeApi(gmh.nodeRepository, gmh.leaderRepository, gmh.eventRepository, gmh.messageDispatcher)
-	switch {
+//<<<<<<< HEAD:p2p/infra/messaging/command_handler.go
+//func (gmh *GrpcMessageHandler) HandleMessageReceive(command gateway.MessageReceiveCommand) {
+//	leaderApi := api.NewLeaderApi(*gmh.nodeRepository, gmh.leaderRepository, gmh.eventRepository, gmh.messageDispatcher)
+//	nodeApi := api.NewNodeApi(gmh.nodeRepository, gmh.leaderRepository, gmh.eventRepository, gmh.messageDispatcher)
+//	switch {
+//
 
-	case command.Protocol=="LeaderInfoRequestProtocol":
+//
+//	// deliver node list when requested!
+//	case command.Protocol=="NodeListRequestProtocol":
+//		nodeList, _ := gmh.nodeRepository.FindAll()
+//		gmh.messageDispatcher.DeliverNodeList(command.FromNode, nodeList)
+//
+
+func (g *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand) {
+
+	switch command.Protocol {
+	case "UpdateLeader":
+
+		leader := p2p.Node{}
+		if err := json.Unmarshal(command.Data, &leader); err != nil {
+			//todo error 처리
+			return
+		}
+
+		g.leaderApi.UpdateLeader(leader)
+	case "LeaderInfoRequestProtocol":
 		leader := gmh.leaderRepository.GetLeader()
 		gmh.messageDispatcher.DeliverLeaderInfo(command.FromNode, *leader)
 
-	// deliver node list when requested!
-	case command.Protocol=="NodeListRequestProtocol":
-		nodeList, _ := gmh.nodeRepository.FindAll()
-		gmh.messageDispatcher.DeliverNodeList(command.FromNode, nodeList)
+	case "NodeListDeliver":
 
-	/*receiveEvent := &event.MessageReceiveEvent{}
-	err := json.Unmarshal(amqpMessage.Body, receiveEvent)
-	if err != nil {
-		// todo amqp error handle
-	}
-	// handle 해야될거만 확인 아니면 버려~
-	if receiveEvent.Protocol == topic.LeaderInfoRequestCmd.String() {
-		curLeader := ml.peerTable.GetLeader()
-		if curLeader == nil {
-			curLeader = &model.Peer{
-				IpAddress: "",
-				Id:        "",
-			}
+		nodeList := make([]p2p.Node, 0)
+		if err := json.Unmarshal(command.Data, &nodeList); err != nil {
+			//todo error 처리
+			return
 		}
-		// todo error handle
-		toPeer, _ := (*ml.peerRepository).FindById(model.PeerId(receiveEvent.SenderId))
-		// todo error handle
-		err = (*ml.messageProducer).DeliverLeaderInfo(*toPeer, *curLeader)
 
-	} else if receiveEvent.Protocol == topic.LeaderInfoPublishEvent.String() {
-		eventBody := &event.LeaderInfoPublishEvent{}
-		// todo error handle
-		err = common.Deserialize(receiveEvent.Body, eventBody)
-		leader := model.NewPeer(eventBody.Address, model.PeerId(eventBody.LeaderId))
-		ml.peerTable.SetLeader(leader)
-	}*/
+		g.nodeApi.UpdateNodeList(nodeList)
+	}
 }
 
-func (gmh *GrpcMessageHandler) HandlerMessageDeliver(command p2p.MessageDeliverCommand){
+func (g *GrpcMessageHandler) HandlerMessageDeliver(command p2p.MessageDeliverCommand) {
 	panic("implement me!")
 }

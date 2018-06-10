@@ -87,13 +87,13 @@ func (pr *NodeRepository) FindById(id p2p.NodeId) (*p2p.Node, error) {
 }
 
 // 모든 피어 검색
-func (pr *NodeRepository) FindAll() ([]*p2p.Node, error) {
+func (pr *NodeRepository) FindAll() ([]p2p.Node, error) {
 	iter := pr.leveldb.GetIteratorWithPrefix([]byte(""))
-	var nodes []*p2p.Node
+	var nodes []p2p.Node
 	for iter.Next() {
 		val := iter.Value()
-		data := &p2p.Node{}
-		err := p2p.Deserialize(val, data)
+		data := p2p.Node{}
+		err := p2p.Deserialize(val, &data)
 
 		if err != nil {
 			return nil, err
