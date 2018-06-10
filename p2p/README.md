@@ -7,15 +7,18 @@ Peer 서비스는 피어노드의 생성, 삭제, 열람, 리더 노드의 선�
 
 
 ## Message Dispatcher
+
 ### RequestLeaderInfo(peer p2p.Node)
+request of leader info
 
 ### DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node)
+delivery of leader info
 
 ### RequestNodeList(peer p2p.Node)
+request of node list
 
 ### DeliverNodeList(toNode p2p.Node, nodeList []p2p.Node)
-
-
+delivery of node list
 
 
 
