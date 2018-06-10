@@ -65,3 +65,8 @@ func (nodeApi *NodeApi) UpdateNodeList(nodeList []p2p.Node) {
 		nodeApi.eventRepository.Save(event.GetID(), event)
 	}
 }
+
+func (nodeApi *NodeApi) DeliverNodeList(nodeId p2p.NodeId){
+	nodeList, _ := nodeApi.nodeRepository.FindAll()
+	nodeApi.messageDispatcher.DeliverNodeList(nodeId, nodeList)
+}

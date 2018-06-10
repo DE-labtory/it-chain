@@ -8,6 +8,7 @@ import (
 )
 
 type LeaderApi struct {
+	leaderRepotitory  p2p.LeaderRepository
 	eventRepository   midgard.Repository
 	messageDispatcher p2p.MessageDispatcher
 	myInfo            *p2p.Node
@@ -43,4 +44,9 @@ func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Node) {
 	if err != nil {
 		log.Println(err.Error())
 	}
+}
+
+func (leaderApi *LeaderApi) DeliverLeaderInfo(nodeId p2p.NodeId){
+	leader:= leaderApi.leaderRepotitory.GetLeader()
+	leaderApi.messageDispatcher.DeliverLeaderInfo(nodeId, *leader)
 }
