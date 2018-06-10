@@ -3,9 +3,9 @@ package messaging
 import (
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/leveldb"
-	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/p2p/api"
+	"github.com/it-chain/it-chain-Engine/gateway"
 )
 
 type GrpcMessageHandler struct {
@@ -15,7 +15,7 @@ type GrpcMessageHandler struct {
 	eventRepository 		midgard.Repository
 }
 
-func NewGrpcMessageHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository, messageDispatcher *MessageDispatcher) *GrpcMessageHandler {
+func NewGrpcMessageHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository, messageDispatcher *p2p.MessageDispatcher) *GrpcMessageHandler {
 	return &GrpcMessageHandler{
 		nodeRepository:   nodeRepo,
 		leaderRepository: leaderRepo,
@@ -24,17 +24,20 @@ func NewGrpcMessageHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb
 }
 
 //todo implement
-func (gmh *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand) {
-	panic("need to implement")
+func (gmh *GrpcMessageHandler) HandleMessageReceive(command gateway.MessageReceiveCommand) {
+	leaderApi := api.NewLeaderApi(*gmh.nodeRepository, gmh.leaderRepository, gmh.eventRepository, gmh.messageDispatcher)
+	nodeApi := api.NewNodeApi(gmh.nodeRepository, gmh.leaderRepository, gmh.eventRepository, gmh.messageDispatcher)
 	switch {
-	case command.Protocol=="UpdateLeader":
-		leaderApi := api.NewLeaderApi(gmh.nodeRepository, gmh.leaderRepository, gmh.eventRepository, gmh.messageDispatcher)
-		leaderApi.UpdateLeader(command)
 
-	case command.Protocol=="NodeListDeliver":
-		nodeApi := api.NewNodeApi(gmh.nodeRepository, gmh.leaderRepository, gmh.eventRepository, gmh.messageDispatcher)
-		nodeApi.UpdateNodeList(command)
-	}
+	case command.Protocol=="LeaderInfoRequestProtocol":
+		leader := gmh.leaderRepository.GetLeader()
+		gmh.messageDispatcher.DeliverLeaderInfo(command.FromNode, *leader)
+
+	// deliver node list when requested!
+	case command.Protocol=="NodeListRequestProtocol":
+		nodeList, _ := gmh.nodeRepository.FindAll()
+		gmh.messageDispatcher.DeliverNodeList(command.FromNode, nodeList)
+
 	/*receiveEvent := &event.MessageReceiveEvent{}
 	err := json.Unmarshal(amqpMessage.Body, receiveEvent)
 	if err != nil {

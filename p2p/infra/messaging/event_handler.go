@@ -31,7 +31,7 @@ func (neh *NodeEventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedE
 	node := p2p.NewNode(address, id)
 	neh.nodeRepository.Save(*node)
 
-
+	// request leader info if leader is not in repository
 	if neh.leaderRepository.GetLeader() == nil {
 		err := neh.messageDispatcher.RequestLeaderInfo(*node)
 		if err != nil {
@@ -44,7 +44,7 @@ func (neh *NodeEventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedE
 	// 노드 생성 이벤트 날림
 	err := neh.messageDispatcher.publisher.Publish("Event", "Connection", p2p.NodeCreatedEvent{
 		EventModel: midgard.EventModel{
-			ID: connection.GetID(),
+			ID: event.GetID(),
 		},
 	})
 

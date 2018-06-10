@@ -5,6 +5,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 	"log"
 	"github.com/it-chain/midgard"
+	"github.com/it-chain/it-chain-Engine/gateway"
 )
 
 type LeaderApi struct {
@@ -14,7 +15,7 @@ type LeaderApi struct {
 	messageDispatcher p2p.MessageDispatcher
 }
 
-func NewLeaderApi(nodeRepository p2p.NodeRepository, leaderRepository p2p.LeaderRepository, eventRepository midgard.Repository, messageDispatcher p2p.MessageDispatcher) *LeaderApi{
+func NewLeaderApi(nodeRepository *p2p.NodeRepository, leaderRepository *p2p.LeaderRepository, eventRepository *midgard.Repository, messageDispatcher *p2p.MessageDispatcher) *LeaderApi{
 	return &LeaderApi{
 		nodeRepository : nodeRepository,
 		leaderRepository: leaderRepository,
@@ -23,7 +24,7 @@ func NewLeaderApi(nodeRepository p2p.NodeRepository, leaderRepository p2p.Leader
 	}
 }
 
-func (leaderApi *LeaderApi) UpdateLeader(command p2p.GrpcRequestCommand) {
+func (leaderApi *LeaderApi) UpdateLeader(command gateway.MessageReceiveCommand) {
 	if command.GetID() == ""{
 		return
 	}

@@ -3,18 +3,18 @@ package api
 import (
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/common"
-	"log"
 	"github.com/it-chain/midgard"
+	"github.com/it-chain/it-chain-Engine/gateway"
 )
 
 type NodeApi struct {
-	nodeRepository p2p.NodeRepository
-	leaderRepository p2p.LeaderRepository
+	nodeRepository *p2p.NodeRepository
+	leaderRepository *p2p.LeaderRepository
 	eventRepository midgard.Repository
-	messageDispatcher p2p.MessageDispatcher
+	messageDispatcher *p2p.MessageDispatcher
 }
 
-func NewNodeApi(nodeRepository p2p.NodeRepository, leaderRepository p2p.LeaderRepository, eventRepository midgard.Repository, messageDispatcher p2p.MessageDispatcher) *NodeApi{
+func NewNodeApi(nodeRepository *p2p.NodeRepository, leaderRepository *p2p.LeaderRepository, eventRepository *midgard.Repository, messageDispatcher *p2p.MessageDispatcher) *NodeApi{
 	return &NodeApi{
 		nodeRepository : nodeRepository,
 		leaderRepository: leaderRepository,
@@ -23,7 +23,7 @@ func NewNodeApi(nodeRepository p2p.NodeRepository, leaderRepository p2p.LeaderRe
 	}
 }
 
-func (nodeApi *NodeApi) UpdateNodeList(command p2p.GrpcRequestCommand) {
+func (nodeApi *NodeApi) UpdateNodeList(command gateway.MessageReceiveCommand) {
 	if command.GetID() ==""{
 		return
 	}
@@ -48,4 +48,6 @@ func (nodeApi *NodeApi) UpdateNodeList(command p2p.GrpcRequestCommand) {
 	nodeApi.messageDispatcher.publisher.Publish("event", "node.update", event)
 }
 
-
+func (nodeApi *NodeApi) DeliverNodeList(command gateway.MessageDeliverCommand){
+	deliverCommand := Me
+}

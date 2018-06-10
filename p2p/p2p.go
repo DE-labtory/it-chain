@@ -17,7 +17,7 @@ func init() {
 	nodeRepository := leveldb.NewNodeRepository("path1")
 	leaderRepository := leveldb.NewLeaderRepository("path2")
 	publisher := rabbitmq.Connect("")
-	messageDispatcher := messaging.NewMessageDispatcher(publisher)
+	messageDispatcher := *messaging.NewMessageDispatcher(publisher)
 
 	//create amqp Handler
 	eventHandler := messaging.NewNodeEventHandler(nodeRepository, leaderRepository, messageDispatcher)
@@ -31,7 +31,7 @@ func init() {
 	}
 
 
-	err2 := rabbitmqClient.Subscribe("Command", "message.receive", grpcMessageHandler)
+	err2 := rabbitmqClient.Subscribe("Command", "message.*", grpcMessageHandler)
 
 	if err2 != nil {
 		panic(err2)

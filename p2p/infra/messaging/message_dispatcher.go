@@ -21,6 +21,7 @@ func NewMessageDispatcher(publisher midgard.Publisher) *MessageDispatcher {
 }
 
 // publish command to amqp to get leader info from other node
+// tested
 func (md *MessageDispatcher) RequestLeaderInfo(peer p2p.Node) error {
 
 	requestBody := p2p.LeaderInfoRequestMessage{
@@ -35,7 +36,7 @@ func (md *MessageDispatcher) RequestLeaderInfo(peer p2p.Node) error {
 		},
 		Recipients: make([]string, 0),
 		Body:       requestBodyByte,
-		Protocol:   "LeaderInfoRequestMessage",
+		Protocol:   "LeaderInfoRequestProtocol",
 	}
 	deliverCom.Recipients = append(deliverCom.Recipients, peer.NodeId.ToString())
 
@@ -67,8 +68,8 @@ func (md *MessageDispatcher) DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node)
 	// 메세지를 수신할 수신자들을 지정해 준다.
 	deliverCommand.Recipients = append(deliverCommand.Recipients, toPeer.NodeId.ToString())
 
-	// topic 과 serilized data를 받아 publisher 한다.
-	return md.publisher.Publish("Command", "MessageDeliverCommand", deliverCommand)
+	// message를 보낸다.
+	return md.publisher.Publish("Command", "message", deliverCommand)
 }
 
 // command message which requests node list of specific node
@@ -94,31 +95,7 @@ func (md *MessageDispatcher) RequestNodeList(peer p2p.Node) error {
 	return md.publisher.Publish("Commnand", "GrpcMessage", commandMessage)
 }
 
-func (md *MessageDispatcher) ResponseTable(toNode p2p.Node, nodes []p2p.Node) error {
-	panic("implement me")
-}
-
-// 새로운 리더를 업데이트하는 메서드이다.
-// todo 추후 리더 변경 알고리즘이 구상된다면 해당 내용을 반영하여 복수의 수신자가 되어야 한다.
-//todo fix path
-func (md *MessageDispatcher) SendLeaderUpdateMessage(nodeId p2p.NodeId, leader p2p.Node) error {
-
-	leaderByte, _ := common.Serialize(leader)
-	deliverCommand := p2p.MessageDeliverCommand{
-		CommandModel: midgard.CommandModel{
-			ID: xid.New().String(),
-		},
-		Recipients: make([]string, 0),
-		Body:       leaderByte,
-		Protocol:   "UpdateLeader",
-	}
-	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
-
-	return md.publisher.Publish("Command", "message.*", deliverCommand)
-}
-
-// deliver content of node repository to new node
-func (md *MessageDispatcher) SendDeliverNodeListMessage(nodeId p2p.NodeId, nodeList []p2p.Node) error{
+func (md *MessageDispatcher) DeliverNodeList(toNode p2p.Node, nodeList []p2p.Node) error {
 	nodeListByte, _ := common.Serialize(nodeList)
 
 	deliverCommand := p2p.MessageDeliverCommand{
@@ -127,10 +104,9 @@ func (md *MessageDispatcher) SendDeliverNodeListMessage(nodeId p2p.NodeId, nodeL
 		},
 		Recipients: make([]string, 0),
 		Body:       nodeListByte,
-		Protocol:   "NodeListDeliver",
+		Protocol:   "NodeListDeliverMessage",
 	}
-	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
+	deliverCommand.Recipients = append(deliverCommand.Recipients, toNode.GetID())
 
 	return md.publisher.Publish("Command", "message.*", deliverCommand)
 }
-
