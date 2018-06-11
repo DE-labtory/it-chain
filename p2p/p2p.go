@@ -5,6 +5,9 @@ import (
 	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/it-chain/it-chain-Engine/p2p/infra/messaging"
 	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/leveldb"
+	"github.com/it-chain/it-chain-Engine/p2p/api"
+	"src/github.com/it-chain/midgard"
+	leveldb2 "src/github.com/it-chain/midgard/store/leveldb"
 )
 
 func init() {
@@ -17,11 +20,15 @@ func init() {
 	nodeRepository := leveldb.NewNodeRepository("path1")
 	leaderRepository := leveldb.NewLeaderRepository("path2")
 	publisher := rabbitmq.Connect("")
-	messageDispatcher := *messaging.NewMessageDispatcher(publisher)
+
+	messageDispatcher := messaging.NewMessageDispatcher(publisher)
+
+
+	leaderApi := api.NewLeaderApi(eventRepository, messageDispatcher, myInfo)
 
 	//create amqp Handler
-	eventHandler := messaging.NewNodeEventHandler(nodeRepository, leaderRepository, messageDispatcher)
-	grpcMessageHandler := messaging.NewGrpcMessageHandler(nodeRepository, leaderRepository, messageDispatcher)
+	eventHandler := messaging.NewNodeEventHandler(nodeRepository, leaderRepository)
+	grpcMessageHandler := messaging.NewGrpcMessageHandler(leaderApi, nodeApi, messageDispatcher)
 
 	// Subscribe amqp server
 	err1 := rabbitmqClient.Subscribe("Command", "connection.*", eventHandler)

@@ -10,14 +10,15 @@ import (
 type GrpcMessageHandler struct {
 	leaderApi api.LeaderApi
 	nodeApi   api.NodeApi
-	messageDispatcher p2p.MessageDispatcher
+	messageDispatcher *MessageDispatcher
 }
 
 
-func NewGrpcMessageHandler(leaderApi api.LeaderApi, nodeApi api.NodeApi) *GrpcMessageHandler {
+func NewGrpcMessageHandler(leaderApi api.LeaderApi, nodeApi api.NodeApi, messageDispatcher *MessageDispatcher) *GrpcMessageHandler {
 	return &GrpcMessageHandler{
 		leaderApi: leaderApi,
 		nodeApi:   nodeApi,
+		messageDispatcher: messageDispatcher,
 	}
 }
 
