@@ -15,7 +15,7 @@ func TestLeaderRepository_GetLeader(t *testing.T) {
 
 	leader := p2p.Leader{
 		LeaderId:p2p.LeaderId{
-			"777",
+			Id: "777",
 		},
 	}
 
@@ -39,7 +39,7 @@ func TestLeaderRepository_SetLeader(t *testing.T) {
 
 	leader := p2p.Leader{
 		LeaderId:p2p.LeaderId{
-			"777",
+			Id: "777",
 		},
 	}
 

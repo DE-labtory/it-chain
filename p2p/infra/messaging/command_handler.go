@@ -30,7 +30,7 @@ func (g *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 		g.leaderApi.DeliverLeaderInfo(command.FromNode.NodeId)
 
 	case "LeaderInfoDeliverProtocol":
-		leader := p2p.Node{}
+		leader := p2p.Leader{}
 		if err := json.Unmarshal(command.Data, &leader); err != nil {
 			//todo error 처리
 			return
