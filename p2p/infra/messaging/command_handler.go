@@ -5,6 +5,7 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/p2p/api"
+	"github.com/it-chain/it-chain-Engine/common"
 )
 
 type GrpcMessageHandler struct {
@@ -49,5 +50,15 @@ func (g *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 		}
 
 		g.nodeApi.UpdateNodeList(nodeList)
+
+	case "NodeDeliverProtocol":
+		node := p2p.Node{}
+		err := common.Deserialize(command.Data, node)
+		if err != nil{
+			return
+		}
+		g.nodeApi.AddNode(node)
 	}
+
+
 }

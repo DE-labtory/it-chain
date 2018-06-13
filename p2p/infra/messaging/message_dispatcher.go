@@ -113,6 +113,17 @@ func (md *MessageDispatcher) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.N
 	return md.publisher("Command", "message.deliver", messageDeliverCommand)
 }
 
+//deliver single node
+func (md *MessageDispatcher) DeliverNode(nodeId p2p.NodeId, node p2p.Node) error {
+	messageDeliverCommand, err := CreateMessageDeliverCommand("NodeDeliverProtocol", node)
+	if err != nil{
+		return err
+	}
+
+	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, node.NodeId.ToString())
+
+	return md.publisher("Command", "message.deliver", messageDeliverCommand)
+}
 func CreateMessageDeliverCommand(protocol string, body interface{}) (p2p.MessageDeliverCommand, error) {
 
 	data, err := common.Serialize(body)

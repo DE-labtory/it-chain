@@ -18,8 +18,8 @@ request of node list
 ### DeliverNodeList(toNode p2p.Node, nodeList []p2p.Node)
 delivery of node list
 
-
-
+### DelverNode(toNode p2p.NodeId, node p2p.Node)
+deliver of single node
 
 ## Message Protocol and Types of Messages
 
@@ -42,6 +42,11 @@ Message: `NodeListRequestMessage`
 send contents of node repository to specific node
 
 Message: `NodeListDelivery`
+
+### NodeDeliverProtocol
+send single node to specific node
+
+Message: `NodeDelivery`
 
 
 

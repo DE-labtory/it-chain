@@ -21,7 +21,7 @@ func TestMessageDispatcher_RequestLeaderInfo(t *testing.T) {
 	}
 
 	nodeId := p2p.NodeId{
-		"1",
+		Id: "1",
 	}
 
 	err := messageDispatcher.RequestLeaderInfo(nodeId)

@@ -8,9 +8,10 @@ import (
 type NodeEventHandler struct {
 	nodeRepository   p2p.NodeRepository
 	leaderRepository p2p.LeaderRepository
+	messageDispatcher p2p.MessageDispatcher
 }
 
-func NewNodeEventHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository) *NodeEventHandler {
+func NewNodeEventHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository, messageDispatcher p2p.MessageDispatcher) *NodeEventHandler {
 	return &NodeEventHandler{
 		nodeRepository:   nodeRepo,
 		leaderRepository: leaderRepo,
@@ -21,36 +22,15 @@ func NewNodeEventHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.L
 //p2p 에서 노드가 추가된 뒤에 노드가 추가되었다는 사실을 알리는 식으로 doc/ 에 시나리오 작성해 두었습니다.
 //참고 바랍니다.
 
-//<<<<<<< HEAD
-//func (neh *NodeEventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent) {
-//	id := p2p.NodeId(event.ID) //id 생성은 어떻게 동작하는가? aggregateID를 사용?!
-//	address := event.Address
-//	node := p2p.NewNode(address, id)
-//	neh.nodeRepository.Save(*node)
-//
-//	// request leader info if leader is not in repository
-//	if neh.leaderRepository.GetLeader() == nil {
-//		err := neh.messageDispatcher.RequestLeaderInfo(*node)
-//		if err != nil {
-//			log.Println(err.Error())
-//		}
-//=======
+
 func (n *NodeEventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent) {
 
 	if event.ID == "" || event.Address == "" {
 		return
 	}
 
-	node := p2p.NewNode(event.Address, p2p.NodeId(event.ID))
+	node := p2p.NewNode(event.Address, p2p.NodeId{Id:event.ID})
 
-//<<<<<<< HEAD
-//	// 노드 생성 이벤트 날림
-//	err := neh.messageDispatcher.publisher.Publish("Event", "Connection", p2p.NodeCreatedEvent{
-//		EventModel: midgard.EventModel{
-//			ID: event.GetID(),
-//		},
-//	})
-//=======
 	n.nodeRepository.Save(*node)
 }
 
@@ -61,7 +41,7 @@ func (n *NodeEventHandler) HandleConnDisconnectEvent(event p2p.ConnectionDisconn
 		return
 	}
 
-	nodeId := p2p.NodeId(event.ID)
+	nodeId := p2p.NodeId{Id:event.ID}
 
 	n.nodeRepository.Remove(nodeId)
 }
@@ -80,6 +60,11 @@ func (n *NodeEventHandler) HandleLeaderUpdatedEvent(event p2p.LeaderUpdatedEvent
 	n.leaderRepository.SetLeader(leader)
 }
 
+func (n *NodeEventHandler) HandlerNodeCreatedEvent(event p2p.NodeCreatedEvent){
+	node := p2p.NewNode(event.IpAddress, p2p.NodeId{Id:event.ID})
+	n.nodeRepository.Save(*node)
+	n.messageDispatcher.DeliverNode(p2p.NodeId{Id:event.ID}, *node)
+}
 //save all nodes when NodeListReceivedEvent Detected
 //node는 각자가 aggregate이기 때문에 aggregate가 동시에 update되는 event는 없습니다.
 //event 1개가 aggregate1개를 변화시키는 것
