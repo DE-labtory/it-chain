@@ -32,3 +32,7 @@ type NodeDeletedEvent struct {
 type LeaderUpdatedEvent struct {
 	midgard.EventModel
 }
+
+type LeaderDeliveredEvent struct {
+	midgard.EventModel
+}
