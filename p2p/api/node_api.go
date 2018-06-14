@@ -11,7 +11,6 @@ type ReadOnlyNodeRepository interface {
 }
 
 type NodeApi struct {
-
 	nodeRepository    ReadOnlyNodeRepository
 	leaderRepository  p2p.LeaderRepository
 	eventRepository   midgard.Repository
@@ -26,7 +25,6 @@ func NewNodeApi(nodeRepository ReadOnlyNodeRepository, leaderRepository p2p.Lead
 		messageDispatcher: messageDispatcher,
 	}
 }
-
 
 func (nodeApi *NodeApi) UpdateNodeList(nodeList []p2p.Node) {
 
@@ -66,7 +64,7 @@ func (nodeApi *NodeApi) UpdateNodeList(nodeList []p2p.Node) {
 	}
 }
 
-func (nodeApi *NodeApi) DeliverNodeList(nodeId p2p.NodeId){
+func (nodeApi *NodeApi) DeliverNodeList(nodeId p2p.NodeId) {
 	nodeList, _ := nodeApi.nodeRepository.FindAll()
 	nodeApi.messageDispatcher.DeliverNodeList(nodeId, nodeList)
 }

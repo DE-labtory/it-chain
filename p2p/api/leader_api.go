@@ -14,7 +14,6 @@ type LeaderApi struct {
 	myInfo            *p2p.Node
 }
 
-
 func NewLeaderApi(eventRepository midgard.Repository, messageDispatcher p2p.MessageDispatcher, myInfo *p2p.Node) *LeaderApi {
 	return &LeaderApi{
 		eventRepository:   eventRepository,
@@ -22,7 +21,6 @@ func NewLeaderApi(eventRepository midgard.Repository, messageDispatcher p2p.Mess
 		myInfo:            myInfo,
 	}
 }
-
 
 func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Node) {
 
@@ -46,7 +44,8 @@ func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Node) {
 	}
 }
 
-func (leaderApi *LeaderApi) DeliverLeaderInfo(nodeId p2p.NodeId){
-	leader:= leaderApi.leaderRepotitory.GetLeader()
+func (leaderApi *LeaderApi) DeliverLeaderInfo(nodeId p2p.NodeId) {
+
+	leader := leaderApi.leaderRepotitory.GetLeader()
 	leaderApi.messageDispatcher.DeliverLeaderInfo(nodeId, *leader)
 }
