@@ -5,11 +5,13 @@ import (
 
 	"sync"
 
-	"github.com/rs/xid"
+	"log"
 )
 
 var instance *TimeoutBatcher
 var once sync.Once
+
+type TimerFunc func() error
 
 func GetTimeOutBatcherInstance() *TimeoutBatcher {
 
@@ -28,7 +30,7 @@ type Timer struct {
 
 func NewTimer(duration time.Duration, timerFunc func() error) Timer {
 	return Timer{
-		quit:      make(chan struct{}),
+		quit:      make(chan struct{}, 1),
 		T:         time.NewTicker(duration),
 		timerFunc: timerFunc,
 	}
@@ -40,7 +42,7 @@ func (t *Timer) Start() error {
 		select {
 		case <-t.T.C:
 			if err := t.timerFunc(); err != nil {
-				return err
+				t.quit <- struct{}{}
 			}
 		case <-t.quit:
 			t.Stop()
@@ -66,13 +68,14 @@ func newTimeoutBatcher() *TimeoutBatcher {
 	}
 }
 
-func (t *TimeoutBatcher) Register(timerFunc func() error, duration time.Duration) chan struct{} {
+func (t *TimeoutBatcher) Register(timerFunc TimerFunc, duration time.Duration) chan struct{} {
 
 	timer := NewTimer(duration, timerFunc)
 
 	var err error
 
 	go func() {
+		defer log.Println("timer is closing")
 		err = timer.Start()
 
 		if err != nil {
@@ -80,14 +83,5 @@ func (t *TimeoutBatcher) Register(timerFunc func() error, duration time.Duration
 		}
 	}()
 
-	t.timers[xid.New().String()] = timer
-
 	return timer.quit
-}
-
-func (t *TimeoutBatcher) StopAll() {
-	for key, timer := range t.timers {
-		timer.Stop()
-		delete(t.timers, key)
-	}
 }
