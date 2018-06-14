@@ -1,5 +1,10 @@
 package api_test
 
+//todo make node api test
+//todo make fake dependencies 1. eventRepository 2. messageDispatcher 3. nodeRepository
+//todo make test map
+//todo test continue
+
 //func TestNodeApi_UpdateNodeList(t *testing.T) {
 //
 //	tests := map[string]struct {

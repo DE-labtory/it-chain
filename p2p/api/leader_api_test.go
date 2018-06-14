@@ -1,5 +1,10 @@
 package api_test
 
+//todo make leader api test
+//todo make fake dependencies 1. eventRepository 2. messageDispatcher 3. readonlyleaderRepository
+//todo make test map
+//todo test continue
+
 // make leader api for use
 // make fake dependencies 1. eventRepository 2. messageDispatcher 3. myInfo
 // make test map
