@@ -1,9 +1,10 @@
 package api
 
 import (
+	"errors"
+
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
-	"errors"
 )
 
 var ErrEmptyNodeList = errors.New("empty node list proposed")
@@ -27,12 +28,7 @@ func NewNodeApi(nodeRepository ReadOnlyNodeRepository, eventRepository midgard.R
 	}
 }
 
-<<<<<<< HEAD
-func (nodeApi *NodeApi) UpdateNodeList(nodeList []p2p.Node) {
-=======
-
 func (nodeApi *NodeApi) UpdateNodeList(nodeList []p2p.Node) error {
->>>>>>> 0561b7484d980697519d18e585f379ab1ee4a647
 
 	//둘다 존재할경우 무시, existNodeList에만 존재할경우 NodeDeletedEvent, nodeList에 존재할경우 NodeCreatedEvent
 	var event midgard.Event
@@ -68,14 +64,14 @@ func (nodeApi *NodeApi) UpdateNodeList(nodeList []p2p.Node) error {
 
 		nodeApi.eventRepository.Save(event.GetID(), event)
 	}
+
+	return nil
 }
 
 func (nodeApi *NodeApi) DeliverNodeList(nodeId p2p.NodeId) {
 	nodeList, _ := nodeApi.nodeRepository.FindAll()
 	nodeApi.messageDispatcher.DeliverNodeList(nodeId, nodeList)
 }
-<<<<<<< HEAD
-=======
 
 // add a node to repo
 func (nodeApi *NodeApi) AddNode(node p2p.Node) error {
@@ -89,8 +85,10 @@ func (nodeApi *NodeApi) AddNode(node p2p.Node) error {
 	}
 
 	err := nodeApi.eventRepository.Save(event.GetID(), event)
-	if err != nil{
+
+	if err != nil {
 		return err
 	}
+
+	return nil
 }
->>>>>>> 0561b7484d980697519d18e585f379ab1ee4a647
