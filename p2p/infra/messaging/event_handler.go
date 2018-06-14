@@ -9,13 +9,13 @@ import (
 )
 
 type NodeEventHandler struct {
-	nodeApi           api.NodeApi
-	nodeRepository    p2p.NodeRepository
-	leaderRepository  p2p.LeaderRepository
-	messageDispatcher p2p.MessageDispatcher
+	nodeApi          api.NodeApi
+	nodeRepository   p2p.NodeRepository
+	leaderRepository p2p.LeaderRepository
 }
 
-func NewNodeEventHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository, messageDispatcher p2p.MessageDispatcher, nodeApi api.NodeApi) *NodeEventHandler {
+func NewNodeEventHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository, nodeApi api.NodeApi) *NodeEventHandler {
+
 	return &NodeEventHandler{
 		nodeRepository:   nodeRepo,
 		leaderRepository: leaderRepo,
@@ -47,7 +47,7 @@ func (n *NodeEventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisco
 		return
 	}
 
-	err := n.nodeApi.DeleteNode(node)
+	err := n.nodeApi.DeleteNode(p2p.NodeId{Id: event.ID})
 
 	if err != nil {
 		log.Println(err)
@@ -69,6 +69,11 @@ func (n *NodeEventHandler) HandleLeaderUpdatedEvent(event p2p.LeaderUpdatedEvent
 }
 
 func (n *NodeEventHandler) HandlerNodeCreatedEvent(event p2p.NodeCreatedEvent) {
+
+	if event.ID == "" || event.IpAddress == "" {
+		return
+	}
+
 	node := p2p.NewNode(event.IpAddress, p2p.NodeId{Id: event.ID})
 	n.nodeRepository.Save(*node)
 }

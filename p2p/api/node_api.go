@@ -69,6 +69,7 @@ func (nodeApi *NodeApi) UpdateNodeList(nodeList []p2p.Node) error {
 }
 
 func (nodeApi *NodeApi) DeliverNodeList(nodeId p2p.NodeId) {
+
 	nodeList, _ := nodeApi.nodeRepository.FindAll()
 	nodeApi.messageDispatcher.DeliverNodeList(nodeId, nodeList)
 }
