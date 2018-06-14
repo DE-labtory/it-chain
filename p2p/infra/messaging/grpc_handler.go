@@ -3,26 +3,24 @@ package messaging
 import (
 	"encoding/json"
 
+	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/p2p/api"
-	"github.com/it-chain/it-chain-Engine/common"
 )
 
 type GrpcMessageHandler struct {
-	leaderApi api.LeaderApi
-	nodeApi   api.NodeApi
+	leaderApi         api.LeaderApi
+	nodeApi           api.NodeApi
 	messageDispatcher *MessageDispatcher
 }
 
-
 func NewGrpcMessageHandler(leaderApi api.LeaderApi, nodeApi api.NodeApi, messageDispatcher *MessageDispatcher) *GrpcMessageHandler {
 	return &GrpcMessageHandler{
-		leaderApi: leaderApi,
-		nodeApi:   nodeApi,
+		leaderApi:         leaderApi,
+		nodeApi:           nodeApi,
 		messageDispatcher: messageDispatcher,
 	}
 }
-
 
 func (g *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand) {
 
@@ -54,11 +52,10 @@ func (g *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 	case "NodeDeliverProtocol":
 		node := p2p.Node{}
 		err := common.Deserialize(command.Data, node)
-		if err != nil{
+		if err != nil {
 			return
 		}
 		g.nodeApi.AddNode(node)
 	}
-
 
 }
