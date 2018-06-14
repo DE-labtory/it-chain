@@ -7,6 +7,7 @@ import (
 	"github.com/it-chain/midgard"
 	"errors"
 )
+
 var ErrSameLeader = errors.New("same leader requested")
 var ErrEmptyNodeId = errors.New("empty node id requested")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
