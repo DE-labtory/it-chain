@@ -69,6 +69,8 @@ func (g *GrpcHostService) Dial(address string) (gateway.Connection, error) {
 
 	g.connStore.Add(connection)
 
+
+
 	go g.startConnectionUntilClose(connection)
 
 	return toGatewayConnectionModel(connection), nil

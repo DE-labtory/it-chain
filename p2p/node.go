@@ -11,7 +11,9 @@ import (
 )
 
 // NodeId 선언
-type NodeId string
+type NodeId struct {
+	Id string
+}
 
 // 노드 구조체 선언.
 type Node struct {
@@ -59,7 +61,7 @@ func Deserialize(b []byte, peer *Node) error {
 
 // conver peerId to String
 func (nodeId NodeId) ToString() string {
-	return string(nodeId)
+	return string(nodeId.Id)
 }
 
 // node repository 인터페이스를 정의한다.
@@ -67,5 +69,40 @@ type NodeRepository interface {
 	Save(node Node) error
 	Remove(id NodeId) error
 	FindById(id NodeId) (*Node, error)
-	FindAll() ([]*Node, error)
+	FindAll() ([]Node, error)
+}
+
+func NodeFilter(vs []Node, f func(Node) bool) []Node {
+	vsf := make([]Node, 0)
+	for _, v := range vs {
+		if f(v) {
+			vsf = append(vsf, v)
+		}
+	}
+	return vsf
+}
+
+func GetMutuallyExclusiveNodes(nodes1 []Node, nodes2 []Node) ([]Node, []Node) {
+
+	exclusiveNodes1 := difference(nodes1, nodes2)
+	exclusiveNodes2 := difference(nodes2, nodes1)
+
+	return exclusiveNodes1, exclusiveNodes2
+}
+
+func difference(a, b []Node) []Node {
+	mb := map[NodeId]bool{}
+
+	for _, x := range b {
+		mb[x.NodeId] = true
+	}
+
+	ab := []Node{}
+	for _, x := range a {
+		if _, ok := mb[x.NodeId]; !ok {
+			ab = append(ab, x)
+		}
+	}
+
+	return ab
 }

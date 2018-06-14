@@ -38,7 +38,7 @@ func (pr *NodeRepository) Save(data p2p.Node) error {
 
 	// return empty peerID error if peerID is null
 	if data.NodeId.ToString() == "" {
-		return errors.New("node Id empty")
+		return errors.New("empty node id purposed")
 	}
 
 	// serialize p2p and allocate to b or err if err occured
@@ -50,7 +50,7 @@ func (pr *NodeRepository) Save(data p2p.Node) error {
 	}
 
 	// leveldb에 peerId 저장 중 에러가 나면 에러 리턴
-	if err = pr.leveldb.Put([]byte(data.NodeId), b, true); err != nil {
+	if err = pr.leveldb.Put([]byte(data.NodeId.Id), b, true); err != nil {
 		return err
 	}
 
@@ -59,12 +59,12 @@ func (pr *NodeRepository) Save(data p2p.Node) error {
 
 // p2p 삭제
 func (pr *NodeRepository) Remove(id p2p.NodeId) error {
-	return pr.leveldb.Delete([]byte(id), true)
+	return pr.leveldb.Delete([]byte(id.ToString()), true)
 }
 
 // p2p 읽어옴
 func (pr *NodeRepository) FindById(id p2p.NodeId) (*p2p.Node, error) {
-	b, err := pr.leveldb.Get([]byte(id))
+	b, err := pr.leveldb.Get([]byte(id.ToString()))
 
 	if err != nil {
 		return nil, err
@@ -87,13 +87,13 @@ func (pr *NodeRepository) FindById(id p2p.NodeId) (*p2p.Node, error) {
 }
 
 // 모든 피어 검색
-func (pr *NodeRepository) FindAll() ([]*p2p.Node, error) {
+func (pr *NodeRepository) FindAll() ([]p2p.Node, error) {
 	iter := pr.leveldb.GetIteratorWithPrefix([]byte(""))
-	var nodes []*p2p.Node
+	var nodes []p2p.Node
 	for iter.Next() {
 		val := iter.Value()
-		data := &p2p.Node{}
-		err := p2p.Deserialize(val, data)
+		data := p2p.Node{}
+		err := p2p.Deserialize(val, &data)
 
 		if err != nil {
 			return nil, err
