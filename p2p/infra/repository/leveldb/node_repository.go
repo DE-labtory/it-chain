@@ -59,12 +59,12 @@ func (pr *NodeRepository) Save(data p2p.Node) error {
 
 // p2p 삭제
 func (pr *NodeRepository) Remove(id p2p.NodeId) error {
-	return pr.leveldb.Delete([]byte(id), true)
+	return pr.leveldb.Delete([]byte(id.ToString()), true)
 }
 
 // p2p 읽어옴
 func (pr *NodeRepository) FindById(id p2p.NodeId) (*p2p.Node, error) {
-	b, err := pr.leveldb.Get([]byte(id))
+	b, err := pr.leveldb.Get([]byte(id.ToString()))
 
 	if err != nil {
 		return nil, err

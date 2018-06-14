@@ -3,12 +3,13 @@ package messaging
 import (
 	"time"
 
+	"errors"
+
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
-	"errors"
 )
 
 //kind of error
@@ -43,7 +44,6 @@ func (md *MessageDispatcher) RequestLeaderInfo(nodeId p2p.NodeId) error {
 	//message deliver command for delivering leader info
 	deliverCommand, err := CreateMessageDeliverCommand(event.LeaderInfoDeliverProtocol, body)
 
-
 	if err != nil {
 		return err
 	}
@@ -71,12 +71,12 @@ func (md *MessageDispatcher) RequestNodeList(nodeId p2p.NodeId) error {
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
 
-	return md.publisher.Publish("Commnand", "message.deliver", deliverCommand)
+	return md.publisher("Command", "message.deliver", deliverCommand)
 }
 
 func (md *MessageDispatcher) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error {
 
-	if nodeId.Id==""{
+	if nodeId.Id == "" {
 		return ErrEmptyNodeId
 	}
 
@@ -92,15 +92,20 @@ func (md *MessageDispatcher) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Lea
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
 
-	return md.publisher.Publish("Command", "message.deliver", deliverCommand)
+	return md.publisher("Command", "message.deliver", deliverCommand)
 }
 
 //deliver node list to other node specified by nodeId
 func (md *MessageDispatcher) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.Node) error {
 
+	if nodeId.Id == "" {
+		return ErrEmptyNodeId
+	}
+
 	if len(nodeList) == 0 {
 		return ErrEmptyNodeList
 	}
+
 	messageDeliverCommand, err := CreateMessageDeliverCommand("NodeListDeliver", nodeList)
 
 	if err != nil {
@@ -109,14 +114,15 @@ func (md *MessageDispatcher) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.N
 
 	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, nodeId.ToString())
 
-
 	return md.publisher("Command", "message.deliver", messageDeliverCommand)
 }
 
 //deliver single node
 func (md *MessageDispatcher) DeliverNode(nodeId p2p.NodeId, node p2p.Node) error {
+
 	messageDeliverCommand, err := CreateMessageDeliverCommand("NodeDeliverProtocol", node)
-	if err != nil{
+
+	if err != nil {
 		return err
 	}
 

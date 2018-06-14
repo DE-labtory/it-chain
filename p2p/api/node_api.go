@@ -1,9 +1,10 @@
 package api
 
 import (
+	"errors"
+
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
-	"errors"
 )
 
 var ErrEmptyNodeList = errors.New("empty node list proposed")
@@ -14,7 +15,6 @@ type ReadOnlyNodeRepository interface {
 }
 
 type NodeApi struct {
-
 	nodeRepository    ReadOnlyNodeRepository
 	eventRepository   midgard.Repository
 	messageDispatcher p2p.MessageDispatcher
@@ -27,7 +27,6 @@ func NewNodeApi(nodeRepository ReadOnlyNodeRepository, eventRepository midgard.R
 		messageDispatcher: messageDispatcher,
 	}
 }
-
 
 func (nodeApi *NodeApi) UpdateNodeList(nodeList []p2p.Node) error {
 
@@ -65,14 +64,17 @@ func (nodeApi *NodeApi) UpdateNodeList(nodeList []p2p.Node) error {
 
 		nodeApi.eventRepository.Save(event.GetID(), event)
 	}
+
+	return nil
 }
 
-func (nodeApi *NodeApi) DeliverNodeList(nodeId p2p.NodeId){
+func (nodeApi *NodeApi) DeliverNodeList(nodeId p2p.NodeId) {
+
 	nodeList, _ := nodeApi.nodeRepository.FindAll()
 	nodeApi.messageDispatcher.DeliverNodeList(nodeId, nodeList)
 }
 
-// add a node to repo
+// add a node
 func (nodeApi *NodeApi) AddNode(node p2p.Node) error {
 
 	event := p2p.NodeCreatedEvent{
@@ -84,7 +86,29 @@ func (nodeApi *NodeApi) AddNode(node p2p.Node) error {
 	}
 
 	err := nodeApi.eventRepository.Save(event.GetID(), event)
-	if err != nil{
+
+	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+// delete a node
+func (nodeApi *NodeApi) DeleteNode(id p2p.NodeId) error {
+
+	event := p2p.NodeDeletedEvent{
+		EventModel: midgard.EventModel{
+			ID:   id.ToString(),
+			Type: "node.deleted",
+		},
+	}
+
+	err := nodeApi.eventRepository.Save(event.GetID(), event)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
