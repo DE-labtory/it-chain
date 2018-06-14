@@ -56,6 +56,7 @@ func TestLeaderApi_UpdateLeader(t *testing.T) {
 
 		return nil
 	})
+
 	myInfo := p2p.NewNode(conf.GetConfiguration().Common.NodeIp, p2p.NodeId{Id: "1"})
 	event := p2p.LeaderUpdatedEvent{}
 	leaderApi := SetupLeaderApi("path", "path", "path", event, publisher, myInfo)

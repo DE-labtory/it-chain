@@ -73,7 +73,7 @@ func (nodeApi *NodeApi) DeliverNodeList(nodeId p2p.NodeId) {
 	nodeApi.messageDispatcher.DeliverNodeList(nodeId, nodeList)
 }
 
-// add a node to repo
+// add a node
 func (nodeApi *NodeApi) AddNode(node p2p.Node) error {
 
 	event := p2p.NodeCreatedEvent{
@@ -82,6 +82,25 @@ func (nodeApi *NodeApi) AddNode(node p2p.Node) error {
 			Type: "node.created",
 		},
 		IpAddress: node.IpAddress,
+	}
+
+	err := nodeApi.eventRepository.Save(event.GetID(), event)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// delete a node
+func (nodeApi *NodeApi) DeleteNode(id p2p.NodeId) error {
+
+	event := p2p.NodeDeletedEvent{
+		EventModel: midgard.EventModel{
+			ID:   id.ToString(),
+			Type: "node.deleted",
+		},
 	}
 
 	err := nodeApi.eventRepository.Save(event.GetID(), event)

@@ -1,20 +1,25 @@
 package messaging
 
 import (
+	"log"
+
 	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/it-chain-Engine/p2p/api"
 	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/leveldb"
 )
 
 type NodeEventHandler struct {
+	nodeApi           api.NodeApi
 	nodeRepository    p2p.NodeRepository
 	leaderRepository  p2p.LeaderRepository
 	messageDispatcher p2p.MessageDispatcher
 }
 
-func NewNodeEventHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository, messageDispatcher p2p.MessageDispatcher) *NodeEventHandler {
+func NewNodeEventHandler(nodeRepo *leveldb.NodeRepository, leaderRepo *leveldb.LeaderRepository, messageDispatcher p2p.MessageDispatcher, nodeApi api.NodeApi) *NodeEventHandler {
 	return &NodeEventHandler{
 		nodeRepository:   nodeRepo,
 		leaderRepository: leaderRepo,
+		nodeApi:          nodeApi,
 	}
 }
 
@@ -27,20 +32,26 @@ func (n *NodeEventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEve
 		return
 	}
 
-	node := p2p.NewNode(event.Address, p2p.NodeId{Id: event.ID})
-	n.nodeRepository.Save(*node)
+	node := *p2p.NewNode(event.Address, p2p.NodeId{Id: event.ID})
+	err := n.nodeApi.AddNode(node)
+
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 //todo conn disconnect event 구현
-func (n *NodeEventHandler) HandleConnDisconnectEvent(event p2p.ConnectionDisconnectedEvent) {
+func (n *NodeEventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconnectedEvent) {
 
 	if event.ID == "" {
 		return
 	}
 
-	nodeId := p2p.NodeId{Id: event.ID}
+	err := n.nodeApi.DeleteNode(node)
 
-	n.nodeRepository.Remove(nodeId)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 //save Leader when LeaderReceivedEvent Detected

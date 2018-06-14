@@ -105,6 +105,7 @@ func (md *MessageDispatcher) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.N
 	if len(nodeList) == 0 {
 		return ErrEmptyNodeList
 	}
+
 	messageDeliverCommand, err := CreateMessageDeliverCommand("NodeListDeliver", nodeList)
 
 	if err != nil {
