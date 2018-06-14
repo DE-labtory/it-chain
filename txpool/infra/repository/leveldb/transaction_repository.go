@@ -13,6 +13,7 @@ type TransactionRepository struct {
 }
 
 func NewTransactionRepository(path string) *TransactionRepository {
+
 	db := leveldbwrapper.CreateNewDB(path)
 	db.Open()
 	return &TransactionRepository{

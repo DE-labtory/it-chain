@@ -71,7 +71,7 @@ func (md *MessageDispatcher) RequestNodeList(nodeId p2p.NodeId) error {
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
 
-	return md.publisher("Commnand", "message.deliver", deliverCommand)
+	return md.publisher("Command", "message.deliver", deliverCommand)
 }
 
 func (md *MessageDispatcher) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error {
@@ -98,6 +98,10 @@ func (md *MessageDispatcher) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Lea
 //deliver node list to other node specified by nodeId
 func (md *MessageDispatcher) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.Node) error {
 
+	if nodeId.Id == "" {
+		return ErrEmptyNodeId
+	}
+
 	if len(nodeList) == 0 {
 		return ErrEmptyNodeList
 	}
@@ -114,7 +118,9 @@ func (md *MessageDispatcher) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.N
 
 //deliver single node
 func (md *MessageDispatcher) DeliverNode(nodeId p2p.NodeId, node p2p.Node) error {
+
 	messageDeliverCommand, err := CreateMessageDeliverCommand("NodeDeliverProtocol", node)
+
 	if err != nil {
 		return err
 	}
