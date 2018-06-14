@@ -5,19 +5,21 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/p2p/api"
+	"github.com/it-chain/it-chain-Engine/common"
 )
 
 type GrpcMessageHandler struct {
 	leaderApi api.LeaderApi
 	nodeApi   api.NodeApi
-	messageDispatcher p2p.MessageDispatcher
+	messageDispatcher *MessageDispatcher
 }
 
 
-func NewGrpcMessageHandler(leaderApi api.LeaderApi, nodeApi api.NodeApi) *GrpcMessageHandler {
+func NewGrpcMessageHandler(leaderApi api.LeaderApi, nodeApi api.NodeApi, messageDispatcher *MessageDispatcher) *GrpcMessageHandler {
 	return &GrpcMessageHandler{
 		leaderApi: leaderApi,
 		nodeApi:   nodeApi,
+		messageDispatcher: messageDispatcher,
 	}
 }
 
@@ -29,7 +31,7 @@ func (g *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 		g.leaderApi.DeliverLeaderInfo(command.FromNode.NodeId)
 
 	case "LeaderInfoDeliverProtocol":
-		leader := p2p.Node{}
+		leader := p2p.Leader{}
 		if err := json.Unmarshal(command.Data, &leader); err != nil {
 			//todo error 처리
 			return
@@ -48,5 +50,15 @@ func (g *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 		}
 
 		g.nodeApi.UpdateNodeList(nodeList)
+
+	case "NodeDeliverProtocol":
+		node := p2p.Node{}
+		err := common.Deserialize(command.Data, node)
+		if err != nil{
+			return
+		}
+		g.nodeApi.AddNode(node)
 	}
+
+
 }

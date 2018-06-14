@@ -11,7 +11,9 @@ import (
 )
 
 // NodeId 선언
-type NodeId string
+type NodeId struct {
+	Id string
+}
 
 // 노드 구조체 선언.
 type Node struct {
@@ -59,7 +61,7 @@ func Deserialize(b []byte, peer *Node) error {
 
 // conver peerId to String
 func (nodeId NodeId) ToString() string {
-	return string(nodeId)
+	return string(nodeId.Id)
 }
 
 // node repository 인터페이스를 정의한다.

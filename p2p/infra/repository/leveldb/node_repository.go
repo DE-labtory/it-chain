@@ -38,7 +38,7 @@ func (pr *NodeRepository) Save(data p2p.Node) error {
 
 	// return empty peerID error if peerID is null
 	if data.NodeId.ToString() == "" {
-		return errors.New("node Id empty")
+		return errors.New("empty node id purposed")
 	}
 
 	// serialize p2p and allocate to b or err if err occured
@@ -50,7 +50,7 @@ func (pr *NodeRepository) Save(data p2p.Node) error {
 	}
 
 	// leveldb에 peerId 저장 중 에러가 나면 에러 리턴
-	if err = pr.leveldb.Put([]byte(data.NodeId), b, true); err != nil {
+	if err = pr.leveldb.Put([]byte(data.NodeId.Id), b, true); err != nil {
 		return err
 	}
 
