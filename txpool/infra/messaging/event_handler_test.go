@@ -141,3 +141,41 @@ func TestTxEventHandler_HandleLeaderChangedEvent(t *testing.T) {
 	leader := teh.leaderRepository.GetLeader()
 	assert.Equal(t, "zf", leader.GetID())
 }
+
+func TestTxEventHandler_HandleLeaderChangedEvent_WhenIDMissing(t *testing.T) {
+	dbPath := "./test"
+
+	defer os.RemoveAll(dbPath)
+
+	// When
+	teh := TxEventHandler{
+		txRepository: leveldb.NewTransactionRepository(dbPath),
+		leaderRepository: txpool.NewLeaderRepository(),
+	}
+
+	event := txpool.LeaderChangedEvent{
+		EventModel: midgard.EventModel{
+			ID: "zf",
+		},
+	}
+
+	teh.HandleLeaderChangedEvent(event)
+
+	// Then
+	leader := teh.leaderRepository.GetLeader()
+	assert.Equal(t, "zf", leader.GetID())
+
+
+	// When
+	event2 := txpool.LeaderChangedEvent{
+		EventModel: midgard.EventModel{
+			// ID Missing
+		},
+	}
+
+	teh.HandleLeaderChangedEvent(event2)
+
+	// Then - leader ID don't change
+	leader2 := teh.leaderRepository.GetLeader()
+	assert.Equal(t, "zf", leader2.GetID())
+}
