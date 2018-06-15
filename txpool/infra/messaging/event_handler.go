@@ -49,6 +49,10 @@ func (t TxEventHandler) HandleLeaderChangedEvent(leaderChangedEvent txpool.Leade
 
 	leaderID := leaderChangedEvent.ID
 
+	if leaderID == "" {
+		return
+	}
+
 	leader := txpool.Leader{
 		txpool.LeaderId{leaderID},
 	}
