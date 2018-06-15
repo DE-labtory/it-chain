@@ -11,7 +11,7 @@ import (
 var instance *TimeoutBatcher
 var once sync.Once
 
-type TimerFunc func() error
+type TaskFunc func() error
 
 func GetTimeOutBatcherInstance() *TimeoutBatcher {
 
@@ -22,26 +22,26 @@ func GetTimeOutBatcherInstance() *TimeoutBatcher {
 	return instance
 }
 
-type Timer struct {
-	T         *time.Ticker
-	quit      chan struct{}
-	timerFunc func() error
+type Task struct {
+	T        *time.Ticker
+	quit     chan struct{}
+	taskFunc func() error
 }
 
-func NewTimer(duration time.Duration, timerFunc func() error) Timer {
-	return Timer{
-		quit:      make(chan struct{}, 1),
-		T:         time.NewTicker(duration),
-		timerFunc: timerFunc,
+func NewTimer(duration time.Duration, taskFunc func() error) Task {
+	return Task{
+		quit:     make(chan struct{}, 1),
+		T:        time.NewTicker(duration),
+		taskFunc: taskFunc,
 	}
 }
 
-func (t *Timer) Start() error {
+func (t *Task) Start() error {
 
 	for {
 		select {
 		case <-t.T.C:
-			if err := t.timerFunc(); err != nil {
+			if err := t.taskFunc(); err != nil {
 				t.quit <- struct{}{}
 			}
 		case <-t.quit:
@@ -53,24 +53,24 @@ func (t *Timer) Start() error {
 	return nil
 }
 
-func (t *Timer) Stop() {
+func (t *Task) Stop() {
 	t.T.Stop()
 }
 
 type TimeoutBatcher struct {
-	timers map[string]Timer
+	timers map[string]Task
 }
 
 func newTimeoutBatcher() *TimeoutBatcher {
 
 	return &TimeoutBatcher{
-		timers: make(map[string]Timer),
+		timers: make(map[string]Task),
 	}
 }
 
-func (t *TimeoutBatcher) Register(timerFunc TimerFunc, duration time.Duration) chan struct{} {
+func (t *TimeoutBatcher) Run(taskFunc TaskFunc, duration time.Duration) chan struct{} {
 
-	timer := NewTimer(duration, timerFunc)
+	timer := NewTimer(duration, taskFunc)
 
 	var err error
 
@@ -79,6 +79,7 @@ func (t *TimeoutBatcher) Register(timerFunc TimerFunc, duration time.Duration) c
 		err = timer.Start()
 
 		if err != nil {
+			log.Println(err)
 			return
 		}
 	}()

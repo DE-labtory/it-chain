@@ -12,7 +12,8 @@ import (
 	"github.com/it-chain/it-chain-Engine/txpool/infra/batch"
 )
 
-func TestTimeoutBatcher_Register(t *testing.T) {
+//todo return error 했을 경우 test할 방법이 없음
+func TestTimeoutBatcher_Run(t *testing.T) {
 
 	wg := sync.WaitGroup{}
 
@@ -20,17 +21,17 @@ func TestTimeoutBatcher_Register(t *testing.T) {
 	//given
 	tests := map[string]struct {
 		input struct {
-			timerFunc batch.TimerFunc
-			duration  time.Duration
+			taskFunc batch.TaskFunc
+			duration time.Duration
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				timerFunc batch.TimerFunc
-				duration  time.Duration
+				taskFunc batch.TaskFunc
+				duration time.Duration
 			}{
-				timerFunc: func() error {
+				taskFunc: func() error {
 					if counter == 0 {
 						wg.Done()
 						fmt.Println("success done")
@@ -46,10 +47,10 @@ func TestTimeoutBatcher_Register(t *testing.T) {
 		},
 		"timer return error": {
 			input: struct {
-				timerFunc batch.TimerFunc
-				duration  time.Duration
+				taskFunc batch.TaskFunc
+				duration time.Duration
 			}{
-				timerFunc: func() error {
+				taskFunc: func() error {
 
 					if counter == 0 {
 						wg.Done()
@@ -74,7 +75,7 @@ func TestTimeoutBatcher_Register(t *testing.T) {
 		//when
 		wg.Add(1)
 		counter = 0
-		quit := batcher.Register(test.input.timerFunc, test.input.duration)
+		quit := batcher.Run(test.input.taskFunc, test.input.duration)
 
 		fmt.Println("wait")
 		wg.Wait()
