@@ -3,9 +3,10 @@ package messaging_test
 import (
 	"testing"
 
-	"github.com/it-chain/it-chain-Engine/gateway/infra"
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"github.com/it-chain/it-chain-Engine/txpool/infra/messaging"
+	"github.com/it-chain/midgard"
+	"github.com/magiconair/properties/assert"
 )
 
 type MockTransactionRepository struct {
@@ -48,29 +49,121 @@ func TestTxEventHandler_HandleTxCreatedEvent(t *testing.T) {
 
 	//given
 	tests := map[string]struct {
-		input  txpool.TxCreatedEvent
-		output string
-		err    error
+		input txpool.TxCreatedEvent
+		err   error
 	}{
 		"handle success": {
-			input: txpool.TxCreatedEvent{},
-			err:   nil,
+			input: txpool.TxCreatedEvent{
+				PublishPeerId: "1",
+				TxData: txpool.TxData{
+					ID:      "123",
+					Jsonrpc: "13",
+					ICodeID: "icode1",
+				},
+				EventModel: midgard.EventModel{
+					ID: "txID",
+				},
+			},
+			err: nil,
 		},
 		"handle fail": {
 			input: txpool.TxCreatedEvent{},
-			err:   infra.ErrConnAlreadyExist,
+			err:   messaging.ErrNoEventID,
 		},
 	}
 
 	mockTxRepo := MockTransactionRepository{}
-	mockLeaderRepo := MockLeaderRepository{}
+	mockTxRepo.SaveFunc = func(transaction txpool.Transaction) error {
+		assert.Equal(t, transaction.GetID(), "txID")
+		assert.Equal(t, transaction.TxData.ICodeID, "icode1")
+		return nil
+	}
 
+	mockLeaderRepo := MockLeaderRepository{}
 	event_handler := messaging.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
 
-		event_handler.HandleTxCreatedEvent()
+		err := event_handler.HandleTxCreatedEvent(test.input)
+		assert.Equal(t, err, test.err)
+	}
+}
+
+func TestTxEventHandler_HandleTxDeletedEvent(t *testing.T) {
+
+	//given
+	tests := map[string]struct {
+		input txpool.TxDeletedEvent
+		err   error
+	}{
+		"handle success": {
+			input: txpool.TxDeletedEvent{
+				EventModel: midgard.EventModel{
+					ID: "txID",
+				},
+			},
+			err: nil,
+		},
+		"handle fail": {
+			input: txpool.TxDeletedEvent{},
+			err:   messaging.ErrNoEventID,
+		},
 	}
 
+	for testName, test := range tests {
+		t.Logf("Running test case %s", testName)
+
+		mockTxRepo := MockTransactionRepository{}
+		mockTxRepo.RemoveFunc = func(id txpool.TransactionId) error {
+
+			assert.Equal(t, id.ToString(), "txID")
+			return nil
+		}
+
+		mockLeaderRepo := MockLeaderRepository{}
+		event_handler := messaging.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
+
+		err := event_handler.HandleTxDeletedEvent(test.input)
+		assert.Equal(t, err, test.err)
+	}
+}
+
+func TestTxEventHandler_HandleLeaderChangedEvent(t *testing.T) {
+
+	//given
+	tests := map[string]struct {
+		input txpool.LeaderChangedEvent
+		err   error
+	}{
+		"handle success": {
+			input: txpool.LeaderChangedEvent{
+				EventModel: midgard.EventModel{
+					ID: "leaderID",
+				},
+			},
+			err: nil,
+		},
+		"handle fail": {
+			input: txpool.LeaderChangedEvent{},
+			err:   messaging.ErrNoEventID,
+		},
+	}
+
+	for testName, test := range tests {
+		t.Logf("Running test case %s", testName)
+
+		mockTxRepo := MockTransactionRepository{}
+		mockLeaderRepo := MockLeaderRepository{}
+
+		mockLeaderRepo.SetLeaderFunc = func(leader txpool.Leader) {
+
+			assert.Equal(t, leader.GetID(), "leaderID")
+		}
+
+		event_handler := messaging.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
+
+		err := event_handler.HandleLeaderChangedEvent(test.input)
+		assert.Equal(t, err, test.err)
+	}
 }
