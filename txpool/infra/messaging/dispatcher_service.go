@@ -22,6 +22,7 @@ func NewDispatcher(publisher Publisher) *MessageDispatcher {
 }
 
 func (m MessageDispatcher) SendLeaderTransactions(transactions []*txpool.Transaction, leader txpool.Leader) error {
+
 	if len(transactions) == 0 {
 		return errors.New("Empty transaction list proposed")
 	}

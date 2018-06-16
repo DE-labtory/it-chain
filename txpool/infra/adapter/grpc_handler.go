@@ -1,4 +1,4 @@
-package messaging
+package adapter
 
 type GrpcHandler struct {
 }

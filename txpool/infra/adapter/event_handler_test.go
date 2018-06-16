@@ -1,10 +1,10 @@
-package messaging_test
+package adapter_test
 
 import (
 	"testing"
 
 	"github.com/it-chain/it-chain-Engine/txpool"
-	"github.com/it-chain/it-chain-Engine/txpool/infra/messaging"
+	"github.com/it-chain/it-chain-Engine/txpool/infra/adapter"
 	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
 )
@@ -68,7 +68,7 @@ func TestTxEventHandler_HandleTxCreatedEvent(t *testing.T) {
 		},
 		"handle fail": {
 			input: txpool.TxCreatedEvent{},
-			err:   messaging.ErrNoEventID,
+			err:   adapter.ErrNoEventID,
 		},
 	}
 
@@ -80,7 +80,7 @@ func TestTxEventHandler_HandleTxCreatedEvent(t *testing.T) {
 	}
 
 	mockLeaderRepo := MockLeaderRepository{}
-	event_handler := messaging.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
+	event_handler := adapter.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
@@ -107,7 +107,7 @@ func TestTxEventHandler_HandleTxDeletedEvent(t *testing.T) {
 		},
 		"handle fail": {
 			input: txpool.TxDeletedEvent{},
-			err:   messaging.ErrNoEventID,
+			err:   adapter.ErrNoEventID,
 		},
 	}
 
@@ -122,7 +122,7 @@ func TestTxEventHandler_HandleTxDeletedEvent(t *testing.T) {
 		}
 
 		mockLeaderRepo := MockLeaderRepository{}
-		event_handler := messaging.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
+		event_handler := adapter.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
 
 		err := event_handler.HandleTxDeletedEvent(test.input)
 		assert.Equal(t, err, test.err)
@@ -146,7 +146,7 @@ func TestTxEventHandler_HandleLeaderChangedEvent(t *testing.T) {
 		},
 		"handle fail": {
 			input: txpool.LeaderChangedEvent{},
-			err:   messaging.ErrNoEventID,
+			err:   adapter.ErrNoEventID,
 		},
 	}
 
@@ -161,7 +161,7 @@ func TestTxEventHandler_HandleLeaderChangedEvent(t *testing.T) {
 			assert.Equal(t, leader.GetID(), "leaderID")
 		}
 
-		event_handler := messaging.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
+		event_handler := adapter.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
 
 		err := event_handler.HandleLeaderChangedEvent(test.input)
 		assert.Equal(t, err, test.err)

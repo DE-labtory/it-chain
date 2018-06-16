@@ -1,4 +1,4 @@
-package messaging
+package adapter
 
 import (
 	"github.com/it-chain/it-chain-Engine/txpool"
