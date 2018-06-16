@@ -122,7 +122,7 @@
     "common",
     "impl"
   ]
-  revision = "d1a2c1591660b77bc5df6d26d60cd2c3b4992d79"
+  revision = "61c75cc5c8ba39907d137cfb50a2d100f72315ee"
 
 [[projects]]
   name = "github.com/jbenet/go-base58"
@@ -493,6 +493,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0ce9fef5c699a1ce776945ae56ec1a2d0b24a0c919764a55e428574d0d863c3f"
+  inputs-digest = "82b8afc9f5bd62dbe76dc7973cdd98dc33c1f7995a0a1d7aafbe7089f2b1642c"
   solver-name = "gps-cdcl"
   solver-version = 1
