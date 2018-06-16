@@ -9,7 +9,6 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/yggdrasill/common"
 )
 
 type BlockApi struct {
@@ -26,7 +25,8 @@ func NewBlockApi(blockchainRepository blockchain.Repository, eventRepository *mi
 	}, nil
 }
 
-func (bApi *BlockApi) CreateGenesisBlock(genesisConfFilePath string) (common.Block, error) {
+// TODO: 테스트 필요.
+func (bApi *BlockApi) CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error) {
 	byteValue, err := getConfigFromJson(genesisConfFilePath)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func (bApi *BlockApi) CreateGenesisBlock(genesisConfFilePath string) (common.Blo
 
 	validator := bApi.blockchainRepository.GetValidator()
 
-	var GenesisBlock common.Block
+	var GenesisBlock blockchain.Block
 
 	json.Unmarshal(byteValue, &GenesisBlock)
 	GenesisBlock.SetTimestamp((time.Now()).Round(0))
@@ -45,6 +45,36 @@ func (bApi *BlockApi) CreateGenesisBlock(genesisConfFilePath string) (common.Blo
 
 	GenesisBlock.SetSeal(Seal)
 	return GenesisBlock, nil
+}
+
+func (bApi *BlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error) {
+	repo := bApi.blockchainRepository
+
+	block, err := repo.NewEmptyBlock()
+	if err != nil {
+		return nil, err
+	}
+
+	v := bApi.blockchainRepository.GetValidator()
+
+	txSeal, err := v.BuildTxSeal(txList)
+	if err != nil {
+		return nil, err
+	}
+
+	block.SetTxSeal(txSeal)
+
+	for _, tx := range txList {
+		block.PutTx(tx)
+	}
+
+	block.SetTimestamp(time.Now())
+
+	blockSeal, err := v.BuildSeal(block)
+
+	block.SetSeal(blockSeal)
+
+	return block, nil
 }
 
 func getConfigFromJson(filePath string) ([]uint8, error) {

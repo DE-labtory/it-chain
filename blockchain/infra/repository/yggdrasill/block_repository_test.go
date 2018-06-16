@@ -11,7 +11,11 @@ func TestNewBlockRepository(t *testing.T) {
 	opts := map[string]interface{}{
 		"db_path": dbPath,
 	}
-	blockRepository, err := NewBlockRepository(dbPath, opts)
+	TestUser := "TestUser"
+
+	blockRepository, err := NewBlockRepository(dbPath, opts, TestUser)
+
 	assert.NoError(t, err)
 	assert.NotNil(t, blockRepository.GetValidator())
+	assert.Equal(t, blockRepository.Creator, TestUser)
 }
