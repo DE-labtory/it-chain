@@ -1,6 +1,5 @@
 package txpool
 
-type MessageDispatcher interface {
+type MessageService interface {
 	SendLeaderTransactions(transactions []*Transaction, leader Leader) error
-	ProposeBlock(transactions []Transaction) error
 }
