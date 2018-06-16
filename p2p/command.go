@@ -8,7 +8,7 @@ type GrpcRequestCommand struct {
 	ConnectionID string
 	Protocol     string
 	FromNode     Node
-	ToNode 		 Node
+	ToNode       Node
 }
 
 type MessageDeliverCommand struct {
