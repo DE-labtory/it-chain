@@ -1,6 +1,7 @@
 package yggdrasill
 
 import (
+	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/leveldb-wrapper"
 	"github.com/it-chain/yggdrasill"
 	"github.com/it-chain/yggdrasill/common"
@@ -30,7 +31,7 @@ func NewBlockRepository(dbpath string, opts map[string]interface{}, creator stri
 	return &BlockRepository{storage, creator}, nil
 }
 
-func (b *BlockRepository) NewEmptyBlock() (*impl.DefaultBlock, error) {
+func (b *BlockRepository) NewEmptyBlock() (blockchain.Block, error) {
 	lastBlock := &Block{}
 	err := b.GetLastBlock(lastBlock)
 	if err != nil {
