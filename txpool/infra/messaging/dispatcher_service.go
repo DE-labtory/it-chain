@@ -38,6 +38,7 @@ func (m MessageDispatcher) SendLeaderTransactions(transactions []*txpool.Transac
 }
 
 func (m MessageDispatcher) ProposeBlock(transactions []txpool.Transaction) error {
+
 	if len(transactions) == 0 {
 		return errors.New("Empty transaction list proposed")
 	}

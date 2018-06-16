@@ -1,181 +1,169 @@
-package messaging
+package messaging_test
 
 import (
 	"testing"
+
 	"github.com/it-chain/it-chain-Engine/txpool"
+	"github.com/it-chain/it-chain-Engine/txpool/infra/messaging"
 	"github.com/it-chain/midgard"
-	"time"
-	"github.com/it-chain/it-chain-Engine/txpool/infra/repository/leveldb"
-	"os"
-	"github.com/stretchr/testify/assert"
+	"github.com/magiconair/properties/assert"
 )
 
-func TestTxEventHandler_HandleTxCreatedEvent(t *testing.T) {
-	dbPath := "./test"
-
-	defer os.RemoveAll(dbPath)
-
-	teh := TxEventHandler{
-		txRepository: leveldb.NewTransactionRepository(dbPath),
-		leaderRepository: txpool.NewLeaderRepository(),
-	}
-
-	// When
-	event := txpool.TxCreatedEvent{
-		EventModel: midgard.EventModel{
-			ID: "zf",
-		},
-		TimeStamp: time.Now().UTC(),
-		TxHash:    "zf_hash",
-		TxData: txpool.TxData{
-			ID: "zf2",
-		},
-	}
-
-	teh.HandleTxCreatedEvent(event)
-
-	// Then
-	tx, _ := teh.txRepository.FindById("zf")
-	assert.Equal(t, (*tx).TxId, txpool.TransactionId("zf"))
+type MockTransactionRepository struct {
+	SaveFunc     func(transaction txpool.Transaction) error
+	RemoveFunc   func(id txpool.TransactionId) error
+	FindByIdFunc func(id txpool.TransactionId) (*txpool.Transaction, error)
+	FindAllFunc  func() ([]*txpool.Transaction, error)
 }
 
-func TestTxEventHandler_HandleTxCreatedEvent_WhenTxIdMissing(t *testing.T) {
-	dbPath := "./test"
+func (m MockTransactionRepository) Save(transaction txpool.Transaction) error {
+	return m.SaveFunc(transaction)
+}
 
-	defer os.RemoveAll(dbPath)
+func (m MockTransactionRepository) Remove(id txpool.TransactionId) error {
+	return m.RemoveFunc(id)
+}
 
-	teh := TxEventHandler{
-		txRepository: leveldb.NewTransactionRepository(dbPath),
-		leaderRepository: txpool.NewLeaderRepository(),
+func (m MockTransactionRepository) FindById(id txpool.TransactionId) (*txpool.Transaction, error) {
+	return m.FindByIdFunc(id)
+}
+
+func (m MockTransactionRepository) FindAll() ([]*txpool.Transaction, error) {
+	return m.FindAllFunc()
+}
+
+type MockLeaderRepository struct {
+	GetLeaderFunc func() txpool.Leader
+	SetLeaderFunc func(leader txpool.Leader)
+}
+
+func (m MockLeaderRepository) GetLeader() txpool.Leader {
+	return m.GetLeaderFunc()
+}
+
+func (m MockLeaderRepository) SetLeader(leader txpool.Leader) {
+	m.SetLeaderFunc(leader)
+}
+
+func TestTxEventHandler_HandleTxCreatedEvent(t *testing.T) {
+
+	//given
+	tests := map[string]struct {
+		input txpool.TxCreatedEvent
+		err   error
+	}{
+		"handle success": {
+			input: txpool.TxCreatedEvent{
+				PublishPeerId: "1",
+				TxData: txpool.TxData{
+					ID:      "123",
+					Jsonrpc: "13",
+					ICodeID: "icode1",
+				},
+				EventModel: midgard.EventModel{
+					ID: "txID",
+				},
+			},
+			err: nil,
+		},
+		"handle fail": {
+			input: txpool.TxCreatedEvent{},
+			err:   messaging.ErrNoEventID,
+		},
 	}
 
-	// When
-	event := txpool.TxCreatedEvent{
-		EventModel: midgard.EventModel{
-			// ID Missing
-		},
-		TimeStamp: time.Now().UTC(),
-		TxHash:    "zf_hash",
-		TxData: txpool.TxData{
-			ID: "zf2",
-		},
+	mockTxRepo := MockTransactionRepository{}
+	mockTxRepo.SaveFunc = func(transaction txpool.Transaction) error {
+		assert.Equal(t, transaction.GetID(), "txID")
+		assert.Equal(t, transaction.TxData.ICodeID, "icode1")
+		return nil
 	}
 
-	teh.HandleTxCreatedEvent(event)
+	mockLeaderRepo := MockLeaderRepository{}
+	event_handler := messaging.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
 
-	// Then
-	tx, _ := teh.txRepository.FindById("zf")
-	assert.Equal(t, (*txpool.Transaction)(nil) , tx)
+	for testName, test := range tests {
+		t.Logf("Running test case %s", testName)
+
+		err := event_handler.HandleTxCreatedEvent(test.input)
+		assert.Equal(t, err, test.err)
+	}
 }
 
 func TestTxEventHandler_HandleTxDeletedEvent(t *testing.T) {
-	dbPath := "./test"
 
-	defer os.RemoveAll(dbPath)
-
-	// When
-	teh := TxEventHandler{
-		txRepository: leveldb.NewTransactionRepository(dbPath),
-		leaderRepository: txpool.NewLeaderRepository(),
-	}
-
-	event := txpool.TxDeletedEvent{
-		EventModel: midgard.EventModel{
-			ID: "zf",
+	//given
+	tests := map[string]struct {
+		input txpool.TxDeletedEvent
+		err   error
+	}{
+		"handle success": {
+			input: txpool.TxDeletedEvent{
+				EventModel: midgard.EventModel{
+					ID: "txID",
+				},
+			},
+			err: nil,
+		},
+		"handle fail": {
+			input: txpool.TxDeletedEvent{},
+			err:   messaging.ErrNoEventID,
 		},
 	}
 
-	teh.HandleTxDeletedEvent(event)
+	for testName, test := range tests {
+		t.Logf("Running test case %s", testName)
 
-	// Then
-	tx, err := teh.txRepository.FindById("zf")
-	assert.Equal(t, (*txpool.Transaction)(nil) , tx)
-	assert.Equal(t, nil, err)
-}
+		mockTxRepo := MockTransactionRepository{}
+		mockTxRepo.RemoveFunc = func(id txpool.TransactionId) error {
 
-func TestTxEventHandler_HandleTxDeletedEvent_WhenTxIdMissing(t *testing.T) {
-	dbPath := "./test"
+			assert.Equal(t, id.ToString(), "txID")
+			return nil
+		}
 
-	defer os.RemoveAll(dbPath)
+		mockLeaderRepo := MockLeaderRepository{}
+		event_handler := messaging.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
 
-	// When
-	teh := TxEventHandler{
-		txRepository: leveldb.NewTransactionRepository(dbPath),
-		leaderRepository: txpool.NewLeaderRepository(),
+		err := event_handler.HandleTxDeletedEvent(test.input)
+		assert.Equal(t, err, test.err)
 	}
-
-	event := txpool.TxDeletedEvent{
-		EventModel: midgard.EventModel{
-			// ID Missing
-		},
-	}
-
-	teh.HandleTxDeletedEvent(event)
-
-	// Then
-	tx, err := teh.txRepository.FindById("zf")
-	assert.Equal(t, (*txpool.Transaction)(nil) , tx)
-	assert.Equal(t, nil, err)
 }
 
 func TestTxEventHandler_HandleLeaderChangedEvent(t *testing.T) {
-	dbPath := "./test"
 
-	defer os.RemoveAll(dbPath)
-
-	// When
-	teh := TxEventHandler{
-		txRepository: leveldb.NewTransactionRepository(dbPath),
-		leaderRepository: txpool.NewLeaderRepository(),
-	}
-
-	event := txpool.LeaderChangedEvent{
-		EventModel: midgard.EventModel{
-			ID: "zf",
+	//given
+	tests := map[string]struct {
+		input txpool.LeaderChangedEvent
+		err   error
+	}{
+		"handle success": {
+			input: txpool.LeaderChangedEvent{
+				EventModel: midgard.EventModel{
+					ID: "leaderID",
+				},
+			},
+			err: nil,
+		},
+		"handle fail": {
+			input: txpool.LeaderChangedEvent{},
+			err:   messaging.ErrNoEventID,
 		},
 	}
 
-	teh.HandleLeaderChangedEvent(event)
+	for testName, test := range tests {
+		t.Logf("Running test case %s", testName)
 
-	// Then
-	leader := teh.leaderRepository.GetLeader()
-	assert.Equal(t, "zf", leader.GetID())
-}
+		mockTxRepo := MockTransactionRepository{}
+		mockLeaderRepo := MockLeaderRepository{}
 
-func TestTxEventHandler_HandleLeaderChangedEvent_WhenIDMissing(t *testing.T) {
-	dbPath := "./test"
+		mockLeaderRepo.SetLeaderFunc = func(leader txpool.Leader) {
 
-	defer os.RemoveAll(dbPath)
+			assert.Equal(t, leader.GetID(), "leaderID")
+		}
 
-	// When
-	teh := TxEventHandler{
-		txRepository: leveldb.NewTransactionRepository(dbPath),
-		leaderRepository: txpool.NewLeaderRepository(),
+		event_handler := messaging.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
+
+		err := event_handler.HandleLeaderChangedEvent(test.input)
+		assert.Equal(t, err, test.err)
 	}
-
-	event := txpool.LeaderChangedEvent{
-		EventModel: midgard.EventModel{
-			ID: "zf",
-		},
-	}
-
-	teh.HandleLeaderChangedEvent(event)
-
-	// Then
-	leader := teh.leaderRepository.GetLeader()
-	assert.Equal(t, "zf", leader.GetID())
-
-
-	// When
-	event2 := txpool.LeaderChangedEvent{
-		EventModel: midgard.EventModel{
-			// ID Missing
-		},
-	}
-
-	teh.HandleLeaderChangedEvent(event2)
-
-	// Then - leader ID don't change
-	leader2 := teh.leaderRepository.GetLeader()
-	assert.Equal(t, "zf", leader2.GetID())
 }
