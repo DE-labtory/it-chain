@@ -82,8 +82,8 @@
     "pb",
     "server"
   ]
-  revision = "119a07762cb5df44cbdaa35bfbd14ec2206291e5"
-  version = "v0.1.3"
+  revision = "a1021530947bcb0440baef498da81d2e9ab077a8"
+  version = "v0.1.4"
 
 [[projects]]
   name = "github.com/it-chain/heimdall"
@@ -144,7 +144,10 @@
 
 [[projects]]
   name = "github.com/magiconair/properties"
-  packages = ["."]
+  packages = [
+    ".",
+    "assert"
+  ]
   revision = "c2353362d570a7bfa228149c62842019201cfb71"
   version = "v1.8.0"
 
@@ -187,8 +190,8 @@
 [[projects]]
   name = "github.com/pelletier/go-toml"
   packages = ["."]
-  revision = "acdc4509485b587f5e675510c4f2c63e90ff68a8"
-  version = "v1.1.0"
+  revision = "c01d1270ff3e442a8a57cddc1c92dc1138598194"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -334,7 +337,7 @@
     "ssh/knownhosts",
     "ssh/terminal"
   ]
-  revision = "5ba7f63082460102a45837dbd1827e10f9479ac0"
+  revision = "b47b1587369238182299fe4dad77d05b8b461e06"
 
 [[projects]]
   branch = "master"
@@ -384,7 +387,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "4065a77fc542a455295382a23a996a08ed18813a"
+  revision = "81158efcc9f219c511e4d3c0d61a0e6e49c01a24"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -493,6 +496,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "82b8afc9f5bd62dbe76dc7973cdd98dc33c1f7995a0a1d7aafbe7089f2b1642c"
+  inputs-digest = "863e3fac4d6b1bf2583fe39c14b52be89d8b096913793c0f97e633acc1431606"
   solver-name = "gps-cdcl"
   solver-version = 1

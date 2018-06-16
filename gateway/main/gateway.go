@@ -1,11 +1,13 @@
-package gateway
+package main
 
 import (
 	"github.com/it-chain/it-chain-Engine/conf"
+	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/it-chain/it-chain-Engine/gateway/api"
 	"github.com/it-chain/it-chain-Engine/gateway/infra"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/midgard/bus/rabbitmq"
+	"github.com/it-chain/midgard/store"
 	"github.com/it-chain/midgard/store/leveldb"
 )
 
@@ -20,12 +22,12 @@ func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 	//load key
 	pri, pub := infra.LoadKeyPair(keyPath, conf.GetConfiguration().Authentication.KeyType)
 	//create gRPC server
-	hostService := infra.NewGrpcHostService(pri, pub, rabbitmqClient)
+	hostService := infra.NewGrpcHostService(pri, pub, rabbitmqClient.Publish)
 
 	//midgard EventStore
 	repository := midgard.NewRepo(leveldb.NewEventStore(
 		".gateway/eventStore",
-		leveldb.NewSerializer(ConnectionCreatedEvent{}, ConnectionDisconnectedEvent{}, ErrorCreatedEvent{}),
+		store.NewSerializer(gateway.ConnectionCreatedEvent{}, gateway.ConnectionDisconnectedEvent{}, gateway.ErrorCreatedEvent{}),
 	), rabbitmqClient)
 
 	//createHandler
@@ -38,7 +40,7 @@ func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 		panic(err)
 	}
 
-	if err := rabbitmqClient.Subscribe("Command", "connection.*", messageApi); err != nil {
+	if err := rabbitmqClient.Subscribe("Command", "message.*", messageApi); err != nil {
 		panic(err)
 	}
 

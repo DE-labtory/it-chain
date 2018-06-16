@@ -1,49 +1,68 @@
 package messaging
 
-import "github.com/it-chain/it-chain-Engine/p2p"
+import (
+	"encoding/json"
+
+	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/it-chain-Engine/p2p/api"
+)
 
 type GrpcMessageHandler struct {
-	nodeRepository   p2p.NodeRepository
-	leaderRepository p2p.LeaderRepository
-	dispatcher       *Dispatcher
+	leaderApi api.LeaderApi
+	nodeApi   api.NodeApi
 }
 
-func NewGrpcMessageHandler(nodeRepo *p2p.NodeRepository, leaderRepo *p2p.LeaderRepository, dispatcher *Dispatcher) *GrpcMessageHandler {
+func NewGrpcMessageHandler(leaderApi api.LeaderApi, nodeApi api.NodeApi) *GrpcMessageHandler {
 	return &GrpcMessageHandler{
-		nodeRepository:   nodeRepo,
-		leaderRepository: leaderRepo,
-		dispatcher:       dispatcher,
+		leaderApi: leaderApi,
+		nodeApi:   nodeApi,
 	}
 }
 
-//todo implement
-func (gmh *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand) {
-	panic("need to implement")
+func (g *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand) {
 
-	/*receiveEvent := &event.MessageReceiveEvent{}
-	err := json.Unmarshal(amqpMessage.Body, receiveEvent)
-	if err != nil {
-		// todo amqp error handle
-	}
-	// handle 해야될거만 확인 아니면 버려~
-	if receiveEvent.Protocol == topic.LeaderInfoRequestCmd.String() {
-		curLeader := ml.peerTable.GetLeader()
-		if curLeader == nil {
-			curLeader = &model.Peer{
-				IpAddress: "",
-				Id:        "",
-			}
+	switch command.Protocol {
+	case "LeaderInfoRequestProtocol":
+		g.leaderApi.DeliverLeaderInfo(command.FromNode.NodeId)
+		break
+
+	case "LeaderInfoDeliverProtocol":
+		leader := p2p.Leader{}
+		if err := json.Unmarshal(command.Data, &leader); err != nil {
+			//todo error 처리
+			return
 		}
-		// todo error handle
-		toPeer, _ := (*ml.peerRepository).FindById(model.PeerId(receiveEvent.SenderId))
-		// todo error handle
-		err = (*ml.messageProducer).DeliverLeaderInfo(*toPeer, *curLeader)
 
-	} else if receiveEvent.Protocol == topic.LeaderInfoPublishEvent.String() {
-		eventBody := &event.LeaderInfoPublishEvent{}
-		// todo error handle
-		err = common.Deserialize(receiveEvent.Body, eventBody)
-		leader := model.NewPeer(eventBody.Address, model.PeerId(eventBody.LeaderId))
-		ml.peerTable.SetLeader(leader)
-	}*/
+		g.leaderApi.UpdateLeader(leader)
+		break
+
+	case "NodeListRequestProtocol":
+
+		g.nodeApi.DeliverNodeList(command.FromNode.NodeId)
+		break
+
+	case "NodeListDeliverProtocol":
+
+		nodeList := make([]p2p.Node, 0)
+		if err := json.Unmarshal(command.Data, &nodeList); err != nil {
+			//todo error 처리
+			return
+		}
+
+		g.nodeApi.UpdateNodeList(nodeList)
+		break
+
+	case "NodeDeliverProtocol":
+
+		node := p2p.Node{}
+		err := common.Deserialize(command.Data, node)
+
+		if err != nil {
+			return
+		}
+
+		g.nodeApi.AddNode(node)
+		break
+	}
 }

@@ -3,6 +3,8 @@ package messaging
 import (
 	"time"
 
+	"errors"
+
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
 	"github.com/it-chain/it-chain-Engine/p2p"
@@ -10,77 +12,138 @@ import (
 	"github.com/rs/xid"
 )
 
+//kind of error
+var ErrEmptyNodeId = errors.New("empty nodeid proposed")
+var ErrEmptyLeaderId = errors.New("empty leader id proposed")
+var ErrEmptyNodeList = errors.New("empty node list proposed")
+
+type Publisher func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
+
+// message dispatcher sends messages to other nodes in p2p network
 type MessageDispatcher struct {
-	publisher midgard.Publisher
+	publisher Publisher // midgard.client
 }
 
-func NewMessageDispatcher(publisher midgard.Publisher) *MessageDispatcher {
+func NewMessageDispatcher(publisher Publisher) *MessageDispatcher {
 	return &MessageDispatcher{
 		publisher: publisher,
 	}
 }
 
-// 새로운 리더 정보를 받아오는 메서드이다.
-func (md *MessageDispatcher) RequestLeaderInfo(peer p2p.Node) error {
+//request leader information in p2p network to the node specified by nodeId
+func (md *MessageDispatcher) RequestLeaderInfo(nodeId p2p.NodeId) error {
 
-	requestBody := p2p.LeaderInfoRequestMessage{
+	if nodeId.Id == "" {
+		return ErrEmptyNodeId
+	}
+
+	body := p2p.LeaderInfoRequestMessage{
 		TimeUnix: time.Now().Unix(),
 	}
 
-	requestBodyByte, _ := common.Serialize(requestBody)
+	//message deliver command for delivering leader info
+	deliverCommand, err := CreateMessageDeliverCommand(event.LeaderInfoDeliverProtocol, body)
 
-	deliverCom := &p2p.MessageDeliverCommand{
+	if err != nil {
+		return err
+	}
+
+	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
+
+	return md.publisher("Command", "message.deliver", deliverCommand)
+}
+
+// command message which requests node list of specific node
+func (md *MessageDispatcher) RequestNodeList(nodeId p2p.NodeId) error {
+
+	if nodeId.Id == "" {
+		return ErrEmptyNodeId
+	}
+	body := p2p.LeaderInfoRequestMessage{
+		TimeUnix: time.Now().Unix(),
+	}
+
+	deliverCommand, err := CreateMessageDeliverCommand("NodeListRequestMessage", body)
+
+	if err != nil {
+		return err
+	}
+
+	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
+
+	return md.publisher("Command", "message.deliver", deliverCommand)
+}
+
+func (md *MessageDispatcher) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error {
+
+	if nodeId.Id == "" {
+		return ErrEmptyNodeId
+	}
+
+	if leader.LeaderId.Id == "" {
+		return ErrEmptyLeaderId
+	}
+
+	deliverCommand, err := CreateMessageDeliverCommand("UpdateLeader", leader)
+
+	if err != nil {
+		return err
+	}
+
+	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
+
+	return md.publisher("Command", "message.deliver", deliverCommand)
+}
+
+//deliver node list to other node specified by nodeId
+func (md *MessageDispatcher) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.Node) error {
+
+	if nodeId.Id == "" {
+		return ErrEmptyNodeId
+	}
+
+	if len(nodeList) == 0 {
+		return ErrEmptyNodeList
+	}
+
+	messageDeliverCommand, err := CreateMessageDeliverCommand("NodeListDeliver", nodeList)
+
+	if err != nil {
+		return err
+	}
+
+	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, nodeId.ToString())
+
+	return md.publisher("Command", "message.deliver", messageDeliverCommand)
+}
+
+//deliver single node
+func (md *MessageDispatcher) DeliverNode(nodeId p2p.NodeId, node p2p.Node) error {
+
+	messageDeliverCommand, err := CreateMessageDeliverCommand("NodeDeliverProtocol", node)
+
+	if err != nil {
+		return err
+	}
+
+	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, node.NodeId.ToString())
+
+	return md.publisher("Command", "message.deliver", messageDeliverCommand)
+}
+func CreateMessageDeliverCommand(protocol string, body interface{}) (p2p.MessageDeliverCommand, error) {
+
+	data, err := common.Serialize(body)
+
+	if err != nil {
+		return p2p.MessageDeliverCommand{}, err
+	}
+
+	return p2p.MessageDeliverCommand{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
 		Recipients: make([]string, 0),
-		Body:       requestBodyByte,
-		Protocol:   "LeaderInfoRequestMessage",
-	}
-	deliverCom.Recipients = append(deliverCom.Recipients, peer.NodeId.ToString())
-
-	return md.publisher.Publish("Command", "GrpcMessage", deliverCom)
+		Body:       data,
+		Protocol:   protocol,
+	}, err
 }
-
-// 단일 피어에게 새로운 리더 정보를 전달하는 메서드이다.
-func (md *MessageDispatcher) DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node) error {
-
-	// 리더 정보를 leaderInfoBody에 담아줌
-	leaderInfoBody := p2p.LeaderInfoResponseMessage{
-		LeaderId: leader.NodeId.ToString(),
-		Address:  leader.IpAddress,
-	}
-
-	// 리더 정보 json byte 변환
-	leaderInfoBodyByte, _ := common.Serialize(leaderInfoBody)
-
-	// 메세지 전달 이벤트 구조를 담는다.
-	deliverCommand := p2p.MessageDeliverCommand{
-		CommandModel: midgard.CommandModel{
-			ID: xid.New().String(),
-		},
-		Recipients: make([]string, 0),
-		Body:       leaderInfoBodyByte,
-		Protocol:   event.LeaderInfoDeliverProtocol,
-	}
-
-	// 메세지를 수신할 수신자들을 지정해 준다.
-	deliverCommand.Recipients = append(deliverCommand.Recipients, toPeer.NodeId.ToString())
-
-	// topic 과 serilized data를 받아 publisher 한다.
-	return md.publisher.Publish("Command", "MessageDeliverCommand", deliverCommand)
-}
-
-func (md *MessageDispatcher) RequestTable(toNode p2p.Node) error {
-	panic("implement me")
-}
-
-func (md *MessageDispatcher) ResponseTable(toNode p2p.Node, nodes []p2p.Node) error {
-	panic("implement me")
-}
-
-// 새로운 리더를 업데이트하는 메서드이다.
-func (md *MessageDispatcher) LeaderUpdateEvent(leader p2p.Node) error {
-	panic("implement me")
-}
-

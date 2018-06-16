@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"time"
 
 	"github.com/it-chain/it-chain-Engine/txpool"
@@ -20,34 +19,30 @@ func NewTransactionApi(eventRepository *midgard.Repository, publisherId string) 
 	}
 }
 
-func (t TransactionApi) CreateTransaction(txCreateCommand txpool.TxCreateCommand) {
+func (t TransactionApi) CreateTransaction(txID string, txData txpool.TxData) error {
 
 	events := make([]midgard.Event, 0)
 
-	if txCreateCommand.GetID() == "" {
-		log.Println("need id")
-		return
-	}
-
-	id := txCreateCommand.GetID()
 	timeStamp := time.Now()
-	hash := txpool.CalTxHash(txCreateCommand.TxData, t.publisherId, txpool.TransactionId(id), timeStamp)
+	hash := txpool.CalTxHash(txData, t.publisherId, txpool.TransactionId(txID), timeStamp)
 
 	events = append(events, txpool.TxCreatedEvent{
 		EventModel: midgard.EventModel{
-			ID:   id,
+			ID:   txID,
 			Type: "Transaction",
 		},
 		PublishPeerId: t.publisherId,
 		TxStatus:      txpool.VALID,
 		TxHash:        hash,
 		TimeStamp:     timeStamp,
-		TxData:        txCreateCommand.TxData,
+		TxData:        txData,
 	})
 
-	err := t.eventRepository.Save(id, events...)
+	err := t.eventRepository.Save(txID, events...)
 
 	if err != nil {
-		log.Println(err.Error())
+		return err
 	}
+
+	return nil
 }

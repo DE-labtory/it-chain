@@ -1,9 +1,9 @@
 package p2p
 
 type MessageDispatcher interface {
-	RequestLeaderInfo(peer Node) error
-	DeliverLeaderInfo(toPeer Node, leader Node) error
-	RequestTable(toNode Node) error
-	ResponseTable(toNode Node, nodes []Node) error
-	LeaderUpdateEvent(leader Node) error
+	RequestLeaderInfo(nodeId NodeId) error
+	DeliverLeaderInfo(nodeId NodeId, leader Leader) error
+	RequestNodeList(nodeId NodeId) error
+	DeliverNodeList(nodeId NodeId, nodes []Node) error
+	DeliverNode(nodeId NodeId, node Node) error
 }

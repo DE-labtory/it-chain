@@ -8,12 +8,12 @@ import (
 	"github.com/it-chain/leveldb-wrapper"
 )
 
-//todo generate test code
 type TransactionRepository struct {
 	leveldb *leveldbwrapper.DB
 }
 
 func NewTransactionRepository(path string) *TransactionRepository {
+
 	db := leveldbwrapper.CreateNewDB(path)
 	db.Open()
 	return &TransactionRepository{
