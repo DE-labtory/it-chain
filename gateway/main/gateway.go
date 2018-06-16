@@ -7,6 +7,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/gateway/infra"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/midgard/bus/rabbitmq"
+	"github.com/it-chain/midgard/store"
 	"github.com/it-chain/midgard/store/leveldb"
 )
 
@@ -26,7 +27,7 @@ func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 	//midgard EventStore
 	repository := midgard.NewRepo(leveldb.NewEventStore(
 		".gateway/eventStore",
-		leveldb.NewSerializer(gateway.ConnectionCreatedEvent{}, gateway.ConnectionDisconnectedEvent{}, gateway.ErrorCreatedEvent{}),
+		store.NewSerializer(gateway.ConnectionCreatedEvent{}, gateway.ConnectionDisconnectedEvent{}, gateway.ErrorCreatedEvent{}),
 	), rabbitmqClient)
 
 	//createHandler
