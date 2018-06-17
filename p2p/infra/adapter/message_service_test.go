@@ -1,4 +1,4 @@
-package messaging_test
+package adapter
 
 import (
 	"reflect"

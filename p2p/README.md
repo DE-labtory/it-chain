@@ -4,7 +4,7 @@ Peer 서비스는 피어노드의 생성, 삭제, 열람, 리더 노드의 선�
 
 ## API
 
-## Message Dispatcher
+## Message Service
 
 ### RequestLeaderInfo(peer p2p.Node)
 request of leader info

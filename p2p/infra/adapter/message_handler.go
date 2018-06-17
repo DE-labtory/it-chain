@@ -1,4 +1,4 @@
-package messaging
+package adapter
 
 import (
 	"encoding/json"
