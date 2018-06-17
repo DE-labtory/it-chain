@@ -15,12 +15,15 @@ type ReadOnlyNodeRepository interface {
 }
 
 type NodeApi struct {
-	nodeRepository    ReadOnlyNodeRepository
-	eventRepository   midgard.Repository
-	messageService p2p.MessageService
+	nodeRepository     ReadOnlyNodeRepository
+	eventRepository    EventRepository
+	messageService		NodeMessageService
+}
+type NodeMessageService interface {
+	DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.Node) error
 }
 
-func NewNodeApi(nodeRepository ReadOnlyNodeRepository, eventRepository midgard.Repository, messageService p2p.MessageService) *NodeApi {
+func NewNodeApi(nodeRepository ReadOnlyNodeRepository, eventRepository EventRepository, messageService NodeMessageService) *NodeApi {
 	return &NodeApi{
 		nodeRepository:    nodeRepository,
 		eventRepository:   eventRepository,
@@ -68,10 +71,14 @@ func (nodeApi *NodeApi) UpdateNodeList(nodeList []p2p.Node) error {
 	return nil
 }
 
-func (nodeApi *NodeApi) DeliverNodeList(nodeId p2p.NodeId) {
+func (nodeApi *NodeApi) DeliverNodeList(nodeId p2p.NodeId) error{
 
 	nodeList, _ := nodeApi.nodeRepository.FindAll()
+	if len(nodeList) == 0{
+		return ErrEmptyNodeList
+	}
 	nodeApi.messageService.DeliverNodeList(nodeId, nodeList)
+	return nil
 }
 
 // add a node

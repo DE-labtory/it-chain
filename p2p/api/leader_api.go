@@ -15,7 +15,7 @@ var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 type LeaderApi struct {
 	leaderRepository  ReadOnlyLeaderRepository
 	eventRepository   EventRepository
-	messageService    MessageService
+	messageService    LeaderMessageService
 	myInfo            *p2p.Node
 }
 
@@ -26,10 +26,10 @@ type ReadOnlyLeaderRepository interface {
 type EventRepository interface { //midgard.Repository
 	Save(aggregateID string, events ...midgard.Event) error
 }
-type MessageService interface {
+type LeaderMessageService interface {
 	DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error
 }
-func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, messageService MessageService, myInfo *p2p.Node) *LeaderApi {
+func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, messageService LeaderMessageService, myInfo *p2p.Node) *LeaderApi {
 
 	return &LeaderApi{
 		leaderRepository:  leaderRepository,
