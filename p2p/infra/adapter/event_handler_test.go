@@ -60,14 +60,92 @@ func TestRepositoryProjector_HandleConnCreatedEvent(t *testing.T) {
 		assert.Equal(t, node.IpAddress, test.input.address)
 		repositoryProjector.NodeRepository.Remove(node.NodeId)
 	}
-
-
 }
 func TestRepositoryProjector_HandleConnDisconnectedEvent(t *testing.T) {
+	repositoryProjector, endUp := SetupRepositoryProjector("path_node_repository", "path_leader_repository")
 
+	tests := map[string] struct{
+		input struct{
+			id string
+		}
+		err error
+	}{
+		"success":{
+			input: struct {
+				id      string
+			}{id: string(123),},
+			err: nil,
+		},
+		"empty node id test":{
+			input: struct {
+				id      string
+			}{id: string(""),},
+		},
+		"empty address test":{
+			input: struct {
+				id      string
+			}{id: string(123),},
+		},
+	}
+
+	defer endUp()
+
+	for testName, test := range tests{
+		t.Logf("running test case %s", testName)
+		event := p2p.ConnectionDisconnectedEvent{
+			EventModel: midgard.EventModel{
+				ID:test.input.id,
+			},
+		}
+		err := repositoryProjector.HandleConnDisconnectedEvent(event)
+		assert.Equal(t, err, test.err)
+
+		node, _ := repositoryProjector.NodeRepository.FindById(p2p.NodeId{Id:test.input.id})
+		assert.Equal(t, node, nil)
+	}
 }
 func TestRepositoryProjector_HandleLeaderUpdatedEvent(t *testing.T) {
+	repositoryProjector, endUp := SetupRepositoryProjector("path_node_repository", "path_leader_repository")
 
+	tests := map[string] struct{
+		input struct{
+			id string
+		}
+		err error
+	}{
+		"success":{
+			input: struct {
+				id      string
+			}{id: string(123),},
+			err: nil,
+		},
+		"empty node id test":{
+			input: struct {
+				id      string
+			}{id: string(""),},
+		},
+		"empty address test":{
+			input: struct {
+				id      string
+			}{id: string(123),},
+		},
+	}
+
+	defer endUp()
+
+	for testName, test := range tests{
+		t.Logf("running test case %s", testName)
+		event := p2p.LeaderUpdatedEvent{
+			EventModel: midgard.EventModel{
+				ID:test.input.id,
+			},
+		}
+		err := repositoryProjector.HandleLeaderUpdatedEvent(event)
+		assert.Equal(t, err, test.err)
+
+		leader:= repositoryProjector.LeaderRepository.GetLeader()
+		assert.Equal(t, leader.GetID(), test.input.id)
+	}
 }
 func TestRepositoryProjector_HandlerNodeCreatedEvent(t *testing.T) {
 

@@ -23,7 +23,7 @@ func NewEventHandler(nodeApi *NodeApi) *EventHandler {
 
 type RepositoryProjector struct {
 	NodeRepository   p2p.NodeRepository
-	leaderRepository p2p.LeaderRepository
+	LeaderRepository p2p.LeaderRepository
 }
 
 //todo conn후 peer에 추가하고 peer 추가됬다는 이벤트를 날려줘야 하나 말아야하나 고민이슈
@@ -32,7 +32,7 @@ type RepositoryProjector struct {
 func NewRepositoryProjector(nodeRepository p2p.NodeRepository, leaderRepository p2p.LeaderRepository) *RepositoryProjector{
 	return &RepositoryProjector{
 		NodeRepository:nodeRepository,
-		leaderRepository:leaderRepository,
+		LeaderRepository:leaderRepository,
 	}
 }
 func (projector *RepositoryProjector) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent) error {
@@ -79,7 +79,7 @@ func (projector *RepositoryProjector) HandleLeaderUpdatedEvent(event p2p.LeaderU
 		LeaderId: p2p.LeaderId{Id: event.ID},
 	}
 
-	projector.leaderRepository.SetLeader(leader)
+	projector.LeaderRepository.SetLeader(leader)
 	return nil
 }
 
