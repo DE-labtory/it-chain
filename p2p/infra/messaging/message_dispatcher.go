@@ -19,9 +19,10 @@ var ErrEmptyNodeList = errors.New("empty node list proposed")
 
 type Publisher func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
+
 // message dispatcher sends messages to other nodes in p2p network
 type MessageDispatcher struct {
-	publisher Publisher // midgard.client
+	publisher Publisher // midgard.client.Publish
 }
 
 func NewMessageDispatcher(publisher Publisher) *MessageDispatcher {
