@@ -25,20 +25,22 @@ func TestRepositoryProjector_HandleConnCreatedEvent(t *testing.T) {
 			input: struct {
 				id      string
 				address string
-			}{id: string(123), address: string(123)},
+			}{id: string("123"), address: string("123")},
 			err: nil,
 		},
 		"empty node id test":{
 			input: struct {
 				id      string
 				address string
-			}{id: string(""), address: string(123)},
+			}{id: string(""), address: string("123")},
+			err: adapter.ErrEmptyNodeId,
 		},
 		"empty address test":{
 			input: struct {
 				id      string
 				address string
-			}{id: string(123), address: string("")},
+			}{id: string("123"), address: string("")},
+			err: adapter.ErrEmptyAddress,
 		},
 	}
 
@@ -56,9 +58,11 @@ func TestRepositoryProjector_HandleConnCreatedEvent(t *testing.T) {
 		assert.Equal(t, err, test.err)
 
 		node, _ := repositoryProjector.NodeRepository.FindById(p2p.NodeId{Id:test.input.id})
-		assert.Equal(t, node.GetID(), test.input.id)
-		assert.Equal(t, node.IpAddress, test.input.address)
-		repositoryProjector.NodeRepository.Remove(node.NodeId)
+		if node != nil{
+			assert.Equal(t, node.NodeId.Id, test.input.id)
+			assert.Equal(t, node.IpAddress, test.input.address)
+			repositoryProjector.NodeRepository.Remove(node.NodeId)
+		}
 	}
 }
 func TestRepositoryProjector_HandleConnDisconnectedEvent(t *testing.T) {
