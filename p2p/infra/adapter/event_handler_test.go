@@ -25,7 +25,10 @@ func TestRepositoryProjector_HandleConnCreatedEvent(t *testing.T) {
 			input: struct {
 				id      string
 				address string
-			}{id: string("123"), address: string("123")},
+			}{
+				id: string("123"),
+				address: string("123"),
+			},
 			err: nil,
 		},
 		"empty node id test":{
@@ -119,18 +122,14 @@ func TestRepositoryProjector_HandleLeaderUpdatedEvent(t *testing.T) {
 		"success":{
 			input: struct {
 				id      string
-			}{id: string(123),},
+			}{id: "123",},
 			err: nil,
 		},
 		"empty node id test":{
 			input: struct {
 				id      string
 			}{id: string(""),},
-		},
-		"empty address test":{
-			input: struct {
-				id      string
-			}{id: string(123),},
+			err: adapter.ErrEmptyNodeId,
 		},
 	}
 
@@ -145,9 +144,6 @@ func TestRepositoryProjector_HandleLeaderUpdatedEvent(t *testing.T) {
 		}
 		err := repositoryProjector.HandleLeaderUpdatedEvent(event)
 		assert.Equal(t, err, test.err)
-
-		leader:= repositoryProjector.LeaderRepository.GetLeader()
-		assert.Equal(t, leader.GetID(), test.input.id)
 	}
 }
 func TestRepositoryProjector_HandlerNodeCreatedEvent(t *testing.T) {
