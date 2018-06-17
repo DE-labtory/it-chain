@@ -58,6 +58,7 @@ func TestRepositoryProjector_HandleConnCreatedEvent(t *testing.T) {
 		node, _ := repositoryProjector.NodeRepository.FindById(p2p.NodeId{Id:test.input.id})
 		assert.Equal(t, node.GetID(), test.input.id)
 		assert.Equal(t, node.IpAddress, test.input.address)
+		repositoryProjector.NodeRepository.Remove(node.NodeId)
 	}
 
 
