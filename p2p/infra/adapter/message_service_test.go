@@ -33,11 +33,11 @@ func TestMessageDispatcher_RequestLeaderInfo(t *testing.T) {
 			}{
 				nodeId: p2p.NodeId{},
 			},
-			err: messaging.ErrEmptyNodeId,
+			err: ErrEmptyNodeId,
 		},
 	}
 
-	publisher := messaging.Publisher(func(exchange string, topic string, data interface{}) error {
+	publisher := Publisher(func(exchange string, topic string, data interface{}) error {
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.deliver")
 		assert.Equal(t, reflect.TypeOf(data).String(), "p2p.MessageDeliverCommand")
@@ -45,7 +45,7 @@ func TestMessageDispatcher_RequestLeaderInfo(t *testing.T) {
 		return nil
 	})
 
-	messageDispatcher := messaging.NewMessageDispatcher(publisher)
+	messageDispatcher := NewMessageService(publisher)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -119,7 +119,7 @@ func TestMessageDispatcher_DeliverLeaderInfo(t *testing.T) {
 		}
 	})
 
-	messageDispatcher := messaging.NewMessageDispatcher(publisher)
+	messageDispatcher := NewMessageService(publisher)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -155,7 +155,7 @@ func TestMessageDispatcher_RequestNodeList(t *testing.T) {
 		}
 	})
 
-	messageDispatcher := messaging.NewMessageDispatcher(publisher)
+	messageDispatcher := NewMessageService(publisher)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -182,7 +182,7 @@ func TestMessageDispatcher_DeliverNodeList(t *testing.T) {
 				},
 				nodeList: []p2p.Node{},
 			},
-			err: messaging.ErrEmptyNodeList,
+			err: ErrEmptyNodeList,
 		},
 		"empty node id test": {
 			input: struct {
@@ -192,7 +192,7 @@ func TestMessageDispatcher_DeliverNodeList(t *testing.T) {
 				nodeId:   p2p.NodeId{},
 				nodeList: []p2p.Node{},
 			},
-			err: messaging.ErrEmptyNodeId,
+			err: ErrEmptyNodeId,
 		},
 		"success": {
 			input: struct {
@@ -214,7 +214,7 @@ func TestMessageDispatcher_DeliverNodeList(t *testing.T) {
 			err: nil,
 		},
 	}
-	publisher := messaging.Publisher(func(exchange string, topic string, data interface{}) error {
+	publisher := Publisher(func(exchange string, topic string, data interface{}) error {
 		{
 			assert.Equal(t, exchange, "Command")
 			assert.Equal(t, topic, "message.deliver")
@@ -224,7 +224,7 @@ func TestMessageDispatcher_DeliverNodeList(t *testing.T) {
 		}
 	})
 
-	messageDispatcher := messaging.NewMessageDispatcher(publisher)
+	messageDispatcher := NewMessageService(publisher)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
