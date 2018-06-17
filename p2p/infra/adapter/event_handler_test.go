@@ -3,52 +3,83 @@ package adapter_test
 import (
 	"testing"
 	"github.com/it-chain/it-chain-Engine/p2p/infra/adapter"
+	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/leveldb"
+	"github.com/it-chain/midgard"
+	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/magiconair/properties/assert"
 )
 
-type MockNodeRepository struct {}
-func (mockNodeRepository MockNodeRepository) Save(){
+
+
+func TestRepositoryProjector_HandleConnCreatedEvent(t *testing.T) {
+	repositoryProjector, endUp := SetupRepositoryProjector("path_node_repository", "path_leader_repository")
+
+	tests := map[string] struct{
+		input struct{
+			id string
+			address string
+		}
+		err error
+	}{
+		"success":{
+			input: struct {
+				id      string
+				address string
+			}{id: string(123), address: string(123)},
+			err: nil,
+		},
+		"empty node id test":{
+			input: struct {
+				id      string
+				address string
+			}{id: string(""), address: string(123)},
+		},
+		"empty address test":{
+			input: struct {
+				id      string
+				address string
+			}{id: string(123), address: string("")},
+		},
+	}
+
+	defer endUp()
+
+	for testName, test := range tests{
+		t.Logf("running test case %s", testName)
+		event := p2p.ConnectionCreatedEvent{
+			EventModel: midgard.EventModel{
+				ID:test.input.id,
+			},
+			Address:test.input.address,
+		}
+		err := repositoryProjector.HandleConnCreatedEvent(event)
+		assert.Equal(t, err, test.err)
+
+		node, _ := repositoryProjector.NodeRepository.FindById(p2p.NodeId{Id:test.input.id})
+		assert.Equal(t, node.GetID(), test.input.id)
+		assert.Equal(t, node.IpAddress, test.input.address)
+	}
+
 
 }
-func (mockNodeRepository MockNodeRepository) Remove(){
+func TestRepositoryProjector_HandleConnDisconnectedEvent(t *testing.T) {
 
 }
-func (mockNodeRepository MockNodeRepository) FindByInd(){
+func TestRepositoryProjector_HandleLeaderUpdatedEvent(t *testing.T) {
 
 }
-func (mockNodeRepository MockNodeRepository) FindAll(){
-
-}
-type MockLeaderRepository struct {
-
-}
-type MockNodeApi struct {
-
-}
-func TestNewEventHandler(t *testing.T) {
-	nodeRepository := MockNodeRepository{}
-	leaderRepository := MockLeaderRepository{}
-	nodeApi := MockNodeApi{}
-
-	eventHandler := adapter.NewEventHandler(nodeRepository, leaderRepository, nodeApi)
-
-	assert.Equal(t, eventHandler.nodeRepository, )
+func TestRepositoryProjector_HandlerNodeCreatedEvent(t *testing.T) {
 
 }
 
-func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
+func SetupRepositoryProjector(pathNodeRepository string, pathLeaderRepository string) (*adapter.RepositoryProjector, func()){
+	nodeRepository := leveldb.NewNodeRepository(pathNodeRepository)
+	leaderRepository := leveldb.NewLeaderRepository(pathLeaderRepository)
 
-}
-func TestEventHandler_HandleConnDisconnectedEvent(t *testing.T) {
+	repositoryProjector := adapter.NewRepositoryProjector(nodeRepository, leaderRepository)
 
-}
-func TestEventHandler_HandleLeaderUpdatedEvent(t *testing.T) {
-
-}
-func TestEventHandler_HandlerNodeCreatedEvent(t *testing.T) {
-
-}
-
-func SetUpEventHandler(){
-
+	return repositoryProjector, func(){
+		nodeRepository.Close()
+		leaderRepository.Close()
+	}
 }
