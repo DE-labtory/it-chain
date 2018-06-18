@@ -1,4 +1,4 @@
-package infra
+package adapter
 
 import (
 	"errors"
@@ -31,5 +31,5 @@ func (m BlockService) ProposeBlock(transactions []txpool.Transaction) error {
 		Transactions: transactions,
 	}
 
-	return m.publisher("Command", "Block", deliverCommand)
+	return m.publisher("Command", "block.propose", deliverCommand)
 }
