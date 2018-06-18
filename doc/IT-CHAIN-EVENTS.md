@@ -44,7 +44,6 @@ Events which is occured when node is created
 
 
 
-
 ---
 ### AUTHOR
 Connection - Namhoon Lee(@frontalnh)

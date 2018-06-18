@@ -26,7 +26,6 @@ send single node to specific node
 Message: `NodeDelivery`
 
 
-
 ---
 ### AUTHOR
 P2P COMPONENT - Namhoon Lee(@frontalnh)
