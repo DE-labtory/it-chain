@@ -13,29 +13,33 @@ var ErrEmptyNodeId = errors.New("empty node id requested")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 
 type LeaderApi struct {
-	leaderRepository  ReadOnlyLeaderRepository
-	eventRepository   EventRepository
-	messageService    LeaderMessageService
-	myInfo            *p2p.Node
+	leaderRepository ReadOnlyLeaderRepository
+	eventRepository  EventRepository
+	messageService   LeaderMessageService
+	myInfo           *p2p.Node
 }
 
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
+
 type ReadOnlyLeaderRepository interface {
 	GetLeader() p2p.Leader
 }
+
 type EventRepository interface { //midgard.Repository
 	Save(aggregateID string, events ...midgard.Event) error
 }
+
 type LeaderMessageService interface {
 	DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error
 }
+
 func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, messageService LeaderMessageService, myInfo *p2p.Node) *LeaderApi {
 
 	return &LeaderApi{
-		leaderRepository:  leaderRepository,
-		eventRepository:   eventRepository,
-		messageService: 	messageService,
-		myInfo:            myInfo,
+		leaderRepository: leaderRepository,
+		eventRepository:  eventRepository,
+		messageService:   messageService,
+		myInfo:           myInfo,
 	}
 }
 
@@ -44,7 +48,6 @@ func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Leader) error {
 	if leader.LeaderId.Id == "" {
 		return ErrEmptyLeaderId
 	}
-
 
 	events := make([]midgard.Event, 0)
 	leaderUpdatedEvent := p2p.LeaderUpdatedEvent{
