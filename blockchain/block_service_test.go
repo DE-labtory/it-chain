@@ -1,26 +1,17 @@
 package blockchain
 
 import (
-	"testing"
-
 	"encoding/json"
-
 	"io/ioutil"
-
 	"os"
-
+	"testing"
 	"time"
 
 	"github.com/it-chain/yggdrasill/impl"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateGenesisBlock(t *testing.T) {
-
-	GenesisFilePath := "./GenesisBlockConfig.json"
-	defer os.Remove(GenesisFilePath)
-	wrongFilePath := "./WrongFileName.json"
-	GenesisBlockConfigJson := []byte(`{
+var GenesisBlockConfigJson = []byte(`{
 								  "Seal":[],
 								  "PrevSeal":[],
 								  "Height":0,
@@ -29,11 +20,22 @@ func TestCreateGenesisBlock(t *testing.T) {
 								  "TimeStamp":"0001-01-01T00:00:00-00:00",
 								  "Creator":[]
 								}`)
+
+func TestCreateGenesisBlock(t *testing.T) {
+
+	GenesisFilePath := "./GenesisBlockConfig.json"
+	wrongFilePath := "./WrongFileName.json"
+
 	validator := new(impl.DefaultValidator)
 	var tempBlock impl.DefaultBlock
-	_ = json.Unmarshal(GenesisBlockConfigJson, &tempBlock)
+	err := json.Unmarshal(GenesisBlockConfigJson, &tempBlock)
+	assert.NoError(t, err)
+
 	GenesisBlockConfigByte, _ := json.Marshal(tempBlock)
-	_ = ioutil.WriteFile(GenesisFilePath, GenesisBlockConfigByte, 0644)
+	err = ioutil.WriteFile(GenesisFilePath, GenesisBlockConfigByte, 0644)
+	assert.NoError(t, err)
+
+	defer os.Remove(GenesisFilePath)
 
 	GenesisBlock, err1 := CreateGenesisBlock(GenesisFilePath)
 	expectedSeal, _ := validator.BuildSeal(GenesisBlock)
@@ -47,5 +49,6 @@ func TestCreateGenesisBlock(t *testing.T) {
 	assert.Equal(t, make([]byte, 0), GenesisBlock.Creator)
 
 	_, err2 := CreateGenesisBlock(wrongFilePath)
+
 	assert.Error(t, err2)
 }
