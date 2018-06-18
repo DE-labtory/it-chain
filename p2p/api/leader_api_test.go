@@ -8,10 +8,6 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-//todo make leader api test
-//todo make fake dependencies 1. eventRepository 2. messageDispatcher 3. readonlyleaderRepository
-//todo make test map
-//todo test continue
 type MockMessageService struct{}
 func (mms MockMessageService) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error{return nil}
 
