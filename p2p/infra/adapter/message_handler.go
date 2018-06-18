@@ -5,22 +5,36 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/p2p"
-	"github.com/it-chain/it-chain-Engine/p2p/api"
+	"errors"
 )
 
-type GrpcMessageHandler struct {
-	leaderApi api.LeaderApi
-	nodeApi   api.NodeApi
+var ErrLeaderInfoDeliver = errors.New("leader info deliver failed")
+var ErrNodeListDeliver = errors.New("node list deliver failed")
+var ErrNodeDeliver = errors.New("node deliver failed")
+
+type LeaderApi interface {
+	UpdateLeader(leader p2p.Leader) error
+	DeliverLeaderInfo(nodeId p2p.NodeId)
 }
 
-func NewGrpcMessageHandler(leaderApi api.LeaderApi, nodeApi api.NodeApi) *GrpcMessageHandler {
-	return &GrpcMessageHandler{
+type MessageHandlerNodeApi interface {
+	UpdateNodeList(nodeList []p2p.Node) error
+	DeliverNodeList(nodeId p2p.NodeId) error
+	AddNode(node p2p.Node)
+}
+
+type MessageHandler struct {
+	leaderApi LeaderApi
+	nodeApi   MessageHandlerNodeApi
+}
+func NewMessageHandler(leaderApi LeaderApi, nodeApi MessageHandlerNodeApi) *MessageHandler {
+	return &MessageHandler{
 		leaderApi: leaderApi,
 		nodeApi:   nodeApi,
 	}
 }
 
-func (g *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand) {
+func (g *MessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand) error {
 
 	switch command.Protocol {
 	case "LeaderInfoRequestProtocol":
@@ -31,7 +45,7 @@ func (g *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 		leader := p2p.Leader{}
 		if err := json.Unmarshal(command.Data, &leader); err != nil {
 			//todo error 처리
-			return
+			return ErrLeaderInfoDeliver
 		}
 
 		g.leaderApi.UpdateLeader(leader)
@@ -47,7 +61,7 @@ func (g *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 		nodeList := make([]p2p.Node, 0)
 		if err := json.Unmarshal(command.Data, &nodeList); err != nil {
 			//todo error 처리
-			return
+			return ErrNodeListDeliver
 		}
 
 		g.nodeApi.UpdateNodeList(nodeList)
@@ -59,10 +73,11 @@ func (g *GrpcMessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 		err := common.Deserialize(command.Data, node)
 
 		if err != nil {
-			return
+			return ErrNodeDeliver
 		}
-
 		g.nodeApi.AddNode(node)
 		break
 	}
+
+	return nil
 }

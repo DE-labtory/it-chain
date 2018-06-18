@@ -1,5 +1,6 @@
 package p2p
 
+//todo implement it!
 func init() {
 	////myIp := conf.GetConfiguration().Common.NodeIp
 	//
