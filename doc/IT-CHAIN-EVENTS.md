@@ -3,50 +3,23 @@
 Types of events(which is kind of AMQP messages) related to certain aggregate root and their usages
 
 ## Connection
-### ConnectionCreatedEvent
-Events which is occured when connection is created
-
-**publised in components below**
-- GATAEWAY COMPONENT
-
-**consumed in components below**
-- GATAEWAY COMPONENT
-
-### ConnectionDisconnectedEvent
-Events which is occured when connection is disconnected
-
-**publised in components below**
-- GATAEWAY COMPONENT
-
-**consumed in components below**
-- GATEWAY COMPONENT
+| Event                       | Publisher    | Consumer     | Desc                                                    |
+| --------------------------- | ------------ | ------------ | ------------------------------------------------------- |
+| ConnectionCreatedEvent      | Gateway, P2P | Gateway, P2P | Events which is occured when connection is connected    |
+| ConnectionDisconnectedEvent | Gateway, P2P | Gateway, P2P | Events which is occured when connection is disconnected |
 
 ## Leader
-### LeaderUpdatedEvent
-Events which is occured when leader is updated
-
-**publised in components below**
-- P2P COMPONENT
-
-**consumed in components below**
-- P2P COMPONENT
+| Event              | Publisher | Consumer | Desc                                           |
+| ------------------ | --------- | -------- | ---------------------------------------------- |
+| LeaderUpdatedEvent | P2P       | P2P      | Events which is occured when leader is updated |
 
 ## Node
-### NodeCreatedEvent
-Events which is occured when node is created
-
-**publised in components below**
-- P2P COMPONENT
-
-**consumed in components below**
-- P2P COMPONENT
-
+| Event            | Publisher | Consumer | Desc                                         |
+| ---------------- | --------- | -------- | -------------------------------------------- |
+| NodeCreatedEvent | P2P       | P2P      | Events which is occured when node is created |
 
 
 
 ---
 ### AUTHOR
-Connection - Namhoon Lee(@frontalnh)
-Leader - Namhoon Lee(@frontalnh)
-Node - Namhoon Lee(@frontalnh)
----
+Namhoon Lee(@frontalnh)
