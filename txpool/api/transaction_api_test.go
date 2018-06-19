@@ -46,7 +46,7 @@ func TestTxCommandHandler_HandleTxCreate(t *testing.T) {
 	}
 
 	//when
-	txCommandHandler.CreateTransaction(txCreatedCommand)
+	txCommandHandler.CreateTransaction(txID, txCreatedCommand.TxData)
 
 	//then
 	tx := &txpool.Transaction{}
