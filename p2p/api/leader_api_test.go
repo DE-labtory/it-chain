@@ -41,7 +41,7 @@ package api_test
 //		},
 //	}
 //
-//	publisher := messaging.Publisher(func(exchange string, topic string, data interface{}) error {
+//	publisher := adapter.Publisher(func(exchange string, topic string, data interface{}) error {
 //
 //		return nil
 //	})
@@ -69,7 +69,7 @@ package api_test
 //			err: api.ErrEmptyNodeId,
 //		},
 //	}
-//	publisher := messaging.Publisher(func(exchange string, topic string, data interface{}) error {
+//	publisher := adapter.Publisher(func(exchange string, topic string, data interface{}) error {
 //		assert.Equal(t, exchange, "Command")
 //		assert.Equal(t, topic, "message.deliver")
 //		assert.Equal(t, reflect.TypeOf(data).String(), "LeaderInfoDelivery")
@@ -87,14 +87,14 @@ package api_test
 //	}
 //}
 //
-//func SetupLeaderApi(leader_repo_path string, event_repo_path string, url string, event midgard.Event, publisher messaging.Publisher, myInfo *p2p.Node) *api.LeaderApi {
+//func SetupLeaderApi(leader_repo_path string, event_repo_path string, url string, event midgard.Event, publisher adapter.Publisher, myInfo *p2p.Node) *api.LeaderApi {
 //
 //	store := leveldb.NewEventStore(event_repo_path, leveldb.NewSerializer(event))
 //	client := rabbitmq.Connect(url)
 //	leaderRepository := leveldb2.NewLeaderRepository(leader_repo_path)
 //	eventRepository := midgard.NewRepo(store, client)
 //
-//	messageDispatcher := messaging.NewMessageDispatcher(publisher)
+//	messageDispatcher := adapter.NewMessageDispatcher(publisher)
 //
 //	leaderApi := api.NewLeaderApi(leaderRepository, *eventRepository, messageDispatcher, myInfo)
 //
