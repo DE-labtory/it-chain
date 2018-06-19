@@ -21,7 +21,6 @@ func (mna MockNodeApi) UpdateNodeList(nodeList []p2p.Node) error { return nil }
 func (mna MockNodeApi) DeliverNodeList(nodeId p2p.NodeId) error  { return nil }
 func (mna MockNodeApi) AddNode(node p2p.Node)                    {}
 
-//todo need mock
 func TestGrpcMessageHandler_HandleMessageReceive(t *testing.T) {
 
 	leader := p2p.Leader{}
