@@ -3,121 +3,107 @@ package adapter_test
 import (
 	"testing"
 
-	"os"
-
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/p2p/infra/adapter"
-	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/leveldb"
 	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
 )
 
-//todo mock
-func TestRepositoryProjector_HandleConnCreatedEvent(t *testing.T) {
-	//repositoryProjector, endUp := SetupRepositoryProjector("path_node_repository", "path_leader_repository")
-	//
-	//tests := map[string]struct {
-	//	input struct {
-	//		id      string
-	//		address string
-	//	}
-	//	err error
-	//}{
-	//	"success": {
-	//		input: struct {
-	//			id      string
-	//			address string
-	//		}{
-	//			id:      string("123"),
-	//			address: string("123"),
-	//		},
-	//		err: nil,
-	//	},
-	//	"empty node id test": {
-	//		input: struct {
-	//			id      string
-	//			address string
-	//		}{id: string(""), address: string("123")},
-	//		err: adapter.ErrEmptyNodeId,
-	//	},
-	//	"empty address test": {
-	//		input: struct {
-	//			id      string
-	//			address string
-	//		}{id: string("123"), address: string("")},
-	//		err: adapter.ErrEmptyAddress,
-	//	},
-	//}
-	//
-	//defer endUp()
-	//
-	//for testName, test := range tests {
-	//	t.Logf("running test case %s", testName)
-	//	event := p2p.ConnectionCreatedEvent{
-	//		EventModel: midgard.EventModel{
-	//			ID: test.input.id,
-	//		},
-	//		Address: test.input.address,
-	//	}
-	//	err := repositoryProjector.HandleConnCreatedEvent(event)
-	//	assert.Equal(t, err, test.err)
-	//
-	//	node, _ := repositoryProjector.NodeRepository.FindById(p2p.NodeId{Id: test.input.id})
-	//	if node != nil {
-	//		assert.Equal(t, node.NodeId.Id, test.input.id)
-	//		assert.Equal(t, node.IpAddress, test.input.address)
-	//		repositoryProjector.NodeRepository.Remove(node.NodeId)
-	//	}
-	//}
+type EventHandlerMockNodeApi struct {}
+func (na EventHandlerMockNodeApi) AddNode(node p2p.Node) error{return nil}
+func (na EventHandlerMockNodeApi) DeleteNode(id p2p.NodeId) error{return nil}
+
+
+func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
+	//1. test proper input
+	//empty nodeid, empty address
+	//2. proper output
+	//matching err
+
+	tests := map[string] struct{
+		input struct{
+			nodeId string
+			address string
+		}
+		err error
+	}{
+		"success":{
+			input: struct {
+				nodeId  string
+				address string
+			}{nodeId: string("123"), address: string("123")},
+			err:nil,
+		},
+		"empty nodeId test":{
+			input: struct {
+				nodeId  string
+				address string
+			}{nodeId: string(""), address: string("123")},
+			err:adapter.ErrEmptyNodeId,
+		},
+		"empty address test":{
+			input: struct {
+				nodeId  string
+				address string
+			}{nodeId: string("123"), address: string("")},
+			err:adapter.ErrEmptyAddress,
+		},
+	}
+	eventHandler := adapter.NewEventHandler(EventHandlerMockNodeApi{})
+
+	for testName, test := range tests{
+		t.Logf("running test case %s", testName)
+		err := eventHandler.HandleConnCreatedEvent(p2p.ConnectionCreatedEvent{EventModel:midgard.EventModel{ID:test.input.nodeId}, Address:test.input.address})
+		assert.Equal(t, err, test.err)
+	}
+
+
 }
 
-//todo mock
-func TestRepositoryProjector_HandleConnDisconnectedEvent(t *testing.T) {
-	//repositoryProjector, endUp := SetupRepositoryProjector("path_node_repository", "path_leader_repository")
-	//
-	//tests := map[string]struct {
-	//	input struct {
-	//		id string
-	//	}
-	//	err error
-	//}{
-	//	"success": {
-	//		input: struct {
-	//			id string
-	//		}{id: string(123)},
-	//		err: nil,
-	//	},
-	//	"empty node id test": {
-	//		input: struct {
-	//			id string
-	//		}{id: string("")},
-	//		err: adapter.ErrEmptyNodeId,
-	//	},
-	//}
-	//
-	//defer endUp()
-	//
-	//for testName, test := range tests {
-	//	t.Logf("running test case %s", testName)
-	//	event := p2p.ConnectionDisconnectedEvent{
-	//		EventModel: midgard.EventModel{
-	//			ID: test.input.id,
-	//		},
-	//	}
-	//	err := repositoryProjector.HandleConnDisconnectedEvent(event)
-	//	assert.Equal(t, err, test.err)
-	//
-	//	node, _ := repositoryProjector.NodeRepository.FindById(p2p.NodeId{Id: test.input.id})
-	//
-	//	if node != nil {
-	//		t.Errorf("node didn't removed!")
-	//	}
-	//}
+func TestEventHandler_HandleConnDisconnectedEvent(t *testing.T) {
+
+	tests := map[string]struct {
+		input struct {
+			id string
+		}
+		err error
+	}{
+		"success": {
+			input: struct {
+				id string
+			}{id: string(123)},
+			err: nil,
+		},
+		"empty node id test": {
+			input: struct {
+				id string
+			}{id: string("")},
+			err: adapter.ErrEmptyNodeId,
+		},
+	}
+
+	eventHandler := adapter.NewEventHandler(EventHandlerMockNodeApi{})
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+		event := p2p.ConnectionDisconnectedEvent{
+			EventModel: midgard.EventModel{
+				ID: test.input.id,
+			},
+		}
+		err := eventHandler.HandleConnDisconnectedEvent(event)
+		assert.Equal(t, err, test.err)
+
+	}
 }
 
-//todo mock
+type MockNodeRepository struct{}
+func (nr MockNodeRepository) Save(data p2p.Node) error{return nil}
+type MockLeaderRepository struct{}
+func (lr MockLeaderRepository) SetLeader(leader p2p.Leader){}
+
+
 func TestRepositoryProjector_HandleLeaderUpdatedEvent(t *testing.T) {
-	repositoryProjector, endUp := SetupRepositoryProjector("path_node_repository", "path_leader_repository")
+	repositoryProjector := SetupRepositoryProjector()
 
 	tests := map[string]struct {
 		input struct {
@@ -139,8 +125,6 @@ func TestRepositoryProjector_HandleLeaderUpdatedEvent(t *testing.T) {
 		},
 	}
 
-	defer endUp()
-
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 		event := p2p.LeaderUpdatedEvent{
@@ -152,22 +136,10 @@ func TestRepositoryProjector_HandleLeaderUpdatedEvent(t *testing.T) {
 		assert.Equal(t, err, test.err)
 	}
 }
-func TestRepositoryProjector_HandlerNodeCreatedEvent(t *testing.T) {
 
-}
+func SetupRepositoryProjector() (*adapter.RepositoryProjector) {
 
-//todo need to change to mock repo
-func SetupRepositoryProjector(pathNodeRepository string, pathLeaderRepository string) (*adapter.RepositoryProjector, func()) {
+	repositoryProjector := adapter.NewRepositoryProjector(MockNodeRepository{}, MockLeaderRepository{})
 
-	nodeRepository := leveldb.NewNodeRepository(pathNodeRepository)
-	leaderRepository := leveldb.NewLeaderRepository(pathLeaderRepository)
-
-	repositoryProjector := adapter.NewRepositoryProjector(nodeRepository, leaderRepository)
-
-	return repositoryProjector, func() {
-		nodeRepository.Close()
-		leaderRepository.Close()
-		os.RemoveAll(pathNodeRepository)
-		os.RemoveAll(pathLeaderRepository)
-	}
+	return repositoryProjector
 }
