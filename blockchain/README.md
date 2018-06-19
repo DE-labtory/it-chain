@@ -44,10 +44,8 @@ Blockchain Component는 blockchain 동기화, block 추가, 조회를 담당한�
 
 ## Command Service
 
-* **SendSyncStartCommand**
-  * 블록체인 컴포넌트의 동기화 시작을 알린다.
-* **SendSyncFinishCommand**
-  * 블록체인 컴포넌트의 동기화가 완료되었다는 것을 알리고, 블록 체인 내 마지막 블록을 보낸다.
+* **SendSyncUpdateCommand**
+  * 블록체인 컴포넌트의 동기화 상태을 알리고 동기화가 완료되었을 경우 블록체인의 마지막 블록을 보낸다.
 
 
 
