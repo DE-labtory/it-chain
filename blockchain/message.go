@@ -1,5 +1,13 @@
 package blockchain
 
-type BlockRequestMessage struct {}
+import (
+	"github.com/it-chain/yggdrasill/impl"
+)
 
-type BlockResponseMessage struct {}
+type BlockRequestMessage struct {
+	TimeUnix int64
+}
+
+type BlockResponseMessage struct {
+	BlockInfo impl.DefaultBlock
+}
