@@ -7,5 +7,9 @@ type SyncUpdateCommand struct {
 	sync bool
 }
 
-
-
+type MessageDeliverCommand struct {
+	midgard.CommandModel
+	Recipients []string
+	Body       []byte
+	Protocol   string
+}

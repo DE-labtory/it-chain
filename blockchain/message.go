@@ -9,5 +9,5 @@ type BlockRequestMessage struct {
 }
 
 type BlockResponseMessage struct {
-	BlockInfo impl.DefaultBlock
+	Block impl.DefaultBlock
 }
