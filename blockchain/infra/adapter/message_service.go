@@ -3,7 +3,10 @@ package adapter
 import (
 	"errors"
 
-	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/midgard"
+	"github.com/rs/xid"
 )
 
 //kind of error
@@ -21,19 +24,57 @@ func NewMessageService(publish Publish) *MessageService {
 	}
 }
 
-//request leader information in p2p network to the node specified by nodeId
-func (md *MessageService) RequestBlock(nodeId p2p.NodeId) error {
-	/*
-		입력값세팅:
-		바디세팅:
-		커맨드세팅:
-		퍼블리쉬:
-	*/
+////request leader information in p2p network to the node specified by nodeId
+//func (md *MessageService) RequestBlock(nodeId p2p.NodeId) error {
+//	/*
+//		입력값세팅:
+//		바디세팅:
+//		커맨드세팅:
+//		퍼블리쉬:
+//	*/
+//
+//	// 입력값 세팅:
+//	if nodeId.Id == "" {
+//		return ErrEmptyNodeId
+//	}
+//
+//	// 바디 세팅:
+//	body := blockchain.BlockRequestMessage{
+//		TimeUnix: time.Now().Unix(),
+//	}
+//
+//	// 커맨드 세팅:
+//
+//	deliverCommand, err := CreateMessagCommand()
+//
+//	if err != nil {
+//		return err
+//	}
+//
+//	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
+//
+//	return md.publish()
+//}
+//
+//func (md *MessageService) ResponseBlock(nodeId p2p.NodeId) error {
+//
+//	return md.publish()
+//}
 
-	return md.publish()
-}
+func createMessageDeliverCommand(protocol string, body interface{}) (blockchain.MessageDeliverCommand, error) {
 
-func (md *MessageService) ResponseBlock(nodeId p2p.NodeId) error {
+	data, err := common.Serialize(body)
 
-	return md.publish()
+	if err != nil {
+		return blockchain.MessageDeliverCommand{}, err
+	}
+
+	return blockchain.MessageDeliverCommand{
+		CommandModel: midgard.CommandModel{
+			ID: xid.New().String(),
+		},
+		Recipients: make([]string, 0),
+		Body:       data,
+		Protocol:   protocol,
+	}, err
 }
