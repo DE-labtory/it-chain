@@ -9,26 +9,37 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-var ErrSameLeader = errors.New("same leader requested")
 var ErrEmptyNodeId = errors.New("empty node id requested")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 
 type LeaderApi struct {
-	leaderRepository  p2p.LeaderRepository
-	eventRepository   midgard.Repository
-	messageDispatcher p2p.MessageDispatcher
-	myInfo            *p2p.Node
+	leaderRepository ReadOnlyLeaderRepository
+	eventRepository  EventRepository
+	messageService   LeaderMessageService
+	myInfo           *p2p.Node
 }
 
-type Publisher func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
+type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
-func NewLeaderApi(leaderRepository p2p.LeaderRepository, eventRepository midgard.Repository, messageDispatcher p2p.MessageDispatcher, myInfo *p2p.Node) *LeaderApi {
+type ReadOnlyLeaderRepository interface {
+	GetLeader() p2p.Leader
+}
+
+type EventRepository interface { //midgard.Repository
+	Save(aggregateID string, events ...midgard.Event) error
+}
+
+type LeaderMessageService interface {
+	DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error
+}
+
+func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, messageService LeaderMessageService, myInfo *p2p.Node) *LeaderApi {
 
 	return &LeaderApi{
-		leaderRepository:  leaderRepository,
-		eventRepository:   eventRepository,
-		messageDispatcher: messageDispatcher,
-		myInfo:            myInfo,
+		leaderRepository: leaderRepository,
+		eventRepository:  eventRepository,
+		messageService:   messageService,
+		myInfo:           myInfo,
 	}
 }
 
@@ -51,7 +62,7 @@ func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Leader) error {
 
 	if err != nil {
 		log.Println(err.Error())
-		return nil
+		return err
 	}
 
 	return err
@@ -64,7 +75,7 @@ func (leaderApi *LeaderApi) DeliverLeaderInfo(nodeId p2p.NodeId) error {
 	}
 
 	leader := leaderApi.leaderRepository.GetLeader()
-	leaderApi.messageDispatcher.DeliverLeaderInfo(nodeId, *leader)
+	leaderApi.messageService.DeliverLeaderInfo(nodeId, leader)
 
 	return nil
 }

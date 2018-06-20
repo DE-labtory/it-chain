@@ -1,6 +1,6 @@
 package p2p
 
-type MessageDispatcher interface {
+type MessageService interface {
 	RequestLeaderInfo(nodeId NodeId) error
 	DeliverLeaderInfo(nodeId NodeId, leader Leader) error
 	RequestNodeList(nodeId NodeId) error
