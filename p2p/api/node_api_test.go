@@ -17,7 +17,7 @@ package api_test
 //		},
 //	}
 //
-//	publisher := messaging.Publisher(func(exchange string, topic string, data interface{}) error {
+//	publisher := adapter.Publisher(func(exchange string, topic string, data interface{}) error {
 //		return nil
 //	})
 //
@@ -32,7 +32,7 @@ package api_test
 //	}
 //}
 //
-//func SetupNodeApi(nodeRepoPath string, eventRepoPath string, url string, publisher messaging.Publisher, myInfo *p2p.Node) *NodeApi {
+//func SetupNodeApi(nodeRepoPath string, eventRepoPath string, url string, publisher adapter.Publisher, myInfo *p2p.Node) *NodeApi {
 //
 //	event := p2p.LeaderUpdatedEvent{}
 //	store := leveldb2.NewEventStore(eventRepoPath, leveldb2.NewSerializer(event))
@@ -40,7 +40,7 @@ package api_test
 //
 //	nodeRepository := leveldb.NewNodeRepository(nodeRepoPath)
 //	eventRepository := midgard.NewRepo(store, client)
-//	messageDispatcher := messaging.NewMessageDispatcher(publisher)
+//	messageDispatcher := adapter.NewMessageDispatcher(publisher)
 //
 //	nodeApi := NewNodeApi(nodeRepository, *eventRepository, messageDispatcher)
 //
