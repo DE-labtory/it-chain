@@ -97,7 +97,7 @@
 
 동기화(Synchronize)는 확인(Check), 구축(Construct), 재구축(PostConstruct)의 과정을 거친다.
 
-먼저 확인(Check)은 (1) '신뢰할 수 있는 노드'(Reliable Node) 선정과 (2) '상태 점검'을 거친다. Reliable Node를 선정하기 위해서 blockchain 컴포넌트는 ['Reliable Node 후보 저장'](#예외-사항-처리) 과정을 통해서 Reliable Node 후보들을 가지고 있다. 선정 방법은 후보들이 가진 마지막 block의 height와 lastSeal의 비교를 하는 것이다. 똑같은 height와 lastSeal이 후보들 중 1/3 이상이 나오게 되면 그 height와 lastSeal을 가진 Node가 Reliable Node가 된다. Reliable Node가 정해지면 자신의 마지막 block의 height와 lastSeal을 비교해서 같은지를 확인한다. 같다면 동기화(Synchronize)는 중단되고 그렇지 않다면 구축(Construct) 단계로 넘어간다.
+먼저 확인(Check)은 (1) '신뢰할 수 있는 노드'(Reliable Node) 선정과 (2) '상태 점검'을 거친다. Reliable Node를 선정하기 위해서 blockchain 컴포넌트는 ['Reliable Node 후보 저장'](#reliable-node-후보-저장) 과정을 통해서 Reliable Node 후보들을 가지고 있다. 선정 방법은 후보들이 가진 마지막 block의 height와 lastSeal의 비교를 하는 것이다. 똑같은 height와 lastSeal이 후보들 중 1/3 이상이 나오게 되면 그 height와 lastSeal을 가진 Node가 Reliable Node가 된다. Reliable Node가 정해지면 자신의 마지막 block의 height와 lastSeal을 비교해서 같은지를 확인한다. 같다면 동기화(Synchronize)는 중단되고 그렇지 않다면 구축(Construct) 단계로 넘어간다.
 
 구축(Construct)단계에서는 Reliable Node를 대상으로 RequestBlock을 통해 block을 요청하고 BlockResponseProtocol로 응답받은 block을 받게된다. AddBlock에서는 추가할 블록이 다음 블록이 맞는지 확인하고 blockchain에 추가하게된다. 그리고 위 과정은 구축 단계 시작할 때의 Reliable Node의 blockchain을 모두 가져올 때 까지 진행된다. 즉 구축 단계 시작 이후로 Reliable Node가 쌓은 block들은 추가하지 않는다. 이런 구축 단계 이후 합의를 통해 확정된 block들은 BlockPool에 보관하게된다. 블록을 요청하고, 응답 받고,  blockchain에 추가하는 과정은 동기적으로 진행된다.(block을 요청하고, blockchain에 추가하는 두 가지 프로세스를 Producer-Consumer 패턴으로 구현하는 것도 하나의 방법이 될 수 있다.)
 
