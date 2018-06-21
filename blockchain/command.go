@@ -7,5 +7,7 @@ type SyncUpdateCommand struct {
 	sync bool
 }
 
-
+type NodeUpdateCommand struct {
+	midgard.EventModel
+}
 
