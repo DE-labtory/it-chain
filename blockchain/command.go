@@ -2,7 +2,16 @@ package blockchain
 
 import (
 	"github.com/it-chain/it-chain-Engine/txpool"
+	"github.com/it-chain/midgard"
 )
 
-// TODO: 의존관계 가져도 되는지?
-type ProposeBlockCommand = txpool.ProposeBlockCommand
+type ProposeBlockCommand struct {
+	midgard.CommandModel
+	// TODO: Transaction이 너무 다름.
+	Transactions []txpool.Transaction
+}
+
+type BlockValidateCommand struct {
+	midgard.CommandModel
+	Block Block
+}

@@ -2,7 +2,7 @@ package blockchain
 
 import "github.com/it-chain/midgard"
 
-type BlockCreatedEvent struct {
+type BlockValidatedEvent struct {
 	midgard.EventModel
 	Block Block
 }

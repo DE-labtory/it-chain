@@ -23,17 +23,17 @@ func NewDispatcher(publisher Publisher) *MessageDispatcher {
 	}
 }
 
-func (m *MessageDispatcher) SendBlockCreatedEvent(block blockchain.Block) error {
+func (m *MessageDispatcher) SendBlockValidateCommand(block blockchain.Block) error {
 	if block == nil {
 		return ErrEmptyBlock
 	}
 
-	event := blockchain.BlockCreatedEvent{
-		EventModel: midgard.EventModel{
+	command := blockchain.BlockValidateCommand{
+		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
 		Block: block,
 	}
 
-	return m.publisher("Event", "Block", event)
+	return m.publisher("Event", "Block", command)
 }

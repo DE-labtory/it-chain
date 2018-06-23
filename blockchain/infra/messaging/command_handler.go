@@ -29,7 +29,7 @@ func (handler *BlockCommandHandler) HandleProposeBlockCommand(cmd blockchain.Pro
 		return
 	}
 
-	dispatcher.SendBlockCreatedEvent(block)
+	dispatcher.SendBlockValidateCommand(block)
 }
 
 // TODO: yggdrasill/impl/Transaction과 txpool/Transaction이 다름.
