@@ -1,4 +1,4 @@
-package messaging
+package adapter
 
 import (
 	"time"
@@ -6,7 +6,6 @@ import (
 	"errors"
 
 	"github.com/it-chain/it-chain-Engine/common"
-	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
@@ -17,21 +16,21 @@ var ErrEmptyNodeId = errors.New("empty nodeid proposed")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 var ErrEmptyNodeList = errors.New("empty node list proposed")
 
-type Publisher func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
+type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
 // message dispatcher sends messages to other nodes in p2p network
-type MessageDispatcher struct {
-	publisher Publisher // midgard.client
+type MessageService struct {
+	publish Publish // midgard.client.Publish
 }
 
-func NewMessageDispatcher(publisher Publisher) *MessageDispatcher {
-	return &MessageDispatcher{
-		publisher: publisher,
+func NewMessageService(publish Publish) *MessageService {
+	return &MessageService{
+		publish: publish,
 	}
 }
 
 //request leader information in p2p network to the node specified by nodeId
-func (md *MessageDispatcher) RequestLeaderInfo(nodeId p2p.NodeId) error {
+func (md *MessageService) RequestLeaderInfo(nodeId p2p.NodeId) error {
 
 	if nodeId.Id == "" {
 		return ErrEmptyNodeId
@@ -42,7 +41,7 @@ func (md *MessageDispatcher) RequestLeaderInfo(nodeId p2p.NodeId) error {
 	}
 
 	//message deliver command for delivering leader info
-	deliverCommand, err := CreateMessageDeliverCommand(event.LeaderInfoDeliverProtocol, body)
+	deliverCommand, err := CreateMessageDeliverCommand("LeaderInfoRequestMessage", body)
 
 	if err != nil {
 		return err
@@ -50,11 +49,11 @@ func (md *MessageDispatcher) RequestLeaderInfo(nodeId p2p.NodeId) error {
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
 
-	return md.publisher("Command", "message.deliver", deliverCommand)
+	return md.publish("Command", "message.deliver", deliverCommand)
 }
 
 // command message which requests node list of specific node
-func (md *MessageDispatcher) RequestNodeList(nodeId p2p.NodeId) error {
+func (md *MessageService) RequestNodeList(nodeId p2p.NodeId) error {
 
 	if nodeId.Id == "" {
 		return ErrEmptyNodeId
@@ -71,10 +70,10 @@ func (md *MessageDispatcher) RequestNodeList(nodeId p2p.NodeId) error {
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
 
-	return md.publisher("Command", "message.deliver", deliverCommand)
+	return md.publish("Command", "message.deliver", deliverCommand)
 }
 
-func (md *MessageDispatcher) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error {
+func (md *MessageService) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error {
 
 	if nodeId.Id == "" {
 		return ErrEmptyNodeId
@@ -92,11 +91,11 @@ func (md *MessageDispatcher) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Lea
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
 
-	return md.publisher("Command", "message.deliver", deliverCommand)
+	return md.publish("Command", "message.deliver", deliverCommand)
 }
 
 //deliver node list to other node specified by nodeId
-func (md *MessageDispatcher) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.Node) error {
+func (md *MessageService) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.Node) error {
 
 	if nodeId.Id == "" {
 		return ErrEmptyNodeId
@@ -114,11 +113,11 @@ func (md *MessageDispatcher) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.N
 
 	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, nodeId.ToString())
 
-	return md.publisher("Command", "message.deliver", messageDeliverCommand)
+	return md.publish("Command", "message.deliver", messageDeliverCommand)
 }
 
 //deliver single node
-func (md *MessageDispatcher) DeliverNode(nodeId p2p.NodeId, node p2p.Node) error {
+func (md *MessageService) DeliverNode(nodeId p2p.NodeId, node p2p.Node) error {
 
 	messageDeliverCommand, err := CreateMessageDeliverCommand("NodeDeliverProtocol", node)
 
@@ -128,7 +127,7 @@ func (md *MessageDispatcher) DeliverNode(nodeId p2p.NodeId, node p2p.Node) error
 
 	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, node.NodeId.ToString())
 
-	return md.publisher("Command", "message.deliver", messageDeliverCommand)
+	return md.publish("Command", "message.deliver", messageDeliverCommand)
 }
 func CreateMessageDeliverCommand(protocol string, body interface{}) (p2p.MessageDeliverCommand, error) {
 
