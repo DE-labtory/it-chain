@@ -48,3 +48,7 @@ func (lr *LeaderRepository) SetLeader(leader p2p.Leader) {
 	lr.leveldb.Put([]byte("leader"), bytes, true)
 
 }
+
+func (lr *LeaderRepository) Close(){
+	lr.leveldb.Close()
+}

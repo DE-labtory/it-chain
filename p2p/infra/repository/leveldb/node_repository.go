@@ -104,3 +104,7 @@ func (pr *NodeRepository) FindAll() ([]p2p.Node, error) {
 
 	return nodes, nil
 }
+
+func (nr *NodeRepository) Close(){
+	nr.leveldb.Close()
+}
