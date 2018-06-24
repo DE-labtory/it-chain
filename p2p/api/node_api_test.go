@@ -1,9 +1,10 @@
 package api_test
 
 import (
-	"testing"
-	"github.com/it-chain/it-chain-Engine/p2p"
 	"errors"
+	"testing"
+
+	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/p2p/api"
 	"github.com/magiconair/properties/assert"
 )
@@ -15,12 +16,16 @@ var ErrEmptyNodeList = errors.New("empty node list proposed")
 //todo make test map
 //todo test continue
 
-type MockNodeRepository struct {}
-func (mnr MockNodeRepository)FindById(id p2p.NodeId) (*p2p.Node, error){return nil, nil}
-func (mnr MockNodeRepository)FindAll() ([]p2p.Node, error){return nil, nil}
+type MockNodeRepository struct{}
 
-type MockNodeMessageService struct {}
-func (mnms MockNodeMessageService) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.Node) error{return nil}
+func (mnr MockNodeRepository) FindById(id p2p.NodeId) (*p2p.Node, error) { return nil, nil }
+func (mnr MockNodeRepository) FindAll() ([]p2p.Node, error)              { return nil, nil }
+
+type MockNodeMessageService struct{}
+
+func (mnms MockNodeMessageService) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.Node) error {
+	return nil
+}
 
 func TestNodeApi_UpdateNodeList(t *testing.T) {
 
@@ -28,11 +33,11 @@ func TestNodeApi_UpdateNodeList(t *testing.T) {
 		input []p2p.Node
 		err   error
 	}{
-		"success":{
+		"success": {
 			input: []p2p.Node{
 				p2p.Node{
-					NodeId:p2p.NodeId{
-						Id:"1",
+					NodeId: p2p.NodeId{
+						Id: "1",
 					},
 				},
 			},

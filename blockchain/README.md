@@ -16,12 +16,8 @@ Blockchain Component는 blockchain 동기화, block 추가, 조회를 담당한�
 
 ## Event
 
-* **ReliableNodeUpdateEvent**
-  * Reliable Node가 바뀌었음을 알린다.
-* **BlockchainSyncStartEvent**
-  * Blockchain synchronize를 시작함을 알린다.
-* **BlockchainSyncFinEvent**
-  * Blockchain synchronize가 끝났음을 알린다.
+* **NodeUpdateEvent**
+  * Reliable Node의 후보가 바뀔 때 바뀐 Reliable Node 후보 정보 event를 발생시킨다.
 
 
 
@@ -48,8 +44,10 @@ Blockchain Component는 blockchain 동기화, block 추가, 조회를 담당한�
 
 ## Command Service
 
-* **SendSyncUpdateCommand**
-  * 블록체인 컴포넌트의 동기화 상태을 알리고 동기화가 완료되었을 경우 블록체인의 마지막 블록을 보낸다.
+* **SendSyncStartCommand**
+  * 블록체인 컴포넌트의 동기화 시작을 알린다.
+* **SendSyncFinishCommand**
+  * 블록체인 컴포넌트의 동기화가 완료되었다는 것을 알리고, 블록 체인 내 마지막 블록을 보낸다.
 
 
 
@@ -75,3 +73,6 @@ Blockchain Component는 blockchain 동기화, block 추가, 조회를 담당한�
 ### Author
 
 [@junk-sound](https://github.com/junk-sound), [@zeroFruit](https://github.com/zeroFruit)
+# Block creation/validation scenario
+
+![](./block-create-validate-scenario.png)
