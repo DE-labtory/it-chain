@@ -78,7 +78,7 @@ it-chain은 repository에 대한 쓰기와 읽기를 분리하는 CQRS(Command Q
 
 
 # Communication between peers
-peer 사이의 통신은 gRPC library 기반의 자체 library 인 bifrost를 활용하여 이루어 진다. 각 peer 사이에서 rpc 통신은 message 객체를 주고받는 것으로 이루어 지며, _송신은 각 컴포넌트의 service의 한 종류인 `message_service` 에서 이루어 지며, 수신은 각 컴포넌트의 infra의 message handler에서 이루어 진다._ 각 메세지는 메세지의 목적에 따라 미리 정해진 protocol 을 포함하며 message handler에서 특정 protocol에 따라 적합한 api 함수를 호출함으로써 모든 기능 수행을 application layer에 위임한다.
+peer 사이의 통신은 gRPC library 기반의 자체 library 인 bifrost를 활용하여 이루어 진다. 각 peer 사이에서 rpc 통신은 message 객체를 주고받는 것으로 이루어 지며, _송신은 각 컴포넌트의 service의 한 종류인 `message_service` 에서 이루어 지며, 수신은 각 컴포넌트의 infra의 grpc command handler에서 이루어 진다._ 각 메세지는 메세지의 목적에 따라 미리 정해진 protocol 을 포함하며 grpc command handler에서 특정 protocol에 따라 적합한 api 함수를 호출함으로써 모든 기능 수행을 application layer에 위임한다.
 
 <p align="center"><img src="../images/communication-between-peers.png" width="500px" height="600px"></p>
 
