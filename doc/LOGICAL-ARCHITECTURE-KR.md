@@ -60,8 +60,14 @@ it-chain의 컴포넌트들 간의 통신은 AMQP(Advanced Message Que Protocol)
 
 여기서 중요한 점은 `event handler` 와 `command handler` 의 역할은 infra에서 수신한 amqp 메세지에 대한 adapter의 임무만을 수행한다는 것이며, 해당 component 내에서 이루어져야 하는 일련의 작업들과 구체적인 구현은 handler 내에서 이루어 지면 안된다는 점이다. handler가 특정 event와 command에 대한 적합한 api 호출 혹은 repository projection 만을 수행하게 함으로써 handler와 application layer 사이의 명확한 역할의 분담이 이루어지게 되고 adapter 내에서 일체의 비즈니스 로직이 이루어 지지 않도록 구분지었다.
 
-**Communication between components via AMQP Design Model**
-![handler](../images/handler.png)
+
+
+**Consume from AMQP**
+![handler](../images/[logical]component-consume.png)
+
+**Publish to AMQP**
+
+![handler](../images/[logical]component-publish.png)
 
 ## Event Handler
 Event handler는 amqp에서 event를 consume하여 필요한 작업을 수행하며, 크게 event 를 기반으로 repository 에 projection을 수행하는 기능과, event 발생시 처리되어야 하는 일련의 작업을 api에 위임하여 처리하는 기능 두가지로 나뉜다. 첫번째 기능은 event_handler 내의 `repository projector` 를 통해 수행되며, 두번째 기능은 event_handler내에서 api 호출을 통해 수행된다. repository projector가 repository projection을 수행하지만, evnet_handler는 필요에 따라 repository에 접근할 수 있다.
@@ -72,15 +78,11 @@ Command handler는 amqp에서 command를 consume하여 필요한 작업을 수�
 ## Repository Projector
 it-chain은 repository에 대한 쓰기와 읽기를 분리하는 CQRS(Command Query Responsibilities Segregation) 패턴을 차용하며, Repository Projector는 오직 repository에 대한 projection(Write) 작업만을 수행하고, 각 handler는 repository에 대한 read작업을 수반하는 비즈니스 로직을 수행하도록 구분된다. 이러한 it-chain의 CQRS pattern은 projection이라는 minimal 한 logic의 수행만을 전담하는 repository projector와 handler를 구분함으로써 기능적으로 보다 명확한 설계를 추구하였다.
 
-**Handling command and event based on CQRS pattern**
-
-![cqrs](../images/cqrs.png)
-
 
 # Communication between peers
 peer 사이의 통신은 gRPC library 기반의 자체 library 인 bifrost를 활용하여 이루어 진다. 각 peer 사이에서 rpc 통신은 message 객체를 주고받는 것으로 이루어 지며, _송신은 각 컴포넌트의 service의 한 종류인 `message_service` 에서 이루어 지며, 수신은 각 컴포넌트의 infra의 grpc command handler에서 이루어 진다._ 각 메세지는 메세지의 목적에 따라 미리 정해진 protocol 을 포함하며 grpc command handler에서 특정 protocol에 따라 적합한 api 함수를 호출함으로써 모든 기능 수행을 application layer에 위임한다.
 
-<p align="center"><img src="../images/communication-between-peers.png" width="500px" height="600px"></p>
+<p align="center"><img src="../images/[logical]peer-communication.png"></p>
 
 
 
