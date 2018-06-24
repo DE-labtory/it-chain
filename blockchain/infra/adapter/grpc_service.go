@@ -3,11 +3,8 @@ package adapter
 import (
 	"errors"
 
-	"fmt"
-
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/common"
-	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/yggdrasill/impl"
@@ -40,7 +37,7 @@ func (md *MessageService) RequestBlock(nodeId p2p.NodeId, height uint64) error {
 		Height: height,
 	}
 
-	deliverCommand, err := createMessageDeliverCommand(event.BlockRequestProtocol, body)
+	deliverCommand, err := createMessageDeliverCommand("BlockRequestProtocol", body)
 	if err != nil {
 		return err
 	}
@@ -57,10 +54,8 @@ func (md *MessageService) ResponseBlock(nodeId p2p.NodeId, block impl.DefaultBlo
 	}
 
 	body := block
-	fmt.Println("check")
-	fmt.Println(block)
 
-	deliverCommand, err := createMessageDeliverCommand(event.BlockResponseProtocol, body)
+	deliverCommand, err := createMessageDeliverCommand("BlockResponseProtocol", body)
 	if err != nil {
 		return err
 	}
@@ -73,7 +68,6 @@ func (md *MessageService) ResponseBlock(nodeId p2p.NodeId, block impl.DefaultBlo
 func createMessageDeliverCommand(protocol string, body interface{}) (blockchain.MessageDeliverCommand, error) {
 
 	data, err := common.Serialize(body)
-
 	if err != nil {
 		return blockchain.MessageDeliverCommand{}, err
 	}
