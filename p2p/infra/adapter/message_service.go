@@ -6,7 +6,6 @@ import (
 	"errors"
 
 	"github.com/it-chain/it-chain-Engine/common"
-	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
@@ -16,7 +15,6 @@ import (
 var ErrEmptyNodeId = errors.New("empty nodeid proposed")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 var ErrEmptyNodeList = errors.New("empty node list proposed")
-
 
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
@@ -43,7 +41,7 @@ func (md *MessageService) RequestLeaderInfo(nodeId p2p.NodeId) error {
 	}
 
 	//message deliver command for delivering leader info
-	deliverCommand, err := CreateMessageDeliverCommand(event.LeaderInfoDeliverProtocol, body)
+	deliverCommand, err := CreateMessageDeliverCommand("LeaderInfoRequestMessage", body)
 
 	if err != nil {
 		return err

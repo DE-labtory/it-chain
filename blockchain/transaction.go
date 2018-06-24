@@ -1,7 +1,5 @@
 package blockchain
 
-import (
-	"github.com/it-chain/yggdrasill/impl"
-)
+import "github.com/it-chain/yggdrasill/common"
 
-type Transaction = impl.DefaultTransaction
+type Transaction = common.Transaction
