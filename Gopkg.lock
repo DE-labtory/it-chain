@@ -122,7 +122,7 @@
     "common",
     "impl"
   ]
-  revision = "d1a2c1591660b77bc5df6d26d60cd2c3b4992d79"
+  revision = "61c75cc5c8ba39907d137cfb50a2d100f72315ee"
 
 [[projects]]
   name = "github.com/jbenet/go-base58"

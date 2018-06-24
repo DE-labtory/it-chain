@@ -1,8 +1,8 @@
 package txpool
 
 import (
-	"log"
 	"errors"
+	"log"
 )
 
 //todo

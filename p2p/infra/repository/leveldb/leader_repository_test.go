@@ -1,10 +1,11 @@
 package leveldb
 
 import (
-	"testing"
 	"os"
-	"github.com/magiconair/properties/assert"
+	"testing"
+
 	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/magiconair/properties/assert"
 )
 
 func TestLeaderRepository_GetLeader(t *testing.T) {
@@ -14,7 +15,7 @@ func TestLeaderRepository_GetLeader(t *testing.T) {
 	leaderRepository := NewLeaderRepository(dbPath)
 
 	leader := p2p.Leader{
-		LeaderId:p2p.LeaderId{
+		LeaderId: p2p.LeaderId{
 			Id: "777",
 		},
 	}
@@ -38,7 +39,7 @@ func TestLeaderRepository_SetLeader(t *testing.T) {
 	leaderRepository := NewLeaderRepository(dbPath)
 
 	leader := p2p.Leader{
-		LeaderId:p2p.LeaderId{
+		LeaderId: p2p.LeaderId{
 			Id: "777",
 		},
 	}
