@@ -124,7 +124,7 @@
 
 ### 예외 사항 처리
 
-* 동기화 중일 때는 합의에 참여하지 못하지만, 리더로부터 합의 된 블록은 받을 수 있다. 받은 블록은 BlockPool에 저장되고, 구축(Construct)단계가 끝나면 추가하게 된다.
+* 동기화 중일 때는 합의에 참여하지 못하지만, 합의된 블록은 BlockPool에 저장되고, 구축(Construct)단계가 끝나면 추가하게 된다.
   1. **BlockPool에 있는 block height가 Construct 단계에서 마지막으로 받은 block height보다 1만큼 크다면** prev hash값을 확인하고 valid하다면 blockchain에 추가한다.
   2. **BlockPool에 있는 block height가 Construct 단계에서 마지막으로 받은 block height에서 1보다 크다면** Reliable Node보다 긴 blockchain을 가지고 있는 노드가 있다는 뜻이므로 Reliable Node를 다시 선정해서 synchronize 과정을 반복한다. 이때 다시 선정한 Reliable Node로부터 height가 BlockPool에 있는 block height보다 1 작은 block까지 받아온다. 받아오는 과정이 끝나면 1번의 과정을 반복한다.
 * 구축(Construct) 과정은 긴 시간이 걸릴 수 있기 때문에 구축과정 중간에 네트워크 연결이 끊겨버리는 문제를 생각해야 한다.: (1) 자기 자신과 네트워크 사이에서 연결이 끊긴 경우와 (2) Reliable Node가 네트워크와 연결이 끊긴 경우가 있을 수 있다.
