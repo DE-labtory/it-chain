@@ -93,11 +93,21 @@
 
 ## 블록체인 동기화
 
-![blockchain-blocksync-seq](../images/blockchain-blocksync-implementation-seq.PNG)
+
 
 동기화(Synchronize)는 확인(Check), 구축(Construct), 재구축(PostConstruct)의 과정을 거친다.
 
+
+### 확인(Check)
+
+![blockchain-blocksync-seq](../images/blockchain-blocksync-check-implementation-seq.PNG)
+
 먼저 확인(Check)은 (1) '신뢰할 수 있는 노드'(Reliable Node) 선정과 (2) '상태 점검'을 거친다. [Reliable Node](#realible-node)를 선정하기 위해서 p2p 컴포넌트에서 peer들의 정보를 받아온다. 이들 중 blockchain height가 가장 긴 peer가 Reliable Node가 된다. Reliable Node가 정해지면 자신의 마지막 block의 height와 lastSeal을 비교해서 같은지를 확인한다. 같다면 동기화(Synchronize)는 중단되고 그렇지 않다면 구축(Construct) 단계로 넘어간다.
+
+
+### 구축(Check), 재구축(PostConstruct)
+
+![blockchain-blocksync-seq](../images/blockchain-blocksync-construct-implementation-seq.PNG)
 
 구축(Construct)단계에서는 Reliable Node를 대상으로 RequestBlock을 통해 block을 요청하고 BlockResponseProtocol로 응답받은 block을 받게된다. AddBlock에서는 추가할 블록이 다음 블록이 맞는지 확인하고 blockchain에 추가하게된다. 그리고 위 과정은 구축 단계 시작할 때의 Reliable Node의 blockchain을 모두 가져올 때 까지 진행된다. 즉 구축 단계 시작 이후로 Reliable Node가 쌓은 block들은 추가하지 않는다. 이런 구축 단계 이후 합의를 통해 확정된 block들은 BlockPool에 보관하게된다. 블록을 요청하고, 응답 받고,  blockchain에 추가하는 과정은 동기적으로 진행된다.(block을 요청하고, blockchain에 추가하는 두 가지 프로세스를 Producer-Consumer 패턴으로 구현하는 것도 하나의 방법이 될 수 있다.)
 
