@@ -36,3 +36,8 @@ type LeaderUpdatedEvent struct {
 type LeaderDeliveredEvent struct {
 	midgard.EventModel
 }
+
+//todo add to event doc
+type LeaderDeletedEvent struct {
+	midgard.EventModel
+}
