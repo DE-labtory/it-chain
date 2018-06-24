@@ -13,8 +13,6 @@ type BlockRepository struct {
 	Creator string
 }
 
-type Block = impl.DefaultBlock
-
 func NewBlockRepository(dbpath string, opts map[string]interface{}, creator string) (*BlockRepository, error) {
 	// Use default validator
 	var validator common.Validator
@@ -32,7 +30,7 @@ func NewBlockRepository(dbpath string, opts map[string]interface{}, creator stri
 }
 
 func (b *BlockRepository) NewEmptyBlock() (blockchain.Block, error) {
-	lastBlock := &Block{}
+	lastBlock := &impl.DefaultBlock{}
 	err := b.GetLastBlock(lastBlock)
 	if err != nil {
 		return nil, err
