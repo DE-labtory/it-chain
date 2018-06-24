@@ -1,11 +1,9 @@
 package blockchain
 
-import (
-	"github.com/it-chain/yggdrasill/impl"
-)
+import "github.com/it-chain/yggdrasill/impl"
 
 type BlockRequestMessage struct {
-	TimeUnix int64
+	Height uint64
 }
 
 type BlockResponseMessage struct {
