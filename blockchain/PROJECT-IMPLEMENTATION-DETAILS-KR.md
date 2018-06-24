@@ -109,21 +109,21 @@
 ### 예외 사항 처리
 
 * 동기화 중일 때는 합의에 참여하지 못하지만, 리더로부터 합의 된 블록은 받을 수 있다. 받은 블록은 BlockPool에 저장되고, 구축(Construct)단계가 끝나면 추가하게 된다.
+  1. **BlockPool에 있는 block height가 Construct 단계에서 마지막으로 받은 block height보다 1만큼 크다면** prev hash값을 확인하고 valid하다면 blockchain에 추가한다.
+  2. **BlockPool에 있는 block height가 Construct 단계에서 마지막으로 받은 block height보다 1보다 크다면** Reliable Node보다 긴 blockchain을 가지고 있는 노드가 있다는 뜻이므로 Reliable Node를 다시 선정해서 synchronize 과정을 반복한다. 이때 다시 선정한 Reliable Node로부터 height가 BlockPool에 있는 block height보다 1 작은 block까지 받아온다. 받아오는 과정이 끝나면 1번의 과정을 반복한다.
 * 구축(Construct) 과정은 긴 시간이 걸릴 수 있기 때문에 구축과정 중간에 네트워크 연결이 끊겨버리는 문제를 생각해야 한다.: (1) 자기 자신과 네트워크 사이에서 연결이 끊긴 경우와 (2) Reliable Node가 네트워크와 연결이 끊긴 경우가 있을 수 있다.
   1. **자기 자신과 네트워크 사이에서 연결이 끊긴 경우,** 다시 연결이 되었을 때, 동기화 과정을 다시 시작하면 된다. 예를 들어 생각해보면, Reliable Node로부터 101번 block부터 10000번 block을 하나씩 받고 있는 도중 500번 block을 받고 연결이 끊겨버렸다. 그러면 다시 연결이 되었을 때, Reliable Node를 다시 선정해서 501번째 block부터 다시 받기 시작하면 된다.
   2. **Reliable Node가 네트워크와 연결이 끊긴 경우,** 마찬가지로 동기화 과정을 처음부터 시작하면 된다. 다시 Reliable Node를 선정하고 나의 마지막 block의 다음 block부터 요청한다.
- 
 
-### Reliable Node 후보 저장
+
+### Reliable Node
 
 ![blockchain-reliablenode-seq](../images/blockchain-reliablenode-implementation-seq.PNG)
 
 
-blockchain 컴포넌트는 동기화를 할 때 Reliable Node 선정을 위해서 Reliable Node 후보들을 가지고 있어야한다.
+blockchain 컴포넌트는 동기화를 할 때 blockchain의 길이가 가장 긴 Node를 Reliable Node로 선정하여, 그 Node를 대상으로 Construct 단계를 진행하게 된다.
 
-Reliable Node 후보들은 다음과 같은 방식으로 유지된다. blockchain은 자신의 Reliable Node 상태(노드의 갯수, IDs)를 알리는 NodeUpdateEvent를 전파한다. 그리고 p2p에서는 Reliable Node들이 특정 개수보다 모자라다면 필요한 양만큼 Reliable Node 후보들을 충당할 수 있는 NodeUpdateCommand를 Command Service에서 보내게된다. 그리고 blockchain에서는 Command Handler에서 command를 받은 후, 특정 개수의 unique한 Reliable Node들을 유지하게 된다.
-
-네트워크에서 노드들의 상태가 변화했을 때, p2p에서는 변화한 노드들의 event를 전파하게된다. blockchain에서는 Event Handler에서 event를 받아 변화한 노드들이 현재 Reliable Node 후보 중에 있는지 확인하고 없으면 그대로 지나가게 되지만 있다면 해당 노드를 후보 리스트에서 삭제하고 NodeUpdateEvent를 다시 전파하게된다.
+Node의 정보는 p2p의 peer-table에서 받아온다. peer-table에서 받아온 Node 정보로 각 Node에게 blockchain 정보를 얻어와서 height가 가장 긴 Nodes 중 한 명을 Reliable Node를 선정한다.
 
 
 ### Author
