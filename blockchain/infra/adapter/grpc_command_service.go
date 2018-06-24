@@ -7,12 +7,13 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/yggdrasill/impl"
+	ygg "github.com/it-chain/yggdrasill/common"
 	"github.com/rs/xid"
 )
 
 //kind of error
 var ErrEmptyNodeId = errors.New("empty nodeid proposed")
+var ErrEmptyBlockSeal = errors.New("empty block seal")
 
 // ToDo: 구현.(gitId:junk-sound)
 type Publish func(exchange string, topic string, data interface{}) (err error)
@@ -47,10 +48,14 @@ func (md *MessageService) RequestBlock(nodeId p2p.NodeId, height uint64) error {
 	return md.publish("Command", "message.deliver", deliverCommand)
 }
 
-func (md *MessageService) ResponseBlock(nodeId p2p.NodeId, block impl.DefaultBlock) error {
+func (md *MessageService) ResponseBlock(nodeId p2p.NodeId, block ygg.Block) error {
 
 	if nodeId.Id == "" {
 		return ErrEmptyNodeId
+	}
+
+	if block.GetSeal() == nil {
+		return ErrEmptyBlockSeal
 	}
 
 	body := block

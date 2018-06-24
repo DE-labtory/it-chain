@@ -5,11 +5,72 @@ import (
 
 	"reflect"
 
+	"time"
+
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
 	"github.com/it-chain/it-chain-Engine/p2p"
-	"github.com/it-chain/yggdrasill/impl"
+	"github.com/it-chain/yggdrasill/common"
 	"github.com/stretchr/testify/assert"
 )
+
+type MockBlock struct {
+	seal []byte
+}
+
+func (MockBlock) SetSeal(seal []byte) {
+	panic("implement me")
+}
+func (MockBlock) SetPrevSeal(prevseal []byte) {
+	panic("implement me")
+}
+func (MockBlock) SetHeight(height uint64) {
+	panic("implement me")
+}
+func (MockBlock) PutTx(tx common.Transaction) error {
+	panic("implement me")
+}
+func (MockBlock) SetTxSeal(txSeal [][]byte) {
+	panic("implement me")
+}
+func (MockBlock) SetCreator(creator []byte) {
+	panic("implement me")
+}
+func (MockBlock) SetTimestamp(currentTime time.Time) {
+	panic("implement me")
+}
+func (m MockBlock) GetSeal() []byte {
+	return m.seal
+}
+func (MockBlock) GetPrevSeal() []byte {
+	panic("implement me")
+}
+func (MockBlock) GetHeight() uint64 {
+	panic("implement me")
+}
+func (MockBlock) GetTxList() []common.Transaction {
+	panic("implement me")
+}
+func (MockBlock) GetTxSeal() [][]byte {
+	panic("implement me")
+}
+func (MockBlock) GetCreator() []byte {
+	panic("implement me")
+}
+func (MockBlock) GetTimestamp() time.Time {
+	panic("implement me")
+}
+func (MockBlock) Serialize() ([]byte, error) {
+	panic("implement me")
+}
+func (MockBlock) Deserialize(serializedBlock []byte) error {
+	panic("implement me")
+}
+func (MockBlock) IsReadyToPublish() bool {
+	panic("implement me")
+}
+func (MockBlock) IsPrev(serializedPrevBlock []byte) bool {
+	panic("implement me")
+}
 
 func TestMessageService_RequestBlock(t *testing.T) {
 
@@ -61,52 +122,54 @@ func TestMessageService_RequestBlock(t *testing.T) {
 
 }
 
-//func TestMessageService_ResponseBlock(t *testing.T) {
-//	nodeId := p2p.NodeId{Id: "1"}
-//	block := impl.DefaultBlock{}
-//
-//	publish := func(exchange string, topic string, data interface{}) error {
-//		//assert.Equal(t, exchange, "Command")
-//		//assert.Equal(t, topic, "message.deliver")
-//		//assert.Equal(t, reflect.TypeOf(data).String(), "blockchain.MessageDeliverCommand")
-//		return nil
-//	}
-//
-//	messageService := adapter.NewMessageService(publish)
-//	messageService.ResponseBlock(nodeId, block)
-//
-//}
-
 func TestMessageService_ResponseBlock(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
 			nodeId p2p.NodeId
-			block  impl.DefaultBlock
+			block  MockBlock
 		}
 		err error
 	}{
 		"success: request block": {
 			input: struct {
 				nodeId p2p.NodeId
-				block  impl.DefaultBlock
+				block  MockBlock
 			}{
 				nodeId: p2p.NodeId{
 					Id: "1",
 				},
-				block: impl.DefaultBlock{},
+				block: MockBlock{
+					seal: []byte("seal"),
+				},
 			},
 			err: nil,
 		},
-		"fail: empty block": {
+		"fail: empty node id": {
 			input: struct {
 				nodeId p2p.NodeId
-				block  impl.DefaultBlock
+				block  MockBlock
 			}{
 				nodeId: p2p.NodeId{},
-				block:  impl.DefaultBlock{},
+				block: MockBlock{
+					seal: []byte("seal"),
+				},
 			},
 			err: adapter.ErrEmptyNodeId,
+		},
+		"fail: empty block seal": {
+			input: struct {
+				nodeId p2p.NodeId
+				block  MockBlock
+			}{
+				nodeId: p2p.NodeId{
+					"1",
+				},
+				block: MockBlock{
+					seal: nil,
+				},
+			},
+			err: adapter.ErrEmptyBlockSeal,
 		},
 	}
 
