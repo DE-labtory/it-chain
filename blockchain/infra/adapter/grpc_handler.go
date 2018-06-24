@@ -1,5 +1,5 @@
 package adapter
 
-type MessageHandler struct {
+type GrpcHandler struct {
 }
 

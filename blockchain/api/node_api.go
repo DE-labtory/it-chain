@@ -17,13 +17,3 @@ func NewNodeApi(eventRepository midgard.Repository, publisherId string) NodeApi 
 	}
 }
 
-/// todo
-func (n *NodeApi) AddNode(node blockchain.Node) error {
-	return nil
-}
-
-/// todo
-func (n *NodeApi) DeleteNode(id blockchain.NodeId) error {
-	return nil
-}
-
