@@ -3,6 +3,8 @@ package adapter
 import (
 	"errors"
 
+	"fmt"
+
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/messaging/rabbitmq/event"
@@ -54,9 +56,9 @@ func (md *MessageService) ResponseBlock(nodeId p2p.NodeId, block impl.DefaultBlo
 		return ErrEmptyNodeId
 	}
 
-	body := blockchain.BlockResponseMessage{
-		Block: block,
-	}
+	body := block
+	fmt.Println("check")
+	fmt.Println(block)
 
 	deliverCommand, err := createMessageDeliverCommand(event.BlockResponseProtocol, body)
 	if err != nil {

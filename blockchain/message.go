@@ -7,5 +7,5 @@ type BlockRequestMessage struct {
 }
 
 type BlockResponseMessage struct {
-	Block impl.DefaultBlock
+	Block *impl.DefaultBlock
 }
