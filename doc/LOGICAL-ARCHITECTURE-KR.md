@@ -30,10 +30,8 @@
 다음은 각 모듈에 대한 간략한 설명이다.
 
 **Infra**
-infra layer 에서는 messaging 및 levelDB 통신 등 서비스에 필요한 기반환경을 구현하고 있다.
-앞서 repository 에서 정의한 함수에 대한 실질적인 구현이 이루어지며, rabbitMQ 서버와 통신을 구현한다.
-
-위 그림은 앞서 제시된 Onion Architecture에서 제시된 사용 관계의 제한과 DDD 개발방법에서 정의하는 사용 관계의 제한을 반영하여 그려졌다. 아래 추적성 관리 테이블을 참고하여, 코드 작성시 아키텍처 모델에 명시된 사용 관계를 지키도록 유의한다.
+infra layer 에서는 messaging 및 levelDB 등 infra 서비스에 필요한 기반환경을 구현하고 있다.
+domain layer의 repository, service 에서 정의한 함수에 대한 실질적인 구현(leveldb, rabbitmq)이 이루어진다.
 
 **API**
 API 레이어는 다른 bounded context와 협력을 위한 다양한 api를 제공한다.
@@ -50,6 +48,8 @@ api 와 service 내에서 infra layer의 기능을 사용하기 위해 service �
 repository는 entity 및 value object 를 기준으로 하여 db와의 입출력을 담당한다. 하지만 직접적인 구현은 infra layer 에서 수행하며, 본 repository에서는 실제적인 구현 내용은 숨기고 interface 형태로 함수만을 선언하여 기능을 추상화 시켜준다.
 
 
+
+위 그림은 앞서 제시된 Onion Architecture에서 제시된 사용 관계의 제한과 DDD 개발방법에서 정의하는 사용 관계의 제한을 반영하여 그려졌다. 아래 추적성 관리 테이블을 참고하여, 코드 작성시 아키텍처 모델에 명시된 사용 관계를 지키도록 유의한다.
 
 ## 모듈-코드 추적성 테이블
 | 모듈                 | 코드                             |
