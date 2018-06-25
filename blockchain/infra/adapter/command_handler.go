@@ -4,6 +4,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/blockchain/api"
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/txpool"
+	"log"
 )
 
 type BlockchainCommandHandler struct {
@@ -19,12 +20,24 @@ func NewBlockchainCommandHandler(blockApi api.BlockApi, nodeApi api.NodeApi) *Bl
 }
 
 // todo
-func (b *BlockchainCommandHandler) HandleUpdateNodesCommand(command blockchain.NodeUpdateCommand) {
-	panic("implement me")
+func (b *BlockchainCommandHandler) HandleUpdateNodeCommand(command blockchain.NodeUpdateCommand) {
+	nodeID := command.GetID()
+
+	if nodeID == "" {
+		log.Println("node id is empty")
+		return
+	}
+
+	node := command.Node
+	err := b.nodeApi.UpdateNode(node)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func (handler *BlockchainCommandHandler) HandleProposeBlockCommand(cmd blockchain.ProposeBlockCommand) {
-	//rawTxList := cmd.Transactions
+func (handler *BlockchainCommandHandler) HandleProposeBlockCommand(command blockchain.ProposeBlockCommand) {
+	//rawTxList := command.Transactions
 	//
 	//txList, err := convertTxList(rawTxList)
 	//if err != nil {

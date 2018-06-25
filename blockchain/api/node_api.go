@@ -1,6 +1,5 @@
 package api
 
-<<<<<<< HEAD
 import (
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/blockchain"
@@ -18,3 +17,7 @@ func NewNodeApi(eventRepository midgard.Repository, publisherId string) NodeApi 
 	}
 }
 
+// TODO
+func (api *NodeApi) UpdateNode(node blockchain.Node) error {
+	return nil
+}
