@@ -58,7 +58,7 @@ Blockchain Component는 blockchain 동기화, block 추가, 조회를 담당한�
 * **ResponseBlock**
   * 요청을 보낸 Node에게 block을 보낸다.
 
-## Block Synchronize 
+## Block Synchronize
 
 1. <u>동기화(Synchronize)</u>는 특정 노드의 블록 체인을 네트워크 내의 합의된 블록 체인과 동일하게 만드는 과정을 의미한다. 즉 <u>동기화(Synchronize)</u> 과정을 통해 특정 노드는 모든 블록에 대하여 대표값(Seal), 이전 블록의 대표값(PrevSeal), 트랜잭션 모음(TxList), 트랜잭션 대표값(TxSeal), 블록 생성 시각(TimeStamp), 생성자(Creator), 블록 체인의 길이(Height) 등의 블록 체인과 관련된 모든 정보들을 다른 노드들의 것과 동일화한다.
 2. <u>동기화(Synchronize)</u>는 *확인(Check)*, *구축(Construct)*, *재구축(PostConstruct)*의 과정을 거친다.

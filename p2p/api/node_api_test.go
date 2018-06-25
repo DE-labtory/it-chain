@@ -16,7 +16,7 @@ var ErrEmptyNodeList = errors.New("empty node list proposed")
 //todo make test map
 //todo test continue
 
-type MockNodeRepository struct{}
+type MockNodeRepository struct {}
 
 func (mnr MockNodeRepository) FindById(id p2p.NodeId) (*p2p.Node, error) { return nil, nil }
 func (mnr MockNodeRepository) FindAll() ([]p2p.Node, error)              { return nil, nil }

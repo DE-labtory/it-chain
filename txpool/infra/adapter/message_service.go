@@ -1,4 +1,4 @@
-package messaging
+package adapter
 
 import (
 	"errors"
@@ -11,17 +11,18 @@ import (
 type Publisher func(exchange string, topic string, data interface{}) (err error) //해당 publish함수는 midgard 에서 의존성 주입을 받기 위해 interface로 작성한다.
 //모든 의존성 주입은 컴포넌트.go 에서 이루어짐
 
-type MessageDispatcher struct {
+type MessageService struct {
 	publisher Publisher // midgard.client
 }
 
-func NewDispatcher(publisher Publisher) *MessageDispatcher {
-	return &MessageDispatcher{
+func NewMessageService(publisher Publisher) *MessageService {
+	return &MessageService{
 		publisher: publisher,
 	}
 }
 
-func (m MessageDispatcher) SendLeaderTransactions(transactions []*txpool.Transaction, leader txpool.Leader) error {
+func (m MessageService) SendLeaderTransactions(transactions []*txpool.Transaction, leader txpool.Leader) error {
+
 	if len(transactions) == 0 {
 		return errors.New("Empty transaction list proposed")
 	}
@@ -35,20 +36,4 @@ func (m MessageDispatcher) SendLeaderTransactions(transactions []*txpool.Transac
 	}
 
 	return m.publisher("Command", "GrpcMessage", deliverCommand)
-}
-
-func (m MessageDispatcher) ProposeBlock(transactions []txpool.Transaction) error {
-
-	if len(transactions) == 0 {
-		return errors.New("Empty transaction list proposed")
-	}
-
-	deliverCommand := txpool.ProposeBlockCommand{
-		CommandModel: midgard.CommandModel{
-			ID: xid.New().String(),
-		},
-		Transactions: transactions,
-	}
-
-	return m.publisher("Command", "Block", deliverCommand)
 }
