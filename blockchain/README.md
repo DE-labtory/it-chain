@@ -70,7 +70,7 @@ Blockchain Component는 blockchain 동기화, block 추가, 조회를 담당한�
 
 ## Implementation Details
 
-[IMPLEMENTATION-DETAILS-KR.md]('./PROJECT-IMPLEMENTATION-DETAILS-KR.md')
+[IMPLEMENTATION-DETAILS-KR.md](PROJECT-IMPLEMENTATION-DETAILS-KR.md)
 
 ### Author
 
