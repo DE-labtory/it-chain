@@ -249,9 +249,6 @@ func TestGrpcHostService_Dial(t *testing.T) {
 	serverHostService, tearDown1 := setupGrpcHostService(t, "127.0.0.1:7777", "server", publish)
 	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client", publish)
 
-	defer tearDown1()
-	defer tearDown2()
-
 	handler := &MockHandler{}
 	handler.OnConnectionFunc = func(connection gateway.Connection) {
 		fmt.Println(connection)
@@ -260,6 +257,9 @@ func TestGrpcHostService_Dial(t *testing.T) {
 	handler.OnDisconnectionFunc = func(connection gateway.Connection) {
 		fmt.Println("connection is closing", connection)
 	}
+
+	defer tearDown1()
+	defer tearDown2()
 
 	serverHostService.SetHandler(handler)
 	clientHostService.SetHandler(handler)
@@ -270,6 +270,7 @@ func TestGrpcHostService_Dial(t *testing.T) {
 		conn, err := clientHostService.Dial(test.input)
 		assert.Equal(t, err, test.err)
 		assert.Equal(t, conn.Address, test.output)
+
 	}
 }
 
