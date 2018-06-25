@@ -21,7 +21,7 @@
 
 # Module Architecture
 
-![Module Architecture](../images/[module]component-architecture-r2.png)
+![Module Architecture](../images/[module]component-r3.png)
 
 위 모델은 `it-chain-Engine`의 개별 컴포넌트의 모듈 아키텍처를 Layered 아키텍처 패턴을 적용하여 표현한 모델이다. 모듈 아키텍처는 개념 수준 아키텍처 모델과는 달리 시스템의 코드 측면 구조를 표현한다. (개념 수준 아키텍처 모델은 시스템의 실행 측면 구조를 묘사하였다.)
 
@@ -51,7 +51,10 @@ repository는 entity 및 value object 를 기준으로 하여 db와의 입출력
 
 위 그림은 앞서 제시된 Onion Architecture에서 제시된 사용 관계의 제한과 DDD 개발방법에서 정의하는 사용 관계의 제한을 반영하여 그려졌다. 아래 추적성 관리 테이블을 참고하여, 코드 작성시 아키텍처 모델에 명시된 사용 관계를 지키도록 유의한다.
 
-## 모듈-코드 추적성 테이블
+
+
+###모듈-코드 추적성 테이블
+
 | 모듈                 | 코드                             |
 | -------------------- | -------------------------------- |
 | Infrastructure layer | `{component-name}/infra` package |
@@ -92,32 +95,16 @@ it-chain은 repository에 대한 쓰기와 읽기를 분리하는 `CQRS(Command 
 
 
 
+## CQRS (TODO)
 
 
 
 
-it-chain의 컴포넌트들 간의 통신은 AMQP(Advanced Message Que Protocol)의 구현체인 rabbitMQ 을 활용하여 이루어 진다. it-chain 에서는 보다 일관되고 효율적인 구현을 위한 자체구축 라이브러리인 midgard를 사용하며, 각 컴포넌트는 midgard를 통해 보다 쉽게 통신 관련 기능을 구현할 수 있다. it-chain의 AMQP 메세지에는 event와 command 가 있는데, 여기서 `event` 는 해당 컴포넌트의 root aggregate에 변화가 생긴 경우, `command` 는 다른 컴포넌트의 root aggregate에 변화를 요구하는 경우 발생하며 `event` 와 `command` 모두 오직  api layer 혹은 서비스 단에서 publish 된다.
-
-여기서 중요한 점은 `event handler` 와 `command handler` 의 역할은 infra에서 수신한 amqp 메세지에 대한 adapter의 임무만을 수행한다는 것이며, 해당 component 내에서 이루어져야 하는 일련의 작업들과 구체적인 구현은 handler 내에서 이루어 지면 안된다는 점이다. handler가 특정 event와 command에 대한 적합한 api 호출 혹은 repository projection 만을 수행하게 함으로써 handler와 application layer 사이의 명확한 역할의 분담이 이루어지게 되고 adapter 내에서 일체의 비즈니스 로직이 이루어 지지 않도록 구분지었다.
-
-
-
-**Consume from AMQP**
-![handler](../images/[logical]component-consume.png)
-
-**Publish to AMQP**
-
-![handler](../images/[logical]component-publish.png)
-
-
-# Communication between peers
+# Communication between peers(TODO)
 peer 사이의 통신은 gRPC library 기반의 자체 library 인 bifrost를 활용하여 이루어 진다. 각 peer 사이에서 rpc 통신은 message 객체를 주고받는 것으로 이루어 지며, _송신은 각 컴포넌트의 service의 한 종류인 `message_service` 에서 이루어 지며, 수신은 각 컴포넌트의 infra의 message handler에서 이루어 진다._ 각 메세지는 메세지의 목적에 따라 미리 정해진 protocol 을 포함하며 message handler에서 특정 protocol에 따라 적합한 api 함수를 호출함으로써 모든 기능 수행을 application layer에 위임한다.
 
-<p align="center"><img src="../images/[logical]peer-communication.png"></p>
+<p align="center"><img src="../images/[logical]peer-communication.png">
 
-
-
-## 모듈-코드 추적성 테이블
 모듈 | 코드
 -----|-----
 Infrastructure layer | `{component-name}/infra` package
