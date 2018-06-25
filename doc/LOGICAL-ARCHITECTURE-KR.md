@@ -60,8 +60,43 @@ repository는 entity 및 value object 를 기준으로 하여 db와의 입출력
 
 
 
-# Communication between components via AMQP
-it-chain의 컴포넌트들 간의 통신은 AMQP(Advanced Message Que Protocol) 라이브러리인 rabbitMQ 을 활용하여 이루어 진다. it-chain 에서는 보다 일관되고 효율적인 구현을 위한 자체구축 라이브러리인 midgard를 사용하며, 각 컴포넌트는 midgard를 통해 보다 쉽게 통신 관련 기능을 구현할 수 있다. it-chain의 AMQP 메세지에는 event와 command 가 있는데, 여기서 `event` 는 해당 컴포넌트의 root aggregate에 변화가 생긴 경우, `command` 는 다른 컴포넌트의 root aggregate에 변화를 요구하는 경우 발생하며 `event` 와 `command` 모두 오직  api layer 혹은 서비스 단에서 publish 된다.
+## Adapter
+
+![moduleadapter-r1](../images/[module]adapter-r2.png)
+
+Adapter는 AMQP Message를 consume하여 작업을 수행하는 기능을 담당한다. it-chain에서 사용되는 AMQP Message종류는 event와 command로, `Event` 는 해당 컴포넌트의 root aggregate에 변화가 생긴 경우 해당 컴포넌트 상태변화를 알리고자 AMQP로 publish하며 발생하고, `Command` 는 다른 컴포넌트에게 기능 수행을 요청하기 위해 publish하여 발생한다.
+
+Command는 `Command_handler`와 `GrpcCommand_handler`에 의해 consume되며 `Command_handler`는 일반적인  모든  Command 를 받아 로직을 수행하며, `GrpcCommand_handler`는 GrpcGateway컴포넌트에서 발생하는 Command를 받아 로직을 수행한다. GrpcGateway에서 발생하는 Command는 grpc를 통한 다른 Node간의 요청, 응답이다.
+
+Event는 `Event_handler`와 `Repository_Projector`에 의해 consume되며 `Event_handler`는 관심있는 event를 받아 기능을 수행하고, `Repository_Projector`는 event를 받아 현재 상태의 view를 업데이트한다(Projection).
+
+**참고자료 https://www.continuousimprover.com/2017/02/the-good-of-event-sourcing-projections.html**
+
+
+
+**Command handler**
+
+Command handler는 amqp에서 command를 consume하여 필요한 작업을 수행하며, 특정 command에 대해 적합한 단일 api를 호출하여 모든 필요한 일련의 작업을 application layer에 위임한다.
+
+**GrpcCommand handler**
+
+it-chain 노드간의 통신은 노드의 GrpcGateway컴포넌트에서 담당하며 다른 노드로 부터 요청, 응답이 올시에 GrpcGateway가 Command를 발생시켜 해당 요청, 응답을 처리하는 Component에 전달한다. GrpcCommand handler는 GrpcGateway에서 발생시킨 이 Command를 받아 로직을 수행한다.
+
+**Event handler**
+
+Event handler는 amqp에서 event를 consume하여 필요한 작업을 api 호출을 통해 수행하며, event_handler는 필요에 따라 repository에서 자료를 **Read**할 수 있다.
+
+**Repository projector**
+
+it-chain은 repository에 대한 쓰기와 읽기를 분리하는 `CQRS(Command Query Responsibilities Segregation)` 패턴을 차용하며, **Repository projector**는 amqp에서 event를 consume하여 event로 부터 원하는 view를 구축(Projection)하는 작업을 수행한다.이러한 it-chain의 CQRS pattern은 projection이라는 minimal 한 logic의 수행만을 전담하는 repository projector와 handler를 구분함으로써 기능적으로 보다 명확한 설계를 추구하였다.
+
+
+
+
+
+
+
+it-chain의 컴포넌트들 간의 통신은 AMQP(Advanced Message Que Protocol)의 구현체인 rabbitMQ 을 활용하여 이루어 진다. it-chain 에서는 보다 일관되고 효율적인 구현을 위한 자체구축 라이브러리인 midgard를 사용하며, 각 컴포넌트는 midgard를 통해 보다 쉽게 통신 관련 기능을 구현할 수 있다. it-chain의 AMQP 메세지에는 event와 command 가 있는데, 여기서 `event` 는 해당 컴포넌트의 root aggregate에 변화가 생긴 경우, `command` 는 다른 컴포넌트의 root aggregate에 변화를 요구하는 경우 발생하며 `event` 와 `command` 모두 오직  api layer 혹은 서비스 단에서 publish 된다.
 
 여기서 중요한 점은 `event handler` 와 `command handler` 의 역할은 infra에서 수신한 amqp 메세지에 대한 adapter의 임무만을 수행한다는 것이며, 해당 component 내에서 이루어져야 하는 일련의 작업들과 구체적인 구현은 handler 내에서 이루어 지면 안된다는 점이다. handler가 특정 event와 command에 대한 적합한 api 호출 혹은 repository projection 만을 수행하게 함으로써 handler와 application layer 사이의 명확한 역할의 분담이 이루어지게 되고 adapter 내에서 일체의 비즈니스 로직이 이루어 지지 않도록 구분지었다.
 
@@ -73,15 +108,6 @@ it-chain의 컴포넌트들 간의 통신은 AMQP(Advanced Message Que Protocol)
 **Publish to AMQP**
 
 ![handler](../images/[logical]component-publish.png)
-
-## Event Handler
-Event handler는 amqp에서 event를 consume하여 필요한 작업을 수행하며, 크게 event 를 기반으로 repository 에 projection을 수행하는 기능과, event 발생시 처리되어야 하는 일련의 작업을 api에 위임하여 처리하는 기능 두가지로 나뉜다. 첫번째 기능은 event_handler 내의 `repository projector` 를 통해 수행되며, 두번째 기능은 event_handler내에서 api 호출을 통해 수행된다. repository projector가 repository projection을 수행하지만, evnet_handler는 필요에 따라 repository에 접근할 수 있다.
-
-## Command Handler
-Command handler는 amqp에서 command를 consume하여 필요한 작업을 수행하며, 특정 command에 대해 적합한 단일 api를 호출하여 모든 필요한 일련의 작업을 application layer에 위임한다.
-
-## Repository Projector
-it-chain은 repository에 대한 쓰기와 읽기를 분리하는 CQRS(Command Query Responsibilities Segregation) 패턴을 차용하며, Repository Projector는 오직 repository에 대한 projection(Write) 작업만을 수행하고, 각 handler는 repository에 대한 read작업을 수반하는 비즈니스 로직을 수행하도록 구분된다. 이러한 it-chain의 CQRS pattern은 projection이라는 minimal 한 logic의 수행만을 전담하는 repository projector와 handler를 구분함으로써 기능적으로 보다 명확한 설계를 추구하였다.
 
 
 # Communication between peers
