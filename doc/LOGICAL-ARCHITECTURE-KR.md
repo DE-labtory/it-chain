@@ -21,7 +21,7 @@
 
 # Module Architecture
 
-![Module Architecture](../images/it-chain-module-view-architecture-r1.png)
+![Module Architecture](../images/[module]component-architecture-r1.png)
 
 위 모델은 `it-chain-Engine`의 개별 컴포넌트의 모듈 아키텍처를 Layered 아키텍처 패턴을 적용하여 표현한 모델이다. 모듈 아키텍처는 개념 수준 아키텍처 모델과는 달리 시스템의 코드 측면 구조를 표현한다. (개념 수준 아키텍처 모델은 시스템의 실행 측면 구조를 묘사하였다.)
 
