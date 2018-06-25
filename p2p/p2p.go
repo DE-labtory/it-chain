@@ -12,13 +12,13 @@ func init() {
 	//leaderRepository := leveldb.NewLeaderRepository("path2")
 	//publisher := rabbitmq.Connect("")
 	//
-	//messageDispatcher := messaging.NewMessageDispatcher(publisher)
+	//messageDispatcher := adapter.NewMessageDispatcher(publisher)
 	//
 	//leaderApi := api.NewLeaderApi(eventRepository, messageDispatcher, myInfo)
 	//
 	////create amqp Handler
-	//eventHandler := messaging.NewNodeEventHandler(nodeRepository, leaderRepository)
-	//grpcMessageHandler := messaging.NewGrpcMessageHandler(leaderApi, nodeApi, messageDispatcher)
+	//eventHandler := adapter.NewNodeEventHandler(nodeRepository, leaderRepository)
+	//grpcMessageHandler := adapter.NewGrpcMessageHandler(leaderApi, nodeApi, messageDispatcher)
 	//
 	//// Subscribe amqp server
 	//err1 := rabbitmqClient.Subscribe("Command", "connection.*", eventHandler)

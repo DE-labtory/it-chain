@@ -59,7 +59,7 @@
 | block_number      | BlockNumber    | Block Hash                   | 블록 번호를 이용하여 블록 저장             |
 | transaction       | Transaction ID | Serialized Transaction       | 트랜잭션 저장                             |
 | unconfirmed_block | BlockHash      | Serialized unconfirmed block | 확정되지 않은 블록 저장                    |
-| util              | Predefined Key | Depends on Key               | 여러 용도를 위한 DB                        |  
+| util              | Predefined Key | Depends on Key               | 여러 용도를 위한 DB                        |
 
 - util DB
 
@@ -88,3 +88,50 @@
 
 [@emperorhan](https://github.com/emperorhan)
 [@zeroFruit](https://github.com/zeroFruit)
+
+
+
+## 블록체인 동기화
+
+
+동기화(Synchronize)는 확인(Check), 구축(Construct), 재구축(PostConstruct)의 과정을 거친다.
+
+
+### 확인(Check)
+
+![blockchain-blocksync-seq](../images/blockchain-blocksync-check-implementation-seq.PNG)
+
+먼저 확인(Check)은 임의의 노드에게 Blockchain 길이와 lastSeal을 받아와서 자신의 마지막 block의 height와 lastSeal을 비교하여 같은지를 확인한다. 같다면 동기화(Synchronize)는 중단되고 그렇지 않다면 구축(Construct) 단계로 넘어간다.
+
+
+### 구축(Check), 재구축(PostConstruct)
+
+![blockchain-blocksync-seq](../images/blockchain-blocksync-construct-implementation-seq.PNG)
+
+구축(Construct)단계에서는 확인(Check)과정에서 선정된 노드를 대상으로 RequestBlock을 통해 block을 요청하고 BlockResponseProtocol로 응답받은 block을 받게된다. AddBlock에서는 추가할 블록이 다음 블록이 맞는지 확인하고 blockchain에 추가하게된다. 그리고 위 과정은 구축 단계 시작할 때의 노드의 blockchain을 모두 가져올 때 까지 진행된다. 즉 구축 단계 시작 이후로 노드가 쌓은 block들은 추가하지 않는다. 이런 구축 단계 이후 합의를 통해 확정된 block들은 BlockPool에 보관하게된다. 블록을 요청하고, 응답 받고,  blockchain에 추가하는 과정은 동기적으로 진행된다.(block을 요청하고, blockchain에 추가하는 두 가지 프로세스를 Producer-Consumer 패턴으로 구현하는 것도 하나의 방법이 될 수 있다.)
+
+블록 요청(RequestBlock)은 특정 노드가 가진 마지막 block의 height를 이용해, 확인(Check)과정에서 선정된 노드에 block을 요청하게된다. 특정 노드가 새로 참여하는 노드일 경우 신뢰할 수 있는 노드의 블록 체인 내 최초 블록부터 마지막 블록까지 요청하고, 기존에 참여중이던 노드일 경우 보유 중인 블록 체인 내 마지막 블록의 다음 블록부터 신뢰할 수 있는 노드의 블록 체인 내 마지막 블록까지 요청한다.
+
+구축(Construct)단계가 완료되고 나면, BlockPool에 block이 있는지 확인한다. block이 있다면 재구축(PostConstruct)을 수행한다. 재구축(PostConstruct)은 이미 구축(Construct)된 블록 체인에 블록 임시 저장소(BlockFool)에 보관중인 블록들을 부수적으로 추가(BlockAddedEvent)하는 것을 의미한다. 재구축(PostConstrcut)을 수행하고 나면, 동기화(Synchronize) 과정이 모두 완료된다.
+
+### 언제 동기화를 진행해야하는가?
+
+* 노드가 처음 네트워크에 들어왔을 때
+* 가 네트워크 연결이 끊겼다 다시 연결 되었을 때(timeout 적용) 
+* PostConstruct 단계에서, BlockPool의 block을 확인했는데 BlockPool의 block height가 Construct 단계에서 받은 마지막 block height에서 1보다 클 때
+
+
+### 예외 사항 처리
+
+* 동기화 중일 때는 합의에 참여하지 못하지만, 합의된 블록은 BlockPool에 저장되고, 구축(Construct)단계가 끝나면 추가하게 된다.
+  1. **BlockPool에 있는 block height가 Construct 단계에서 마지막으로 받은 block height보다 1만큼 크다면** prev hash값을 확인하고 valid하다면 blockchain에 추가한다.
+  2. **BlockPool에 있는 block height가 Construct 단계에서 마지막으로 받은 block height에서 1보다 크다면** 확인(Check) 과정에서 선택된 임의의 노드보다 긴 blockchain을 가지고 있는 노드가 있다는 뜻이므로 노드를 다시 선정해서 synchronize 과정을 반복한다. 이때 다시 선정한 노드로부터 height가 BlockPool에 있는 block height보다 1 작은 block까지 받아온다. 받아오는 과정이 끝나면 1번 또는 2 과정을 반복한다.
+* 구축(Construct) 과정은 긴 시간이 걸릴 수 있기 때문에 구축과정 중간에 네트워크 연결이 끊겨버리는 문제를 생각해야 한다.: (1) 자기 자신과 네트워크 사이에서 연결이 끊긴 경우와 (2) Reliable Node가 네트워크와 연결이 끊긴 경우가 있을 수 있다.
+  1. **자기 자신과 네트워크 사이에서 연결이 끊긴 경우,** 다시 연결이 되었을 때, 동기화 과정을 다시 시작하면 된다. 예를 들어 생각해보면, 확인(Check)과정에서 선정된 노드로부터 101번 block부터 10000번 block을 하나씩 받고 있는 도중 500번 block을 받고 연결이 끊겨버렸다. 그러면 다시 연결이 되었을 때, 다시 임의의 노드를 선정해서 501번째 block부터 다시 받기 시작하면 된다.
+  2. **확인(Check)과정에서 선정된 노드가 네트워크와 연결이 끊긴 경우,** 마찬가지로 동기화 과정을 처음부터 시작하면 된다. 다시 임의의 노드를 선정하고 나의 마지막 block의 다음 block부터 요청한다.
+
+
+### Author
+
+[@zeroFruit](https://github.com/zeroFruit)
+[@junk-sound](https://github.com/junk-sound)
