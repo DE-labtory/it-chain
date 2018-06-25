@@ -1,7 +1,6 @@
 package adapter
 
 import (
-	"github.com/it-chain/it-chain-Engine/blockchain/api"
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"log"
@@ -17,12 +16,17 @@ type CommandHandlerNodeApi interface {
 	UpdateNode(node blockchain.Node) error
 }
 
-type CommandHandler struct {
-	nodeApi CommandHandlerNodeApi
-	blockApi api.BlockApi
+type CommandHandlerBlockApi interface {
+	CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error)
+	CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error)
 }
 
-func NewBlockchainCommandHandler(blockApi api.BlockApi, nodeApi CommandHandlerNodeApi) *CommandHandler {
+type CommandHandler struct {
+	nodeApi CommandHandlerNodeApi
+	blockApi CommandHandlerBlockApi
+}
+
+func NewCommandHandler(blockApi CommandHandlerBlockApi, nodeApi CommandHandlerNodeApi) *CommandHandler {
 	return &CommandHandler{
 		nodeApi: nodeApi,
 		blockApi: blockApi,
@@ -34,26 +38,26 @@ func (b *CommandHandler) HandleUpdateNodeCommand(command blockchain.NodeUpdateCo
 	eventID := command.GetID()
 
 	if eventID == "" {
-		log.Fatal(ErrEmptyEventId)
+		log.Println(ErrEmptyEventId)
 		return
 	}
 
 	node := command.Node
 
 	if node.IpAddress == "" {
-		log.Fatal(ErrEmptyIpAddress)
+		log.Println(ErrEmptyIpAddress)
 		return
 	}
 
 	if node.NodeId.Id == "" {
-		log.Fatal(ErrEmptyNodeId)
+		log.Println(ErrEmptyNodeId)
 		return
 	}
 
 	err := b.nodeApi.UpdateNode(node)
 
 	if err != nil {
-		log.Fatalf("%s: %s", ErrNodeApi, err)
+		log.Println("%s: %s", ErrNodeApi, err)
 	}
 }
 
