@@ -21,7 +21,7 @@
 
 # Module Architecture
 
-![Module Architecture](../images/[module]component-architecture-r1.png)
+![Module Architecture](../images/[module]component-architecture-r2.png)
 
 위 모델은 `it-chain-Engine`의 개별 컴포넌트의 모듈 아키텍처를 Layered 아키텍처 패턴을 적용하여 표현한 모델이다. 모듈 아키텍처는 개념 수준 아키텍처 모델과는 달리 시스템의 코드 측면 구조를 표현한다. (개념 수준 아키텍처 모델은 시스템의 실행 측면 구조를 묘사하였다.)
 
@@ -29,29 +29,34 @@
 
 다음은 각 모듈에 대한 간략한 설명이다.
 
-**API**
-API 레이어는 다른 bounded context와 협력을 위한 다양한 api를 제공한다.
-다른 bonded context 내의 서비스들을 오직 api를 통해서만 해당 서비스에 접근이 가능하다.
-
-**model**
-model 은 해당 bounded context 에서 주로 사용되는 entity와 이를 구성하는 value object를 정의한다.
-
-**factory**
-factory는 model의 entity를 생성해 주는 역할을 담당하며, 다양한 값을 받아 value object를 구현하고 이를 조합하여 entity를 생성해 반환해 주는 역할을 수행한다.
-
-**Service**
-service는 해당 subcontext 내의 다양한 기능을 수행하며, infra의 기능들에 대한 interface를 만들어 준다.
-api 와 service 내에서 infra layer에 접근하지 않기 위해서 이 service 단에서 interface를 구현해 두고 필요한 경우 사용한다.
-
-**repository**
-repository는 entity 및 value object 를 기준으로 하여 db와의 입출력을 담당하며, it-chain에서는 levelDB와의 통신을 수행한다.
-하지만 직접적인 통신의 구현은 infra layer 에서 수행하며, 본 repository에서는 실제적인 구현 내용은 숨기고 interface 형태로 함수만을 선언하여 기능을 추상화 시켜준다.
-
 **Infra**
 infra layer 에서는 messaging 및 levelDB 통신 등 서비스에 필요한 기반환경을 구현하고 있다.
-앞서 repository 에서 정의한 함수에 대한 실질적인 구현이 이루어지며, rabitMQ 서버와 통신을 구현한다.
+앞서 repository 에서 정의한 함수에 대한 실질적인 구현이 이루어지며, rabbitMQ 서버와 통신을 구현한다.
 
 위 그림은 앞서 제시된 Onion Architecture에서 제시된 사용 관계의 제한과 DDD 개발방법에서 정의하는 사용 관계의 제한을 반영하여 그려졌다. 아래 추적성 관리 테이블을 참고하여, 코드 작성시 아키텍처 모델에 명시된 사용 관계를 지키도록 유의한다.
+
+**API**
+API 레이어는 다른 bounded context와 협력을 위한 다양한 api를 제공한다.
+다른 bonded context 내의 서비스들을 오직 api를 통해서만 해당 서비스에 접근이 가능하다. domain layer를 사용하여 하나의 의미있는 기능 단위를 제공한다.
+
+**domain**
+해결하고자 하는 도메인의 추상화로 비지니스 로직의 구현체이다. aggregate, service를 활용해 비지니스 로직을 수행한다.
+
+**service**
+service는 해당 subcontext 내의 다양한 도메인 기능을 수행하며, infra의 기능들에 대한 interface를 제공해 준다.
+api 와 service 내에서 infra layer의 기능을 사용하기 위해 service 단에서 interface를 구현해 두고 필요한 경우 사용한다.
+
+**repository**
+repository는 entity 및 value object 를 기준으로 하여 db와의 입출력을 담당한다. 하지만 직접적인 구현은 infra layer 에서 수행하며, 본 repository에서는 실제적인 구현 내용은 숨기고 interface 형태로 함수만을 선언하여 기능을 추상화 시켜준다.
+
+
+
+## 모듈-코드 추적성 테이블
+| 모듈                 | 코드                             |
+| -------------------- | -------------------------------- |
+| Infrastructure layer | `{component-name}/infra` package |
+| API layer            | `{component-name}/api` package   |
+| Domain layer         | `{component-name}` package       |
 
 
 
