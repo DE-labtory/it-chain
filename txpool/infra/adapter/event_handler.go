@@ -2,7 +2,7 @@ package adapter
 
 import (
 	"github.com/it-chain/it-chain-Engine/txpool"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 var ErrNoEventID = errors.New("no event id ")

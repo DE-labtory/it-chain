@@ -1,15 +1,14 @@
-package messaging_test
+package adapter
 
 import (
 	"reflect"
 	"testing"
 
 	"github.com/it-chain/it-chain-Engine/p2p"
-	"github.com/it-chain/it-chain-Engine/p2p/infra/messaging"
 	"github.com/magiconair/properties/assert"
 )
 
-func TestMessageDispatcher_RequestLeaderInfo(t *testing.T) {
+func TestMessageService_RequestLeaderInfo(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
@@ -33,29 +32,29 @@ func TestMessageDispatcher_RequestLeaderInfo(t *testing.T) {
 			}{
 				nodeId: p2p.NodeId{},
 			},
-			err: messaging.ErrEmptyNodeId,
+			err: ErrEmptyNodeId,
 		},
 	}
 
-	publisher := messaging.Publisher(func(exchange string, topic string, data interface{}) error {
+	publish := func(exchange string, topic string, data interface{}) error {
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.deliver")
 		assert.Equal(t, reflect.TypeOf(data).String(), "p2p.MessageDeliverCommand")
 
 		return nil
-	})
+	}
 
-	messageDispatcher := messaging.NewMessageDispatcher(publisher)
+	messageService := NewMessageService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageDispatcher.RequestLeaderInfo(test.input.nodeId)
+		err := messageService.RequestLeaderInfo(test.input.nodeId)
 		assert.Equal(t, err, test.err)
 	}
 
 }
 
-func TestMessageDispatcher_DeliverLeaderInfo(t *testing.T) {
+func TestMessageService_DeliverLeaderInfo(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
@@ -76,7 +75,7 @@ func TestMessageDispatcher_DeliverLeaderInfo(t *testing.T) {
 					},
 				},
 			},
-			err: messaging.ErrEmptyNodeId,
+			err: ErrEmptyNodeId,
 		},
 		"empty leader id test": {
 			input: struct {
@@ -90,7 +89,7 @@ func TestMessageDispatcher_DeliverLeaderInfo(t *testing.T) {
 					LeaderId: p2p.LeaderId{},
 				},
 			},
-			err: messaging.ErrEmptyLeaderId,
+			err: ErrEmptyLeaderId,
 		},
 		"success": {
 			input: struct {
@@ -109,7 +108,7 @@ func TestMessageDispatcher_DeliverLeaderInfo(t *testing.T) {
 			err: nil,
 		},
 	}
-	publisher := messaging.Publisher(func(exchange string, topic string, data interface{}) error {
+	publish := func(exchange string, topic string, data interface{}) error {
 		{
 			assert.Equal(t, exchange, "Command")
 			assert.Equal(t, topic, "message.deliver")
@@ -117,18 +116,18 @@ func TestMessageDispatcher_DeliverLeaderInfo(t *testing.T) {
 
 			return nil
 		}
-	})
+	}
 
-	messageDispatcher := messaging.NewMessageDispatcher(publisher)
+	messageService := NewMessageService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageDispatcher.DeliverLeaderInfo(test.input.nodeId, test.input.leader)
+		err := messageService.DeliverLeaderInfo(test.input.nodeId, test.input.leader)
 		assert.Equal(t, err, test.err)
 	}
 }
 
-func TestMessageDispatcher_RequestNodeList(t *testing.T) {
+func TestMessageService_RequestNodeList(t *testing.T) {
 
 	tests := map[string]struct {
 		input p2p.NodeId
@@ -142,10 +141,10 @@ func TestMessageDispatcher_RequestNodeList(t *testing.T) {
 		},
 		"success": {
 			input: p2p.NodeId{},
-			err:   messaging.ErrEmptyNodeId,
+			err:   ErrEmptyNodeId,
 		},
 	}
-	publisher := messaging.Publisher(func(exchange string, topic string, data interface{}) error {
+	publish := func(exchange string, topic string, data interface{}) error {
 		{
 			assert.Equal(t, exchange, "Command")
 			assert.Equal(t, topic, "message.deliver")
@@ -153,18 +152,18 @@ func TestMessageDispatcher_RequestNodeList(t *testing.T) {
 
 			return nil
 		}
-	})
+	}
 
-	messageDispatcher := messaging.NewMessageDispatcher(publisher)
+	messageService := NewMessageService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageDispatcher.RequestNodeList(test.input)
+		err := messageService.RequestNodeList(test.input)
 		assert.Equal(t, err, test.err)
 	}
 }
 
-func TestMessageDispatcher_DeliverNodeList(t *testing.T) {
+func TestMessageService_DeliverNodeList(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			nodeId   p2p.NodeId
@@ -182,7 +181,7 @@ func TestMessageDispatcher_DeliverNodeList(t *testing.T) {
 				},
 				nodeList: []p2p.Node{},
 			},
-			err: messaging.ErrEmptyNodeList,
+			err: ErrEmptyNodeList,
 		},
 		"empty node id test": {
 			input: struct {
@@ -192,7 +191,7 @@ func TestMessageDispatcher_DeliverNodeList(t *testing.T) {
 				nodeId:   p2p.NodeId{},
 				nodeList: []p2p.Node{},
 			},
-			err: messaging.ErrEmptyNodeId,
+			err: ErrEmptyNodeId,
 		},
 		"success": {
 			input: struct {
@@ -214,7 +213,7 @@ func TestMessageDispatcher_DeliverNodeList(t *testing.T) {
 			err: nil,
 		},
 	}
-	publisher := messaging.Publisher(func(exchange string, topic string, data interface{}) error {
+	publish := func(exchange string, topic string, data interface{}) error {
 		{
 			assert.Equal(t, exchange, "Command")
 			assert.Equal(t, topic, "message.deliver")
@@ -222,13 +221,13 @@ func TestMessageDispatcher_DeliverNodeList(t *testing.T) {
 
 			return nil
 		}
-	})
+	}
 
-	messageDispatcher := messaging.NewMessageDispatcher(publisher)
+	messageService := NewMessageService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageDispatcher.DeliverNodeList(test.input.nodeId, test.input.nodeList)
+		err := messageService.DeliverNodeList(test.input.nodeId, test.input.nodeList)
 		assert.Equal(t, err, test.err)
 	}
 
