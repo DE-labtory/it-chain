@@ -94,7 +94,6 @@
 ## 블록체인 동기화
 
 
-
 동기화(Synchronize)는 확인(Check), 구축(Construct), 재구축(PostConstruct)의 과정을 거친다.
 
 

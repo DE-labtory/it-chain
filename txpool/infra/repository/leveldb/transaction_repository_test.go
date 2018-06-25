@@ -1,9 +1,10 @@
 package leveldb
 
 import (
-	"testing"
-	"github.com/it-chain/it-chain-Engine/txpool"
 	"os"
+	"testing"
+
+	"github.com/it-chain/it-chain-Engine/txpool"
 	"github.com/magiconair/properties/assert"
 )
 
@@ -139,7 +140,6 @@ func TestTransactionRepository_FindAll(t *testing.T) {
 	// Then
 	assert.Equal(t, transactions, transactions1)
 	assert.Equal(t, nil, err1)
-
 
 	// When
 	t1 := txpool.Transaction{
