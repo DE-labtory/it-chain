@@ -1,20 +1,36 @@
 package blockchain
 
 import (
-	"go/build"
 	"os"
 	"testing"
 
 	"time"
+
+	"encoding/json"
+	"io/ioutil"
 
 	"github.com/it-chain/leveldb-wrapper"
 	"github.com/it-chain/yggdrasill/impl"
 	"github.com/stretchr/testify/assert"
 )
 
-var genesisConfFilePath = build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/.it-chain/genesisconf/GenesisBlockConfig.json"
-
 func TestBlockRepository_AddBlock(t *testing.T) {
+	GenesisConfFilePath := "./GenesisBlockConfig.json"
+	defer os.Remove(GenesisConfFilePath)
+	GenesisBlockConfigJson := []byte(`{
+								  "Seal":[],
+								  "PrevSeal":[],
+								  "Height":0,
+								  "TxList":[],
+								  "TxSeal":[],
+								  "TimeStamp":"0001-01-01T00:00:00-00:00",
+								  "Creator":[]
+								}`)
+	var tempJson impl.DefaultBlock
+	_ = json.Unmarshal(GenesisBlockConfigJson, &tempJson)
+	GenesisBlockConfigByte, _ := json.Marshal(tempJson)
+	_ = ioutil.WriteFile(GenesisConfFilePath, GenesisBlockConfigByte, 0644)
+
 	dbPath := "./.db"
 	db := leveldbwrapper.CreateNewDB(dbPath)
 	defer func() {
@@ -22,7 +38,7 @@ func TestBlockRepository_AddBlock(t *testing.T) {
 		os.RemoveAll(dbPath)
 	}()
 
-	genesisBlock, _ := CreateGenesisBlock(genesisConfFilePath)
+	genesisBlock, _ := CreateGenesisBlock(GenesisConfFilePath)
 	validator := new(impl.DefaultValidator)
 	opts := map[string]interface{}{
 		"db_path": dbPath,
@@ -34,10 +50,23 @@ func TestBlockRepository_AddBlock(t *testing.T) {
 }
 
 func TestBlockRepository_GetBlockByHeight(t *testing.T) {
+	GenesisConfFilePath := "./GenesisBlockConfig.json"
+	defer os.Remove(GenesisConfFilePath)
+	GenesisBlockConfigJson := []byte(`{
+								  "Seal":[],
+								  "PrevSeal":[],
+								  "Height":0,
+								  "TxList":[],
+								  "TxSeal":[],
+								  "TimeStamp":"0001-01-01T00:00:00-00:00",
+								  "Creator":[]
+								}`)
+	var tempJson impl.DefaultBlock
+	_ = json.Unmarshal(GenesisBlockConfigJson, &tempJson)
+	GenesisBlockConfigByte, _ := json.Marshal(tempJson)
+	_ = ioutil.WriteFile(GenesisConfFilePath, GenesisBlockConfigByte, 0644)
+
 	dbPath := "./.db"
-
-	genesisConfFilePath := build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/.it-chain/genesisconf/GenesisBlockConfig.json"
-
 	validator := new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
 	defer func() {
@@ -48,7 +77,7 @@ func TestBlockRepository_GetBlockByHeight(t *testing.T) {
 		"db_path": dbPath,
 	}
 	br := NewBlockRepository(db, *validator, opts)
-	genesisBlock, _ := CreateGenesisBlock(genesisConfFilePath)
+	genesisBlock, _ := CreateGenesisBlock(GenesisConfFilePath)
 	br.AddBlock(*genesisBlock)
 	retrievedBlock, err := br.GetBlockByHeight(0)
 	assert.NoError(t, err)
@@ -56,8 +85,23 @@ func TestBlockRepository_GetBlockByHeight(t *testing.T) {
 }
 
 func TestBlockRepository_GetBlockBySeal(t *testing.T) {
+	GenesisConfFilePath := "./GenesisBlockConfig.json"
+	defer os.Remove(GenesisConfFilePath)
+	GenesisBlockConfigJson := []byte(`{
+								  "Seal":[],
+								  "PrevSeal":[],
+								  "Height":0,
+								  "TxList":[],
+								  "TxSeal":[],
+								  "TimeStamp":"0001-01-01T00:00:00-00:00",
+								  "Creator":[]
+								}`)
+	var tempJson impl.DefaultBlock
+	_ = json.Unmarshal(GenesisBlockConfigJson, &tempJson)
+	GenesisBlockConfigByte, _ := json.Marshal(tempJson)
+	_ = ioutil.WriteFile(GenesisConfFilePath, GenesisBlockConfigByte, 0644)
+
 	dbPath := "./.db"
-	genesisConfFilePath := build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/.it-chain/genesisconf/GenesisBlockConfig.json"
 	validator := new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
 	defer func() {
@@ -68,7 +112,7 @@ func TestBlockRepository_GetBlockBySeal(t *testing.T) {
 		"db_path": dbPath,
 	}
 	br := NewBlockRepository(db, *validator, opts)
-	genesisBlock, _ := CreateGenesisBlock(genesisConfFilePath)
+	genesisBlock, _ := CreateGenesisBlock(GenesisConfFilePath)
 	br.AddBlock(*genesisBlock)
 	retrievedBlock, err := br.GetBlockBySeal(genesisBlock.Seal)
 	assert.NoError(t, err)
@@ -76,10 +120,23 @@ func TestBlockRepository_GetBlockBySeal(t *testing.T) {
 }
 
 func TestBlockRepository_GetLastBlock(t *testing.T) {
+	GenesisConfFilePath := "./GenesisBlockConfig.json"
+	defer os.Remove(GenesisConfFilePath)
+	GenesisBlockConfigJson := []byte(`{
+								  "Seal":[],
+								  "PrevSeal":[],
+								  "Height":0,
+								  "TxList":[],
+								  "TxSeal":[],
+								  "TimeStamp":"0001-01-01T00:00:00-00:00",
+								  "Creator":[]
+								}`)
+	var tempJson impl.DefaultBlock
+	_ = json.Unmarshal(GenesisBlockConfigJson, &tempJson)
+	GenesisBlockConfigByte, _ := json.Marshal(tempJson)
+	_ = ioutil.WriteFile(GenesisConfFilePath, GenesisBlockConfigByte, 0644)
+
 	dbPath := "./.db"
-
-	genesisConfFilePath := build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/.it-chain/genesisconf/GenesisBlockConfig.json"
-
 	validator := new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
 	defer func() {
@@ -90,7 +147,7 @@ func TestBlockRepository_GetLastBlock(t *testing.T) {
 		"db_path": dbPath,
 	}
 	br := NewBlockRepository(db, *validator, opts)
-	genesisBlock, _ := CreateGenesisBlock(genesisConfFilePath)
+	genesisBlock, _ := CreateGenesisBlock(GenesisConfFilePath)
 	br.AddBlock(*genesisBlock)
 	retrievedBlock, err := br.GetLastBlock()
 	assert.NoError(t, err)
@@ -98,8 +155,23 @@ func TestBlockRepository_GetLastBlock(t *testing.T) {
 }
 
 func TestBlockRepositoryImpl_GetBlockByTxID(t *testing.T) {
+	GenesisConfFilePath := "./GenesisBlockConfig.json"
+	defer os.Remove(GenesisConfFilePath)
+	GenesisBlockConfigJson := []byte(`{
+								  "Seal":[],
+								  "PrevSeal":[],
+								  "Height":0,
+								  "TxList":[],
+								  "TxSeal":[],
+								  "TimeStamp":"0001-01-01T00:00:00-00:00",
+								  "Creator":[]
+								}`)
+	var tempJson impl.DefaultBlock
+	_ = json.Unmarshal(GenesisBlockConfigJson, &tempJson)
+	GenesisBlockConfigByte, _ := json.Marshal(tempJson)
+	_ = ioutil.WriteFile(GenesisConfFilePath, GenesisBlockConfigByte, 0644)
+
 	dbPath := "./.db"
-	genesisConfFilePath := build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/.it-chain/genesisconf/GenesisBlockConfig.json"
 	validator := new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
 	defer func() {
@@ -110,7 +182,7 @@ func TestBlockRepositoryImpl_GetBlockByTxID(t *testing.T) {
 		"db_path": dbPath,
 	}
 	br := NewBlockRepository(db, *validator, opts)
-	genesisBlock, _ := CreateGenesisBlock(genesisConfFilePath)
+	genesisBlock, _ := CreateGenesisBlock(GenesisConfFilePath)
 	tx := &impl.DefaultTransaction{
 		PeerID:    "p01",
 		ID:        "tx01",
@@ -138,8 +210,23 @@ func TestBlockRepositoryImpl_GetBlockByTxID(t *testing.T) {
 }
 
 func TestBlockRepositoryImpl_GetTransactionByTxID(t *testing.T) {
+	GenesisConfFilePath := "./GenesisBlockConfig.json"
+	defer os.Remove(GenesisConfFilePath)
+	GenesisBlockConfigJson := []byte(`{
+								  "Seal":[],
+								  "PrevSeal":[],
+								  "Height":0,
+								  "TxList":[],
+								  "TxSeal":[],
+								  "TimeStamp":"0001-01-01T00:00:00-00:00",
+								  "Creator":[]
+								}`)
+	var tempJson impl.DefaultBlock
+	_ = json.Unmarshal(GenesisBlockConfigJson, &tempJson)
+	GenesisBlockConfigByte, _ := json.Marshal(tempJson)
+	_ = ioutil.WriteFile(GenesisConfFilePath, GenesisBlockConfigByte, 0644)
+
 	dbPath := "./.db"
-	genesisConfFilePath := build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/.it-chain/genesisconf/GenesisBlockConfig.json"
 	validator := new(impl.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
 	defer func() {
@@ -150,7 +237,7 @@ func TestBlockRepositoryImpl_GetTransactionByTxID(t *testing.T) {
 		"db_path": dbPath,
 	}
 	br := NewBlockRepository(db, *validator, opts)
-	genesisBlock, _ := CreateGenesisBlock(genesisConfFilePath)
+	genesisBlock, _ := CreateGenesisBlock(GenesisConfFilePath)
 	tx := &impl.DefaultTransaction{
 		PeerID:    "p01",
 		ID:        "tx01",
