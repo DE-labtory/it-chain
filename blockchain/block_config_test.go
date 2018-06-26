@@ -1,35 +1,30 @@
 package blockchain
 
 import (
-	"testing"
-
-	"os"
-
-	"io/ioutil"
-
 	"encoding/json"
+	"io/ioutil"
+	"os"
+	"testing"
 
 	"github.com/it-chain/yggdrasill/impl"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConfigFromJson(t *testing.T) {
+
 	genesisFilePath := "./GenesisBlockConfig.json"
-	defer os.Remove(genesisFilePath)
 	wrongFilePath := "./WrongFileName.json"
-	GenesisBlockConfigJson := []byte(`{
-								  "Seal":[],
-								  "PrevSeal":[],
-								  "Height":0,
-								  "TxList":[],
-								  "TxSeal":[],
-								  "TimeStamp":"0001-01-01T00:00:00-00:00",
-								  "Creator":[]
-								}`)
 	var tempJson impl.DefaultBlock
-	_ = json.Unmarshal(GenesisBlockConfigJson, &tempJson)
+
+	err := json.Unmarshal(GenesisBlockConfigJson, &tempJson)
+	assert.NoError(t, err)
+
 	GenesisBlockConfigByte, _ := json.Marshal(tempJson)
-	_ = ioutil.WriteFile(genesisFilePath, GenesisBlockConfigByte, 0644)
+	err = ioutil.WriteFile(genesisFilePath, GenesisBlockConfigByte, 0644)
+	assert.NoError(t, err)
+
+	defer os.Remove(genesisFilePath)
+
 	_, err1 := ConfigFromJson(genesisFilePath)
 	assert.NoError(t, err1)
 	_, err2 := ConfigFromJson(wrongFilePath)
