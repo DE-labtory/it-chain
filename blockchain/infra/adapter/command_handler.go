@@ -3,14 +3,7 @@ package adapter
 import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/txpool"
-	"log"
-	"errors"
 )
-
-var ErrEmptyEventId = errors.New("empty event id proposed.")
-var ErrEmptyIpAddress = errors.New("empty ip address proposed.")
-var ErrEmptyNodeId = errors.New("empty node id proposed.")
-var ErrNodeApi = errors.New("problem in node api")
 
 type CommandHandlerNodeApi interface {
 	UpdateNode(node blockchain.Node) error
@@ -35,30 +28,30 @@ func NewCommandHandler(blockApi CommandHandlerBlockApi, nodeApi CommandHandlerNo
 
 /// 임의로 선정한 노드의 정보를 업데이트한다.
 func (b *CommandHandler) HandleUpdateNodeCommand(command blockchain.NodeUpdateCommand) {
-	eventID := command.GetID()
-
-	if eventID == "" {
-		log.Println(ErrEmptyEventId)
-		return
-	}
-
-	node := command.Node
-
-	if node.IpAddress == "" {
-		log.Println(ErrEmptyIpAddress)
-		return
-	}
-
-	if node.NodeId.Id == "" {
-		log.Println(ErrEmptyNodeId)
-		return
-	}
-
-	err := b.nodeApi.UpdateNode(node)
-
-	if err != nil {
-		log.Println("%s: %s", ErrNodeApi, err)
-	}
+	//eventID := command.GetID()
+	//
+	//if eventID == "" {
+	//	log.Println(ErrEmptyEventId)
+	//	return
+	//}
+	//
+	//node := command.Node
+	//
+	//if node.IpAddress == "" {
+	//	log.Println(ErrEmptyIpAddress)
+	//	return
+	//}
+	//
+	//if node.NodeId.Id == "" {
+	//	log.Println(ErrEmptyNodeId)
+	//	return
+	//}
+	//
+	//err := b.nodeApi.UpdateNode(node)
+	//
+	//if err != nil {
+	//	log.Println("%s: %s", ErrNodeApi, err)
+	//}
 }
 
 func (handler *CommandHandler) HandleProposeBlockCommand(command blockchain.ProposeBlockCommand) {

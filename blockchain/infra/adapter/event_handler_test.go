@@ -1,26 +1,25 @@
 package adapter_test
 
 import (
-	"testing"
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 	"github.com/it-chain/midgard"
-	"github.com/magiconair/properties/assert"
 )
 
-type CommandHandlerMockNodeApi struct {
-	UpdateNodeFunc func(node blockchain.Node) error
+type EventHandlerMockNodeApi struct {
+	AddNodeFunc func(node blockchain.Node) error
 }
-func (na CommandHandlerMockNodeApi) UpdateNode(node blockchain.Node) error {
-	return na.UpdateNodeFunc(node)
+func (na EventHandlerMockNodeApi) AddNode(node blockchain.Node) error {
+	return nil
+}
+func (na EventHandlerMockNodeApi) DeleteNode(node blockchain.Node) error {
+	return nil
 }
 
-type CommandHandlerMockBlockApi struct {}
-func (ba CommandHandlerMockBlockApi) CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error) {return nil, nil}
-func (ba CommandHandlerMockBlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error) {return nil, nil}
-
-
-func TestBlockchainCommandHandler_HandleUpdateNodeCommand(t *testing.T) {
+func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 	tests := map[string] struct {
 		input struct {
 			ID string
@@ -43,23 +42,23 @@ func TestBlockchainCommandHandler_HandleUpdateNodeCommand(t *testing.T) {
 				nodeId string
 				address string
 			}{ID: string(""), nodeId: string("zf2"), address: string("11.22.33.44")},
-			err: nil,
+			err: adapter.ErrEmptyEventId,
 		},
 	}
 
-	mockNodeApi := CommandHandlerMockNodeApi{}
-	mockNodeApi.UpdateNodeFunc = func(node blockchain.Node) error {
+	mockNodeApi := EventHandlerMockNodeApi{}
+	mockNodeApi.AddNodeFunc = func(node blockchain.Node) error {
 		assert.Equal(t, node.NodeId.Id, string("zf2"))
 		assert.Equal(t, node.IpAddress, string("11.22.33.44"))
 		return nil
 	}
 
-	commandHandler := adapter.NewCommandHandler(CommandHandlerMockBlockApi{}, mockNodeApi)
+	eventHandler := adapter.NewEventHandler(mockNodeApi)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		command := blockchain.NodeUpdateCommand{
+		event := blockchain.NodeCreatedEvent{
 			EventModel: midgard.EventModel{
 				ID: test.input.ID,
 			},
@@ -70,8 +69,8 @@ func TestBlockchainCommandHandler_HandleUpdateNodeCommand(t *testing.T) {
 				IpAddress: test.input.address,
 			},
 		}
-		commandHandler.HandleUpdateNodeCommand(command)
+		err := eventHandler.HandleNodeCreatedEvent(event)
+
+		assert.Equal(t, err, test.err)
 	}
 }
-
-
