@@ -44,6 +44,20 @@ func (eh *EventHandler) HandleNodeCreatedEvent(event blockchain.NodeCreatedEvent
 }
 
 func (eh *EventHandler) HandleNodeDeletedEvent(event blockchain.NodeDeletedEvent) error {
+	eventID := event.GetID()
+
+	if eventID == "" {
+		return ErrEmptyEventId
+	}
+
+	node := event.Node
+
+	err := eh.nodeApi.DeleteNode(node)
+
+	if err != nil {
+		return ErrNodeApi
+	}
+
 	return nil
 }
 
