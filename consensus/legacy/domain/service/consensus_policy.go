@@ -1,8 +1,8 @@
 package service
 
 import (
-	cs "github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/msg"
+	cs "github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/consensus"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/msg"
 )
 
 //함수의 로직이 똑같기 때문에 재사용 하는 방향으로 구현되어야함

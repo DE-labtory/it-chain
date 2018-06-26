@@ -1,6 +1,6 @@
 package service
 
-import "github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
+import "github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/consensus"
 
 type Serializable interface {
 	ToByte() ([]byte, error)

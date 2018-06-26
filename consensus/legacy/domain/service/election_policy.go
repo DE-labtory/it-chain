@@ -3,8 +3,8 @@ package service
 import (
 	"errors"
 
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/parliament"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/consensus"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/parliament"
 )
 
 func Elect(parliament parliament.Parliament) ([]*consensus.Representative, error) {
