@@ -37,7 +37,7 @@ func (gcs *GrpcCommandService) RequestBlock(nodeId p2p.NodeId, height uint64) er
 		Height: height,
 	}
 
-	deliverCommand, err := createMessageDeliverCommand("BlockRequestProtocol", body)
+	deliverCommand, err := createGrpcCommand("BlockRequestProtocol", body)
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (gcs *GrpcCommandService) ResponseBlock(nodeId p2p.NodeId, block blockchain
 
 	body := block
 
-	deliverCommand, err := createMessageDeliverCommand("BlockResponseProtocol", body)
+	deliverCommand, err := createGrpcCommand("BlockResponseProtocol", body)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (gcs *GrpcCommandService) ResponseBlock(nodeId p2p.NodeId, block blockchain
 	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
 
-func createMessageDeliverCommand(protocol string, body interface{}) (blockchain.GrpcCommand, error) {
+func createGrpcCommand(protocol string, body interface{}) (blockchain.GrpcCommand, error) {
 
 	data, err := common.Serialize(body)
 	if err != nil {
