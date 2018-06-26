@@ -3,7 +3,7 @@ package msg
 import (
 	"testing"
 
-	cs "github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
+	cs "github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/consensus"
 	"github.com/stretchr/testify/assert"
 )
 

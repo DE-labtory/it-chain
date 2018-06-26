@@ -5,7 +5,7 @@ import (
 
 	"fmt"
 
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/consensus"
 )
 
 //자기 자신을 제외한 네트워크의 Leader와 Member들

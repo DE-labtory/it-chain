@@ -3,7 +3,7 @@ package msg
 import (
 	"encoding/json"
 
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/consensus"
 )
 
 type CommitMsg struct {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	cs "github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
+	cs "github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/consensus"
 	"github.com/pkg/errors"
 )
 

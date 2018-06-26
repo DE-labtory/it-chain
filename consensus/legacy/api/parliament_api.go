@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/parliament"
-	"github.com/it-chain/it-chain-Engine/consensus/domain/repository"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/parliament"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/repository"
 )
 
 type ParliamentApi struct {
