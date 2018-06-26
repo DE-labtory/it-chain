@@ -91,7 +91,7 @@ Event handler는 amqp에서 event를 consume하여 필요한 작업을 api 호�
 
 **Repository projector**
 
-it-chain은 repository에 대한 쓰기와 읽기를 분리하는 `CQRS(Command Query Responsibilities Segregation)` 패턴을 차용하며, **Repository projector** 는 amqp에서 event를 consume하여 event로 부터 원하는 view를 구축(Projection)하는 작업을 수행한다.이러한 it-chain의 CQRS pattern은 projection이라는 minimal 한 logic의 수행만을 전담하는 repository projector와 handler를 구분함으로써 기능적으로 보다 명확한 설계를 추구하였다.
+it-chain은 repository에 대한 쓰기와 읽기를 분리하는 `CQRS(Command Query Responsibilities Segregation)` 패턴을 차용하며, **Repository projector**는 amqp에서 event를 consume하여 event로 부터 원하는 view를 구축(Projection)하는 작업을 수행한다.이러한 it-chain의 CQRS pattern은 projection이라는 minimal 한 logic의 수행만을 전담하는 repository projector와 handler를 구분함으로써 기능적으로 보다 명확한 설계를 추구하였다.
 
 
 
@@ -101,27 +101,7 @@ it-chain은 repository에 대한 쓰기와 읽기를 분리하는 `CQRS(Command 
 
 
 
-# Communication between peers(TODO)
-peer 사이의 통신은 gRPC library 기반의 자체 library 인 bifrost를 활용하여 이루어 진다. 각 peer 사이에서 rpc 통신은 message 객체를 주고받는 것으로 이루어 지며, _송신은 각 컴포넌트의 service의 한 종류인 `grpc_command_service` 에서 이루어 지며, 수신은 각 컴포넌트의 infra의 grpc command handler에서 이루어 진다._ 각 메세지는 메세지의 목적에 따라 미리 정해진 protocol 을 포함하며 message handler에서 특정 protocol에 따라 적합한 api 함수를 호출함으로써 모든 기능 수행을 application layer에 위임한다.
+# Communication between nodes
+Node 사이의 통신은 gRPC library 기반의 자체 library 인 bifrost를 활용하여 이루어 진다. gRPC Gateway 컴포넌트가 한다. 송신은 각 컴포넌트의 service의 한 종류인 `grpc_command_service` 에서 이루어 지며, 수신은 각 컴포넌트의 infra의 `grpc_command_handler`에서 이루어 진다. 각 메세지는 메세지의 목적에 따라 미리 정해진 protocol 을 포함하며 `grpc_command handler`에서 특정 protocol에 따라 적합한 api 함수를 호출함으로써 모든 기능 수행을 application layer에 위임한다.
 
-아래 그림은 peer 사이 통신에 있어 peer, gateway, AMQP 사이의 조망도이다.
-<p align="center"><img src="../images/[logical]peer-communication.png">
-
-## Send gRPC Message
-다른 peer에게 grpc message를 보내는 송신은 각 component의 `grpc command service` 에서 이루어지며, 아래 그림은 단일 peer에서 gRPC message의 송신에 대한 module view이다.
-
-![grpc message 송신](../images/GrpcMessageSend.png)
-
-
-
-## Receive gRPC Message
-다른 peer로 부터 grpc message의 수신은 각 component의 infra layer의 adapter내의 `grpc command handler` 에서 이루어지며, 아래 그림은 단일 peer에서 gRPC message의 수신에 대한 module view이다.
-![grpc message 수신](../images/GrpcMessageReceive.png)
-
-
-모듈 | 코드
------|-----
-Infrastructure layer | `{component-name}/infra` package
-API layer | `{component-name}/api` package
-Domain layer | `{component-name}` package
-
+![logicalnetwork-communication](../images/[logical]network-communication-r1.png)
