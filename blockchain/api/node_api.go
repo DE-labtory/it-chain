@@ -21,3 +21,5 @@ func NewNodeApi(eventRepository midgard.Repository, publisherId string) NodeApi 
 func (api *NodeApi) UpdateNode(node blockchain.Node) error {
 	return nil
 }
+
+
