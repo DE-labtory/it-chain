@@ -2,20 +2,26 @@ package api_test
 
 import (
 	"testing"
+
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/p2p/api"
-	"github.com/magiconair/properties/assert"
 	"github.com/it-chain/midgard"
+	"github.com/magiconair/properties/assert"
 )
 
 type MockMessageService struct{}
-func (mms MockMessageService) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error{return nil}
 
-type MockEventRepository struct {}
-func (mer MockEventRepository) Save(aggregateID string, events ...midgard.Event) error{return nil}
+func (mms MockMessageService) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error {
+	return nil
+}
 
-type MockReadOnlyLeaderRepository struct {}
-func (mrolr MockReadOnlyLeaderRepository) GetLeader() p2p.Leader{return p2p.Leader{}}
+type MockEventRepository struct{}
+
+func (mer MockEventRepository) Save(aggregateID string, events ...midgard.Event) error { return nil }
+
+type MockReadOnlyLeaderRepository struct{}
+
+func (mrolr MockReadOnlyLeaderRepository) GetLeader() p2p.Leader { return p2p.Leader{} }
 
 func TestLeaderApi_UpdateLeader(t *testing.T) {
 
@@ -40,7 +46,6 @@ func TestLeaderApi_UpdateLeader(t *testing.T) {
 			err: nil,
 		},
 	}
-
 
 	leaderApi := SetupLeaderApi()
 
@@ -78,7 +83,7 @@ func SetupLeaderApi() *api.LeaderApi {
 	eventRepository := MockEventRepository{}
 
 	messageService := MockMessageService{}
-	leaderApi := api.NewLeaderApi(leaderRepository, eventRepository, messageService, &p2p.Node{NodeId:p2p.NodeId{Id:"123"}})
+	leaderApi := api.NewLeaderApi(leaderRepository, eventRepository, messageService, &p2p.Node{NodeId: p2p.NodeId{Id: "123"}})
 
 	return leaderApi
 }
