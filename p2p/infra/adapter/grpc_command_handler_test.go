@@ -63,7 +63,7 @@ func TestGrpcMessageHandler_HandleMessageReceive(t *testing.T) {
 	}
 	leaderApi := MockLeaderApi{}
 	nodeApi := MockNodeApi{}
-	messageHandler := adapter.NewMessageHandler(leaderApi, nodeApi)
+	messageHandler := adapter.NewGrpcCommandHandler(leaderApi, nodeApi)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)

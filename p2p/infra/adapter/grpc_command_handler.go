@@ -17,24 +17,24 @@ type LeaderApi interface {
 	DeliverLeaderInfo(nodeId p2p.NodeId)
 }
 
-type MessageHandlerNodeApi interface {
+type GrpcCommandHandlerNodeApi interface {
 	UpdateNodeList(nodeList []p2p.Node) error
 	DeliverNodeList(nodeId p2p.NodeId) error
 	AddNode(node p2p.Node)
 }
 
-type MessageHandler struct {
+type GrpcCommandHandler struct {
 	leaderApi LeaderApi
-	nodeApi   MessageHandlerNodeApi
+	nodeApi   GrpcCommandHandlerNodeApi
 }
-func NewMessageHandler(leaderApi LeaderApi, nodeApi MessageHandlerNodeApi) *MessageHandler {
-	return &MessageHandler{
+func NewGrpcCommandHandler(leaderApi LeaderApi, nodeApi GrpcCommandHandlerNodeApi) *GrpcCommandHandler {
+	return &GrpcCommandHandler{
 		leaderApi: leaderApi,
 		nodeApi:   nodeApi,
 	}
 }
 
-func (g *MessageHandler) HandleMessageReceive(command p2p.GrpcRequestCommand) error {
+func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcRequestCommand) error {
 
 	switch command.Protocol {
 	case "LeaderInfoRequestProtocol":
