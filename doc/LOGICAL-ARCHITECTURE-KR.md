@@ -111,3 +111,4 @@ peer 사이의 통신은 gRPC library 기반의 자체 library 인 bifrost를 �
 Infrastructure layer | `{component-name}/infra` package
 API layer | `{component-name}/api` package
 Domain layer | `{component-name}` package
+
