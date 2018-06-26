@@ -7,7 +7,6 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
-	ygg "github.com/it-chain/yggdrasill/common"
 	"github.com/rs/xid"
 )
 
@@ -48,7 +47,7 @@ func (md *MessageService) RequestBlock(nodeId p2p.NodeId, height uint64) error {
 	return md.publish("Command", "message.deliver", deliverCommand)
 }
 
-func (md *MessageService) ResponseBlock(nodeId p2p.NodeId, block ygg.Block) error {
+func (md *MessageService) ResponseBlock(nodeId p2p.NodeId, block blockchain.Block) error {
 
 	if nodeId.Id == "" {
 		return ErrEmptyNodeId
