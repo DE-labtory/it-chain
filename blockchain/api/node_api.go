@@ -21,5 +21,11 @@ func NewNodeApi(eventRepository midgard.Repository, publisherId string) NodeApi 
 func (api *NodeApi) UpdateNode(node blockchain.Node) error {
 	return nil
 }
-
-
+// TODO:
+func (api *NodeApi) AddNode(node blockchain.Node) error {
+	return nil
+}
+// TODO:
+func (api *NodeApi) DeleteNode(node blockchain.Node) error {
+	return nil
+}
