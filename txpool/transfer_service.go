@@ -7,9 +7,9 @@ import (
 
 //todo
 type TxPeriodicTransferService struct {
-	txRepository      TransactionRepository
-	leaderRepository  LeaderRepository
-	messageDispatcher MessageDispatcher
+	txRepository     TransactionRepository
+	leaderRepository LeaderRepository
+	messageService   MessageService
 }
 
 //todo (진행중) 이 함수가 call되었을 때 조건에 맞는 tx를 leader에게 전송하는 로직 추가
@@ -28,7 +28,7 @@ func (t TxPeriodicTransferService) TransferTxToLeader() {
 		log.Println(errors.New("there is no leader"))
 	}
 
-	err = t.messageDispatcher.SendLeaderTransactions(transactions, leader)
+	err = t.messageService.SendLeaderTransactions(transactions, leader)
 
 	if err != nil {
 		log.Println(err.Error())

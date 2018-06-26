@@ -1,4 +1,4 @@
-package messaging
+package adapter
 
 import (
 	"github.com/it-chain/it-chain-Engine/txpool"
@@ -7,20 +7,28 @@ import (
 
 var ErrNoEventID = errors.New("no event id ")
 
-type TxEventHandler struct {
+//////////////Event Handler
+
+type EventHandler struct {
+}
+
+//RepositoryProjector
+//do not import any api or service
+//event를 받아서 repository를 update하는 역할만 수행
+type RepositoryProjector struct {
 	txRepository     txpool.TransactionRepository
 	leaderRepository txpool.LeaderRepository
 }
 
-func NewTxEventHandler(txRepository txpool.TransactionRepository, leaderRepository txpool.LeaderRepository) *TxEventHandler {
-	return &TxEventHandler{
+func NewTxEventHandler(txRepository txpool.TransactionRepository, leaderRepository txpool.LeaderRepository) *RepositoryProjector {
+	return &RepositoryProjector{
 		txRepository:     txRepository,
 		leaderRepository: leaderRepository,
 	}
 }
 
 //add tx to txrepository
-func (t TxEventHandler) HandleTxCreatedEvent(txCreatedEvent txpool.TxCreatedEvent) error {
+func (t RepositoryProjector) HandleTxCreatedEvent(txCreatedEvent txpool.TxCreatedEvent) error {
 
 	txID := txCreatedEvent.ID
 
@@ -39,7 +47,7 @@ func (t TxEventHandler) HandleTxCreatedEvent(txCreatedEvent txpool.TxCreatedEven
 }
 
 //remove transaction
-func (t TxEventHandler) HandleTxDeletedEvent(txDeletedEvent txpool.TxDeletedEvent) error {
+func (t RepositoryProjector) HandleTxDeletedEvent(txDeletedEvent txpool.TxDeletedEvent) error {
 
 	txID := txDeletedEvent.ID
 
@@ -57,7 +65,7 @@ func (t TxEventHandler) HandleTxDeletedEvent(txDeletedEvent txpool.TxDeletedEven
 }
 
 //update leader
-func (t TxEventHandler) HandleLeaderChangedEvent(leaderChangedEvent txpool.LeaderChangedEvent) error {
+func (t RepositoryProjector) HandleLeaderChangedEvent(leaderChangedEvent txpool.LeaderChangedEvent) error {
 
 	leaderID := leaderChangedEvent.ID
 

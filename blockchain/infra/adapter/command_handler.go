@@ -23,27 +23,25 @@ func (b *BlockchainCommandHandler) HandleUpdateNodesCommand(command blockchain.N
 	panic("implement me")
 }
 
-
-func (handler *BlockchainCommandHandler) HandleProposeBlockCommand(cmd blockchain.ProposeBlockCommand, dispatcher blockchain.MessageDispatcher) {
-	rawTxList := cmd.Transactions
-
-	txList, err := convertTxList(rawTxList)
-	if err != nil {
-		// TODO: handle errors
-		return
-	}
-
-	block, err := handler.blockApi.CreateBlock(txList)
-	if err != nil {
-		// TODO: handle errors
-		return
-	}
-
-	dispatcher.SendBlockValidateCommand(block)
+func (handler *BlockchainCommandHandler) HandleProposeBlockCommand(cmd blockchain.ProposeBlockCommand) {
+	//rawTxList := cmd.Transactions
+	//
+	//txList, err := convertTxList(rawTxList)
+	//if err != nil {
+	//	// TODO: handle errors
+	//	return
+	//}
+	//
+	//block, err := handler.blockApi.CreateBlock(txList)
+	//if err != nil {
+	//	// TODO: handle errors
+	//	return
+	//}
+	// TODO: service는 api에서 호출되어야한다.
+	//dispatcher.SendBlockValidateCommand(block)
 }
 
 // TODO: yggdrasill/impl/Transaction과 txpool/Transaction이 다름.
 func convertTxList(txList []txpool.Transaction) ([]blockchain.Transaction, error) {
 	return nil, nil
 }
-
