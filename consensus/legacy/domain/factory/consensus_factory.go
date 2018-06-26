@@ -1,9 +1,9 @@
 package factory
 
 import (
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/parliament"
-	"github.com/it-chain/it-chain-Engine/consensus/domain/service"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/consensus"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/parliament"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/service"
 	"github.com/rs/xid"
 )
 

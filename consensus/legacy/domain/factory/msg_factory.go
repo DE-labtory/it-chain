@@ -1,8 +1,8 @@
 package factory
 
 import (
-	cs "github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/msg"
+	cs "github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/consensus"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/msg"
 )
 
 func CreatePreprepareMsg(consensus cs.Consensus) msg.PreprepareMsg {

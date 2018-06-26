@@ -5,7 +5,7 @@ import (
 
 	"fmt"
 
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/parliament"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/parliament"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -1,12 +1,12 @@
 package api
 
 import (
-	"github.com/it-chain/it-chain-Engine/consensus/domain/factory"
-	cs "github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/msg"
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/parliament"
-	"github.com/it-chain/it-chain-Engine/consensus/domain/repository"
-	"github.com/it-chain/it-chain-Engine/consensus/domain/service"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/factory"
+	cs "github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/consensus"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/msg"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/parliament"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/repository"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/service"
 )
 
 type ConsensusApi struct {

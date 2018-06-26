@@ -3,7 +3,7 @@ package parliament
 import (
 	"testing"
 
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/consensus"
+	"github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/consensus"
 	"github.com/stretchr/testify/assert"
 )
 
