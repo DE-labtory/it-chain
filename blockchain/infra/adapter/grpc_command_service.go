@@ -17,17 +17,17 @@ var ErrEmptyBlockSeal = errors.New("empty block seal")
 // ToDo: 구현.(gitId:junk-sound)
 type Publish func(exchange string, topic string, data interface{}) (err error)
 
-type MessageService struct {
+type GrpcCommandService struct {
 	publish Publish // midgard.client.Publish
 }
 
-func NewMessageService(publish Publish) *MessageService {
-	return &MessageService{
+func NewGrpcCommandService(publish Publish) *GrpcCommandService {
+	return &GrpcCommandService{
 		publish: publish,
 	}
 }
 
-func (md *MessageService) RequestBlock(nodeId p2p.NodeId, height uint64) error {
+func (gcs *GrpcCommandService) RequestBlock(nodeId p2p.NodeId, height uint64) error {
 
 	if nodeId.Id == "" {
 		return ErrEmptyNodeId
@@ -44,10 +44,10 @@ func (md *MessageService) RequestBlock(nodeId p2p.NodeId, height uint64) error {
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
 
-	return md.publish("Command", "message.deliver", deliverCommand)
+	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
 
-func (md *MessageService) ResponseBlock(nodeId p2p.NodeId, block blockchain.Block) error {
+func (gcs *GrpcCommandService) ResponseBlock(nodeId p2p.NodeId, block blockchain.Block) error {
 
 	if nodeId.Id == "" {
 		return ErrEmptyNodeId
@@ -66,17 +66,17 @@ func (md *MessageService) ResponseBlock(nodeId p2p.NodeId, block blockchain.Bloc
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
 
-	return md.publish("Command", "message.deliver", deliverCommand)
+	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
 
-func createMessageDeliverCommand(protocol string, body interface{}) (blockchain.MessageDeliverCommand, error) {
+func createMessageDeliverCommand(protocol string, body interface{}) (blockchain.GrpcCommand, error) {
 
 	data, err := common.Serialize(body)
 	if err != nil {
-		return blockchain.MessageDeliverCommand{}, err
+		return blockchain.GrpcCommand{}, err
 	}
 
-	return blockchain.MessageDeliverCommand{
+	return blockchain.GrpcCommand{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},

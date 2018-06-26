@@ -1,6 +1,5 @@
 package api
 
-<<<<<<< HEAD
 import (
 	"github.com/it-chain/midgard"
 )

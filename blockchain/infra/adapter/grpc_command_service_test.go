@@ -72,7 +72,7 @@ func (MockBlock) IsPrev(serializedPrevBlock []byte) bool {
 	panic("implement me")
 }
 
-func TestMessageService_RequestBlock(t *testing.T) {
+func TestGrpcCommandService_RequestBlock(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
@@ -108,21 +108,21 @@ func TestMessageService_RequestBlock(t *testing.T) {
 	publish := func(exchange string, topic string, data interface{}) error {
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.deliver")
-		assert.Equal(t, reflect.TypeOf(data).String(), "blockchain.MessageDeliverCommand")
+		assert.Equal(t, reflect.TypeOf(data).String(), "blockchain.GrpcCommand")
 		return nil
 	}
 
-	messageService := adapter.NewMessageService(publish)
+	GrpcCommandService := adapter.NewGrpcCommandService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageService.RequestBlock(test.input.nodeId, test.input.height)
+		err := GrpcCommandService.RequestBlock(test.input.nodeId, test.input.height)
 		assert.Equal(t, err, test.err)
 	}
 
 }
 
-func TestMessageService_ResponseBlock(t *testing.T) {
+func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
@@ -176,16 +176,16 @@ func TestMessageService_ResponseBlock(t *testing.T) {
 	publish := func(exchange string, topic string, data interface{}) error {
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.deliver")
-		assert.Equal(t, reflect.TypeOf(data).String(), "blockchain.MessageDeliverCommand")
+		assert.Equal(t, reflect.TypeOf(data).String(), "blockchain.GrpcCommand")
 
 		return nil
 	}
 
-	messageService := adapter.NewMessageService(publish)
+	GrpcCommandService := adapter.NewGrpcCommandService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageService.ResponseBlock(test.input.nodeId, test.input.block)
+		err := GrpcCommandService.ResponseBlock(test.input.nodeId, test.input.block)
 		assert.Equal(t, err, test.err)
 	}
 
