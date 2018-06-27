@@ -9,7 +9,7 @@ import (
 var ErrEmptyEventId = errors.New("empty event id proposed.")
 var ErrNodeApi = errors.New("problem in node api")
 
-type RepositoryProjector interface {
+type RepositoryProjector struct {
 	blockchain.NodeRepository
 }
 
@@ -33,7 +33,7 @@ func (eh *EventHandler) HandleNodeCreatedEvent(event blockchain.NodeCreatedEvent
 
 	node := event.Node
 
-	err := eh.repositoryProjector.AddNode(node)
+	err := eh.repositoryProjector.NodeRepository.AddNode(node)
 
 	if err != nil {
 		return ErrNodeApi
@@ -51,7 +51,7 @@ func (eh *EventHandler) HandleNodeDeletedEvent(event blockchain.NodeDeletedEvent
 
 	node := event.Node
 
-	err := eh.repositoryProjector.DeleteNode(node)
+	err := eh.repositoryProjector.NodeRepository.DeleteNode(node)
 
 	if err != nil {
 		return ErrNodeApi

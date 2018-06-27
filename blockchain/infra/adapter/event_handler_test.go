@@ -10,15 +10,15 @@ import (
 	"errors"
 )
 
-type MockRepositoryProjector struct {
+type MockNodeRepository struct {
 	AddNodeFunc func(node blockchain.Node) error
 	DeleteNodeFunc func(node blockchain.Node) error
 }
 
-func (nr MockRepositoryProjector) AddNode(node blockchain.Node) error {
+func (nr MockNodeRepository) AddNode(node blockchain.Node) error {
 	return nr.AddNodeFunc(node)
 }
-func (nr MockRepositoryProjector) DeleteNode(node blockchain.Node) error {
+func (nr MockNodeRepository) DeleteNode(node blockchain.Node) error {
 	return nr.DeleteNodeFunc(node)
 }
 
@@ -51,7 +51,7 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 			}{ID: string(""), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
 			err: adapter.ErrEmptyEventId,
 		},
-		"api error test": {
+		"repository error test": {
 			input: struct {
 				ID string
 				nodeId string
@@ -65,11 +65,14 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		rp := MockRepositoryProjector{}
-		rp.AddNodeFunc = func(node blockchain.Node) error {
+		nr := MockNodeRepository{}
+		nr.AddNodeFunc = func(node blockchain.Node) error {
 			assert.Equal(t, node.NodeId.Id, string("zf2"))
 			assert.Equal(t, node.IpAddress, string("11.22.33.44"))
 			return test.input.rpErr
+		}
+		rp := adapter.RepositoryProjector{
+			NodeRepository: nr,
 		}
 
 		eventHandler := adapter.NewEventHandler(rp)
@@ -119,7 +122,7 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 			}{ID: string(""), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
 			err: adapter.ErrEmptyEventId,
 		},
-		"api error test": {
+		"repository error test": {
 			input: struct {
 				ID string
 				nodeId string
@@ -133,11 +136,14 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		rp := MockRepositoryProjector{}
-		rp.DeleteNodeFunc = func(node blockchain.Node) error {
+		nr := MockNodeRepository{}
+		nr.DeleteNodeFunc = func(node blockchain.Node) error {
 			assert.Equal(t, node.NodeId.Id, string("zf2"))
 			assert.Equal(t, node.IpAddress, string("11.22.33.44"))
 			return test.input.rpErr
+		}
+		rp := adapter.RepositoryProjector{
+			NodeRepository: nr,
 		}
 
 		eventHandler := adapter.NewEventHandler(rp)
