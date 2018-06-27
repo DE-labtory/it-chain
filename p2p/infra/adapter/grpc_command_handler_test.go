@@ -13,7 +13,7 @@ import (
 type MockLeaderApi struct{}
 
 func (mla MockLeaderApi) UpdateLeader(leader p2p.Leader) error { return nil }
-func (mla MockLeaderApi) DeliverLeaderInfo(peerId p2p.PeerId)  {}
+func (mla MockLeaderApi) DeliverLeaderInfo(connectionId string)  {}
 
 type MockPeerApi struct{}
 
@@ -32,17 +32,17 @@ func TestGrpcMessageHandler_HandleMessageReceive(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			command p2p.GrpcRequestCommand
+			command p2p.GrpcReceiveCommand
 		}
 		err error
 	}{
 		"leader info deliver test success": {
 			input: struct {
-				command p2p.GrpcRequestCommand
+				command p2p.GrpcReceiveCommand
 			}{
-				command: p2p.GrpcRequestCommand{
+				command: p2p.GrpcReceiveCommand{
 					CommandModel: midgard.CommandModel{ID: "123"},
-					Data:         leaderByte,
+					Body:         leaderByte,
 					Protocol:     "LeaderInfoDeliverProtocol",
 				},
 			},
@@ -50,11 +50,11 @@ func TestGrpcMessageHandler_HandleMessageReceive(t *testing.T) {
 		},
 		"peer list deliver test success": {
 			input: struct {
-				command p2p.GrpcRequestCommand
+				command p2p.GrpcReceiveCommand
 			}{
-				command: p2p.GrpcRequestCommand{
+				command: p2p.GrpcReceiveCommand{
 					CommandModel: midgard.CommandModel{ID: "123"},
-					Data:         peerListByte,
+					Body:         peerListByte,
 					Protocol:     "PeerListDeliverProtocol",
 				},
 			},

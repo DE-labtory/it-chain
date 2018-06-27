@@ -44,11 +44,11 @@ func TestGrpcCommandService_RequestLeaderInfo(t *testing.T) {
 		return nil
 	}
 
-	messageService := NewGrpcCommandService(publish)
+	grpcCommandService := NewGrpcCommandService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageService.RequestLeaderInfo(test.input.peerId)
+		err := grpcCommandService.RequestLeaderInfo(test.input.peerId)
 		assert.Equal(t, err, test.err)
 	}
 
@@ -118,11 +118,11 @@ func TestGrpcCommandService_DeliverLeaderInfo(t *testing.T) {
 		}
 	}
 
-	messageService := NewGrpcCommandService(publish)
+	grpcCommandService := NewGrpcCommandService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageService.DeliverLeaderInfo(test.input.peerId, test.input.leader)
+		err := grpcCommandService.DeliverLeaderInfo(test.input.peerId, test.input.leader)
 		assert.Equal(t, err, test.err)
 	}
 }
@@ -154,11 +154,11 @@ func TestGrpcCommandService_RequestPeerList(t *testing.T) {
 		}
 	}
 
-	messageService := NewGrpcCommandService(publish)
+	grpcCommandService := NewGrpcCommandService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageService.RequestPeerList(test.input)
+		err := grpcCommandService.RequestPeerList(test.input)
 		assert.Equal(t, err, test.err)
 	}
 }
@@ -223,11 +223,11 @@ func TestGrpcCommandService_DeliverPeerList(t *testing.T) {
 		}
 	}
 
-	messageService := NewGrpcCommandService(publish)
+	grpcCommandService := NewGrpcCommandService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageService.DeliverPeerList(test.input.peerId, test.input.peerList)
+		err := grpcCommandService.DeliverPeerList(test.input.peerId, test.input.peerList)
 		assert.Equal(t, err, test.err)
 	}
 

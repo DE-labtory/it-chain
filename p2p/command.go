@@ -2,18 +2,18 @@ package p2p
 
 import "github.com/it-chain/midgard"
 
-type GrpcRequestCommand struct {
+//다른 Peer에게 Message수신 command
+type GrpcReceiveCommand struct {
 	midgard.CommandModel
-	Data         []byte
+	Body         []byte
 	ConnectionID string
 	Protocol     string
-	FromPeer     Peer
-	ToPeer       Peer
 }
 
-type MessageDeliverCommand struct {
+//다른 Peer에게 Message전송 command
+type GrpcDeliverCommand struct {
 	midgard.CommandModel
-	Recipients []string
+	Recipients []string //connectionId
 	Body       []byte
 	Protocol   string
 }

@@ -29,10 +29,10 @@ func NewGrpcCommandService(publish Publish) *GrpcCommandService {
 	}
 }
 
-//request leader information in p2p network to the node specified by nodeId
-func (md *GrpcCommandService) RequestLeaderInfo(nodeId p2p.PeerId) error {
+//request leader information in p2p network to the node specified by peerId
+func (md *GrpcCommandService) RequestLeaderInfo(connectionId string) error {
 
-	if nodeId.Id == "" {
+	if connectionId == "" {
 		return ErrEmptyPeerId
 	}
 
@@ -41,41 +41,41 @@ func (md *GrpcCommandService) RequestLeaderInfo(nodeId p2p.PeerId) error {
 	}
 
 	//message deliver command for delivering leader info
-	deliverCommand, err := CreateMessageDeliverCommand("LeaderInfoRequestMessage", body)
+	deliverCommand, err := CreateGrpcDeliverCommand("LeaderInfoRequestMessage", body)
 
 	if err != nil {
 		return err
 	}
 
-	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
+	deliverCommand.Recipients = append(deliverCommand.Recipients, connectionId)
 
 	return md.publish("Command", "message.deliver", deliverCommand)
 }
 
 // command message which requests node list of specific node
-func (md *GrpcCommandService) RequestPeerList(nodeId p2p.PeerId) error {
+func (md *GrpcCommandService) RequestPeerList(peerId p2p.PeerId) error {
 
-	if nodeId.Id == "" {
+	if peerId.Id == "" {
 		return ErrEmptyPeerId
 	}
 	body := p2p.LeaderInfoRequestMessage{
 		TimeUnix: time.Now().Unix(),
 	}
 
-	deliverCommand, err := CreateMessageDeliverCommand("PeerListRequestMessage", body)
+	deliverCommand, err := CreateGrpcDeliverCommand("PeerListRequestMessage", body)
 
 	if err != nil {
 		return err
 	}
 
-	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
+	deliverCommand.Recipients = append(deliverCommand.Recipients, peerId.ToString())
 
 	return md.publish("Command", "message.deliver", deliverCommand)
 }
 
-func (md *GrpcCommandService) DeliverLeaderInfo(nodeId p2p.PeerId, leader p2p.Leader) error {
+func (md *GrpcCommandService) DeliverLeaderInfo(connectionId string, leader p2p.Leader) error {
 
-	if nodeId.Id == "" {
+	if connectionId == "" {
 		return ErrEmptyPeerId
 	}
 
@@ -83,21 +83,21 @@ func (md *GrpcCommandService) DeliverLeaderInfo(nodeId p2p.PeerId, leader p2p.Le
 		return ErrEmptyLeaderId
 	}
 
-	deliverCommand, err := CreateMessageDeliverCommand("UpdateLeader", leader)
+	deliverCommand, err := CreateGrpcDeliverCommand("UpdateLeader", leader)
 
 	if err != nil {
 		return err
 	}
 
-	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
+	deliverCommand.Recipients = append(deliverCommand.Recipients, connectionId)
 
 	return md.publish("Command", "message.deliver", deliverCommand)
 }
 
-//deliver node list to other node specified by nodeId
-func (md *GrpcCommandService) DeliverPeerList(nodeId p2p.PeerId, nodeList []p2p.Peer) error {
+//deliver node list to other node specified by peerId
+func (md *GrpcCommandService) DeliverPeerList(peerId p2p.PeerId, nodeList []p2p.Peer) error {
 
-	if nodeId.Id == "" {
+	if peerId.Id == "" {
 		return ErrEmptyPeerId
 	}
 
@@ -105,39 +105,39 @@ func (md *GrpcCommandService) DeliverPeerList(nodeId p2p.PeerId, nodeList []p2p.
 		return ErrEmptyPeerList
 	}
 
-	messageDeliverCommand, err := CreateMessageDeliverCommand("PeerListDeliver", nodeList)
+	messageDeliverCommand, err := CreateGrpcDeliverCommand("PeerListDeliver", nodeList)
 
 	if err != nil {
 		return err
 	}
 
-	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, nodeId.ToString())
+	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, peerId.ToString())
 
 	return md.publish("Command", "message.deliver", messageDeliverCommand)
 }
 
 //deliver single node
-func (md *GrpcCommandService) DeliverPeer(nodeId p2p.PeerId, node p2p.Peer) error {
+func (md *GrpcCommandService) DeliverPeer(connectionId string, node p2p.Peer) error {
 
-	messageDeliverCommand, err := CreateMessageDeliverCommand("PeerDeliverProtocol", node)
+	messageDeliverCommand, err := CreateGrpcDeliverCommand("PeerDeliverProtocol", node)
 
 	if err != nil {
 		return err
 	}
 
-	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, node.PeerId.ToString())
+	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, connectionId)
 
 	return md.publish("Command", "message.deliver", messageDeliverCommand)
 }
-func CreateMessageDeliverCommand(protocol string, body interface{}) (p2p.MessageDeliverCommand, error) {
+func CreateGrpcDeliverCommand(protocol string, body interface{}) (p2p.GrpcDeliverCommand, error) {
 
 	data, err := common.Serialize(body)
 
 	if err != nil {
-		return p2p.MessageDeliverCommand{}, err
+		return p2p.GrpcDeliverCommand{}, err
 	}
 
-	return p2p.MessageDeliverCommand{
+	return p2p.GrpcDeliverCommand{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},

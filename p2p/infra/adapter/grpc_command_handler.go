@@ -14,12 +14,12 @@ var ErrPeerDeliver = errors.New("peer deliver failed")
 
 type LeaderApi interface {
 	UpdateLeader(leader p2p.Leader) error
-	DeliverLeaderInfo(peerId p2p.PeerId)
+	DeliverLeaderInfo(connectionId string)
 }
 
 type GrpcCommandHandlerPeerApi interface {
 	UpdatePeerList(peerList []p2p.Peer) error
-	DeliverPeerList(peerId p2p.PeerId) error
+	DeliverPeerList(connectionId string) error
 	AddPeer(peer p2p.Peer)
 }
 
@@ -35,16 +35,16 @@ func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerAp
 	}
 }
 
-func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcRequestCommand) error {
+func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveCommand) error {
 
 	switch command.Protocol {
 	case "LeaderInfoRequestProtocol":
-		g.leaderApi.DeliverLeaderInfo(command.FromPeer.PeerId)
+		g.leaderApi.DeliverLeaderInfo(command.ConnectionID)
 		break
 
 	case "LeaderInfoDeliverProtocol":
 		leader := p2p.Leader{}
-		if err := json.Unmarshal(command.Data, &leader); err != nil {
+		if err := json.Unmarshal(command.Body, &leader); err != nil {
 			//todo error 처리
 			return ErrLeaderInfoDeliver
 		}
@@ -54,14 +54,14 @@ func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 
 	case "PeerListRequestProtocol":
 
-		g.peerApi.DeliverPeerList(command.FromPeer.PeerId)
+		g.peerApi.DeliverPeerList(command.ConnectionID)
 		break
 
 	case "PeerListDeliverProtocol":
 
 
 		peerList := make([]p2p.Peer, 0)
-		if err := json.Unmarshal(command.Data, &peerList); err != nil {
+		if err := json.Unmarshal(command.Body, &peerList); err != nil {
 			//todo error 처리
 			return ErrPeerListDeliver
 		}
@@ -73,7 +73,7 @@ func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 	case "PeerDeliverProtocol":
 
 		peer := p2p.Peer{}
-		err := common.Deserialize(command.Data, peer)
+		err := common.Deserialize(command.Body, peer)
 
 		if err != nil {
 			return ErrPeerDeliver
