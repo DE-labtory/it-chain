@@ -26,7 +26,7 @@ type GrpcDeliverCommand struct {
 //다른 Peer에게 Message수신 command
 type GrpcReceiveCommand struct {
 	midgard.CommandModel
-	Data         []byte
+	Body         []byte
 	ConnectionID string
 	Protocol     string
 }
