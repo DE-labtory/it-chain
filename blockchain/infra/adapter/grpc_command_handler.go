@@ -2,17 +2,17 @@ package adapter
 
 import "github.com/it-chain/it-chain-Engine/blockchain"
 
-type GrpcCommandHandlerBlockApi interface {
+type BlockApi interface {
 	CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error)
 	CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error)
 	SyncedCheck(block blockchain.Block) error
 }
 
 type GrpcCommandHandler struct {
-	blockApi GrpcCommandHandlerBlockApi
+	blockApi BlockApi
 }
 
-func NewGrpcCommandHandler(blockApi GrpcCommandHandlerBlockApi) *GrpcCommandHandler {
+func NewGrpcCommandHandler(blockApi BlockApi) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		blockApi: blockApi,
 	}
