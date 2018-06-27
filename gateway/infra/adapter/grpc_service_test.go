@@ -196,16 +196,16 @@ func TestMemConnectionStore_Delete(t *testing.T) {
 }
 
 type MockHandler struct {
-	OnConnectionFunc    func(connection gateway.Connection)
-	OnDisconnectionFunc func(connection gateway.Connection)
+	OnConnectionFunc    func(connection gateway.Connection) error
+	OnDisconnectionFunc func(connection gateway.Connection) error
 }
 
-func (m *MockHandler) OnConnection(connection gateway.Connection) {
-	m.OnConnectionFunc(connection)
+func (m *MockHandler) OnConnection(connection gateway.Connection) error {
+	return m.OnConnectionFunc(connection)
 }
 
-func (m *MockHandler) OnDisconnection(connection gateway.Connection) {
-	m.OnDisconnectionFunc(connection)
+func (m *MockHandler) OnDisconnection(connection gateway.Connection) error {
+	return m.OnDisconnectionFunc(connection)
 }
 
 var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish func(exchange string, topic string, data interface{}) error) (*adapter.GrpcHostService, func()) {
@@ -251,12 +251,14 @@ func TestGrpcHostService_Dial(t *testing.T) {
 	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client", publish)
 
 	handler := &MockHandler{}
-	handler.OnConnectionFunc = func(connection gateway.Connection) {
+	handler.OnConnectionFunc = func(connection gateway.Connection) error {
 		fmt.Println(connection)
+		return nil
 	}
 
-	handler.OnDisconnectionFunc = func(connection gateway.Connection) {
+	handler.OnDisconnectionFunc = func(connection gateway.Connection) error {
 		fmt.Println("connection is closing", connection)
+		return nil
 	}
 
 	defer tearDown1()
@@ -323,12 +325,14 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 	defer tearDown2()
 
 	handler := &MockHandler{}
-	handler.OnConnectionFunc = func(connection gateway.Connection) {
+	handler.OnConnectionFunc = func(connection gateway.Connection) error {
 		connID = connection.ID
+		return nil
 	}
 
-	handler.OnDisconnectionFunc = func(connection gateway.Connection) {
+	handler.OnDisconnectionFunc = func(connection gateway.Connection) error {
 		fmt.Println("connection is closing", connection)
+		return nil
 	}
 
 	serverHostService.SetHandler(handler)
@@ -380,14 +384,17 @@ func TestGrpcHostService_Close(t *testing.T) {
 	var connID string
 
 	handler := &MockHandler{}
-	handler.OnConnectionFunc = func(connection gateway.Connection) {
+	handler.OnConnectionFunc = func(connection gateway.Connection) error {
 		fmt.Println(connection)
 		connID = connection.ID
+		return nil
 	}
 
-	handler.OnDisconnectionFunc = func(connection gateway.Connection) {
+	handler.OnDisconnectionFunc = func(connection gateway.Connection) error {
 		fmt.Println("connection is closing", connection)
 		assert.Equal(t, connID, connection.ID)
+
+		return nil
 	}
 
 	serverHostService.SetHandler(handler)

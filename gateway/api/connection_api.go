@@ -19,21 +19,16 @@ func NewConnectionApi(eventRepository midgard.Repository, grpcService gateway.Gr
 	}
 }
 
-func (c ConnectionApi) CreateConnection(command gateway.ConnectionCreateCommand) {
+func (c ConnectionApi) CreateConnection(address string) error {
 
 	events := make([]midgard.Event, 0)
 
-	if command.Address == "" {
-		log.Printf("invalid address [%s]")
-		return
-	}
-
-	log.Printf("dialing [%s]", command.Address)
-
-	connection, err := c.grpcService.Dial(command.Address)
+	log.Printf("dialing [%s]", address)
+	connection, err := c.grpcService.Dial(address)
 
 	if err != nil {
 		log.Printf("fail to dial [%s]", err)
+		return err
 	}
 
 	events = append(events, gateway.ConnectionCreatedEvent{
@@ -48,17 +43,39 @@ func (c ConnectionApi) CreateConnection(command gateway.ConnectionCreateCommand)
 
 	if err != nil {
 		log.Println(err.Error())
+		return err
 	}
+
+	return nil
 }
 
 //다른 node와의 연결 close
 //todo close connection event 발생
-func (c ConnectionApi) CloseConnection(connection gateway.Connection) {
+func (c ConnectionApi) CloseConnection(connectionID string) error {
 
+	events := make([]midgard.Event, 0)
+
+	c.grpcService.CloseConnection(connectionID)
+
+	events = append(events, gateway.ConnectionClosedEvent{
+		EventModel: midgard.EventModel{
+			ID:   connectionID,
+			Type: "connection.closed",
+		},
+	})
+
+	err := c.eventRepository.Save(connectionID, events...)
+
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+
+	return nil
 }
 
 //
-func (c ConnectionApi) OnConnection(connection gateway.Connection) {
+func (c ConnectionApi) OnConnection(connection gateway.Connection) error {
 
 	events := make([]midgard.Event, 0)
 
@@ -73,11 +90,33 @@ func (c ConnectionApi) OnConnection(connection gateway.Connection) {
 
 	if err != nil {
 		log.Println(err.Error())
+		return err
 	}
+
+	return nil
 }
 
 //연결된 node의 connection 종료
 //todo close connection event 발생
-func (c ConnectionApi) OnDisconnection(connection gateway.Connection) {
+func (c ConnectionApi) OnDisconnection(connection gateway.Connection) error {
 
+	events := make([]midgard.Event, 0)
+
+	c.grpcService.CloseConnection(connection.GetID())
+
+	events = append(events, gateway.ConnectionClosedEvent{
+		EventModel: midgard.EventModel{
+			ID:   connection.GetID(),
+			Type: "connection.closed",
+		},
+	})
+
+	err := c.eventRepository.Save(connection.GetID(), events...)
+
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+
+	return nil
 }

@@ -7,7 +7,7 @@ type ConnectionCreatedEvent struct {
 	Address string
 }
 
-type ConnectionDisconnectedEvent struct {
+type ConnectionClosedEvent struct {
 	midgard.EventModel
 }
 
