@@ -21,24 +21,13 @@ func NewPeerRepository(path string) *PeerRepository {
 	}
 }
 
-// 새로운 node repo 생성
-// 원래 코드가 임의 코드인 것 같아서 leveldb wrapper usage 참고하여 수정하였습니다.
-// leveldb에 적합한 db를 제공하여 기존의 다른 함수들은 잘 동작할 것으로 예상되며 leveldbwrapper 참고해주시면 될 것 같습니다
-//func NewPeerRepository(path string) *PeerRepository {
-//	// path := "./leveldb"
-//	dbProvider := leveldbwrapper.CreateNewDBProvider(path)
-//	peerDb := dbProvider.getDBHandle("Peer")
-//	return &PeerRepository{
-//		leveldb: peerDb.db,
-//	}
-//}
 
 // 새로운 p2p 를 leveldb에 저장
 func (pr *PeerRepository) Save(data p2p.Peer) error {
 
 	// return empty peerID error if peerID is null
 	if data.PeerId.ToString() == "" {
-		return errors.New("empty node id purposed")
+		return errors.New("empty peer id purposed")
 	}
 
 	// serialize p2p and allocate to b or err if err occured
@@ -75,21 +64,21 @@ func (pr *PeerRepository) FindById(id p2p.PeerId) (*p2p.Peer, error) {
 	}
 
 	// model.PeerRepository 에 읽어온 p2p 를 할당
-	node := &p2p.Peer{}
+	peer := &p2p.Peer{}
 
-	err = json.Unmarshal(b, node)
+	err = json.Unmarshal(b, peer)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return node, nil
+	return peer, nil
 }
 
 // 모든 피어 검색
 func (pr *PeerRepository) FindAll() ([]p2p.Peer, error) {
 	iter := pr.leveldb.GetIteratorWithPrefix([]byte(""))
-	var nodes []p2p.Peer
+	var peers []p2p.Peer
 	for iter.Next() {
 		val := iter.Value()
 		data := p2p.Peer{}
@@ -99,10 +88,10 @@ func (pr *PeerRepository) FindAll() ([]p2p.Peer, error) {
 			return nil, err
 		}
 
-		nodes = append(nodes, data)
+		peers = append(peers, data)
 	}
 
-	return nodes, nil
+	return peers, nil
 }
 
 func (nr *PeerRepository) Close(){

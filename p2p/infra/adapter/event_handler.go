@@ -8,18 +8,18 @@ import (
 )
 
 var ErrEmptyAddress = errors.New("empty address proposed")
-var ErrPeerApi = errors.New("problem in node api")
+var ErrPeerApi = errors.New("problem in peer api")
 type EventHandlerPeerApi interface{
-	AddPeer(node p2p.Peer) error
+	AddPeer(peer p2p.Peer) error
 	DeletePeer(id p2p.PeerId) error
 }
 type EventHandler struct {
-	nodeApi EventHandlerPeerApi
+	peerApi EventHandlerPeerApi
 }
 
-func NewEventHandler(nodeApi EventHandlerPeerApi) *EventHandler {
+func NewEventHandler(peerApi EventHandlerPeerApi) *EventHandler {
 	return &EventHandler{
-		nodeApi: nodeApi,
+		peerApi: peerApi,
 	}
 }
 
@@ -33,8 +33,8 @@ func (n *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent) 
 		return ErrEmptyAddress
 	}
 
-	node := *p2p.NewPeer(event.Address, p2p.PeerId{Id: event.ID})
-	err := n.nodeApi.AddPeer(node)
+	peer := *p2p.NewPeer(event.Address, p2p.PeerId{Id: event.ID})
+	err := n.peerApi.AddPeer(peer)
 
 	if err != nil {
 		return ErrPeerApi
@@ -50,7 +50,7 @@ func (n *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconnec
 		return ErrEmptyPeerId
 	}
 
-	err := n.nodeApi.DeletePeer(p2p.PeerId{Id: event.ID})
+	err := n.peerApi.DeletePeer(p2p.PeerId{Id: event.ID})
 
 	if err != nil {
 		log.Println(err)
@@ -66,13 +66,13 @@ type WriteOnlyLeaderRepository interface {
 	SetLeader(leader p2p.Leader)
 }
 type RepositoryProjector struct {
-	nodeRepository   WriteOnlyPeerRepository
+	peerRepository   WriteOnlyPeerRepository
 	leaderRepository WriteOnlyLeaderRepository
 }
 
-func NewRepositoryProjector(nodeRepository WriteOnlyPeerRepository, leaderRepository WriteOnlyLeaderRepository) *RepositoryProjector {
+func NewRepositoryProjector(peerRepository WriteOnlyPeerRepository, leaderRepository WriteOnlyLeaderRepository) *RepositoryProjector {
 	return &RepositoryProjector{
-		nodeRepository:   nodeRepository,
+		peerRepository:   peerRepository,
 		leaderRepository: leaderRepository,
 	}
 }
@@ -102,8 +102,8 @@ func (projector *RepositoryProjector) HandlerPeerCreatedEvent(event p2p.PeerCrea
 		return ErrEmptyAddress
 	}
 
-	node := p2p.NewPeer(event.IpAddress, p2p.PeerId{Id: event.ID})
-	projector.nodeRepository.Save(*node)
+	peer := p2p.NewPeer(event.IpAddress, p2p.PeerId{Id: event.ID})
+	projector.peerRepository.Save(*peer)
 
 	return nil
 }
