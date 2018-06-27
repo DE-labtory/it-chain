@@ -52,7 +52,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 	//given
 	tests := map[string]struct {
 		input  bifrost.Message
-		output gateway.MessageReceiveCommand
+		output gateway.GrpcReceiveCommand
 		err    error
 	}{
 		"success": {
@@ -62,8 +62,8 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 					ID: "123",
 				},
 			},
-			output: gateway.MessageReceiveCommand{
-				Data:         []byte("hello world"),
+			output: gateway.GrpcReceiveCommand{
+				Body:         []byte("hello world"),
 				ConnectionID: "123",
 			},
 			err: nil,
@@ -75,8 +75,8 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 		//then
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.receive")
-		assert.Equal(t, data, gateway.MessageReceiveCommand{
-			Data:         []byte("hello world"),
+		assert.Equal(t, data, gateway.GrpcReceiveCommand{
+			Body:         []byte("hello world"),
 			ConnectionID: "123",
 		})
 		return nil
@@ -308,8 +308,8 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.receive")
-		assert.Equal(t, data, gateway.MessageReceiveCommand{
-			Data:         publishedData,
+		assert.Equal(t, data, gateway.GrpcReceiveCommand{
+			Body:         publishedData,
 			ConnectionID: connID,
 		})
 		return nil
