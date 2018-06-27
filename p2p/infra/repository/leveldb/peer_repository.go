@@ -8,15 +8,15 @@ import (
 	"github.com/it-chain/leveldb-wrapper"
 )
 
-type NodeRepository struct {
+type PeerRepository struct {
 	leveldb *leveldbwrapper.DB
 }
 
 // 새로운 p2p repo 생성
-func NewNodeRepository(path string) *NodeRepository {
+func NewPeerRepository(path string) *PeerRepository {
 	db := leveldbwrapper.CreateNewDB(path)
 	db.Open()
-	return &NodeRepository{
+	return &PeerRepository{
 		leveldb: db,
 	}
 }
@@ -24,7 +24,7 @@ func NewNodeRepository(path string) *NodeRepository {
 // 새로운 node repo 생성
 // 원래 코드가 임의 코드인 것 같아서 leveldb wrapper usage 참고하여 수정하였습니다.
 // leveldb에 적합한 db를 제공하여 기존의 다른 함수들은 잘 동작할 것으로 예상되며 leveldbwrapper 참고해주시면 될 것 같습니다
-//func NewNodeRepository(path string) *PeerRepository {
+//func NewPeerRepository(path string) *PeerRepository {
 //	// path := "./leveldb"
 //	dbProvider := leveldbwrapper.CreateNewDBProvider(path)
 //	peerDb := dbProvider.getDBHandle("Peer")
@@ -34,10 +34,10 @@ func NewNodeRepository(path string) *NodeRepository {
 //}
 
 // 새로운 p2p 를 leveldb에 저장
-func (pr *NodeRepository) Save(data p2p.Node) error {
+func (pr *PeerRepository) Save(data p2p.Peer) error {
 
 	// return empty peerID error if peerID is null
-	if data.NodeId.ToString() == "" {
+	if data.PeerId.ToString() == "" {
 		return errors.New("empty node id purposed")
 	}
 
@@ -50,7 +50,7 @@ func (pr *NodeRepository) Save(data p2p.Node) error {
 	}
 
 	// leveldb에 peerId 저장 중 에러가 나면 에러 리턴
-	if err = pr.leveldb.Put([]byte(data.NodeId.Id), b, true); err != nil {
+	if err = pr.leveldb.Put([]byte(data.PeerId.Id), b, true); err != nil {
 		return err
 	}
 
@@ -58,12 +58,12 @@ func (pr *NodeRepository) Save(data p2p.Node) error {
 }
 
 // p2p 삭제
-func (pr *NodeRepository) Remove(id p2p.NodeId) error {
+func (pr *PeerRepository) Remove(id p2p.PeerId) error {
 	return pr.leveldb.Delete([]byte(id.ToString()), true)
 }
 
 // p2p 읽어옴
-func (pr *NodeRepository) FindById(id p2p.NodeId) (*p2p.Node, error) {
+func (pr *PeerRepository) FindById(id p2p.PeerId) (*p2p.Peer, error) {
 	b, err := pr.leveldb.Get([]byte(id.ToString()))
 
 	if err != nil {
@@ -74,8 +74,8 @@ func (pr *NodeRepository) FindById(id p2p.NodeId) (*p2p.Node, error) {
 		return nil, nil
 	}
 
-	// model.NodeRepository 에 읽어온 p2p 를 할당
-	node := &p2p.Node{}
+	// model.PeerRepository 에 읽어온 p2p 를 할당
+	node := &p2p.Peer{}
 
 	err = json.Unmarshal(b, node)
 
@@ -87,12 +87,12 @@ func (pr *NodeRepository) FindById(id p2p.NodeId) (*p2p.Node, error) {
 }
 
 // 모든 피어 검색
-func (pr *NodeRepository) FindAll() ([]p2p.Node, error) {
+func (pr *PeerRepository) FindAll() ([]p2p.Peer, error) {
 	iter := pr.leveldb.GetIteratorWithPrefix([]byte(""))
-	var nodes []p2p.Node
+	var nodes []p2p.Peer
 	for iter.Next() {
 		val := iter.Value()
-		data := p2p.Node{}
+		data := p2p.Peer{}
 		err := p2p.Deserialize(val, &data)
 
 		if err != nil {
@@ -105,6 +105,6 @@ func (pr *NodeRepository) FindAll() ([]p2p.Node, error) {
 	return nodes, nil
 }
 
-func (nr *NodeRepository) Close(){
+func (nr *PeerRepository) Close(){
 	nr.leveldb.Close()
 }
