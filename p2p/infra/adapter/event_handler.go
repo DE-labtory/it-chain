@@ -8,16 +8,16 @@ import (
 )
 
 var ErrEmptyAddress = errors.New("empty address proposed")
-var ErrNodeApi = errors.New("problem in node api")
-type EventHandlerNodeApi interface{
-	AddNode(node p2p.Node) error
-	DeleteNode(id p2p.NodeId) error
+var ErrPeerApi = errors.New("problem in node api")
+type EventHandlerPeerApi interface{
+	AddPeer(node p2p.Peer) error
+	DeletePeer(id p2p.PeerId) error
 }
 type EventHandler struct {
-	nodeApi EventHandlerNodeApi
+	nodeApi EventHandlerPeerApi
 }
 
-func NewEventHandler(nodeApi EventHandlerNodeApi) *EventHandler {
+func NewEventHandler(nodeApi EventHandlerPeerApi) *EventHandler {
 	return &EventHandler{
 		nodeApi: nodeApi,
 	}
@@ -26,18 +26,18 @@ func NewEventHandler(nodeApi EventHandlerNodeApi) *EventHandler {
 
 func (n *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent) error {
 	if event.ID == "" {
-		return ErrEmptyNodeId
+		return ErrEmptyPeerId
 	}
 
 	if event.Address == "" {
 		return ErrEmptyAddress
 	}
 
-	node := *p2p.NewNode(event.Address, p2p.NodeId{Id: event.ID})
-	err := n.nodeApi.AddNode(node)
+	node := *p2p.NewPeer(event.Address, p2p.PeerId{Id: event.ID})
+	err := n.nodeApi.AddPeer(node)
 
 	if err != nil {
-		return ErrNodeApi
+		return ErrPeerApi
 	}
 
 	return nil
@@ -47,10 +47,10 @@ func (n *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent) 
 func (n *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconnectedEvent) error {
 
 	if event.ID == "" {
-		return ErrEmptyNodeId
+		return ErrEmptyPeerId
 	}
 
-	err := n.nodeApi.DeleteNode(p2p.NodeId{Id: event.ID})
+	err := n.nodeApi.DeletePeer(p2p.PeerId{Id: event.ID})
 
 	if err != nil {
 		log.Println(err)
@@ -59,18 +59,18 @@ func (n *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconnec
 	return nil
 }
 
-type WriteOnlyNodeRepository interface{
-	Save(data p2p.Node) error
+type WriteOnlyPeerRepository interface{
+	Save(data p2p.Peer) error
 }
 type WriteOnlyLeaderRepository interface {
 	SetLeader(leader p2p.Leader)
 }
 type RepositoryProjector struct {
-	nodeRepository   WriteOnlyNodeRepository
+	nodeRepository   WriteOnlyPeerRepository
 	leaderRepository WriteOnlyLeaderRepository
 }
 
-func NewRepositoryProjector(nodeRepository WriteOnlyNodeRepository, leaderRepository WriteOnlyLeaderRepository) *RepositoryProjector {
+func NewRepositoryProjector(nodeRepository WriteOnlyPeerRepository, leaderRepository WriteOnlyLeaderRepository) *RepositoryProjector {
 	return &RepositoryProjector{
 		nodeRepository:   nodeRepository,
 		leaderRepository: leaderRepository,
@@ -81,7 +81,7 @@ func NewRepositoryProjector(nodeRepository WriteOnlyNodeRepository, leaderReposi
 func (projector *RepositoryProjector) HandleLeaderUpdatedEvent(event p2p.LeaderUpdatedEvent) error {
 
 	if event.ID == "" {
-		return ErrEmptyNodeId
+		return ErrEmptyPeerId
 	}
 
 	leader := p2p.Leader{
@@ -92,17 +92,17 @@ func (projector *RepositoryProjector) HandleLeaderUpdatedEvent(event p2p.LeaderU
 	return nil
 }
 
-func (projector *RepositoryProjector) HandlerNodeCreatedEvent(event p2p.NodeCreatedEvent) error {
+func (projector *RepositoryProjector) HandlerPeerCreatedEvent(event p2p.PeerCreatedEvent) error {
 
 	if event.ID == "" {
-		return ErrEmptyNodeId
+		return ErrEmptyPeerId
 	}
 
 	if event.IpAddress == "" {
 		return ErrEmptyAddress
 	}
 
-	node := p2p.NewNode(event.IpAddress, p2p.NodeId{Id: event.ID})
+	node := p2p.NewPeer(event.IpAddress, p2p.PeerId{Id: event.ID})
 	projector.nodeRepository.Save(*node)
 
 	return nil
