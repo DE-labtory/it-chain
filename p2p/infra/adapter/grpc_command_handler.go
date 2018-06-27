@@ -9,7 +9,6 @@ import (
 )
 
 var ErrLeaderInfoDeliver = errors.New("leader info deliver failed")
-
 var ErrPeerListDeliver = errors.New("peer list deliver failed")
 var ErrPeerDeliver = errors.New("peer deliver failed")
 

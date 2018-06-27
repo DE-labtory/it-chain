@@ -1,7 +1,6 @@
 package leveldb
 
 import (
-	"os"
 	"testing"
 
 	"github.com/it-chain/it-chain-Engine/p2p"
@@ -9,50 +8,43 @@ import (
 )
 
 func TestLeaderRepository_GetLeader(t *testing.T) {
-	// Given
-	dbPath := "./.test"
 
-	leaderRepository := NewLeaderRepository(dbPath)
-
-	leader := p2p.Leader{
-		LeaderId: p2p.LeaderId{
-			Id: "777",
+	leader1 := &p2p.Leader{
+		LeaderId:p2p.LeaderId{
+			Id:"1",
+		},
+	}
+	leaderRepository := NewLeaderRepository(leader1)
+	leader2 := &p2p.Leader{
+		LeaderId:p2p.LeaderId{
+			Id:"2",
 		},
 	}
 
-	defer func() {
-		leaderRepository.leveldb.Close()
-		os.RemoveAll(dbPath)
-	}()
-
-	leaderRepository.SetLeader(leader)
-	leader2 := leaderRepository.GetLeader()
+	leaderRepository.SetLeader(leader2)
+	savedLeader := leaderRepository.GetLeader()
 
 	// Then
-	assert.Equal(t, leader, leader2)
+	assert.Equal(t, leader2, savedLeader)
 }
 
 func TestLeaderRepository_SetLeader(t *testing.T) {
-	// Given
-	dbPath := "./.test"
 
-	leaderRepository := NewLeaderRepository(dbPath)
-
-	leader := p2p.Leader{
-		LeaderId: p2p.LeaderId{
-			Id: "777",
+	leader1 := &p2p.Leader{
+		LeaderId:p2p.LeaderId{
+			Id:"1",
+		},
+	}
+	leaderRepository := NewLeaderRepository(leader1)
+	leader2 := &p2p.Leader{
+		LeaderId:p2p.LeaderId{
+			Id:"2",
 		},
 	}
 
-	defer func() {
-		leaderRepository.leveldb.Close()
-		os.RemoveAll(dbPath)
-	}()
-
-	// When
-	leaderRepository.SetLeader(leader)
-	leader2 := *leaderRepository.GetLeader()
+	leaderRepository.SetLeader(leader2)
+	savedLeader := leaderRepository.GetLeader()
 
 	// Then
-	assert.Equal(t, leader, leader2)
+	assert.Equal(t, leader2, savedLeader)
 }
