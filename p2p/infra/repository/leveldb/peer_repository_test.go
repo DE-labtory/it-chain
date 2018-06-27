@@ -5,6 +5,7 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/magiconair/properties/assert"
+	"fmt"
 )
 
 func TestPeerRepository_Save(t *testing.T) {
@@ -19,7 +20,7 @@ func TestPeerRepository_Save(t *testing.T) {
 			input: struct {
 				firstInput  p2p.Peer
 				secondInput p2p.Peer
-			}{firstInput: p2p.Peer{PeerId:p2p.PeerId{Id:"1"}}, secondInput: p2p.Peer{PeerId:p2p.PeerId{Id:"2"}}},
+			}{firstInput: p2p.Peer{PeerId:p2p.PeerId{Id:"2"}}, secondInput: p2p.Peer{PeerId:p2p.PeerId{Id:"3"}}},
 			err:nil,
 		},
 		"empty peer id test":{
@@ -37,9 +38,9 @@ func TestPeerRepository_Save(t *testing.T) {
 			err: ErrExistPeer,
 		},
 	}
-	peerRepository := NewPeerRepository()
 	ClearPeerTable()
-
+	peerRepository, _ := NewPeerRepository()
+	fmt.Print(peerRepository.FindById(p2p.PeerId{Id:"1"}))
 	for testName, test := range tests{
 		t.Logf("running test case %s", testName)
 		peerRepository.Save(test.input.firstInput)
@@ -67,9 +68,7 @@ func TestPeerRepository_Remove(t *testing.T) {
 			err: ErrEmptyPeerId,
 		},
 	}
-	peerRepository := NewPeerRepository()
-	peer := p2p.Peer{PeerId:p2p.PeerId{Id:"1"}}
-	peerRepository.Save(peer)
+	peerRepository, _ := NewPeerRepository()
 
 	for testName, test := range tests{
 		t.Logf("running test case %s", testName)
@@ -92,7 +91,7 @@ func TestPeerRepository_FindAll(t *testing.T) {
 			err:nil,
 		},
 	}
-	peerRepository := NewPeerRepository()
+	peerRepository, _ := NewPeerRepository()
 	ClearPeerTable()
 
 	for testName, test := range tests{
@@ -136,8 +135,7 @@ func TestPeerRepository_FindById(t *testing.T) {
 			err:ErrNoMatchingPeer,
 		},
 	}
-	peerRepository := NewPeerRepository()
-
+	peerRepository, _ := NewPeerRepository()
 	for testName, test := range tests{
 		t.Logf("running test case %s", testName)
 		ClearPeerTable()
@@ -148,11 +146,3 @@ func TestPeerRepository_FindById(t *testing.T) {
 	}
 }
 
-func ClearPeerTable(){
-	peerRepository := NewPeerRepository()
-	peer := p2p.Peer{PeerId:p2p.PeerId{Id:"1"}}
-	_, exist := peerTable[peer.PeerId.Id]
-	if exist{
-		peerRepository.Remove(peer.PeerId)
-	}
-}

@@ -3,15 +3,18 @@ package leveldb
 import (
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"sync"
+	"errors"
 )
 
 //inmemory leader info
-var leader *p2p.Leader
+var leader p2p.Leader
 var once sync.Once
+
+var ErrNoLeader = errors.New("there is no leader")
 
 type LeaderRepository struct {}
 
-func NewLeaderRepository(firstLeader *p2p.Leader) *LeaderRepository {
+func NewLeaderRepository(firstLeader p2p.Leader) *LeaderRepository {
 
 	once.Do(func() {
 		leader = firstLeader
@@ -20,11 +23,11 @@ func NewLeaderRepository(firstLeader *p2p.Leader) *LeaderRepository {
 }
 
 // get leader method
-func (lr *LeaderRepository) GetLeader() *p2p.Leader {
+func (lr *LeaderRepository) GetLeader() p2p.Leader {
 	return leader
 }
 
 // set leader method
-func (lr *LeaderRepository) SetLeader(newLeader *p2p.Leader) {
+func (lr *LeaderRepository) SetLeader(newLeader p2p.Leader) {
 	leader = newLeader
 }

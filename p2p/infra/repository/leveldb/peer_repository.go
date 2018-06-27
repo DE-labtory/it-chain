@@ -17,11 +17,12 @@ type PeerRepository struct {}
 var peerTable map[string]p2p.Peer
 
 // 새로운 p2p repo 생성
-func NewPeerRepository() *PeerRepository {
+func NewPeerRepository() (PeerRepository, error) {
+
 	once.Do(func() {
-		peerTable = make(map[string]p2p.Peer, 0)
+		peerTable = make(map[string]p2p.Peer)
 	})
-	return &PeerRepository{}
+	return PeerRepository{}, nil
 }
 
 
@@ -29,7 +30,7 @@ func NewPeerRepository() *PeerRepository {
 func (pr *PeerRepository) Save(data p2p.Peer) error {
 
 	// return empty peerID error if peerID is null
-	if data.PeerId.ToString() == "" {
+	if data.PeerId.Id == "" {
 		return ErrEmptyPeerId
 	}
 	_, exist := peerTable[data.PeerId.Id]
@@ -38,7 +39,6 @@ func (pr *PeerRepository) Save(data p2p.Peer) error {
 	}
 
 	peerTable[data.PeerId.Id] = data
-
 
 	return nil
 }
@@ -87,4 +87,11 @@ func (pr *PeerRepository) FindAll() ([]p2p.Peer, error) {
 	}
 
 	return peers, nil
+}
+
+func ClearPeerTable(){
+	for key := range peerTable{
+		delete(peerTable, key)
+	}
+	peerTable = make(map[string]p2p.Peer)
 }
