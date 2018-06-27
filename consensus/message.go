@@ -7,3 +7,13 @@ type PrePrepareMsg struct {
 	SenderId string
 	ProposedBlock blockchain.Block
 }
+
+type PrepareMsg struct {
+	ConsensusId string
+	SenderId string
+}
+
+type CommitMsg struct {
+	ConsensusId string
+	SenderId string
+}
