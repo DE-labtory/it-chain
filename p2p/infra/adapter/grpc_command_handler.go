@@ -9,25 +9,25 @@ import (
 )
 
 var ErrLeaderInfoDeliver = errors.New("leader info deliver failed")
-var ErrNodeListDeliver = errors.New("node list deliver failed")
-var ErrNodeDeliver = errors.New("node deliver failed")
+var ErrPeerListDeliver = errors.New("node list deliver failed")
+var ErrPeerDeliver = errors.New("node deliver failed")
 
 type LeaderApi interface {
 	UpdateLeader(leader p2p.Leader) error
-	DeliverLeaderInfo(nodeId p2p.NodeId)
+	DeliverLeaderInfo(nodeId p2p.PeerId)
 }
 
-type GrpcCommandHandlerNodeApi interface {
-	UpdateNodeList(nodeList []p2p.Node) error
-	DeliverNodeList(nodeId p2p.NodeId) error
-	AddNode(node p2p.Node)
+type GrpcCommandHandlerPeerApi interface {
+	UpdatePeerList(nodeList []p2p.Peer) error
+	DeliverPeerList(nodeId p2p.PeerId) error
+	AddPeer(node p2p.Peer)
 }
 
 type GrpcCommandHandler struct {
 	leaderApi LeaderApi
-	nodeApi   GrpcCommandHandlerNodeApi
+	nodeApi   GrpcCommandHandlerPeerApi
 }
-func NewGrpcCommandHandler(leaderApi LeaderApi, nodeApi GrpcCommandHandlerNodeApi) *GrpcCommandHandler {
+func NewGrpcCommandHandler(leaderApi LeaderApi, nodeApi GrpcCommandHandlerPeerApi) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		leaderApi: leaderApi,
 		nodeApi:   nodeApi,
@@ -38,7 +38,7 @@ func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 
 	switch command.Protocol {
 	case "LeaderInfoRequestProtocol":
-		g.leaderApi.DeliverLeaderInfo(command.FromNode.NodeId)
+		g.leaderApi.DeliverLeaderInfo(command.FromPeer.PeerId)
 		break
 
 	case "LeaderInfoDeliverProtocol":
@@ -51,31 +51,31 @@ func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 		g.leaderApi.UpdateLeader(leader)
 		break
 
-	case "NodeListRequestProtocol":
+	case "PeerListRequestProtocol":
 
-		g.nodeApi.DeliverNodeList(command.FromNode.NodeId)
+		g.nodeApi.DeliverPeerList(command.FromPeer.PeerId)
 		break
 
-	case "NodeListDeliverProtocol":
+	case "PeerListDeliverProtocol":
 
-		nodeList := make([]p2p.Node, 0)
+		nodeList := make([]p2p.Peer, 0)
 		if err := json.Unmarshal(command.Data, &nodeList); err != nil {
 			//todo error 처리
-			return ErrNodeListDeliver
+			return ErrPeerListDeliver
 		}
 
-		g.nodeApi.UpdateNodeList(nodeList)
+		g.nodeApi.UpdatePeerList(nodeList)
 		break
 
-	case "NodeDeliverProtocol":
+	case "PeerDeliverProtocol":
 
-		node := p2p.Node{}
+		node := p2p.Peer{}
 		err := common.Deserialize(command.Data, node)
 
 		if err != nil {
-			return ErrNodeDeliver
+			return ErrPeerDeliver
 		}
-		g.nodeApi.AddNode(node)
+		g.nodeApi.AddPeer(node)
 		break
 	}
 
