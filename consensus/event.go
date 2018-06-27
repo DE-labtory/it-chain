@@ -30,3 +30,11 @@ type ConsensusStartedEvent struct {
 type LeaderChangedEvent struct {
 	midgard.EventModel
 }
+
+type MemberJoinedEvent struct {
+	midgard.EventModel
+}
+
+type MemberRemovedEvent struct {
+	midgard.EventModel
+}
