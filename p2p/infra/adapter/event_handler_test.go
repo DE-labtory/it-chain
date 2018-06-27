@@ -9,9 +9,9 @@ import (
 	"github.com/magiconair/properties/assert"
 )
 
-type EventHandlerMockNodeApi struct {}
-func (na EventHandlerMockNodeApi) AddNode(node p2p.Node) error{return nil}
-func (na EventHandlerMockNodeApi) DeleteNode(id p2p.NodeId) error{return nil}
+type EventHandlerMockPeerApi struct {}
+func (na EventHandlerMockPeerApi) AddPeer(node p2p.Peer) error{return nil}
+func (na EventHandlerMockPeerApi) DeletePeer(id p2p.PeerId) error{return nil}
 
 
 func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
@@ -39,7 +39,7 @@ func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
 				nodeId  string
 				address string
 			}{nodeId: string(""), address: string("123")},
-			err:adapter.ErrEmptyNodeId,
+			err:adapter.ErrEmptyPeerId,
 		},
 		"empty address test":{
 			input: struct {
@@ -49,7 +49,7 @@ func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
 			err:adapter.ErrEmptyAddress,
 		},
 	}
-	eventHandler := adapter.NewEventHandler(EventHandlerMockNodeApi{})
+	eventHandler := adapter.NewEventHandler(EventHandlerMockPeerApi{})
 
 	for testName, test := range tests{
 		t.Logf("running test case %s", testName)
@@ -78,11 +78,11 @@ func TestEventHandler_HandleConnDisconnectedEvent(t *testing.T) {
 			input: struct {
 				id string
 			}{id: string("")},
-			err: adapter.ErrEmptyNodeId,
+			err: adapter.ErrEmptyPeerId,
 		},
 	}
 
-	eventHandler := adapter.NewEventHandler(EventHandlerMockNodeApi{})
+	eventHandler := adapter.NewEventHandler(EventHandlerMockPeerApi{})
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 		event := p2p.ConnectionDisconnectedEvent{
@@ -96,8 +96,8 @@ func TestEventHandler_HandleConnDisconnectedEvent(t *testing.T) {
 	}
 }
 
-type MockNodeRepository struct{}
-func (nr MockNodeRepository) Save(data p2p.Node) error{return nil}
+type MockPeerRepository struct{}
+func (nr MockPeerRepository) Save(data p2p.Peer) error{return nil}
 type MockLeaderRepository struct{}
 func (lr MockLeaderRepository) SetLeader(leader p2p.Leader){}
 
@@ -121,7 +121,7 @@ func TestRepositoryProjector_HandleLeaderUpdatedEvent(t *testing.T) {
 			input: struct {
 				id string
 			}{id: string("")},
-			err: adapter.ErrEmptyNodeId,
+			err: adapter.ErrEmptyPeerId,
 		},
 	}
 
@@ -139,7 +139,7 @@ func TestRepositoryProjector_HandleLeaderUpdatedEvent(t *testing.T) {
 
 func SetupRepositoryProjector() (*adapter.RepositoryProjector) {
 
-	repositoryProjector := adapter.NewRepositoryProjector(MockNodeRepository{}, MockLeaderRepository{})
+	repositoryProjector := adapter.NewRepositoryProjector(MockPeerRepository{}, MockLeaderRepository{})
 
 	return repositoryProjector
 }

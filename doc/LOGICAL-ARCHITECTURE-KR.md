@@ -19,12 +19,9 @@
 * iCode 컴포넌트: it-chain의 스마트 컨트랙트인 iCode 관련 기능을 담당한다.
 
 
-
-
-
 # Module Architecture
 
-![Module Architecture](../images/it-chain-module-view-architecture-r1.png)
+![Module Architecture](../images/[module]component-r3.png)
 
 위 모델은 `it-chain-Engine`의 개별 컴포넌트의 모듈 아키텍처를 Layered 아키텍처 패턴을 적용하여 표현한 모델이다. 모듈 아키텍처는 개념 수준 아키텍처 모델과는 달리 시스템의 코드 측면 구조를 표현한다. (개념 수준 아키텍처 모델은 시스템의 실행 측면 구조를 묘사하였다.)
 
@@ -32,34 +29,80 @@
 
 다음은 각 모듈에 대한 간략한 설명이다.
 
+**Infra**
+infra layer 에서는 messaging 및 levelDB 등 infra 서비스에 필요한 기반환경을 구현하고 있다.
+domain layer의 repository, service 에서 정의한 함수에 대한 실질적인 구현(leveldb, rabbitmq)이 이루어진다.
+
 **API**
 API 레이어는 다른 bounded context와 협력을 위한 다양한 api를 제공한다.
-다른 bonded context 내의 서비스들을 오직 api를 통해서만 해당 서비스에 접근이 가능하다.
+다른 bonded context 내의 서비스들을 오직 api를 통해서만 해당 서비스에 접근이 가능하다. domain layer를 사용하여 하나의 의미있는 기능 단위를 제공한다.
 
-**model**
-model 은 해당 bounded context 에서 주로 사용되는 entity와 이를 구성하는 value object를 정의한다.
+**domain**
+해결하고자 하는 도메인의 추상화로 비지니스 로직의 구현체이다. aggregate, service를 활용해 비지니스 로직을 수행한다.
 
-**factory**
-factory는 model의 entity를 생성해 주는 역할을 담당하며, 다양한 값을 받아 value object를 구현하고 이를 조합하여 entity를 생성해 반환해 주는 역할을 수행한다.
-
-**Service**
-service는 해당 subcontext 내의 다양한 기능을 수행하며, infra의 기능들에 대한 interface를 만들어 준다.
-api 와 service 내에서 infra layer에 접근하지 않기 위해서 이 service 단에서 interface를 구현해 두고 필요한 경우 사용한다.
+**service**
+service는 해당 subcontext 내의 다양한 도메인 기능을 수행하며, infra의 기능들에 대한 interface를 제공해 준다.
+api 와 service 내에서 infra layer의 기능을 사용하기 위해 service 단에서 interface를 구현해 두고 필요한 경우 사용한다.
 
 **repository**
-repository는 entity 및 value object 를 기준으로 하여 db와의 입출력을 담당하며, it-chain에서는 levelDB와의 통신을 수행한다.
-하지만 직접적인 통신의 구현은 infra layer 에서 수행하며, 본 repository에서는 실제적인 구현 내용은 숨기고 interface 형태로 함수만을 선언하여 기능을 추상화 시켜준다.
+repository는 entity 및 value object 를 기준으로 하여 db와의 입출력을 담당한다. 하지만 직접적인 구현은 infra layer 에서 수행하며, 본 repository에서는 실제적인 구현 내용은 숨기고 interface 형태로 함수만을 선언하여 기능을 추상화 시켜준다.
 
-**Infra**
-infra layer 에서는 messaging 및 levelDB 통신 등 서비스에 필요한 기반환경을 구현하고 있다.
-앞서 repository 에서 정의한 함수에 대한 실질적인 구현이 이루어지며, rabitMQ 서버와 통신을 구현한다.
+
 
 위 그림은 앞서 제시된 Onion Architecture에서 제시된 사용 관계의 제한과 DDD 개발방법에서 정의하는 사용 관계의 제한을 반영하여 그려졌다. 아래 추적성 관리 테이블을 참고하여, 코드 작성시 아키텍처 모델에 명시된 사용 관계를 지키도록 유의한다.
 
 
-## 모듈-코드 추적성 테이블
-모듈 | 코드
------|-----
-Infrastructure layer | `{component-name}/infra` package
-API layer | `{component-name}/api` package
-Domain layer | `{component-name}` package
+
+###모듈-코드 추적성 테이블
+
+| 모듈                 | 코드                             |
+| -------------------- | -------------------------------- |
+| Infrastructure layer | `{component-name}/infra` package |
+| API layer            | `{component-name}/api` package   |
+| Domain layer         | `{component-name}` package       |
+
+
+
+## Adapter
+
+![moduleadapter-r1](../images/[module]adapter-r2.png)
+
+Adapter는 AMQP Message를 consume하여 작업을 수행하는 기능을 담당한다. it-chain에서 사용되는 AMQP Message종류는 event와 command로, `Event` 는 해당 컴포넌트의 root aggregate에 변화가 생긴 경우 해당 컴포넌트 상태변화를 알리고자 AMQP로 publish하며 발생하고, `Command` 는 다른 컴포넌트에게 기능 수행을 요청하기 위해 publish하여 발생한다.
+
+Command는 `Command_handler`와 `GrpcCommand_handler`에 의해 consume되며 `Command_handler`는 일반적인  모든  Command 를 받아 로직을 수행하며, `GrpcCommand_handler`는 GrpcGateway컴포넌트에서 발생하는 Command를 받아 로직을 수행한다. GrpcGateway에서 발생하는 Command는 grpc를 통한 다른 Node간의 요청, 응답이다.
+
+Event는 `Event_handler`와 `Repository_Projector`에 의해 consume되며 `Event_handler`는 관심있는 event를 받아 기능을 수행하고, `Repository_Projector`는 event를 받아 현재 상태의 view를 업데이트한다(Projection).
+
+**참고자료 https://www.continuousimprover.com/2017/02/the-good-of-event-sourcing-projections.html**
+
+
+
+**Command handler**
+
+Command handler는 amqp에서 command를 consume하여 필요한 작업을 수행하며, 특정 command에 대해 적합한 단일 api를 호출하여 모든 필요한 일련의 작업을 application layer에 위임한다.
+
+**GrpcCommand handler**
+
+it-chain 노드간의 통신은 노드의 GrpcGateway컴포넌트에서 담당하며 다른 노드로 부터 요청, 응답이 올시에 GrpcGateway가 Command를 발생시켜 해당 요청, 응답을 처리하는 Component에 전달한다. GrpcCommand handler는 GrpcGateway에서 발생시킨 이 Command를 받아 로직을 수행한다.
+
+**Event handler**
+
+Event handler는 amqp에서 event를 consume하여 필요한 작업을 api 호출을 통해 수행하며, event_handler는 필요에 따라 repository에서 자료를 **Read**할 수 있다.
+
+**Repository projector**
+
+it-chain은 repository에 대한 쓰기와 읽기를 분리하는 `CQRS(Command Query Responsibilities Segregation)` 패턴을 차용하며, **Repository projector**는 amqp에서 event를 consume하여 event로 부터 원하는 view를 구축(Projection)하는 작업을 수행한다.이러한 it-chain의 CQRS pattern은 projection이라는 minimal 한 logic의 수행만을 전담하는 repository projector와 handler를 구분함으로써 기능적으로 보다 명확한 설계를 추구하였다.
+
+
+
+
+## CQRS
+
+**todo...**
+
+
+# Communication between nodes
+Node 사이의 통신은 gRPC library 기반의 자체 library 인 bifrost를 활용하여 이루어 진다. gRPC Gateway 컴포넌트가 한다. 송신은 각 컴포넌트의 service의 한 종류인 `grpc_command_service` 에서 이루어 지며, 수신은 각 컴포넌트의 infra의 `grpc_command_handler`에서 이루어 진다. 각 메세지는 메세지의 목적에 따라 미리 정해진 protocol 을 포함하며 `grpc_command handler`에서 특정 protocol에 따라 적합한 api 함수를 호출함으로써 모든 기능 수행을 application layer에 위임한다.
+
+다음은 node 간 communication의 logical view이다.
+![logicalnetwork-communication](../images/[logical]network-communication-r1.png)

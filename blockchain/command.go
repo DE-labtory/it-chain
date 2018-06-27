@@ -1,8 +1,8 @@
 package blockchain
 
 import (
-	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/txpool"
+	"github.com/it-chain/midgard"
 )
 
 type SyncUpdateCommand struct {
@@ -24,4 +24,11 @@ type ProposeBlockCommand struct {
 type BlockValidateCommand struct {
 	midgard.CommandModel
 	Block Block
+}
+
+type GrpcCommand struct {
+	midgard.CommandModel
+	Recipients []string
+	Body       []byte
+	Protocol   string
 }
