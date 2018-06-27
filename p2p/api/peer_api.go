@@ -7,7 +7,7 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-var ErrEmptyPeerList = errors.New("empty node list proposed")
+var ErrEmptyPeerList = errors.New("empty peer list proposed")
 
 type ReadOnlyPeerRepository interface {
 	FindById(id p2p.PeerId) (*p2p.Peer, error)
@@ -15,85 +15,85 @@ type ReadOnlyPeerRepository interface {
 }
 
 type PeerApi struct {
-	nodeRepository  ReadOnlyPeerRepository
+	peerRepository  ReadOnlyPeerRepository
 	eventRepository EventRepository
 	messageService  PeerMessageService
 }
 
 type PeerMessageService interface {
-	DeliverPeerList(nodeId p2p.PeerId, nodeList []p2p.Peer) error
+	DeliverPeerList(peerId p2p.PeerId, peerList []p2p.Peer) error
 }
 
-func NewPeerApi(nodeRepository ReadOnlyPeerRepository, eventRepository EventRepository, messageService PeerMessageService) *PeerApi {
+func NewPeerApi(peerRepository ReadOnlyPeerRepository, eventRepository EventRepository, messageService PeerMessageService) *PeerApi {
 	return &PeerApi{
-		nodeRepository:  nodeRepository,
+		peerRepository:  peerRepository,
 		eventRepository: eventRepository,
 		messageService:  messageService,
 	}
 }
 
-func (nodeApi *PeerApi) UpdatePeerList(nodeList []p2p.Peer) error {
+func (peerApi *PeerApi) UpdatePeerList(peerList []p2p.Peer) error {
 
-	//둘다 존재할경우 무시, existPeerList에만 존재할경우 PeerDeletedEvent, nodeList에 존재할경우 PeerCreatedEvent
+	//둘다 존재할경우 무시, existPeerList에만 존재할경우 PeerDeletedEvent, peerList에 존재할경우 PeerCreatedEvent
 	var event midgard.Event
 
-	existPeerList, err := nodeApi.nodeRepository.FindAll()
+	existPeerList, err := peerApi.peerRepository.FindAll()
 
 	if err != nil {
 		return err
 	}
 
-	newPeers, disconnectedPeers := p2p.GetMutuallyExclusivePeers(nodeList, existPeerList)
+	newPeers, disconnectedPeers := p2p.GetMutuallyExclusivePeers(peerList, existPeerList)
 
-	for _, node := range newPeers {
+	for _, peer := range newPeers {
 
 		event = p2p.PeerCreatedEvent{
 			EventModel: midgard.EventModel{
-				ID:   node.GetID(),
-				Type: "node.created",
+				ID:   peer.GetID(),
+				Type: "peer.created",
 			},
-			IpAddress: node.IpAddress,
+			IpAddress: peer.IpAddress,
 		}
 
-		nodeApi.eventRepository.Save(event.GetID(), event)
+		peerApi.eventRepository.Save(event.GetID(), event)
 	}
 
-	for _, node := range disconnectedPeers {
+	for _, peer := range disconnectedPeers {
 		event = p2p.PeerDeletedEvent{
 			EventModel: midgard.EventModel{
-				ID:   node.GetID(),
-				Type: "node.deleted",
+				ID:   peer.GetID(),
+				Type: "peer.deleted",
 			},
 		}
 
-		nodeApi.eventRepository.Save(event.GetID(), event)
+		peerApi.eventRepository.Save(event.GetID(), event)
 	}
 
 	return nil
 }
 
-func (nodeApi *PeerApi) DeliverPeerList(nodeId p2p.PeerId) error {
+func (peerApi *PeerApi) DeliverPeerList(peerId p2p.PeerId) error {
 
-	nodeList, _ := nodeApi.nodeRepository.FindAll()
-	if len(nodeList) == 0 {
+	peerList, _ := peerApi.peerRepository.FindAll()
+	if len(peerList) == 0 {
 		return ErrEmptyPeerList
 	}
-	nodeApi.messageService.DeliverPeerList(nodeId, nodeList)
+	peerApi.messageService.DeliverPeerList(peerId, peerList)
 	return nil
 }
 
-// add a node
-func (nodeApi *PeerApi) AddPeer(node p2p.Peer) error {
+// add a peer
+func (peerApi *PeerApi) AddPeer(peer p2p.Peer) error {
 
 	event := p2p.PeerCreatedEvent{
 		EventModel: midgard.EventModel{
-			ID:   node.GetID(),
-			Type: "node.created",
+			ID:   peer.GetID(),
+			Type: "peer.created",
 		},
-		IpAddress: node.IpAddress,
+		IpAddress: peer.IpAddress,
 	}
 
-	err := nodeApi.eventRepository.Save(event.GetID(), event)
+	err := peerApi.eventRepository.Save(event.GetID(), event)
 
 	if err != nil {
 		return err
@@ -102,17 +102,17 @@ func (nodeApi *PeerApi) AddPeer(node p2p.Peer) error {
 	return nil
 }
 
-// delete a node
-func (nodeApi *PeerApi) DeletePeer(id p2p.PeerId) error {
+// delete a peer
+func (peerApi *PeerApi) DeletePeer(id p2p.PeerId) error {
 
 	event := p2p.PeerDeletedEvent{
 		EventModel: midgard.EventModel{
 			ID:   id.ToString(),
-			Type: "node.deleted",
+			Type: "peer.deleted",
 		},
 	}
 
-	err := nodeApi.eventRepository.Save(event.GetID(), event)
+	err := peerApi.eventRepository.Save(event.GetID(), event)
 
 	if err != nil {
 		return err
