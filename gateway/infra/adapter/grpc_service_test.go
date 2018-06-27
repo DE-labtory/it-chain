@@ -1,4 +1,4 @@
-package infra_test
+package adapter_test
 
 import (
 	"testing"
@@ -53,7 +53,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 	//given
 	tests := map[string]struct {
 		input  bifrost.Message
-		output adapter.GrpcReceiveCommand
+		output gateway.GrpcReceiveCommand
 		err    error
 	}{
 		"success": {
@@ -63,7 +63,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 					ID: "123",
 				},
 			},
-			output: adapter.GrpcReceiveCommand{
+			output: gateway.GrpcReceiveCommand{
 				Body:         []byte("hello world"),
 				ConnectionID: "123",
 			},
@@ -76,14 +76,14 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 		//then
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.receive")
-		assert.Equal(t, data, adapter.GrpcReceiveCommand{
+		assert.Equal(t, data, gateway.GrpcReceiveCommand{
 			Body:         []byte("hello world"),
 			ConnectionID: "123",
 		})
 		return nil
 	}
 
-	messageHandler := infra.NewMessageHandler(publish)
+	messageHandler := adapter.NewMessageHandler(publish)
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
@@ -109,11 +109,11 @@ func TestMemConnectionStore_Add(t *testing.T) {
 		"add same id": {
 			input:  MockConn{ID: "123"},
 			output: MockConn{ID: "123"},
-			err:    infra.ErrConnAlreadyExist,
+			err:    adapter.ErrConnAlreadyExist,
 		},
 	}
 
-	connectionStore := infra.NewMemConnectionStore()
+	connectionStore := adapter.NewMemConnectionStore()
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
@@ -147,7 +147,7 @@ func TestMemConnectionStore_Find(t *testing.T) {
 		},
 	}
 
-	connectionStore := infra.NewMemConnectionStore()
+	connectionStore := adapter.NewMemConnectionStore()
 	connectionStore.Add(MockConn{ID: "123"})
 
 	for testName, test := range tests {
@@ -181,7 +181,7 @@ func TestMemConnectionStore_Delete(t *testing.T) {
 		},
 	}
 
-	connectionStore := infra.NewMemConnectionStore()
+	connectionStore := adapter.NewMemConnectionStore()
 	connectionStore.Add(MockConn{ID: "123"})
 
 	for testName, test := range tests {
@@ -208,11 +208,11 @@ func (m *MockHandler) OnDisconnection(connection gateway.Connection) {
 	m.OnDisconnectionFunc(connection)
 }
 
-var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish func(exchange string, topic string, data interface{}) error) (*infra.GrpcHostService, func()) {
+var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish func(exchange string, topic string, data interface{}) error) (*adapter.GrpcHostService, func()) {
 
 	pri, pub := infra.LoadKeyPair(keyPath, "ECDSA256")
 
-	hostService := infra.NewGrpcHostService(pri, pub, publish)
+	hostService := adapter.NewGrpcHostService(pri, pub, publish)
 
 	go hostService.Listen(ip)
 
@@ -238,7 +238,7 @@ func TestGrpcHostService_Dial(t *testing.T) {
 		"dial exist connection": {
 			input:  "127.0.0.1:7777",
 			output: "",
-			err:    infra.ErrConnAlreadyExist,
+			err:    adapter.ErrConnAlreadyExist,
 		},
 	}
 
@@ -309,7 +309,7 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.receive")
-		assert.Equal(t, data, adapter.GrpcReceiveCommand{
+		assert.Equal(t, data, gateway.GrpcReceiveCommand{
 			Body:         publishedData,
 			ConnectionID: connID,
 		})
@@ -362,7 +362,7 @@ func TestGrpcHostService_Close(t *testing.T) {
 		"dial exist connection": {
 			input:  "127.0.0.1:7777",
 			output: "",
-			err:    infra.ErrConnAlreadyExist,
+			err:    adapter.ErrConnAlreadyExist,
 		},
 	}
 
