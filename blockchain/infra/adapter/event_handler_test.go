@@ -10,16 +10,18 @@ import (
 	"errors"
 )
 
-type EventHandlerMockNodeApi struct {
+type MockRepositoryProjector struct {
 	AddNodeFunc func(node blockchain.Node) error
 	DeleteNodeFunc func(node blockchain.Node) error
 }
-func (na EventHandlerMockNodeApi) AddNode(node blockchain.Node) error {
-	return na.AddNodeFunc(node)
+
+func (nr MockRepositoryProjector) AddNode(node blockchain.Node) error {
+	return nr.AddNodeFunc(node)
 }
-func (na EventHandlerMockNodeApi) DeleteNode(node blockchain.Node) error {
-	return na.DeleteNodeFunc(node)
+func (nr MockRepositoryProjector) DeleteNode(node blockchain.Node) error {
+	return nr.DeleteNodeFunc(node)
 }
+
 
 func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 	tests := map[string] struct {
@@ -27,7 +29,7 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 			ID string
 			nodeId string
 			address string
-			apiErr error
+			rpErr error
 		}
 		err error
 	}{
@@ -36,8 +38,8 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 				ID string
 				nodeId string
 				address string
-				apiErr error
-			}{ID: string("zf"), nodeId: string("zf2"), address: string("11.22.33.44"), apiErr: nil},
+				rpErr error
+			}{ID: string("zf"), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
 			err: nil,
 		},
 		"empty eventId test": {
@@ -45,8 +47,8 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 				ID string
 				nodeId string
 				address string
-				apiErr error
-			}{ID: string(""), nodeId: string("zf2"), address: string("11.22.33.44"), apiErr: nil},
+				rpErr error
+			}{ID: string(""), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
 			err: adapter.ErrEmptyEventId,
 		},
 		"api error test": {
@@ -54,8 +56,8 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 				ID string
 				nodeId string
 				address string
-				apiErr error
-			}{ID: string("zf"), nodeId: string("zf2"), address: string("11.22.33.44"), apiErr: errors.New("api error")},
+				rpErr error
+			}{ID: string("zf"), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: errors.New("repository error")},
 			err: adapter.ErrNodeApi,
 		},
 	}
@@ -63,14 +65,14 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		mockNodeApi := EventHandlerMockNodeApi{}
-		mockNodeApi.AddNodeFunc = func(node blockchain.Node) error {
+		rp := MockRepositoryProjector{}
+		rp.AddNodeFunc = func(node blockchain.Node) error {
 			assert.Equal(t, node.NodeId.Id, string("zf2"))
 			assert.Equal(t, node.IpAddress, string("11.22.33.44"))
-			return test.input.apiErr
+			return test.input.rpErr
 		}
 
-		eventHandler := adapter.NewEventHandler(mockNodeApi)
+		eventHandler := adapter.NewEventHandler(rp)
 
 		event := blockchain.NodeCreatedEvent{
 			EventModel: midgard.EventModel{
@@ -95,7 +97,7 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 			ID string
 			nodeId string
 			address string
-			apiErr error
+			rpErr error
 		}
 		err error
 	}{
@@ -104,8 +106,8 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 				ID string
 				nodeId string
 				address string
-				apiErr error
-			}{ID: string("zf"), nodeId: string("zf2"), address: string("11.22.33.44"), apiErr: nil},
+				rpErr error
+			}{ID: string("zf"), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
 			err: nil,
 		},
 		"empty eventId test": {
@@ -113,8 +115,8 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 				ID string
 				nodeId string
 				address string
-				apiErr error
-			}{ID: string(""), nodeId: string("zf2"), address: string("11.22.33.44"), apiErr: nil},
+				rpErr error
+			}{ID: string(""), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
 			err: adapter.ErrEmptyEventId,
 		},
 		"api error test": {
@@ -122,8 +124,8 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 				ID string
 				nodeId string
 				address string
-				apiErr error
-			}{ID: string("zf"), nodeId: string("zf2"), address: string("11.22.33.44"), apiErr: errors.New("api error")},
+				rpErr error
+			}{ID: string("zf"), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: errors.New("repository error")},
 			err: adapter.ErrNodeApi,
 		},
 	}
@@ -131,14 +133,14 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		mockNodeApi := EventHandlerMockNodeApi{}
-		mockNodeApi.DeleteNodeFunc = func(node blockchain.Node) error {
+		rp := MockRepositoryProjector{}
+		rp.DeleteNodeFunc = func(node blockchain.Node) error {
 			assert.Equal(t, node.NodeId.Id, string("zf2"))
 			assert.Equal(t, node.IpAddress, string("11.22.33.44"))
-			return test.input.apiErr
+			return test.input.rpErr
 		}
 
-		eventHandler := adapter.NewEventHandler(mockNodeApi)
+		eventHandler := adapter.NewEventHandler(rp)
 
 		event := blockchain.NodeDeletedEvent{
 			EventModel: midgard.EventModel{

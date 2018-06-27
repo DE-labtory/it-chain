@@ -76,17 +76,17 @@ func TestGrpcCommandService_RequestBlock(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			nodeId p2p.NodeId
+			nodeId p2p.PeerId
 			height uint64
 		}
 		err error
 	}{
 		"success: request block": {
 			input: struct {
-				nodeId p2p.NodeId
+				nodeId p2p.PeerId
 				height uint64
 			}{
-				nodeId: p2p.NodeId{
+				nodeId: p2p.PeerId{
 					Id: "1",
 				},
 				height: uint64(0),
@@ -95,10 +95,10 @@ func TestGrpcCommandService_RequestBlock(t *testing.T) {
 		},
 		"fail: empty node id": {
 			input: struct {
-				nodeId p2p.NodeId
+				nodeId p2p.PeerId
 				height uint64
 			}{
-				nodeId: p2p.NodeId{},
+				nodeId: p2p.PeerId{},
 				height: uint64(0),
 			},
 			err: adapter.ErrEmptyNodeId,
@@ -126,17 +126,17 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			nodeId p2p.NodeId
+			nodeId p2p.PeerId
 			block  MockBlock
 		}
 		err error
 	}{
 		"success: request block": {
 			input: struct {
-				nodeId p2p.NodeId
+				nodeId p2p.PeerId
 				block  MockBlock
 			}{
-				nodeId: p2p.NodeId{
+				nodeId: p2p.PeerId{
 					Id: "1",
 				},
 				block: MockBlock{
@@ -147,10 +147,10 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 		},
 		"fail: empty node id": {
 			input: struct {
-				nodeId p2p.NodeId
+				nodeId p2p.PeerId
 				block  MockBlock
 			}{
-				nodeId: p2p.NodeId{},
+				nodeId: p2p.PeerId{},
 				block: MockBlock{
 					seal: []byte("seal"),
 				},
@@ -159,10 +159,10 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 		},
 		"fail: empty block seal": {
 			input: struct {
-				nodeId p2p.NodeId
+				nodeId p2p.PeerId
 				block  MockBlock
 			}{
-				nodeId: p2p.NodeId{
+				nodeId: p2p.PeerId{
 					"1",
 				},
 				block: MockBlock{
