@@ -236,8 +236,8 @@ type MessageHandler struct {
 
 func (r MessageHandler) ServeRequest(msg bifrost.Message) {
 
-	err := r.publish("Command", "message.receive", gateway.MessageReceiveCommand{
-		Data:         msg.Data,
+	err := r.publish("Command", "message.receive", gateway.GrpcReceiveCommand{
+		Body:         msg.Data,
 		ConnectionID: msg.Conn.GetID(),
 	})
 
