@@ -19,12 +19,12 @@ type ConnectionDisconnectedEvent struct {
 }
 
 // node created event
-type NodeCreatedEvent struct {
+type PeerCreatedEvent struct {
 	midgard.EventModel
 	IpAddress string
 }
 
-type NodeDeletedEvent struct {
+type PeerDeletedEvent struct {
 	midgard.EventModel
 }
 

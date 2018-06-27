@@ -2,7 +2,6 @@ package api
 
 import (
 	"github.com/it-chain/it-chain-Engine/gateway"
-	"github.com/it-chain/it-chain-Engine/gateway/infra"
 )
 
 type MessageApi struct {
@@ -16,9 +15,8 @@ func NewMessageApi(grpcService gateway.GrpcService) *MessageApi {
 }
 
 //todo validation rule added example( check length of recipent)
-func (c MessageApi) DeliverMessage(command gateway.MessageDeliverCommand) {
+func (c MessageApi) DeliverMessage(command gateway.GrpcDeliverCommand) {
 
 	//validation rule add
-	hostService := infra.NewGrpcHostService()
 	c.grpcService.SendMessages(command.Body, command.Protocol, command.Recipients...)
 }

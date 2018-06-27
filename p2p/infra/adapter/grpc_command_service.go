@@ -12,28 +12,28 @@ import (
 )
 
 //kind of error
-var ErrEmptyNodeId = errors.New("empty nodeid proposed")
+var ErrEmptyPeerId = errors.New("empty nodeid proposed")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
-var ErrEmptyNodeList = errors.New("empty node list proposed")
+var ErrEmptyPeerList = errors.New("empty node list proposed")
 
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
 // message dispatcher sends messages to other nodes in p2p network
-type MessageService struct {
+type GrpcCommandService struct {
 	publish Publish // midgard.client.Publish
 }
 
-func NewMessageService(publish Publish) *MessageService {
-	return &MessageService{
+func NewGrpcCommandService(publish Publish) *GrpcCommandService {
+	return &GrpcCommandService{
 		publish: publish,
 	}
 }
 
 //request leader information in p2p network to the node specified by nodeId
-func (md *MessageService) RequestLeaderInfo(nodeId p2p.NodeId) error {
+func (md *GrpcCommandService) RequestLeaderInfo(nodeId p2p.PeerId) error {
 
 	if nodeId.Id == "" {
-		return ErrEmptyNodeId
+		return ErrEmptyPeerId
 	}
 
 	body := p2p.LeaderInfoRequestMessage{
@@ -53,16 +53,16 @@ func (md *MessageService) RequestLeaderInfo(nodeId p2p.NodeId) error {
 }
 
 // command message which requests node list of specific node
-func (md *MessageService) RequestNodeList(nodeId p2p.NodeId) error {
+func (md *GrpcCommandService) RequestPeerList(nodeId p2p.PeerId) error {
 
 	if nodeId.Id == "" {
-		return ErrEmptyNodeId
+		return ErrEmptyPeerId
 	}
 	body := p2p.LeaderInfoRequestMessage{
 		TimeUnix: time.Now().Unix(),
 	}
 
-	deliverCommand, err := CreateMessageDeliverCommand("NodeListRequestMessage", body)
+	deliverCommand, err := CreateMessageDeliverCommand("PeerListRequestMessage", body)
 
 	if err != nil {
 		return err
@@ -73,10 +73,10 @@ func (md *MessageService) RequestNodeList(nodeId p2p.NodeId) error {
 	return md.publish("Command", "message.deliver", deliverCommand)
 }
 
-func (md *MessageService) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error {
+func (md *GrpcCommandService) DeliverLeaderInfo(nodeId p2p.PeerId, leader p2p.Leader) error {
 
 	if nodeId.Id == "" {
-		return ErrEmptyNodeId
+		return ErrEmptyPeerId
 	}
 
 	if leader.LeaderId.Id == "" {
@@ -95,17 +95,17 @@ func (md *MessageService) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader
 }
 
 //deliver node list to other node specified by nodeId
-func (md *MessageService) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.Node) error {
+func (md *GrpcCommandService) DeliverPeerList(nodeId p2p.PeerId, nodeList []p2p.Peer) error {
 
 	if nodeId.Id == "" {
-		return ErrEmptyNodeId
+		return ErrEmptyPeerId
 	}
 
 	if len(nodeList) == 0 {
-		return ErrEmptyNodeList
+		return ErrEmptyPeerList
 	}
 
-	messageDeliverCommand, err := CreateMessageDeliverCommand("NodeListDeliver", nodeList)
+	messageDeliverCommand, err := CreateMessageDeliverCommand("PeerListDeliver", nodeList)
 
 	if err != nil {
 		return err
@@ -117,15 +117,15 @@ func (md *MessageService) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.Node
 }
 
 //deliver single node
-func (md *MessageService) DeliverNode(nodeId p2p.NodeId, node p2p.Node) error {
+func (md *GrpcCommandService) DeliverPeer(nodeId p2p.PeerId, node p2p.Peer) error {
 
-	messageDeliverCommand, err := CreateMessageDeliverCommand("NodeDeliverProtocol", node)
+	messageDeliverCommand, err := CreateMessageDeliverCommand("PeerDeliverProtocol", node)
 
 	if err != nil {
 		return err
 	}
 
-	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, node.NodeId.ToString())
+	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, node.PeerId.ToString())
 
 	return md.publish("Command", "message.deliver", messageDeliverCommand)
 }

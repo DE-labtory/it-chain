@@ -1,5 +1,5 @@
 package blockchain
 
-type BlockRequestMessage struct {}
-
-type BlockResponseMessage struct {}
+type BlockRequestMessage struct {
+	Height uint64
+}
