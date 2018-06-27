@@ -18,7 +18,7 @@ func NewGrpcCommandHandler(blockApi GrpcCommandHandlerBlockApi) *GrpcCommandHand
 	}
 }
 
-func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcRequestCommand) error {
+func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCommand) error {
 	switch command.Protocol {
 	case "SyncCheckRequestProtocol":
 		//TODO: 상대방의 SyncCheck를 위해서 자신의 last block을 보내준다.
