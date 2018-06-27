@@ -9,28 +9,30 @@ import (
 )
 
 var ErrLeaderInfoDeliver = errors.New("leader info deliver failed")
-var ErrPeerListDeliver = errors.New("node list deliver failed")
-var ErrPeerDeliver = errors.New("node deliver failed")
+
+var ErrPeerListDeliver = errors.New("peer list deliver failed")
+var ErrPeerDeliver = errors.New("peer deliver failed")
 
 type LeaderApi interface {
 	UpdateLeader(leader p2p.Leader) error
-	DeliverLeaderInfo(nodeId p2p.PeerId)
+	DeliverLeaderInfo(peerId p2p.PeerId)
 }
 
 type GrpcCommandHandlerPeerApi interface {
-	UpdatePeerList(nodeList []p2p.Peer) error
-	DeliverPeerList(nodeId p2p.PeerId) error
-	AddPeer(node p2p.Peer)
+	UpdatePeerList(peerList []p2p.Peer) error
+	DeliverPeerList(peerId p2p.PeerId) error
+	AddPeer(peer p2p.Peer)
 }
 
 type GrpcCommandHandler struct {
 	leaderApi LeaderApi
-	nodeApi   GrpcCommandHandlerPeerApi
+
+	peerApi   GrpcCommandHandlerPeerApi
 }
-func NewGrpcCommandHandler(leaderApi LeaderApi, nodeApi GrpcCommandHandlerPeerApi) *GrpcCommandHandler {
+func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		leaderApi: leaderApi,
-		nodeApi:   nodeApi,
+		peerApi:   peerApi,
 	}
 }
 
@@ -53,29 +55,32 @@ func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 
 	case "PeerListRequestProtocol":
 
-		g.nodeApi.DeliverPeerList(command.FromPeer.PeerId)
+		g.peerApi.DeliverPeerList(command.FromPeer.PeerId)
 		break
 
 	case "PeerListDeliverProtocol":
 
-		nodeList := make([]p2p.Peer, 0)
-		if err := json.Unmarshal(command.Data, &nodeList); err != nil {
+
+		peerList := make([]p2p.Peer, 0)
+		if err := json.Unmarshal(command.Data, &peerList); err != nil {
 			//todo error 처리
 			return ErrPeerListDeliver
 		}
 
-		g.nodeApi.UpdatePeerList(nodeList)
+
+		g.peerApi.UpdatePeerList(peerList)
 		break
 
 	case "PeerDeliverProtocol":
 
-		node := p2p.Peer{}
-		err := common.Deserialize(command.Data, node)
+		peer := p2p.Peer{}
+		err := common.Deserialize(command.Data, peer)
 
 		if err != nil {
 			return ErrPeerDeliver
 		}
-		g.nodeApi.AddPeer(node)
+
+		g.peerApi.AddPeer(peer)
 		break
 	}
 

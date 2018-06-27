@@ -9,14 +9,14 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-var ErrEmptyNodeId = errors.New("empty node id requested")
+var ErrEmptyPeerId = errors.New("empty node id requested")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 
 type LeaderApi struct {
 	leaderRepository ReadOnlyLeaderRepository
 	eventRepository  EventRepository
 	messageService   LeaderMessageService
-	myInfo           *p2p.Node
+	myInfo           *p2p.Peer
 }
 
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
@@ -30,10 +30,10 @@ type EventRepository interface { //midgard.Repository
 }
 
 type LeaderMessageService interface {
-	DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error
+	DeliverLeaderInfo(nodeId p2p.PeerId, leader p2p.Leader) error
 }
 
-func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, messageService LeaderMessageService, myInfo *p2p.Node) *LeaderApi {
+func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, messageService LeaderMessageService, myInfo *p2p.Peer) *LeaderApi {
 
 	return &LeaderApi{
 		leaderRepository: leaderRepository,
@@ -68,10 +68,10 @@ func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Leader) error {
 	return err
 }
 
-func (leaderApi *LeaderApi) DeliverLeaderInfo(nodeId p2p.NodeId) error {
+func (leaderApi *LeaderApi) DeliverLeaderInfo(nodeId p2p.PeerId) error {
 
 	if nodeId.Id == "" {
-		return ErrEmptyNodeId
+		return ErrEmptyPeerId
 	}
 
 	leader := leaderApi.leaderRepository.GetLeader()

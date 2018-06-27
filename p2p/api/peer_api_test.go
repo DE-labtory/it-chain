@@ -9,34 +9,34 @@ import (
 	"github.com/magiconair/properties/assert"
 )
 
-var ErrEmptyNodeList = errors.New("empty node list proposed")
+var ErrEmptyPeerList = errors.New("empty node list proposed")
 
 //todo make node api test
 //todo make fake dependencies 1. eventRepository 2. messageDispatcher 3. nodeRepository
 //todo make test map
 //todo test continue
 
-type MockNodeRepository struct {}
+type MockPeerRepository struct {}
 
-func (mnr MockNodeRepository) FindById(id p2p.NodeId) (*p2p.Node, error) { return nil, nil }
-func (mnr MockNodeRepository) FindAll() ([]p2p.Node, error)              { return nil, nil }
+func (mnr MockPeerRepository) FindById(id p2p.PeerId) (*p2p.Peer, error) { return nil, nil }
+func (mnr MockPeerRepository) FindAll() ([]p2p.Peer, error)              { return nil, nil }
 
-type MockNodeMessageService struct{}
+type MockPeerMessageService struct{}
 
-func (mnms MockNodeMessageService) DeliverNodeList(nodeId p2p.NodeId, nodeList []p2p.Node) error {
+func (mnms MockPeerMessageService) DeliverPeerList(nodeId p2p.PeerId, nodeList []p2p.Peer) error {
 	return nil
 }
 
-func TestNodeApi_UpdateNodeList(t *testing.T) {
+func TestPeerApi_UpdatePeerList(t *testing.T) {
 
 	tests := map[string]struct {
-		input []p2p.Node
+		input []p2p.Peer
 		err   error
 	}{
 		"success": {
-			input: []p2p.Node{
-				p2p.Node{
-					NodeId: p2p.NodeId{
+			input: []p2p.Peer{
+				p2p.Peer{
+					PeerId: p2p.PeerId{
 						Id: "1",
 					},
 				},
@@ -45,21 +45,21 @@ func TestNodeApi_UpdateNodeList(t *testing.T) {
 		},
 	}
 
-	nodeApi := SetupNodeApi()
+	nodeApi := SetupPeerApi()
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := nodeApi.UpdateNodeList(test.input)
+		err := nodeApi.UpdatePeerList(test.input)
 		assert.Equal(t, err, test.err)
 	}
 }
 
-func SetupNodeApi() *api.NodeApi {
-	nodeRepository := MockNodeRepository{}
+func SetupPeerApi() *api.PeerApi {
+	nodeRepository := MockPeerRepository{}
 	eventRepository := MockEventRepository{}
-	messageService := MockNodeMessageService{}
+	messageService := MockPeerMessageService{}
 
-	nodeApi := api.NewNodeApi(nodeRepository, eventRepository, messageService)
+	nodeApi := api.NewPeerApi(nodeRepository, eventRepository, messageService)
 
 	return nodeApi
 }
