@@ -8,11 +8,11 @@ import (
 )
 
 type ConnectionApi struct {
-	eventRepository midgard.Repository
+	eventRepository gateway.EventRepository
 	grpcService     gateway.GrpcService
 }
 
-func NewConnectionApi(eventRepository midgard.Repository, grpcService gateway.GrpcService) *ConnectionApi {
+func NewConnectionApi(eventRepository gateway.EventRepository, grpcService gateway.GrpcService) *ConnectionApi {
 	return &ConnectionApi{
 		eventRepository: eventRepository,
 		grpcService:     grpcService,
