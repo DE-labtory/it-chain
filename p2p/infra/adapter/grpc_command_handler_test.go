@@ -18,7 +18,7 @@ func (mla MockLeaderApi) DeliverLeaderInfo(connectionId string)  {}
 type MockPeerApi struct{}
 
 func (mna MockPeerApi) UpdatePeerList(peerList []p2p.Peer) error { return nil }
-func (mna MockPeerApi) DeliverPeerList(peerId p2p.PeerId) error  { return nil }
+func (mna MockPeerApi) DeliverPeerList(connectionId string) error  { return nil }
 func (mna MockPeerApi) AddPeer(peer p2p.Peer)                    {}
 
 func TestGrpcMessageHandler_HandleMessageReceive(t *testing.T) {

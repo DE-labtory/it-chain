@@ -96,9 +96,9 @@ func (md *GrpcCommandService) DeliverLeaderInfo(connectionId string, leader p2p.
 }
 
 //deliver node list to other node specified by peerId
-func (md *GrpcCommandService) DeliverPeerList(peerId p2p.PeerId, nodeList []p2p.Peer) error {
+func (md *GrpcCommandService) DeliverPeerList(connectionId string, nodeList []p2p.Peer) error {
 
-	if peerId.Id == "" {
+	if connectionId== "" {
 		return ErrEmptyPeerId
 	}
 
@@ -112,7 +112,7 @@ func (md *GrpcCommandService) DeliverPeerList(peerId p2p.PeerId, nodeList []p2p.
 		return err
 	}
 
-	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, peerId.ToString())
+	messageDeliverCommand.Recipients = append(messageDeliverCommand.Recipients, connectionId)
 
 	return md.publish("Command", "message.deliver", messageDeliverCommand)
 }

@@ -37,7 +37,7 @@ func TestGrpcCommandService_RequestLeaderInfo(t *testing.T) {
 	publish := func(exchange string, topic string, data interface{}) error {
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.deliver")
-		assert.Equal(t, reflect.TypeOf(data).String(), "p2p.MessageDeliverCommand")
+		assert.Equal(t, reflect.TypeOf(data).String(), "p2p.GrpcDeliverCommand")
 
 		return nil
 	}
@@ -46,7 +46,7 @@ func TestGrpcCommandService_RequestLeaderInfo(t *testing.T) {
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := grpcCommandService.RequestLeaderInfo(test.input.peerId)
+		err := grpcCommandService.RequestLeaderInfo(test.input.connectionId)
 		assert.Equal(t, err, test.err)
 	}
 
@@ -56,17 +56,17 @@ func TestGrpcCommandService_DeliverLeaderInfo(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			peerId p2p.PeerId
+			connectionId string
 			leader p2p.Leader
 		}
 		err error
 	}{
-		"empty peer id test": {
+		"empty connection id test": {
 			input: struct {
-				peerId p2p.PeerId
+				connectionId string
 				leader p2p.Leader
 			}{
-				peerId: p2p.PeerId{},
+				connectionId: "",
 				leader: p2p.Leader{
 					LeaderId: p2p.LeaderId{
 						Id: "1",
@@ -77,26 +77,24 @@ func TestGrpcCommandService_DeliverLeaderInfo(t *testing.T) {
 		},
 		"empty leader id test": {
 			input: struct {
-				peerId p2p.PeerId
+				connectionId string
 				leader p2p.Leader
 			}{
-				peerId: p2p.PeerId{
-					Id: "1",
-				},
+				connectionId:"1",
 				leader: p2p.Leader{
-					LeaderId: p2p.LeaderId{},
+					LeaderId: p2p.LeaderId{
+						Id:"",
+					},
 				},
 			},
 			err: ErrEmptyLeaderId,
 		},
 		"success": {
 			input: struct {
-				peerId p2p.PeerId
+				connectionId string
 				leader p2p.Leader
 			}{
-				peerId: p2p.PeerId{
-					Id: "1",
-				},
+				connectionId: "1",
 				leader: p2p.Leader{
 					LeaderId: p2p.LeaderId{
 						Id: "1",
@@ -110,7 +108,7 @@ func TestGrpcCommandService_DeliverLeaderInfo(t *testing.T) {
 		{
 			assert.Equal(t, exchange, "Command")
 			assert.Equal(t, topic, "message.deliver")
-			assert.Equal(t, reflect.TypeOf(data).String(), "p2p.MessageDeliverCommand")
+			assert.Equal(t, reflect.TypeOf(data).String(), "p2p.GrpcDeliverCommand")
 
 			return nil
 		}
@@ -120,7 +118,7 @@ func TestGrpcCommandService_DeliverLeaderInfo(t *testing.T) {
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := grpcCommandService.DeliverLeaderInfo(test.input.peerId, test.input.leader)
+		err := grpcCommandService.DeliverLeaderInfo(test.input.connectionId, test.input.leader)
 		assert.Equal(t, err, test.err)
 	}
 }
@@ -146,7 +144,7 @@ func TestGrpcCommandService_RequestPeerList(t *testing.T) {
 		{
 			assert.Equal(t, exchange, "Command")
 			assert.Equal(t, topic, "message.deliver")
-			assert.Equal(t, reflect.TypeOf(data).String(), "p2p.MessageDeliverCommand")
+			assert.Equal(t, reflect.TypeOf(data).String(), "p2p.GrpcDeliverCommand")
 
 			return nil
 		}
@@ -164,41 +162,37 @@ func TestGrpcCommandService_RequestPeerList(t *testing.T) {
 func TestGrpcCommandService_DeliverPeerList(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			peerId   p2p.PeerId
+			connectionId   string
 			peerList []p2p.Peer
 		}
 		err error
 	}{
 		"empty peer list test": {
 			input: struct {
-				peerId   p2p.PeerId
+				connectionId   string
 				peerList []p2p.Peer
 			}{
-				peerId: p2p.PeerId{
-					Id: "1",
-				},
+				connectionId: "1",
 				peerList: []p2p.Peer{},
 			},
 			err: ErrEmptyPeerList,
 		},
-		"empty peer id test": {
+		"empty connection id test": {
 			input: struct {
-				peerId   p2p.PeerId
+				connectionId   string
 				peerList []p2p.Peer
 			}{
-				peerId:   p2p.PeerId{},
+				connectionId: "",
 				peerList: []p2p.Peer{},
 			},
 			err: ErrEmptyPeerId,
 		},
 		"success": {
 			input: struct {
-				peerId   p2p.PeerId
+				connectionId   string
 				peerList []p2p.Peer
 			}{
-				peerId: p2p.PeerId{
-					Id: "1",
-				},
+				connectionId: "1",
 				peerList: []p2p.Peer{
 					p2p.Peer{
 						PeerId: p2p.PeerId{
@@ -215,7 +209,7 @@ func TestGrpcCommandService_DeliverPeerList(t *testing.T) {
 		{
 			assert.Equal(t, exchange, "Command")
 			assert.Equal(t, topic, "message.deliver")
-			assert.Equal(t, reflect.TypeOf(data).String(), "p2p.MessageDeliverCommand")
+			assert.Equal(t, reflect.TypeOf(data).String(), "p2p.GrpcDeliverCommand")
 
 			return nil
 		}
@@ -225,7 +219,7 @@ func TestGrpcCommandService_DeliverPeerList(t *testing.T) {
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := grpcCommandService.DeliverPeerList(test.input.peerId, test.input.peerList)
+		err := grpcCommandService.DeliverPeerList(test.input.connectionId, test.input.peerList)
 		assert.Equal(t, err, test.err)
 	}
 
