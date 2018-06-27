@@ -1,10 +1,6 @@
 package api
 
-<<<<<<< HEAD
-import (
-	"github.com/it-chain/midgard"
-	"github.com/it-chain/it-chain-Engine/blockchain"
-)
+import "github.com/it-chain/midgard"
 
 type NodeApi struct {
 	eventRepository midgard.Repository

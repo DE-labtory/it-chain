@@ -24,3 +24,12 @@ type BlockValidateCommand struct {
 	midgard.CommandModel
 	Block Block
 }
+
+type GrpcRequestCommand struct {
+	midgard.CommandModel
+	Data []byte
+	ConnectionID string
+	Protocol string
+	FromNode Node
+	ToNode Node
+}
