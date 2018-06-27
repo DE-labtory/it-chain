@@ -8,31 +8,31 @@ import (
 	"github.com/magiconair/properties/assert"
 )
 
-func TestMessageService_RequestLeaderInfo(t *testing.T) {
+func TestGrpcCommandService_RequestLeaderInfo(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			nodeId p2p.NodeId
+			peerId p2p.PeerId
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				nodeId p2p.NodeId
+				peerId p2p.PeerId
 			}{
-				nodeId: p2p.NodeId{
+				peerId: p2p.PeerId{
 					Id: "1",
 				},
 			},
 			err: nil,
 		},
-		"empty node id test": {
+		"empty peer id test": {
 			input: struct {
-				nodeId p2p.NodeId
+				peerId p2p.PeerId
 			}{
-				nodeId: p2p.NodeId{},
+				peerId: p2p.PeerId{},
 			},
-			err: ErrEmptyNodeId,
+			err: ErrEmptyPeerId,
 		},
 	}
 
@@ -44,45 +44,45 @@ func TestMessageService_RequestLeaderInfo(t *testing.T) {
 		return nil
 	}
 
-	messageService := NewMessageService(publish)
+	messageService := NewGrpcCommandService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageService.RequestLeaderInfo(test.input.nodeId)
+		err := messageService.RequestLeaderInfo(test.input.peerId)
 		assert.Equal(t, err, test.err)
 	}
 
 }
 
-func TestMessageService_DeliverLeaderInfo(t *testing.T) {
+func TestGrpcCommandService_DeliverLeaderInfo(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			nodeId p2p.NodeId
+			peerId p2p.PeerId
 			leader p2p.Leader
 		}
 		err error
 	}{
-		"empty node id test": {
+		"empty peer id test": {
 			input: struct {
-				nodeId p2p.NodeId
+				peerId p2p.PeerId
 				leader p2p.Leader
 			}{
-				nodeId: p2p.NodeId{},
+				peerId: p2p.PeerId{},
 				leader: p2p.Leader{
 					LeaderId: p2p.LeaderId{
 						Id: "1",
 					},
 				},
 			},
-			err: ErrEmptyNodeId,
+			err: ErrEmptyPeerId,
 		},
 		"empty leader id test": {
 			input: struct {
-				nodeId p2p.NodeId
+				peerId p2p.PeerId
 				leader p2p.Leader
 			}{
-				nodeId: p2p.NodeId{
+				peerId: p2p.PeerId{
 					Id: "1",
 				},
 				leader: p2p.Leader{
@@ -93,10 +93,10 @@ func TestMessageService_DeliverLeaderInfo(t *testing.T) {
 		},
 		"success": {
 			input: struct {
-				nodeId p2p.NodeId
+				peerId p2p.PeerId
 				leader p2p.Leader
 			}{
-				nodeId: p2p.NodeId{
+				peerId: p2p.PeerId{
 					Id: "1",
 				},
 				leader: p2p.Leader{
@@ -118,30 +118,30 @@ func TestMessageService_DeliverLeaderInfo(t *testing.T) {
 		}
 	}
 
-	messageService := NewMessageService(publish)
+	messageService := NewGrpcCommandService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageService.DeliverLeaderInfo(test.input.nodeId, test.input.leader)
+		err := messageService.DeliverLeaderInfo(test.input.peerId, test.input.leader)
 		assert.Equal(t, err, test.err)
 	}
 }
 
-func TestMessageService_RequestNodeList(t *testing.T) {
+func TestGrpcCommandService_RequestPeerList(t *testing.T) {
 
 	tests := map[string]struct {
-		input p2p.NodeId
+		input p2p.PeerId
 		err   error
 	}{
-		"empty node id test": {
-			input: p2p.NodeId{
+		"empty peer id test": {
+			input: p2p.PeerId{
 				Id: "1",
 			},
 			err: nil,
 		},
 		"success": {
-			input: p2p.NodeId{},
-			err:   ErrEmptyNodeId,
+			input: p2p.PeerId{},
+			err:   ErrEmptyPeerId,
 		},
 	}
 	publish := func(exchange string, topic string, data interface{}) error {
@@ -154,56 +154,56 @@ func TestMessageService_RequestNodeList(t *testing.T) {
 		}
 	}
 
-	messageService := NewMessageService(publish)
+	messageService := NewGrpcCommandService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageService.RequestNodeList(test.input)
+		err := messageService.RequestPeerList(test.input)
 		assert.Equal(t, err, test.err)
 	}
 }
 
-func TestMessageService_DeliverNodeList(t *testing.T) {
+func TestGrpcCommandService_DeliverPeerList(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			nodeId   p2p.NodeId
-			nodeList []p2p.Node
+			peerId   p2p.PeerId
+			peerList []p2p.Peer
 		}
 		err error
 	}{
-		"empty node list test": {
+		"empty peer list test": {
 			input: struct {
-				nodeId   p2p.NodeId
-				nodeList []p2p.Node
+				peerId   p2p.PeerId
+				peerList []p2p.Peer
 			}{
-				nodeId: p2p.NodeId{
+				peerId: p2p.PeerId{
 					Id: "1",
 				},
-				nodeList: []p2p.Node{},
+				peerList: []p2p.Peer{},
 			},
-			err: ErrEmptyNodeList,
+			err: ErrEmptyPeerList,
 		},
-		"empty node id test": {
+		"empty peer id test": {
 			input: struct {
-				nodeId   p2p.NodeId
-				nodeList []p2p.Node
+				peerId   p2p.PeerId
+				peerList []p2p.Peer
 			}{
-				nodeId:   p2p.NodeId{},
-				nodeList: []p2p.Node{},
+				peerId:   p2p.PeerId{},
+				peerList: []p2p.Peer{},
 			},
-			err: ErrEmptyNodeId,
+			err: ErrEmptyPeerId,
 		},
 		"success": {
 			input: struct {
-				nodeId   p2p.NodeId
-				nodeList []p2p.Node
+				peerId   p2p.PeerId
+				peerList []p2p.Peer
 			}{
-				nodeId: p2p.NodeId{
+				peerId: p2p.PeerId{
 					Id: "1",
 				},
-				nodeList: []p2p.Node{
-					p2p.Node{
-						NodeId: p2p.NodeId{
+				peerList: []p2p.Peer{
+					p2p.Peer{
+						PeerId: p2p.PeerId{
 							Id: "1",
 						},
 						IpAddress: "123",
@@ -223,11 +223,11 @@ func TestMessageService_DeliverNodeList(t *testing.T) {
 		}
 	}
 
-	messageService := NewMessageService(publish)
+	messageService := NewGrpcCommandService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := messageService.DeliverNodeList(test.input.nodeId, test.input.nodeList)
+		err := messageService.DeliverPeerList(test.input.peerId, test.input.peerList)
 		assert.Equal(t, err, test.err)
 	}
 

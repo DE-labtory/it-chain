@@ -7,8 +7,8 @@ type GrpcRequestCommand struct {
 	Data         []byte
 	ConnectionID string
 	Protocol     string
-	FromNode     Node
-	ToNode       Node
+	FromPeer     Peer
+	ToPeer       Peer
 }
 
 type MessageDeliverCommand struct {
