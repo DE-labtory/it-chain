@@ -15,6 +15,7 @@ import (
 var ErrEmptyPeerId = errors.New("empty nodeid proposed")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 var ErrEmptyPeerList = errors.New("empty node list proposed")
+var ErrEmptyConnectionId = errors.New("empty connection ")
 
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 

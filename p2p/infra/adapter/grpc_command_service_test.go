@@ -12,25 +12,23 @@ func TestGrpcCommandService_RequestLeaderInfo(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			peerId p2p.PeerId
+			connectionId string
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				peerId p2p.PeerId
+				connectionId string
 			}{
-				peerId: p2p.PeerId{
-					Id: "1",
-				},
+				connectionId:"1",
 			},
 			err: nil,
 		},
-		"empty peer id test": {
+		"empty connection id test": {
 			input: struct {
-				peerId p2p.PeerId
+				connectionId string
 			}{
-				peerId: p2p.PeerId{},
+				connectionId:"",
 			},
 			err: ErrEmptyPeerId,
 		},

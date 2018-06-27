@@ -11,18 +11,16 @@ var ErrNoMatchingPeer = errors.New("no matching peer exists")
 var ErrEmptyPeerId = errors.New("empty peer id proposed")
 var ErrEmptyPeerTable = errors.New("peer table is empty")
 
-type PeerRepository struct {}
+type PeerRepository struct {
+	peerTable map[string]p2p.Peer
+}
 
-//in memory peer list
-var peerTable map[string]p2p.Peer
 
 // 새로운 p2p repo 생성
 func NewPeerRepository() (PeerRepository, error) {
-
-	once.Do(func() {
-		peerTable = make(map[string]p2p.Peer)
-	})
-	return PeerRepository{}, nil
+	return PeerRepository{
+		peerTable:make(map[string]p2p.Peer),
+	}, nil
 }
 
 
@@ -33,12 +31,12 @@ func (pr *PeerRepository) Save(data p2p.Peer) error {
 	if data.PeerId.Id == "" {
 		return ErrEmptyPeerId
 	}
-	_, exist := peerTable[data.PeerId.Id]
+	_, exist := pr.peerTable[data.PeerId.Id]
 	if exist {
 		return ErrExistPeer
 	}
 
-	peerTable[data.PeerId.Id] = data
+	pr.peerTable[data.PeerId.Id] = data
 
 	return nil
 }
@@ -49,19 +47,19 @@ func (pr *PeerRepository) Remove(id p2p.PeerId) error {
 		return ErrEmptyPeerId
 	}
 
-	_, exist := peerTable[id.Id]
+	_, exist := pr.peerTable[id.Id]
 
 	if !exist{
 		return ErrNoMatchingPeer
 	}
 
-	delete(peerTable, id.Id)
+	delete(pr.peerTable, id.Id)
 	return nil
 }
 
 // p2p 읽어옴
 func (pr *PeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) {
-	v, exist := peerTable[id.Id]
+	v, exist := pr.peerTable[id.Id]
 
 	if id.Id == "" {
 		return v, ErrEmptyPeerId
@@ -78,20 +76,20 @@ func (pr *PeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) {
 func (pr *PeerRepository) FindAll() ([]p2p.Peer, error) {
 	peers := make([]p2p.Peer, 0)
 
-	if len(peerTable) == 0{
+	if len(pr.peerTable) == 0{
 		return peers, ErrEmptyPeerTable
 	}
 
-	for _, value := range peerTable{
+	for _, value := range pr.peerTable{
 		peers = append(peers, value)
 	}
 
 	return peers, nil
 }
 
-func ClearPeerTable(){
-	for key := range peerTable{
-		delete(peerTable, key)
+func (pr *PeerRepository) ClearPeerTable(){
+	for key := range pr.peerTable{
+		delete(pr.peerTable, key)
 	}
-	peerTable = make(map[string]p2p.Peer)
+	pr.peerTable = make(map[string]p2p.Peer)
 }
