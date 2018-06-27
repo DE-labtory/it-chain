@@ -3,7 +3,6 @@ package consensus
 import "github.com/it-chain/midgard"
 
 // todo : Consensus로 시작하는 네이밍
-// todo : ConsensusMsg 구조
 
 // Publish part
 
@@ -25,5 +24,9 @@ type ConsensusMessageArrivedEvent struct {
 }
 
 type ConsensusStartedEvent struct {
+	midgard.EventModel
+}
+
+type LeaderChangedEvent struct {
 	midgard.EventModel
 }

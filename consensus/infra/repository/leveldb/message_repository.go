@@ -15,4 +15,3 @@ func NewMessageRepository(path string) *MessageRepository {
 		leveldb: db,
 	}
 }
-
