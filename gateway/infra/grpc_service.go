@@ -1,16 +1,16 @@
 package infra
 
 import (
+	"errors"
 	"log"
 	"sync"
-
-	"errors"
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/bifrost/server"
 	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/gateway"
+	"github.com/it-chain/it-chain-Engine/gateway/infra/adapter"
 	"github.com/it-chain/midgard"
 )
 
@@ -236,7 +236,7 @@ type MessageHandler struct {
 
 func (r MessageHandler) ServeRequest(msg bifrost.Message) {
 
-	err := r.publish("Command", "message.receive", gateway.GrpcReceiveCommand{
+	err := r.publish("Command", "message.receive", adapter.GrpcReceiveCommand{
 		Body:         msg.Data,
 		ConnectionID: msg.Conn.GetID(),
 	})

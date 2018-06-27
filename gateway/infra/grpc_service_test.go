@@ -11,6 +11,7 @@ import (
 	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/it-chain/it-chain-Engine/gateway/infra"
+	"github.com/it-chain/it-chain-Engine/gateway/infra/adapter"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -52,7 +53,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 	//given
 	tests := map[string]struct {
 		input  bifrost.Message
-		output gateway.GrpcReceiveCommand
+		output adapter.GrpcReceiveCommand
 		err    error
 	}{
 		"success": {
@@ -62,7 +63,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 					ID: "123",
 				},
 			},
-			output: gateway.GrpcReceiveCommand{
+			output: adapter.GrpcReceiveCommand{
 				Body:         []byte("hello world"),
 				ConnectionID: "123",
 			},
@@ -75,7 +76,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 		//then
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.receive")
-		assert.Equal(t, data, gateway.GrpcReceiveCommand{
+		assert.Equal(t, data, adapter.GrpcReceiveCommand{
 			Body:         []byte("hello world"),
 			ConnectionID: "123",
 		})
@@ -308,7 +309,7 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.receive")
-		assert.Equal(t, data, gateway.GrpcReceiveCommand{
+		assert.Equal(t, data, adapter.GrpcReceiveCommand{
 			Body:         publishedData,
 			ConnectionID: connID,
 		})
