@@ -28,7 +28,11 @@ func NewParliament() Parliament {
 	}
 }
 
-func (p *Parliament) IsNeedConsensus() bool{
+func (p *Parliament) GetId() string {
+	return p.ParliamentId.ToString()
+}
+
+func (p *Parliament) IsNeedConsensus() bool {
 	numOfMember := 0
 
 	if p.HasLeader() {
@@ -44,7 +48,7 @@ func (p *Parliament) IsNeedConsensus() bool{
 	return false
 }
 
-func (p *Parliament) HasLeader() bool{
+func (p *Parliament) HasLeader() bool {
 	if p.Leader == nil {
 		return false
 	}
@@ -52,7 +56,7 @@ func (p *Parliament) HasLeader() bool{
 	return true
 }
 
-func (p *Parliament) AddMember(member *Member) (midgard.Event, error){
+func (p *Parliament) AddMember(member *Member) (midgard.Event, error) {
 	if member == nil {
 		return nil, errors.New("Member is nil")
 	}
@@ -76,7 +80,7 @@ func (p *Parliament) AddMember(member *Member) (midgard.Event, error){
 	}, nil
 }
 
-func (p *Parliament) RemoveMember(memberID MemberId) (midgard.Event, error){
+func (p *Parliament) RemoveMember(memberID MemberId) (midgard.Event, error) {
 	index := p.findIndexOfMember(memberID.ToString())
 
 	if index == -1 {
@@ -92,7 +96,7 @@ func (p *Parliament) RemoveMember(memberID MemberId) (midgard.Event, error){
 	}, nil
 }
 
-func (p *Parliament) ValidateRepresentative(representatives []*Representative) bool{
+func (p *Parliament) ValidateRepresentative(representatives []*Representative) bool {
 	for _, representatives := range representatives {
 		index := p.findIndexOfMember(representatives.GetIdString())
 
@@ -114,7 +118,7 @@ func (p *Parliament) findIndexOfMember(memberID string) int {
 	return -1
 }
 
-func (p *Parliament) FindByPeerID(memberID string) *Member{
+func (p *Parliament) FindByPeerID(memberID string) *Member {
 	index := p.findIndexOfMember(memberID)
 
 	if index == -1 {
@@ -171,7 +175,6 @@ func (pr *ParliamentRepositoryImpl) GetParliament() Parliament {
 func (pr *ParliamentRepositoryImpl) SetParliament(parliament Parliament) {
 	pr.lock.Lock()
 	defer pr.lock.Unlock()
-	
+
 	pr.parliament = parliament
 }
-
