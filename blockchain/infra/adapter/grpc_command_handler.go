@@ -1,20 +1,26 @@
 package adapter
 
-import "github.com/it-chain/it-chain-Engine/blockchain"
+import (
+	"github.com/it-chain/it-chain-Engine/blockchain"
+)
 
 type BlockApi interface {
-	CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error)
-	CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error)
 	SyncedCheck(block blockchain.Block) error
+}
+
+type ReadOnlyBlockRepository interface {
+	GetLastBlock(block blockchain.Block) error
 }
 
 type GrpcCommandHandler struct {
 	blockApi BlockApi
+	blockRepository ReadOnlyBlockRepository
 }
 
-func NewGrpcCommandHandler(blockApi BlockApi) *GrpcCommandHandler {
+func NewGrpcCommandHandler(blockApi BlockApi, blockRepository ReadOnlyBlockRepository) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		blockApi: blockApi,
+		blockRepository: blockRepository,
 	}
 }
 
@@ -22,6 +28,10 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 	switch command.Protocol {
 	case "SyncCheckRequestProtocol":
 		//TODO: 상대방의 SyncCheck를 위해서 자신의 last block을 보내준다.
+		block := blockchain.DefaultBlock{}
+		g.blockRepository.GetLastBlock(&block)
+
+
 		break
 
 	case "SyncCheckResponseProtocol":
