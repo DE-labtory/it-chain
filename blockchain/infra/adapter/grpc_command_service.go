@@ -70,7 +70,7 @@ func (gcs *GrpcCommandService) ResponseBlock(nodeId p2p.PeerId, block blockchain
 }
 
 // TODO "SyncCheckResponseProtocol"을 통해서 last block을 전달한다.
-func (gcs *GrpcCommandService) SyncCheckResponse(peerId blockchain.PeerId, block blockchain.Block) error {
+func (gcs *GrpcCommandService) SyncCheckResponse(block blockchain.Block) error {
 	return nil
 }
 
