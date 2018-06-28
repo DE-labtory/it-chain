@@ -2,7 +2,6 @@ package adapter
 
 import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/it-chain/it-chain-Engine/common"
 	"errors"
 )
 
@@ -20,7 +19,7 @@ type ReadOnlyBlockRepository interface {
 }
 
 type SyncCheckGrpcCommandService interface {
-	SyncCheckResponse(peerId blockchain.PeerId, block blockchain.Block) error
+	SyncCheckResponse(block blockchain.Block) error
 }
 
 type GrpcCommandHandler struct {
@@ -41,20 +40,17 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 	switch command.Protocol {
 	case "SyncCheckRequestProtocol":
 		//TODO: 상대방의 SyncCheck를 위해서 자신의 last block을 보내준다.
-		peer := blockchain.Peer{}
-		common.Deserialize(command.Body, peer)
-
 		block, err := g.blockRepository.NewEmptyBlock()
 		if err != nil {
 			return ErrCreateBlock
 		}
 
-		err = g.blockRepository.GetLastBlock(&block)
+		err = g.blockRepository.GetLastBlock(block)
 		if err != nil {
 			return ErrGetLastBlock
 		}
 
-		err = g.grpcCommandService.SyncCheckResponse(peer.PeerId, block)
+		err = g.grpcCommandService.SyncCheckResponse(block)
 		if err != nil {
 			return ErrSyncCheckResponse
 		}
