@@ -1,4 +1,4 @@
-package leveldb
+package memory
 
 import (
 	"errors"
@@ -43,7 +43,7 @@ func (pr *PeerRepository) Save(data p2p.Peer) error {
 
 // p2p 삭제
 func (pr *PeerRepository) Remove(id p2p.PeerId) error {
-	if len(id.Id) == 0 {
+	if id.Id == "" {
 		return ErrEmptyPeerId
 	}
 

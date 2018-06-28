@@ -1,10 +1,11 @@
-package leveldb
+package memory_test
 
 import (
 	"testing"
 
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/magiconair/properties/assert"
+	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/memory"
 )
 
 func TestLeaderRepository_GetLeader(t *testing.T) {
@@ -34,7 +35,7 @@ func TestLeaderRepository_GetLeader(t *testing.T) {
 		},
 	}
 
-	leaderRepository := NewLeaderRepository(firstLeader)
+	leaderRepository := memory.NewLeaderRepository(firstLeader)
 
 	for testName, test := range tests{
 		t.Logf("running test case %s", testName)
@@ -71,7 +72,7 @@ func TestLeaderRepository_SetLeader(t *testing.T) {
 		},
 	}
 
-	leaderRepository := NewLeaderRepository(firstLeader)
+	leaderRepository := memory.NewLeaderRepository(firstLeader)
 
 	for testName, test := range tests{
 		t.Logf("running test case %s", testName)

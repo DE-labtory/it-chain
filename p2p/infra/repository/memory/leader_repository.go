@@ -1,4 +1,4 @@
-package leveldb
+package memory
 
 import (
 	"github.com/it-chain/it-chain-Engine/p2p"

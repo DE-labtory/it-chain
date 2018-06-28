@@ -30,6 +30,7 @@ func TestGrpcMessageHandler_HandleMessageReceive(t *testing.T) {
 	newPeerList := append(peerList, p2p.Peer{PeerId: p2p.PeerId{Id: "123"}})
 	peerListByte, _ := json.Marshal(newPeerList)
 
+	//todo error case write!
 	tests := map[string]struct {
 		input struct {
 			command p2p.GrpcReceiveCommand

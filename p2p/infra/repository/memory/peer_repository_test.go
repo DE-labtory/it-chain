@@ -1,4 +1,4 @@
-package leveldb
+package memory_test
 
 import (
 	"testing"
@@ -6,6 +6,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/magiconair/properties/assert"
 	"fmt"
+	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/memory"
 )
 
 func TestPeerRepository_Save(t *testing.T) {
@@ -28,18 +29,18 @@ func TestPeerRepository_Save(t *testing.T) {
 				firstInput  p2p.Peer
 				secondInput p2p.Peer
 			}{firstInput: p2p.Peer{PeerId:p2p.PeerId{Id:"1"}}, secondInput: p2p.Peer{PeerId:p2p.PeerId{Id:""}}},
-			err: ErrEmptyPeerId,
+			err: memory.ErrEmptyPeerId,
 		},
 		"already exist peer test":{
 			input: struct {
 				firstInput  p2p.Peer
 				secondInput p2p.Peer
 			}{firstInput: p2p.Peer{PeerId:p2p.PeerId{Id:"1"}}, secondInput: p2p.Peer{PeerId:p2p.PeerId{Id:"1"}}},
-			err: ErrExistPeer,
+			err: memory.ErrExistPeer,
 		},
 	}
-	ClearPeerTable()
-	peerRepository, _ := NewPeerRepository()
+
+	peerRepository, _ := memory.NewPeerRepository()
 	fmt.Print(peerRepository.FindById(p2p.PeerId{Id:"1"}))
 	for testName, test := range tests{
 		t.Logf("running test case %s", testName)
@@ -61,15 +62,16 @@ func TestPeerRepository_Remove(t *testing.T) {
 		},
 		"no matching peer test":{
 			input: p2p.PeerId{Id:"1"},
-			err: ErrNoMatchingPeer,
+			err: memory.ErrNoMatchingPeer,
 		},
 		"empty peer id test":{
 			input: p2p.PeerId{Id:""},
-			err: ErrEmptyPeerId,
+			err: memory.ErrEmptyPeerId,
 		},
 	}
-	peerRepository, _ := NewPeerRepository()
-
+	peerRepository, _ := memory.NewPeerRepository()
+	peer := p2p.Peer{PeerId:p2p.PeerId{Id:"1"}}
+	peerRepository.Save(peer)
 	for testName, test := range tests{
 		t.Logf("running test case %s", testName)
 		err := peerRepository.Remove(test.input)
@@ -84,19 +86,18 @@ func TestPeerRepository_FindAll(t *testing.T) {
 	}{
 		"empty peer list test":{
 			input:p2p.Peer{PeerId:p2p.PeerId{Id:""}},
-			err: ErrEmptyPeerTable,
+			err: memory.ErrEmptyPeerTable,
 		},
 		"success":{
 			input:p2p.Peer{PeerId:p2p.PeerId{Id:"1"}},
 			err:nil,
 		},
 	}
-	peerRepository, _ := NewPeerRepository()
-	ClearPeerTable()
+	peerRepository, _ := memory.NewPeerRepository()
 
 	for testName, test := range tests{
 		t.Logf("running test case %s", testName)
-		ClearPeerTable()
+		peerRepository.ClearPeerTable()
 		peerRepository.Save(test.input)
 
 		_, err := peerRepository.FindAll()
@@ -125,20 +126,19 @@ func TestPeerRepository_FindById(t *testing.T) {
 				insertPeer p2p.Peer
 				searchPeer p2p.Peer
 			}{insertPeer: p2p.Peer{PeerId:p2p.PeerId{Id:"1"}}, searchPeer: p2p.Peer{PeerId:p2p.PeerId{Id:""}}},
-			err:ErrEmptyPeerId,
+			err:memory.ErrEmptyPeerId,
 		},
 		"no matching peer test":{
 			input: struct {
 				insertPeer p2p.Peer
 				searchPeer p2p.Peer
 			}{insertPeer: p2p.Peer{PeerId:p2p.PeerId{Id:"1"}}, searchPeer: p2p.Peer{PeerId:p2p.PeerId{Id:"2"}}},
-			err:ErrNoMatchingPeer,
+			err:memory.ErrNoMatchingPeer,
 		},
 	}
-	peerRepository, _ := NewPeerRepository()
+	peerRepository, _ := memory.NewPeerRepository()
 	for testName, test := range tests{
 		t.Logf("running test case %s", testName)
-		ClearPeerTable()
 		peerRepository.Save(test.input.insertPeer)
 		_, err := peerRepository.FindById(test.input.searchPeer.PeerId)
 
