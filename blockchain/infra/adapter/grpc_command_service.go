@@ -69,6 +69,11 @@ func (gcs *GrpcCommandService) ResponseBlock(nodeId p2p.PeerId, block blockchain
 	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
 
+// TODO
+func (gcs *GrpcCommandService) SyncCheckResponse(peerId p2p.PeerId, block blockchain.Block) error {
+	return nil
+}
+
 func createGrpcCommand(protocol string, body interface{}) (blockchain.GrpcDeliverCommand, error) {
 
 	data, err := common.Serialize(body)
