@@ -27,9 +27,9 @@ func NewGrpcCommandService(publish Publish) *GrpcCommandService {
 	}
 }
 
-func (gcs *GrpcCommandService) RequestBlock(nodeId p2p.NodeId, height uint64) error {
+func (gcs *GrpcCommandService) RequestBlock(peerId p2p.PeerId, height uint64) error {
 
-	if nodeId.Id == "" {
+	if peerId.Id == "" {
 		return ErrEmptyNodeId
 	}
 
@@ -42,14 +42,13 @@ func (gcs *GrpcCommandService) RequestBlock(nodeId p2p.NodeId, height uint64) er
 		return err
 	}
 
-	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
+	deliverCommand.Recipients = append(deliverCommand.Recipients, peerId.ToString())
 
 	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
 
-func (gcs *GrpcCommandService) ResponseBlock(nodeId p2p.NodeId, block blockchain.Block) error {
-
-	if nodeId.Id == "" {
+func (gcs *GrpcCommandService) ResponseBlock(peerId p2p.PeerId, block blockchain.Block) error {
+	if peerId.Id == "" {
 		return ErrEmptyNodeId
 	}
 
@@ -64,7 +63,7 @@ func (gcs *GrpcCommandService) ResponseBlock(nodeId p2p.NodeId, block blockchain
 		return err
 	}
 
-	deliverCommand.Recipients = append(deliverCommand.Recipients, nodeId.ToString())
+	deliverCommand.Recipients = append(deliverCommand.Recipients, peerId.ToString())
 
 	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
