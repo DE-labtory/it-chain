@@ -1,7 +1,6 @@
 package leveldb
 
 import (
-	"os"
 	"testing"
 
 	"github.com/it-chain/it-chain-Engine/p2p"
@@ -9,50 +8,76 @@ import (
 )
 
 func TestLeaderRepository_GetLeader(t *testing.T) {
-	// Given
-	dbPath := "./.test"
-
-	leaderRepository := NewLeaderRepository(dbPath)
-
-	leader := p2p.Leader{
-		LeaderId: p2p.LeaderId{
-			Id: "777",
+	tests := map[string]struct{
+		input p2p.Leader
+		outPut p2p.Leader
+		err error
+	}{
+		"success":{
+			input:p2p.Leader{
+				LeaderId:p2p.LeaderId{
+					Id:"2",
+				},
+			},
+			outPut: p2p.Leader{
+				LeaderId:p2p.LeaderId{
+					Id:"2",
+				},
+			},
+			err:nil,
 		},
 	}
 
-	defer func() {
-		leaderRepository.leveldb.Close()
-		os.RemoveAll(dbPath)
-	}()
+	firstLeader := p2p.Leader{
+		LeaderId:p2p.LeaderId{
+			Id:"1",
+		},
+	}
 
-	leaderRepository.SetLeader(leader)
-	leader2 := leaderRepository.GetLeader()
+	leaderRepository := NewLeaderRepository(firstLeader)
 
-	// Then
-	assert.Equal(t, leader, leader2)
+	for testName, test := range tests{
+		t.Logf("running test case %s", testName)
+		leaderRepository.SetLeader(test.input)
+		gotLeader := leaderRepository.GetLeader()
+		assert.Equal(t, gotLeader, test.outPut)
+	}
 }
 
 func TestLeaderRepository_SetLeader(t *testing.T) {
-	// Given
-	dbPath := "./.test"
-
-	leaderRepository := NewLeaderRepository(dbPath)
-
-	leader := p2p.Leader{
-		LeaderId: p2p.LeaderId{
-			Id: "777",
+	tests := map[string]struct{
+		input p2p.Leader
+		outPut p2p.Leader
+		err error
+	}{
+		"success":{
+			input:p2p.Leader{
+				LeaderId:p2p.LeaderId{
+					Id:"2",
+				},
+			},
+			outPut: p2p.Leader{
+				LeaderId:p2p.LeaderId{
+					Id:"2",
+				},
+			},
+			err:nil,
 		},
 	}
 
-	defer func() {
-		leaderRepository.leveldb.Close()
-		os.RemoveAll(dbPath)
-	}()
+	firstLeader := p2p.Leader{
+		LeaderId:p2p.LeaderId{
+			Id:"1",
+		},
+	}
 
-	// When
-	leaderRepository.SetLeader(leader)
-	leader2 := *leaderRepository.GetLeader()
+	leaderRepository := NewLeaderRepository(firstLeader)
 
-	// Then
-	assert.Equal(t, leader, leader2)
+	for testName, test := range tests{
+		t.Logf("running test case %s", testName)
+		leaderRepository.SetLeader(test.input)
+		gotLeader := leaderRepository.GetLeader()
+		assert.Equal(t, gotLeader, test.outPut)
+	}
+
 }

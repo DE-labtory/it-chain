@@ -25,6 +25,7 @@ type GrpcCommandHandlerPeerApi interface {
 
 type GrpcCommandHandler struct {
 	leaderApi LeaderApi
+
 	peerApi   GrpcCommandHandlerPeerApi
 }
 func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi) *GrpcCommandHandler {
@@ -58,11 +59,13 @@ func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 
 	case "PeerListDeliverProtocol":
 
+
 		peerList := make([]p2p.Peer, 0)
 		if err := json.Unmarshal(command.Data, &peerList); err != nil {
 			//todo error 처리
 			return ErrPeerListDeliver
 		}
+
 
 		g.peerApi.UpdatePeerList(peerList)
 		break
@@ -75,6 +78,7 @@ func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcRequestCommand
 		if err != nil {
 			return ErrPeerDeliver
 		}
+
 		g.peerApi.AddPeer(peer)
 		break
 	}
