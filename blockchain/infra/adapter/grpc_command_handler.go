@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/it-chain-Engine/p2p"
 )
 
 type BlockApi interface {
@@ -10,6 +11,10 @@ type BlockApi interface {
 
 type ReadOnlyBlockRepository interface {
 	GetLastBlock(block blockchain.Block) error
+}
+
+type SyncCheckGrpcCommandService interface {
+	SyncCheckResponse(peerId p2p.PeerId, )
 }
 
 type GrpcCommandHandler struct {

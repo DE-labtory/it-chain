@@ -1,10 +1,10 @@
 package blockchain
 
-type NodeId struct {
+type PeerId struct {
 	Id string
 }
 
-type Node struct {
+type Peer struct {
 	IpAddress string
-	NodeId NodeId
+	PeerId PeerId
 }

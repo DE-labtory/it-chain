@@ -70,7 +70,7 @@ func (gcs *GrpcCommandService) ResponseBlock(nodeId p2p.PeerId, block blockchain
 }
 
 // TODO
-func (gcs *GrpcCommandService) SyncCheckResponse(peerId p2p.PeerId, block blockchain.Block) error {
+func (gcs *GrpcCommandService) SyncCheckResponse(peerId blockchain.PeerId, block blockchain.Block) error {
 	return nil
 }
 
