@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type DefaultBlock = impl.DefaultBlock
+
 func TestGrpcCommandService_RequestBlock(t *testing.T) {
 
 	tests := map[string]struct {
@@ -66,19 +68,19 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			PeerId p2p.PeerId
-			block  impl.DefaultBlock
+			block  DefaultBlock
 		}
 		err error
 	}{
 		"success: request block": {
 			input: struct {
 				PeerId p2p.PeerId
-				block  impl.DefaultBlock
+				block  DefaultBlock
 			}{
 				PeerId: p2p.PeerId{
 					Id: "1",
 				},
-				block: impl.DefaultBlock{
+				block: DefaultBlock{
 					Seal: []byte("seal"),
 				},
 			},
@@ -87,10 +89,10 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 		"fail: empty node id": {
 			input: struct {
 				PeerId p2p.PeerId
-				block  impl.DefaultBlock
+				block  DefaultBlock
 			}{
 				PeerId: p2p.PeerId{},
-				block: impl.DefaultBlock{
+				block: DefaultBlock{
 					Seal: []byte("seal"),
 				},
 			},
@@ -99,12 +101,12 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 		"fail: empty block seal": {
 			input: struct {
 				PeerId p2p.PeerId
-				block  impl.DefaultBlock
+				block  DefaultBlock
 			}{
 				PeerId: p2p.PeerId{
 					"1",
 				},
-				block: impl.DefaultBlock{
+				block: DefaultBlock{
 					Seal: nil,
 				},
 			},
