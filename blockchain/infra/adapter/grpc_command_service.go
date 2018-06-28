@@ -68,14 +68,14 @@ func (gcs *GrpcCommandService) ResponseBlock(peerId p2p.PeerId, block blockchain
 	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
 
-func createGrpcCommand(protocol string, body interface{}) (blockchain.GrpcCommand, error) {
+func createGrpcCommand(protocol string, body interface{}) (blockchain.GrpcDeliverCommand, error) {
 
 	data, err := common.Serialize(body)
 	if err != nil {
-		return blockchain.GrpcCommand{}, err
+		return blockchain.GrpcDeliverCommand{}, err
 	}
 
-	return blockchain.GrpcCommand{
+	return blockchain.GrpcDeliverCommand{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},

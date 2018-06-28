@@ -25,7 +25,7 @@ type BlockValidateCommand struct {
 	Block Block
 }
 
-type GrpcCommand struct {
+type GrpcDeliverCommand struct {
 	midgard.CommandModel
 	Recipients []string
 	Body       []byte
