@@ -2,30 +2,38 @@ package adapter
 
 import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/it-chain-Engine/common"
+	"errors"
 )
+
+var ErrCreateBlock = errors.New("error when creating block")
+var ErrGetLastBlock = errors.New("error when get last block")
+var ErrSyncCheckResponse = errors.New("error when sync check response")
 
 type BlockApi interface {
 	SyncedCheck(block blockchain.Block) error
 }
 
 type ReadOnlyBlockRepository interface {
+	NewEmptyBlock() (blockchain.Block, error)
 	GetLastBlock(block blockchain.Block) error
 }
 
 type SyncCheckGrpcCommandService interface {
-	SyncCheckResponse(peerId p2p.PeerId, )
+	SyncCheckResponse(peerId blockchain.PeerId, block blockchain.Block) error
 }
 
 type GrpcCommandHandler struct {
 	blockApi BlockApi
 	blockRepository ReadOnlyBlockRepository
+	grpcCommandService SyncCheckGrpcCommandService
 }
 
-func NewGrpcCommandHandler(blockApi BlockApi, blockRepository ReadOnlyBlockRepository) *GrpcCommandHandler {
+func NewGrpcCommandHandler(blockApi BlockApi, blockRepository ReadOnlyBlockRepository, grpcCommandService SyncCheckGrpcCommandService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		blockApi: blockApi,
 		blockRepository: blockRepository,
+		grpcCommandService: grpcCommandService,
 	}
 }
 
@@ -33,10 +41,23 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 	switch command.Protocol {
 	case "SyncCheckRequestProtocol":
 		//TODO: 상대방의 SyncCheck를 위해서 자신의 last block을 보내준다.
-		block := blockchain.DefaultBlock{}
-		g.blockRepository.GetLastBlock(&block)
+		peer := blockchain.Peer{}
+		common.Deserialize(command.Body, peer)
 
+		block, err := g.blockRepository.NewEmptyBlock()
+		if err != nil {
+			return ErrCreateBlock
+		}
 
+		err = g.blockRepository.GetLastBlock(&block)
+		if err != nil {
+			return ErrGetLastBlock
+		}
+
+		err = g.grpcCommandService.SyncCheckResponse(peer.PeerId, block)
+		if err != nil {
+			return ErrSyncCheckResponse
+		}
 		break
 
 	case "SyncCheckResponseProtocol":
