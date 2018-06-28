@@ -28,6 +28,82 @@ func NewParliament() Parliament {
 	}
 }
 
+func (p *Parliament) IsNeedConsensus() bool{
+	numOfMember := 0
+
+	if p.HasLeader() {
+		numOfMember = numOfMember + 1
+	}
+
+	numOfMember = numOfMember + len(p.Members)
+
+	if numOfMember >= 1 {
+		return true
+	}
+
+	return false
+}
+
+func (p *Parliament) HasLeader() bool{
+	if p.Leader == nil {
+		return false
+	}
+
+	return true
+}
+
+func (p *Parliament) AddMember(member *Member) (midgard.Event, error){
+	if member == nil {
+		return nil, errors.New("Member is nil")
+	}
+
+	if member.GetId() == "" {
+		return nil, errors.New(fmt.Sprintf("Need Valid PeerID [%s]", member.GetId()))
+	}
+
+	index := p.findIndexOfMember(member.GetId())
+
+	if index != -1 {
+		return nil, errors.New(fmt.Sprintf("Already exist member [%s]", member.GetId()))
+	}
+
+	p.Members = append(p.Members, member)
+
+	return MemberJoinedEvent{
+		EventModel: midgard.EventModel{
+			ID: member.GetId(),
+		},
+	}, nil
+}
+
+func (p *Parliament) RemoveMember(memberID MemberId) (midgard.Event, error){
+	index := p.findIndexOfMember(memberID.ToString())
+
+	if index == -1 {
+		return nil, nil
+	}
+
+	p.Members = append(p.Members[:index], p.Members[index+1:]...)
+
+	return MemberRemovedEvent{
+		EventModel: midgard.EventModel{
+			ID: memberID.ToString(),
+		},
+	}, nil
+}
+
+func (p *Parliament) ValidateRepresentative(representatives []*Representative) bool{
+	for _, representatives := range representatives {
+		index := p.findIndexOfMember(representatives.GetIdString())
+
+		if index == -1 {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (p *Parliament) findIndexOfMember(memberID string) int {
 	for i, member := range p.Members {
 		if member.MemberId.Id == memberID {
@@ -36,6 +112,16 @@ func (p *Parliament) findIndexOfMember(memberID string) int {
 	}
 
 	return -1
+}
+
+func (p *Parliament) FindByPeerID(memberID string) *Member{
+	index := p.findIndexOfMember(memberID)
+
+	if index == -1 {
+		return nil
+	}
+
+	return p.Members[index]
 }
 
 func (p *Parliament) On(event midgard.Event) error {
@@ -62,14 +148,8 @@ func (p *Parliament) On(event midgard.Event) error {
 }
 
 type ParliamentRepository interface {
-	IsNeedConsensus() bool
-	HasLeader() bool
-	SetLeader(leader *Leader) midgard.Event
-	GetLeader() *Leader
-	AddMember(member *Member) (midgard.Event, error)
-	RemoveMember(memberID MemberId) (midgard.Event, error)
-	ValidateRepresentative(representatives []*Representative) bool
-	FindByPeerID(memberID string) *Member
+	GetParliament() Parliament
+	SetParliament(parliament Parliament)
 }
 
 type ParliamentRepositoryImpl struct {
@@ -84,108 +164,14 @@ func NewParliamentRepository() ParliamentRepository {
 	}
 }
 
-func (pr *ParliamentRepositoryImpl) IsNeedConsensus() bool {
-	numOfMember := 0
-
-	if pr.HasLeader() {
-		numOfMember = numOfMember + 1
-	}
-
-	numOfMember = numOfMember + len(pr.parliament.Members)
-
-	if numOfMember >= 1 {
-		return true
-	}
-
-	return false
+func (pr *ParliamentRepositoryImpl) GetParliament() Parliament {
+	return pr.parliament
 }
 
-func (pr *ParliamentRepositoryImpl) HasLeader() bool {
-	if pr.parliament.Leader == nil {
-		return false
-	}
-
-	return true
-}
-
-func (pr *ParliamentRepositoryImpl) SetLeader(leader *Leader) midgard.Event {
+func (pr *ParliamentRepositoryImpl) SetParliament(parliament Parliament) {
 	pr.lock.Lock()
 	defer pr.lock.Unlock()
-
-	pr.parliament.Leader = leader
-
-	return LeaderChangedEvent{
-		EventModel: midgard.EventModel{
-			ID: leader.GetId(),
-		},
-	}
+	
+	pr.parliament = parliament
 }
 
-func (pr *ParliamentRepositoryImpl) GetLeader() *Leader {
-	return pr.parliament.Leader
-}
-
-func (pr *ParliamentRepositoryImpl) AddMember(member *Member) (midgard.Event, error) {
-	if member == nil {
-		return nil, errors.New("Member is nil")
-	}
-
-	if member.GetId() == "" {
-		return nil, errors.New(fmt.Sprintf("Need Valid PeerID [%s]", member.GetId()))
-	}
-
-	index := pr.parliament.findIndexOfMember(member.GetId())
-
-	if index != -1 {
-		return nil, errors.New(fmt.Sprintf("Already exist member [%s]", member.GetId()))
-	}
-
-	pr.parliament.Members = append(pr.parliament.Members, member)
-
-	return MemberJoinedEvent{
-		EventModel: midgard.EventModel{
-			ID: member.GetId(),
-		},
-	}, nil
-}
-
-func (pr *ParliamentRepositoryImpl) RemoveMember(memberID MemberId) (midgard.Event, error) {
-
-	index := pr.parliament.findIndexOfMember(memberID.ToString())
-
-	if index == -1 {
-		return nil, nil
-	}
-
-	pr.parliament.Members = append(pr.parliament.Members[:index], pr.parliament.Members[index+1:]...)
-
-	return MemberRemovedEvent{
-		EventModel: midgard.EventModel{
-			ID: memberID.ToString(),
-		},
-	}, nil
-}
-
-func (pr *ParliamentRepositoryImpl) ValidateRepresentative(representatives []*Representative) bool {
-
-	for _, representatives := range representatives {
-		index := pr.parliament.findIndexOfMember(representatives.GetIdString())
-
-		if index == -1 {
-			return false
-		}
-	}
-
-	return true
-}
-
-func (pr *ParliamentRepositoryImpl) FindByPeerID(memberID string) *Member {
-
-	index := pr.parliament.findIndexOfMember(memberID)
-
-	if index == -1 {
-		return nil
-	}
-
-	return pr.parliament.Members[index]
-}
