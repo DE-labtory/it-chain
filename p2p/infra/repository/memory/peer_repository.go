@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/it-chain/it-chain-Engine/p2p"
+	"sync"
 )
 //types of errors
 var ErrExistPeer = errors.New("proposed peer already exists")
@@ -13,6 +14,7 @@ var ErrEmptyPeerTable = errors.New("peer table is empty")
 
 type PeerRepository struct {
 	peerTable map[string]p2p.Peer
+	mux sync.Mutex
 }
 
 
@@ -26,7 +28,8 @@ func NewPeerRepository() (PeerRepository, error) {
 
 // 새로운 p2p 를 leveldb에 저장
 func (pr *PeerRepository) Save(data p2p.Peer) error {
-
+	pr.mux.Lock()
+	defer pr.mux.Unlock()
 	// return empty peerID error if peerID is null
 	if data.PeerId.Id == "" {
 		return ErrEmptyPeerId
@@ -43,6 +46,8 @@ func (pr *PeerRepository) Save(data p2p.Peer) error {
 
 // p2p 삭제
 func (pr *PeerRepository) Remove(id p2p.PeerId) error {
+	pr.mux.Lock()
+	defer pr.mux.Unlock()
 	if id.Id == "" {
 		return ErrEmptyPeerId
 	}
@@ -59,6 +64,8 @@ func (pr *PeerRepository) Remove(id p2p.PeerId) error {
 
 // p2p 읽어옴
 func (pr *PeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) {
+	pr.mux.Lock()
+	defer pr.mux.Unlock()
 	v, exist := pr.peerTable[id.Id]
 
 	if id.Id == "" {
@@ -74,6 +81,8 @@ func (pr *PeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) {
 
 // 모든 피어 검색
 func (pr *PeerRepository) FindAll() ([]p2p.Peer, error) {
+	pr.mux.Lock()
+	defer pr.mux.Unlock()
 	peers := make([]p2p.Peer, 0)
 
 	if len(pr.peerTable) == 0{
@@ -88,6 +97,8 @@ func (pr *PeerRepository) FindAll() ([]p2p.Peer, error) {
 }
 
 func (pr *PeerRepository) ClearPeerTable(){
+	pr.mux.Lock()
+	defer pr.mux.Unlock()
 	for key := range pr.peerTable{
 		delete(pr.peerTable, key)
 	}
