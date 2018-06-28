@@ -56,6 +56,22 @@ func (p *Parliament) HasLeader() bool {
 	return true
 }
 
+func (p *Parliament) ChangeLeader(leader *Leader) (midgard.Event, error) {
+	if leader == nil {
+		return nil, errors.New("Leader is nil")
+	}
+
+	leaderChangedEvent := LeaderChangedEvent{
+		EventModel: midgard.EventModel{
+			ID: leader.GetId(),
+		},
+	}
+
+	p.On(leaderChangedEvent)
+
+	return leaderChangedEvent, nil
+}
+
 func (p *Parliament) AddMember(member *Member) (midgard.Event, error) {
 	if member == nil {
 		return nil, errors.New("Member is nil")
@@ -71,13 +87,15 @@ func (p *Parliament) AddMember(member *Member) (midgard.Event, error) {
 		return nil, errors.New(fmt.Sprintf("Already exist member [%s]", member.GetId()))
 	}
 
-	p.Members = append(p.Members, member)
-
-	return MemberJoinedEvent{
+	memberJoinedEvent := MemberJoinedEvent{
 		EventModel: midgard.EventModel{
 			ID: member.GetId(),
 		},
-	}, nil
+	}
+
+	p.On(memberJoinedEvent)
+
+	return memberJoinedEvent, nil
 }
 
 func (p *Parliament) RemoveMember(memberID MemberId) (midgard.Event, error) {
@@ -87,13 +105,15 @@ func (p *Parliament) RemoveMember(memberID MemberId) (midgard.Event, error) {
 		return nil, nil
 	}
 
-	p.Members = append(p.Members[:index], p.Members[index+1:]...)
-
-	return MemberRemovedEvent{
+	memberRemovedEvent := MemberRemovedEvent{
 		EventModel: midgard.EventModel{
 			ID: memberID.ToString(),
 		},
-	}, nil
+	}
+
+	p.On(memberRemovedEvent)
+
+	return memberRemovedEvent, nil
 }
 
 func (p *Parliament) ValidateRepresentative(representatives []*Representative) bool {
