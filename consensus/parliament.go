@@ -28,7 +28,7 @@ func NewParliament() Parliament {
 	}
 }
 
-func (p *Parliament) findIndexOfMemeber(memberID string) int {
+func (p *Parliament) findIndexOfMember(memberID string) int {
 	for i, member := range p.Members {
 		if member.MemberId.Id == memberID {
 			return i
@@ -48,11 +48,10 @@ func (p *Parliament) On(event midgard.Event) error {
 		p.Members = append(p.Members, &Member{MemberId: MemberId{v.GetID()}})
 
 	case *MemberRemovedEvent:
-		index := p.findIndexOfMemeber(v.GetID())
+		index := p.findIndexOfMember(v.GetID())
 
-		if index != -1{
+		if index != -1 {
 			p.Members = append(p.Members[:index], p.Members[index+1:]...)
-
 		}
 
 	default:
@@ -67,10 +66,9 @@ type ParliamentRepository interface {
 	HasLeader() bool
 	SetLeader(leader *Leader)
 	GetLeader() *Leader
-	AddMember(member *Member)
+	AddMember(member *Member) error
 	RemoveMember(memberID MemberId)
 	ValidateRepresentative(representatives []*Representative) bool
-	findIndexOfMember(memberID string) int
 	FindByPeerID(memberID string) *Member
 }
 
@@ -87,109 +85,94 @@ func NewParliamentRepository() ParliamentRepository {
 }
 
 func (pr *ParliamentRepositoryImpl) IsNeedConsensus() bool {
-	//numOfMember := 0
+	numOfMember := 0
 
-	//if p.HasLeader() {
-	//	numOfMember = numOfMember + 1
-	//}
-	//
-	//numOfMember = numOfMember + len(p.Members)
-	//
-	//if numOfMember >= 1 {
-	//	return true
-	//}
+	if pr.HasLeader() {
+		numOfMember = numOfMember + 1
+	}
+
+	numOfMember = numOfMember + len(pr.parliament.Members)
+
+	if numOfMember >= 1 {
+		return true
+	}
 
 	return false
 }
 
 func (pr *ParliamentRepositoryImpl) HasLeader() bool {
-
-	//if p.Leader == nil {
-	//	return false
-	//}
+	if pr.parliament.Leader == nil {
+		return false
+	}
 
 	return true
 }
 
+// todo : Publish event
 func (pr *ParliamentRepositoryImpl) SetLeader(leader *Leader) {
+	pr.lock.Lock()
+	defer pr.lock.Unlock()
 
-	//if leader == nil {
-	//	return errors.New("Leader is nil")
-	//}
-	//p.Leader = leader
-
-	return
+	pr.parliament.Leader = leader
 }
 
 func (pr *ParliamentRepositoryImpl) GetLeader() *Leader {
-	//return p.Leader
-	return &Leader{LeaderId: LeaderId{"a"}}
+	return pr.parliament.Leader
 }
 
-func (pr *ParliamentRepositoryImpl) AddMember(member *Member) {
+// todo : Publish event
+func (pr *ParliamentRepositoryImpl) AddMember(member *Member) error {
+	if member == nil {
+		return errors.New("Member is nil")
+	}
 
-	//if member == nil {
-	//	return errors.New("Member is nil")
-	//}
-	//
-	//if member.GetId() == "" {
-	//	return errors.New(fmt.Sprintf("Need Valid PeerID [%s]", member.GetId()))
-	//}
-	//
-	//index := p.findIndexOfMember(member.GetId())
-	//
-	//if index != -1 {
-	//	return errors.New(fmt.Sprintf("Already exist member [%s]", member.GetId()))
-	//}
-	//
-	//p.Members = append(p.Members, member)
+	if member.GetId() == "" {
+		return errors.New(fmt.Sprintf("Need Valid PeerID [%s]", member.GetId()))
+	}
 
-	return
+	index := pr.parliament.findIndexOfMember(member.GetId())
+
+	if index != -1 {
+		return errors.New(fmt.Sprintf("Already exist member [%s]", member.GetId()))
+	}
+
+	pr.parliament.Members = append(pr.parliament.Members, member)
+
+	return nil
 }
 
+// todo : Publish event
 func (pr *ParliamentRepositoryImpl) RemoveMember(memberID MemberId) {
 
-	//index := p.findIndexOfMember(memberID.ToString())
-	//
-	//if index == -1 {
-	//	return
-	//}
-	//
-	//p.Members = append(p.Members[:index], p.Members[index+1:]...)
+	index := pr.parliament.findIndexOfMember(memberID.ToString())
+
+	if index == -1 {
+		return
+	}
+
+	pr.parliament.Members = append(pr.parliament.Members[:index], pr.parliament.Members[index+1:]...)
 }
 
 func (pr *ParliamentRepositoryImpl) ValidateRepresentative(representatives []*Representative) bool {
 
-	//for _, representatives := range representatives {
-	//	index := p.findIndexOfMember(representatives.GetIdString())
-	//
-	//	if index == -1 {
-	//		return false
-	//	}
-	//}
+	for _, representatives := range representatives {
+		index := pr.parliament.findIndexOfMember(representatives.GetIdString())
+
+		if index == -1 {
+			return false
+		}
+	}
 
 	return true
 }
 
-func (pr *ParliamentRepositoryImpl) findIndexOfMember(memberID string) int {
-
-	//for i, member := range p.Members {
-	//	if member.GetId() == memberID {
-	//		return i
-	//	}
-	//}
-
-	return -1
-}
-
 func (pr *ParliamentRepositoryImpl) FindByPeerID(memberID string) *Member {
 
-	//index := p.findIndexOfMember(memberID)
-	//
-	//if index == -1 {
-	//	return nil
-	//}
+	index := pr.parliament.findIndexOfMember(memberID)
 
-	//return pr.Members[index]
-	return &Member{MemberId: MemberId{"a"}}
+	if index == -1 {
+		return nil
+	}
+
+	return pr.parliament.Members[index]
 }
