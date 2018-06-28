@@ -11,7 +11,7 @@ import (
 
 type MockMessageService struct{}
 
-func (mms MockMessageService) DeliverLeaderInfo(nodeId p2p.NodeId, leader p2p.Leader) error {
+func (mms MockMessageService) DeliverLeaderInfo(nodeId p2p.PeerId, leader p2p.Leader) error {
 	return nil
 }
 
@@ -58,14 +58,14 @@ func TestLeaderApi_UpdateLeader(t *testing.T) {
 
 func TestLeaderApi_DeliverLeaderInfo(t *testing.T) {
 	tests := map[string]struct {
-		input p2p.NodeId
+		input p2p.PeerId
 		err   error
 	}{
 		"proper node id test": {
-			input: p2p.NodeId{
+			input: p2p.PeerId{
 				Id: "",
 			},
-			err: api.ErrEmptyNodeId,
+			err: api.ErrEmptyPeerId,
 		},
 	}
 	leaderApi := SetupLeaderApi()
@@ -83,7 +83,7 @@ func SetupLeaderApi() *api.LeaderApi {
 	eventRepository := MockEventRepository{}
 
 	messageService := MockMessageService{}
-	leaderApi := api.NewLeaderApi(leaderRepository, eventRepository, messageService, &p2p.Node{NodeId: p2p.NodeId{Id: "123"}})
+	leaderApi := api.NewLeaderApi(leaderRepository, eventRepository, messageService, &p2p.Peer{PeerId: p2p.PeerId{Id: "123"}})
 
 	return leaderApi
 }

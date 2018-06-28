@@ -72,6 +72,7 @@ Blockchain Component는 blockchain 동기화, block 추가, 조회를 담당한�
 
 [IMPLEMENTATION-DETAILS-KR.md](PROJECT-IMPLEMENTATION-DETAILS-KR.md)
 
+![](./block-create-validate-scenario.png)
 ### Author
 
 [@junk-sound](https://github.com/junk-sound), [@zeroFruit](https://github.com/zeroFruit)
