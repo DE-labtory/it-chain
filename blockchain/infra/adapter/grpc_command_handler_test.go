@@ -6,7 +6,6 @@ import (
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
 	"github.com/magiconair/properties/assert"
-	"github.com/it-chain/it-chain-Engine/common"
 	"errors"
 )
 
@@ -25,19 +24,13 @@ func (br MockROBlockRepository) GetLastBlock(block blockchain.Block) error {
 }
 
 type MockSyncCheckGrpcCommandService struct {
-	SyncCheckResponseFunc func(peerId blockchain.PeerId, block blockchain.Block) error
+	SyncCheckResponseFunc func(block blockchain.Block) error
 }
-func (cs MockSyncCheckGrpcCommandService) SyncCheckResponse(peerId blockchain.PeerId, block blockchain.Block) error {
-	return cs.SyncCheckResponseFunc(peerId, block)
+func (cs MockSyncCheckGrpcCommandService) SyncCheckResponse(block blockchain.Block) error {
+	return cs.SyncCheckResponseFunc(block)
 }
 
 func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testing.T) {
-	peer1 := blockchain.Peer{
-		IpAddress: "11.22.33.44",
-		PeerId: blockchain.PeerId{Id: "1"},
-	}
-	peer1Byte, _ := common.Serialize(peer1)
-
 	tests := map[string]struct {
 		input struct {
 			command blockchain.GrpcReceiveCommand
@@ -56,7 +49,7 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 			} {
 				command: blockchain.GrpcReceiveCommand{
 					CommandModel: midgard.CommandModel{ID: "111"},
-					Body: peer1Byte,
+					Body: nil,
 					Protocol: "SyncCheckRequestProtocol",
 				},
 			},
@@ -71,7 +64,7 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 			} {
 				command: blockchain.GrpcReceiveCommand{
 					CommandModel: midgard.CommandModel{ID: "111"},
-					Body: peer1Byte,
+					Body: nil,
 					Protocol: "SyncCheckRequestProtocol",
 				},
 				newEmptyBlockErr: errors.New("error occur in NewEmptyBlock"),
@@ -87,7 +80,7 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 			} {
 				command: blockchain.GrpcReceiveCommand{
 					CommandModel: midgard.CommandModel{ID: "111"},
-					Body: peer1Byte,
+					Body: nil,
 					Protocol: "SyncCheckRequestProtocol",
 				},
 				getLastBlockErr: errors.New("error occur in ErrGetLastBlock"),
@@ -103,7 +96,7 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 			} {
 				command: blockchain.GrpcReceiveCommand{
 					CommandModel: midgard.CommandModel{ID: "111"},
-					Body: peer1Byte,
+					Body: nil,
 					Protocol: "SyncCheckRequestProtocol",
 				},
 				syncCheckErr: errors.New("error occur in SyncCheckResponse"),
@@ -128,8 +121,7 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 		}
 
 		grpcCommandService := MockSyncCheckGrpcCommandService{}
-		grpcCommandService.SyncCheckResponseFunc = func(peerId blockchain.PeerId, block blockchain.Block) error {
-			assert.Equal(t, peerId.Id, "1")
+		grpcCommandService.SyncCheckResponseFunc = func(block blockchain.Block) error {
 			assert.Equal(t, block.GetHeight(), uint64(99887))
 			return test.input.syncCheckErr
 		}
