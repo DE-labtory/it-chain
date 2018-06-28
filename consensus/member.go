@@ -1,11 +1,5 @@
 package consensus
 
-import (
-	"github.com/it-chain/midgard"
-	"errors"
-	"fmt"
-)
-
 type MemberId struct {
 	Id string
 }
@@ -24,17 +18,4 @@ func (m *Member) StringMemberId() string {
 
 func (m Member) GetId() string {
 	return m.StringMemberId()
-}
-
-func (m *Member) On(event midgard.Event) error {
-	switch v := event.(type) {
-
-	case *MemberJoinedEvent:
-		m.MemberId = MemberId{v.ID}
-
-	default:
-		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
-	}
-
-	return nil
 }
