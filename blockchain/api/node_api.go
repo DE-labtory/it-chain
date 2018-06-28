@@ -1,8 +1,7 @@
 package api
 
-import (
-	"github.com/it-chain/midgard"
-)
+
+import "github.com/it-chain/midgard"
 
 type NodeApi struct {
 	eventRepository midgard.Repository

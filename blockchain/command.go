@@ -27,7 +27,14 @@ type BlockValidateCommand struct {
 
 type GrpcDeliverCommand struct {
 	midgard.CommandModel
-	Recipients []string
-	Body       []byte
-	Protocol   string
+	Body         []byte
+	ConnectionID string
+	Protocol     string
+}
+
+type GrpcReceiveCommand struct {
+	midgard.CommandModel
+	Body         []byte
+	ConnectionID string
+	Protocol     string
 }
