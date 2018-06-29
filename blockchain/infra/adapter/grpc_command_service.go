@@ -27,7 +27,9 @@ func NewGrpcCommandService(publish Publish) *GrpcCommandService {
 	}
 }
 
+
 func (gcs *GrpcCommandService) RequestBlock(peerId p2p.PeerId, height uint64) error {
+
 
 	if peerId.Id == "" {
 		return ErrEmptyNodeId
@@ -46,6 +48,7 @@ func (gcs *GrpcCommandService) RequestBlock(peerId p2p.PeerId, height uint64) er
 
 	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
+
 
 func (gcs *GrpcCommandService) ResponseBlock(peerId p2p.PeerId, block blockchain.Block) error {
 	if peerId.Id == "" {
@@ -68,14 +71,14 @@ func (gcs *GrpcCommandService) ResponseBlock(peerId p2p.PeerId, block blockchain
 	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
 
-func createGrpcCommand(protocol string, body interface{}) (blockchain.GrpcCommand, error) {
+func createGrpcCommand(protocol string, body interface{}) (blockchain.GrpcDeliverCommand, error) {
 
 	data, err := common.Serialize(body)
 	if err != nil {
-		return blockchain.GrpcCommand{}, err
+		return blockchain.GrpcDeliverCommand{}, err
 	}
 
-	return blockchain.GrpcCommand{
+	return blockchain.GrpcDeliverCommand{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
