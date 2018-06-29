@@ -1,6 +1,6 @@
 package blockchain
 
-type MessageService interface {
+type GrpcCommandService interface {
 	RequestBlock() error
 	ResponseBlock() error
 }
