@@ -82,9 +82,7 @@ func (leaderApi *LeaderApi) DeliverLeaderInfo(connectionId string) error {
 }
 
 func (leaderApi *LeaderApi) ElectLeaderWithRaft(){
-
 	//1. Start random timeout
-	//2. timedout!
+	//2. timed out! alter state to 'candidate'
 	//3. Send message having 'RequestVoteProtocol' to other node
-	//
 }
