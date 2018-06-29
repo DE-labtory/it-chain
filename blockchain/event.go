@@ -9,12 +9,12 @@ type NodeUpdateEvent struct {
 
 type NodeCreatedEvent struct {
 	midgard.EventModel
-	Node
+	Peer
 }
 
 type NodeDeletedEvent struct {
 	midgard.EventModel
-	Node
+	Peer
 }
 
 type BlockValidatedEvent struct {

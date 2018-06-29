@@ -5,7 +5,6 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/common"
-	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
@@ -28,18 +27,18 @@ func NewGrpcCommandService(publish Publish) *GrpcCommandService {
 }
 
 
-func (gcs *GrpcCommandService) RequestBlock(peerId p2p.PeerId, height uint64) error {
+func (gcs *GrpcCommandService) RequestBlock(peerId blockchain.PeerId, height uint64) error {
 
 
 	if peerId.Id == "" {
 		return ErrEmptyNodeId
 	}
 
-	body := blockchain.BlockRequestMessage{
+	body := blockchain.DefaultBlock{
 		Height: height,
 	}
 
-	deliverCommand, err := createGrpcCommand("BlockRequestProtocol", body)
+	deliverCommand, err := createGrpcDeliverCommand("BlockRequestProtocol", body)
 	if err != nil {
 		return err
 	}
@@ -50,7 +49,7 @@ func (gcs *GrpcCommandService) RequestBlock(peerId p2p.PeerId, height uint64) er
 }
 
 
-func (gcs *GrpcCommandService) ResponseBlock(peerId p2p.PeerId, block blockchain.Block) error {
+func (gcs *GrpcCommandService) ResponseBlock(peerId blockchain.PeerId, block blockchain.Block) error {
 	if peerId.Id == "" {
 		return ErrEmptyNodeId
 	}
@@ -61,7 +60,7 @@ func (gcs *GrpcCommandService) ResponseBlock(peerId p2p.PeerId, block blockchain
 
 	body := block
 
-	deliverCommand, err := createGrpcCommand("BlockResponseProtocol", body)
+	deliverCommand, err := createGrpcDeliverCommand("BlockResponseProtocol", body)
 	if err != nil {
 		return err
 	}
@@ -71,7 +70,12 @@ func (gcs *GrpcCommandService) ResponseBlock(peerId p2p.PeerId, block blockchain
 	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
 
-func createGrpcCommand(protocol string, body interface{}) (blockchain.GrpcDeliverCommand, error) {
+// TODO "SyncCheckResponseProtocol"을 통해서 last block을 전달한다.
+func (gcs *GrpcCommandService) SyncCheckResponse(block blockchain.Block) error {
+	return nil
+}
+
+func createGrpcDeliverCommand(protocol string, body interface{}) (blockchain.GrpcDeliverCommand, error) {
 
 	data, err := common.Serialize(body)
 	if err != nil {

@@ -4,30 +4,26 @@ import (
 	"testing"
 
 	"reflect"
-
+	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
-	"github.com/it-chain/it-chain-Engine/p2p"
-	"github.com/it-chain/yggdrasill/impl"
 	"github.com/stretchr/testify/assert"
 )
-
-type DefaultBlock = impl.DefaultBlock
 
 func TestGrpcCommandService_RequestBlock(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			peerId p2p.PeerId
+			peerId blockchain.PeerId
 			height uint64
 		}
 		err error
 	}{
 		"success: request block": {
 			input: struct {
-				peerId p2p.PeerId
+				peerId blockchain.PeerId
 				height uint64
 			}{
-				peerId: p2p.PeerId{
+				peerId: blockchain.PeerId{
 					Id: "1",
 				},
 				height: uint64(0),
@@ -36,10 +32,10 @@ func TestGrpcCommandService_RequestBlock(t *testing.T) {
 		},
 		"fail: empty node id": {
 			input: struct {
-				peerId p2p.PeerId
+				peerId blockchain.PeerId
 				height uint64
 			}{
-				peerId: p2p.PeerId{},
+				peerId: blockchain.PeerId{},
 				height: uint64(0),
 			},
 			err: adapter.ErrEmptyNodeId,
@@ -49,7 +45,7 @@ func TestGrpcCommandService_RequestBlock(t *testing.T) {
 	publish := func(exchange string, topic string, data interface{}) error {
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.deliver")
-		assert.Equal(t, reflect.TypeOf(data).String(), "blockchain.GrpcCommand")
+		assert.Equal(t, reflect.TypeOf(data).String(), "blockchain.GrpcDeliverCommand")
 		return nil
 	}
 
@@ -67,20 +63,20 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			peerId p2p.PeerId
-			block  DefaultBlock
+			peerId blockchain.PeerId
+			block  blockchain.DefaultBlock
 		}
 		err error
 	}{
 		"success: request block": {
 			input: struct {
-				peerId p2p.PeerId
-				block  DefaultBlock
+				peerId blockchain.PeerId
+				block  blockchain.DefaultBlock
 			}{
-				peerId: p2p.PeerId{
+				peerId: blockchain.PeerId{
 					Id: "1",
 				},
-				block: DefaultBlock{
+				block: blockchain.DefaultBlock{
 					Seal: []byte("seal"),
 				},
 			},
@@ -88,11 +84,11 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 		},
 		"fail: empty node id": {
 			input: struct {
-				peerId p2p.PeerId
-				block  DefaultBlock
+				peerId blockchain.PeerId
+				block  blockchain.DefaultBlock
 			}{
-				peerId: p2p.PeerId{},
-				block: DefaultBlock{
+				peerId: blockchain.PeerId{},
+				block: blockchain.DefaultBlock{
 					Seal: []byte("seal"),
 				},
 			},
@@ -100,13 +96,13 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 		},
 		"fail: empty block seal": {
 			input: struct {
-				peerId p2p.PeerId
-				block  DefaultBlock
+				peerId blockchain.PeerId
+				block  blockchain.DefaultBlock
 			}{
-				peerId: p2p.PeerId{
+				peerId: blockchain.PeerId{
 					"1",
 				},
-				block: DefaultBlock{
+				block: blockchain.DefaultBlock{
 					Seal: nil,
 				},
 			},
@@ -117,7 +113,7 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 	publish := func(exchange string, topic string, data interface{}) error {
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.deliver")
-		assert.Equal(t, reflect.TypeOf(data).String(), "blockchain.GrpcCommand")
+		assert.Equal(t, reflect.TypeOf(data).String(), "blockchain.GrpcDeliverCommand")
 
 		return nil
 	}
