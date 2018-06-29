@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"github.com/it-chain/midgard"
 )
@@ -37,4 +38,5 @@ type GrpcReceiveCommand struct {
 	Body         []byte
 	ConnectionID string
 	Protocol     string
+	FromPeer     p2p.Peer
 }
