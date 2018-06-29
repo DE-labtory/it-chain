@@ -23,6 +23,10 @@ func (mna MockPeerApi) GetPeerLeaderTable() (p2p.PeerLeaderTable){
 	}
 	return peerTable
 }
+func (mna MockPeerApi) FindById(peerId p2p.PeerId) (p2p.Peer, error){
+	peer := p2p.Peer{PeerId:peerId}
+	return peer, nil
+}
 func (mna MockPeerApi) GetPeerList() []p2p.Peer{
 	peerList := []p2p.Peer{{PeerId:p2p.PeerId{Id:"2"}}}
 	return peerList

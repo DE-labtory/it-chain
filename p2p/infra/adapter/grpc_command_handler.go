@@ -118,7 +118,7 @@ func UpdateWithLongerPeerList(gch *GrpcCommandHandler, oppositeLeader p2p.Leader
 func DialToUnConnectedNode(commandService GrpcCommandHandlerCommandService, peerApi GrpcCommandHandlerPeerApi, peerList []p2p.Peer) error{
 
 	for _, peer := range peerList{
-		//err is nil if there is no matching peer
+		//err is nil if there is matching peer
 		peer, err := peerApi.FindById(peer.PeerId)
 
 		//dial if no peer matching peer id
