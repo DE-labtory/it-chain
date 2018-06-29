@@ -52,7 +52,7 @@ func (c ConnectionApi) CreateConnection(command gateway.ConnectionCreateCommand)
 }
 
 //다른 node와의 연결 close
-//todo close connection eventstore 발생
+//todo close connection event 발생
 func (c ConnectionApi) CloseConnection(connection gateway.Connection) {
 
 }
@@ -77,7 +77,7 @@ func (c ConnectionApi) OnConnection(connection gateway.Connection) {
 }
 
 //연결된 node의 connection 종료
-//todo close connection eventstore 발생
+//todo close connection event 발생
 func (c ConnectionApi) OnDisconnection(connection gateway.Connection) {
 
 }

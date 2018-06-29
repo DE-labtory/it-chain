@@ -18,7 +18,7 @@ type ConnectionDisconnectedEvent struct {
 	midgard.EventModel
 }
 
-// node created eventstore
+// node created event
 type PeerCreatedEvent struct {
 	midgard.EventModel
 	IpAddress string
@@ -28,7 +28,7 @@ type PeerDeletedEvent struct {
 	midgard.EventModel
 }
 
-// handle leader received eventstore
+// handle leader received event
 type LeaderUpdatedEvent struct {
 	midgard.EventModel
 }
@@ -37,7 +37,7 @@ type LeaderDeliveredEvent struct {
 	midgard.EventModel
 }
 
-//todo add to eventstore doc
+//todo add to event doc
 type LeaderDeletedEvent struct {
 	midgard.EventModel
 }
