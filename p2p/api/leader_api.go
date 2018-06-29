@@ -80,3 +80,7 @@ func (leaderApi *LeaderApi) DeliverLeaderInfo(connectionId string) error {
 
 	return nil
 }
+
+func (leaderApi *LeaderApi) ElectLeader(){
+	
+}

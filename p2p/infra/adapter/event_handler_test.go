@@ -15,10 +15,6 @@ func (na EventHandlerMockPeerApi) DeletePeer(id p2p.PeerId) error{return nil}
 func (na EventHandlerMockPeerApi) DeliverPeerTable(connectionId string) error{return nil}
 
 func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
-	//1. test proper input
-	//empty nodeid, empty address
-	//2. proper output
-	//matching err
 
 	tests := map[string] struct{
 		input struct{
@@ -76,14 +72,19 @@ func TestEventHandler_HandleConnDisconnectedEvent(t *testing.T) {
 	}
 
 	eventHandler := adapter.NewEventHandler(EventHandlerMockPeerApi{})
+
 	for testName, test := range tests {
+
 		t.Logf("running test case %s", testName)
+
 		event := p2p.ConnectionDisconnectedEvent{
 			EventModel: midgard.EventModel{
 				ID: test.input.id,
 			},
 		}
+
 		err := eventHandler.HandleConnDisconnectedEvent(event)
+
 		assert.Equal(t, err, test.err)
 
 	}
