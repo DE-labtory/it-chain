@@ -15,13 +15,14 @@ func (service *Service) GetPeerList() []Peer{
 	return peerList
 }
 
-func (service *Service) GetPeerTable() PeerTable{
+//get peer leader table
+func (service *Service) GetPeerLeaderTable() PeerLeaderTable{
 	leader := service.leaderRepository.GetLeader()
 	peerList, _ := service.peerRepository.FindAll()
-	peerTable := PeerTable{
+	peerLeaderTable := PeerLeaderTable{
 		Leader:leader,
 		PeerList:peerList,
 	}
-	return peerTable
+	return peerLeaderTable
 }
 
