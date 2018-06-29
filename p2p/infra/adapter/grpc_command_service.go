@@ -94,23 +94,22 @@ func (md *GrpcCommandService) DeliverLeaderInfo(connectionId string, leader p2p.
 	return md.publish("Command", "message.deliver", deliverCommand)
 }
 
-//deliver peer table which has peer list and leader to other node specified by connectionId
-func (md *GrpcCommandService) DeliverPeerTable(connectionId string, peerTable p2p.PeerTable) error {
+func (md *GrpcCommandService) DeliverPeerLeaderTable(connectionId string, peerLeaderTable p2p.PeerLeaderTable) error {
 
 	if connectionId== "" {
 		return ErrEmptyPeerId
 	}
 
-	if len(peerTable.PeerList) ==0 {
+	if len(peerLeaderTable.PeerList) ==0 {
 		return p2p.ErrEmptyPeerList
 	}
 
 	//create peer table message
-	peerTableMessage := p2p.PeerTableMessage{
-		PeerTable:peerTable,
+	peerLeaderTableMessage := p2p.PeerLeaderTableMessage{
+		PeerLeaderTable:peerLeaderTable,
 	}
 
-	grpcDeliverCommand, err := CreateGrpcDeliverCommand("PeerTableDeliver", peerTableMessage)
+	grpcDeliverCommand, err := CreateGrpcDeliverCommand("PeerTableDeliver", peerLeaderTableMessage)
 
 	if err != nil {
 		return err
@@ -121,19 +120,7 @@ func (md *GrpcCommandService) DeliverPeerTable(connectionId string, peerTable p2
 	return md.publish("Command", "message.deliver", grpcDeliverCommand)
 }
 
-//deliver single node
-func (md *GrpcCommandService) DeliverPeer(connectionId string, node p2p.Peer) error {
 
-	grpcDeliverCommand, err := CreateGrpcDeliverCommand("PeerDeliverProtocol", node)
-
-	if err != nil {
-		return err
-	}
-
-	grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
-
-	return md.publish("Command", "message.deliver", grpcDeliverCommand)
-}
 func CreateGrpcDeliverCommand(protocol string, body interface{}) (p2p.GrpcDeliverCommand, error) {
 
 	data, err := common.Serialize(body)

@@ -8,9 +8,8 @@ import (
 )
 
 var ErrEmptyPeerList = errors.New("empty peer list proposed")
-type PeerApiService interface {
+type PeerApiPeerService interface {
 	GetPeerLeaderTable() p2p.PeerLeaderTable
-	GetPeerList() []p2p.Peer
 }
 type PeerApiGrpcCommandService interface {
 	DeliverPeerLeaderTable(connectionId string, peerTable p2p.PeerLeaderTable) error
@@ -21,7 +20,7 @@ type ReadOnlyPeerRepository interface {
 }
 
 type PeerApi struct {
-	service PeerApiService
+	peerApiPeerService PeerApiPeerService
 	peerRepository  ReadOnlyPeerRepository
 	eventRepository EventRepository
 	peerApiGrpcCommandService  PeerApiGrpcCommandService
@@ -29,9 +28,9 @@ type PeerApi struct {
 
 
 
-func NewPeerApi(service PeerApiService, peerRepository ReadOnlyPeerRepository, eventRepository EventRepository, peerApiGrpcCommandService PeerApiGrpcCommandService) *PeerApi {
+func NewPeerApi(peerApiPeerService PeerApiPeerService, peerRepository ReadOnlyPeerRepository, eventRepository EventRepository, peerApiGrpcCommandService PeerApiGrpcCommandService) *PeerApi {
 	return &PeerApi{
-		service:service,
+		peerApiPeerService:peerApiPeerService,
 		peerRepository:  peerRepository,
 		eventRepository: eventRepository,
 		peerApiGrpcCommandService:  peerApiGrpcCommandService,
@@ -78,19 +77,15 @@ func (peerApi *PeerApi) UpdatePeerList(peerList []p2p.Peer) error {
 	return nil
 }
 func (peerApi *PeerApi) GetPeerLeaderTable() p2p.PeerLeaderTable{
-	peerTable := peerApi.service.GetPeerLeaderTable()
+	peerTable := peerApi.peerApiPeerService.GetPeerLeaderTable()
 
 	return peerTable
 }
 
-func (peerApi *PeerApi) GetPeerList() []p2p.Peer{
-	peers := peerApi.service.GetPeerList()
-	return peers
-}
 //Deliver Peer table that consists of peerList and leader
 func (peerApi *PeerApi) DeliverPeerLeaderTable(connectionId string) error {
 
-	peerTable := peerApi.service.GetPeerLeaderTable()
+	peerTable := peerApi.peerApiPeerService.GetPeerLeaderTable()
 	peerApi.peerApiGrpcCommandService.DeliverPeerLeaderTable(connectionId, peerTable)
 	return nil
 }
@@ -132,4 +127,8 @@ func (peerApi *PeerApi) DeletePeer(id p2p.PeerId) error {
 	}
 
 	return nil
+}
+
+func (peerApi *PeerApi) FindById(id p2p.PeerId) (p2p.Peer, error){
+	return peerApi.peerRepository.FindById(id)
 }

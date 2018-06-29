@@ -19,6 +19,6 @@ type LeaderInfoResponseMessage struct {
 	Address  string
 }
 
-type PeerTableMessage struct{
-	PeerTable PeerTable
+type PeerLeaderTableMessage struct{
+	PeerLeaderTable PeerLeaderTable
 }

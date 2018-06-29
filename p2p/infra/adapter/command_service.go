@@ -11,4 +11,5 @@ func (cs *CommandService) Dial(ipAddress string) error{
 		Address: ipAddress,
 	}
 	cs.publish("Command", "connection.create", command)
+	return nil
 }
