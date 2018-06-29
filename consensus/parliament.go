@@ -28,7 +28,7 @@ func NewParliament() Parliament {
 	}
 }
 
-func (p *Parliament) GetId() string {
+func (p *Parliament) GetID() string {
 	return p.ParliamentId.ToString()
 }
 
@@ -56,23 +56,24 @@ func (p *Parliament) HasLeader() bool {
 	return true
 }
 
-func (p *Parliament) ChangeLeader(leader *Leader) (midgard.Event, error) {
+func (p *Parliament) ChangeLeader(leader *Leader) (*LeaderChangedEvent, error) {
 	if leader == nil {
 		return nil, errors.New("Leader is nil")
 	}
 
 	leaderChangedEvent := LeaderChangedEvent{
 		EventModel: midgard.EventModel{
-			ID: leader.GetId(),
+			ID: p.GetID(),
 		},
+		LeaderId: leader.LeaderId,
 	}
 
-	p.On(leaderChangedEvent)
+	p.On(&leaderChangedEvent)
 
-	return leaderChangedEvent, nil
+	return &leaderChangedEvent, nil
 }
 
-func (p *Parliament) AddMember(member *Member) (midgard.Event, error) {
+func (p *Parliament) AddMember(member *Member) (*MemberJoinedEvent, error) {
 	if member == nil {
 		return nil, errors.New("Member is nil")
 	}
@@ -91,14 +92,15 @@ func (p *Parliament) AddMember(member *Member) (midgard.Event, error) {
 		EventModel: midgard.EventModel{
 			ID: member.GetId(),
 		},
+		MemberId: member.MemberId,
 	}
 
-	p.On(memberJoinedEvent)
+	p.On(&memberJoinedEvent)
 
-	return memberJoinedEvent, nil
+	return &memberJoinedEvent, nil
 }
 
-func (p *Parliament) RemoveMember(memberID MemberId) (midgard.Event, error) {
+func (p *Parliament) RemoveMember(memberID MemberId) (*MemberRemovedEvent, error) {
 	index := p.findIndexOfMember(memberID.ToString())
 
 	if index == -1 {
@@ -109,11 +111,12 @@ func (p *Parliament) RemoveMember(memberID MemberId) (midgard.Event, error) {
 		EventModel: midgard.EventModel{
 			ID: memberID.ToString(),
 		},
+		MemberId: memberID,
 	}
 
-	p.On(memberRemovedEvent)
+	p.On(&memberRemovedEvent)
 
-	return memberRemovedEvent, nil
+	return &memberRemovedEvent, nil
 }
 
 func (p *Parliament) ValidateRepresentative(representatives []*Representative) bool {
@@ -152,13 +155,13 @@ func (p *Parliament) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *LeaderChangedEvent:
-		p.Leader.LeaderId = LeaderId{v.GetID()}
+		p.Leader = &Leader{LeaderId:v.LeaderId}
 
 	case *MemberJoinedEvent:
-		p.Members = append(p.Members, &Member{MemberId: MemberId{v.GetID()}})
+		p.Members = append(p.Members, &Member{MemberId: v.MemberId})
 
 	case *MemberRemovedEvent:
-		index := p.findIndexOfMember(v.GetID())
+		index := p.findIndexOfMember(v.MemberId.ToString())
 
 		if index != -1 {
 			p.Members = append(p.Members[:index], p.Members[index+1:]...)
@@ -172,7 +175,7 @@ func (p *Parliament) On(event midgard.Event) error {
 }
 
 type ParliamentRepository interface {
-	GetParliament() Parliament
+	GetParliament() *Parliament
 	SetParliament(parliament Parliament)
 }
 
@@ -188,8 +191,8 @@ func NewParliamentRepository() ParliamentRepository {
 	}
 }
 
-func (pr *ParliamentRepositoryImpl) GetParliament() Parliament {
-	return pr.parliament
+func (pr *ParliamentRepositoryImpl) GetParliament() *Parliament {
+	return &pr.parliament
 }
 
 func (pr *ParliamentRepositoryImpl) SetParliament(parliament Parliament) {
