@@ -6,6 +6,8 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"errors"
+	"github.com/it-chain/it-chain-Engine/gateway"
+	"github.com/it-chain/it-chain-Engine/p2p/api"
 )
 
 var ErrLeaderInfoDeliver = errors.New("leader info deliver failed")
@@ -21,6 +23,7 @@ type LeaderApi interface {
 
 type GrpcCommandHandlerPeerApi interface {
 	GetPeerTable() (p2p.PeerTable)
+	GetPeerList() []p2p.Peer
 	UpdatePeerList(peerList []p2p.Peer) error
 	DeliverPeerTable(connectionId string) error
 	AddPeer(peer p2p.Peer)
@@ -28,13 +31,14 @@ type GrpcCommandHandlerPeerApi interface {
 
 type GrpcCommandHandler struct {
 	leaderApi LeaderApi
-
 	peerApi   GrpcCommandHandlerPeerApi
+	commandService p2p.CommandService
 }
-func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi) *GrpcCommandHandler {
+func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi, commandService p2p.CommandService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		leaderApi: leaderApi,
 		peerApi:   peerApi,
+		commandService: commandService,
 	}
 }
 
@@ -64,7 +68,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 		UpdateWithLongerPeerList(gch, oppositeLeader, oppositePeerList)
 
 		//3. dial according to peer table
-
+		DialToUnConnectedNode(gch.commandService, gch.peerApi, oppositePeerList)
 
 		break
 
@@ -106,5 +110,20 @@ func UpdateWithLongerPeerList(gch *GrpcCommandHandler, oppositeLeader p2p.Leader
 		gch.peerApi.UpdatePeerList(oppositePeerList)
 	}else{
 		gch.leaderApi.UpdateLeader(myLeader)
+	}
+}
+
+func DialToUnConnectedNode(commandService p2p.CommandService, peerApi GrpcCommandHandlerPeerApi, peerList []p2p.Peer) error{
+	myPeerList := peerApi.GetPeerList()
+
+	for _, peer := range peerList{
+
+		//
+		for _, myPeer := range myPeerList{
+			if myPeer == peer{
+				break
+			}
+		}
+		commandService.Dial(peer.IpAddress)
 	}
 }

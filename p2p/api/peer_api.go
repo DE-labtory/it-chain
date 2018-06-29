@@ -10,6 +10,7 @@ import (
 var ErrEmptyPeerList = errors.New("empty peer list proposed")
 type PeerApiService interface {
 	GetPeerTable() p2p.PeerTable
+	GetPeerList() []p2p.Peer
 }
 type PeerApiGrpcCommandService interface {
 	DeliverPeerTable(connectionId string, peerTable p2p.PeerTable) error
@@ -82,6 +83,10 @@ func (peerApi *PeerApi) GetPeerTable() p2p.PeerTable{
 	return peerTable
 }
 
+func (peerApi *PeerApi) GetPeerList() []p2p.Peer{
+	peers := peerApi.service.GetPeerList()
+	return peers
+}
 //Deliver Peer table that consists of peerList and leader
 func (peerApi *PeerApi) DeliverPeerTable(connectionId string) error {
 

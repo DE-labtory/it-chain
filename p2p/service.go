@@ -24,3 +24,4 @@ func (service *Service) GetPeerTable() PeerTable{
 	}
 	return peerTable
 }
+
