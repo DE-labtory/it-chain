@@ -1,15 +1,31 @@
 package adapter
 
-import "github.com/it-chain/it-chain-Engine/blockchain"
+import (
+	"errors"
+
+	"encoding/json"
+
+	"github.com/it-chain/it-chain-Engine/blockchain"
+)
+
+var ErrBlockInfoDeliver = errors.New("block info deliver failed")
+var ErrGetBlock = errors.New("error when Getting block")
+var ErrResponseBlock = errors.New("error when response block")
 
 type BlockApi interface {
-	CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error)
-	CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error)
 	SyncedCheck(block blockchain.Block) error
 }
 
+type ReadOnlyBlockRepository interface {
+	NewEmptyBlock() (blockchain.Block, error)
+	GetLastBlock(block blockchain.Block) error
+	GetBlockByHeight(blockHeight uint64) (blockchain.Block, error)
+}
+
 type GrpcCommandHandler struct {
-	blockApi BlockApi
+	blockApi           BlockApi
+	blockRepository    ReadOnlyBlockRepository
+	grpcCommandService GrpcCommandService
 }
 
 func NewGrpcCommandHandler(blockApi BlockApi) *GrpcCommandHandler {
@@ -29,7 +45,21 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 		break
 
 	case "BlockRequestProtocol":
-		//TODO: Construct 과정을 위해서 상대방에게 block을 보내준다.
+		var height uint64
+		err := json.Unmarshal(command.Body, &height)
+		if err != nil {
+			return ErrBlockInfoDeliver
+		}
+
+		block, err := g.blockRepository.GetBlockByHeight(height)
+		if err != nil {
+			return ErrGetBlock
+		}
+
+		err = g.grpcCommandService.ResponseBlock(command.FromPeer.PeerId, block)
+		if err != nil {
+			return ErrResponseBlock
+		}
 		break
 
 	case "BlockResponseProtocol":
