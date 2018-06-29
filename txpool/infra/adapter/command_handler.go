@@ -32,4 +32,5 @@ func (t *TxCommandHandler) HandleTxCreateCommand(txCreateCommand txpool.TxCreate
 	if err != nil {
 		log.Println(err.Error())
 	}
+
 }
