@@ -11,6 +11,7 @@ import (
 
 var ErrEmptyPeerId = errors.New("empty peer id requested")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
+var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 
 type LeaderApi struct {
 	leaderRepository ReadOnlyLeaderRepository
@@ -30,7 +31,7 @@ type EventRepository interface { //midgard.Repository
 }
 
 type LeaderGrpcCommandService interface {
-	DeliverLeaderInfo(peerId p2p.PeerId, leader p2p.Leader) error
+	DeliverLeaderInfo(connectionId string, leader p2p.Leader) error
 }
 
 func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, grpcCommandService LeaderGrpcCommandService, myInfo *p2p.Peer) *LeaderApi {
@@ -68,14 +69,14 @@ func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Leader) error {
 	return err
 }
 
-func (leaderApi *LeaderApi) DeliverLeaderInfo(peerId p2p.PeerId) error {
+func (leaderApi *LeaderApi) DeliverLeaderInfo(connectionId string) error {
 
-	if peerId.Id == "" {
-		return ErrEmptyPeerId
+	if connectionId == "" {
+		return ErrEmptyConnectionId
 	}
 
 	leader := leaderApi.leaderRepository.GetLeader()
-	leaderApi.grpcCommandService.DeliverLeaderInfo(peerId, leader)
+	leaderApi.grpcCommandService.DeliverLeaderInfo(connectionId, leader)
 
 	return nil
 }

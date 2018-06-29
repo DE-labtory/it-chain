@@ -68,7 +68,7 @@ func (peerId PeerId) ToString() string {
 type PeerRepository interface {
 	Save(peer Peer) error
 	Remove(id PeerId) error
-	FindById(id PeerId) (*Peer, error)
+	FindById(id PeerId) (Peer, error)
 	FindAll() ([]Peer, error)
 }
 

@@ -8,31 +8,36 @@ import (
 )
 
 var ErrEmptyPeerList = errors.New("empty peer list proposed")
-
+type PeerApiService interface {
+	GetPeerTable() p2p.PeerTable
+}
+type PeerApiGrpcCommandService interface {
+	DeliverPeerTable(connectionId string, peerTable p2p.PeerTable) error
+}
 type ReadOnlyPeerRepository interface {
-	FindById(id p2p.PeerId) (*p2p.Peer, error)
+	FindById(id p2p.PeerId) (p2p.Peer, error)
 	FindAll() ([]p2p.Peer, error)
 }
 
 type PeerApi struct {
+	service PeerApiService
 	peerRepository  ReadOnlyPeerRepository
 	eventRepository EventRepository
-	messageService  PeerMessageService
+	peerApiGrpcCommandService  PeerApiGrpcCommandService
 }
 
-type PeerMessageService interface {
-	DeliverPeerList(peerId p2p.PeerId, peerList []p2p.Peer) error
-}
 
-func NewPeerApi(peerRepository ReadOnlyPeerRepository, eventRepository EventRepository, messageService PeerMessageService) *PeerApi {
+
+func NewPeerApi(service PeerApiService, peerRepository ReadOnlyPeerRepository, eventRepository EventRepository, peerApiGrpcCommandService PeerApiGrpcCommandService) *PeerApi {
 	return &PeerApi{
+		service:service,
 		peerRepository:  peerRepository,
 		eventRepository: eventRepository,
-		messageService:  messageService,
+		peerApiGrpcCommandService:  peerApiGrpcCommandService,
 	}
 }
 
-func (peerApi *PeerApi) UpdatePeerList(peerList []p2p.Peer) error {
+func (peerApi *PeerApi) UpdatePeerTable(peerList []p2p.Peer) error {
 
 	//둘다 존재할경우 무시, existPeerList에만 존재할경우 PeerDeletedEvent, peerList에 존재할경우 PeerCreatedEvent
 	var event midgard.Event
@@ -71,14 +76,17 @@ func (peerApi *PeerApi) UpdatePeerList(peerList []p2p.Peer) error {
 
 	return nil
 }
+func (peerApi *PeerApi) GetPeerTable() p2p.PeerTable{
+	peerTable := peerApi.service.GetPeerTable()
 
-func (peerApi *PeerApi) DeliverPeerList(peerId p2p.PeerId) error {
+	return peerTable
+}
 
-	peerList, _ := peerApi.peerRepository.FindAll()
-	if len(peerList) == 0 {
-		return ErrEmptyPeerList
-	}
-	peerApi.messageService.DeliverPeerList(peerId, peerList)
+//Deliver Peer table that consists of peerList and leader
+func (peerApi *PeerApi) DeliverPeerTable(connectionId string) error {
+
+	peerTable := peerApi.service.GetPeerTable()
+	peerApi.peerApiGrpcCommandService.DeliverPeerTable(connectionId, peerTable)
 	return nil
 }
 

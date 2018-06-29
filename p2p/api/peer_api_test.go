@@ -12,18 +12,20 @@ import (
 var ErrEmptyPeerList = errors.New("empty node list proposed")
 
 //todo make node api test
-//todo make fake dependencies 1. eventRepository 2. messageDispatcher 3. nodeRepository
+//todo make fake dependencies 1. eventRepository 2. messageDispatcher 3. peerRepository
 //todo make test map
 //todo test continue
 
+type MockService struct {}
+func (ms MockService) GetPeerTable() p2p.PeerTable{}
 type MockPeerRepository struct {}
 
-func (mnr MockPeerRepository) FindById(id p2p.PeerId) (*p2p.Peer, error) { return nil, nil }
+func (mnr MockPeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) { return nil, nil }
 func (mnr MockPeerRepository) FindAll() ([]p2p.Peer, error)              { return nil, nil }
 
-type MockPeerMessageService struct{}
+type MockPeerApiGrpcCommandService struct{}
 
-func (mnms MockPeerMessageService) DeliverPeerList(nodeId p2p.PeerId, nodeList []p2p.Peer) error {
+func (mnms MockPeerApiGrpcCommandService) DeliverPeerTable(connectionId string, peerTable p2p.PeerTable) error {
 	return nil
 }
 
@@ -45,21 +47,22 @@ func TestPeerApi_UpdatePeerList(t *testing.T) {
 		},
 	}
 
-	nodeApi := SetupPeerApi()
+	peerApi := SetupPeerApi()
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := nodeApi.UpdatePeerList(test.input)
+		err := peerApi.UpdatePeerList(test.input)
 		assert.Equal(t, err, test.err)
 	}
 }
 
 func SetupPeerApi() *api.PeerApi {
-	nodeRepository := MockPeerRepository{}
+	mockService := MockService{}
+	peerRepository := MockPeerRepository{}
 	eventRepository := MockEventRepository{}
-	messageService := MockPeerMessageService{}
+	grpcCommandService := MockPeerApiGrpcCommandService{}
 
-	nodeApi := api.NewPeerApi(nodeRepository, eventRepository, messageService)
+	peerApi := api.NewPeerApi(mockService, peerRepository, eventRepository, grpcCommandService)
 
-	return nodeApi
+	return peerApi
 }

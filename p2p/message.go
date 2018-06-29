@@ -18,3 +18,7 @@ type LeaderInfoResponseMessage struct {
 	LeaderId string
 	Address  string
 }
+
+type PeerTableMessage struct{
+	PeerTable PeerTable
+}

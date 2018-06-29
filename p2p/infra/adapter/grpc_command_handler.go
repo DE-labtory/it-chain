@@ -18,7 +18,8 @@ type LeaderApi interface {
 }
 
 type GrpcCommandHandlerPeerApi interface {
-	UpdatePeerList(peerList []p2p.Peer) error
+	GetPeerTable() ([]p2p.Peer, error)
+	UpdatePeerTable(peerList []p2p.Peer) error
 	DeliverPeerList(connectionId string) error
 	AddPeer(peer p2p.Peer)
 }
@@ -35,11 +36,11 @@ func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerAp
 	}
 }
 
-func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveCommand) error {
+func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveCommand) error {
 
 	switch command.Protocol {
 	case "LeaderInfoRequestProtocol":
-		g.leaderApi.DeliverLeaderInfo(command.ConnectionID)
+		gch.leaderApi.DeliverLeaderInfo(command.ConnectionID)
 		break
 
 	case "LeaderInfoDeliverProtocol":
@@ -49,25 +50,38 @@ func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveCommand
 			return ErrLeaderInfoDeliver
 		}
 
-		g.leaderApi.UpdateLeader(leader)
+		gch.leaderApi.UpdateLeader(leader)
 		break
 
 	case "PeerListRequestProtocol":
 
-		g.peerApi.DeliverPeerList(command.ConnectionID)
+		gch.peerApi.DeliverPeerList(command.ConnectionID)
 		break
 
-	case "PeerListDeliverProtocol":
 
+	case "PeerTableDeliverProtocol":
+		//receive peer table
 
-		peerList := make([]p2p.Peer, 0)
-		if err := json.Unmarshal(command.Body, &peerList); err != nil {
+		//1. receive peer table
+		oppositePeerTable := make([]p2p.Peer, 0)
+		if err := json.Unmarshal(command.Body, &oppositePeerTable); err != nil {
 			//todo error 처리
 			return ErrPeerListDeliver
 		}
 
 
-		g.peerApi.UpdatePeerList(peerList)
+		gch.peerApi.UpdatePeerTable(oppositePeerTable)
+
+		//2. update leader
+		myPeerTable, myErr := gch.peerApi.GetPeerTable()
+
+		if len(myPeerTable) < len(oppositePeerTable) {
+
+		}
+
+		//3. dial according to peer table
+
+
 		break
 
 	case "PeerDeliverProtocol":
@@ -79,7 +93,7 @@ func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveCommand
 			return ErrPeerDeliver
 		}
 
-		g.peerApi.AddPeer(peer)
+		gch.peerApi.AddPeer(peer)
 		break
 	}
 

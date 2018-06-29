@@ -1,7 +1,21 @@
 package p2p
 
+import (
+	"github.com/it-chain/it-chain-Engine/p2p/api"
+	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/memory"
+	"github.com/it-chain/midgard"
+	"github.com/it-chain/midgard/bus/rabbitmq"
+	"github.com/it-chain/it-chain-Engine/p2p/infra/adapter"
+)
+
 //todo implement it!
 func init() {
+	peerRepository, _ := memory.NewPeerRepository()
+	publisher := rabbitmq.Connect("")
+	eventRepository := midgard.NewRepo(store, publisher)
+	publisher :=
+	grpcCommandService := adapter.NewGrpcCommandService(publisher)
+	peerApi := api.NewPeerApi(peerRepository, eventRepository, grpcCommandService)
 	////myIp := conf.GetConfiguration().Common.NodeIp
 	//
 	//config := conf.GetConfiguration()
@@ -10,11 +24,10 @@ func init() {
 	//// todo change node repo and leader repo after managing peerTable
 	//nodeRepository := leveldb.NewNodeRepository("path1")
 	//leaderRepository := leveldb.NewLeaderRepository("path2")
-	//publisher := rabbitmq.Connect("")
+
 	//
 	//messageDispatcher := adapter.NewMessageDispatcher(publisher)
 	//
-	//leaderApi := api.NewLeaderApi(eventRepository, messageDispatcher, myInfo)
 	//
 	////create amqp Handler
 	//eventHandler := adapter.NewNodeEventHandler(nodeRepository, leaderRepository)
