@@ -56,7 +56,7 @@ func (t *Transaction) On(event midgard.Event) error {
 		t.TxData = v.TxData
 
 	default:
-		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
+		return errors.New(fmt.Sprintf("unhandled event_store [%s]", v))
 	}
 
 	return nil

@@ -1,11 +1,12 @@
 package adapter
 
 import (
-	"github.com/it-chain/it-chain-Engine/txpool"
 	"errors"
+
+	"github.com/it-chain/it-chain-Engine/txpool"
 )
 
-var ErrNoEventID = errors.New("no event id ")
+var ErrNoEventID = errors.New("no event_store id ")
 
 //////////////Event Handler
 

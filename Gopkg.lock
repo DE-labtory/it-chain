@@ -109,10 +109,11 @@
     ".",
     "bus",
     "bus/rabbitmq",
+    "store",
     "store/leveldb"
   ]
-  revision = "7650c4bd32e3ea0cef37303ce523a478fc20e4ee"
-  version = "v0.0.1"
+  revision = "b7fe3c7479773f3aece558f3fb5c426c775dfd4c"
+  version = "v0.0.2"
 
 [[projects]]
   branch = "develop"
@@ -496,6 +497,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "863e3fac4d6b1bf2583fe39c14b52be89d8b096913793c0f97e633acc1431606"
+  inputs-digest = "88611eb26a7940ab90370edae8100e1da75a0f6cf316e024bed922de1d161beb"
   solver-name = "gps-cdcl"
   solver-version = 1

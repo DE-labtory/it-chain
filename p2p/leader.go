@@ -31,7 +31,7 @@ func (l *Leader) On(event midgard.Event) error {
 		l.LeaderId = LeaderId{v.GetID()}
 
 	default:
-		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
+		return errors.New(fmt.Sprintf("unhandled event_store [%s]", v))
 	}
 
 	return nil
