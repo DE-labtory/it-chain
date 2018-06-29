@@ -48,7 +48,6 @@ func (gcs *GrpcCommandService) RequestBlock(peerId p2p.PeerId, height uint64) er
 }
 
 func (gcs *GrpcCommandService) ResponseBlock(peerId p2p.PeerId, block blockchain.Block) error {
-
 	if peerId.Id == "" {
 		return ErrEmptyNodeId
 	}
