@@ -29,7 +29,7 @@ func NewBlockApi(blockchainRepository blockchain.Repository, eventRepository *mi
 func (bApi *BlockApi) CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error) {
 	byteValue, err := getConfigFromJson(genesisConfFilePath)
 	if err != nil {
-		return nil, err
+		return blockchain.Block{}, err
 	}
 
 	validator := bApi.blockchainRepository.GetValidator()
@@ -38,9 +38,9 @@ func (bApi *BlockApi) CreateGenesisBlock(genesisConfFilePath string) (blockchain
 
 	json.Unmarshal(byteValue, &GenesisBlock)
 	GenesisBlock.SetTimestamp((time.Now()).Round(0))
-	Seal, err := validator.BuildSeal(GenesisBlock)
+	Seal, err := validator.BuildSeal(&GenesisBlock)
 	if err != nil {
-		return nil, err
+		return blockchain.Block{}, err
 	}
 
 	GenesisBlock.SetSeal(Seal)
@@ -52,14 +52,14 @@ func (bApi *BlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.B
 
 	block, err := repo.NewEmptyBlock()
 	if err != nil {
-		return nil, err
+		return blockchain.Block{}, err
 	}
 
 	v := bApi.blockchainRepository.GetValidator()
 
 	txSeal, err := v.BuildTxSeal(txList)
 	if err != nil {
-		return nil, err
+		return blockchain.Block{}, err
 	}
 
 	block.SetTxSeal(txSeal)
@@ -70,7 +70,7 @@ func (bApi *BlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.B
 
 	block.SetTimestamp(time.Now())
 
-	blockSeal, err := v.BuildSeal(block)
+	blockSeal, err := v.BuildSeal(&block)
 
 	block.SetSeal(blockSeal)
 
