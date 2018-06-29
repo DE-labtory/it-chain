@@ -1,5 +1,5 @@
 package blockchain
 
-type MessageDispatcher interface {
+type CommandService interface {
 	SendBlockValidateCommand(block Block) error
 }
