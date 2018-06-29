@@ -1,30 +1,27 @@
 package adapter
 
 import (
-	"github.com/it-chain/it-chain-Engine/blockchain/api"
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/txpool"
 )
 
-type BlockchainCommandHandler struct {
-	nodeApi api.NodeApi
-	blockApi api.BlockApi
+type CommandHandlerBlockApi interface {
+	CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error)
+	CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error)
 }
 
-func NewBlockchainCommandHandler(blockApi api.BlockApi, nodeApi api.NodeApi) *BlockchainCommandHandler {
-	return &BlockchainCommandHandler{
-		nodeApi: nodeApi,
+type CommandHandler struct {
+	blockApi CommandHandlerBlockApi
+}
+
+func NewCommandHandler(blockApi CommandHandlerBlockApi) *CommandHandler {
+	return &CommandHandler{
 		blockApi: blockApi,
 	}
 }
 
-// todo
-func (b *BlockchainCommandHandler) HandleUpdateNodesCommand(command blockchain.NodeUpdateCommand) {
-	panic("implement me")
-}
-
-func (handler *BlockchainCommandHandler) HandleProposeBlockCommand(cmd blockchain.ProposeBlockCommand) {
-	//rawTxList := cmd.Transactions
+func (handler *CommandHandler) HandleProposeBlockCommand(command blockchain.ProposeBlockCommand) {
+	//rawTxList := command.Transactions
 	//
 	//txList, err := convertTxList(rawTxList)
 	//if err != nil {

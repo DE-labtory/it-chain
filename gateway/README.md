@@ -26,13 +26,36 @@ in server.go
 gRPC 의 서버의 모든 기능을 수행한다.
 응답을 대기하고, 새로운 서버를 생성하고, rpc connection이 생겼을 때에 대한 handler 역할을 수행한다.
 
+## GRPC Command
+
+**GrpcDeliverCommand**
+Command used for deliver message to other node
+```go
+type GrpcDeliverCommand struct {
+	midgard.CommandModel
+	Recipients []string
+	Body       []byte
+	Protocol   string
+}
+```
+
+**GrpcReceiveCommand**
+Command used for receive message from other node
+```go
+type GrpcReceiveCommand struct {
+	midgard.CommandModel
+	Body         []byte
+	ConnectionID string
+	Protocol     string
+}
+```
 
 
-# Consume Event
+## Consume Event
 
 - MessageDeliveryEvent
 
-# PublishEvent
+## PublishEvent
 
 - PeerConnectEvent
 

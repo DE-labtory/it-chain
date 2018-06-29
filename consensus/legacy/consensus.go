@@ -1,0 +1,5 @@
+package legacy
+
+func Init() {
+
+}
