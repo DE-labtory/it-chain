@@ -2,7 +2,6 @@ package blockchain
 
 import "github.com/it-chain/midgard"
 
-
 type NodeUpdateEvent struct {
 	midgard.EventModel
 }
@@ -18,6 +17,11 @@ type NodeDeletedEvent struct {
 }
 
 type BlockValidatedEvent struct {
+	midgard.EventModel
+	Block Block
+}
+
+type BlockProposedEvent struct {
 	midgard.EventModel
 	Block Block
 }
