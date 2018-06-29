@@ -33,9 +33,7 @@ func (gcs *GrpcCommandService) RequestBlock(peerId p2p.PeerId, height uint64) er
 		return ErrEmptyNodeId
 	}
 
-	body := blockchain.BlockRequestMessage{
-		Height: height,
-	}
+	body := height
 
 	deliverCommand, err := createGrpcCommand("BlockRequestProtocol", body)
 	if err != nil {
