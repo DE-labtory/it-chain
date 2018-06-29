@@ -43,7 +43,7 @@ func (n *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent) 
 	return nil
 }
 
-//todo conn disconnect event_store 구현
+//todo conn disconnect eventstore 구현
 func (n *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconnectedEvent) error {
 
 	if event.ID == "" {

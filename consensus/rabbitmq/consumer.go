@@ -31,7 +31,7 @@ func (mc MessageConsumer) HandleConsensusCreateCmd(amqpMessage amqp.Delivery) {
 
 func (mc MessageConsumer) HandleReceivedConsensusMessageEvent(amqpMessage amqp.Delivery) {
 
-	//consensusMsg := &event_store.ConsensusMessageArriveEvent{}
+	//consensusMsg := &eventstore.ConsensusMessageArriveEvent{}
 	//err := json.Unmarshal(amqpMessage.Body, &consensusMsg)
 	//
 	//if err != nil {
@@ -39,7 +39,7 @@ func (mc MessageConsumer) HandleReceivedConsensusMessageEvent(amqpMessage amqp.D
 	//}
 	//
 	//switch consensusMsg.MessageType {
-	//case event_store.PREPREPARE:
+	//case eventstore.PREPREPARE:
 	//
 	//	preprepareMsg := msg.PreprepareMsg{}
 	//	err := json.Unmarshal(amqpMessage.Body, &preprepareMsg)
@@ -51,7 +51,7 @@ func (mc MessageConsumer) HandleReceivedConsensusMessageEvent(amqpMessage amqp.D
 	//	mc.consensusApi.ReceivePreprepareMsg(preprepareMsg)
 	//	break
 	//
-	//case event_store.PREPARE:
+	//case eventstore.PREPARE:
 	//
 	//	prepareMsg := msg.PrepareMsg{}
 	//	err := json.Unmarshal(amqpMessage.Body, &prepareMsg)
@@ -63,7 +63,7 @@ func (mc MessageConsumer) HandleReceivedConsensusMessageEvent(amqpMessage amqp.D
 	//	mc.consensusApi.ReceivePrepareMsg(prepareMsg)
 	//	break
 	//
-	//case event_store.COMMIT:
+	//case eventstore.COMMIT:
 	//
 	//	commitMsg := msg.CommitMsg{}
 	//	err := json.Unmarshal(amqpMessage.Body, &commitMsg)

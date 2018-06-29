@@ -24,7 +24,7 @@ type Peer struct {
 func (n Peer) On(event midgard.Event) error {
 	switch v := event.(type) {
 	default:
-		return errors.New(fmt.Sprintf("unhandled event_store [%s]", v))
+		return errors.New(fmt.Sprintf("unhandled eventstore [%s]", v))
 	}
 
 	return nil

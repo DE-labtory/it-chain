@@ -6,7 +6,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/txpool"
 )
 
-var ErrNoEventID = errors.New("no event_store id ")
+var ErrNoEventID = errors.New("no eventstore id ")
 
 //////////////Event Handler
 
