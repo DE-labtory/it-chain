@@ -12,7 +12,7 @@ import (
 type EventHandlerMockPeerApi struct {}
 func (na EventHandlerMockPeerApi) AddPeer(node p2p.Peer) error{return nil}
 func (na EventHandlerMockPeerApi) DeletePeer(id p2p.PeerId) error{return nil}
-
+func (na EventHandlerMockPeerApi) DeliverPeerTable(connectionId string) error{return nil}
 
 func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
 	//1. test proper input
@@ -33,13 +33,6 @@ func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
 				address string
 			}{nodeId: string("123"), address: string("123")},
 			err:nil,
-		},
-		"empty nodeId test":{
-			input: struct {
-				nodeId  string
-				address string
-			}{nodeId: string(""), address: string("123")},
-			err:adapter.ErrEmptyPeerId,
 		},
 		"empty address test":{
 			input: struct {

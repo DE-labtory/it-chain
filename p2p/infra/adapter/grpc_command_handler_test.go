@@ -16,12 +16,18 @@ func (mla MockLeaderApi) UpdateLeader(leader p2p.Leader) error { return nil }
 func (mla MockLeaderApi) DeliverLeaderInfo(connectionId string)  {}
 
 type MockPeerApi struct{}
-
+func (mna MockPeerApi) GetPeerTable() (p2p.PeerTable){
+	peerTable := p2p.PeerTable{
+		Leader:p2p.Leader{LeaderId:p2p.LeaderId{Id:"1"}},
+		PeerList:[]p2p.Peer{p2p.Peer{PeerId:p2p.PeerId{Id:"2"}}},
+	}
+	return peerTable
+}
 func (mna MockPeerApi) UpdatePeerList(peerList []p2p.Peer) error { return nil }
-func (mna MockPeerApi) DeliverPeerList(connectionId string) error  { return nil }
+func (mna MockPeerApi) DeliverPeerTable(connectionId string) error  { return nil }
 func (mna MockPeerApi) AddPeer(peer p2p.Peer)                    {}
 
-func TestGrpcMessageHandler_HandleMessageReceive(t *testing.T) {
+func TestGrpcCommandHandler_HandleMessageReceive(t *testing.T) {
 
 	leader := p2p.Leader{}
 	leaderByte, _ := json.Marshal(leader)
@@ -49,14 +55,14 @@ func TestGrpcMessageHandler_HandleMessageReceive(t *testing.T) {
 			},
 			err: nil,
 		},
-		"peer list deliver test success": {
+		"peer table deliver test success": {
 			input: struct {
 				command p2p.GrpcReceiveCommand
 			}{
 				command: p2p.GrpcReceiveCommand{
 					CommandModel: midgard.CommandModel{ID: "123"},
 					Body:         peerListByte,
-					Protocol:     "PeerListDeliverProtocol",
+					Protocol:     "PeerTableDeliverProtocol",
 				},
 			},
 			err: nil,
@@ -71,5 +77,15 @@ func TestGrpcMessageHandler_HandleMessageReceive(t *testing.T) {
 		err := messageHandler.HandleMessageReceive(test.input.command)
 		assert.Equal(t, err, test.err)
 	}
+
+}
+
+//todo
+func TestReceiverPeerTable(t *testing.T) {
+
+}
+
+//todo
+func TestUpdateWithLongerPeerList(t *testing.T) {
 
 }

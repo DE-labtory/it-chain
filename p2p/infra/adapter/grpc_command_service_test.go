@@ -175,7 +175,7 @@ func TestGrpcCommandService_DeliverPeerTable(t *testing.T) {
 				connectionId: "1",
 				peerTable: p2p.PeerTable{},
 			},
-			err: ErrEmptyPeerList,
+			err: p2p.ErrEmptyPeerList,
 		},
 		"empty connection id test": {
 			input: struct {

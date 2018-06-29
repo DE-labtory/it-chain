@@ -22,7 +22,7 @@ type LeaderApi interface {
 type GrpcCommandHandlerPeerApi interface {
 	GetPeerTable() (p2p.PeerTable)
 	UpdatePeerList(peerList []p2p.Peer) error
-	DeliverPeerList(connectionId string) error
+	DeliverPeerTable(connectionId string) error
 	AddPeer(peer p2p.Peer)
 }
 
@@ -53,11 +53,6 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 		}
 
 		gch.leaderApi.UpdateLeader(leader)
-		break
-
-	case "PeerListRequestProtocol":
-
-		gch.peerApi.DeliverPeerList(command.ConnectionID)
 		break
 
 

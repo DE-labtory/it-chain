@@ -9,7 +9,7 @@ import (
 	"github.com/magiconair/properties/assert"
 )
 
-var ErrEmptyPeerList = errors.New("empty node list proposed")
+var ErrEmptyPeerList = errors.New("empty peer list proposed")
 
 //todo make node api test
 //todo make fake dependencies 1. eventRepository 2. messageDispatcher 3. peerRepository
