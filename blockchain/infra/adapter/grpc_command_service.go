@@ -5,7 +5,6 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/common"
-	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
@@ -28,7 +27,7 @@ func NewGrpcCommandService(publish Publish) *GrpcCommandService {
 }
 
 
-func (gcs *GrpcCommandService) RequestBlock(peerId p2p.PeerId, height uint64) error {
+func (gcs *GrpcCommandService) RequestBlock(peerId blockchain.PeerId, height uint64) error {
 
 
 	if peerId.Id == "" {
@@ -50,7 +49,7 @@ func (gcs *GrpcCommandService) RequestBlock(peerId p2p.PeerId, height uint64) er
 }
 
 
-func (gcs *GrpcCommandService) ResponseBlock(peerId p2p.PeerId, block blockchain.Block) error {
+func (gcs *GrpcCommandService) ResponseBlock(peerId blockchain.PeerId, block blockchain.Block) error {
 	if peerId.Id == "" {
 		return ErrEmptyNodeId
 	}

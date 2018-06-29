@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
-	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,17 +13,17 @@ func TestGrpcCommandService_RequestBlock(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			peerId p2p.PeerId
+			peerId blockchain.PeerId
 			height uint64
 		}
 		err error
 	}{
 		"success: request block": {
 			input: struct {
-				peerId p2p.PeerId
+				peerId blockchain.PeerId
 				height uint64
 			}{
-				peerId: p2p.PeerId{
+				peerId: blockchain.PeerId{
 					Id: "1",
 				},
 				height: uint64(0),
@@ -33,10 +32,10 @@ func TestGrpcCommandService_RequestBlock(t *testing.T) {
 		},
 		"fail: empty node id": {
 			input: struct {
-				peerId p2p.PeerId
+				peerId blockchain.PeerId
 				height uint64
 			}{
-				peerId: p2p.PeerId{},
+				peerId: blockchain.PeerId{},
 				height: uint64(0),
 			},
 			err: adapter.ErrEmptyNodeId,
@@ -64,17 +63,17 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			peerId p2p.PeerId
+			peerId blockchain.PeerId
 			block  blockchain.DefaultBlock
 		}
 		err error
 	}{
 		"success: request block": {
 			input: struct {
-				peerId p2p.PeerId
+				peerId blockchain.PeerId
 				block  blockchain.DefaultBlock
 			}{
-				peerId: p2p.PeerId{
+				peerId: blockchain.PeerId{
 					Id: "1",
 				},
 				block: blockchain.DefaultBlock{
@@ -85,10 +84,10 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 		},
 		"fail: empty node id": {
 			input: struct {
-				peerId p2p.PeerId
+				peerId blockchain.PeerId
 				block  blockchain.DefaultBlock
 			}{
-				peerId: p2p.PeerId{},
+				peerId: blockchain.PeerId{},
 				block: blockchain.DefaultBlock{
 					Seal: []byte("seal"),
 				},
@@ -97,10 +96,10 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 		},
 		"fail: empty block seal": {
 			input: struct {
-				peerId p2p.PeerId
+				peerId blockchain.PeerId
 				block  blockchain.DefaultBlock
 			}{
-				peerId: p2p.PeerId{
+				peerId: blockchain.PeerId{
 					"1",
 				},
 				block: blockchain.DefaultBlock{
