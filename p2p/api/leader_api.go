@@ -9,13 +9,13 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-var ErrEmptyPeerId = errors.New("empty node id requested")
+var ErrEmptyPeerId = errors.New("empty peer id requested")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 
 type LeaderApi struct {
 	leaderRepository ReadOnlyLeaderRepository
 	eventRepository  EventRepository
-	messageService   LeaderMessageService
+	grpcCommandService   LeaderGrpcCommandService
 	myInfo           *p2p.Peer
 }
 
@@ -29,16 +29,16 @@ type EventRepository interface { //midgard.Repository
 	Save(aggregateID string, events ...midgard.Event) error
 }
 
-type LeaderMessageService interface {
-	DeliverLeaderInfo(nodeId p2p.PeerId, leader p2p.Leader) error
+type LeaderGrpcCommandService interface {
+	DeliverLeaderInfo(peerId p2p.PeerId, leader p2p.Leader) error
 }
 
-func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, messageService LeaderMessageService, myInfo *p2p.Peer) *LeaderApi {
+func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, grpcCommandService LeaderGrpcCommandService, myInfo *p2p.Peer) *LeaderApi {
 
 	return &LeaderApi{
 		leaderRepository: leaderRepository,
 		eventRepository:  eventRepository,
-		messageService:   messageService,
+		grpcCommandService:   grpcCommandService,
 		myInfo:           myInfo,
 	}
 }
@@ -68,14 +68,14 @@ func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Leader) error {
 	return err
 }
 
-func (leaderApi *LeaderApi) DeliverLeaderInfo(nodeId p2p.PeerId) error {
+func (leaderApi *LeaderApi) DeliverLeaderInfo(peerId p2p.PeerId) error {
 
-	if nodeId.Id == "" {
+	if peerId.Id == "" {
 		return ErrEmptyPeerId
 	}
 
 	leader := leaderApi.leaderRepository.GetLeader()
-	leaderApi.messageService.DeliverLeaderInfo(nodeId, leader)
+	leaderApi.grpcCommandService.DeliverLeaderInfo(peerId, leader)
 
 	return nil
 }
