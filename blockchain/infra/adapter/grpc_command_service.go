@@ -27,7 +27,9 @@ func NewGrpcCommandService(publish Publish) *GrpcCommandService {
 	}
 }
 
+
 func (gcs *GrpcCommandService) RequestBlock(peerId p2p.PeerId, height uint64) error {
+
 
 	if peerId.Id == "" {
 		return ErrEmptyNodeId
@@ -46,6 +48,7 @@ func (gcs *GrpcCommandService) RequestBlock(peerId p2p.PeerId, height uint64) er
 
 	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
+
 
 func (gcs *GrpcCommandService) ResponseBlock(peerId p2p.PeerId, block blockchain.Block) error {
 	if peerId.Id == "" {

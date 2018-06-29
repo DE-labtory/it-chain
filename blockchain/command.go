@@ -12,6 +12,7 @@ type SyncUpdateCommand struct {
 
 type NodeUpdateCommand struct {
 	midgard.EventModel
+	Peer
 }
 
 type ProposeBlockCommand struct {

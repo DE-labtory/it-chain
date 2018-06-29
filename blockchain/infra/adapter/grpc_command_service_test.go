@@ -68,14 +68,14 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			peerId p2p.PeerId
-			block  MockBlock
+			block  DefaultBlock
 		}
 		err error
 	}{
 		"success: request block": {
 			input: struct {
 				peerId p2p.PeerId
-				block  MockBlock
+				block  DefaultBlock
 			}{
 				peerId: p2p.PeerId{
 					Id: "1",
@@ -89,11 +89,11 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 		"fail: empty node id": {
 			input: struct {
 				peerId p2p.PeerId
-				block  MockBlock
+				block  DefaultBlock
 			}{
 				peerId: p2p.PeerId{},
-				block: MockBlock{
-					seal: []byte("seal"),
+				block: DefaultBlock{
+					Seal: []byte("seal"),
 				},
 			},
 			err: adapter.ErrEmptyNodeId,
@@ -101,7 +101,7 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 		"fail: empty block seal": {
 			input: struct {
 				peerId p2p.PeerId
-				block  MockBlock
+				block  DefaultBlock
 			}{
 				peerId: p2p.PeerId{
 					"1",
@@ -126,7 +126,7 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := GrpcCommandService.ResponseBlock(test.input.peerId, test.input.block)
+		err := GrpcCommandService.ResponseBlock(test.input.peerId, &test.input.block)
 		assert.Equal(t, err, test.err)
 	}
 
