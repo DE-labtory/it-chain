@@ -17,10 +17,25 @@ var ErrEmptyPeerList = errors.New("empty node list proposed")
 //todo test continue
 
 type MockService struct {}
-func (ms MockService) GetPeerTable() p2p.PeerTable{}
+func (ms MockService) GetPeerTable() p2p.PeerTable{
+	peerTable := p2p.PeerTable{
+		Leader:p2p.Leader{
+			LeaderId:p2p.LeaderId{Id:"1"},
+		},
+		PeerList:[]p2p.Peer{{
+			PeerId:p2p.PeerId{
+				Id:"2",
+			},
+		}},
+	}
+	return peerTable
+}
 type MockPeerRepository struct {}
 
-func (mnr MockPeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) { return nil, nil }
+func (mnr MockPeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) {
+	peer := p2p.Peer{PeerId:id}
+	return peer, nil
+}
 func (mnr MockPeerRepository) FindAll() ([]p2p.Peer, error)              { return nil, nil }
 
 type MockPeerApiGrpcCommandService struct{}

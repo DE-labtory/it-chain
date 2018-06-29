@@ -37,7 +37,7 @@ func NewPeerApi(service PeerApiService, peerRepository ReadOnlyPeerRepository, e
 	}
 }
 
-func (peerApi *PeerApi) UpdatePeerTable(peerList []p2p.Peer) error {
+func (peerApi *PeerApi) UpdatePeerList(peerList []p2p.Peer) error {
 
 	//둘다 존재할경우 무시, existPeerList에만 존재할경우 PeerDeletedEvent, peerList에 존재할경우 PeerCreatedEvent
 	var event midgard.Event
