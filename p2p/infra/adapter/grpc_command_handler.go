@@ -63,6 +63,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 
 
 	case "PeerLeaderTableDeliverProtocol": //receive peer table
+
 		//1. receive peer table
 		_, oppositeLeader, oppositePeerList, _ := ReceiverPeerLeaderTable(command.Body)
 
@@ -102,7 +103,7 @@ func ReceiverPeerLeaderTable(body []byte) (p2p.PeerLeaderTable, p2p.Leader, []p2
 	return peerTable, leader, peerList, nil
 }
 
-func UpdateWithLongerPeerList(gch *GrpcCommandHandler, oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer){
+func UpdateWithLongerPeerList(gch *GrpcCommandHandler, oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer) error{
 	myPeerLeaderTable := gch.peerApi.GetPeerLeaderTable()
 	myPeerList, _ := myPeerLeaderTable.GetPeerList()
 	myLeader, _ := myPeerLeaderTable.GetLeader()
@@ -113,6 +114,7 @@ func UpdateWithLongerPeerList(gch *GrpcCommandHandler, oppositeLeader p2p.Leader
 	}else{
 		gch.leaderApi.UpdateLeader(myLeader)
 	}
+	return nil
 }
 
 func DialToUnConnectedNode(commandService GrpcCommandHandlerCommandService, peerApi GrpcCommandHandlerPeerApi, peerList []p2p.Peer) error{

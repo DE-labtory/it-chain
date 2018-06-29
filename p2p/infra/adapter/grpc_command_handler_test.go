@@ -38,47 +38,48 @@ func (mna MockPeerApi) AddPeer(peer p2p.Peer)                    {}
 type MockCommandService struct{}
 func (mcs MockCommandService) Dial(ipAddress string) error {return nil}
 
+//todo
 func TestGrpcCommandHandler_HandleMessageReceive(t *testing.T) {
 
 	leader := p2p.Leader{}
 	leaderByte, _ := json.Marshal(leader)
 
-	peerList := make([]p2p.Peer, 0)
-	newPeerList := append(peerList, p2p.Peer{PeerId: p2p.PeerId{Id: "123"}})
-	peerListByte, _ := json.Marshal(newPeerList)
 
 	//todo error case write!
 	tests := map[string]struct {
 		input struct {
-			command p2p.GrpcReceiveCommand
+			id string
+			protocol string
+			body []byte
 		}
 		err error
 	}{
-		"leader info deliver test success": {
+		"leader info deliver test success":{
 			input: struct {
-				command p2p.GrpcReceiveCommand
+				id string
+				protocol string
+				body     []byte
 			}{
-				command: p2p.GrpcReceiveCommand{
-					CommandModel: midgard.CommandModel{ID: "123"},
-					Body:         leaderByte,
-					Protocol:     "LeaderInfoDeliverProtocol",
-				},
+				id:"1",
+				protocol: string("LeaderInfoDeliverProtocol"),
+				body: leaderByte,
 			},
-			err: nil,
+			err:nil,
 		},
-		"peer table deliver test success": {
-			input: struct {
-				command p2p.GrpcReceiveCommand
-			}{
-				command: p2p.GrpcReceiveCommand{
-					CommandModel: midgard.CommandModel{ID: "123"},
-					Body:         peerListByte,
-					Protocol:     "PeerLeaderTableDeliverProtocol",
-				},
-			},
-			err: nil,
+		"leader info deliver test empty leader id":{
+
+		},
+		"leader table deliver test success":{
+
+		},
+		"peer leader table deliver test empty peer list":{
+
+		},
+		"peer leader table deliver test empty leader id":{
+
 		},
 	}
+
 	leaderApi := MockLeaderApi{}
 	peerApi := MockPeerApi{}
 	commandService := MockCommandService{}
@@ -86,8 +87,15 @@ func TestGrpcCommandHandler_HandleMessageReceive(t *testing.T) {
 	messageHandler := adapter.NewGrpcCommandHandler(leaderApi, peerApi, commandService)
 
 	for testName, test := range tests {
+		grpcReceiveCommand := p2p.GrpcReceiveCommand{
+			CommandModel:midgard.CommandModel{
+				ID:test.input.id,
+			},
+			Body:test.input.body,
+			Protocol:test.input.protocol,
+		}
 		t.Logf("running test case %s", testName)
-		err := messageHandler.HandleMessageReceive(test.input.command)
+		err := messageHandler.HandleMessageReceive(grpcReceiveCommand)
 		assert.Equal(t, err, test.err)
 	}
 
