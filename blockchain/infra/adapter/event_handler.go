@@ -32,9 +32,9 @@ func (eh *EventHandler) HandleNodeCreatedEvent(event blockchain.NodeCreatedEvent
 		return ErrEmptyEventId
 	}
 
-	node := event.Peer
+	peer := event.Peer
 
-	err := eh.repositoryProjector.PeerRepository.Add(node)
+	err := eh.repositoryProjector.PeerRepository.Add(peer)
 
 	if err != nil {
 		return ErrNodeApi
@@ -50,9 +50,9 @@ func (eh *EventHandler) HandleNodeDeletedEvent(event blockchain.NodeDeletedEvent
 		return ErrEmptyEventId
 	}
 
-	node := event.Peer
+	peer := event.Peer
 
-	err := eh.repositoryProjector.PeerRepository.Remove(node.PeerId)
+	err := eh.repositoryProjector.PeerRepository.Remove(peer.PeerId)
 
 	if err != nil {
 		return ErrNodeApi
