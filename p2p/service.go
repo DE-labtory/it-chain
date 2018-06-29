@@ -1,5 +1,5 @@
 package p2p
 
-type CommandService interface {
+type PeerService interface{
 	Dial(ipAddress string) error
 }

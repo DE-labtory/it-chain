@@ -22,16 +22,18 @@ type ReadOnlyPeerRepository interface {
 type PeerApi struct {
 	peerApiPeerService PeerApiPeerService
 	peerRepository  ReadOnlyPeerRepository
+	leaderRepository ReadOnlyLeaderRepository
 	eventRepository EventRepository
 	peerApiGrpcCommandService  PeerApiGrpcCommandService
 }
 
 
 
-func NewPeerApi(peerApiPeerService PeerApiPeerService, peerRepository ReadOnlyPeerRepository, eventRepository EventRepository, peerApiGrpcCommandService PeerApiGrpcCommandService) *PeerApi {
+func NewPeerApi(peerApiPeerService PeerApiPeerService, peerRepository ReadOnlyPeerRepository, leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, peerApiGrpcCommandService PeerApiGrpcCommandService) *PeerApi {
 	return &PeerApi{
 		peerApiPeerService:peerApiPeerService,
 		peerRepository:  peerRepository,
+		leaderRepository:leaderRepository,
 		eventRepository: eventRepository,
 		peerApiGrpcCommandService:  peerApiGrpcCommandService,
 	}
@@ -77,9 +79,13 @@ func (peerApi *PeerApi) UpdatePeerList(peerList []p2p.Peer) error {
 	return nil
 }
 func (peerApi *PeerApi) GetPeerLeaderTable() p2p.PeerLeaderTable{
-	peerTable := peerApi.peerApiPeerService.GetPeerLeaderTable()
-
-	return peerTable
+	leader := peerApi.leaderRepository.GetLeader()
+	peerList, _ := peerApi.peerRepository.FindAll()
+	peerLeaderTable := p2p.PeerLeaderTable{
+		Leader:leader,
+		PeerList:peerList,
+	}
+	return peerLeaderTable
 }
 
 //Deliver Peer table that consists of peerList and leader
@@ -132,3 +138,4 @@ func (peerApi *PeerApi) DeletePeer(id p2p.PeerId) error {
 func (peerApi *PeerApi) FindById(id p2p.PeerId) (p2p.Peer, error){
 	return peerApi.peerRepository.FindById(id)
 }
+

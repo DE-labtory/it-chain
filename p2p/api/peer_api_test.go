@@ -36,7 +36,13 @@ func (mnr MockPeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) {
 	peer := p2p.Peer{PeerId:id}
 	return peer, nil
 }
-func (mnr MockPeerRepository) FindAll() ([]p2p.Peer, error)              { return nil, nil }
+func (mnr MockPeerRepository) FindAll() ([]p2p.Peer, error) { return nil, nil }
+
+type MockLeaderRepository struct{}
+func (mpr MockLeaderRepository) GetLeader() p2p.Leader{
+	leader := p2p.Leader{LeaderId:p2p.LeaderId{Id:"1"}}
+	return leader
+}
 
 type MockPeerApiGrpcCommandService struct{}
 
@@ -74,10 +80,11 @@ func TestPeerApi_UpdatePeerList(t *testing.T) {
 func SetupPeerApi() *api.PeerApi {
 	mockService := MockService{}
 	peerRepository := MockPeerRepository{}
+	leaderRepository := MockLeaderRepository{}
 	eventRepository := MockEventRepository{}
 	grpcCommandService := MockPeerApiGrpcCommandService{}
 
-	peerApi := api.NewPeerApi(mockService, peerRepository, eventRepository, grpcCommandService)
+	peerApi := api.NewPeerApi(mockService, peerRepository, leaderRepository, eventRepository, grpcCommandService)
 
 	return peerApi
 }
