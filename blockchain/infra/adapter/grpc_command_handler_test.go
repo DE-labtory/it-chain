@@ -34,7 +34,6 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 	tests := map[string]struct {
 		input struct {
 			command blockchain.GrpcReceiveCommand
-			newEmptyBlockErr error
 			getLastBlockErr error
 			syncCheckErr error
 		}
@@ -43,7 +42,6 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 		"success": {
 			input: struct {
 				command blockchain.GrpcReceiveCommand
-				newEmptyBlockErr error
 				getLastBlockErr error
 				syncCheckErr error
 			} {
@@ -55,26 +53,9 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 			},
 			err: nil,
 		},
-		"new empty block err test": {
-			input: struct {
-				command blockchain.GrpcReceiveCommand
-				newEmptyBlockErr error
-				getLastBlockErr error
-				syncCheckErr error
-			} {
-				command: blockchain.GrpcReceiveCommand{
-					CommandModel: midgard.CommandModel{ID: "111"},
-					Body: nil,
-					Protocol: "SyncCheckRequestProtocol",
-				},
-				newEmptyBlockErr: errors.New("error occur in NewEmptyBlock"),
-			},
-			err: adapter.ErrCreateBlock,
-		},
 		"get last block err test": {
 			input: struct {
 				command blockchain.GrpcReceiveCommand
-				newEmptyBlockErr error
 				getLastBlockErr error
 				syncCheckErr error
 			} {
@@ -90,7 +71,6 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 		"sync check err test": {
 			input: struct {
 				command blockchain.GrpcReceiveCommand
-				newEmptyBlockErr error
 				getLastBlockErr error
 				syncCheckErr error
 			} {
@@ -111,12 +91,8 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 		blockApi := MockBlockApi{}
 
 		blockRepository := MockROBlockRepository{}
-		blockRepository.NewEmptyBlockFunc = func() (blockchain.Block, error) {
-			return &blockchain.DefaultBlock{
-				Height: 99887,
-			}, test.input.newEmptyBlockErr
-		}
 		blockRepository.GetLastBlockFunc = func(block blockchain.Block) error {
+			block.SetHeight(99887)
 			return test.input.getLastBlockErr
 		}
 

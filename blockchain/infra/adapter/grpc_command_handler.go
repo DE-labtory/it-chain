@@ -5,7 +5,6 @@ import (
 	"errors"
 )
 
-var ErrCreateBlock = errors.New("error when creating block")
 var ErrGetLastBlock = errors.New("error when get last block")
 var ErrSyncCheckResponse = errors.New("error when sync check response")
 
@@ -14,7 +13,6 @@ type BlockApi interface {
 }
 
 type ReadOnlyBlockRepository interface {
-	NewEmptyBlock() (blockchain.Block, error)
 	GetLastBlock(block blockchain.Block) error
 }
 
@@ -40,12 +38,9 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 	switch command.Protocol {
 	case "SyncCheckRequestProtocol":
 		//TODO: 상대방의 SyncCheck를 위해서 자신의 last block을 보내준다.
-		block, err := g.blockRepository.NewEmptyBlock()
-		if err != nil {
-			return ErrCreateBlock
-		}
+		block := &blockchain.DefaultBlock{}
 
-		err = g.blockRepository.GetLastBlock(block)
+		err := g.blockRepository.GetLastBlock(block)
 		if err != nil {
 			return ErrGetLastBlock
 		}

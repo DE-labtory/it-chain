@@ -4,14 +4,11 @@ import (
 	"testing"
 
 	"reflect"
-
+	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
 	"github.com/it-chain/it-chain-Engine/p2p"
-	"github.com/it-chain/yggdrasill/impl"
 	"github.com/stretchr/testify/assert"
 )
-
-type DefaultBlock = impl.DefaultBlock
 
 func TestGrpcCommandService_RequestBlock(t *testing.T) {
 
@@ -68,19 +65,19 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			peerId p2p.PeerId
-			block  DefaultBlock
+			block  blockchain.DefaultBlock
 		}
 		err error
 	}{
 		"success: request block": {
 			input: struct {
 				peerId p2p.PeerId
-				block  DefaultBlock
+				block  blockchain.DefaultBlock
 			}{
 				peerId: p2p.PeerId{
 					Id: "1",
 				},
-				block: DefaultBlock{
+				block: blockchain.DefaultBlock{
 					Seal: []byte("seal"),
 				},
 			},
@@ -89,10 +86,10 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 		"fail: empty node id": {
 			input: struct {
 				peerId p2p.PeerId
-				block  DefaultBlock
+				block  blockchain.DefaultBlock
 			}{
 				peerId: p2p.PeerId{},
-				block: DefaultBlock{
+				block: blockchain.DefaultBlock{
 					Seal: []byte("seal"),
 				},
 			},
@@ -101,12 +98,12 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 		"fail: empty block seal": {
 			input: struct {
 				peerId p2p.PeerId
-				block  DefaultBlock
+				block  blockchain.DefaultBlock
 			}{
 				peerId: p2p.PeerId{
 					"1",
 				},
-				block: DefaultBlock{
+				block: blockchain.DefaultBlock{
 					Seal: nil,
 				},
 			},
