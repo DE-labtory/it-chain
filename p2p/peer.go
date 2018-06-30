@@ -3,7 +3,6 @@ package p2p
 import (
 	"encoding/json"
 	"errors"
-
 	"fmt"
 
 	"github.com/it-chain/it-chain-Engine/common"
