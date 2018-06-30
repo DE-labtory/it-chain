@@ -4,9 +4,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"io/ioutil"
-	"os"
-
 	"bytes"
 
 	"errors"
@@ -143,48 +140,8 @@ func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock
 	return block
 }
 
-type BlockRepository interface {
+type Repository interface {
 	yggdrasill.BlockStorageManager
 	NewEmptyBlock() (Block, error)
 	GetBlockCreator() string
-}
-
-func CreateGenesisBlock(genesisconfFilePath string) (*DefaultBlock, error) {
-	byteValue, err := ConfigFromJson(genesisconfFilePath)
-	if err != nil {
-		return nil, err
-	}
-
-	validator := new(DefaultValidator)
-
-	var GenesisBlock *DefaultBlock
-
-	json.Unmarshal(byteValue, &GenesisBlock)
-	GenesisBlock.SetTimestamp((time.Now()).Round(0))
-	Seal, err := validator.BuildSeal(GenesisBlock)
-	if err != nil {
-		return nil, err
-	}
-
-	GenesisBlock.SetSeal(Seal)
-	GenesisBlock.SetPrevSeal(GenesisBlock.PrevSeal)
-	GenesisBlock.SetHeight(GenesisBlock.Height)
-	GenesisBlock.SetHeight(GenesisBlock.Height)
-	GenesisBlock.SetTxSeal(GenesisBlock.TxSeal)
-	GenesisBlock.SetCreator(GenesisBlock.Creator)
-	return GenesisBlock, nil
-}
-
-func ConfigFromJson(filePath string) ([]uint8, error) {
-	jsonFile, err := os.Open(filePath)
-	defer jsonFile.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	byteValue, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		return nil, err
-	}
-	return byteValue, nil
 }
