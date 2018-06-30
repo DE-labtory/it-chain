@@ -151,7 +151,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 
 				gch.leaderApi.UpdateLeader(leader)
 			}
-			
+
 		}
 	}
 
