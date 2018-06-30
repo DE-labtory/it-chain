@@ -5,12 +5,12 @@ import (
 	"testing"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 	"errors"
 )
 
-type MockBlockApi struct {}
-func (ba MockBlockApi) SyncedCheck(block blockchain.Block) error { return nil }
+type MockSyncBlockApi struct {}
+func (ba MockSyncBlockApi) SyncedCheck(block blockchain.Block) error { return nil }
 
 type MockROBlockRepository struct {
 	NewEmptyBlockFunc func() (blockchain.Block, error)
@@ -88,7 +88,7 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		blockApi := MockBlockApi{}
+		blockApi := MockSyncBlockApi{}
 
 		blockRepository := MockROBlockRepository{}
 		blockRepository.GetLastBlockFunc = func(block blockchain.Block) error {

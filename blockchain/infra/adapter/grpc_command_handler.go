@@ -8,7 +8,7 @@ import (
 var ErrGetLastBlock = errors.New("error when get last block")
 var ErrSyncCheckResponse = errors.New("error when sync check response")
 
-type BlockApi interface {
+type SyncBlockApi interface {
 	SyncedCheck(block blockchain.Block) error
 }
 
@@ -21,12 +21,12 @@ type SyncCheckGrpcCommandService interface {
 }
 
 type GrpcCommandHandler struct {
-	blockApi BlockApi
+	blockApi SyncBlockApi
 	blockRepository ReadOnlyBlockRepository
 	grpcCommandService SyncCheckGrpcCommandService
 }
 
-func NewGrpcCommandHandler(blockApi BlockApi, blockRepository ReadOnlyBlockRepository, grpcCommandService SyncCheckGrpcCommandService) *GrpcCommandHandler {
+func NewGrpcCommandHandler(blockApi SyncBlockApi, blockRepository ReadOnlyBlockRepository, grpcCommandService SyncCheckGrpcCommandService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		blockApi: blockApi,
 		blockRepository: blockRepository,

@@ -8,21 +8,18 @@ import (
 )
 
 var ErrBlockNil = errors.New("Block nil error");
-var ErrAddBlockToPool = errors.New("AddBlockToPool error")
 
-type CommandHandlerBlockApi interface {
-	CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error)
-	CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error)
+type BlockApi interface {
 	AddBlockToPool(block blockchain.Block)
 }
 
 type CommandHandler struct {
-	blockApi CommandHandlerBlockApi
+	blockApi BlockApi
 	// block pool에 들어가는 block의 순서는 보장되어야한다.
 	confirmBlockMux *sync.RWMutex
 }
 
-func NewCommandHandler(blockApi CommandHandlerBlockApi) *CommandHandler {
+func NewCommandHandler(blockApi BlockApi) *CommandHandler {
 	return &CommandHandler{
 		confirmBlockMux: &sync.RWMutex{},
 		blockApi: blockApi,
@@ -60,7 +57,7 @@ func (h *CommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlo
 	defer h.confirmBlockMux.Unlock()
 
 	block := command.Block
-	if block != nil {
+	if block == nil {
 		return ErrBlockNil
 	}
 
