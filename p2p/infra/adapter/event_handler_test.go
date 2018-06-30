@@ -9,43 +9,43 @@ import (
 	"github.com/magiconair/properties/assert"
 )
 
-type EventHandlerMockPeerApi struct {}
-func (na EventHandlerMockPeerApi) AddPeer(node p2p.Peer) error{return nil}
-func (na EventHandlerMockPeerApi) DeletePeer(id p2p.PeerId) error{return nil}
-func (na EventHandlerMockPeerApi) DeliverPeerTable(connectionId string) error{return nil}
+type EventHandlerMockPeerApi struct{}
+
+func (na EventHandlerMockPeerApi) AddPeer(node p2p.Peer) error                { return nil }
+func (na EventHandlerMockPeerApi) DeletePeer(id p2p.PeerId) error             { return nil }
+func (na EventHandlerMockPeerApi) DeliverPeerTable(connectionId string) error { return nil }
 
 func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
 
-	tests := map[string] struct{
-		input struct{
-			nodeId string
+	tests := map[string]struct {
+		input struct {
+			nodeId  string
 			address string
 		}
 		err error
 	}{
-		"success":{
+		"success": {
 			input: struct {
 				nodeId  string
 				address string
 			}{nodeId: string("123"), address: string("123")},
-			err:nil,
+			err: nil,
 		},
-		"empty address test":{
+		"empty address test": {
 			input: struct {
 				nodeId  string
 				address string
 			}{nodeId: string("123"), address: string("")},
-			err:adapter.ErrEmptyAddress,
+			err: adapter.ErrEmptyAddress,
 		},
 	}
 	eventHandler := adapter.NewEventHandler(EventHandlerMockPeerApi{})
 
-	for testName, test := range tests{
+	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := eventHandler.HandleConnCreatedEvent(p2p.ConnectionCreatedEvent{EventModel:midgard.EventModel{ID:test.input.nodeId}, Address:test.input.address})
+		err := eventHandler.HandleConnCreatedEvent(p2p.ConnectionCreatedEvent{EventModel: midgard.EventModel{ID: test.input.nodeId}, Address: test.input.address})
 		assert.Equal(t, err, test.err)
 	}
-
 
 }
 
@@ -91,10 +91,12 @@ func TestEventHandler_HandleConnDisconnectedEvent(t *testing.T) {
 }
 
 type MockPeerRepository struct{}
-func (nr MockPeerRepository) Save(data p2p.Peer) error{return nil}
-type MockLeaderRepository struct{}
-func (lr MockLeaderRepository) SetLeader(leader p2p.Leader){}
 
+func (nr MockPeerRepository) Save(data p2p.Peer) error { return nil }
+
+type MockLeaderRepository struct{}
+
+func (lr MockLeaderRepository) SetLeader(leader p2p.Leader) {}
 
 func TestRepositoryProjector_HandleLeaderUpdatedEvent(t *testing.T) {
 	repositoryProjector := SetupRepositoryProjector()
@@ -131,7 +133,7 @@ func TestRepositoryProjector_HandleLeaderUpdatedEvent(t *testing.T) {
 	}
 }
 
-func SetupRepositoryProjector() (*adapter.RepositoryProjector) {
+func SetupRepositoryProjector() *adapter.RepositoryProjector {
 
 	repositoryProjector := adapter.NewRepositoryProjector(MockPeerRepository{}, MockLeaderRepository{})
 

@@ -23,10 +23,10 @@ type UpdateLeaderMessage struct {
 	Peer Peer
 }
 
-type PeerLeaderTableMessage struct{
+type PeerLeaderTableMessage struct {
 	PeerLeaderTable PeerLeaderTable
 }
 
 type RequestVoteMessage struct{}
 
-type VoteLeaderMessage struct {}
+type VoteLeaderMessage struct{}

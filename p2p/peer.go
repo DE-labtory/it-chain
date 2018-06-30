@@ -9,7 +9,9 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/midgard"
 )
+
 type PeerTable map[string]Peer
+
 // PeerId 선언
 type PeerId struct {
 	Id string
@@ -107,4 +109,3 @@ func difference(a, b []Peer) []Peer {
 
 	return ab
 }
-

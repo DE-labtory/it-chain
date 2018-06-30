@@ -8,7 +8,6 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/it-chain-Engine/p2p"
-	"github.com/it-chain/it-chain-Engine/p2p/api"
 )
 
 var ErrLeaderInfoDeliver = errors.New("leader info deliver failed")
@@ -33,21 +32,19 @@ type GrpcCommandHandlerPeerApi interface {
 type GrpcCommandHandlerPeerService interface {
 	Dial(ipAddress string) error
 }
+
 type GrpcCommandHandler struct {
 	leaderApi          LeaderApi
 	peerApi            GrpcCommandHandlerPeerApi
-	leaderRepository   api.ReadOnlyLeaderRepository
 	peerService        GrpcCommandHandlerPeerService
-	grpcCommandService GrpcCommandService
+	votingService      VotingService
 }
 
-func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi, leaderRepository api.ReadOnlyLeaderRepository, peerService GrpcCommandHandlerPeerService, grpcCommandService GrpcCommandService) *GrpcCommandHandler {
+func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi, peerService GrpcCommandHandlerPeerService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		leaderApi:          leaderApi,
-		leaderRepository:   leaderRepository,
 		peerApi:            peerApi,
 		peerService:        peerService,
-		grpcCommandService: grpcCommandService,
 	}
 }
 
@@ -97,11 +94,11 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 	case "RequestVoteProtocol":
 
 		//	1. if leftTime >0, reset left time and send VoteLeaderMessage
-		if gch.leaderRepository.GetLeftTime() > 0 {
+		if gch.votingService.GetLeftTime() > 0 {
 
-			gch.leaderRepository.ResetLeftTime()
+			gch.votingService.ResetLeftTime()
 
-			gch.grpcCommandService.DeliverVoteLeaderMessage(command.ConnectionID)
+			gch.votingService.DeliverVoteLeaderMessage(command.ConnectionID)
 
 		}
 
@@ -109,25 +106,25 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 
 		//	1. if candidate, reset left time
 		//	2. count up
-		if gch.leaderRepository.GetState() == "candidate" {
+		if gch.votingService.GetState() == "candidate" {
 
-			gch.leaderRepository.ResetLeftTime()
+			gch.votingService.ResetLeftTime()
 
-			gch.leaderRepository.CountUp()
+			gch.votingService.CountUp()
 
 		}
 
 		//	3. if counted is same with num of peer-1 set leader and publish
 		numOfPeers := len(gch.peerApi.GetPeerList())
 
-		if gch.leaderRepository.GetVoteCount() == numOfPeers-1 {
+		if gch.votingService.GetVoteCount() == numOfPeers-1 {
 
 			peer := p2p.Peer{
 				PeerId:    p2p.PeerId{Id: ""},
 				IpAddress: conf.GetConfiguration().Common.NodeIp,
 			}
 
-			gch.grpcCommandService.DeliverUpdateLeaderMessage(command.ConnectionID, peer)
+			gch.votingService.DeliverUpdateLeaderMessage(command.ConnectionID, peer)
 		}
 
 	case "UpdateLeaderProtocol":

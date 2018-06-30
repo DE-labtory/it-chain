@@ -1,6 +1,5 @@
 package api
 
-
 import "github.com/it-chain/midgard"
 
 type NodeApi struct {

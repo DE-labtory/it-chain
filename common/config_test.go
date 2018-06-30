@@ -1,18 +1,18 @@
 package common
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/spf13/viper"
 	"bytes"
 	"fmt"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
-func TestConfig_init_from_file(t *testing.T){
-	assert.Equal(t,"./.leveldb",viper.GetString("database.leveldb.defaultPath"))
+func TestConfig_init_from_file(t *testing.T) {
+	assert.Equal(t, "./.leveldb", viper.GetString("database.leveldb.defaultPath"))
 }
 
-func TestConfigInit(t *testing.T){
+func TestConfigInit(t *testing.T) {
 
 	var yamlExample = []byte(`
 import:
@@ -25,5 +25,5 @@ import:
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))
 	}
 	v := viper.GetViper()
-	assert.Equal(t,"github.com/urfave/cli",v.GetString("import.package"))
+	assert.Equal(t, "github.com/urfave/cli", v.GetString("import.package"))
 }

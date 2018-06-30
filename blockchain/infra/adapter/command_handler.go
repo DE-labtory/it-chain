@@ -1,19 +1,19 @@
 package adapter
 
 import (
-	"github.com/it-chain/it-chain-Engine/blockchain/api"
 	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/it-chain-Engine/blockchain/api"
 	"github.com/it-chain/it-chain-Engine/txpool"
 )
 
 type BlockchainCommandHandler struct {
-	nodeApi api.NodeApi
+	nodeApi  api.NodeApi
 	blockApi api.BlockApi
 }
 
 func NewBlockchainCommandHandler(blockApi api.BlockApi, nodeApi api.NodeApi) *BlockchainCommandHandler {
 	return &BlockchainCommandHandler{
-		nodeApi: nodeApi,
+		nodeApi:  nodeApi,
 		blockApi: blockApi,
 	}
 }

@@ -63,7 +63,7 @@ func TestLeaderApi_DeliverLeaderInfo(t *testing.T) {
 	}{
 		"proper node id test": {
 			input: "",
-			err: api.ErrEmptyConnectionId,
+			err:   api.ErrEmptyConnectionId,
 		},
 	}
 	leaderApi := SetupLeaderApi()

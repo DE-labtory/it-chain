@@ -16,31 +16,34 @@ var ErrEmptyPeerList = errors.New("empty peer list proposed")
 //todo make test map
 //todo test continue
 
-type MockService struct {}
-func (ms MockService) GetPeerLeaderTable() p2p.PeerLeaderTable{
+type MockService struct{}
+
+func (ms MockService) GetPeerLeaderTable() p2p.PeerLeaderTable {
 	peerLeaderTable := p2p.PeerLeaderTable{
-		Leader:p2p.Leader{
-			LeaderId:p2p.LeaderId{Id:"1"},
+		Leader: p2p.Leader{
+			LeaderId: p2p.LeaderId{Id: "1"},
 		},
-		PeerList:[]p2p.Peer{{
-			PeerId:p2p.PeerId{
-				Id:"2",
+		PeerList: []p2p.Peer{{
+			PeerId: p2p.PeerId{
+				Id: "2",
 			},
 		}},
 	}
 	return peerLeaderTable
 }
-type MockPeerRepository struct {}
+
+type MockPeerRepository struct{}
 
 func (mnr MockPeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) {
-	peer := p2p.Peer{PeerId:id}
+	peer := p2p.Peer{PeerId: id}
 	return peer, nil
 }
 func (mnr MockPeerRepository) FindAll() ([]p2p.Peer, error) { return nil, nil }
 
 type MockLeaderRepository struct{}
-func (mpr MockLeaderRepository) GetLeader() p2p.Leader{
-	leader := p2p.Leader{LeaderId:p2p.LeaderId{Id:"1"}}
+
+func (mpr MockLeaderRepository) GetLeader() p2p.Leader {
+	leader := p2p.Leader{LeaderId: p2p.LeaderId{Id: "1"}}
 	return leader
 }
 

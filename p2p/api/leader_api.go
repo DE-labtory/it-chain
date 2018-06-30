@@ -3,9 +3,6 @@ package api
 import (
 	"errors"
 	"log"
-	"math/rand"
-	"time"
-
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
 )
@@ -26,13 +23,6 @@ type Publish func(exchange string, topic string, data interface{}) (err error) /
 
 type ReadOnlyLeaderRepository interface {
 	GetLeader() p2p.Leader
-	CountDownLeftTimeBy(tick int64)
-	SetState(state string)
-	GetState() string
-	ResetLeftTime() int64
-	GetLeftTime() int64
-	CountUp()
-	GetVoteCount() int
 }
 
 type EventRepository interface { //midgard.Repository
@@ -90,59 +80,4 @@ func (leaderApi *LeaderApi) DeliverLeaderInfo(connectionId string) error {
 	leaderApi.grpcCommandService.DeliverLeaderInfo(connectionId, leader)
 
 	return nil
-}
-
-func (leaderApi *LeaderApi) ElectLeaderWithRaft() {
-	//1. Start random timeout
-	//2. timed out! alter state to 'candidate'
-	//3. while ticking, count down leader repo left time
-	//4. Send message having 'RequestVoteProtocol' to other node
-	go StartRandomTimeOut(leaderApi)
-}
-
-func StartRandomTimeOut(leaderApi *LeaderApi) {
-
-	timeoutNum := GenRandomInRange(150, 300)
-	timeout := time.After(time.Duration(timeoutNum) * time.Microsecond)
-	tick := time.Tick(1 * time.Millisecond)
-
-	for {
-		select {
-
-		case <-timeout:
-			if leaderApi.leaderRepository.GetState() == "Ticking" {
-
-				leaderApi.leaderRepository.SetState("Candidate")
-
-				peerList, _ := leaderApi.peerRepository.FindAll()
-
-				connectionIds := make([]string, 0)
-
-				for _, peer := range peerList {
-					connectionIds = append(connectionIds, peer.PeerId.Id)
-				}
-
-				leaderApi.grpcCommandService.DeliverRequestVoteMessages(connectionIds)
-
-			} else if leaderApi.leaderRepository.GetState() == "Candidate" {
-
-				//reset time and state chane candidate -> ticking when timed in candidate state
-				leaderApi.leaderRepository.ResetLeftTime()
-				leaderApi.leaderRepository.SetState("Ticking")
-
-			}
-
-		case <-tick:
-
-			leaderApi.leaderRepository.CountDownLeftTimeBy(1)
-		}
-	}
-}
-
-func GenRandomInRange(min, max int64) int64 {
-
-	rand.Seed(time.Now().Unix())
-
-	return rand.Int63n(max-min) + min
-
 }
