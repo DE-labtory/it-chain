@@ -46,8 +46,3 @@ type PrepareFinishedEvent struct {
 	midgard.EventModel
 	ConsensusId ConsensusId
 }
-
-type CommitFinishedEvent struct {
-	midgard.EventModel
-	ConsensusId ConsensusId
-}
