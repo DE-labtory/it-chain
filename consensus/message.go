@@ -7,8 +7,8 @@ import (
 )
 
 type PrePrepareMsg struct {
-	ConsensusId ConsensusId
-	SenderId string
+	ConsensusId   ConsensusId
+	SenderId      string
 	ProposedBlock blockchain.Block
 }
 
@@ -21,8 +21,8 @@ func (pp PrePrepareMsg) ToByte() ([]byte, error) {
 }
 
 type PrepareMsg struct {
-	ConsensusId ConsensusId
-	SenderId string
+	ConsensusId   ConsensusId
+	SenderId      string
 	ProposedBlock blockchain.Block
 }
 
@@ -36,7 +36,7 @@ func (p PrepareMsg) ToByte() ([]byte, error) {
 
 type CommitMsg struct {
 	ConsensusId ConsensusId
-	SenderId string
+	SenderId    string
 }
 
 func (c CommitMsg) ToByte() ([]byte, error) {
@@ -47,45 +47,57 @@ func (c CommitMsg) ToByte() ([]byte, error) {
 	return data, nil
 }
 
-type PrepareMsgRepository struct {
+type PrepareMsgRepository interface {
+	DeleteAllPrepareMsg(consensusId ConsensusId)
+	InsertPrepareMsg(prepareMsg PrepareMsg)
+	FindPrepareMsgsByConsensusID(consensusId ConsensusId) []PrepareMsg
+}
+
+type PrepareMsgRepositoryImpl struct {
 	PrepareMsgPool map[ConsensusId][]PrepareMsg
 	lock           *sync.RWMutex
 }
 
-type CommitMsgRepository struct {
+type CommitMsgRepository interface {
+	DeleteAllCommitMsg(consensusId ConsensusId)
+	InsertCommitMsg(commitMsg CommitMsg)
+	FindCommitMsgsByConsensusID(consensusId ConsensusId) []CommitMsg
+}
+
+type CommitMsgRepositoryImpl struct {
 	CommitMsgPool map[ConsensusId][]CommitMsg
-	lock           *sync.RWMutex
+	lock          *sync.RWMutex
 }
 
-func NewPrepareMsgRepository() *PrepareMsgRepository {
-	return &PrepareMsgRepository{
+func NewPrepareMsgRepository() *PrepareMsgRepositoryImpl {
+	return &PrepareMsgRepositoryImpl{
 		PrepareMsgPool: make(map[ConsensusId][]PrepareMsg),
-		lock: &sync.RWMutex{},
+		lock:           &sync.RWMutex{},
 	}
 }
 
-func NewCommitMsgRepository() *CommitMsgRepository {
-	return &CommitMsgRepository{
+func NewCommitMsgRepository() *CommitMsgRepositoryImpl {
+	return &CommitMsgRepositoryImpl{
 		CommitMsgPool: make(map[ConsensusId][]CommitMsg),
-		lock: &sync.RWMutex{},
+		lock:          &sync.RWMutex{},
 	}
 }
 
-func (pr *PrepareMsgRepository) DeleteAllPrepareMsg(consensusId ConsensusId) {
+func (pr *PrepareMsgRepositoryImpl) DeleteAllPrepareMsg(consensusId ConsensusId) {
 	pr.lock.Lock()
 	defer pr.lock.Unlock()
 
 	delete(pr.PrepareMsgPool, consensusId)
 }
 
-func (cr *CommitMsgRepository) DeleteAllCommitMsg(consensusId ConsensusId) {
+func (cr *CommitMsgRepositoryImpl) DeleteAllCommitMsg(consensusId ConsensusId) {
 	cr.lock.Lock()
 	defer cr.lock.Unlock()
 
 	delete(cr.CommitMsgPool, consensusId)
 }
 
-func (pr *PrepareMsgRepository) InsertPrepareMsg(prepareMsg PrepareMsg) {
+func (pr *PrepareMsgRepositoryImpl) InsertPrepareMsg(prepareMsg PrepareMsg) {
 	pr.lock.Lock()
 	defer pr.lock.Unlock()
 
@@ -115,7 +127,7 @@ func (pr *PrepareMsgRepository) InsertPrepareMsg(prepareMsg PrepareMsg) {
 	pr.PrepareMsgPool[prepareMsg.ConsensusId] = append(pr.PrepareMsgPool[prepareMsg.ConsensusId], prepareMsg)
 }
 
-func (cr *CommitMsgRepository) InsertCommitMsg(CommitMsg CommitMsg) {
+func (cr *CommitMsgRepositoryImpl) InsertCommitMsg(CommitMsg CommitMsg) {
 	cr.lock.Lock()
 	defer cr.lock.Unlock()
 
@@ -145,12 +157,12 @@ func (cr *CommitMsgRepository) InsertCommitMsg(CommitMsg CommitMsg) {
 	cr.CommitMsgPool[CommitMsg.ConsensusId] = append(cr.CommitMsgPool[CommitMsg.ConsensusId], CommitMsg)
 }
 
-func (pr *PrepareMsgRepository) FindPrepareMsgsByConsensusID(consensusId ConsensusId) []PrepareMsg {
+func (pr *PrepareMsgRepositoryImpl) FindPrepareMsgsByConsensusID(consensusId ConsensusId) []PrepareMsg {
 
 	return pr.PrepareMsgPool[consensusId]
 }
 
-func (cr *CommitMsgRepository) FindCommitMsgsByConsensusID(consensusId ConsensusId) []CommitMsg {
+func (cr *CommitMsgRepositoryImpl) FindCommitMsgsByConsensusID(consensusId ConsensusId) []CommitMsg {
 
 	return cr.CommitMsgPool[consensusId]
 }
