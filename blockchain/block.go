@@ -13,7 +13,6 @@ import (
 
 	"github.com/it-chain/yggdrasill"
 	"github.com/it-chain/yggdrasill/common"
-	"github.com/it-chain/yggdrasill/impl"
 )
 
 var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
@@ -150,15 +149,15 @@ type BlockRepository interface {
 	GetBlockCreator() string
 }
 
-func CreateGenesisBlock(genesisconfFilePath string) (*impl.DefaultBlock, error) {
+func CreateGenesisBlock(genesisconfFilePath string) (*DefaultBlock, error) {
 	byteValue, err := ConfigFromJson(genesisconfFilePath)
 	if err != nil {
 		return nil, err
 	}
 
-	validator := new(impl.DefaultValidator)
+	validator := new(DefaultValidator)
 
-	var GenesisBlock *impl.DefaultBlock
+	var GenesisBlock *DefaultBlock
 
 	json.Unmarshal(byteValue, &GenesisBlock)
 	GenesisBlock.SetTimestamp((time.Now()).Round(0))

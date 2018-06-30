@@ -3,11 +3,15 @@ package blockchain
 import (
 	"bytes"
 	"errors"
+
+	"github.com/it-chain/yggdrasill/common"
 )
 
 // ErrHashCalculationFailed 변수는 Hash 계산 중 발생한 에러를 정의한다.
 var ErrHashCalculationFailed = errors.New("Hash Calculation Failed Error")
 var ErrInsufficientFields = errors.New("Previous seal or transaction list seal is not set")
+
+type Validator = common.Validator
 
 // DefaultValidator 객체는 Validator interface를 구현한 객체.
 type DefaultValidator struct{}
