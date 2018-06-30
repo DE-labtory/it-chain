@@ -5,6 +5,7 @@ import (
 )
 
 type ICodeStoreApi interface {
+	//clone code from deploy info
 	Clone(repositoryUrl string) (*icode.Meta, error)
 
 	//push code to auth repo

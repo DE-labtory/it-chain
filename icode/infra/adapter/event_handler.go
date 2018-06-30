@@ -6,12 +6,12 @@ import (
 )
 
 type EventHandler struct {
-	icodeMetaRepository icode.MetaRepository
+	iCodeMetaRepository icode.MetaRepository
 }
 
 func NewEventHandler(ICodeMetaRepository icode.MetaRepository) *EventHandler {
 	return &EventHandler{
-		icodeMetaRepository: ICodeMetaRepository,
+		iCodeMetaRepository: ICodeMetaRepository,
 	}
 }
 
@@ -19,12 +19,12 @@ func (handler EventHandler) HandleMetaCreatedEvent(event icode.MetaCreatedEvent)
 	if event.ID == "" {
 		return errors.New("Empty event id err")
 	}
-	return handler.icodeMetaRepository.Save(*event.GetMeta())
+	return handler.iCodeMetaRepository.Save(*event.GetMeta())
 }
 
 func (handler EventHandler) HandleMetaDeletedEvent(event icode.MetaDeletedEvent) error {
 	if event.ID == "" {
 		return errors.New("Empty event id err")
 	}
-	return handler.icodeMetaRepository.Remove(event.ID)
+	return handler.iCodeMetaRepository.Remove(event.ID)
 }

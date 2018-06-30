@@ -1,7 +1,7 @@
 package icode
 
 type ContainerService interface {
-	Start(meta Meta) error
-	Stop(id ID) error
-	Run(tx Transaction) (*Result, error)
+	StartContainer(meta Meta) error
+	StopContainer(id ID) error
+	ExecuteTransaction(tx Transaction) (*Result, error)
 }

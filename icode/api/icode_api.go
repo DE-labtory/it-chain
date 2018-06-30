@@ -11,6 +11,14 @@ type ICodeApi struct {
 	MetaRepository   icode.ReadOnlyMetaRepository
 }
 
+func NewIcodeApi(containerService icode.ContainerService, storeApi ICodeStoreApi, repository icode.ReadOnlyMetaRepository) *ICodeApi {
+	return &ICodeApi{
+		ContainerService: nil,
+		StoreApi:         nil,
+		MetaRepository:   nil,
+	}
+}
+
 func (iApi ICodeApi) Deploy(gitUrl string) error {
 	// check for already in repository
 	meta, err := iApi.MetaRepository.FindByGitURL(gitUrl)
@@ -28,14 +36,14 @@ func (iApi ICodeApi) Deploy(gitUrl string) error {
 	}
 
 	//start ICode with container
-	if err = iApi.ContainerService.Start(*meta); err != nil {
+	if err = iApi.ContainerService.StartContainer(*meta); err != nil {
 		return err
 	}
 }
 
 func (iApi ICodeApi) UnDeploy(id icode.ID) error {
 	// stop iCode container
-	err := iApi.ContainerService.Stop(id)
+	err := iApi.ContainerService.StopContainer(id)
 	if err != nil {
 		return err
 	}
@@ -53,7 +61,7 @@ func (iApi ICodeApi) UnDeploy(id icode.ID) error {
 func (iApi ICodeApi) Invoke(txs []icode.Transaction) []icode.Result {
 	resultData := make([]icode.Result, 0)
 	for _, tx := range txs {
-		result, err := iApi.ContainerService.Run(tx)
+		result, err := iApi.ContainerService.ExecuteTransaction(tx)
 		if err != nil {
 			result = &icode.Result{
 				TxId:    tx.TxId,
@@ -67,7 +75,7 @@ func (iApi ICodeApi) Invoke(txs []icode.Transaction) []icode.Result {
 }
 
 func (iApi ICodeApi) Query(tx icode.Transaction) (*icode.Result, error) {
-	result, err := iApi.ContainerService.Run(tx)
+	result, err := iApi.ContainerService.ExecuteTransaction(tx)
 
 	if err != nil {
 		return nil, err

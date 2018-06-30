@@ -35,7 +35,9 @@ func NewMeta(repositoryName string, gitUrl string, path string, commitHash strin
 		CommitHash:     commitHash,
 	}
 	eventstore.Save(createEvent.GetID(), createEvent)
-	return createEvent.GetMeta()
+	m := Meta{}
+	m.On(createEvent)
+	return &m
 }
 
 func DeleteMeta(metaId ID) error {
@@ -53,7 +55,13 @@ func (m Meta) GetID() string {
 
 func (m *Meta) On(event midgard.Event) error {
 	switch v := event.(type) {
-
+	case *MetaCreatedEvent:
+		m.CommitHash = v.CommitHash
+		m.Version = v.Version
+		m.Path = v.Path
+		m.GitUrl = v.GitUrl
+		m.ICodeID = v.ID
+		m.RepositoryName = v.RepositoryName
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
 	}
