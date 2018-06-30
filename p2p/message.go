@@ -29,4 +29,4 @@ type PeerLeaderTableMessage struct {
 
 type RequestVoteMessage struct{}
 
-type VoteLeaderMessage struct{}
+type VoteMessage struct{}

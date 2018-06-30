@@ -36,7 +36,7 @@ type GrpcCommandHandler struct {
 	leaderApi     LeaderApi
 	peerApi       GrpcCommandHandlerPeerApi
 	peerService   GrpcCommandHandlerPeerService
-	votingService p2p.VotingService
+	electionService p2p.ElectionService
 }
 
 func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi, peerService GrpcCommandHandlerPeerService) *GrpcCommandHandler {
@@ -91,40 +91,15 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 		break
 
 	case "RequestVoteProtocol":
+		gch.electionService.Vote(command.ConnectionID)
 
-		//	1. if leftTime >0, reset left time and send VoteLeaderMessage
-		//if gch.votingService.GetLeftTime() > 0 {
-		//
-		//	gch.votingService.ResetLeftTime()
-		//
-		//	gch.votingService.DeliverVoteLeaderMessage(command.ConnectionID)
-		//
-		//}
 
 	case "VoteLeaderProtocol":
 
 		//	1. if candidate, reset left time
 		//	2. count up
-		//if gch.votingService.GetState() == "candidate" {
-		//
-		//	gch.votingService.ResetLeftTime()
-		//
-		//	gch.votingService.CountUp()
-		//
-		//}
-		//
-		////	3. if counted is same with num of peer-1 set leader and publish
-		//numOfPeers := len(gch.peerApi.GetPeerList())
-		//
-		//if gch.votingService.GetVoteCount() == numOfPeers-1 {
-		//
-		//	peer := p2p.Peer{
-		//		PeerId:    p2p.PeerId{Id: ""},
-		//		IpAddress: conf.GetConfiguration().Common.NodeIp,
-		//	}
-		//
-		//	gch.votingService.DeliverUpdateLeaderMessage(command.ConnectionID, peer)
-		//}
+		//	3. if counted is same with num of peer-1 set leader and publish
+		gch.electionService.DecideToBeLeader(command)
 
 	case "UpdateLeaderProtocol":
 

@@ -8,6 +8,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
+	"github.com/it-chain/it-chain-Engine/conf"
 )
 
 type PeerService interface {
@@ -18,107 +19,38 @@ type PeerService interface {
 
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
-type VotingService struct {
-	leftTime       int64 //left time in millisecond
-	state          string
-	voteCount      int
-	mux            sync.Mutex
-	peerRepository PeerRepository
-	publish        Publish
+type ElectionService struct {
+	mux                sync.Mutex
+	electionRepository ElectionRepository
+	peerRepository     PeerRepository
+	publish            Publish
 }
 
-func (vs *VotingService) getLeftTime() int64 {
-
-	vs.mux.Lock()
-	defer vs.mux.Unlock()
-
-	return vs.leftTime
-}
-
-func (vs *VotingService) resetLeftTime() {
-
-	vs.mux.Lock()
-	defer vs.mux.Unlock()
-
-	vs.leftTime = genRandomInRange(150, 300)
-}
-
-//count down left time by tick millisecond  until 0
-func (vs *VotingService) countDownLeftTimeBy(tick int64) {
-
-	vs.mux.Lock()
-	defer vs.mux.Unlock()
-
-	if vs.leftTime == 0 {
-		return
-	}
-
-	vs.leftTime = vs.leftTime - tick
-}
-
-func (vs *VotingService) setState(state string) {
-
-	vs.mux.Lock()
-	defer vs.mux.Unlock()
-
-	vs.state = state
-}
-
-func (vs *VotingService) getState() string {
-
-	vs.mux.Lock()
-	defer vs.mux.Unlock()
-
-	return vs.state
-}
-
-func (vs *VotingService) getVoteCount() int {
-
-	vs.mux.Lock()
-	defer vs.mux.Unlock()
-
-	return vs.voteCount
-}
-
-func (vs *VotingService) resetVoteCount() {
-
-	vs.mux.Lock()
-	defer vs.mux.Unlock()
-
-	vs.voteCount = 0
-}
-
-func (vs *VotingService) countUp() {
-
-	vs.mux.Lock()
-	defer vs.mux.Unlock()
-
-	vs.voteCount = vs.voteCount + 1
-}
-
-func (vs *VotingService) ElectLeaderWithRaft() {
+func (es *ElectionService) ElectLeaderWithRaft() {
 	//1. Start random timeout
 	//2. timed out! alter state to 'candidate'
 	//3. while ticking, count down leader repo left time
 	//4. Send message having 'RequestVoteProtocol' to other node
-	go StartRandomTimeOut(vs)
+	go StartRandomTimeOut(es)
 }
 
-func StartRandomTimeOut(vs *VotingService) {
+func StartRandomTimeOut(es *ElectionService) {
 
 	timeoutNum := genRandomInRange(150, 300)
 	timeout := time.After(time.Duration(timeoutNum) * time.Microsecond)
 	tick := time.Tick(1 * time.Millisecond)
+	election := es.electionRepository.GetElection()
 
 	for {
 		select {
 
 		case <-timeout:
-			if vs.getState() == "Ticking" {
+			if election.GetState() == "Ticking" {
 
-				vs.setState("Candidate")
+				election.SetState("Candidate")
+				es.electionRepository.SetElection(election)
 
-				peerList, _ := vs.peerRepository.FindAll()
+				peerList, _ := es.peerRepository.FindAll()
 
 				connectionIds := make([]string, 0)
 
@@ -126,21 +58,23 @@ func StartRandomTimeOut(vs *VotingService) {
 					connectionIds = append(connectionIds, peer.PeerId.Id)
 				}
 
-				vs.deliverRequestVoteMessages(connectionIds)
+				es.deliverRequestVoteMessages(connectionIds)
 
-			} else if vs.getState() == "Candidate" {
+			} else if election.GetState() == "Candidate" {
 				//reset time and state chane candidate -> ticking when timed in candidate state
-				vs.resetLeftTime()
-				vs.setState("Ticking")
+				election.ResetLeftTime()
+				election.SetState("Ticking")
 			}
 
 		case <-tick:
-			vs.countDownLeftTimeBy(1)
+			election.CountDownLeftTimeBy(1)
+			es.electionRepository.SetElection(election)
+
 		}
 	}
 }
 
-func (vs *VotingService) deliverRequestVoteMessages(connectionIds []string) error {
+func (es *ElectionService) deliverRequestVoteMessages(connectionIds []string) error {
 
 	requestVoteMessage := RequestVoteMessage{}
 
@@ -150,7 +84,7 @@ func (vs *VotingService) deliverRequestVoteMessages(connectionIds []string) erro
 		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
 	}
 
-	vs.publish("Command", "message.send", grpcDeliverCommand)
+	es.publish("Command", "message.send", grpcDeliverCommand)
 
 	return nil
 }
@@ -179,3 +113,72 @@ func genRandomInRange(min, max int64) int64 {
 
 	return rand.Int63n(max-min) + min
 }
+
+func (es *ElectionService) Vote(connectionId string) error {
+
+	//if leftTime >0, reset left time and send VoteLeaderMessage
+	election := es.electionRepository.GetElection()
+
+	if election.GetLeftTime() < 0 {
+		return nil
+	}
+
+	election.ResetLeftTime()
+
+	voteLeaderMessage := VoteMessage{}
+
+	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("VoteLeaderProtocol", voteLeaderMessage)
+
+	grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
+
+	es.publish("Command", "message.send", grpcDeliverCommand)
+
+	return nil
+
+}
+
+func (es *ElectionService) BroadcastLeader(peer Peer) error {
+
+	updateLeaderMessage := UpdateLeaderMessage{}
+
+	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
+
+	peers, _ := es.peerRepository.FindAll()
+	for _, peer := range peers{
+		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, peer.PeerId.Id)
+
+	}
+	es.publish("Command", "message.deliver", grpcDeliverCommand)
+
+	return nil
+}
+
+//broad case leader when voted fully
+func (es *ElectionService) DecideToBeLeader(command GrpcReceiveCommand) error{
+	election := es.electionRepository.GetElection()
+
+	//	1. if candidate, reset left time
+	//	2. count up
+	if election.GetState() == "candidate" {
+
+		election.CountUp()
+		es.electionRepository.SetElection(election)
+	}
+
+	//	3. if counted is same with num of peer-1 set leader and publish
+	peers, _ := es.peerRepository.FindAll()
+	numOfPeers := len(peers)
+
+	if election.GetVoteCount() == numOfPeers-1 {
+
+		peer := Peer{
+			PeerId:    PeerId{Id: ""},
+			IpAddress: conf.GetConfiguration().Common.NodeIp,
+		}
+
+		es.BroadcastLeader(peer)
+	}
+
+	return nil
+}
+
