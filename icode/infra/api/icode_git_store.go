@@ -74,6 +74,15 @@ func (gApi *ICodeGitStoreApi) Clone(repositoryUrl string) (*icode.Meta, error) {
 		return nil, errors.New(fmt.Sprintf("Invalid url name [%s]", repositoryUrl))
 	}
 
+	//check file already exist
+	if _, err := os.Stat(conf.GetConfiguration().Icode.ICodeSavePath + "/" + name); err == nil {
+		// if iCode already exist, remove that
+		err = os.RemoveAll(conf.GetConfiguration().Icode.ICodeSavePath + "/" + name)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	r, err := git.PlainClone(conf.GetConfiguration().Icode.ICodeSavePath+"/"+name, false, &git.CloneOptions{
 		URL:               repositoryUrl,
 		Auth:              gApi.sshAuth,
