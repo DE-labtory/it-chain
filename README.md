@@ -1,7 +1,7 @@
 # it-chain
 
 
-<p align="center"><img src="./images/logo.png" width="250px" height="250px"></p>
+<p align="center"><img src="./doc/images/logo.png" width="250px" height="250px"></p>
 
 ## Overview
 
