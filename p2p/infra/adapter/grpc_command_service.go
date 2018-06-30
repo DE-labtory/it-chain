@@ -149,7 +149,7 @@ func (gcs *GrpcCommandService) DeliverVoteLeaderMessage(connectionId string) err
 
 }
 
-func (gcs *GrpcCommandService) DeliverUpdateLeaderMessage(connectionId string, leader p2p.Leader) error {
+func (gcs *GrpcCommandService) DeliverUpdateLeaderMessage(connectionId string, peer p2p.Peer) error {
 
 	updateLeaderMessage := p2p.UpdateLeaderMessage{}
 

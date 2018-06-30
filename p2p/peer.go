@@ -70,6 +70,7 @@ type PeerRepository interface {
 	Remove(id PeerId) error
 	FindById(id PeerId) (Peer, error)
 	FindAll() ([]Peer, error)
+	FindByAddress(ipAddress string) (Peer, error)
 }
 
 func PeerFilter(vs []Peer, f func(Peer) bool) []Peer {
@@ -106,3 +107,4 @@ func difference(a, b []Peer) []Peer {
 
 	return ab
 }
+

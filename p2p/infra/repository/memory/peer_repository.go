@@ -104,3 +104,17 @@ func (pr *PeerRepository) ClearPeerTable(){
 	}
 	pr.peerTable = make(map[string]p2p.Peer)
 }
+
+func (pr *PeerRepository) FindByAddress(ipAddress string) (p2p.Peer, error){
+
+	pr.mux.Lock()
+	defer  pr.mux.Unlock()
+
+	for _, peer := range pr.peerTable{
+
+		if peer.IpAddress == ipAddress{
+			return peer, nil
+		}
+	}
+
+}

@@ -11,7 +11,7 @@ type LeaderInfoRequestMessage struct {
 }
 
 type PeerListResponseMessage struct {
-	peers []Peer
+	Peers []Peer
 }
 
 type LeaderInfoResponseMessage struct {
@@ -19,7 +19,9 @@ type LeaderInfoResponseMessage struct {
 	Address  string
 }
 
-type UpdateLeaderMessage struct {}
+type UpdateLeaderMessage struct {
+	Peer Peer
+}
 
 type PeerLeaderTableMessage struct{
 	PeerLeaderTable PeerLeaderTable

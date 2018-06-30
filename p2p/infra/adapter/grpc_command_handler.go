@@ -7,6 +7,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"errors"
 	"github.com/it-chain/it-chain-Engine/p2p/api"
+	"github.com/it-chain/it-chain-Engine/conf"
 )
 
 var ErrLeaderInfoDeliver = errors.New("leader info deliver failed")
@@ -120,15 +121,42 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 
 		if gch.leaderRepository.GetVoteCount() == numOfPeers-1{
 
-			gch.grpcCommandService.
+			peer := p2p.Peer{
+				PeerId:p2p.PeerId{Id:""},
+				IpAddress:conf.GetConfiguration().Common.NodeIp,
+			}
 
+			gch.grpcCommandService.DeliverUpdateLeaderMessage(command.ConnectionID, peer)
+
+		}
+
+	case "UpdateLeaderProtocol":
+
+		toBeLeader := p2p.Peer{}
+		err := common.Deserialize(command.Body, toBeLeader)
+
+		if err != nil{
+			return err
+		}
+
+		peers := gch.peerApi.GetPeerList()
+
+		for _, peer  := range peers{
+
+			if peer.IpAddress == toBeLeader.IpAddress{
+
+				leader := p2p.Leader{
+					LeaderId:p2p.LeaderId{Id:peer.PeerId.Id},
+				}
+
+				gch.leaderApi.UpdateLeader(leader)
+			}
+			
 		}
 	}
 
 	return nil
 }
-
-
 
 func ReceiverPeerLeaderTable(body []byte) (p2p.PeerLeaderTable, p2p.Leader, []p2p.Peer, error){
 	peerTable := p2p.PeerLeaderTable{}
