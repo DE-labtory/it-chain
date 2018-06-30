@@ -15,3 +15,8 @@ type Repository interface {
 	NewEmptyBlock() (Block, error)
 	GetBlockCreator() string
 }
+
+type BlockPool interface {
+	Enqueue(block Block)
+	Dequeue() error
+}

@@ -77,11 +77,6 @@ func (bApi *BlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.B
 	return block, nil
 }
 
-// TODO: Check 과정에서 임의의 노드에게서 받은 blockchain 정보로 동기화 되었는지 확인한다.
-func (bApi *BlockApi) SyncedCheck(block blockchain.Block) error {
-	return nil
-}
-
 func getConfigFromJson(filePath string) ([]uint8, error) {
 	jsonFile, err := os.Open(filePath)
 	defer jsonFile.Close()
@@ -94,4 +89,14 @@ func getConfigFromJson(filePath string) ([]uint8, error) {
 		return nil, err
 	}
 	return byteValue, nil
+}
+
+// TODO: Check 과정에서 임의의 노드에게서 받은 blockchain 정보로 동기화 되었는지 확인한다.
+func (bApi *BlockApi) SyncedCheck(block blockchain.Block) error {
+	return nil
+}
+
+// 받은 block을 block pool에 추가한다.
+func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
+	return nil
 }
