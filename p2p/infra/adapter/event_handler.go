@@ -80,7 +80,7 @@ func NewRepositoryProjector(peerRepository WriteOnlyPeerRepository, leaderReposi
 	}
 }
 
-//save Leader when LeaderReceivedEvent Detected
+//save Leader when LeaderReceivedEvent Detected, publish updated info to network
 func (projector *RepositoryProjector) HandleLeaderUpdatedEvent(event p2p.LeaderUpdatedEvent) error {
 
 	if event.ID == "" {

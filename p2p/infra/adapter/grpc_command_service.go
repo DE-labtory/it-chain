@@ -30,7 +30,7 @@ func NewGrpcCommandService(publish Publish) *GrpcCommandService {
 }
 
 //request leader information in p2p network to the node specified by peerId
-func (md *GrpcCommandService) RequestLeaderInfo(connectionId string) error {
+func (gcs *GrpcCommandService) RequestLeaderInfo(connectionId string) error {
 
 	if connectionId == "" {
 		return ErrEmptyPeerId
@@ -49,11 +49,11 @@ func (md *GrpcCommandService) RequestLeaderInfo(connectionId string) error {
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, connectionId)
 
-	return md.publish("Command", "message.deliver", deliverCommand)
+	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
 
 // command message which requests node list of specific node
-func (md *GrpcCommandService) RequestPeerList(peerId p2p.PeerId) error {
+func (gcs *GrpcCommandService) RequestPeerList(peerId p2p.PeerId) error {
 
 	if peerId.Id == "" {
 		return ErrEmptyPeerId
@@ -70,10 +70,10 @@ func (md *GrpcCommandService) RequestPeerList(peerId p2p.PeerId) error {
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, peerId.ToString())
 
-	return md.publish("Command", "message.deliver", deliverCommand)
+	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
 
-func (md *GrpcCommandService) DeliverLeaderInfo(connectionId string, leader p2p.Leader) error {
+func (gcs *GrpcCommandService) DeliverLeaderInfo(connectionId string, leader p2p.Leader) error {
 
 	if connectionId == "" {
 		return ErrEmptyPeerId
@@ -91,10 +91,10 @@ func (md *GrpcCommandService) DeliverLeaderInfo(connectionId string, leader p2p.
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, connectionId)
 
-	return md.publish("Command", "message.deliver", deliverCommand)
+	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
 
-func (md *GrpcCommandService) DeliverPeerLeaderTable(connectionId string, peerLeaderTable p2p.PeerLeaderTable) error {
+func (gcs *GrpcCommandService) DeliverPeerLeaderTable(connectionId string, peerLeaderTable p2p.PeerLeaderTable) error {
 
 	if connectionId== "" {
 		return ErrEmptyPeerId
@@ -117,9 +117,49 @@ func (md *GrpcCommandService) DeliverPeerLeaderTable(connectionId string, peerLe
 
 	grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
 
-	return md.publish("Command", "message.deliver", grpcDeliverCommand)
+	return gcs.publish("Command", "message.deliver", grpcDeliverCommand)
 }
 
+func (gcs *GrpcCommandService) DeliverRequestVoteMessages(connectionIds ...string) error{
+
+	requestVoteMessage := p2p.RequestVoteMessage{}
+
+	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("PeerTableDeliver", requestVoteMessage)
+
+	for _, connectionId := range connectionIds{
+		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
+	}
+
+	gcs.publish("Command", "message.send", grpcDeliverCommand)
+
+	return nil
+
+}
+
+func (gcs *GrpcCommandService) DeliverVoteLeaderMessage(connectionId string) error {
+	voteLeaderMessage := p2p.VoteLeaderMessage{}
+
+	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("VoteLeaderProtocol", voteLeaderMessage)
+
+	grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
+
+	gcs.publish("Command", "message.send", grpcDeliverCommand)
+
+	return nil
+
+}
+
+func (gcs *GrpcCommandService) DeliverUpdateLeaderMessage(connectionId string, leader p2p.Leader) error {
+
+	updateLeaderMessage := p2p.UpdateLeaderMessage{}
+
+	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
+
+	gcs.publish("Command", "message.deliver", grpcDeliverCommand)
+
+	return nil
+
+}
 
 func CreateGrpcDeliverCommand(protocol string, body interface{}) (p2p.GrpcDeliverCommand, error) {
 

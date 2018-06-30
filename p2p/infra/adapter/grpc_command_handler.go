@@ -6,6 +6,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"errors"
+	"github.com/it-chain/it-chain-Engine/p2p/api"
 )
 
 var ErrLeaderInfoDeliver = errors.New("leader info deliver failed")
@@ -28,25 +29,30 @@ type GrpcCommandHandlerPeerApi interface {
 	AddPeer(peer p2p.Peer)
 }
 
-type GrpcCommandHandlerCommandService interface {
+type GrpcCommandHandlerPeerService interface {
 	Dial(ipAddress string) error
 }
 type GrpcCommandHandler struct {
 	leaderApi LeaderApi
 	peerApi   GrpcCommandHandlerPeerApi
-	commandService GrpcCommandHandlerCommandService
+	leaderRepository api.ReadOnlyLeaderRepository
+	peerService GrpcCommandHandlerPeerService
+	grpcCommandService GrpcCommandService
 }
-func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi, commandService GrpcCommandHandlerCommandService) *GrpcCommandHandler {
+func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi, leaderRepository api.ReadOnlyLeaderRepository, peerService GrpcCommandHandlerPeerService, grpcCommandService GrpcCommandService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		leaderApi: leaderApi,
+		leaderRepository:leaderRepository,
 		peerApi:   peerApi,
-		commandService: commandService,
+		peerService: peerService,
+		grpcCommandService:grpcCommandService,
 	}
 }
 
 func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveCommand) error {
 
 	switch command.Protocol {
+
 	case "LeaderInfoRequestProtocol":
 		gch.leaderApi.DeliverLeaderInfo(command.ConnectionID)
 		break
@@ -61,7 +67,6 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 		gch.leaderApi.UpdateLeader(leader)
 		break
 
-
 	case "PeerLeaderTableDeliverProtocol": //receive peer table
 
 		//1. receive peer table
@@ -71,7 +76,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 		UpdateWithLongerPeerList(gch, oppositeLeader, oppositePeerList)
 
 		//3. dial according to peer table
-		DialToUnConnectedNode(gch.commandService, gch.peerApi, oppositePeerList)
+		DialToUnConnectedNode(gch.peerService, gch.peerApi, oppositePeerList)
 
 		break
 
@@ -86,10 +91,44 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 
 		gch.peerApi.AddPeer(peer)
 		break
+
+	case "RequestVoteProtocol":
+
+		//	1. if leftTime >0, reset left time and send VoteLeaderMessage
+		if gch.leaderRepository.GetLeftTime() > 0{
+
+			gch.leaderRepository.ResetLeftTime()
+
+			gch.grpcCommandService.DeliverVoteLeaderMessage(command.ConnectionID)
+
+		}
+
+	case "VoteLeaderProtocol":
+
+		//	1. if candidate, reset left time
+		//	2. count up
+		if gch.leaderRepository.GetState() == "candidate"{
+
+			gch.leaderRepository.ResetLeftTime()
+
+			gch.leaderRepository.CountUp()
+
+		}
+
+		//	3. if counted is same with num of peer-1 set leader and publish
+		numOfPeers := len(gch.peerApi.GetPeerList())
+
+		if gch.leaderRepository.GetVoteCount() == numOfPeers-1{
+
+			gch.grpcCommandService.
+
+		}
 	}
 
 	return nil
 }
+
+
 
 func ReceiverPeerLeaderTable(body []byte) (p2p.PeerLeaderTable, p2p.Leader, []p2p.Peer, error){
 	peerTable := p2p.PeerLeaderTable{}
@@ -117,7 +156,7 @@ func UpdateWithLongerPeerList(gch *GrpcCommandHandler, oppositeLeader p2p.Leader
 	return nil
 }
 
-func DialToUnConnectedNode(commandService GrpcCommandHandlerCommandService, peerApi GrpcCommandHandlerPeerApi, peerList []p2p.Peer) error{
+func DialToUnConnectedNode(peerService GrpcCommandHandlerPeerService, peerApi GrpcCommandHandlerPeerApi, peerList []p2p.Peer) error{
 
 	for _, peer := range peerList{
 		//err is nil if there is matching peer
@@ -125,7 +164,7 @@ func DialToUnConnectedNode(commandService GrpcCommandHandlerCommandService, peer
 
 		//dial if no peer matching peer id
 		if err !=nil{
-			commandService.Dial(peer.IpAddress)
+			peerService.Dial(peer.IpAddress)
 		}
 	}
 

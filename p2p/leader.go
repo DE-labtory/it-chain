@@ -40,4 +40,12 @@ func (l *Leader) On(event midgard.Event) error {
 type LeaderRepository interface {
 	GetLeader() Leader
 	SetLeader(leader Leader)
+	CountDownLeftTimeBy(tick int64)
+	SetState(state string)
+	GetState() string
+	ResetLeftTime() int64
+	GetLeftTime() int64
+	GetVoteCount() int
+	ResetVoteCount()
+	CountUp()
 }

@@ -19,6 +19,12 @@ type LeaderInfoResponseMessage struct {
 	Address  string
 }
 
+type UpdateLeaderMessage struct {}
+
 type PeerLeaderTableMessage struct{
 	PeerLeaderTable PeerLeaderTable
 }
+
+type RequestVoteMessage struct{}
+
+type VoteLeaderMessage struct {}
