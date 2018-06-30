@@ -1,24 +1,23 @@
 package memory
 
 import (
-	"github.com/it-chain/it-chain-Engine/p2p"
 	"errors"
-	"sync"
 	"math/rand"
+	"sync"
 	"time"
-)
 
+	"github.com/it-chain/it-chain-Engine/p2p"
+)
 
 var ErrNoLeader = errors.New("there is no leader")
 
 type LeaderRepository struct {
-	leader p2p.Leader
-	leftTime int64 //left time in millisecond
-	state string
+	leader    p2p.Leader
+	leftTime  int64 //left time in millisecond
+	state     string
 	voteCount int
-	mux sync.Mutex
+	mux       sync.Mutex
 }
-
 
 func NewLeaderRepository(leader p2p.Leader) *LeaderRepository {
 
@@ -41,10 +40,10 @@ func (lr *LeaderRepository) SetLeader(leader p2p.Leader) {
 	defer lr.mux.Unlock()
 
 	lr.leader = leader
-	
+
 }
 
-func (lr *LeaderRepository) GetLeftTime() int64{
+func (lr *LeaderRepository) GetLeftTime() int64 {
 
 	lr.mux.Lock()
 	defer lr.mux.Unlock()
@@ -53,7 +52,7 @@ func (lr *LeaderRepository) GetLeftTime() int64{
 
 }
 
-func (lr *LeaderRepository) ResetLeftTime(){
+func (lr *LeaderRepository) ResetLeftTime() {
 
 	lr.mux.Lock()
 	defer lr.mux.Unlock()
@@ -63,26 +62,26 @@ func (lr *LeaderRepository) ResetLeftTime(){
 }
 
 //count down left time by tick millisecond  until 0
-func (lr *LeaderRepository) CountDownLeftTimeBy(tick int64){
+func (lr *LeaderRepository) CountDownLeftTimeBy(tick int64) {
 
 	lr.mux.Lock()
 	defer lr.mux.Unlock()
-	if lr.leftTime == 0{
+	if lr.leftTime == 0 {
 		return
 	}
 	lr.leftTime = lr.leftTime - tick
 }
 
-func (lr *LeaderRepository) SetState(state string){
+func (lr *LeaderRepository) SetState(state string) {
 
 	lr.mux.Lock()
 	defer lr.mux.Unlock()
 
-	lr.state=state
+	lr.state = state
 
 }
 
-func (lr *LeaderRepository) GetState() string{
+func (lr *LeaderRepository) GetState() string {
 
 	lr.mux.Lock()
 	defer lr.mux.Unlock()
@@ -90,7 +89,7 @@ func (lr *LeaderRepository) GetState() string{
 	return lr.state
 }
 
-func (lr *LeaderRepository) GetVoteCount() int{
+func (lr *LeaderRepository) GetVoteCount() int {
 
 	lr.mux.Lock()
 	defer lr.mux.Unlock()
@@ -121,6 +120,5 @@ func GenRandomInRange(min, max int64) int64 {
 
 	rand.Seed(time.Now().Unix())
 
-	return rand.Int63n(max - min) + min
-
+	return rand.Int63n(max-min) + min
 }

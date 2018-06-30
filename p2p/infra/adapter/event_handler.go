@@ -9,7 +9,8 @@ import (
 
 var ErrEmptyAddress = errors.New("empty address proposed")
 var ErrPeerApi = errors.New("problem in peer api")
-type EventHandlerPeerApi interface{
+
+type EventHandlerPeerApi interface {
 	AddPeer(peer p2p.Peer) error
 	DeletePeer(id p2p.PeerId) error
 	DeliverPeerTable(connectionId string) error
@@ -23,7 +24,6 @@ func NewEventHandler(peerApi EventHandlerPeerApi) *EventHandler {
 		peerApi: peerApi,
 	}
 }
-
 
 //handler connection created event
 func (eh *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent) error {
@@ -41,7 +41,6 @@ func (eh *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent)
 	}
 	//2. send peer table
 	eh.peerApi.DeliverPeerTable(event.ID)
-
 
 	return nil
 }
@@ -62,12 +61,14 @@ func (n *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconnec
 	return nil
 }
 
-type WriteOnlyPeerRepository interface{
+type WriteOnlyPeerRepository interface {
 	Save(data p2p.Peer) error
 }
+
 type WriteOnlyLeaderRepository interface {
 	SetLeader(leader p2p.Leader)
 }
+
 type RepositoryProjector struct {
 	peerRepository   WriteOnlyPeerRepository
 	leaderRepository WriteOnlyLeaderRepository
