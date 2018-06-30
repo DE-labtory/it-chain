@@ -46,14 +46,14 @@ func (eh *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent)
 	return nil
 }
 
-//todo conn disconnect event 구현
-func (n *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconnectedEvent) error {
+//todo deleted peer if disconnected peer is leader
+func (eh *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconnectedEvent) error {
 
 	if event.ID == "" {
 		return ErrEmptyPeerId
 	}
 
-	err := n.peerApi.DeletePeer(p2p.PeerId{Id: event.ID})
+	err := eh.peerApi.DeletePeer(p2p.PeerId{Id: event.ID})
 
 	if err != nil {
 		log.Println(err)
@@ -63,11 +63,17 @@ func (n *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconnec
 }
 
 type WriteOnlyPeerRepository interface{
+
 	Save(data p2p.Peer) error
+
 }
+
 type WriteOnlyLeaderRepository interface {
+
 	SetLeader(leader p2p.Leader)
+
 }
+
 type RepositoryProjector struct {
 	peerRepository   WriteOnlyPeerRepository
 	leaderRepository WriteOnlyLeaderRepository
@@ -92,7 +98,9 @@ func (projector *RepositoryProjector) HandleLeaderUpdatedEvent(event p2p.LeaderU
 	}
 
 	projector.leaderRepository.SetLeader(leader)
+
 	return nil
+
 }
 
 func (projector *RepositoryProjector) HandlerPeerCreatedEvent(event p2p.PeerCreatedEvent) error {

@@ -94,16 +94,15 @@ func (leaderApi *LeaderApi) DeliverLeaderInfo(connectionId string) error {
 }
 
 func (leaderApi *LeaderApi) ElectLeaderWithRaft(){
+
 	//1. Start random timeout
 	//2. timed out! alter state to 'candidate'
 	//3. while ticking, count down leader repo left time
 	//4. Send message having 'RequestVoteProtocol' to other node
 	go StartRandomTimeOut(leaderApi)
 
-
 }
 
-//todo find connectionId by peerId of make peer repo contains connectionId
 func StartRandomTimeOut(leaderApi *LeaderApi) {
 
 	timeoutNum := GenRandomInRange(150, 300)
@@ -114,6 +113,7 @@ func StartRandomTimeOut(leaderApi *LeaderApi) {
 		select {
 
 		case <-timeout:
+
 			if leaderApi.leaderRepository.GetState() == "Ticking"{
 
 				leaderApi.leaderRepository.SetState("Candidate")
@@ -130,6 +130,8 @@ func StartRandomTimeOut(leaderApi *LeaderApi) {
 
 			}else if leaderApi.leaderRepository.GetState() == "Candidate"{
 
+				//reset time and state chane candidate -> ticking when timed in candidate state
+				leaderApi.leaderRepository.ResetLeftTime()
 				leaderApi.leaderRepository.SetState("Ticking")
 
 			}
