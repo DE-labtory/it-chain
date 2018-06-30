@@ -9,9 +9,9 @@ import (
 	"github.com/magiconair/properties/assert"
 )
 
-type MockMessageService struct{}
+type MockGrpcCommandService struct{}
 
-func (mms MockMessageService) DeliverLeaderInfo(nodeId p2p.PeerId, leader p2p.Leader) error {
+func (mms MockGrpcCommandService) DeliverLeaderInfo(connectionId string, leader p2p.Leader) error {
 	return nil
 }
 
@@ -58,14 +58,12 @@ func TestLeaderApi_UpdateLeader(t *testing.T) {
 
 func TestLeaderApi_DeliverLeaderInfo(t *testing.T) {
 	tests := map[string]struct {
-		input p2p.PeerId
+		input string
 		err   error
 	}{
 		"proper node id test": {
-			input: p2p.PeerId{
-				Id: "",
-			},
-			err: api.ErrEmptyPeerId,
+			input: "",
+			err:   api.ErrEmptyConnectionId,
 		},
 	}
 	leaderApi := SetupLeaderApi()
@@ -82,8 +80,8 @@ func SetupLeaderApi() *api.LeaderApi {
 	leaderRepository := MockReadOnlyLeaderRepository{}
 	eventRepository := MockEventRepository{}
 
-	messageService := MockMessageService{}
-	leaderApi := api.NewLeaderApi(leaderRepository, eventRepository, messageService, &p2p.Peer{PeerId: p2p.PeerId{Id: "123"}})
+	grpcCommandService := MockGrpcCommandService{}
+	leaderApi := api.NewLeaderApi(leaderRepository, eventRepository, grpcCommandService, &p2p.Peer{PeerId: p2p.PeerId{Id: "123"}})
 
 	return leaderApi
 }

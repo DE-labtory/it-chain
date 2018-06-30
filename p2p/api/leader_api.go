@@ -1,22 +1,22 @@
 package api
 
 import (
-	"log"
-
 	"errors"
-
+	"log"
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/midgard"
 )
 
 var ErrEmptyPeerId = errors.New("empty peer id requested")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
+var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 
 type LeaderApi struct {
-	leaderRepository ReadOnlyLeaderRepository
-	eventRepository  EventRepository
-	grpcCommandService   LeaderGrpcCommandService
-	myInfo           *p2p.Peer
+	leaderRepository   ReadOnlyLeaderRepository
+	peerRepository     ReadOnlyPeerRepository
+	eventRepository    EventRepository
+	grpcCommandService LeaderGrpcCommandService
+	myInfo             *p2p.Peer
 }
 
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
@@ -30,16 +30,18 @@ type EventRepository interface { //midgard.Repository
 }
 
 type LeaderGrpcCommandService interface {
-	DeliverLeaderInfo(peerId p2p.PeerId, leader p2p.Leader) error
+	DeliverLeaderInfo(connectionId string, leader p2p.Leader) error
+	DeliverRequestVoteMessages(connectionIds []string) error
 }
 
-func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, grpcCommandService LeaderGrpcCommandService, myInfo *p2p.Peer) *LeaderApi {
+func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, peerRepository ReadOnlyPeerRepository, eventRepository EventRepository, grpcCommandService LeaderGrpcCommandService, myInfo *p2p.Peer) *LeaderApi {
 
 	return &LeaderApi{
-		leaderRepository: leaderRepository,
-		eventRepository:  eventRepository,
-		grpcCommandService:   grpcCommandService,
-		myInfo:           myInfo,
+		leaderRepository:   leaderRepository,
+		peerRepository:     peerRepository,
+		eventRepository:    eventRepository,
+		grpcCommandService: grpcCommandService,
+		myInfo:             myInfo,
 	}
 }
 
@@ -68,14 +70,14 @@ func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Leader) error {
 	return err
 }
 
-func (leaderApi *LeaderApi) DeliverLeaderInfo(peerId p2p.PeerId) error {
+func (leaderApi *LeaderApi) DeliverLeaderInfo(connectionId string) error {
 
-	if peerId.Id == "" {
-		return ErrEmptyPeerId
+	if connectionId == "" {
+		return ErrEmptyConnectionId
 	}
 
 	leader := leaderApi.leaderRepository.GetLeader()
-	leaderApi.grpcCommandService.DeliverLeaderInfo(peerId, leader)
+	leaderApi.grpcCommandService.DeliverLeaderInfo(connectionId, leader)
 
 	return nil
 }
