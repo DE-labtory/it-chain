@@ -17,6 +17,9 @@ type PeerService interface {
 	DeliverPeerLeaderTable(connectionId string, peerLeaderTable PeerLeaderTable) error
 }
 
+type LeaderService interface{
+	DeliverLeaderInfo(connectionId string, leader Leader) error
+}
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
 type ElectionService struct {
