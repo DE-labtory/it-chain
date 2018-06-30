@@ -83,3 +83,18 @@ func (mr *MetaRepository) FindAll() ([]*icode.Meta, error) {
 
 	return iCodeMetas, nil
 }
+
+func (mr *MetaRepository) FindByGitURL(url string) (*icode.Meta, error) {
+	metas, err := mr.FindAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, meta := range metas {
+		if meta.GitUrl == url {
+			return meta, nil
+		}
+	}
+
+	return &icode.Meta{}, nil
+}

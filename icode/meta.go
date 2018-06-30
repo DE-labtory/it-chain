@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
@@ -23,13 +24,27 @@ type Meta struct {
 }
 
 func NewMeta(repositoryName string, gitUrl string, path string, commitHash string) *Meta {
-	return &Meta{
-		ICodeID:        xid.New().String(),
+	createEvent := MetaCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID:   xid.New().String(),
+			Type: "meta.created",
+		},
 		RepositoryName: repositoryName,
-		CommitHash:     commitHash,
 		GitUrl:         gitUrl,
 		Path:           path,
+		CommitHash:     commitHash,
 	}
+	eventstore.Save(createEvent.GetID(), createEvent)
+	return createEvent.GetMeta()
+}
+
+func DeleteMeta(metaId ID) error {
+	return eventstore.Save(metaId, MetaDeletedEvent{
+		EventModel: midgard.EventModel{
+			ID:   metaId,
+			Type: "meta.deleted",
+		},
+	})
 }
 
 func (m Meta) GetID() string {
@@ -50,5 +65,12 @@ type MetaRepository interface {
 	Save(meta Meta) error
 	Remove(id ID) error
 	FindById(id ID) (*Meta, error)
+	FindByGitURL(url string) (*Meta, error)
+	FindAll() ([]*Meta, error)
+}
+
+type ReadOnlyMetaRepository interface {
+	FindById(id ID) (*Meta, error)
+	FindByGitURL(url string) (*Meta, error)
 	FindAll() ([]*Meta, error)
 }

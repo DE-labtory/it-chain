@@ -1,19 +1,52 @@
 package api
 
-import "github.com/it-chain/it-chain-Engine/icode"
+import (
+	"github.com/it-chain/it-chain-Engine/icode"
+	"github.com/pkg/errors"
+)
 
 type ICodeApi struct {
 	ContainerService icode.ContainerService
 	StoreApi         ICodeStoreApi
-	MetaRepository   icode.MetaRepository
+	MetaRepository   icode.ReadOnlyMetaRepository
 }
 
 func (iApi ICodeApi) Deploy(gitUrl string) error {
-	panic("implement please")
+	// check for already in repository
+	meta, err := iApi.MetaRepository.FindByGitURL(gitUrl)
+	if meta.ICodeID != "" {
+		return errors.New("Already deployed")
+	}
+	if err != nil {
+		return err
+	}
+
+	// clone meta. in clone function, metaCreatedEvent will publish
+	meta, err = iApi.StoreApi.Clone(gitUrl)
+	if err != nil {
+		return err
+	}
+
+	//start ICode with container
+	if err = iApi.ContainerService.Start(*meta); err != nil {
+		return err
+	}
 }
 
 func (iApi ICodeApi) UnDeploy(id icode.ID) error {
-	panic("implement please")
+	// stop iCode container
+	err := iApi.ContainerService.Stop(id)
+	if err != nil {
+		return err
+	}
+
+	// publish meta delete event
+	err = icode.DeleteMeta(id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (iApi ICodeApi) Invoke(txs []icode.Transaction) {
