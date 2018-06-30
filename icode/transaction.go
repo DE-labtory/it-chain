@@ -17,7 +17,7 @@ const (
 	Query  TxDataType = "query"
 )
 
-type TxDataType string
+type TxDataType = string
 
 type TxData struct {
 	Jsonrpc string

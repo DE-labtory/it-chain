@@ -1,8 +1,9 @@
 package api
 
 import (
+	"errors"
+
 	"github.com/it-chain/it-chain-Engine/icode"
-	"github.com/pkg/errors"
 )
 
 type ICodeApi struct {
@@ -13,9 +14,9 @@ type ICodeApi struct {
 
 func NewIcodeApi(containerService icode.ContainerService, storeApi ICodeStoreApi, repository icode.ReadOnlyMetaRepository) *ICodeApi {
 	return &ICodeApi{
-		ContainerService: nil,
-		StoreApi:         nil,
-		MetaRepository:   nil,
+		ContainerService: containerService,
+		StoreApi:         storeApi,
+		MetaRepository:   repository,
 	}
 }
 
