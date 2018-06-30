@@ -62,26 +62,6 @@ func (ps *PeerService) RequestPeerList(peerId p2p.PeerId) error {
 	return ps.publish("Command", "message.deliver", deliverCommand)
 }
 
-func (ps *PeerService) DeliverLeaderInfo(connectionId string, leader p2p.Leader) error {
-
-	if connectionId == "" {
-		return ErrEmptyPeerId
-	}
-
-	if leader.LeaderId.Id == "" {
-		return ErrEmptyLeaderId
-	}
-
-	deliverCommand, err := CreateGrpcDeliverCommand("UpdateLeader", leader)
-
-	if err != nil {
-		return err
-	}
-
-	deliverCommand.Recipients = append(deliverCommand.Recipients, connectionId)
-
-	return ps.publish("Command", "message.deliver", deliverCommand)
-}
 
 func (ps *PeerService) DeliverPeerLeaderTable(connectionId string, peerLeaderTable p2p.PeerLeaderTable) error {
 

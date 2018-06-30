@@ -56,32 +56,32 @@ func TestLeaderApi_UpdateLeader(t *testing.T) {
 	}
 }
 
-func TestLeaderApi_DeliverLeaderInfo(t *testing.T) {
-	tests := map[string]struct {
-		input string
-		err   error
-	}{
-		"proper node id test": {
-			input: "",
-			err:   api.ErrEmptyConnectionId,
-		},
-	}
-	leaderApi := SetupLeaderApi()
+//func TestLeaderApi_DeliverLeaderInfo(t *testing.T) {
+//	tests := map[string]struct {
+//		input string
+//		err   error
+//	}{
+//		"proper node id test": {
+//			input: "",
+//			err:   api.ErrEmptyConnectionId,
+//		},
+//	}
+//	leaderApi := SetupLeaderApi()
+//
+//	for testName, test := range tests {
+//		t.Logf("running test case %s", testName)
+//		err := leaderApi.DeliverLeaderInfo(test.input)
+//		assert.Equal(t, err, test.err)
+//	}
+//}
 
-	for testName, test := range tests {
-		t.Logf("running test case %s", testName)
-		err := leaderApi.DeliverLeaderInfo(test.input)
-		assert.Equal(t, err, test.err)
-	}
-}
-
-func SetupLeaderApi() *api.LeaderApi {
-
-	leaderRepository := MockReadOnlyLeaderRepository{}
-	eventRepository := MockEventRepository{}
-
-	grpcCommandService := MockGrpcCommandService{}
-	leaderApi := api.NewLeaderApi(leaderRepository, eventRepository, grpcCommandService, &p2p.Peer{PeerId: p2p.PeerId{Id: "123"}})
-
-	return leaderApi
-}
+//func SetupLeaderApi() *api.LeaderApi {
+//
+//	leaderRepository := MockReadOnlyLeaderRepository{}
+//	eventRepository := MockEventRepository{}
+//
+//	grpcCommandService := MockGrpcCommandService{}
+//	leaderApi := api.NewLeaderApi(leaderRepository, eventRepository, grpcCommandService, &p2p.Peer{PeerId: p2p.PeerId{Id: "123"}})
+//
+//	return leaderApi
+//}

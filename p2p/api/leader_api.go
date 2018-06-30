@@ -13,9 +13,7 @@ var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 
 type LeaderApi struct {
 	leaderRepository   ReadOnlyLeaderRepository
-	peerRepository     ReadOnlyPeerRepository
 	eventRepository    EventRepository
-	grpcCommandService LeaderGrpcCommandService
 	myInfo             *p2p.Peer
 }
 
@@ -29,22 +27,16 @@ type EventRepository interface { //midgard.Repository
 	Save(aggregateID string, events ...midgard.Event) error
 }
 
-type LeaderGrpcCommandService interface {
-	DeliverLeaderInfo(connectionId string, leader p2p.Leader) error
-	DeliverRequestVoteMessages(connectionIds []string) error
-}
-
-func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, peerRepository ReadOnlyPeerRepository, eventRepository EventRepository, grpcCommandService LeaderGrpcCommandService, myInfo *p2p.Peer) *LeaderApi {
+func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, myInfo *p2p.Peer) *LeaderApi {
 
 	return &LeaderApi{
 		leaderRepository:   leaderRepository,
-		peerRepository:     peerRepository,
 		eventRepository:    eventRepository,
-		grpcCommandService: grpcCommandService,
 		myInfo:             myInfo,
 	}
 }
 
+//todo update leader with ip address by peer!! not leader
 func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Leader) error {
 
 	if leader.LeaderId.Id == "" {
@@ -68,16 +60,4 @@ func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Leader) error {
 	}
 
 	return err
-}
-
-func (leaderApi *LeaderApi) DeliverLeaderInfo(connectionId string) error {
-
-	if connectionId == "" {
-		return ErrEmptyConnectionId
-	}
-
-	leader := leaderApi.leaderRepository.GetLeader()
-	leaderApi.grpcCommandService.DeliverLeaderInfo(connectionId, leader)
-
-	return nil
 }
