@@ -4,27 +4,33 @@ import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"errors"
+	"sync"
 )
 
 var ErrBlockNil = errors.New("Block nil error");
+var ErrAddBlockToPool = errors.New("AddBlockToPool error")
 
 type CommandHandlerBlockApi interface {
 	CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error)
 	CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error)
+	AddBlockToPool(block blockchain.Block) error
 }
 
 type CommandHandler struct {
 	blockApi CommandHandlerBlockApi
+	// block pool에 들어가는 block의 순서는 보장되어야한다.
+	confirmBlockMux *sync.RWMutex
 }
 
 func NewCommandHandler(blockApi CommandHandlerBlockApi) *CommandHandler {
 	return &CommandHandler{
+		confirmBlockMux: &sync.RWMutex{},
 		blockApi: blockApi,
 	}
 }
 
 // txpool에서 받은 transactions들을 block으로 만들어서 consensus에 보내준다.
-func (handler *CommandHandler) HandleProposeBlockCommand(command blockchain.ProposeBlockCommand) {
+func (h *CommandHandler) HandleProposeBlockCommand(command blockchain.ProposeBlockCommand) {
 	//rawTxList := command.Transactions
 	//
 	//txList, err := convertTxList(rawTxList)
@@ -48,12 +54,19 @@ func convertTxList(txList []txpool.Transaction) ([]blockchain.Transaction, error
 }
 
 /// 합의된 block이 넘어오면 block pool에 저장한다.
-func (handler *CommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlockCommand) error {
-	block := command.Block
+func (h *CommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlockCommand) error {
+	h.confirmBlockMux.Lock()
 
+	defer h.confirmBlockMux.Unlock()
+
+	block := command.Block
 	if block != nil {
 		return ErrBlockNil
 	}
 
-
+	err := h.blockApi.AddBlockToPool(block)
+	if err != nil {
+		return ErrAddBlockToPool
+	}
+	return nil
 }
