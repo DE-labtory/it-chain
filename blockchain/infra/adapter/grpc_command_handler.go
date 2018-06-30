@@ -1,20 +1,36 @@
 package adapter
 
-import "github.com/it-chain/it-chain-Engine/blockchain"
+import (
+	"github.com/it-chain/it-chain-Engine/blockchain"
+	"errors"
+)
+
+var ErrGetLastBlock = errors.New("error when get last block")
+var ErrSyncCheckResponse = errors.New("error when sync check response")
 
 type BlockApi interface {
-	CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error)
-	CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error)
 	SyncedCheck(block blockchain.Block) error
+}
+
+type ReadOnlyBlockRepository interface {
+	GetLastBlock(block blockchain.Block) error
+}
+
+type SyncCheckGrpcCommandService interface {
+	SyncCheckResponse(block blockchain.Block) error
 }
 
 type GrpcCommandHandler struct {
 	blockApi BlockApi
+	blockRepository ReadOnlyBlockRepository
+	grpcCommandService SyncCheckGrpcCommandService
 }
 
-func NewGrpcCommandHandler(blockApi BlockApi) *GrpcCommandHandler {
+func NewGrpcCommandHandler(blockApi BlockApi, blockRepository ReadOnlyBlockRepository, grpcCommandService SyncCheckGrpcCommandService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		blockApi: blockApi,
+		blockRepository: blockRepository,
+		grpcCommandService: grpcCommandService,
 	}
 }
 
@@ -22,6 +38,17 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 	switch command.Protocol {
 	case "SyncCheckRequestProtocol":
 		//TODO: 상대방의 SyncCheck를 위해서 자신의 last block을 보내준다.
+		block := &blockchain.DefaultBlock{}
+
+		err := g.blockRepository.GetLastBlock(block)
+		if err != nil {
+			return ErrGetLastBlock
+		}
+
+		err = g.grpcCommandService.SyncCheckResponse(block)
+		if err != nil {
+			return ErrSyncCheckResponse
+		}
 		break
 
 	case "SyncCheckResponseProtocol":

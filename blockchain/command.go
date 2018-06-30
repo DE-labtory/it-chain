@@ -12,6 +12,7 @@ type SyncUpdateCommand struct {
 
 type NodeUpdateCommand struct {
 	midgard.EventModel
+	Peer
 }
 
 type ProposeBlockCommand struct {
@@ -30,4 +31,11 @@ type GrpcReceiveCommand struct {
 	Body         []byte
 	ConnectionID string
 	Protocol     string
+}
+
+type GrpcDeliverCommand struct {
+	midgard.CommandModel
+	Recipients []string
+	Body []byte
+	Protocol string
 }
