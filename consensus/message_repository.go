@@ -21,6 +21,13 @@ type PrepareMsgRepositoryImpl struct {
 	lock        *sync.RWMutex
 }
 
+func NewPrepareMsgRepository() PrepareMsgRepository {
+	return &PrepareMsgRepositoryImpl{
+		PreparePool: make(map[ConsensusId]*[]PrepareMsg, 0),
+		lock:        &sync.RWMutex{},
+	}
+}
+
 func (pr *PrepareMsgRepositoryImpl) Save(prepareMsg PrepareMsg) {
 	msgPool := *pr.PreparePool[prepareMsg.ConsensusId]
 
@@ -48,6 +55,13 @@ type CommitMsgRepository interface {
 type CommitMsgRepositoryImpl struct {
 	CommitPool map[ConsensusId]*[]CommitMsg
 	lock       *sync.RWMutex
+}
+
+func NewCommitMsgRepository() CommitMsgRepository {
+	return &CommitMsgRepositoryImpl{
+		CommitPool: make(map[ConsensusId]*[]CommitMsg, 0),
+		lock:       &sync.RWMutex{},
+	}
 }
 
 func (cr *CommitMsgRepositoryImpl) Save(commitMsg CommitMsg) {
