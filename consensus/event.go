@@ -41,3 +41,13 @@ type MemberRemovedEvent struct {
 	midgard.EventModel
 	MemberId MemberId
 }
+
+type PrepareFinishedEvent struct {
+	midgard.EventModel
+	ConsensusId ConsensusId
+}
+
+type CommitFinishedEvent struct {
+	midgard.EventModel
+	ConsensusId ConsensusId
+}
