@@ -1,62 +1,30 @@
 package api
 
 import (
-	"github.com/it-chain/it-chain-Engine/consensus/domain/model/parliament"
-	"github.com/it-chain/it-chain-Engine/consensus/domain/repository"
+	"github.com/it-chain/midgard"
+	"github.com/it-chain/it-chain-Engine/consensus"
 )
 
 type ParliamentApi struct {
-	parlimentRepository repository.ParlimentRepository
+	eventRepository *midgard.Repository
 }
 
-func NewParliamentApi(parlimentRepository repository.ParlimentRepository) ParliamentApi {
+func NewParliamentApi(eventRepository *midgard.Repository) ParliamentApi {
 	return ParliamentApi{
-		parlimentRepository: parlimentRepository,
+		eventRepository: eventRepository,
 	}
 }
 
-func (pApi ParliamentApi) ChangeLeader(leader parliament.Leader) error {
+// todo : Implement & Event Sourcing 첨가
 
-	parliament := pApi.parlimentRepository.Get()
-	parliament.SetLeader(&leader)
-
-	err := pApi.parlimentRepository.Save(parliament)
-
-	if err != nil {
-		return err
-	}
-
+func (p ParliamentApi) ChangeLeader(leader consensus.Leader) error {
 	return nil
 }
 
-func (pApi ParliamentApi) AddMember(member parliament.Member) error {
-
-	parliament := pApi.parlimentRepository.Get()
-	err := parliament.AddMember(&member)
-
-	if err != nil {
-		return err
-	}
-
-	err = pApi.parlimentRepository.Save(parliament)
-
-	if err != nil {
-		return err
-	}
-
+func (p ParliamentApi) AddMember(member consensus.Member) error {
 	return nil
 }
 
-func (pApi ParliamentApi) RemoveMember(memberID parliament.PeerID) error {
-
-	parliament := pApi.parlimentRepository.Get()
-	parliament.RemoveMember(memberID)
-
-	err := pApi.parlimentRepository.Save(parliament)
-
-	if err != nil {
-		return err
-	}
-
+func (p ParliamentApi) RemoveMember(memberId consensus.MemberId) error {
 	return nil
 }

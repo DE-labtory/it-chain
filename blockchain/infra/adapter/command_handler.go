@@ -6,6 +6,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/txpool"
 )
 
+<<<<<<< HEAD
 type BlockchainCommandHandler struct {
 	nodeApi  api.NodeApi
 	blockApi api.BlockApi
@@ -16,15 +17,25 @@ func NewBlockchainCommandHandler(blockApi api.BlockApi, nodeApi api.NodeApi) *Bl
 		nodeApi:  nodeApi,
 		blockApi: blockApi,
 	}
+=======
+type CommandHandlerBlockApi interface {
+	CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error)
+	CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error)
 }
 
-// todo
-func (b *BlockchainCommandHandler) HandleUpdateNodesCommand(command blockchain.NodeUpdateCommand) {
-	panic("implement me")
+type CommandHandler struct {
+	blockApi CommandHandlerBlockApi
+>>>>>>> 9cd35c0feee7b112e9f4370452cca8aa76beb428
 }
 
-func (handler *BlockchainCommandHandler) HandleProposeBlockCommand(cmd blockchain.ProposeBlockCommand) {
-	//rawTxList := cmd.Transactions
+func NewCommandHandler(blockApi CommandHandlerBlockApi) *CommandHandler {
+	return &CommandHandler{
+		blockApi: blockApi,
+	}
+}
+
+func (handler *CommandHandler) HandleProposeBlockCommand(command blockchain.ProposeBlockCommand) {
+	//rawTxList := command.Transactions
 	//
 	//txList, err := convertTxList(rawTxList)
 	//if err != nil {

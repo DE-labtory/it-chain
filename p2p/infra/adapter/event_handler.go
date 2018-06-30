@@ -25,10 +25,22 @@ func NewEventHandler(peerApi EventHandlerPeerApi) *EventHandler {
 	}
 }
 
+<<<<<<< HEAD
 //handler connection created event
 func (eh *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent) error {
 
 	//1. addPeer
+=======
+func (n *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent) error {
+	if event.ID == "" {
+		return ErrEmptyPeerId
+	}
+
+	if event.Address == "" {
+		return ErrEmptyAddress
+	}
+
+>>>>>>> 9cd35c0feee7b112e9f4370452cca8aa76beb428
 	peer := *p2p.NewPeer(event.Address, p2p.PeerId{Id: event.ID})
 	err := eh.peerApi.AddPeer(peer)
 

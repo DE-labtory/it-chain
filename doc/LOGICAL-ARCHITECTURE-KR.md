@@ -1,6 +1,6 @@
 # Logical Architecture
 
-![](../images/it-chain-logical-view-architecture-r5.png)
+![](./images/it-chain-logical-view-architecture-r5.png)
 
 `it-chain`의 개념 수준 아키텍처 모델은 위 그림과 같다. `it-chain` 노드는 2개의 게이트웨이 컴포넌트(`Client API Gateway` 와 `Inter-Node API Gateway`)를 통해 외부 네트워크 노드(다른 `it-chain` 노드 또는 클라이언트 어플리케이션들)와 연결된다.
 
@@ -21,7 +21,7 @@
 
 # Module Architecture
 
-![Module Architecture](../images/[module]component-r3.png)
+![Module Architecture](./images/[module]component-r3.png)
 
 위 모델은 `it-chain-Engine`의 개별 컴포넌트의 모듈 아키텍처를 Layered 아키텍처 패턴을 적용하여 표현한 모델이다. 모듈 아키텍처는 개념 수준 아키텍처 모델과는 달리 시스템의 코드 측면 구조를 표현한다. (개념 수준 아키텍처 모델은 시스템의 실행 측면 구조를 묘사하였다.)
 
@@ -65,7 +65,7 @@ repository는 entity 및 value object 를 기준으로 하여 db와의 입출력
 
 ## Adapter
 
-![moduleadapter-r1](../images/[module]adapter-r2.png)
+![moduleadapter-r1](./images/[module]adapter-r2.png)
 
 Adapter는 AMQP Message를 consume하여 작업을 수행하는 기능을 담당한다. it-chain에서 사용되는 AMQP Message종류는 event와 command로, `Event` 는 해당 컴포넌트의 root aggregate에 변화가 생긴 경우 해당 컴포넌트 상태변화를 알리고자 AMQP로 publish하며 발생하고, `Command` 는 다른 컴포넌트에게 기능 수행을 요청하기 위해 publish하여 발생한다.
 
@@ -91,7 +91,7 @@ Event handler는 amqp에서 event를 consume하여 필요한 작업을 api 호�
 
 **Repository projector**
 
-it-chain은 repository에 대한 쓰기와 읽기를 분리하는 `CQRS(Command Query Responsibilities Segregation)` 패턴을 차용하며, **Repository projector**는 amqp에서 event를 consume하여 event로 부터 원하는 view를 구축(Projection)하는 작업을 수행한다.이러한 it-chain의 CQRS pattern은 projection이라는 minimal 한 logic의 수행만을 전담하는 repository projector와 handler를 구분함으로써 기능적으로 보다 명확한 설계를 추구하였다.
+it-chain은 repository에 대한 쓰기와 읽기를 분리하는 `CQRS(Command Query Responsibilities Segregation)` 패턴을 차용하며, **Repository projector** 는 amqp에서 event를 consume하여 event로 부터 원하는 view를 구축(Projection)하는 작업을 수행한다.이러한 it-chain의 CQRS pattern은 projection이라는 minimal 한 logic의 수행만을 전담하는 repository projector와 handler를 구분함으로써 기능적으로 보다 명확한 설계를 추구하였다.
 
 
 
@@ -100,9 +100,8 @@ it-chain은 repository에 대한 쓰기와 읽기를 분리하는 `CQRS(Command 
 
 **todo...**
 
-
 # Communication between nodes
-Node 사이의 통신은 gRPC library 기반의 자체 library 인 bifrost를 활용하여 이루어 진다. gRPC Gateway 컴포넌트가 한다. 송신은 각 컴포넌트의 service의 한 종류인 `grpc_command_service` 에서 이루어 지며, 수신은 각 컴포넌트의 infra의 `grpc_command_handler`에서 이루어 진다. 각 메세지는 메세지의 목적에 따라 미리 정해진 protocol 을 포함하며 `grpc_command handler`에서 특정 protocol에 따라 적합한 api 함수를 호출함으로써 모든 기능 수행을 application layer에 위임한다.
+Node 사이의 통신은 gRPC library 기반의 자체 library 인 bifrost를 활용하여 이루어 진다. gRPC Gateway 컴포넌트가 한다. 송신은 각 컴포넌트의 service의 한 종류인 `grpc_command_service` 에서 `GrpcDeliverCommand` 를 publish 함으로써 이루어 지며, 수신은 각 컴포넌트의 infra의 `grpc_command_handler`에서 `GrpcReceiveCommand` 를 consume 함으로써 이루어 진다. 각 메세지는 메세지의 목적에 따라 미리 정해진 protocol 을 포함하며 `grpc_command handler`에서 특정 protocol에 따라 적합한 api 함수를 호출함으로써 모든 기능 수행을 application layer에 위임한다.
 
 다음은 node 간 communication의 logical view이다.
-![logicalnetwork-communication](../images/[logical]network-communication-r1.png)
+![logicalnetwork-communication](./images/[logical]network-communication-r1.png)
