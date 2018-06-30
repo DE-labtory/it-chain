@@ -13,12 +13,12 @@ import (
 type MockLeaderApi struct{}
 
 func (mla MockLeaderApi) UpdateLeader(leader p2p.Leader) error { return nil }
-func (mla MockLeaderApi) DeliverLeaderInfo(peerId p2p.PeerId)  {}
+func (mla MockLeaderApi) DeliverLeaderInfo(connectionId string)  {}
 
 type MockPeerApi struct{}
 
 func (mna MockPeerApi) UpdatePeerList(peerList []p2p.Peer) error { return nil }
-func (mna MockPeerApi) DeliverPeerList(peerId p2p.PeerId) error  { return nil }
+func (mna MockPeerApi) DeliverPeerList(connectionId string) error  { return nil }
 func (mna MockPeerApi) AddPeer(peer p2p.Peer)                    {}
 
 func TestGrpcMessageHandler_HandleMessageReceive(t *testing.T) {
@@ -30,19 +30,20 @@ func TestGrpcMessageHandler_HandleMessageReceive(t *testing.T) {
 	newPeerList := append(peerList, p2p.Peer{PeerId: p2p.PeerId{Id: "123"}})
 	peerListByte, _ := json.Marshal(newPeerList)
 
+	//todo error case write!
 	tests := map[string]struct {
 		input struct {
-			command p2p.GrpcRequestCommand
+			command p2p.GrpcReceiveCommand
 		}
 		err error
 	}{
 		"leader info deliver test success": {
 			input: struct {
-				command p2p.GrpcRequestCommand
+				command p2p.GrpcReceiveCommand
 			}{
-				command: p2p.GrpcRequestCommand{
+				command: p2p.GrpcReceiveCommand{
 					CommandModel: midgard.CommandModel{ID: "123"},
-					Data:         leaderByte,
+					Body:         leaderByte,
 					Protocol:     "LeaderInfoDeliverProtocol",
 				},
 			},
@@ -50,11 +51,11 @@ func TestGrpcMessageHandler_HandleMessageReceive(t *testing.T) {
 		},
 		"peer list deliver test success": {
 			input: struct {
-				command p2p.GrpcRequestCommand
+				command p2p.GrpcReceiveCommand
 			}{
-				command: p2p.GrpcRequestCommand{
+				command: p2p.GrpcReceiveCommand{
 					CommandModel: midgard.CommandModel{ID: "123"},
-					Data:         peerListByte,
+					Body:         peerListByte,
 					Protocol:     "PeerListDeliverProtocol",
 				},
 			},
