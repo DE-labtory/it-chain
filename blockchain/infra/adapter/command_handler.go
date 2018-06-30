@@ -62,5 +62,8 @@ func (h *CommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlo
 	}
 
 	h.blockApi.AddBlockToPool(block)
+
+	// TODO: BlockQueuedEvent eventRepository에 추가하기
+	// TODO: event_handler에서 받아서 sync 중이 아니면 block을 dequeue하여 추가합니다.
 	return nil
 }

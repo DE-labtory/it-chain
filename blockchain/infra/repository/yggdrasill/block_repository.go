@@ -46,3 +46,7 @@ func (b *BlockRepository) NewEmptyBlock() (blockchain.Block, error) {
 func (b *BlockRepository) GetBlockCreator() string {
 	return b.Creator
 }
+
+func (b *BlockRepository) AddBlock(block blockchain.Block) error {
+	return b.BlockStorage.AddBlock(block)
+}
