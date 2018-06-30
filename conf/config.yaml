@@ -20,6 +20,7 @@ authentication:
 icode:
   repositorypath: empty
   sshpath: default
+  icodesavepath: ./.tmp
 grpcgateway:
   empty: empty
   ip: 127.0.0.1:13579
