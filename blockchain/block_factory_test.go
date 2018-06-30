@@ -8,6 +8,8 @@ import (
 
 	"time"
 
+	"fmt"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,6 +24,39 @@ var GenesisBlockConfigJson = []byte(`{
 								}`)
 
 func TestCreateGenesisBlock(t *testing.T) {
+
+	tests := map[string]struct {
+		input  string
+		output DefaultBlock
+		err    error
+	}{
+		"success:": {
+			input: "./GenesisBlockConfig.json",
+			output: DefaultBlock{
+				Height:    0,
+				TxList:    nil,
+				TxSeal:    nil,
+				Timestamp: time.Now(),
+				Creator:   []byte("ddd"),
+			},
+			err: nil,
+		},
+		"fail:": {
+			input: "./GenesisBlockConfig.json",
+			output: DefaultBlock{
+				Height:    0,
+				TxList:    nil,
+				TxSeal:    nil,
+				Timestamp: time.Now(),
+				Creator:   nil,
+			},
+			err: nil,
+		},
+	}
+	fmt.Println("tests success")
+	if tests["success:"].output.TxList == nil {
+		fmt.Println("kkkkk")
+	}
 
 	GenesisFilePath := "./GenesisBlockConfig.json"
 	wrongFilePath := "./WrongFileName.json"
@@ -47,6 +82,10 @@ func TestCreateGenesisBlock(t *testing.T) {
 	assert.Equal(t, make([][]byte, 0), GenesisBlock.TxSeal)
 	assert.Equal(t, time.Now().String()[:19], GenesisBlock.Timestamp.String()[:19])
 	assert.Equal(t, make([]byte, 0), GenesisBlock.Creator)
+	fmt.Println("GenesisBlock")
+	if GenesisBlock.TxList == nil {
+		fmt.Println("tttttt")
+	}
 
 	_, err2 := CreateGenesisBlock(wrongFilePath)
 

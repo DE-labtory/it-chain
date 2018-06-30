@@ -2,15 +2,18 @@ package blockchain
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 	"time"
 )
 
+var ErrGetConfig = errors.New("error when get Config")
+
 func CreateGenesisBlock(genesisconfFilePath string) (*DefaultBlock, error) {
 	byteValue, err := ConfigFromJson(genesisconfFilePath)
 	if err != nil {
-		return nil, err
+		return nil, ErrGetConfig
 	}
 
 	validator := new(DefaultValidator)
