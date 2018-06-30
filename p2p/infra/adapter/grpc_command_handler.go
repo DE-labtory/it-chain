@@ -33,9 +33,9 @@ type GrpcCommandHandlerPeerService interface {
 }
 
 type GrpcCommandHandler struct {
-	leaderApi     LeaderApi
-	peerApi       GrpcCommandHandlerPeerApi
-	peerService   GrpcCommandHandlerPeerService
+	leaderApi       LeaderApi
+	peerApi         GrpcCommandHandlerPeerApi
+	peerService     GrpcCommandHandlerPeerService
 	electionService p2p.ElectionService
 }
 
@@ -93,7 +93,6 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 	case "RequestVoteProtocol":
 		gch.electionService.Vote(command.ConnectionID)
 
-
 	case "VoteLeaderProtocol":
 
 		//	1. if candidate, reset left time
@@ -130,6 +129,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 }
 
 func ReceiverPeerLeaderTable(body []byte) (p2p.PeerLeaderTable, p2p.Leader, []p2p.Peer, error) {
+
 	peerTable := p2p.PeerLeaderTable{}
 	if err := json.Unmarshal(body, &peerTable); err != nil {
 		//todo error 처리
@@ -142,6 +142,7 @@ func ReceiverPeerLeaderTable(body []byte) (p2p.PeerLeaderTable, p2p.Leader, []p2
 }
 
 func UpdateWithLongerPeerList(gch *GrpcCommandHandler, oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer) error {
+
 	myPeerLeaderTable := gch.peerApi.GetPeerLeaderTable()
 	myPeerList, _ := myPeerLeaderTable.GetPeerList()
 	myLeader, _ := myPeerLeaderTable.GetLeader()

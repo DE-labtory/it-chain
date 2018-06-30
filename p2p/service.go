@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
-	"github.com/it-chain/it-chain-Engine/conf"
 )
 
 type PeerService interface {
@@ -65,6 +65,8 @@ func StartRandomTimeOut(es *ElectionService) {
 				election.ResetLeftTime()
 				election.SetState("Ticking")
 			}
+
+			es.electionRepository.SetElection(election)
 
 		case <-tick:
 			election.CountDownLeftTimeBy(1)
@@ -128,13 +130,11 @@ func (es *ElectionService) Vote(connectionId string) error {
 	voteLeaderMessage := VoteMessage{}
 
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("VoteLeaderProtocol", voteLeaderMessage)
-
 	grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
 
-	es.publish("Command", "message.send", grpcDeliverCommand)
+	es.publish("Command", "message.deliver", grpcDeliverCommand)
 
 	return nil
-
 }
 
 func (es *ElectionService) BroadcastLeader(peer Peer) error {
@@ -144,17 +144,18 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
 
 	peers, _ := es.peerRepository.FindAll()
-	for _, peer := range peers{
-		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, peer.PeerId.Id)
 
+	for _, peer := range peers {
+		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, peer.PeerId.Id)
 	}
+
 	es.publish("Command", "message.deliver", grpcDeliverCommand)
 
 	return nil
 }
 
 //broad case leader when voted fully
-func (es *ElectionService) DecideToBeLeader(command GrpcReceiveCommand) error{
+func (es *ElectionService) DecideToBeLeader(command GrpcReceiveCommand) error {
 	election := es.electionRepository.GetElection()
 
 	//	1. if candidate, reset left time
@@ -181,4 +182,3 @@ func (es *ElectionService) DecideToBeLeader(command GrpcReceiveCommand) error{
 
 	return nil
 }
-
