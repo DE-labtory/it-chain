@@ -49,10 +49,29 @@ func (iApi ICodeApi) UnDeploy(id icode.ID) error {
 	return nil
 }
 
-func (iApi ICodeApi) Invoke(txs []icode.Transaction) {
-	panic("implement please")
+//todo need asnyc process
+func (iApi ICodeApi) Invoke(txs []icode.Transaction) []icode.Result {
+	resultData := make([]icode.Result, 0)
+	for _, tx := range txs {
+		result, err := iApi.ContainerService.Run(tx)
+		if err != nil {
+			result = &icode.Result{
+				TxId:    tx.TxId,
+				Data:    nil,
+				Success: false,
+			}
+		}
+		resultData = append(resultData, *result)
+	}
+	return resultData
 }
 
-func (iApi ICodeApi) Query(tx icode.Transaction) (icode.Result, error) {
-	panic("implement please")
+func (iApi ICodeApi) Query(tx icode.Transaction) (*icode.Result, error) {
+	result, err := iApi.ContainerService.Run(tx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
