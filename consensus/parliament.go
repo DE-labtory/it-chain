@@ -90,7 +90,7 @@ func (p *Parliament) AddMember(member *Member) (*MemberJoinedEvent, error) {
 
 	memberJoinedEvent := MemberJoinedEvent{
 		EventModel: midgard.EventModel{
-			ID: member.GetId(),
+			ID: p.GetID(),
 		},
 		MemberId: member.MemberId,
 	}
@@ -109,7 +109,7 @@ func (p *Parliament) RemoveMember(memberID MemberId) (*MemberRemovedEvent, error
 
 	memberRemovedEvent := MemberRemovedEvent{
 		EventModel: midgard.EventModel{
-			ID: memberID.ToString(),
+			ID: p.GetID(),
 		},
 		MemberId: memberID,
 	}
