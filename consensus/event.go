@@ -6,9 +6,19 @@ import "github.com/it-chain/midgard"
 
 // Publish part
 
-type ConsensusMessagePublishedEvent struct {
+type PrePrepareMsgCreatedEvent struct {
 	midgard.EventModel
-	ConsensusMsg string
+	PrePrepareMsg PrePrepareMsg
+}
+
+type PrepareMsgCreatedEvent struct {
+	midgard.EventModel
+	PrepareMsg PrepareMsg
+}
+
+type CommitMsgCreatedEvent struct {
+	midgard.EventModel
+	CommitMsg CommitMsg
 }
 
 // todo : Blockchain 모듈 참고
@@ -18,9 +28,19 @@ type BlockCreatedEvent struct {
 
 // Consume part
 
-type ConsensusMessageArrivedEvent struct {
+type PrePrepareMsgArrivedEvent struct {
 	midgard.EventModel
-	ConsensusMsg string
+	PrePrepareMsg PrePrepareMsg
+}
+
+type PrepareMsgArrivedEvent struct {
+	midgard.EventModel
+	PrepareMsg PrepareMsg
+}
+
+type CommitMsgArrivedEvent struct {
+	midgard.EventModel
+	CommitMsg CommitMsg
 }
 
 type ConsensusStartedEvent struct {
@@ -43,6 +63,11 @@ type MemberRemovedEvent struct {
 }
 
 type PrepareFinishedEvent struct {
+	midgard.EventModel
+	ConsensusId ConsensusId
+}
+
+type ConsensusFinishedEvent struct {
 	midgard.EventModel
 	ConsensusId ConsensusId
 }

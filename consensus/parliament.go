@@ -3,9 +3,9 @@ package consensus
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/it-chain/midgard"
-	"sync"
 )
 
 type ParliamentId string
@@ -155,7 +155,7 @@ func (p *Parliament) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *LeaderChangedEvent:
-		p.Leader = &Leader{LeaderId:v.LeaderId}
+		p.Leader = &Leader{LeaderId: v.LeaderId}
 
 	case *MemberJoinedEvent:
 		p.Members = append(p.Members, &Member{MemberId: v.MemberId})
