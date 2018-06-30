@@ -8,8 +8,6 @@ import (
 
 	"time"
 
-	"fmt"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,6 +22,7 @@ var GenesisBlockConfigJson = []byte(`{
 								}`)
 
 func TestCreateGenesisBlock(t *testing.T) {
+	GenesisFilePath := "./GenesisBlockConfig.json"
 
 	tests := map[string]struct {
 		input  string
@@ -31,37 +30,19 @@ func TestCreateGenesisBlock(t *testing.T) {
 		err    error
 	}{
 		"success:": {
-			input: "./GenesisBlockConfig.json",
+			input: GenesisFilePath,
 			output: DefaultBlock{
 				Height:    0,
-				TxList:    nil,
-				TxSeal:    nil,
-				Timestamp: time.Now(),
-				Creator:   []byte("ddd"),
-			},
-			err: nil,
-		},
-		"fail:": {
-			input: "./GenesisBlockConfig.json",
-			output: DefaultBlock{
-				Height:    0,
-				TxList:    nil,
-				TxSeal:    nil,
-				Timestamp: time.Now(),
-				Creator:   nil,
+				TxList:    make([]*DefaultTransaction, 0),
+				TxSeal:    make([][]byte, 0),
+				Timestamp: (time.Now()).Round(0),
+				Creator:   make([]byte, 0),
 			},
 			err: nil,
 		},
 	}
-	fmt.Println("tests success")
-	if tests["success:"].output.TxList == nil {
-		fmt.Println("kkkkk")
-	}
 
-	GenesisFilePath := "./GenesisBlockConfig.json"
-	wrongFilePath := "./WrongFileName.json"
-
-	validator := new(DefaultValidator)
+	//validator := new(DefaultValidator)
 	var tempBlock DefaultBlock
 	err := json.Unmarshal(GenesisBlockConfigJson, &tempBlock)
 	assert.NoError(t, err)
@@ -72,24 +53,22 @@ func TestCreateGenesisBlock(t *testing.T) {
 
 	defer os.Remove(GenesisFilePath)
 
-	GenesisBlock, err1 := CreateGenesisBlock(GenesisFilePath)
-	expectedSeal, _ := validator.BuildSeal(GenesisBlock)
-	assert.NoError(t, err1)
-	assert.Equal(t, expectedSeal, GenesisBlock.Seal)
-	assert.Equal(t, make([]byte, 0), GenesisBlock.PrevSeal)
-	assert.Equal(t, uint64(0), GenesisBlock.Height)
-	assert.Equal(t, make([]*DefaultTransaction, 0), GenesisBlock.TxList)
-	assert.Equal(t, make([][]byte, 0), GenesisBlock.TxSeal)
-	assert.Equal(t, time.Now().String()[:19], GenesisBlock.Timestamp.String()[:19])
-	assert.Equal(t, make([]byte, 0), GenesisBlock.Creator)
-	fmt.Println("GenesisBlock")
-	if GenesisBlock.TxList == nil {
-		fmt.Println("tttttt")
+	for testName, test := range tests {
+		t.Logf("Running test case %s", testName)
+
+		//when
+		GenesisBlock, err := CreateGenesisBlock(GenesisFilePath)
+
+		//then
+		assert.Equal(t, test.err, err)
+		assert.Equal(t, test.output.Height, GenesisBlock.Height)
+		assert.Equal(t, test.output.TxList, GenesisBlock.TxList)
+		assert.Equal(t, test.output.TxSeal, GenesisBlock.TxSeal)
+		assert.Equal(t, test.output.Timestamp.String()[:19], GenesisBlock.Timestamp.String()[:19])
+		assert.Equal(t, test.output.Creator, GenesisBlock.Creator)
+
 	}
 
-	_, err2 := CreateGenesisBlock(wrongFilePath)
-
-	assert.Error(t, err2)
 }
 
 func TestConfigFromJson(t *testing.T) {
