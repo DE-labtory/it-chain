@@ -16,22 +16,22 @@ type Repository interface {
 	GetBlockCreator() string
 }
 
+type BlockHeight = uint64
+
 type BlockPool interface {
-	Enqueue(block Block)
-	Dequeue() Block
+	Add(block Block)
+	Get(height BlockHeight) Block
 }
 
 type DefaultBlockPool struct {
-	pool []Block
+	pool map[BlockHeight] Block
 }
 
-func (p *DefaultBlockPool) Enqueue(block Block) {
-	p.pool = append(p.pool, block)
+func (p *DefaultBlockPool) Add(block Block) {
+	height := block.GetHeight()
+	p.pool[height] = block
 }
 
-func (p *DefaultBlockPool) Dequeue() Block {
-	if len(p.pool) == 0 {
-		return nil
-	}
-	return p.pool[0]
+func (p *DefaultBlockPool) Get(height BlockHeight) Block {
+	return p.pool[height]
 }

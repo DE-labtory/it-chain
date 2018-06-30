@@ -21,7 +21,7 @@ type ProposeBlockCommand struct {
 	Transactions []txpool.Transaction
 }
 
-// consensus에서 합의된 블록이 넘어오면 repository에 저장한다.
+// consensus에서 합의된 블록이 넘어오면 block pool에 저장한다.
 type ConfirmBlockCommand struct {
 	midgard.CommandModel
 	Block Block
