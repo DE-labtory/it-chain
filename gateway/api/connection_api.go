@@ -3,8 +3,8 @@ package api
 import (
 	"log"
 
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/it-chain-Engine/gateway"
-	"github.com/it-chain/midgard"
 )
 
 type ConnectionApi struct {
@@ -19,7 +19,7 @@ func NewConnectionApi(eventRepository gateway.EventRepository, grpcService gatew
 	}
 }
 
-func (c ConnectionApi) CreateConnection(address string) error {
+func (c ConnectionApi) CreateConnection(address string) (gateway.Connection, error) {
 
 	log.Printf("dialing [%s]", address)
 
@@ -27,68 +27,33 @@ func (c ConnectionApi) CreateConnection(address string) error {
 
 	if err != nil {
 		log.Printf("fail to dial [%s]", err)
-		return err
+		return gateway.Connection{}, err
 	}
 
-	return c.storeConnectionCreatedEvent(connection)
-}
-
-func (c ConnectionApi) storeConnectionCreatedEvent(connection gateway.Connection) error {
-
-	events := make([]midgard.Event, 0)
-
-	events = append(events, gateway.ConnectionCreatedEvent{
-		EventModel: midgard.EventModel{
-			ID:   connection.ID,
-			Type: "connection.created",
-		},
-		Address: connection.Address,
-	})
-
-	err := c.eventRepository.Save(connection.ID, events...)
-
-	if err != nil {
-		log.Println(err.Error())
-		return err
-	}
-
-	return nil
+	return gateway.NewConnection(connection)
 }
 
 func (c ConnectionApi) CloseConnection(connectionID string) error {
 
-	c.grpcService.CloseConnection(connectionID)
+	connection := &gateway.Connection{}
 
-	return c.storeConnectionClosedEvent(connectionID)
-}
-
-func (c ConnectionApi) storeConnectionClosedEvent(connectionID string) error {
-
-	events := make([]midgard.Event, 0)
-
-	events = append(events, gateway.ConnectionClosedEvent{
-		EventModel: midgard.EventModel{
-			ID:   connectionID,
-			Type: "connection.closed",
-		},
-	})
-
-	err := c.eventRepository.Save(connectionID, events...)
+	err := eventstore.Load(connection, connectionID)
 
 	if err != nil {
-		log.Println(err.Error())
 		return err
 	}
 
-	return nil
+	c.grpcService.CloseConnection(connectionID)
+
+	return gateway.CloseConnection(connection.ID)
 }
 
-func (c ConnectionApi) OnConnection(connection gateway.Connection) error {
+func (c ConnectionApi) OnConnection(connection gateway.Connection) (gateway.Connection, error) {
 
-	return c.storeConnectionCreatedEvent(connection)
+	return gateway.NewConnection(connection)
 }
 
 func (c ConnectionApi) OnDisconnection(connection gateway.Connection) error {
 
-	return c.storeConnectionClosedEvent(connection.ID)
+	return gateway.CloseConnection(connection.ID)
 }

@@ -18,7 +18,7 @@ func (c ConnectionCommandHandler) HandleConnectionCreateCommand(command gateway.
 		return
 	}
 
-	err := c.connectionApi.CreateConnection(command.Address)
+	_, err := c.connectionApi.CreateConnection(command.Address)
 
 	if err != nil {
 		log.Printf("invalid address [%s]")

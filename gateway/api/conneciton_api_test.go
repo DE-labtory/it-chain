@@ -3,6 +3,9 @@ package api_test
 import (
 	"testing"
 
+	"os"
+
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/it-chain/it-chain-Engine/gateway/api"
 	"github.com/it-chain/midgard"
@@ -40,7 +43,12 @@ func (m MockGrpcService) SendMessages(message []byte, protocol string, connIDs .
 	m.sendMessagesFunc(message, protocol, connIDs...)
 }
 
+func init() {
+}
+
 func TestConnectionApi_CreateConnection(t *testing.T) {
+
+	defer InitStore()()
 
 	//given
 	tests := map[string]struct {
@@ -79,12 +87,14 @@ func TestConnectionApi_CreateConnection(t *testing.T) {
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
-		err := connectionApi.CreateConnection(test.input)
+		_, err := connectionApi.CreateConnection(test.input)
 		assert.Equal(t, err, test.err)
 	}
 }
 
 func TestConnectionApi_CloseConnection(t *testing.T) {
+
+	defer InitStore()()
 
 	//given
 	tests := map[string]struct {
@@ -116,7 +126,28 @@ func TestConnectionApi_CloseConnection(t *testing.T) {
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
+		eventstore.Save(test.input, gateway.ConnectionCreatedEvent{
+			EventModel: midgard.EventModel{
+				ID:   test.input,
+				Type: "connection.created",
+			},
+			Address: "123",
+		})
 		err := connectionApi.CloseConnection(test.input)
 		assert.Equal(t, err, test.err)
+	}
+}
+
+func InitStore() func() {
+
+	path := "./.test"
+
+	eventstore.InitLevelDBStore(path, nil,
+		gateway.ConnectionCreatedEvent{},
+		gateway.ConnectionClosedEvent{})
+
+	return func() {
+		eventstore.Close()
+		os.RemoveAll(path)
 	}
 }
