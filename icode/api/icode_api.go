@@ -8,6 +8,18 @@ type ICodeApi struct {
 	MetaRepository   icode.MetaRepository
 }
 
-func (iApi ICodeApi)()  {
+func (iApi ICodeApi) Deploy(gitUrl string) error {
+	panic("implement please")
+}
 
+func (iApi ICodeApi) UnDeploy(id icode.ID) error {
+	panic("implement please")
+}
+
+func (iApi ICodeApi) Invoke(txs []icode.Transaction) {
+	panic("implement please")
+}
+
+func (iApi ICodeApi) Query(tx icode.Transaction) (icode.Result, error) {
+	panic("implement please")
 }
