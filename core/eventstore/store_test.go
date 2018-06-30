@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSave(t *testing.T) {
+func TestSaveAndLoad(t *testing.T) {
 
 	defer InitStore()()
 
@@ -30,6 +30,14 @@ func TestSave(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, user.ID, aggregateID)
+}
+
+func TestPanicWhenInitTwice(t *testing.T) {
+
+	assert.Panics(t, func() {
+		defer InitStore()()
+		defer InitStore()()
+	})
 }
 
 func InitStore() func() {
