@@ -15,13 +15,15 @@ type BlockApi struct {
 	blockchainRepository blockchain.Repository
 	eventRepository      *midgard.Repository
 	publisherId          string
+	blockPool blockchain.BlockPool
 }
 
-func NewBlockApi(blockchainRepository blockchain.Repository, eventRepository *midgard.Repository, publisherId string) (BlockApi, error) {
+func NewBlockApi(blockchainRepository blockchain.Repository, eventRepository *midgard.Repository, publisherId string, blockPool blockchain.BlockPool) (BlockApi, error) {
 	return BlockApi{
 		blockchainRepository: blockchainRepository,
 		eventRepository:      eventRepository,
 		publisherId:          publisherId,
+		blockPool: blockPool,
 	}, nil
 }
 
@@ -97,6 +99,6 @@ func (bApi *BlockApi) SyncedCheck(block blockchain.Block) error {
 }
 
 // 받은 block을 block pool에 추가한다.
-func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
-	return nil
+func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) {
+	bApi.blockPool.Enqueue(block)
 }

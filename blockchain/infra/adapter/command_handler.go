@@ -13,7 +13,7 @@ var ErrAddBlockToPool = errors.New("AddBlockToPool error")
 type CommandHandlerBlockApi interface {
 	CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error)
 	CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error)
-	AddBlockToPool(block blockchain.Block) error
+	AddBlockToPool(block blockchain.Block)
 }
 
 type CommandHandler struct {
@@ -64,9 +64,6 @@ func (h *CommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlo
 		return ErrBlockNil
 	}
 
-	err := h.blockApi.AddBlockToPool(block)
-	if err != nil {
-		return ErrAddBlockToPool
-	}
+	h.blockApi.AddBlockToPool(block)
 	return nil
 }
