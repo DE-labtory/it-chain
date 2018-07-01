@@ -27,11 +27,13 @@ func CreateGenesisBlock(genesisconfFilePath string) (*DefaultBlock, error) {
 	GenesisBlock.SetTxSeal(GenesisBlock.TxSeal)
 	GenesisBlock.SetCreator(GenesisBlock.Creator)
 	GenesisBlock.SetTimestamp((time.Now()).Round(0))
+
 	Seal, err := validator.BuildSeal(GenesisBlock)
 	if err != nil {
 		return nil, err
 	}
 	GenesisBlock.SetSeal(Seal)
+
 	return GenesisBlock, nil
 }
 

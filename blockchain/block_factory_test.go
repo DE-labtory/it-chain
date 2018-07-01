@@ -8,6 +8,8 @@ import (
 
 	"time"
 
+	"log"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,7 +31,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 		output DefaultBlock
 		err    error
 	}{
-		"success:": {
+		"success create genesisBlock": {
 			input: GenesisFilePath,
 			output: DefaultBlock{
 				Height:    0,
@@ -42,14 +44,20 @@ func TestCreateGenesisBlock(t *testing.T) {
 		},
 	}
 
-	//validator := new(DefaultValidator)
 	var tempBlock DefaultBlock
 	err := json.Unmarshal(GenesisBlockConfigJson, &tempBlock)
-	assert.NoError(t, err)
 
-	GenesisBlockConfigByte, _ := json.Marshal(tempBlock)
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	GenesisBlockConfigByte, err := json.Marshal(tempBlock)
+
 	err = ioutil.WriteFile(GenesisFilePath, GenesisBlockConfigByte, 0644)
-	assert.NoError(t, err)
+
+	if err != nil {
+		log.Println(err.Error())
+	}
 
 	defer os.Remove(GenesisFilePath)
 
