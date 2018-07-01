@@ -31,21 +31,21 @@ func (c *Connection) On(event midgard.Event) error {
 	return nil
 }
 
-func NewConnection(connection Connection) (Connection, error) {
+func NewConnection(connectionID string, address string) (Connection, error) {
 
 	c := Connection{}
 
-	event := ConnectionCreatedEvent{
+	event := &ConnectionCreatedEvent{
 		EventModel: midgard.EventModel{
-			ID:   connection.ID,
+			ID:   connectionID,
 			Type: "connection.created",
 		},
-		Address: connection.Address,
+		Address: address,
 	}
 
 	c.On(event)
 
-	return c, eventstore.Save(connection.ID, event)
+	return c, eventstore.Save(connectionID, event)
 }
 
 func CloseConnection(connectionID string) error {

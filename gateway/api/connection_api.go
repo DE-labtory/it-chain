@@ -30,7 +30,7 @@ func (c ConnectionApi) CreateConnection(address string) (gateway.Connection, err
 		return gateway.Connection{}, err
 	}
 
-	return gateway.NewConnection(connection)
+	return gateway.NewConnection(connection.ID, connection.Address)
 }
 
 func (c ConnectionApi) CloseConnection(connectionID string) error {
@@ -50,7 +50,7 @@ func (c ConnectionApi) CloseConnection(connectionID string) error {
 
 func (c ConnectionApi) OnConnection(connection gateway.Connection) (gateway.Connection, error) {
 
-	return gateway.NewConnection(connection)
+	return gateway.NewConnection(connection.ID, connection.Address)
 }
 
 func (c ConnectionApi) OnDisconnection(connection gateway.Connection) error {
