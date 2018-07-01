@@ -38,6 +38,6 @@ func (l *Leader) On(event midgard.Event) error {
 }
 
 type LeaderRepository interface {
-	GetLeader() *Leader
+	GetLeader() Leader
 	SetLeader(leader Leader)
 }
