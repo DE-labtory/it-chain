@@ -71,6 +71,8 @@ func TestCreateGenesisBlock(t *testing.T) {
 
 }
 
+// fail case
+
 func TestConfigFromJson(t *testing.T) {
 
 	genesisFilePath := "./GenesisBlockConfig.json"
