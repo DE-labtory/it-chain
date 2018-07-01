@@ -2,10 +2,7 @@ package adapter
 
 import (
 	"errors"
-<<<<<<< HEAD
-=======
 
->>>>>>> 9cd35c0feee7b112e9f4370452cca8aa76beb428
 	"github.com/it-chain/it-chain-Engine/txpool"
 )
 

@@ -11,7 +11,7 @@ import (
 var ErrGetConfig = errors.New("error when get Config")
 
 func CreateGenesisBlock(genesisconfFilePath string) (*DefaultBlock, error) {
-	byteValue, err := ConfigFromJson(genesisconfFilePath)
+	byteValue, err := configFromJson(genesisconfFilePath)
 	if err != nil {
 		return nil, ErrGetConfig
 	}
@@ -21,17 +21,17 @@ func CreateGenesisBlock(genesisconfFilePath string) (*DefaultBlock, error) {
 	var GenesisBlock *DefaultBlock
 
 	json.Unmarshal(byteValue, &GenesisBlock)
+
+	GenesisBlock.SetPrevSeal(GenesisBlock.PrevSeal)
+	GenesisBlock.SetHeight(GenesisBlock.Height)
+	GenesisBlock.SetTxSeal(GenesisBlock.TxSeal)
+	GenesisBlock.SetCreator(GenesisBlock.Creator)
 	GenesisBlock.SetTimestamp((time.Now()).Round(0))
 	Seal, err := validator.BuildSeal(GenesisBlock)
 	if err != nil {
 		return nil, err
 	}
-
 	GenesisBlock.SetSeal(Seal)
-	GenesisBlock.SetPrevSeal(GenesisBlock.PrevSeal)
-	GenesisBlock.SetHeight(GenesisBlock.Height)
-	GenesisBlock.SetTxSeal(GenesisBlock.TxSeal)
-	GenesisBlock.SetCreator(GenesisBlock.Creator)
 	return GenesisBlock, nil
 }
 
@@ -60,7 +60,7 @@ func CreateBlock(txList []Transaction) (Block, error) {
 	return Block, nil
 }
 
-func ConfigFromJson(filePath string) ([]uint8, error) {
+func configFromJson(filePath string) ([]uint8, error) {
 	jsonFile, err := os.Open(filePath)
 	defer jsonFile.Close()
 	if err != nil {
