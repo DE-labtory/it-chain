@@ -11,7 +11,9 @@ import (
 var ErrGetConfig = errors.New("error when get Config")
 
 func CreateGenesisBlock(genesisconfFilePath string) (*DefaultBlock, error) {
+
 	byteValue, err := configFromJson(genesisconfFilePath)
+
 	if err != nil {
 		return nil, ErrGetConfig
 	}
@@ -29,9 +31,11 @@ func CreateGenesisBlock(genesisconfFilePath string) (*DefaultBlock, error) {
 	GenesisBlock.SetTimestamp((time.Now()).Round(0))
 
 	Seal, err := validator.BuildSeal(GenesisBlock)
+
 	if err != nil {
 		return nil, err
 	}
+
 	GenesisBlock.SetSeal(Seal)
 
 	return GenesisBlock, nil

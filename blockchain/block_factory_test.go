@@ -59,7 +59,9 @@ func TestCreateGenesisBlock(t *testing.T) {
 	}
 
 	GenesisFilePath := "./GenesisBlockConfig.json"
+
 	defer os.Remove(GenesisFilePath)
+
 	GenesisBlockConfigJson := []byte(`{
 								  "Seal":[],
 								  "PrevSeal":[],
@@ -87,6 +89,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 	}
 
 	for testName, test := range tests {
+
 		t.Logf("Running test case %s", testName)
 
 		//when
