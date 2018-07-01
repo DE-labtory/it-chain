@@ -1,19 +1,66 @@
-package blockchain
+package blockchain_test
 
 import (
 	"encoding/json"
 	"io/ioutil"
-	"os"
 	"testing"
-
-	"time"
 
 	"log"
 
+	"time"
+
+	"os"
+
+	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/stretchr/testify/assert"
 )
 
-var GenesisBlockConfigJson = []byte(`{
+func TestCreateGenesisBlock(t *testing.T) {
+
+	tests := map[string]struct {
+		input struct {
+			ConfigFilePath string
+		}
+		output *blockchain.DefaultBlock
+		err    error
+	}{
+		"success create genesisBlock": {
+
+			input: struct {
+				ConfigFilePath string
+			}{
+				ConfigFilePath: "./GenesisBlockConfig.json",
+			},
+
+			output: &blockchain.DefaultBlock{
+				PrevSeal:  make([]byte, 0),
+				Height:    uint64(0),
+				TxList:    make([]blockchain.Transaction, 0),
+				TxSeal:    make([][]byte, 0),
+				Timestamp: (time.Now()).Round(0),
+				Creator:   make([]byte, 0),
+			},
+
+			err: nil,
+		},
+
+		"fail create genesisBlock: wrong file path": {
+
+			input: struct {
+				ConfigFilePath string
+			}{
+				ConfigFilePath: "./WrongBlockConfig.json",
+			},
+
+			output: nil,
+
+			err: blockchain.ErrGetConfig,
+		},
+	}
+
+	GenesisFilePath := "./GenesisBlockConfig.json"
+	defer os.Remove(GenesisFilePath)
+	GenesisBlockConfigJson := []byte(`{
 								  "Seal":[],
 								  "PrevSeal":[],
 								  "Height":0,
@@ -23,28 +70,8 @@ var GenesisBlockConfigJson = []byte(`{
 								  "Creator":[]
 								}`)
 
-func TestCreateGenesisBlock(t *testing.T) {
-	GenesisFilePath := "./GenesisBlockConfig.json"
+	var tempBlock blockchain.DefaultBlock
 
-	tests := map[string]struct {
-		input  string
-		output DefaultBlock
-		err    error
-	}{
-		"success create genesisBlock": {
-			input: GenesisFilePath,
-			output: DefaultBlock{
-				Height:    0,
-				TxList:    make([]*DefaultTransaction, 0),
-				TxSeal:    make([][]byte, 0),
-				Timestamp: (time.Now()).Round(0),
-				Creator:   make([]byte, 0),
-			},
-			err: nil,
-		},
-	}
-
-	var tempBlock DefaultBlock
 	err := json.Unmarshal(GenesisBlockConfigJson, &tempBlock)
 
 	if err != nil {
@@ -59,21 +86,25 @@ func TestCreateGenesisBlock(t *testing.T) {
 		log.Println(err.Error())
 	}
 
-	defer os.Remove(GenesisFilePath)
-
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
 
 		//when
-		GenesisBlock, err := CreateGenesisBlock(GenesisFilePath)
+		GenesisBlock, err := blockchain.CreateGenesisBlock(test.input.ConfigFilePath)
 
 		//then
 		assert.Equal(t, test.err, err)
-		assert.Equal(t, test.output.Height, GenesisBlock.Height)
-		assert.Equal(t, test.output.TxList, GenesisBlock.TxList)
-		assert.Equal(t, test.output.TxSeal, GenesisBlock.TxSeal)
-		assert.Equal(t, test.output.Timestamp.String()[:19], GenesisBlock.Timestamp.String()[:19])
-		assert.Equal(t, test.output.Creator, GenesisBlock.Creator)
+
+		if err != nil {
+			assert.Equal(t, test.output, GenesisBlock)
+			continue
+		}
+
+		assert.Equal(t, test.output.Height, GenesisBlock.GetHeight())
+		assert.Equal(t, test.output.TxList, GenesisBlock.GetTxList())
+		assert.Equal(t, test.output.TxSeal, GenesisBlock.GetTxSeal())
+		assert.Equal(t, test.output.Timestamp.String()[:19], GenesisBlock.GetTimestamp().String()[:19])
+		assert.Equal(t, test.output.Creator, GenesisBlock.GetCreator())
 
 	}
 

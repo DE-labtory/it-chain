@@ -37,30 +37,31 @@ func CreateGenesisBlock(genesisconfFilePath string) (*DefaultBlock, error) {
 	return GenesisBlock, nil
 }
 
-func CreateBlock(txList []Transaction) (Block, error) {
-
-	var Block *DefaultBlock
-
-	validator := new(DefaultValidator)
-
-	txSeal, err := validator.BuildTxSeal(txList)
-
-	if err != nil {
-		return nil, err
-	}
-
-	Block.SetTxSeal(txSeal)
-
-	for _, tx := range txList {
-		Block.PutTx(tx)
-	}
-
-	Seal, err := validator.BuildSeal(Block)
-	Block.SetSeal(Seal)
-	Block.SetTimestamp((time.Now()).Round(0))
-
-	return Block, nil
-}
+//ToDo: Implementation(GitId:junk-sound)
+//func CreateBlock(txList []Transaction) (Block, error) {
+//
+//	var Block *DefaultBlock
+//
+//	validator := new(DefaultValidator)
+//
+//	txSeal, err := validator.BuildTxSeal(txList)
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	Block.SetTxSeal(txSeal)
+//
+//	for _, tx := range txList {
+//		Block.PutTx(tx)
+//	}
+//
+//	Seal, err := validator.BuildSeal(Block)
+//	Block.SetSeal(Seal)
+//	Block.SetTimestamp((time.Now()).Round(0))
+//
+//	return Block, nil
+//}
 
 func configFromJson(filePath string) ([]uint8, error) {
 	jsonFile, err := os.Open(filePath)
