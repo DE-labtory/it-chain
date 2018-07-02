@@ -1,15 +1,16 @@
-package txpool
+package batch
 
 import (
-	"errors"
-	"log"
+"errors"
+"log"
+	"github.com/it-chain/it-chain-Engine/txpool"
 )
 
 //todo
 type TxPeriodicTransferService struct {
-	txRepository     TransactionRepository
-	leaderRepository LeaderRepository
-	grpcService   GrpcCommandService
+	txRepository     txpool.TransactionRepository
+	leaderRepository txpool.LeaderRepository
+	grpcService   txpool.GrpcCommandService
 }
 
 //todo (진행중) 이 함수가 call되었을 때 조건에 맞는 tx를 leader에게 전송하는 로직 추가
