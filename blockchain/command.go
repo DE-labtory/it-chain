@@ -32,3 +32,10 @@ type GrpcReceiveCommand struct {
 	ConnectionID string
 	Protocol     string
 }
+
+type GrpcDeliverCommand struct {
+	CommandModel midgard.CommandModel
+	Recipients []string
+	Body       []byte
+	Protocol   string
+}

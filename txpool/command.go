@@ -18,8 +18,13 @@ type SendTransactionsCommand struct {
 	Leader
 }
 
-type MessageDeliverCommand struct {
+type GrpcDeliverCommand struct {
+	//midgard.CommandModel
+	//Transactions []*Transaction
+	//Leader
+
 	midgard.CommandModel
-	Transactions []*Transaction
-	Leader
+	Recipients []string
+	Body       []byte
+	Protocol   string
 }
