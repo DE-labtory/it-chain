@@ -1,8 +1,8 @@
 package batch
 
 import (
-"errors"
-"log"
+	"errors"
+	"log"
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"time"
 )
@@ -41,13 +41,13 @@ func (t TxPeriodicTransferService) TransferTxToLeader() error {
 		return errors.New("there is no leader")
 	}
 
-	if err := t.removeTxs(transactions); err != nil {
+	err = t.grpcCommandService.SendLeaderTransactions(transactions, leader)
+	if err != nil {
 		log.Println(err.Error())
 		return err
 	}
 
-	err = t.grpcCommandService.SendLeaderTransactions(transactions, leader)
-	if err != nil {
+	if err := t.removeTxs(transactions); err != nil {
 		log.Println(err.Error())
 		return err
 	}
