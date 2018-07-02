@@ -21,7 +21,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 		input struct {
 			ConfigFilePath string
 		}
-		output *blockchain.DefaultBlock
+		output blockchain.Block
 		err    error
 	}{
 		"success create genesisBlock": {
@@ -103,11 +103,11 @@ func TestCreateGenesisBlock(t *testing.T) {
 			continue
 		}
 
-		assert.Equal(t, test.output.Height, GenesisBlock.GetHeight())
-		assert.Equal(t, test.output.TxList, GenesisBlock.GetTxList())
-		assert.Equal(t, test.output.TxSeal, GenesisBlock.GetTxSeal())
-		assert.Equal(t, test.output.Timestamp.String()[:19], GenesisBlock.GetTimestamp().String()[:19])
-		assert.Equal(t, test.output.Creator, GenesisBlock.GetCreator())
+		assert.Equal(t, test.output.GetHeight(), GenesisBlock.GetHeight())
+		assert.Equal(t, test.output.GetTxList(), GenesisBlock.GetTxList())
+		assert.Equal(t, test.output.GetTxSeal(), GenesisBlock.GetTxSeal())
+		assert.Equal(t, test.output.GetTimestamp().String()[:19], GenesisBlock.GetTimestamp().String()[:19])
+		assert.Equal(t, test.output.GetCreator(), GenesisBlock.GetCreator())
 
 	}
 

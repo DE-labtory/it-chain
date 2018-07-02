@@ -10,7 +10,7 @@ import (
 
 var ErrGetConfig = errors.New("error when get Config")
 
-func CreateGenesisBlock(genesisconfFilePath string) (*DefaultBlock, error) {
+func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 
 	byteValue, err := configFromJson(genesisconfFilePath)
 
