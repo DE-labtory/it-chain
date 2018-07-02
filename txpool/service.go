@@ -1,6 +1,6 @@
 package txpool
 
-type MessageService interface {
+type GrpcCommandService interface {
 	SendLeaderTransactions(transactions []*Transaction, leader Leader) error
 }
 
