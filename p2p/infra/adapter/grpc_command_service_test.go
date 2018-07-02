@@ -20,7 +20,7 @@ func TestGrpcCommandService_RequestLeaderInfo(t *testing.T) {
 			input: struct {
 				connectionId string
 			}{
-				connectionId:"1",
+				connectionId: "1",
 			},
 			err: nil,
 		},
@@ -28,7 +28,7 @@ func TestGrpcCommandService_RequestLeaderInfo(t *testing.T) {
 			input: struct {
 				connectionId string
 			}{
-				connectionId:"",
+				connectionId: "",
 			},
 			err: ErrEmptyPeerId,
 		},
@@ -57,14 +57,14 @@ func TestGrpcCommandService_DeliverLeaderInfo(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			connectionId string
-			leader p2p.Leader
+			leader       p2p.Leader
 		}
 		err error
 	}{
 		"empty connection id test": {
 			input: struct {
 				connectionId string
-				leader p2p.Leader
+				leader       p2p.Leader
 			}{
 				connectionId: "",
 				leader: p2p.Leader{
@@ -78,12 +78,11 @@ func TestGrpcCommandService_DeliverLeaderInfo(t *testing.T) {
 		"empty leader id test": {
 			input: struct {
 				connectionId string
-				leader p2p.Leader
-			}{
-				connectionId:"1",
+				leader       p2p.Leader
+			}{connectionId: "1",
 				leader: p2p.Leader{
 					LeaderId: p2p.LeaderId{
-						Id:"",
+						Id: "",
 					},
 				},
 			},
@@ -92,7 +91,7 @@ func TestGrpcCommandService_DeliverLeaderInfo(t *testing.T) {
 		"success": {
 			input: struct {
 				connectionId string
-				leader p2p.Leader
+				leader       p2p.Leader
 			}{
 				connectionId: "1",
 				leader: p2p.Leader{
@@ -159,46 +158,49 @@ func TestGrpcCommandService_RequestPeerList(t *testing.T) {
 	}
 }
 
-func TestGrpcCommandService_DeliverPeerList(t *testing.T) {
+func TestGrpcCommandService_DeliverPeerLeaderTable(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			connectionId   string
-			peerList []p2p.Peer
+			connectionId string
+			peerTable    p2p.PeerLeaderTable
 		}
 		err error
 	}{
 		"empty peer list test": {
 			input: struct {
-				connectionId   string
-				peerList []p2p.Peer
+				connectionId string
+				peerTable    p2p.PeerLeaderTable
 			}{
 				connectionId: "1",
-				peerList: []p2p.Peer{},
+				peerTable:    p2p.PeerLeaderTable{},
 			},
-			err: ErrEmptyPeerList,
+			err: p2p.ErrEmptyPeerList,
 		},
 		"empty connection id test": {
 			input: struct {
-				connectionId   string
-				peerList []p2p.Peer
+				connectionId string
+				peerTable    p2p.PeerLeaderTable
 			}{
 				connectionId: "",
-				peerList: []p2p.Peer{},
+				peerTable:    p2p.PeerLeaderTable{},
 			},
 			err: ErrEmptyPeerId,
 		},
 		"success": {
 			input: struct {
-				connectionId   string
-				peerList []p2p.Peer
+				connectionId string
+				peerTable    p2p.PeerLeaderTable
 			}{
 				connectionId: "1",
-				peerList: []p2p.Peer{
-					p2p.Peer{
-						PeerId: p2p.PeerId{
-							Id: "1",
+				peerTable: p2p.PeerLeaderTable{
+					Leader: p2p.Leader{},
+					PeerList: []p2p.Peer{
+						{
+							PeerId: p2p.PeerId{
+								Id: "1",
+							},
+							IpAddress: "123",
 						},
-						IpAddress: "123",
 					},
 				},
 			},
@@ -219,7 +221,7 @@ func TestGrpcCommandService_DeliverPeerList(t *testing.T) {
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := grpcCommandService.DeliverPeerList(test.input.connectionId, test.input.peerList)
+		err := grpcCommandService.DeliverPeerLeaderTable(test.input.connectionId, test.input.peerTable)
 		assert.Equal(t, err, test.err)
 	}
 

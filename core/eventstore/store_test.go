@@ -1,18 +1,15 @@
 package eventstore_test
 
 import (
-	"testing"
-
 	"os"
-
-	"fmt"
+	"testing"
 
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEventStore(t *testing.T) {
+func TestSaveAndLoad(t *testing.T) {
 
 	defer InitStore()()
 
@@ -27,14 +24,20 @@ func TestEventStore(t *testing.T) {
 	err := eventstore.Save(event.GetID(), event)
 	assert.NoError(t, err)
 
-	fmt.Println(eventstore.Instance)
-
 	user := &User{}
 
 	err = eventstore.Load(user, "123")
 	assert.NoError(t, err)
 
 	assert.Equal(t, user.ID, aggregateID)
+}
+
+func TestPanicWhenInitTwice(t *testing.T) {
+
+	assert.Panics(t, func() {
+		defer InitStore()()
+		defer InitStore()()
+	})
 }
 
 func InitStore() func() {

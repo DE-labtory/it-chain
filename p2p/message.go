@@ -11,10 +11,22 @@ type LeaderInfoRequestMessage struct {
 }
 
 type PeerListResponseMessage struct {
-	peers []Peer
+	Peers []Peer
 }
 
 type LeaderInfoResponseMessage struct {
 	LeaderId string
 	Address  string
 }
+
+type UpdateLeaderMessage struct {
+	Peer Peer
+}
+
+type PeerLeaderTableMessage struct {
+	PeerLeaderTable PeerLeaderTable
+}
+
+type RequestVoteMessage struct{}
+
+type VoteMessage struct{}
