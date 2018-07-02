@@ -4,7 +4,6 @@ import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"errors"
-	"sync"
 )
 
 var ErrBlockNil = errors.New("Block nil error");
@@ -15,13 +14,10 @@ type BlockApi interface {
 
 type CommandHandler struct {
 	blockApi BlockApi
-	// block pool에 들어가는 block의 순서는 보장되어야한다.
-	confirmBlockMux *sync.RWMutex
 }
 
 func NewCommandHandler(blockApi BlockApi) *CommandHandler {
 	return &CommandHandler{
-		confirmBlockMux: &sync.RWMutex{},
 		blockApi: blockApi,
 	}
 }
@@ -52,10 +48,6 @@ func convertTxList(txList []txpool.Transaction) ([]blockchain.Transaction, error
 
 /// 합의된 block이 넘어오면 block pool에 저장한다.
 func (h *CommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlockCommand) error {
-	h.confirmBlockMux.Lock()
-
-	defer h.confirmBlockMux.Unlock()
-
 	block := command.Block
 	if block == nil {
 		return ErrBlockNil
