@@ -41,8 +41,7 @@ func CreateGenesisBlock(genesisconfFilePath string) (*DefaultBlock, error) {
 	return GenesisBlock, nil
 }
 
-//ToDo: Implementation(GitId:junk-sound)
-//func CreateBlock(txList []Transaction) (Block, error) {
+//func CreateBlock(prevSeal []byte, Height uint64, txList []Transaction, Timestamp time.Time, Creator []byte) (Block, error) {
 //
 //	var Block *DefaultBlock
 //
