@@ -3,14 +3,16 @@ package adapter
 import (
 	"encoding/json"
 
+	"errors"
+
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/p2p"
-	"errors"
 )
 
 var ErrLeaderInfoDeliver = errors.New("leader info deliver failed")
 var ErrPeerListDeliver = errors.New("peer list deliver failed")
 var ErrPeerDeliver = errors.New("peer deliver failed")
+var ErrUnmarshal = errors.New("error during unmarshal")
 
 type LeaderApi interface {
 	UpdateLeader(leader p2p.Leader) error
@@ -18,28 +20,39 @@ type LeaderApi interface {
 }
 
 type GrpcCommandHandlerPeerApi interface {
+	GetPeerLeaderTable() p2p.PeerLeaderTable
+	GetPeerList() []p2p.Peer
+	FindById(peerId p2p.PeerId) (p2p.Peer, error)
 	UpdatePeerList(peerList []p2p.Peer) error
-	DeliverPeerList(connectionId string) error
+	DeliverPeerLeaderTable(connectionId string) error
 	AddPeer(peer p2p.Peer)
 }
 
-type GrpcCommandHandler struct {
-	leaderApi LeaderApi
-
-	peerApi   GrpcCommandHandlerPeerApi
+type GrpcCommandHandlerPeerService interface {
+	Dial(ipAddress string) error
 }
-func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi) *GrpcCommandHandler {
+
+type GrpcCommandHandler struct {
+	leaderApi       LeaderApi
+	peerApi         GrpcCommandHandlerPeerApi
+	peerService     GrpcCommandHandlerPeerService
+	electionService p2p.ElectionService
+}
+
+func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi, peerService GrpcCommandHandlerPeerService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
-		leaderApi: leaderApi,
-		peerApi:   peerApi,
+		leaderApi:   leaderApi,
+		peerApi:     peerApi,
+		peerService: peerService,
 	}
 }
 
-func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveCommand) error {
+func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveCommand) error {
 
 	switch command.Protocol {
+
 	case "LeaderInfoRequestProtocol":
-		g.leaderApi.DeliverLeaderInfo(command.ConnectionID)
+		gch.leaderApi.DeliverLeaderInfo(command.ConnectionID)
 		break
 
 	case "LeaderInfoDeliverProtocol":
@@ -49,25 +62,20 @@ func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveCommand
 			return ErrLeaderInfoDeliver
 		}
 
-		g.leaderApi.UpdateLeader(leader)
+		gch.leaderApi.UpdateLeader(leader)
 		break
 
-	case "PeerListRequestProtocol":
+	case "PeerLeaderTableDeliverProtocol": //receive peer table
 
-		g.peerApi.DeliverPeerList(command.ConnectionID)
-		break
+		//1. receive peer table
+		_, oppositeLeader, oppositePeerList, _ := ReceiverPeerLeaderTable(command.Body)
 
-	case "PeerListDeliverProtocol":
+		//2. update leader and peer list by info of node which has longer peer list
+		UpdateWithLongerPeerList(gch, oppositeLeader, oppositePeerList)
 
+		//3. dial according to peer table
+		DialToUnConnectedNode(gch.peerService, gch.peerApi, oppositePeerList)
 
-		peerList := make([]p2p.Peer, 0)
-		if err := json.Unmarshal(command.Body, &peerList); err != nil {
-			//todo error 처리
-			return ErrPeerListDeliver
-		}
-
-
-		g.peerApi.UpdatePeerList(peerList)
 		break
 
 	case "PeerDeliverProtocol":
@@ -79,8 +87,85 @@ func (g *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveCommand
 			return ErrPeerDeliver
 		}
 
-		g.peerApi.AddPeer(peer)
+		gch.peerApi.AddPeer(peer)
 		break
+
+	case "RequestVoteProtocol":
+		gch.electionService.Vote(command.ConnectionID)
+
+	case "VoteLeaderProtocol":
+
+		//	1. if candidate, reset left time
+		//	2. count up
+		//	3. if counted is same with num of peer-1 set leader and publish
+		gch.electionService.DecideToBeLeader(command)
+
+	case "UpdateLeaderProtocol":
+
+		toBeLeader := p2p.Peer{}
+		err := common.Deserialize(command.Body, toBeLeader)
+
+		if err != nil {
+			return err
+		}
+
+		peers := gch.peerApi.GetPeerList()
+
+		for _, peer := range peers {
+
+			if peer.IpAddress == toBeLeader.IpAddress {
+
+				leader := p2p.Leader{
+					LeaderId: p2p.LeaderId{Id: peer.PeerId.Id},
+				}
+
+				gch.leaderApi.UpdateLeader(leader)
+			}
+
+		}
+	}
+
+	return nil
+}
+
+func ReceiverPeerLeaderTable(body []byte) (p2p.PeerLeaderTable, p2p.Leader, []p2p.Peer, error) {
+
+	peerTable := p2p.PeerLeaderTable{}
+	if err := json.Unmarshal(body, &peerTable); err != nil {
+		//todo error 처리
+		return p2p.PeerLeaderTable{}, p2p.Leader{}, []p2p.Peer{}, ErrUnmarshal
+	}
+	peerList, _ := peerTable.GetPeerList()
+	leader, _ := peerTable.GetLeader()
+
+	return peerTable, leader, peerList, nil
+}
+
+func UpdateWithLongerPeerList(gch *GrpcCommandHandler, oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer) error {
+
+	myPeerLeaderTable := gch.peerApi.GetPeerLeaderTable()
+	myPeerList, _ := myPeerLeaderTable.GetPeerList()
+	myLeader, _ := myPeerLeaderTable.GetLeader()
+
+	if len(myPeerList) < len(oppositePeerList) {
+		gch.leaderApi.UpdateLeader(oppositeLeader)
+		gch.peerApi.UpdatePeerList(oppositePeerList)
+	} else {
+		gch.leaderApi.UpdateLeader(myLeader)
+	}
+	return nil
+}
+
+func DialToUnConnectedNode(peerService GrpcCommandHandlerPeerService, peerApi GrpcCommandHandlerPeerApi, peerList []p2p.Peer) error {
+
+	for _, peer := range peerList {
+		//err is nil if there is matching peer
+		peer, err := peerApi.FindById(peer.PeerId)
+
+		//dial if no peer matching peer id
+		if err != nil {
+			peerService.Dial(peer.IpAddress)
+		}
 	}
 
 	return nil

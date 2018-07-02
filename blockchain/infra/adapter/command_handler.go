@@ -17,6 +17,7 @@ type CommandHandler struct {
 	blockApi BlockApi
 	// block pool에 들어가는 block의 순서는 보장되어야한다.
 	confirmBlockMux *sync.RWMutex
+
 }
 
 func NewCommandHandler(blockApi BlockApi) *CommandHandler {

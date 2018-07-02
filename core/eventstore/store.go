@@ -4,8 +4,6 @@ import (
 	"errors"
 	"sync"
 
-	"fmt"
-
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/it-chain/midgard/store"
@@ -46,6 +44,10 @@ func InitDefault() {
 //todo path, dbname from viper
 func initDefaultStore() (midgard.EventStore, store.EventSerializer) {
 
+	if Instance != nil {
+		panic("eventstore is already initialized")
+	}
+
 	path := "mongodb://localhost:27017"
 	dbname := "test"
 
@@ -78,10 +80,17 @@ func InitForMock(repository midgard.EventRepository) {
 //todo CustomMongoStore init part
 func InitMongoStore(path string, dbname string, publisher midgard.Publisher, events ...midgard.Event) {
 
+	if Instance != nil {
+		panic("eventstore is already initialized")
+	}
 }
 
 //
 func InitLevelDBStore(path string, publisher midgard.Publisher, events ...midgard.Event) {
+
+	if Instance != nil {
+		panic("eventstore is already initialized")
+	}
 
 	serializer := store.NewSerializer(events...)
 	store := leveldb.NewEventStore(path, serializer)
@@ -90,8 +99,6 @@ func InitLevelDBStore(path string, publisher midgard.Publisher, events ...midgar
 		repo:       midgard.NewRepo(store, publisher),
 		serializer: serializer,
 	}
-
-	fmt.Println(Instance)
 }
 
 func RegisterEvents(events ...midgard.Event) error {
