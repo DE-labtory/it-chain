@@ -64,5 +64,11 @@ func (eh *EventHandler) HandleNodeDeletedEvent(event blockchain.NodeDeletedEvent
 }
 
 func (eh *EventHandler) HandleBlockQueuedEvent(event blockchain.BlockQueuedEvent) error {
+	block := event.Block
+	if block == nil {
+		return ErrBlockNil
+	}
+
+	eh.repositoryProjector.EventRepository.Load()
 	return nil
 }

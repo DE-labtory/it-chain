@@ -40,3 +40,9 @@ func (p *BlockPoolModel) Get(height BlockHeight) Block {
 func (p *BlockPoolModel) Delete(height BlockHeight) {
 	delete(p.pool, height)
 }
+
+
+// 현재 블록 동기화가 진행 중인지 정보를 가진다.
+type BlockSyncState struct {
+	isProgress bool
+}
