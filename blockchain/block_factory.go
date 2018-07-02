@@ -9,18 +9,19 @@ import (
 )
 
 var ErrGetConfig = errors.New("error when get Config")
+var ErrBuildingSeal = errors.New("error when building Seal")
+var ErrBuildingTxSeal = errors.New("error when building TxSeal")
 
 func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
+
+	var GenesisBlock *DefaultBlock
+	var validator DefaultValidator
 
 	byteValue, err := configFromJson(genesisconfFilePath)
 
 	if err != nil {
 		return nil, ErrGetConfig
 	}
-
-	validator := new(DefaultValidator)
-
-	var GenesisBlock *DefaultBlock
 
 	json.Unmarshal(byteValue, &GenesisBlock)
 
@@ -33,7 +34,7 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	Seal, err := validator.BuildSeal(GenesisBlock)
 
 	if err != nil {
-		return nil, err
+		return nil, ErrBuildingSeal
 	}
 
 	GenesisBlock.SetSeal(Seal)
@@ -41,30 +42,39 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	return GenesisBlock, nil
 }
 
-//func CreateBlock(prevSeal []byte, Height uint64, txList []Transaction, Timestamp time.Time, Creator []byte) (Block, error) {
-//
-//	var Block *DefaultBlock
-//
-//	validator := new(DefaultValidator)
-//
-//	txSeal, err := validator.BuildTxSeal(txList)
-//
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	Block.SetTxSeal(txSeal)
-//
-//	for _, tx := range txList {
-//		Block.PutTx(tx)
-//	}
-//
-//	Seal, err := validator.BuildSeal(Block)
-//	Block.SetSeal(Seal)
-//	Block.SetTimestamp((time.Now()).Round(0))
-//
-//	return Block, nil
-//}
+func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, Creator []byte) (Block, error) {
+
+	var Block *DefaultBlock
+	var validator DefaultValidator
+
+	Block.SetPrevSeal(prevSeal)
+	Block.SetHeight(height)
+	Block.SetCreator(Creator)
+
+	for _, tx := range txList {
+		Block.PutTx(tx)
+	}
+
+	txSeal, err := validator.BuildTxSeal(txList)
+
+	if err != nil {
+		return nil, ErrBuildingTxSeal
+	}
+
+	Block.SetTxSeal(txSeal)
+
+	Block.SetTimestamp((time.Now()).Round(0))
+
+	Seal, err := validator.BuildSeal(Block)
+
+	if err != nil {
+		return nil, ErrBuildingSeal
+	}
+
+	Block.SetSeal(Seal)
+
+	return Block, nil
+}
 
 func configFromJson(filePath string) ([]uint8, error) {
 	jsonFile, err := os.Open(filePath)
