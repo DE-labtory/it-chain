@@ -4,37 +4,31 @@ import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/api"
 	"github.com/it-chain/it-chain-Engine/txpool"
+	"errors"
+	"sync"
 )
 
-<<<<<<< HEAD
-type BlockchainCommandHandler struct {
-	nodeApi  api.NodeApi
-	blockApi api.BlockApi
-}
+var ErrBlockNil = errors.New("Block nil error");
 
-func NewBlockchainCommandHandler(blockApi api.BlockApi, nodeApi api.NodeApi) *BlockchainCommandHandler {
-	return &BlockchainCommandHandler{
-		nodeApi:  nodeApi,
-		blockApi: blockApi,
-	}
-=======
-type CommandHandlerBlockApi interface {
-	CreateGenesisBlock(genesisConfFilePath string) (blockchain.Block, error)
-	CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error)
+type BlockApi interface {
+	AddBlockToPool(block blockchain.Block)
 }
 
 type CommandHandler struct {
-	blockApi CommandHandlerBlockApi
->>>>>>> 9cd35c0feee7b112e9f4370452cca8aa76beb428
+	blockApi BlockApi
+	// block pool에 들어가는 block의 순서는 보장되어야한다.
+	confirmBlockMux *sync.RWMutex
 }
 
-func NewCommandHandler(blockApi CommandHandlerBlockApi) *CommandHandler {
+func NewCommandHandler(blockApi BlockApi) *CommandHandler {
 	return &CommandHandler{
+		confirmBlockMux: &sync.RWMutex{},
 		blockApi: blockApi,
 	}
 }
 
-func (handler *CommandHandler) HandleProposeBlockCommand(command blockchain.ProposeBlockCommand) {
+// txpool에서 받은 transactions들을 block으로 만들어서 consensus에 보내준다.
+func (h *CommandHandler) HandleProposeBlockCommand(command blockchain.ProposeBlockCommand) {
 	//rawTxList := command.Transactions
 	//
 	//txList, err := convertTxList(rawTxList)
@@ -55,4 +49,22 @@ func (handler *CommandHandler) HandleProposeBlockCommand(command blockchain.Prop
 // TODO: yggdrasill/impl/Transaction과 txpool/Transaction이 다름.
 func convertTxList(txList []txpool.Transaction) ([]blockchain.Transaction, error) {
 	return nil, nil
+}
+
+/// 합의된 block이 넘어오면 block pool에 저장한다.
+func (h *CommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlockCommand) error {
+	h.confirmBlockMux.Lock()
+
+	defer h.confirmBlockMux.Unlock()
+
+	block := command.Block
+	if block == nil {
+		return ErrBlockNil
+	}
+
+	h.blockApi.AddBlockToPool(block)
+
+	// TODO: BlockQueuedEvent eventRepository에 추가하기
+	// TODO: event_handler에서 받아서 sync 중이 아니면 block을 get하여 추가합니다.
+	return nil
 }

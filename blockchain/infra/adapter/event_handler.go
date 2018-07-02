@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"errors"
 )
@@ -12,6 +13,7 @@ var ErrNodeApi = errors.New("problem in node api")
 
 type RepositoryProjector struct {
 	blockchain.PeerRepository
+	midgard.EventRepository
 }
 
 type EventHandler struct {
@@ -61,3 +63,6 @@ func (eh *EventHandler) HandleNodeDeletedEvent(event blockchain.NodeDeletedEvent
 	return nil
 }
 
+func (eh *EventHandler) HandleBlockQueuedEvent(event blockchain.BlockQueuedEvent) error {
+	return nil
+}
