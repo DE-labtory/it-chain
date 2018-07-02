@@ -6,7 +6,6 @@ import (
 	"errors"
 
 	"github.com/it-chain/it-chain-Engine/gateway"
-	"github.com/it-chain/it-chain-Engine/gateway/api"
 	"github.com/it-chain/midgard"
 )
 
@@ -18,7 +17,7 @@ type ConnectionApi interface {
 }
 
 type ConnectionCommandHandler struct {
-	connectionApi ConnectionApi
+	ConnectionApi ConnectionApi
 }
 
 func (c ConnectionCommandHandler) HandleConnectionCreateCommand(command gateway.ConnectionCreateCommand) error {
@@ -27,10 +26,11 @@ func (c ConnectionCommandHandler) HandleConnectionCreateCommand(command gateway.
 		return ErrInvalidCommand
 	}
 
-	_, err := c.connectionApi.CreateConnection(command.Address)
+	_, err := c.ConnectionApi.CreateConnection(command.Address)
 
 	if err != nil {
 		log.Printf("invalid address [%s]")
+		return err
 	}
 
 	return nil
@@ -42,17 +42,22 @@ func (c ConnectionCommandHandler) HandleConnectionCloseCommand(command gateway.C
 		return ErrInvalidCommand
 	}
 
-	err := c.connectionApi.CloseConnection(command.GetID())
+	err := c.ConnectionApi.CloseConnection(command.GetID())
 
 	if err != nil {
 		log.Printf("fail to close connection: [%s]", err)
+		return err
 	}
 
 	return nil
 }
 
+type MessageApi interface {
+	DeliverMessage(body []byte, protocol string, ids ...string)
+}
+
 type GrpcCommandHandler struct {
-	messageApi api.MessageApi
+	MessageApi MessageApi
 }
 
 func (g GrpcCommandHandler) HandleGrpcDeliverCommand(command gateway.GrpcDeliverCommand) error {
@@ -61,7 +66,7 @@ func (g GrpcCommandHandler) HandleGrpcDeliverCommand(command gateway.GrpcDeliver
 		return ErrInvalidCommand
 	}
 
-	g.messageApi.DeliverMessage(command.Body, command.Protocol, command.Recipients...)
+	g.MessageApi.DeliverMessage(command.Body, command.Protocol, command.Recipients...)
 
 	return nil
 }
