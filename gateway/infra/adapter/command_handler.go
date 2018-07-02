@@ -3,19 +3,28 @@ package adapter
 import (
 	"log"
 
+	"errors"
+
 	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/it-chain/it-chain-Engine/gateway/api"
+	"github.com/it-chain/midgard"
 )
 
-type ConnectionCommandHandler struct {
-	connectionApi api.ConnectionApi
+var ErrInvalidCommand = errors.New("invalid command ")
+
+type ConnectionApi interface {
+	CreateConnection(address string) (gateway.Connection, error)
+	CloseConnection(connectionID string) error
 }
 
-func (c ConnectionCommandHandler) HandleConnectionCreateCommand(command gateway.ConnectionCreateCommand) {
+type ConnectionCommandHandler struct {
+	connectionApi ConnectionApi
+}
 
-	if command.Address == "" {
-		log.Printf("invalid address [%s]")
-		return
+func (c ConnectionCommandHandler) HandleConnectionCreateCommand(command gateway.ConnectionCreateCommand) error {
+
+	if !isValidCommand(command) {
+		return ErrInvalidCommand
 	}
 
 	_, err := c.connectionApi.CreateConnection(command.Address)
@@ -23,13 +32,14 @@ func (c ConnectionCommandHandler) HandleConnectionCreateCommand(command gateway.
 	if err != nil {
 		log.Printf("invalid address [%s]")
 	}
+
+	return nil
 }
 
-func (c ConnectionCommandHandler) HandleConnectionCloseCommand(command gateway.ConnectionCloseCommand) {
+func (c ConnectionCommandHandler) HandleConnectionCloseCommand(command gateway.ConnectionCloseCommand) error {
 
-	if command.GetID() == "" {
-		log.Printf("invalid connection id [%s]", command.GetID())
-		return
+	if !isValidCommand(command) {
+		return ErrInvalidCommand
 	}
 
 	err := c.connectionApi.CloseConnection(command.GetID())
@@ -37,12 +47,31 @@ func (c ConnectionCommandHandler) HandleConnectionCloseCommand(command gateway.C
 	if err != nil {
 		log.Printf("fail to close connection: [%s]", err)
 	}
+
+	return nil
 }
 
-type MessageCommandHandler struct {
+type GrpcCommandHandler struct {
 	messageApi api.MessageApi
 }
 
-func (c ConnectionCommandHandler) HandleGrpcDeliverCommand(command gateway.GrpcDeliverCommand) {
+func (g GrpcCommandHandler) HandleGrpcDeliverCommand(command gateway.GrpcDeliverCommand) error {
 
+	if !isValidCommand(command) {
+		return ErrInvalidCommand
+	}
+
+	g.messageApi.DeliverMessage(command.Body, command.Protocol, command.Recipients...)
+
+	return nil
+}
+
+func isValidCommand(command midgard.Command) bool {
+
+	if command.GetID() == "" {
+		log.Printf("invalid command id [%s]", command.GetID())
+		return false
+	}
+
+	return true
 }
