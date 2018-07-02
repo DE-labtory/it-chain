@@ -102,3 +102,8 @@ func (bApi *BlockApi) SyncedCheck(block blockchain.Block) error {
 func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) {
 	bApi.blockPool.Add(block)
 }
+
+func (bApi *BlockApi) CheckBlockFromPool(height blockchain.BlockHeight) error {
+
+	return nil
+}
