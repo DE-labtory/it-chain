@@ -4,6 +4,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"errors"
+	"github.com/it-chain/midgard"
 )
 
 var ErrBlockNil = errors.New("Block nil error");
@@ -14,11 +15,13 @@ type BlockApi interface {
 
 type CommandHandler struct {
 	blockApi BlockApi
+	repositoryProjector RepositoryProjector
 }
 
-func NewCommandHandler(blockApi BlockApi) *CommandHandler {
+func NewCommandHandler(blockApi BlockApi, repositoryProjector RepositoryProjector) *CommandHandler {
 	return &CommandHandler{
 		blockApi: blockApi,
+		repositoryProjector: repositoryProjector,
 	}
 }
 
@@ -55,7 +58,17 @@ func (h *CommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlo
 
 	h.blockApi.AddBlockToPool(block)
 
-	// TODO: BlockQueuedEvent eventRepository에 추가하기
-	// TODO: event_handler에서 받아서 sync 중이 아니면 block을 get하여 추가합니다.
+	// BlockQueuedEvent eventRepository에 추가하기
+	event := createBlockQueuedEvent(block)
+	h.repositoryProjector.EventRepository.Save(blockchain.BLOCK_QUEUED_EID, event)
 	return nil
+}
+
+func createBlockQueuedEvent(block blockchain.Block) blockchain.BlockQueuedEvent {
+	return blockchain.BlockQueuedEvent{
+		EventModel: midgard.EventModel{
+			ID: blockchain.BLOCK_QUEUED_EID,
+		},
+		Block: block,
+	}
 }

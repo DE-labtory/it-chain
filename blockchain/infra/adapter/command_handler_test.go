@@ -15,6 +15,18 @@ func (api MockBlockApi) AddBlockToPool(block blockchain.Block) {
 	api.AddBlockToPoolFunc(block)
 }
 
+type MockCommandHandlerPeerRepository struct {
+}
+
+func (rp MockCommandHandlerPeerRepository) Add(peer blockchain.Peer) error { return nil }
+func (rp MockCommandHandlerPeerRepository) Remove(peer blockchain.PeerId) error { return nil }
+
+type MockEventRepository struct {}
+
+func (er MockEventRepository) Save(aggregateID string, events ...midgard.Event) error { return nil }
+func (er MockEventRepository) Load(aggregate midgard.Aggregate, aggregateID string) error { return nil }
+func (er MockEventRepository) Close() {}
+
 func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 	tests := map[string] struct {
 		input struct {
@@ -52,7 +64,16 @@ func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 	blockApi.AddBlockToPoolFunc = func(block blockchain.Block) {
 		assert.Equal(t, block.GetHeight(), uint64(99887))
 	}
-	commandHandler := adapter.NewCommandHandler(blockApi)
+
+	peerRepository := MockPeerRepository{}
+	eventRepository := MockEventRepository{}
+
+	repositoryProjector := adapter.RepositoryProjector{
+		PeerRepository: peerRepository,
+		EventRepository: eventRepository,
+	}
+
+	commandHandler := adapter.NewCommandHandler(blockApi, repositoryProjector)
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 

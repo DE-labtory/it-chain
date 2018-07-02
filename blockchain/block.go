@@ -21,17 +21,22 @@ type BlockHeight = uint64
 type BlockPool interface {
 	Add(block Block)
 	Get(height BlockHeight) Block
+	Delete(height BlockHeight)
 }
 
-type DefaultBlockPool struct {
+type BlockPoolModel struct {
 	pool map[BlockHeight] Block
 }
 
-func (p *DefaultBlockPool) Add(block Block) {
+func (p *BlockPoolModel) Add(block Block) {
 	height := block.GetHeight()
 	p.pool[height] = block
 }
 
-func (p *DefaultBlockPool) Get(height BlockHeight) Block {
+func (p *BlockPoolModel) Get(height BlockHeight) Block {
 	return p.pool[height]
+}
+
+func (p *BlockPoolModel) Delete(height BlockHeight) {
+	delete(p.pool, height)
 }
