@@ -1,5 +1,5 @@
 package txpool
 
 type TransactionService interface {
-	TransferTxToLeader()
+	TransferTxToLeader() error
 }
