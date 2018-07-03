@@ -10,10 +10,8 @@ import (
 
 	"github.com/it-chain/yggdrasill"
 	"github.com/it-chain/yggdrasill/common"
-	"github.com/it-chain/yggdrasill/impl"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
-	"github.com/pkg/errors"
 	"fmt"
 )
 
@@ -158,8 +156,11 @@ type BlockPool interface {
 }
 
 
-// block queued Aggregate id
-var BLOCK_QUEUED_AID = "BLOCK_QUEUED_AID"
+// block queued events Aggregate id
+// BlockQueuedEvent들을 모아놓은 aggregate id 이다.
+// struct는 존재하지 않는다.
+var BLOCK_QUEUED_EVENTS_AID = "BLOCK_QUEUED_EVENTS_AID"
+
 
 type BlockPoolModel struct {
 	pool map[BlockHeight] Block
@@ -177,7 +178,7 @@ func (p *BlockPoolModel) Add(block Block) {
 
 	event := createBlockQueuedEvent(block)
 
-	eventstore.Save(BLOCK_QUEUED_AID, event)
+	eventstore.Save(BLOCK_QUEUED_EVENTS_AID, event)
 }
 
 func (p *BlockPoolModel) Get(height BlockHeight) Block {
@@ -191,7 +192,7 @@ func (p *BlockPoolModel) Delete(height BlockHeight) {
 func createBlockQueuedEvent(block Block) BlockQueuedEvent {
 	return BlockQueuedEvent{
 		EventModel: midgard.EventModel{
-			ID: BLOCK_QUEUED_EID,
+			ID: BLOCK_QUEUED_EVENTS_AID,
 		},
 		Block: block,
 	}
