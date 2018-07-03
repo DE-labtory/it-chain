@@ -46,7 +46,7 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 
 	Block := &DefaultBlock{}
 	validator := DefaultValidator{}
-	Block.PrevSeal = prevSeal
+
 	Block.SetPrevSeal(prevSeal)
 	Block.SetHeight(height)
 	Block.SetCreator(Creator)
