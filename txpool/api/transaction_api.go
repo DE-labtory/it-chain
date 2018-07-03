@@ -8,11 +8,11 @@ import (
 )
 
 type TransactionApi struct {
-	eventRepository *midgard.Repository
+	eventRepository midgard.EventRepository
 	publisherId     string
 }
 
-func NewTransactionApi(eventRepository *midgard.Repository, publisherId string) TransactionApi {
+func NewTransactionApi(eventRepository midgard.EventRepository, publisherId string) TransactionApi {
 	return TransactionApi{
 		publisherId:     publisherId,
 		eventRepository: eventRepository,

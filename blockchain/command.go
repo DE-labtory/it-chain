@@ -34,8 +34,8 @@ type GrpcReceiveCommand struct {
 }
 
 type GrpcDeliverCommand struct {
-	midgard.CommandModel
+	CommandModel midgard.CommandModel
 	Recipients []string
-	Body []byte
-	Protocol string
+	Body       []byte
+	Protocol   string
 }

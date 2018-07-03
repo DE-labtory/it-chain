@@ -7,7 +7,6 @@ type CommonConfiguration struct {
 	Messaging  MessagingConfiguration
 }
 
-
 func NewCommonConfiguration() CommonConfiguration {
 	return CommonConfiguration{
 		BootNodeIp: "127.0.0.1:4444",

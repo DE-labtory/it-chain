@@ -1,4 +1,4 @@
-package batch_test
+package txpool_test
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 
 	"fmt"
 
-	"github.com/it-chain/it-chain-Engine/txpool/infra/batch"
+	"github.com/it-chain/it-chain-Engine/txpool"
 )
 
 //todo return error 했을 경우 test할 방법이 없음
@@ -21,14 +21,14 @@ func TestTimeoutBatcher_Run(t *testing.T) {
 	//given
 	tests := map[string]struct {
 		input struct {
-			taskFunc batch.TaskFunc
+			taskFunc txpool.TaskFunc
 			duration time.Duration
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				taskFunc batch.TaskFunc
+				taskFunc txpool.TaskFunc
 				duration time.Duration
 			}{
 				taskFunc: func() error {
@@ -47,7 +47,7 @@ func TestTimeoutBatcher_Run(t *testing.T) {
 		},
 		"timer return error": {
 			input: struct {
-				taskFunc batch.TaskFunc
+				taskFunc txpool.TaskFunc
 				duration time.Duration
 			}{
 				taskFunc: func() error {
@@ -67,7 +67,7 @@ func TestTimeoutBatcher_Run(t *testing.T) {
 		},
 	}
 
-	batcher := batch.GetTimeOutBatcherInstance()
+	batcher := txpool.GetTimeOutBatcherInstance()
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
