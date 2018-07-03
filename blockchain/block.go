@@ -6,6 +6,8 @@ import (
 	"github.com/it-chain/yggdrasill/impl"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/pkg/errors"
+	"fmt"
 )
 
 type Block = common.Block
@@ -64,10 +66,17 @@ func createBlockQueuedEvent(block Block) BlockQueuedEvent {
 // BlockSyncState Aggregate ID
 var BC_SYNC_STATE_AID = "BC_SYNC_STATE_AID"
 
+type ProgressState bool
+
+const (
+	PROGRESSING ProgressState = true
+	DONE ProgressState = false
+)
+
 // 현재 블록 동기화가 진행 중인지 정보를 가진다.
 type BlockSyncState struct {
 	midgard.AggregateModel
-	isProgress bool
+	isProgress ProgressState
 }
 
 func (state BlockSyncState) GetID() string {
@@ -75,7 +84,18 @@ func (state BlockSyncState) GetID() string {
 }
 
 func (state BlockSyncState) On(event midgard.Event) error {
-	// TODO: Event에 따라서 isProgress 값 바꿔주기
+	switch v := event.(type) {
+
+	case *SyncStartEvent:
+		state.isProgress = PROGRESSING
+
+	case *SyncDoneEvent:
+		state.isProgress = DONE
+
+	default:
+		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
+	}
+
 	return nil
 }
 

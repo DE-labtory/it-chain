@@ -31,3 +31,11 @@ type BlockValidatedEvent struct {
 	midgard.EventModel
 	Block Block
 }
+
+type SyncStartEvent struct {
+	midgard.EventModel
+}
+
+type SyncDoneEvent struct {
+	midgard.EventModel
+}
