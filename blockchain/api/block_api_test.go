@@ -29,7 +29,7 @@ func (bp MockBlockPool) Add(block blockchain.Block) {
 func (bp MockBlockPool) Get(height blockchain.BlockHeight) blockchain.Block {
 	return bp.GetFunc(height)
 }
-func (bp MockBlockPool) Delete(height blockchain.BlockHeight) {}
+func (bp MockBlockPool) Delete(height blockchain.Block) {}
 
 func TestBlockApi_AddBlockToPool(t *testing.T) {
 	tests := map[string] struct {
@@ -71,20 +71,24 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 	tests := map[string] struct {
 		input struct {
-			height blockchain.BlockHeight
+			block blockchain.Block
 		}
 		err error
 	} {
 		"success": {
 			input: struct {
-				height blockchain.BlockHeight
-			}{height: blockchain.BlockHeight(12)},
+				block blockchain.Block
+			}{block: &blockchain.DefaultBlock{
+				Height: blockchain.BlockHeight(12),
+			}},
 			err: nil,
 		},
 		"block nil test": {
 			input: struct {
-				height blockchain.BlockHeight
-			}{height: blockchain.BlockHeight(13)},
+				block blockchain.Block
+			}{block: &blockchain.DefaultBlock{
+				Height: blockchain.BlockHeight(13),
+			}},
 			err: api.ErrNilBlock,
 		},
 	}
@@ -110,7 +114,7 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 		t.Logf("running test case %s", testName)
 
 		// When
-		err := blockApi.CheckAndSaveBlockFromPool(test.input.height)
+		err := blockApi.CheckAndSaveBlockFromPool(test.input.block)
 
 		// Then
 		assert.Equal(t, test.err, err)

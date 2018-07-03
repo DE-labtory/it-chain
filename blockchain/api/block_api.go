@@ -44,10 +44,12 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) {
 }
 
 // TODO
-func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
+func (bApi *BlockApi) CheckAndSaveBlockFromPool(heightOnlyblock blockchain.Block) error {
+	height := heightOnlyblock.GetHeight()
+
 	// Get block from pool
-	block := bApi.blockPool.Get(height)
-	if block == nil {
+	blockFromPool := bApi.blockPool.Get(height)
+	if blockFromPool == nil {
 		return ErrNilBlock
 	}
 
@@ -56,18 +58,18 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) e
 	bApi.blockRepository.GetLastBlock(lastBlock)
 
 	// Compare height
-	if block.GetHeight() > lastBlock.GetHeight() + 1 {
+	if blockFromPool.GetHeight() > lastBlock.GetHeight() + 1 {
 		// TODO: Start synchronize
 
-	} else if block.GetHeight() == lastBlock.GetHeight() + 1 {
+	} else if blockFromPool.GetHeight() == lastBlock.GetHeight() + 1 {
 		// Save
-		bApi.blockRepository.AddBlock(block)
+		bApi.blockRepository.AddBlock(blockFromPool)
 
-		bApi.blockPool.Delete(height)
+		bApi.blockPool.Delete(blockFromPool)
 
 	} else {
 		// Got shorter height block, but this is not an error
-		fmt.Printf("got shorter height block [%d < %d]", block.GetHeight(), lastBlock.GetHeight());
+		fmt.Printf("got shorter height block [%d < %d]", blockFromPool.GetHeight(), lastBlock.GetHeight());
 	}
 
 	return nil
