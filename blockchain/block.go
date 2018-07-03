@@ -17,7 +17,6 @@ import (
 )
 
 var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
-var ErrTransactionType = errors.New("Wrong transaction type")
 
 type Block = ygg.Block
 
@@ -50,7 +49,6 @@ func (block *DefaultBlock) SetHeight(height uint64) {
 
 // TODO: Write test case
 func (block *DefaultBlock) PutTx(transaction Transaction) error {
-
 	if block.TxList == nil {
 		block.TxList = make([]Transaction, 0)
 	}
@@ -58,8 +56,6 @@ func (block *DefaultBlock) PutTx(transaction Transaction) error {
 	block.TxList = append(block.TxList, transaction)
 
 	return nil
-
-	return ErrTransactionType
 }
 
 // TODO: Write test case
