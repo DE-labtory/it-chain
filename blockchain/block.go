@@ -14,6 +14,8 @@ type Block = common.Block
 
 type DefaultBlock = impl.DefaultBlock
 
+type Validator = common.Validator
+
 type Repository interface {
 	yggdrasill.BlockStorageManager
 	NewEmptyBlock() (Block, error)

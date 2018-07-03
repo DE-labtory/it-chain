@@ -8,21 +8,27 @@ import (
 	"os"
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/it-chain/midgard"
 	"fmt"
+	"github.com/pkg/errors"
 )
 
+type BlockRepository interface {
+	GetValidator() blockchain.Validator
+	GetLastBlock(block blockchain.Block) error
+	AddBlock(block blockchain.Block) error
+	NewEmptyBlock() (blockchain.Block, error)
+	Close()
+}
+
 type BlockApi struct {
-	blockRepository blockchain.Repository
-	eventRepository      *midgard.Repository
+	blockRepository BlockRepository
 	publisherId          string
 	blockPool blockchain.BlockPool
 }
 
-func NewBlockApi(blockRepository blockchain.Repository, eventRepository *midgard.Repository, publisherId string, blockPool blockchain.BlockPool) (BlockApi, error) {
+func NewBlockApi(blockRepository BlockRepository, publisherId string, blockPool blockchain.BlockPool) (BlockApi, error) {
 	return BlockApi{
 		blockRepository: blockRepository,
-		eventRepository:      eventRepository,
 		publisherId:          publisherId,
 		blockPool: blockPool,
 	}, nil
@@ -101,13 +107,20 @@ func (bApi *BlockApi) SyncedCheck(block blockchain.Block) error {
 
 // 받은 block을 block pool에 추가한다.
 func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) {
+	if block == nil {
+		fmt.Println("block is nil")
+		return
+	}
 	bApi.blockPool.Add(block)
 }
 
-
+// TODO
 func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
 	// Get block from pool
 	block := bApi.blockPool.Get(height)
+	if block == nil {
+		return errors.New("block is nil")
+	}
 
 	// Get my last block
 	lastBlock := &blockchain.DefaultBlock{}

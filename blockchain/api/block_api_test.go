@@ -1,59 +1,64 @@
-package api
+package api_test
 
-//func TestCreateGenesisBlock(t *testing.T) {
-//	dbPath := "./.db"
-//	opts := map[string]interface{}{
-//		"db_path": dbPath,
-//	}
-//	blockRepository, err := yggdrasill.NewBlockRepository(dbPath, opts)
-//	assert.NoError(t, err)
-//
-//	bApi := NewBlockApi(blockRepository, )
-//
-//	genesisconfPath := build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/.it-chain/genesisconf/"
-//	genesisConfFilePath := genesisconfPath + "GenesisBlockConfig.json"
-//	tempFilePath := genesisconfPath + "TempBlockConfig.json"
-//	wrongFilePath := genesisconfPath + "WrongFileName.json"
-//	tempBlockConfigJson := []byte(`{
-//								  "Seal":[],
-//								  "PrevSeal":[],
-//								  "Height":0,
-//								  "TxList":[],
-//								  "TxSeal":[],
-//								  "TimeStamp":"0001-01-01T00:00:00-00:00",
-//								  "Creator":[]
-//								}`)
-//	validator := new(impl.DefaultValidator)
-//	var tempBlock impl.DefaultBlock
-//	_ = json.Unmarshal(tempBlockConfigJson, &tempBlock)
-//	tempBlockConfigByte, _ := json.Marshal(tempBlock)
-//	_ = ioutil.WriteFile(tempFilePath, tempBlockConfigByte, 0644)
-//
-//	defer os.Remove(tempFilePath)
-//
-//	rightFilePaths := []string{genesisConfFilePath, tempFilePath}
-//	for _, rightFilePath := range rightFilePaths {
-//		GenesisBlock, err1 := CreateGenesisBlock(rightFilePath)
-//		expectedSeal, _ := validator.BuildSeal(GenesisBlock)
-//		assert.NoError(t, err1)
-//		assert.Equal(t, expectedSeal, GenesisBlock.Seal)
-//		assert.Equal(t, make([]byte, 0), GenesisBlock.PrevSeal)
-//		assert.Equal(t, uint64(0), GenesisBlock.Height)
-//		assert.Equal(t, make([]*impl.DefaultTransaction, 0), GenesisBlock.TxList)
-//		assert.Equal(t, make([][]byte, 0), GenesisBlock.TxSeal)
-//		assert.Equal(t, time.Now().String()[:19], GenesisBlock.Timestamp.String()[:19])
-//		assert.Equal(t, make([]byte, 0), GenesisBlock.Creator)
-//	}
-//	_, err2 := CreateGenesisBlock(wrongFilePath)
-//	assert.Error(t, err2)
-//}
-//
-//func TestConfigFromJson(t *testing.T) {
-//	genesisconfPath := build.Default.GOPATH + "/src/github.com/it-chain/it-chain-Engine/.it-chain/genesisconf/"
-//	rightFilePath := genesisconfPath + "GenesisBlockConfig.json"
-//	wrongFilePath := genesisconfPath + "WrongFileName.json"
-//	_, err1 := ConfigFromJson(rightFilePath)
-//	assert.NoError(t, err1)
-//	_, err2 := ConfigFromJson(wrongFilePath)
-//	assert.Error(t, err2)
-//}
+import (
+	"github.com/it-chain/yggdrasill/common"
+	"github.com/it-chain/it-chain-Engine/blockchain"
+	"testing"
+	"github.com/it-chain/it-chain-Engine/blockchain/api"
+	"github.com/magiconair/properties/assert"
+)
+
+type MockBlockRepository struct {}
+
+func (br MockBlockRepository) Close() {}
+func (br MockBlockRepository) GetValidator() common.Validator { return nil }
+func (br MockBlockRepository) AddBlock(block common.Block) error { return nil }
+func (br MockBlockRepository) GetLastBlock(block common.Block) error { return nil }
+func (br MockBlockRepository) NewEmptyBlock() (blockchain.Block, error) {return nil, nil}
+
+
+type MockBlockPool struct {
+	AddFunc func(block blockchain.Block)
+}
+
+func (bp MockBlockPool) Add(block blockchain.Block) {
+	bp.AddFunc(block)
+}
+func (bp MockBlockPool) Get(height blockchain.BlockHeight) blockchain.Block { return nil }
+func (bp MockBlockPool) Delete(height blockchain.BlockHeight) {}
+
+func TestBlockApi_AddBlockToPool(t *testing.T) {
+	tests := map[string] struct {
+		input struct {
+			block blockchain.Block
+		}
+	} {
+		"success": {
+			input: struct {
+				block blockchain.Block
+			} {block: &blockchain.DefaultBlock{
+				Height: uint64(11),
+			}},
+		},
+		"block nil test": {
+			input: struct {
+				block blockchain.Block
+			} {block: nil},
+		},
+	}
+
+	blockRepository := MockBlockRepository{}
+	publisherId := "zf"
+	blockPool := MockBlockPool{}
+	blockPool.AddFunc = func(block blockchain.Block) {
+		assert.Equal(t, uint64(11), block.GetHeight())
+	}
+
+	blockApi, _ := api.NewBlockApi(blockRepository, publisherId, blockPool)
+
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+
+		blockApi.AddBlockToPool(test.input.block)
+	}
+}
