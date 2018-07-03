@@ -79,6 +79,15 @@ type BlockSyncState struct {
 	isProgress ProgressState
 }
 
+func NewBlockSyncState() *BlockSyncState {
+	return &BlockSyncState{
+		AggregateModel: midgard.AggregateModel{
+			ID: BC_SYNC_STATE_AID,
+		},
+		isProgress:DONE,
+	}
+}
+
 func (state BlockSyncState) GetID() string {
 	return BC_SYNC_STATE_AID
 }

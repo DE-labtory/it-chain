@@ -22,6 +22,18 @@ func (nr MockPeerRepository) Remove(peerId blockchain.PeerId) error {
 	return nr.RemoveFunc(peerId)
 }
 
+type MockEventListenerBlockApi struct {
+
+}
+
+func (api MockEventListenerBlockApi) AddBlockToPool(block blockchain.Block) {
+	return
+}
+
+func (api MockEventListenerBlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
+	return nil
+}
+
 
 func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 	tests := map[string] struct {
@@ -65,6 +77,7 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
+		// When
 		nr := MockPeerRepository{}
 		nr.AddFunc = func(peer blockchain.Peer) error {
 			assert.Equal(t, peer.PeerId.Id, string("zf2"))
@@ -75,7 +88,9 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 			PeerRepository: nr,
 		}
 
-		eventHandler := adapter.NewEventHandler(rp)
+		blockApi := MockEventListenerBlockApi{}
+
+		eventHandler := adapter.NewEventHandler(rp, blockApi)
 
 		event := blockchain.NodeCreatedEvent{
 			EventModel: midgard.EventModel{
@@ -88,8 +103,11 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 				IpAddress: test.input.address,
 			},
 		}
+
+		// When
 		err := eventHandler.HandleNodeCreatedEvent(event)
 
+		// Then
 		assert.Equal(t, err, test.err)
 	}
 }
@@ -132,6 +150,7 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
+		// When
 		nr := MockPeerRepository{}
 		nr.RemoveFunc = func(peerId blockchain.PeerId) error {
 			assert.Equal(t, peerId.Id, string("zf2"))
@@ -141,7 +160,9 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 			PeerRepository: nr,
 		}
 
-		eventHandler := adapter.NewEventHandler(rp)
+		blockApi := MockEventListenerBlockApi{}
+
+		eventHandler := adapter.NewEventHandler(rp, blockApi)
 
 		event := blockchain.NodeDeletedEvent{
 			EventModel: midgard.EventModel{
@@ -153,8 +174,67 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 				},
 			},
 		}
+
+		// When
 		err := eventHandler.HandleNodeDeletedEvent(event)
 
+		// Then
+		assert.Equal(t, err, test.err)
+	}
+}
+
+type MockEventRepository struct {}
+
+func (er MockEventRepository) Load(aggregate midgard.Aggregate, aggregateID string) error { return nil }
+func (er MockEventRepository) Save(aggregateID string, events ...midgard.Event) error { return nil }
+func (er MockEventRepository) Close() {}
+
+func TestEventHandler_HandleBlockQueuedEvent(t *testing.T) {
+	tests := map[string] struct {
+		input struct {
+			blockchain.BlockQueuedEvent
+		}
+		err error
+	} {
+		"success": {
+			input: struct {
+				blockchain.BlockQueuedEvent
+			}{BlockQueuedEvent: blockchain.BlockQueuedEvent{
+				Block: &blockchain.DefaultBlock{
+					Height: uint64(12),
+				},
+			}},
+			err: nil,
+		},
+		"block nil test": {
+			input: struct {
+				blockchain.BlockQueuedEvent
+			}{BlockQueuedEvent: blockchain.BlockQueuedEvent{
+				Block: nil,
+			}},
+			err: adapter.ErrBlockNil,
+		},
+	}
+
+	// When
+	nr := MockPeerRepository{}
+	er := MockEventRepository{}
+	rp := adapter.RepositoryProjector{
+		PeerRepository: nr,
+		EventRepository: er,
+	}
+
+	blockApi := MockEventListenerBlockApi{}
+
+	eventHandler := adapter.NewEventHandler(rp, blockApi)
+
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+
+		// When
+		err := eventHandler.HandleBlockQueuedEvent(test.input.BlockQueuedEvent)
+
+		// Then
 		assert.Equal(t, err, test.err)
 	}
 }

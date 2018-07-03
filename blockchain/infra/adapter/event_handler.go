@@ -71,12 +71,16 @@ func (eh *EventHandler) HandleBlockQueuedEvent(event blockchain.BlockQueuedEvent
 		return ErrBlockNil
 	}
 
-	syncState := blockchain.BlockSyncState{}
+	syncState := blockchain.NewBlockSyncState()
 	eh.repositoryProjector.EventRepository.Load(syncState, blockchain.BC_SYNC_STATE_AID)
 
 	// TODO: sync state에 따라서 BlockApi 호출 여부 결정
 	if !syncState.IsProgressing() {
-		eh.blockApi.CheckAndSaveBlockFromPool(block.GetHeight())
+		err := eh.blockApi.CheckAndSaveBlockFromPool(block.GetHeight())
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

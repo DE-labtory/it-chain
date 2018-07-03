@@ -15,6 +15,10 @@ func (api MockBlockApi) AddBlockToPool(block blockchain.Block) {
 	api.AddBlockToPoolFunc(block)
 }
 
+func (api MockBlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
+	return nil
+}
+
 func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 	tests := map[string] struct {
 		input struct {
