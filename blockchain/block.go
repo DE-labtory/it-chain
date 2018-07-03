@@ -38,6 +38,12 @@ type BlockPoolModel struct {
 	pool map[BlockHeight] Block
 }
 
+func NewBlockPool() *BlockPoolModel {
+	return &BlockPoolModel{
+		pool: make(map[BlockHeight] Block),
+	}
+}
+
 func (p *BlockPoolModel) Add(block Block) {
 	height := block.GetHeight()
 	p.pool[height] = block
@@ -90,15 +96,15 @@ func NewBlockSyncState() *BlockSyncState {
 	}
 }
 
-func (state BlockSyncState) GetID() string {
+func (state *BlockSyncState) GetID() string {
 	return BC_SYNC_STATE_AID
 }
 
-func (state BlockSyncState) IsProgressing() ProgressState {
+func (state *BlockSyncState) IsProgressing() ProgressState {
 	return state.isProgress
 }
 
-func (state BlockSyncState) On(event midgard.Event) error {
+func (state *BlockSyncState) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *SyncStartEvent:
