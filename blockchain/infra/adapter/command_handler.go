@@ -15,13 +15,11 @@ type BlockApi interface {
 
 type CommandHandler struct {
 	blockApi BlockApi
-	repositoryProjector RepositoryProjector
 }
 
-func NewCommandHandler(blockApi BlockApi, repositoryProjector RepositoryProjector) *CommandHandler {
+func NewCommandHandler(blockApi BlockApi) *CommandHandler {
 	return &CommandHandler{
 		blockApi: blockApi,
-		repositoryProjector: repositoryProjector,
 	}
 }
 
@@ -58,9 +56,9 @@ func (h *CommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlo
 
 	h.blockApi.AddBlockToPool(block)
 
-	// BlockQueuedEvent eventRepository에 추가하기
-	event := createBlockQueuedEvent(block)
-	h.repositoryProjector.EventRepository.Save(blockchain.BLOCK_QUEUED_EID, event)
+	// BlockPool에서 event 저장
+	//event := createBlockQueuedEvent(block)
+	//h.repositoryProjector.EventRepository.Save(blockchain.BLOCK_QUEUED_EID, event)
 	return nil
 }
 
