@@ -4,8 +4,6 @@ import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/leveldb-wrapper"
 	"github.com/it-chain/yggdrasill"
-	"github.com/it-chain/yggdrasill/common"
-	"github.com/it-chain/yggdrasill/impl"
 )
 
 type BlockRepository struct {
@@ -15,8 +13,8 @@ type BlockRepository struct {
 
 func NewBlockRepository(dbpath string, opts map[string]interface{}, creator string) (*BlockRepository, error) {
 	// Use default validator
-	var validator common.Validator
-	validator = new(impl.DefaultValidator)
+	var validator blockchain.Validator
+	validator = new(blockchain.DefaultValidator)
 
 	db := leveldbwrapper.CreateNewDB(dbpath)
 
@@ -30,7 +28,7 @@ func NewBlockRepository(dbpath string, opts map[string]interface{}, creator stri
 }
 
 func (b *BlockRepository) NewEmptyBlock() (blockchain.Block, error) {
-	lastBlock := &impl.DefaultBlock{}
+	lastBlock := &blockchain.DefaultBlock{}
 	err := b.GetLastBlock(lastBlock)
 	if err != nil {
 		return nil, err
@@ -40,7 +38,7 @@ func (b *BlockRepository) NewEmptyBlock() (blockchain.Block, error) {
 	height := lastBlock.GetHeight() + 1 // TODO: correct?
 	creator := []byte(b.Creator)
 
-	return impl.NewEmptyBlock(prevSeal, height, creator), nil
+	return blockchain.NewEmptyBlock(prevSeal, height, creator), nil
 }
 
 func (b *BlockRepository) GetBlockCreator() string {
