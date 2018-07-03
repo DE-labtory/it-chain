@@ -10,6 +10,7 @@ import (
 // ErrHashCalculationFailed 변수는 Hash 계산 중 발생한 에러를 정의한다.
 var ErrHashCalculationFailed = errors.New("Hash Calculation Failed Error")
 var ErrInsufficientFields = errors.New("Previous seal or transaction list seal is not set")
+var ErrEmptyTxList = errors.New("Empty TxList")
 
 type Validator = common.Validator
 
@@ -112,16 +113,16 @@ func (t *DefaultValidator) BuildSeal(block Block) ([]byte, error) {
 		return nil, err
 	}
 
-	prevSeal, txListSeal, creator := block.GetPrevSeal(), block.GetTxSeal(), block.GetCreator()
+	prevSeal, txSeal, creator := block.GetPrevSeal(), block.GetTxSeal(), block.GetCreator()
 
-	if prevSeal == nil || txListSeal == nil || creator == nil {
+	if prevSeal == nil || txSeal == nil || creator == nil {
 		return nil, ErrInsufficientFields
 	}
 	var rootHash []byte
-	if len(txListSeal) == 0 {
+	if len(txSeal) == 0 {
 		rootHash = make([]byte, 0)
 	} else {
-		rootHash = txListSeal[0]
+		rootHash = txSeal[0]
 	}
 	combined := append(prevSeal, rootHash...)
 	combined = append(combined, timestamp...)
@@ -132,6 +133,11 @@ func (t *DefaultValidator) BuildSeal(block Block) ([]byte, error) {
 
 // BuildTxSeal 함수는 Transaction 배열을 받아서 TxSeal을 생성하여 반환한다.
 func (t *DefaultValidator) BuildTxSeal(txList []Transaction) ([][]byte, error) {
+
+	if len(txList) == 0 {
+		return nil, ErrEmptyTxList
+	}
+
 	leafNodeList := make([][]byte, 0)
 
 	for _, tx := range txList {
@@ -144,7 +150,6 @@ func (t *DefaultValidator) BuildTxSeal(txList []Transaction) ([][]byte, error) {
 	}
 
 	// leafNodeList의 개수는 짝수개로 맞춤. (홀수 일 경우 마지막 Tx를 중복 저장.)
-	// TODO: 이래도 되는지 논의 필요.
 	if len(leafNodeList)%2 != 0 {
 		leafNodeList = append(leafNodeList, leafNodeList[len(leafNodeList)-1])
 	}
@@ -160,7 +165,6 @@ func (t *DefaultValidator) BuildTxSeal(txList []Transaction) ([][]byte, error) {
 
 func buildTree(nodeList [][]byte, fullNodeList [][]byte) ([][]byte, error) {
 	intermediateNodeList := make([][]byte, 0)
-
 	for i := 0; i < len(nodeList); i += 2 {
 		leftIndex, rightIndex := i, i+1
 		leftNode, rightNode := nodeList[leftIndex], nodeList[rightIndex]
