@@ -9,18 +9,19 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/midgard"
+	"fmt"
 )
 
 type BlockApi struct {
-	blockchainRepository blockchain.Repository
+	blockRepository blockchain.Repository
 	eventRepository      *midgard.Repository
 	publisherId          string
 	blockPool blockchain.BlockPool
 }
 
-func NewBlockApi(blockchainRepository blockchain.Repository, eventRepository *midgard.Repository, publisherId string, blockPool blockchain.BlockPool) (BlockApi, error) {
+func NewBlockApi(blockRepository blockchain.Repository, eventRepository *midgard.Repository, publisherId string, blockPool blockchain.BlockPool) (BlockApi, error) {
 	return BlockApi{
-		blockchainRepository: blockchainRepository,
+		blockRepository: blockRepository,
 		eventRepository:      eventRepository,
 		publisherId:          publisherId,
 		blockPool: blockPool,
@@ -34,7 +35,7 @@ func (bApi *BlockApi) CreateGenesisBlock(genesisConfFilePath string) (blockchain
 		return nil, err
 	}
 
-	validator := bApi.blockchainRepository.GetValidator()
+	validator := bApi.blockRepository.GetValidator()
 
 	var GenesisBlock blockchain.Block
 
@@ -50,14 +51,14 @@ func (bApi *BlockApi) CreateGenesisBlock(genesisConfFilePath string) (blockchain
 }
 
 func (bApi *BlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error) {
-	repo := bApi.blockchainRepository
+	repo := bApi.blockRepository
 
 	block, err := repo.NewEmptyBlock()
 	if err != nil {
 		return nil, err
 	}
 
-	v := bApi.blockchainRepository.GetValidator()
+	v := bApi.blockRepository.GetValidator()
 
 	txSeal, err := v.BuildTxSeal(txList)
 	if err != nil {
@@ -104,7 +105,26 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) {
 }
 
 
-func (bApi *BlockApi) CheckBlockFromPool(height blockchain.BlockHeight) error {
+func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
+	// Get block from pool
+	block := bApi.blockPool.Get(height)
+
+	// Get my last block
+	lastBlock := &blockchain.DefaultBlock{}
+	bApi.blockRepository.GetLastBlock(lastBlock)
+
+	// Compare height
+	if block.GetHeight() > lastBlock.GetHeight() + 1 {
+		// TODO: Start synchronize
+
+	} else if block.GetHeight() == lastBlock.GetHeight() + 1 {
+		// Save
+		bApi.blockRepository.AddBlock(block)
+
+	} else {
+		// Got shorter height block, but not an error
+		fmt.Printf("got shorter height block [%d < %d]", block.GetHeight(), lastBlock.GetHeight());
+	}
 
 	return nil
 }

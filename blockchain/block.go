@@ -83,6 +83,10 @@ func (state BlockSyncState) GetID() string {
 	return BC_SYNC_STATE_AID
 }
 
+func (state BlockSyncState) IsProgressing() ProgressState {
+	return state.isProgress
+}
+
 func (state BlockSyncState) On(event midgard.Event) error {
 	switch v := event.(type) {
 

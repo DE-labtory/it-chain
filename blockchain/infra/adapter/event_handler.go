@@ -18,11 +18,13 @@ type RepositoryProjector struct {
 
 type EventHandler struct {
 	repositoryProjector RepositoryProjector
+	blockApi BlockApi
 }
 
-func NewEventHandler(rp RepositoryProjector) *EventHandler{
+func NewEventHandler(rp RepositoryProjector, api BlockApi) *EventHandler{
 	return &EventHandler{
 		repositoryProjector: rp,
+		blockApi: api,
 	}
 }
 
@@ -70,10 +72,12 @@ func (eh *EventHandler) HandleBlockQueuedEvent(event blockchain.BlockQueuedEvent
 	}
 
 	syncState := blockchain.BlockSyncState{}
-
 	eh.repositoryProjector.EventRepository.Load(syncState, blockchain.BC_SYNC_STATE_AID)
 
 	// TODO: sync state에 따라서 BlockApi 호출 여부 결정
+	if !syncState.IsProgressing() {
+		eh.blockApi.CheckAndSaveBlockFromPool(block.GetHeight())
+	}
 
 	return nil
 }

@@ -10,6 +10,7 @@ var ErrBlockNil = errors.New("Block nil error");
 
 type BlockApi interface {
 	AddBlockToPool(block blockchain.Block)
+	CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error
 }
 
 type CommandHandler struct {
@@ -55,8 +56,5 @@ func (h *CommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlo
 
 	h.blockApi.AddBlockToPool(block)
 
-	// BlockPool에서 event 저장
-	//event := createBlockQueuedEvent(block)
-	//h.repositoryProjector.EventRepository.Save(blockchain.BLOCK_QUEUED_EID, event)
 	return nil
 }
