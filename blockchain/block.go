@@ -5,6 +5,7 @@ import (
 	"github.com/it-chain/yggdrasill/common"
 	"github.com/it-chain/yggdrasill/impl"
 	"github.com/it-chain/midgard"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 )
 
 type Block = common.Block
@@ -25,6 +26,10 @@ type BlockPool interface {
 	Delete(height BlockHeight)
 }
 
+
+// block queued Aggregate id
+var BLOCK_QUEUED_AID = "BLOCK_QUEUED_AID"
+
 type BlockPoolModel struct {
 	pool map[BlockHeight] Block
 }
@@ -32,6 +37,10 @@ type BlockPoolModel struct {
 func (p *BlockPoolModel) Add(block Block) {
 	height := block.GetHeight()
 	p.pool[height] = block
+
+	event := createBlockQueuedEvent(block)
+
+	eventstore.Save(BLOCK_QUEUED_AID, event)
 }
 
 func (p *BlockPoolModel) Get(height BlockHeight) Block {
@@ -40,6 +49,15 @@ func (p *BlockPoolModel) Get(height BlockHeight) Block {
 
 func (p *BlockPoolModel) Delete(height BlockHeight) {
 	delete(p.pool, height)
+}
+
+func createBlockQueuedEvent(block Block) BlockQueuedEvent {
+	return BlockQueuedEvent{
+		EventModel: midgard.EventModel{
+			ID: BLOCK_QUEUED_EID,
+		},
+		Block: block,
+	}
 }
 
 

@@ -4,7 +4,6 @@ import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"errors"
-	"github.com/it-chain/midgard"
 )
 
 var ErrBlockNil = errors.New("Block nil error");
@@ -60,13 +59,4 @@ func (h *CommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlo
 	//event := createBlockQueuedEvent(block)
 	//h.repositoryProjector.EventRepository.Save(blockchain.BLOCK_QUEUED_EID, event)
 	return nil
-}
-
-func createBlockQueuedEvent(block blockchain.Block) blockchain.BlockQueuedEvent {
-	return blockchain.BlockQueuedEvent{
-		EventModel: midgard.EventModel{
-			ID: blockchain.BLOCK_QUEUED_EID,
-		},
-		Block: block,
-	}
 }
