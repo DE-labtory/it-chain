@@ -4,40 +4,40 @@ import (
 	"testing"
 
 	"github.com/it-chain/it-chain-Engine/p2p"
-	"github.com/magiconair/properties/assert"
 	"github.com/it-chain/it-chain-Engine/p2p/infra/repository/memory"
+	"github.com/magiconair/properties/assert"
 )
 
 func TestLeaderRepository_GetLeader(t *testing.T) {
-	tests := map[string]struct{
-		input p2p.Leader
+	tests := map[string]struct {
+		input  p2p.Leader
 		outPut p2p.Leader
-		err error
+		err    error
 	}{
-		"success":{
-			input:p2p.Leader{
-				LeaderId:p2p.LeaderId{
-					Id:"2",
+		"success": {
+			input: p2p.Leader{
+				LeaderId: p2p.LeaderId{
+					Id: "2",
 				},
 			},
 			outPut: p2p.Leader{
-				LeaderId:p2p.LeaderId{
-					Id:"2",
+				LeaderId: p2p.LeaderId{
+					Id: "2",
 				},
 			},
-			err:nil,
+			err: nil,
 		},
 	}
 
 	firstLeader := p2p.Leader{
-		LeaderId:p2p.LeaderId{
-			Id:"1",
+		LeaderId: p2p.LeaderId{
+			Id: "1",
 		},
 	}
 
 	leaderRepository := memory.NewLeaderRepository(firstLeader)
 
-	for testName, test := range tests{
+	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 		leaderRepository.SetLeader(test.input)
 		gotLeader := leaderRepository.GetLeader()
@@ -46,35 +46,35 @@ func TestLeaderRepository_GetLeader(t *testing.T) {
 }
 
 func TestLeaderRepository_SetLeader(t *testing.T) {
-	tests := map[string]struct{
-		input p2p.Leader
+	tests := map[string]struct {
+		input  p2p.Leader
 		outPut p2p.Leader
-		err error
+		err    error
 	}{
-		"success":{
-			input:p2p.Leader{
-				LeaderId:p2p.LeaderId{
-					Id:"2",
+		"success": {
+			input: p2p.Leader{
+				LeaderId: p2p.LeaderId{
+					Id: "2",
 				},
 			},
 			outPut: p2p.Leader{
-				LeaderId:p2p.LeaderId{
-					Id:"2",
+				LeaderId: p2p.LeaderId{
+					Id: "2",
 				},
 			},
-			err:nil,
+			err: nil,
 		},
 	}
 
 	firstLeader := p2p.Leader{
-		LeaderId:p2p.LeaderId{
-			Id:"1",
+		LeaderId: p2p.LeaderId{
+			Id: "1",
 		},
 	}
 
 	leaderRepository := memory.NewLeaderRepository(firstLeader)
 
-	for testName, test := range tests{
+	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 		leaderRepository.SetLeader(test.input)
 		gotLeader := leaderRepository.GetLeader()

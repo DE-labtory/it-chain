@@ -1,10 +1,10 @@
 package common
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"path"
+	"testing"
 	"time"
 )
 
@@ -15,12 +15,12 @@ type TestStruct struct {
 	MemberByte   []byte
 }
 
-func TestCreateDirIfMissing(t *testing.T){
+func TestCreateDirIfMissing(t *testing.T) {
 
 	dirPath := "./test_path"
 
 	CreateDirIfMissing(dirPath)
-	assert.DirExists(t,dirPath)
+	assert.DirExists(t, dirPath)
 
 	//clean up
 	os.Remove(dirPath)
@@ -34,11 +34,11 @@ func TestDirEmpty(t *testing.T) {
 
 	isExist, err := DirEmpty(dirPath)
 
-	if err != nil{
+	if err != nil {
 		//error
 	}
 
-	assert.True(t,isExist)
+	assert.True(t, isExist)
 
 	//clean up
 	os.Remove(dirPath)
