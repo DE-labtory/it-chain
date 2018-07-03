@@ -20,6 +20,8 @@ type BlockRepository interface {
 	Close()
 }
 
+var ErrNilBlock = errors.New("block is nil")
+
 type BlockApi struct {
 	blockRepository BlockRepository
 	publisherId          string
@@ -119,7 +121,7 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) e
 	// Get block from pool
 	block := bApi.blockPool.Get(height)
 	if block == nil {
-		return errors.New("block is nil")
+		return ErrNilBlock
 	}
 
 	// Get my last block
@@ -134,8 +136,10 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) e
 		// Save
 		bApi.blockRepository.AddBlock(block)
 
+		bApi.blockPool.Delete(height)
+
 	} else {
-		// Got shorter height block, but not an error
+		// Got shorter height block, but this is not an error
 		fmt.Printf("got shorter height block [%d < %d]", block.GetHeight(), lastBlock.GetHeight());
 	}
 
