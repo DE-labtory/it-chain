@@ -33,3 +33,13 @@ type SyncStartEvent struct {
 type SyncDoneEvent struct {
 	midgard.EventModel
 }
+
+type BlockAddToPoolEvent struct {
+	midgard.EventModel
+	Block Block
+}
+
+type BlockRemoveFromPoolEvent struct {
+	midgard.EventModel
+	Block Block
+}
