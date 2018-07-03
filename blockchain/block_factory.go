@@ -14,8 +14,8 @@ var ErrBuildingTxSeal = errors.New("error when building TxSeal")
 
 func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 
-	var GenesisBlock *DefaultBlock
-	var validator DefaultValidator
+	GenesisBlock := &DefaultBlock{}
+	validator := DefaultValidator{}
 
 	byteValue, err := configFromJson(genesisconfFilePath)
 
@@ -44,9 +44,9 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 
 func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, Creator []byte) (Block, error) {
 
-	var Block *DefaultBlock
-	var validator DefaultValidator
-
+	Block := &DefaultBlock{}
+	validator := DefaultValidator{}
+	Block.PrevSeal = prevSeal
 	Block.SetPrevSeal(prevSeal)
 	Block.SetHeight(height)
 	Block.SetCreator(Creator)
@@ -55,7 +55,7 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 		Block.PutTx(tx)
 	}
 
-	txSeal, err := validator.BuildTxSeal(txList)
+	txSeal, err := validator.BuildTxSeal(Block.GetTxList())
 
 	if err != nil {
 		return nil, ErrBuildingTxSeal
