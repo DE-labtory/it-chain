@@ -1,4 +1,4 @@
-package infra_test
+package adapter_test
 
 import (
 	"testing"
@@ -11,6 +11,7 @@ import (
 	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/it-chain/it-chain-Engine/gateway/infra"
+	"github.com/it-chain/it-chain-Engine/gateway/infra/adapter"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -82,7 +83,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 		return nil
 	}
 
-	messageHandler := infra.NewMessageHandler(publish)
+	messageHandler := adapter.NewMessageHandler(publish)
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
@@ -108,11 +109,11 @@ func TestMemConnectionStore_Add(t *testing.T) {
 		"add same id": {
 			input:  MockConn{ID: "123"},
 			output: MockConn{ID: "123"},
-			err:    infra.ErrConnAlreadyExist,
+			err:    adapter.ErrConnAlreadyExist,
 		},
 	}
 
-	connectionStore := infra.NewMemConnectionStore()
+	connectionStore := adapter.NewMemConnectionStore()
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
@@ -146,7 +147,7 @@ func TestMemConnectionStore_Find(t *testing.T) {
 		},
 	}
 
-	connectionStore := infra.NewMemConnectionStore()
+	connectionStore := adapter.NewMemConnectionStore()
 	connectionStore.Add(MockConn{ID: "123"})
 
 	for testName, test := range tests {
@@ -180,7 +181,7 @@ func TestMemConnectionStore_Delete(t *testing.T) {
 		},
 	}
 
-	connectionStore := infra.NewMemConnectionStore()
+	connectionStore := adapter.NewMemConnectionStore()
 	connectionStore.Add(MockConn{ID: "123"})
 
 	for testName, test := range tests {
@@ -195,23 +196,23 @@ func TestMemConnectionStore_Delete(t *testing.T) {
 }
 
 type MockHandler struct {
-	OnConnectionFunc    func(connection gateway.Connection)
-	OnDisconnectionFunc func(connection gateway.Connection)
+	OnConnectionFunc    func(connection gateway.Connection) error
+	OnDisconnectionFunc func(connection gateway.Connection) error
 }
 
-func (m *MockHandler) OnConnection(connection gateway.Connection) {
-	m.OnConnectionFunc(connection)
+func (m *MockHandler) OnConnection(connection gateway.Connection) error {
+	return m.OnConnectionFunc(connection)
 }
 
-func (m *MockHandler) OnDisconnection(connection gateway.Connection) {
-	m.OnDisconnectionFunc(connection)
+func (m *MockHandler) OnDisconnection(connection gateway.Connection) error {
+	return m.OnDisconnectionFunc(connection)
 }
 
-var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish func(exchange string, topic string, data interface{}) error) (*infra.GrpcHostService, func()) {
+var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish func(exchange string, topic string, data interface{}) error) (*adapter.GrpcHostService, func()) {
 
 	pri, pub := infra.LoadKeyPair(keyPath, "ECDSA256")
 
-	hostService := infra.NewGrpcHostService(pri, pub, publish)
+	hostService := adapter.NewGrpcHostService(pri, pub, publish)
 
 	go hostService.Listen(ip)
 
@@ -237,7 +238,7 @@ func TestGrpcHostService_Dial(t *testing.T) {
 		"dial exist connection": {
 			input:  "127.0.0.1:7777",
 			output: "",
-			err:    infra.ErrConnAlreadyExist,
+			err:    adapter.ErrConnAlreadyExist,
 		},
 	}
 
@@ -250,12 +251,14 @@ func TestGrpcHostService_Dial(t *testing.T) {
 	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client", publish)
 
 	handler := &MockHandler{}
-	handler.OnConnectionFunc = func(connection gateway.Connection) {
+	handler.OnConnectionFunc = func(connection gateway.Connection) error {
 		fmt.Println(connection)
+		return nil
 	}
 
-	handler.OnDisconnectionFunc = func(connection gateway.Connection) {
+	handler.OnDisconnectionFunc = func(connection gateway.Connection) error {
 		fmt.Println("connection is closing", connection)
+		return nil
 	}
 
 	defer tearDown1()
@@ -322,12 +325,14 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 	defer tearDown2()
 
 	handler := &MockHandler{}
-	handler.OnConnectionFunc = func(connection gateway.Connection) {
+	handler.OnConnectionFunc = func(connection gateway.Connection) error {
 		connID = connection.ID
+		return nil
 	}
 
-	handler.OnDisconnectionFunc = func(connection gateway.Connection) {
+	handler.OnDisconnectionFunc = func(connection gateway.Connection) error {
 		fmt.Println("connection is closing", connection)
+		return nil
 	}
 
 	serverHostService.SetHandler(handler)
@@ -361,7 +366,7 @@ func TestGrpcHostService_Close(t *testing.T) {
 		"dial exist connection": {
 			input:  "127.0.0.1:7777",
 			output: "",
-			err:    infra.ErrConnAlreadyExist,
+			err:    adapter.ErrConnAlreadyExist,
 		},
 	}
 
@@ -379,14 +384,17 @@ func TestGrpcHostService_Close(t *testing.T) {
 	var connID string
 
 	handler := &MockHandler{}
-	handler.OnConnectionFunc = func(connection gateway.Connection) {
+	handler.OnConnectionFunc = func(connection gateway.Connection) error {
 		fmt.Println(connection)
 		connID = connection.ID
+		return nil
 	}
 
-	handler.OnDisconnectionFunc = func(connection gateway.Connection) {
+	handler.OnDisconnectionFunc = func(connection gateway.Connection) error {
 		fmt.Println("connection is closing", connection)
 		assert.Equal(t, connID, connection.ID)
+
+		return nil
 	}
 
 	serverHostService.SetHandler(handler)
