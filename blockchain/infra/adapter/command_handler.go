@@ -6,6 +6,7 @@ import (
 	"errors"
 )
 
+<<<<<<< HEAD
 var ErrBlockNil = errors.New("Block nil error");
 
 type BlockApi interface {

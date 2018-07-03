@@ -1,10 +1,9 @@
-package infra
+package adapter
 
 import (
+	"errors"
 	"log"
 	"sync"
-
-	"errors"
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
@@ -19,8 +18,8 @@ var ErrConnAlreadyExist = errors.New("connection is already exist")
 type Publish func(exchange string, topic string, data interface{}) (err error)
 
 type ConnectionHandler interface {
-	OnConnection(connection gateway.Connection)
-	OnDisconnection(connection gateway.Connection)
+	OnConnection(connection gateway.Connection) error
+	OnDisconnection(connection gateway.Connection) error
 }
 
 type GrpcHostService struct {
