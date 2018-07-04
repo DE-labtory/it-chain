@@ -58,7 +58,7 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 		assert.Equal(t, uint64(11), block.GetHeight())
 	}
 
-	blockApi, _ := api.NewBlockApi(blockRepository, publisherId, blockPool)
+	blockApi, _ := api.NewBlockApi(blockRepository, publisherId)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -108,7 +108,7 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 		return blockPool.blockPool[height]
 	}
 	// When
-	blockApi, _ := api.NewBlockApi(blockRepository, publisherId, blockPool)
+	blockApi, _ := api.NewBlockApi(blockRepository, publisherId)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)

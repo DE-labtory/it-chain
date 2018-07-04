@@ -22,6 +22,7 @@ func TestBlockPoolModel(t *testing.T) {
 
 
 	// When
+
 	pool.Delete(blockchain.BlockHeight(2))
 
 	// Then

@@ -19,14 +19,12 @@ var ErrNilBlock = errors.New("block is nil")
 type BlockApi struct {
 	blockRepository BlockRepository
 	publisherId          string
-	blockPool blockchain.BlockPool
 }
 
-func NewBlockApi(blockRepository BlockRepository, publisherId string, blockPool blockchain.BlockPool) (BlockApi, error) {
+func NewBlockApi(blockRepository BlockRepository, publisherId string) (BlockApi, error) {
 	return BlockApi{
 		blockRepository: blockRepository,
 		publisherId:          publisherId,
-		blockPool: blockPool,
 	}, nil
 }
 
@@ -40,15 +38,18 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) {
 		fmt.Println("block is nil")
 		return
 	}
-	bApi.blockPool.Add(block)
+
+	pool := blockchain.NewBlockPool()
+	pool.Add(block)
 }
 
 // TODO
 func (bApi *BlockApi) CheckAndSaveBlockFromPool(heightOnlyblock blockchain.Block) error {
 	height := heightOnlyblock.GetHeight()
+	pool := blockchain.NewBlockPool()
 
 	// Get block from pool
-	blockFromPool := bApi.blockPool.Get(height)
+	blockFromPool := pool.Get(height)
 	if blockFromPool == nil {
 		return ErrNilBlock
 	}
@@ -65,7 +66,7 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(heightOnlyblock blockchain.Block
 		// Save
 		bApi.blockRepository.AddBlock(blockFromPool)
 
-		bApi.blockPool.Delete(blockFromPool)
+		pool.Delete(blockFromPool)
 
 	} else {
 		// Got shorter height block, but this is not an error

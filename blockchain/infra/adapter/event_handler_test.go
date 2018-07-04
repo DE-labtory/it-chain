@@ -30,7 +30,7 @@ func (api MockEventListenerBlockApi) AddBlockToPool(block blockchain.Block) {
 	return
 }
 
-func (api MockEventListenerBlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
+func (api MockEventListenerBlockApi) CheckAndSaveBlockFromPool(height blockchain.Block) error {
 	return nil
 }
 
