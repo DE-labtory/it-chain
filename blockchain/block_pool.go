@@ -93,11 +93,11 @@ func (p *BlockPoolModel) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *BlockAddToPoolEvent:
-		block := event.(BlockAddToPoolEvent).Block
-		p.Pool[block.GetHeight()] = block
+		block := event.(*BlockAddToPoolEvent).Block
+		(p.Pool)[block.GetHeight()] = block
 
 	case *BlockRemoveFromPoolEvent:
-		block := event.(BlockRemoveFromPoolEvent).Block
+		block := event.(*BlockRemoveFromPoolEvent).Block
 		delete(p.Pool, block.GetHeight())
 
 	default:
