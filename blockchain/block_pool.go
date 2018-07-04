@@ -24,7 +24,7 @@ var BLOCK_POOL_AID = "BLOCK_POOL_AID"
 
 type BlockPoolModel struct {
 	midgard.AggregateModel
-	pool map[BlockHeight] Block
+	Pool map[BlockHeight] Block
 }
 
 func NewBlockPool() *BlockPoolModel {
@@ -32,13 +32,13 @@ func NewBlockPool() *BlockPoolModel {
 		AggregateModel: midgard.AggregateModel{
 			ID: BLOCK_POOL_AID,
 		},
-		pool: make(map[BlockHeight] Block),
+		Pool: make(map[BlockHeight] Block),
 	}
 }
 
 func (p *BlockPoolModel) Add(block Block) {
 	height := block.GetHeight()
-	p.pool[height] = block
+	p.Pool[height] = block
 
 	addEvent := createBlockAddToPoolEvent(block)
 	eventstore.Save(BLOCK_POOL_AID, addEvent)
@@ -48,11 +48,11 @@ func (p *BlockPoolModel) Add(block Block) {
 }
 
 func (p *BlockPoolModel) Get(height BlockHeight) Block {
-	return p.pool[height]
+	return p.Pool[height]
 }
 
 func (p *BlockPoolModel) Delete(block Block) {
-	delete(p.pool, block.GetHeight())
+	delete(p.Pool, block.GetHeight())
 
 	event := createBlockRemoveFromPoolEvent(block)
 	eventstore.Save(BLOCK_POOL_AID, event)
@@ -94,11 +94,11 @@ func (p *BlockPoolModel) On(event midgard.Event) error {
 
 	case *BlockAddToPoolEvent:
 		block := event.(BlockAddToPoolEvent).Block
-		p.pool[block.GetHeight()] = block
+		p.Pool[block.GetHeight()] = block
 
 	case *BlockRemoveFromPoolEvent:
 		block := event.(BlockRemoveFromPoolEvent).Block
-		delete(p.pool, block.GetHeight())
+		delete(p.Pool, block.GetHeight())
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))

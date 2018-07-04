@@ -15,7 +15,7 @@ func (api MockBlockApi) AddBlockToPool(block blockchain.Block) {
 	api.AddBlockToPoolFunc(block)
 }
 
-func (api MockBlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
+func (api MockBlockApi) CheckAndSaveBlockFromPool(height blockchain.Block) error {
 	return nil
 }
 

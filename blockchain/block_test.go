@@ -22,8 +22,10 @@ func TestBlockPoolModel(t *testing.T) {
 
 
 	// When
-
-	pool.Delete(blockchain.BlockHeight(2))
+	block2 := &blockchain.DefaultBlock{
+		Height: blockchain.BlockHeight(2),
+	}
+	pool.Delete(block2)
 
 	// Then
 	assert.Equal(t, nil, pool.Get(blockchain.BlockHeight(2)))
@@ -41,7 +43,7 @@ func TestBlockSyncState(t *testing.T) {
 	// When
 	event1 := &blockchain.SyncStartEvent{
 		EventModel: midgard.EventModel{
-			ID: blockchain.BC_SYNC_STATE_EID,
+			ID: blockchain.BC_SYNC_STATE_AID,
 		},
 	}
 	syncState.On(event1)
@@ -53,7 +55,7 @@ func TestBlockSyncState(t *testing.T) {
 	// When
 	event2 := &blockchain.SyncDoneEvent{
 		EventModel: midgard.EventModel{
-			ID: blockchain.BC_SYNC_STATE_EID,
+			ID: blockchain.BC_SYNC_STATE_AID,
 		},
 	}
 	syncState.On(event2)

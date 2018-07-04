@@ -4,6 +4,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/it-chain/midgard"
 )
 
 type BlockRepository interface {
@@ -18,12 +19,14 @@ var ErrNilBlock = errors.New("block is nil")
 
 type BlockApi struct {
 	blockRepository BlockRepository
+	eventRepository midgard.EventRepository
 	publisherId          string
 }
 
-func NewBlockApi(blockRepository BlockRepository, publisherId string) (BlockApi, error) {
+func NewBlockApi(blockRepository BlockRepository, eventRepository midgard.EventRepository, publisherId string) (BlockApi, error) {
 	return BlockApi{
 		blockRepository: blockRepository,
+		eventRepository: eventRepository,
 		publisherId:          publisherId,
 	}, nil
 }
@@ -39,17 +42,18 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) {
 		return
 	}
 
-	pool := blockchain.NewBlockPool()
+	pool := bApi.loadBlockPool()
 	pool.Add(block)
 }
 
 // TODO
-func (bApi *BlockApi) CheckAndSaveBlockFromPool(heightOnlyblock blockchain.Block) error {
-	height := heightOnlyblock.GetHeight()
-	pool := blockchain.NewBlockPool()
+func (bApi *BlockApi) CheckAndSaveBlockFromPool(heightOnlyBlock blockchain.Block) error {
+	height := heightOnlyBlock.GetHeight()
+	pool := bApi.loadBlockPool()
 
 	// Get block from pool
 	blockFromPool := pool.Get(height)
+
 	if blockFromPool == nil {
 		return ErrNilBlock
 	}
@@ -63,9 +67,7 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(heightOnlyblock blockchain.Block
 		// TODO: Start synchronize
 
 	} else if blockFromPool.GetHeight() == lastBlock.GetHeight() + 1 {
-		// Save
 		bApi.blockRepository.AddBlock(blockFromPool)
-
 		pool.Delete(blockFromPool)
 
 	} else {
@@ -74,4 +76,10 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(heightOnlyblock blockchain.Block
 	}
 
 	return nil
+}
+
+func (bApi *BlockApi) loadBlockPool() blockchain.BlockPool {
+	pool := blockchain.NewBlockPool()
+	bApi.eventRepository.Load(pool, blockchain.BLOCK_POOL_AID)
+	return pool
 }
