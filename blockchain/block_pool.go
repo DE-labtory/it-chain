@@ -132,22 +132,32 @@ func NewBlockSyncState() *BlockSyncState {
 	}
 }
 
-func (state *BlockSyncState) GetID() string {
+func (bss *BlockSyncState) GetID() string {
 	return BC_SYNC_STATE_AID
 }
 
-func (state *BlockSyncState) IsProgressing() ProgressState {
-	return state.isProgress
+func (bss *BlockSyncState) SetProgress(state ProgressState) {
+	if state == PROGRESSING {
+		bss.isProgress = PROGRESSING
+		bss.On(SyncStartEvent{})
+	} else { // state == DONE
+		bss.isProgress = DONE
+		bss.On(SyncDoneEvent{})
+	}
 }
 
-func (state *BlockSyncState) On(event midgard.Event) error {
+func (bss *BlockSyncState) IsProgressing() ProgressState {
+	return bss.isProgress
+}
+
+func (bss *BlockSyncState) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *SyncStartEvent:
-		state.isProgress = PROGRESSING
+		bss.isProgress = PROGRESSING
 
 	case *SyncDoneEvent:
-		state.isProgress = DONE
+		bss.isProgress = DONE
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
