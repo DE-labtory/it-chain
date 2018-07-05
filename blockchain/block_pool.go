@@ -14,12 +14,6 @@ type BlockPool interface {
 }
 
 
-// block queued events Aggregate id
-// BlockQueuedEvent들을 모아놓은 aggregate id 이다.
-// struct는 존재하지 않는다.
-var BLOCK_QUEUED_EVENTS_AID = "BLOCK_QUEUED_EVENTS_AID"
-
-
 var BLOCK_POOL_AID = "BLOCK_POOL_AID"
 
 type BlockPoolModel struct {
