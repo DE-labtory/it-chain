@@ -9,7 +9,6 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
-	"github.com/rs/xid"
 )
 
 var ErrGetConfig = errors.New("error when get Config")
@@ -90,7 +89,7 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 
 	createEvent := &BlockCreatedEvent{
 		EventModel: midgard.EventModel{
-			ID:   xid.New().String(),
+			ID:   string(Seal),
 			Type: "block.created",
 		},
 		Seal:      Seal,
