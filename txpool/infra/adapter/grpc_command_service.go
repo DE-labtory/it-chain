@@ -3,10 +3,10 @@ package adapter
 import (
 	"errors"
 
+	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
-	"github.com/it-chain/it-chain-Engine/common"
 )
 
 var ErrTxEmpty = errors.New("Empty transaction list proposed")
@@ -20,7 +20,8 @@ type GrpcCommandService struct {
 
 func NewGrpcCommandService(publisher Publisher) *GrpcCommandService {
 	return &GrpcCommandService{
-		publisher: publisher
+		publisher: publisher,
+	}
 }
 
 func (gcs GrpcCommandService) SendLeaderTransactions(transactions []*txpool.Transaction, leader txpool.Leader) error {

@@ -117,7 +117,7 @@ func TestTxEventHandler_HandleTxDeletedEvent(t *testing.T) {
 		mockTxRepo := MockTransactionRepository{}
 		mockTxRepo.RemoveFunc = func(id txpool.TransactionId) error {
 
-			assert.Equal(t, id.ToString(), "txID")
+			assert.Equal(t, id, "txID")
 			return nil
 		}
 

@@ -22,5 +22,12 @@ func (t TransactionApi) CreateTransaction(txData txpool.TxData) (txpool.Transact
 		return tx, err
 	}
 
+	pool := txpool.LoadTransactionPool()
+
+	if err = pool.Add(tx); err != nil {
+
+		return tx, err
+	}
+
 	return tx, nil
 }

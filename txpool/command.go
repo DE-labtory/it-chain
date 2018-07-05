@@ -4,7 +4,11 @@ import "github.com/it-chain/midgard"
 
 type TxCreateCommand struct {
 	midgard.CommandModel
-	TxData
+	Jsonrpc string
+	Method  TxDataType
+	Params  Param
+	ID      string
+	ICodeID string
 }
 
 type ProposeBlockCommand struct {

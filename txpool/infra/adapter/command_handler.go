@@ -19,7 +19,14 @@ func NewTxCommandHandler(transactionApi api.TransactionApi) *TxCommandHandler {
 
 func (t *TxCommandHandler) HandleTxCreateCommand(txCreateCommand txpool.TxCreateCommand) {
 
-	txData := txCreateCommand.TxData
+	txData := txpool.TxData{
+		ID:      txCreateCommand.ID,
+		ICodeID: txCreateCommand.ICodeID,
+		Jsonrpc: txCreateCommand.Jsonrpc,
+		Method:  txCreateCommand.Method,
+		Params:  txCreateCommand.Params,
+	}
+
 	tx, err := t.transactionApi.CreateTransaction(txData)
 
 	if err != nil {

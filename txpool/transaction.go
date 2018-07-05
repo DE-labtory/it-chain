@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/it-chain/it-chain-Engine/common"
@@ -19,11 +20,7 @@ const (
 	General TransactionType = 0 + iota
 )
 
-type TransactionId string
-
-func (tId TransactionId) ToString() string {
-	return string(tId)
-}
+type TransactionId = string
 
 type TransactionStatus int
 type TransactionType int
@@ -106,7 +103,7 @@ func CreateTransaction(publisherId string, txData TxData) (Transaction, error) {
 	event := &TxCreatedEvent{
 		EventModel: midgard.EventModel{
 			ID:   id,
-			Type: "Transaction",
+			Type: "transaction.created",
 		},
 		PublishPeerId: publisherId,
 		TxStatus:      VALID,
@@ -164,28 +161,129 @@ type TransactionRepository interface {
 	FindAll() ([]*Transaction, error)
 }
 
-type TransactionPool interface {
-	Add(transaction Transaction) error
-	CommitToStaging(transaction Transaction) error
-	Delete(id TransactionId) error
+var TRANSACTION_POOL_ID = "TRANSACTION_POOL"
+
+func LoadTransactionPool() TransactionPool {
+
+	pool := &TransactionPool{}
+	eventstore.Load(pool, TRANSACTION_POOL_ID)
+
+	return *pool
 }
 
-type TransactionPoolModel struct {
+type TransactionPool struct {
 	midgard.AggregateModel
-	stagingTransactions map[TransactionId]Transaction
+	prepareTx map[TransactionId]Transaction
+	stagingTx map[TransactionId]Transaction
+	mux       sync.RWMutex
 }
 
-func (t *TransactionPoolModel) Add(transaction Transaction) error {
+//Add transaction to transaction pool
+func (t *TransactionPool) Add(transaction Transaction) error {
+	t.mux.Lock()
+	defer t.mux.Unlock()
+
+	_, ok := t.prepareTx[transaction.TxId]
+
+	if ok {
+		return errors.New("transaction already exist")
+	}
+
+	event := &TxAddedPoolEvent{
+		EventModel: midgard.EventModel{
+			ID:   transaction.GetID(),
+			Type: "transaction.addedToPool",
+		},
+		Transaction: transaction,
+	}
+
+	return saveAndOn(t, event)
+}
+
+//Commit transaction to staging
+func (t *TransactionPool) CommitToStaging(id TransactionId) error {
+	t.mux.Lock()
+	defer t.mux.Unlock()
+
+	_, ok := t.prepareTx[id]
+
+	if !ok {
+		return errors.New("no transaction exist")
+	}
+
+	event := &TxCommitedToStageEvent{
+		EventModel: midgard.EventModel{
+			ID:   id,
+			Type: "transaction.commitedToStage",
+		},
+	}
+
+	return saveAndOn(t, event)
+}
+
+//Can delete only staging transactions
+//This function should be called when blockCommitted to blockchain
+//Check transaction in committed block and call this func
+func (t *TransactionPool) Delete(id TransactionId) error {
+	t.mux.Lock()
+	defer t.mux.Unlock()
+
+	_, ok := t.stagingTx[id]
+
+	if !ok {
+		return errors.New("transaction does not exist")
+	}
+
+	event := &TxDeletedFromPoolEvent{
+		EventModel: midgard.EventModel{
+			ID:   id,
+			Type: "transaction.deleteFromPool",
+		},
+	}
+
+	return saveAndOn(t, event)
+}
+
+//apply on aggrgate and publish to eventstore
+func saveAndOn(aggregate midgard.Aggregate, event midgard.Event) error {
+
+	//must do call on func first!!!
+	//after save events if aggregate.On failed then data inconsistency will be occured
+	if err := aggregate.On(event); err != nil {
+		return err
+	}
+
+	if err := eventstore.Save(event.GetID(), event); err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (t *TransactionPoolModel) CommitToStaging(transaction Transaction) error {
-
-	return nil
+func (t *TransactionPool) GetID() string {
+	return TRANSACTION_POOL_ID
 }
 
-func (t *TransactionPoolModel) Delete(id TransactionId) error {
+func (t *TransactionPool) On(event midgard.Event) error {
+	t.mux.Lock()
+	defer t.mux.Unlock()
+
+	switch v := event.(type) {
+
+	case *TxAddedPoolEvent:
+		t.prepareTx[v.ID] = v.Transaction
+
+	case *TxCommitedToStageEvent:
+		tx := t.prepareTx[v.ID]
+		t.stagingTx[tx.TxId] = tx
+		delete(t.stagingTx, tx.TxId)
+
+	case *TxDeletedFromPoolEvent:
+		delete(t.stagingTx, v.ID)
+
+	default:
+		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
+	}
 
 	return nil
 }

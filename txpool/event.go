@@ -6,31 +6,24 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-type TxCreatedEvent struct {
+type TxAddedPoolEvent struct {
 	midgard.EventModel
 	PublishPeerId string
 	TxStatus      TransactionStatus
 	TxHash        string
 	TimeStamp     time.Time
-	TxData        TxData
+	Jsonrpc       string
+	Method        TxDataType
+	Params        Param
+	ID            string
+	ICodeID       string
 }
 
-func (tx TxCreatedEvent) GetTransaction() Transaction {
-
-	return Transaction{
-		TxId:          TransactionId(tx.ID),
-		PublishPeerId: tx.PublishPeerId,
-		TxStatus:      tx.TxStatus,
-		TxHash:        tx.TxHash,
-		TxData:        tx.TxData,
-	}
-}
-
-type TxReceivedEvent struct {
+type TxDeletedFromPoolEvent struct {
 	midgard.EventModel
 }
 
-type TxDeletedEvent struct {
+type TxCommitedToStageEvent struct {
 	midgard.EventModel
 }
 
