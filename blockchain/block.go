@@ -203,15 +203,18 @@ func NewSyncAction() *SyncAction {
 	return &SyncAction{}
 }
 func (block *DefaultBlock) On(event midgard.Event) error {
+
 	switch v := event.(type) {
+
 	case *BlockCreatedEvent:
-		block.Seal = v.GetSeal()
-		block.PrevSeal = v.GetPrevSeal()
-		block.Height = v.GetHeight()
-		block.TxList = v.GetTxList()
-		block.TxSeal = v.GetTxSeal()
-		block.Timestamp = v.GetTimestamp()
-		block.Creator = v.GetCreator()
+
+		block.Seal = v.Seal
+		block.PrevSeal = v.PrevSeal
+		block.Height = v.Height
+		block.TxList = v.TxList
+		block.TxSeal = v.TxSeal
+		block.Timestamp = v.Timestamp
+		block.Creator = v.Creator
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
