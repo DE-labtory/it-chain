@@ -6,6 +6,10 @@ import (
 	"io/ioutil"
 	"os"
 	"time"
+
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/midgard"
+	"github.com/rs/xid"
 )
 
 var ErrGetConfig = errors.New("error when get Config")
@@ -25,10 +29,6 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 
 	json.Unmarshal(byteValue, &GenesisBlock)
 
-	GenesisBlock.SetPrevSeal(GenesisBlock.PrevSeal)
-	GenesisBlock.SetHeight(GenesisBlock.Height)
-	GenesisBlock.SetTxSeal(GenesisBlock.TxSeal)
-	GenesisBlock.SetCreator(GenesisBlock.Creator)
 	GenesisBlock.SetTimestamp((time.Now()).Round(0))
 
 	Seal, err := validator.BuildSeal(GenesisBlock)
@@ -37,43 +37,76 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 		return nil, ErrBuildingSeal
 	}
 
-	GenesisBlock.SetSeal(Seal)
+	createEvent := BlockCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID:   xid.New().String(),
+			Type: "block.created",
+		},
+
+		Seal:      Seal,
+		PrevSeal:  GenesisBlock.PrevSeal,
+		Height:    GenesisBlock.Height,
+		TxList:    GenesisBlock.TxList,
+		TxSeal:    GenesisBlock.TxSeal,
+		Timestamp: GenesisBlock.Timestamp,
+		Creator:   GenesisBlock.Creator,
+	}
+
+	eventstore.Save(createEvent.GetID(), createEvent)
+
+	GenesisBlock.On(&createEvent)
 
 	return GenesisBlock, nil
 }
 
 func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, Creator []byte) (Block, error) {
 
-	Block := &DefaultBlock{}
+	ProposedBlock := &DefaultBlock{}
 	validator := DefaultValidator{}
 
-	Block.SetPrevSeal(prevSeal)
-	Block.SetHeight(height)
-	Block.SetCreator(Creator)
+	ProposedBlock.SetPrevSeal(prevSeal)
+
+	ProposedBlock.SetCreator(Creator)
 
 	for _, tx := range txList {
-		Block.PutTx(tx)
+		ProposedBlock.PutTx(tx)
 	}
 
-	txSeal, err := validator.BuildTxSeal(Block.GetTxList())
+	txSeal, err := validator.BuildTxSeal(ProposedBlock.GetTxList())
 
 	if err != nil {
 		return nil, ErrBuildingTxSeal
 	}
 
-	Block.SetTxSeal(txSeal)
+	ProposedBlock.SetTxSeal(txSeal)
 
-	Block.SetTimestamp((time.Now()).Round(0))
+	ProposedBlock.SetTimestamp((time.Now()).Round(0))
 
-	Seal, err := validator.BuildSeal(Block)
+	Seal, err := validator.BuildSeal(ProposedBlock)
 
 	if err != nil {
 		return nil, ErrBuildingSeal
 	}
 
-	Block.SetSeal(Seal)
+	createEvent := BlockCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID:   xid.New().String(),
+			Type: "block.created",
+		},
+		Seal:      Seal,
+		PrevSeal:  ProposedBlock.PrevSeal,
+		Height:    height,
+		TxList:    ProposedBlock.TxList,
+		TxSeal:    ProposedBlock.TxSeal,
+		Timestamp: ProposedBlock.Timestamp,
+		Creator:   ProposedBlock.Creator,
+	}
 
-	return Block, nil
+	eventstore.Save(createEvent.GetID(), createEvent)
+
+	ProposedBlock.On(&createEvent)
+
+	return ProposedBlock, nil
 }
 
 func configFromJson(filePath string) ([]uint8, error) {
