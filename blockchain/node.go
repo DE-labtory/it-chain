@@ -6,11 +6,5 @@ type NodeId struct {
 
 type Node struct {
 	IpAddress string
-	NodeId NodeId
+	NodeId    NodeId
 }
-
-type NodeRepository interface {
-	AddNode(node Node) error
-	DeleteNode(node Node) error
-}
-

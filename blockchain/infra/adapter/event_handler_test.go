@@ -10,16 +10,16 @@ import (
 	"errors"
 )
 
-type MockNodeRepository struct {
-	AddNodeFunc func(node blockchain.Node) error
-	DeleteNodeFunc func(node blockchain.Node) error
+type MockPeerRepository struct {
+	AddFunc func(peer blockchain.Peer) error
+	RemoveFunc func(peer blockchain.PeerId) error
 }
 
-func (nr MockNodeRepository) AddNode(node blockchain.Node) error {
-	return nr.AddNodeFunc(node)
+func (nr MockPeerRepository) Add(peer blockchain.Peer) error {
+	return nr.AddFunc(peer)
 }
-func (nr MockNodeRepository) DeleteNode(node blockchain.Node) error {
-	return nr.DeleteNodeFunc(node)
+func (nr MockPeerRepository) Remove(peerId blockchain.PeerId) error {
+	return nr.RemoveFunc(peerId)
 }
 
 
@@ -27,7 +27,7 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 	tests := map[string] struct {
 		input struct {
 			ID string
-			nodeId string
+			peerId string
 			address string
 			rpErr error
 		}
@@ -36,28 +36,28 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 		"success": {
 			input: struct {
 				ID string
-				nodeId string
+				peerId string
 				address string
 				rpErr error
-			}{ID: string("zf"), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
+			}{ID: string("zf"), peerId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
 			err: nil,
 		},
 		"empty eventId test": {
 			input: struct {
 				ID string
-				nodeId string
+				peerId string
 				address string
 				rpErr error
-			}{ID: string(""), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
+			}{ID: string(""), peerId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
 			err: adapter.ErrEmptyEventId,
 		},
 		"repository error test": {
 			input: struct {
 				ID string
-				nodeId string
+				peerId string
 				address string
 				rpErr error
-			}{ID: string("zf"), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: errors.New("repository error")},
+			}{ID: string("zf"), peerId: string("zf2"), address: string("11.22.33.44"), rpErr: errors.New("repository error")},
 			err: adapter.ErrNodeApi,
 		},
 	}
@@ -65,14 +65,14 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		nr := MockNodeRepository{}
-		nr.AddNodeFunc = func(node blockchain.Node) error {
-			assert.Equal(t, node.NodeId.Id, string("zf2"))
-			assert.Equal(t, node.IpAddress, string("11.22.33.44"))
+		nr := MockPeerRepository{}
+		nr.AddFunc = func(peer blockchain.Peer) error {
+			assert.Equal(t, peer.PeerId.Id, string("zf2"))
+			assert.Equal(t, peer.IpAddress, string("11.22.33.44"))
 			return test.input.rpErr
 		}
 		rp := adapter.RepositoryProjector{
-			NodeRepository: nr,
+			PeerRepository: nr,
 		}
 
 		eventHandler := adapter.NewEventHandler(rp)
@@ -81,9 +81,9 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 			EventModel: midgard.EventModel{
 				ID: test.input.ID,
 			},
-			Node: blockchain.Node{
-				NodeId: blockchain.NodeId{
-					test.input.nodeId,
+			Peer: blockchain.Peer{
+				PeerId: blockchain.PeerId{
+					test.input.peerId,
 				},
 				IpAddress: test.input.address,
 			},
@@ -98,8 +98,7 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 	tests := map[string] struct {
 		input struct {
 			ID string
-			nodeId string
-			address string
+			peerId string
 			rpErr error
 		}
 		err error
@@ -107,28 +106,25 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 		"success": {
 			input: struct {
 				ID string
-				nodeId string
-				address string
+				peerId string
 				rpErr error
-			}{ID: string("zf"), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
+			}{ID: string("zf"), peerId: string("zf2"), rpErr: nil},
 			err: nil,
 		},
 		"empty eventId test": {
 			input: struct {
 				ID string
-				nodeId string
-				address string
+				peerId string
 				rpErr error
-			}{ID: string(""), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
+			}{ID: string(""), peerId: string("zf2"), rpErr: nil},
 			err: adapter.ErrEmptyEventId,
 		},
 		"repository error test": {
 			input: struct {
 				ID string
-				nodeId string
-				address string
+				peerId string
 				rpErr error
-			}{ID: string("zf"), nodeId: string("zf2"), address: string("11.22.33.44"), rpErr: errors.New("repository error")},
+			}{ID: string("zf"), peerId: string("zf2"), rpErr: errors.New("repository error")},
 			err: adapter.ErrNodeApi,
 		},
 	}
@@ -136,14 +132,13 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		nr := MockNodeRepository{}
-		nr.DeleteNodeFunc = func(node blockchain.Node) error {
-			assert.Equal(t, node.NodeId.Id, string("zf2"))
-			assert.Equal(t, node.IpAddress, string("11.22.33.44"))
+		nr := MockPeerRepository{}
+		nr.RemoveFunc = func(peerId blockchain.PeerId) error {
+			assert.Equal(t, peerId.Id, string("zf2"))
 			return test.input.rpErr
 		}
 		rp := adapter.RepositoryProjector{
-			NodeRepository: nr,
+			PeerRepository: nr,
 		}
 
 		eventHandler := adapter.NewEventHandler(rp)
@@ -152,11 +147,10 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 			EventModel: midgard.EventModel{
 				ID: test.input.ID,
 			},
-			Node: blockchain.Node{
-				NodeId: blockchain.NodeId{
-					test.input.nodeId,
+			Peer: blockchain.Peer{
+				PeerId: blockchain.PeerId{
+					test.input.peerId,
 				},
-				IpAddress: test.input.address,
 			},
 		}
 		err := eventHandler.HandleNodeDeletedEvent(event)

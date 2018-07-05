@@ -3,81 +3,57 @@ package api
 import (
 	"log"
 
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/it-chain-Engine/gateway"
-	"github.com/it-chain/midgard"
 )
 
 type ConnectionApi struct {
-	eventRepository midgard.Repository
+	eventRepository gateway.EventRepository
 	grpcService     gateway.GrpcService
 }
 
-func NewConnectionApi(eventRepository midgard.Repository, grpcService gateway.GrpcService) *ConnectionApi {
+func NewConnectionApi(eventRepository gateway.EventRepository, grpcService gateway.GrpcService) *ConnectionApi {
 	return &ConnectionApi{
 		eventRepository: eventRepository,
 		grpcService:     grpcService,
 	}
 }
 
-func (c ConnectionApi) CreateConnection(command gateway.ConnectionCreateCommand) {
+func (c ConnectionApi) CreateConnection(address string) (gateway.Connection, error) {
 
-	events := make([]midgard.Event, 0)
+	log.Printf("dialing [%s]", address)
 
-	if command.Address == "" {
-		log.Printf("invalid address [%s]")
-		return
-	}
-
-	log.Printf("dialing [%s]", command.Address)
-
-	connection, err := c.grpcService.Dial(command.Address)
+	connection, err := c.grpcService.Dial(address)
 
 	if err != nil {
 		log.Printf("fail to dial [%s]", err)
+		return gateway.Connection{}, err
 	}
 
-	events = append(events, gateway.ConnectionCreatedEvent{
-		EventModel: midgard.EventModel{
-			ID:   connection.ID,
-			Type: "connection.created",
-		},
-		Address: connection.Address,
-	})
+	return gateway.NewConnection(connection.ID, connection.Address)
+}
 
-	err = c.eventRepository.Save(connection.ID, events...)
+func (c ConnectionApi) CloseConnection(connectionID string) error {
+
+	connection := &gateway.Connection{}
+
+	err := eventstore.Load(connection, connectionID)
 
 	if err != nil {
-		log.Println(err.Error())
+		return err
 	}
+
+	c.grpcService.CloseConnection(connectionID)
+
+	return gateway.CloseConnection(connection.ID)
 }
 
-//다른 node와의 연결 close
-//todo close connection event 발생
-func (c ConnectionApi) CloseConnection(connection gateway.Connection) {
+func (c ConnectionApi) OnConnection(connection gateway.Connection) (gateway.Connection, error) {
 
+	return gateway.NewConnection(connection.ID, connection.Address)
 }
 
-//
-func (c ConnectionApi) OnConnection(connection gateway.Connection) {
+func (c ConnectionApi) OnDisconnection(connection gateway.Connection) error {
 
-	events := make([]midgard.Event, 0)
-
-	events = append(events, gateway.ConnectionCreatedEvent{
-		EventModel: midgard.EventModel{
-			ID: connection.ID,
-		},
-		Address: connection.Address,
-	})
-
-	err := c.eventRepository.Save(connection.ID, events...)
-
-	if err != nil {
-		log.Println(err.Error())
-	}
-}
-
-//연결된 node의 connection 종료
-//todo close connection event 발생
-func (c ConnectionApi) OnDisconnection(connection gateway.Connection) {
-
+	return gateway.CloseConnection(connection.ID)
 }
