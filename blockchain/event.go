@@ -34,3 +34,8 @@ type BlockCommittedEvent struct {
 	midgard.EventModel
 	Seal string
 }
+
+type BlockCreatedEvent struct {
+	midgard.EventModel
+	Block
+}

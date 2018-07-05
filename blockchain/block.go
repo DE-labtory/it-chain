@@ -8,11 +8,13 @@ import (
 
 	"errors"
 
-	ygg "github.com/it-chain/yggdrasill/common"
-	"github.com/it-chain/midgard"
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"fmt"
 	"log"
+
 	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/midgard"
+	ygg "github.com/it-chain/yggdrasill/common"
 )
 
 var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
@@ -180,7 +182,6 @@ type BlockQueryApi interface {
 	GetTransactionByTxID(txid string) (Transaction, error)
 }
 
-
 type Action interface {
 	DoAction(block Block) error
 }
@@ -196,18 +197,38 @@ func CreateSaveOrSyncAction(checkResult int64) Action {
 	}
 }
 
-type SyncAction struct {}
+type SyncAction struct{}
 
 func NewSyncAction() *SyncAction {
 	return &SyncAction{}
 }
+func (block *DefaultBlock) On(event midgard.Event) error {
+	switch v := event.(type) {
+	case *BlockCreatedEvent:
+		block.Seal = v.GetSeal()
+		block.PrevSeal = v.GetPrevSeal()
+		block.Height = v.GetHeight()
+		block.TxList = v.GetTxList()
+		block.TxSeal = v.GetTxSeal()
+		block.Timestamp = v.GetTimestamp()
+		block.Creator = v.GetCreator()
 
+	default:
+		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
+	}
+
+	return nil
+}
+
+func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock {
+	block := &DefaultBlock{}
+	return block
+}
 
 func (syncAction *SyncAction) DoAction(block Block) error {
 	// TODO: Start synchronize
 	return nil
 }
-
 
 type SaveAction struct {
 	blockPool BlockPool
@@ -238,9 +259,9 @@ func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
 	}, nil
 }
 
-type DefaultAction struct {}
+type DefaultAction struct{}
 
-func NewDefaultAction() *DefaultAction{
+func NewDefaultAction() *DefaultAction {
 	return &DefaultAction{}
 }
 
