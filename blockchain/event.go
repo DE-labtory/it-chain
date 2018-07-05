@@ -44,5 +44,11 @@ type BlockCommittedEvent struct {
 
 type BlockCreatedEvent struct {
 	midgard.EventModel
-	Block
+	Seal      []byte
+	PrevSeal  []byte
+	Height    uint64
+	TxList    []Transaction
+	TxSeal    [][]byte
+	Timestamp time.Time
+	Creator   []byte
 }
