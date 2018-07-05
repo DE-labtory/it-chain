@@ -13,23 +13,27 @@ type MockEventRepository struct {
 	SaveFunc func(aggregateID string, events ...midgard.Event) error
 }
 
-func (rp MockEventRepository) Load(aggregate midgard.Aggregate, aggregateID string) error { return nil }
+func (rp MockEventRepository) Load(aggregate midgard.Aggregate, aggregateID string) error {
+	return nil
+}
+
 func (rp MockEventRepository) Save(aggregateID string, events ...midgard.Event) error {
-	return rp.SaveFunc(aggregateID, events...) }
+	return rp.SaveFunc(aggregateID, events...)
+}
+
 func (rp MockEventRepository) Close() {}
 
-
 func TestTransactionApi_CreateTransaction(t *testing.T) {
-	tests := map[string] struct {
+	tests := map[string]struct {
 		input struct {
-			txID string
+			txID   string
 			txData txpool.TxData
 		}
 		err error
-	} {
+	}{
 		"success": {
 			input: struct {
-				txID string
+				txID   string
 				txData txpool.TxData
 			}{txID: "zf", txData: txpool.TxData{ID: "gg"}},
 			err: nil,

@@ -1,4 +1,4 @@
-package txpool
+package batch
 
 import (
 	"time"

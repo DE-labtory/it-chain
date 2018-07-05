@@ -8,7 +8,9 @@ import (
 	"encoding/json"
 
 	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
+	"github.com/rs/xid"
 )
 
 const (
@@ -94,6 +96,34 @@ func CalTxHash(txData TxData, publishPeerId string, txId TransactionId, timeStam
 	}
 
 	return common.ComputeSHA256(hashArgs)
+}
+
+func CreateTransaction(publisherId string, txData TxData) (Transaction, error) {
+
+	id := xid.New().String()
+	timeStamp := time.Now()
+	hash := CalTxHash(txData, publisherId, TransactionId(id), timeStamp)
+
+	event := &TxCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID:   id,
+			Type: "Transaction",
+		},
+		PublishPeerId: publisherId,
+		TxStatus:      VALID,
+		TxHash:        hash,
+		TimeStamp:     timeStamp,
+		TxData:        txData,
+	}
+
+	tx := Transaction{}
+	tx.On(event)
+
+	if err := eventstore.Save(tx.GetID(), event); err != nil {
+		return tx, err
+	}
+
+	return tx, nil
 }
 
 //TxData Declaration

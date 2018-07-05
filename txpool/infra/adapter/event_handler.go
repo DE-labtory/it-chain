@@ -75,7 +75,7 @@ func (t RepositoryProjector) HandleLeaderChangedEvent(leaderChangedEvent txpool.
 	}
 
 	leader := txpool.Leader{
-		txpool.LeaderId{leaderID},
+		LeaderId: txpool.LeaderId{leaderID},
 	}
 
 	t.leaderRepository.SetLeader(leader)
