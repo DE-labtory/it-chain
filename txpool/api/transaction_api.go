@@ -2,18 +2,15 @@ package api
 
 import (
 	"github.com/it-chain/it-chain-Engine/txpool"
-	"github.com/it-chain/midgard"
 )
 
 type TransactionApi struct {
-	eventRepository midgard.EventRepository
-	publisherId     string
+	publisherId string
 }
 
-func NewTransactionApi(eventRepository midgard.EventRepository, publisherId string) TransactionApi {
+func NewTransactionApi(publisherId string) TransactionApi {
 	return TransactionApi{
-		publisherId:     publisherId,
-		eventRepository: eventRepository,
+		publisherId: publisherId,
 	}
 }
 

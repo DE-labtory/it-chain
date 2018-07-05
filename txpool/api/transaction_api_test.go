@@ -48,7 +48,7 @@ func TestTransactionApi_CreateTransaction(t *testing.T) {
 
 	eventstore.InitForMock(eventRepository)
 
-	transactionApi := api.NewTransactionApi(eventRepository, "zf")
+	transactionApi := api.NewTransactionApi("zf")
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
