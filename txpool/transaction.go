@@ -248,7 +248,7 @@ func (t *TransactionPool) Delete(id TransactionId) error {
 func saveAndOn(aggregate midgard.Aggregate, event midgard.Event) error {
 
 	//must do call on func first!!!
-	//after save events if aggregate.On failed then data inconsistency will be occured
+	//after save events if aggregate.On failed then data inconsistency will be occurred
 	if err := aggregate.On(event); err != nil {
 		return err
 	}
