@@ -40,7 +40,7 @@ func (p *BlockPoolModel) Add(block Block) {
 	event := createBlockAddToPoolEvent(block)
 	eventstore.Save(BLOCK_POOL_AID, event)
 
-	p.On(event)
+	p.On(&event)
 }
 
 func (p *BlockPoolModel) Get(height BlockHeight) Block {
@@ -51,7 +51,7 @@ func (p *BlockPoolModel) Delete(block Block) {
 	event := createBlockRemoveFromPoolEvent(block)
 	eventstore.Save(BLOCK_POOL_AID, event)
 
-	p.On(event)
+	p.On(&event)
 }
 
 func createBlockAddToPoolEvent(block Block) BlockAddToPoolEvent {
