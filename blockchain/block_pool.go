@@ -37,14 +37,10 @@ func NewBlockPool() *BlockPoolModel {
 }
 
 func (p *BlockPoolModel) Add(block Block) {
-	height := block.GetHeight()
-	p.Pool[height] = block
+	event := createBlockAddToPoolEvent(block)
+	eventstore.Save(BLOCK_POOL_AID, event)
 
-	addEvent := createBlockAddToPoolEvent(block)
-	eventstore.Save(BLOCK_POOL_AID, addEvent)
-
-	qEvent := createBlockQueuedEvent(block)
-	eventstore.Save(BLOCK_QUEUED_EVENTS_AID, qEvent)
+	p.On(event)
 }
 
 func (p *BlockPoolModel) Get(height BlockHeight) Block {
@@ -52,19 +48,10 @@ func (p *BlockPoolModel) Get(height BlockHeight) Block {
 }
 
 func (p *BlockPoolModel) Delete(block Block) {
-	delete(p.Pool, block.GetHeight())
-
 	event := createBlockRemoveFromPoolEvent(block)
 	eventstore.Save(BLOCK_POOL_AID, event)
-}
 
-func createBlockQueuedEvent(block Block) BlockQueuedEvent {
-	return BlockQueuedEvent{
-		EventModel: midgard.EventModel{
-			ID: BLOCK_QUEUED_EVENTS_AID,
-		},
-		Block: block,
-	}
+	p.On(event)
 }
 
 func createBlockAddToPoolEvent(block Block) BlockAddToPoolEvent {

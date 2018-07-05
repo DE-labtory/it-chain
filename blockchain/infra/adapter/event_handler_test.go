@@ -189,17 +189,17 @@ func (er MockEventRepository) Load(aggregate midgard.Aggregate, aggregateID stri
 func (er MockEventRepository) Save(aggregateID string, events ...midgard.Event) error { return nil }
 func (er MockEventRepository) Close() {}
 
-func TestEventHandler_HandleBlockQueuedEvent(t *testing.T) {
+func TestEventHandler_HandleBlockAddToPoolEvent(t *testing.T) {
 	tests := map[string] struct {
 		input struct {
-			blockchain.BlockQueuedEvent
+			blockchain.BlockAddToPoolEvent
 		}
 		err error
 	} {
 		"success": {
 			input: struct {
-				blockchain.BlockQueuedEvent
-			}{BlockQueuedEvent: blockchain.BlockQueuedEvent{
+				blockchain.BlockAddToPoolEvent
+			}{BlockAddToPoolEvent: blockchain.BlockAddToPoolEvent{
 				Block: &blockchain.DefaultBlock{
 					Height: uint64(12),
 				},
@@ -208,8 +208,8 @@ func TestEventHandler_HandleBlockQueuedEvent(t *testing.T) {
 		},
 		"block nil test": {
 			input: struct {
-				blockchain.BlockQueuedEvent
-			}{BlockQueuedEvent: blockchain.BlockQueuedEvent{
+				blockchain.BlockAddToPoolEvent
+			}{BlockAddToPoolEvent: blockchain.BlockAddToPoolEvent{
 				Block: nil,
 			}},
 			err: adapter.ErrBlockNil,
@@ -232,7 +232,7 @@ func TestEventHandler_HandleBlockQueuedEvent(t *testing.T) {
 		t.Logf("running test case %s", testName)
 
 		// When
-		err := eventHandler.HandleBlockQueuedEvent(test.input.BlockQueuedEvent)
+		err := eventHandler.HandleBlockAddToPoolEvent(test.input.BlockAddToPoolEvent)
 
 		// Then
 		assert.Equal(t, err, test.err)

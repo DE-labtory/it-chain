@@ -65,7 +65,7 @@ func (eh *EventHandler) HandleNodeDeletedEvent(event blockchain.NodeDeletedEvent
 	return nil
 }
 
-func (eh *EventHandler) HandleBlockQueuedEvent(event blockchain.BlockQueuedEvent) error {
+func (eh *EventHandler) HandleBlockAddToPoolEvent(event blockchain.BlockAddToPoolEvent) error {
 	block := event.Block
 	if block == nil {
 		return ErrBlockNil
