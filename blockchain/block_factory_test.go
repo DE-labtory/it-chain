@@ -10,8 +10,25 @@ import (
 	"time"
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
+
+type MockRepostiory struct {
+	loadFunc func(aggregate midgard.Aggregate, aggregateID string) error
+	saveFunc func(aggregateID string, events ...midgard.Event) error
+}
+
+func (m MockRepostiory) Load(aggregate midgard.Aggregate, aggregateID string) error {
+	return m.loadFunc(aggregate, aggregateID)
+}
+
+func (m MockRepostiory) Save(aggregateID string, events ...midgard.Event) error {
+	return m.saveFunc(aggregateID, events...)
+}
+
+func (MockRepostiory) Close() {}
 
 func TestCreateGenesisBlock(t *testing.T) {
 
@@ -55,6 +72,18 @@ func TestCreateGenesisBlock(t *testing.T) {
 			err: blockchain.ErrGetConfig,
 		},
 	}
+
+	repo := MockRepostiory{}
+
+	repo.saveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.Equal(t, aggregateID, events[0].GetID())
+		assert.Equal(t, 1, len(events))
+		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
+		return nil
+	}
+
+	eventstore.InitForMock(repo)
+	defer eventstore.Close()
 
 	GenesisFilePath := "./GenesisBlockConfig.json"
 
@@ -194,6 +223,18 @@ func TestCreateProposedBlock(t *testing.T) {
 			err: blockchain.ErrBuildingSeal,
 		},
 	}
+
+	repo := MockRepostiory{}
+
+	repo.saveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.Equal(t, aggregateID, events[0].GetID())
+		assert.Equal(t, 1, len(events))
+		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
+		return nil
+	}
+
+	eventstore.InitForMock(repo)
+	defer eventstore.Close()
 
 	for testName, test := range tests {
 

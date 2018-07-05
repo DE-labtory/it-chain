@@ -37,9 +37,9 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 		return nil, ErrBuildingSeal
 	}
 
-	createEvent := BlockCreatedEvent{
+	createEvent := &BlockCreatedEvent{
 		EventModel: midgard.EventModel{
-			ID:   xid.New().String(),
+			ID:   string(Seal),
 			Type: "block.created",
 		},
 
@@ -54,7 +54,7 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 
 	eventstore.Save(createEvent.GetID(), createEvent)
 
-	GenesisBlock.On(&createEvent)
+	GenesisBlock.On(createEvent)
 
 	return GenesisBlock, nil
 }
@@ -88,7 +88,7 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 		return nil, ErrBuildingSeal
 	}
 
-	createEvent := BlockCreatedEvent{
+	createEvent := &BlockCreatedEvent{
 		EventModel: midgard.EventModel{
 			ID:   xid.New().String(),
 			Type: "block.created",
@@ -104,7 +104,7 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 
 	eventstore.Save(createEvent.GetID(), createEvent)
 
-	ProposedBlock.On(&createEvent)
+	ProposedBlock.On(createEvent)
 
 	return ProposedBlock, nil
 }
