@@ -30,10 +30,10 @@ type TxReceivedEvent struct {
 	midgard.EventModel
 }
 
-type LeaderChangedEvent struct {
+type TxDeletedEvent struct {
 	midgard.EventModel
 }
 
-type TxDeletedEvent struct {
+type LeaderChangedEvent struct {
 	midgard.EventModel
 }

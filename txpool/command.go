@@ -19,10 +19,6 @@ type SendTransactionsCommand struct {
 }
 
 type GrpcDeliverCommand struct {
-	//midgard.CommandModel
-	//Transactions []*Transaction
-	//Leader
-
 	midgard.CommandModel
 	Recipients []string
 	Body       []byte

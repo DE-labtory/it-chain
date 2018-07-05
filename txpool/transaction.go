@@ -163,3 +163,29 @@ type TransactionRepository interface {
 	FindById(id TransactionId) (*Transaction, error)
 	FindAll() ([]*Transaction, error)
 }
+
+type TransactionPool interface {
+	Add(transaction Transaction) error
+	CommitToStaging(transaction Transaction) error
+	Delete(id TransactionId) error
+}
+
+type TransactionPoolModel struct {
+	midgard.AggregateModel
+	stagingTransactions map[TransactionId]Transaction
+}
+
+func (t *TransactionPoolModel) Add(transaction Transaction) error {
+
+	return nil
+}
+
+func (t *TransactionPoolModel) CommitToStaging(transaction Transaction) error {
+
+	return nil
+}
+
+func (t *TransactionPoolModel) Delete(id TransactionId) error {
+
+	return nil
+}
