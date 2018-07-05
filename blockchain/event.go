@@ -41,3 +41,8 @@ type BlockCommittedEvent struct {
 	Timestamp time.Time
 	Creator   []byte
 }
+
+type BlockCreatedEvent struct {
+	midgard.EventModel
+	Block
+}

@@ -7,7 +7,7 @@ import (
 	"bytes"
 
 	"errors"
-
+	"fmt"
 	"log"
 
 	"github.com/it-chain/it-chain-Engine/common"
@@ -202,6 +202,28 @@ type SyncAction struct{}
 
 func NewSyncAction() *SyncAction {
 	return &SyncAction{}
+}
+func (block *DefaultBlock) On(event midgard.Event) error {
+	switch v := event.(type) {
+	case *BlockCreatedEvent:
+		block.Seal = v.GetSeal()
+		block.PrevSeal = v.GetPrevSeal()
+		block.Height = v.GetHeight()
+		block.TxList = v.GetTxList()
+		block.TxSeal = v.GetTxSeal()
+		block.Timestamp = v.GetTimestamp()
+		block.Creator = v.GetCreator()
+
+	default:
+		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
+	}
+
+	return nil
+}
+
+func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock {
+	block := &DefaultBlock{}
+	return block
 }
 
 func (syncAction *SyncAction) DoAction(block Block) error {
