@@ -20,8 +20,7 @@ type GrpcCommandService struct {
 
 func NewGrpcCommandService(publisher Publisher) *GrpcCommandService {
 	return &GrpcCommandService{
-		publisher: publisher,
-	}
+		publisher: publisher
 }
 
 func (gcs GrpcCommandService) SendLeaderTransactions(transactions []*txpool.Transaction, leader txpool.Leader) error {

@@ -1,11 +1,10 @@
 package txpool
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
-
-	"encoding/json"
 
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"

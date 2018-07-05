@@ -20,6 +20,7 @@ type TxPeriodicTransferService struct {
 }
 
 func NewTxPeriodicTransferService(tr TransactionRepository, lr LeaderRepository, gcs GrpcCommandService) *TxPeriodicTransferService {
+
 	return &TxPeriodicTransferService{
 		txRepository:       tr,
 		leaderRepository:   lr,
