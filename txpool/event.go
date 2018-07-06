@@ -12,7 +12,12 @@ type TxCreatedEvent struct {
 	TxStatus      TransactionStatus
 	TxHash        string
 	TimeStamp     time.Time
-	TxData        TxData
+	Jsonrpc       string
+	Method        TxDataType
+	Params        Param
+	ID            string
+	ICodeID       string
+	Stage         TransactionStage
 }
 
 func (tx TxCreatedEvent) GetTransaction() Transaction {
@@ -22,28 +27,23 @@ func (tx TxCreatedEvent) GetTransaction() Transaction {
 		PublishPeerId: tx.PublishPeerId,
 		TxStatus:      tx.TxStatus,
 		TxHash:        tx.TxHash,
-		TxData:        tx.TxData,
+		TxData: TxData{
+			ICodeID: tx.ICodeID,
+			Jsonrpc: tx.Jsonrpc,
+			Method:  tx.Method,
+			Params:  tx.Params,
+			ID:      tx.ID,
+		},
+		TimeStamp: tx.TimeStamp,
 	}
 }
 
-type TxAddedPoolEvent struct {
-	midgard.EventModel
-	PublishPeerId string
-	TxStatus      TransactionStatus
-	TxHash        string
-	TimeStamp     time.Time
-	Jsonrpc       string
-	Method        TxDataType
-	Params        Param
-	ID            string
-	ICodeID       string
-}
-
-type TxDeletedFromPoolEvent struct {
+type TxStagedEvent struct {
 	midgard.EventModel
 }
 
-type TxCommitedToStageEvent struct {
+// when block
+type TxDeleteEvent struct {
 	midgard.EventModel
 }
 

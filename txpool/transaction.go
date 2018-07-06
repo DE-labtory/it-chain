@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/it-chain/it-chain-Engine/common"
@@ -18,12 +17,16 @@ const (
 	INVALID TransactionStatus = 1
 
 	General TransactionType = 0 + iota
+
+	CREATED TransactionStage = 0
+	STAGED  TransactionStage = 1
 )
 
 type TransactionId = string
 
 type TransactionStatus int
 type TransactionType int
+type TransactionStage int
 
 //Aggregate root must implement aggregate interface
 type Transaction struct {
@@ -33,6 +36,9 @@ type Transaction struct {
 	TxHash        string
 	TimeStamp     time.Time
 	TxData        TxData
+
+	//this attribute will be used only for checking resend
+	Stage TransactionStage
 }
 
 // must implement id method
@@ -46,12 +52,19 @@ func (t *Transaction) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *TxCreatedEvent:
+
 		t.TxId = TransactionId(v.ID)
 		t.PublishPeerId = v.PublishPeerId
 		t.TxStatus = v.TxStatus
 		t.TxHash = v.TxHash
 		t.TimeStamp = v.TimeStamp
-		t.TxData = v.TxData
+		t.TxData = TxData{
+			ID:      v.ID,
+			Params:  v.Params,
+			Method:  v.Method,
+			Jsonrpc: v.Jsonrpc,
+			ICodeID: v.ICodeID,
+		}
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
@@ -109,17 +122,40 @@ func CreateTransaction(publisherId string, txData TxData) (Transaction, error) {
 		TxStatus:      VALID,
 		TxHash:        hash,
 		TimeStamp:     timeStamp,
-		TxData:        txData,
+		ID:            txData.ID,
+		ICodeID:       txData.ICodeID,
+		Jsonrpc:       txData.Jsonrpc,
+		Method:        txData.Method,
+		Params:        txData.Params,
+		Stage:         CREATED,
 	}
 
-	tx := Transaction{}
+	tx := &Transaction{}
+	saveAndOn(tx, event)
+
 	tx.On(event)
 
 	if err := eventstore.Save(tx.GetID(), event); err != nil {
-		return tx, err
+		return *tx, err
 	}
 
-	return tx, nil
+	return *tx, nil
+}
+
+//apply on aggrgate and publish to eventstore
+func saveAndOn(aggregate midgard.Aggregate, event midgard.Event) error {
+
+	//must do call on func first!!!
+	//after save events if aggregate.On failed then data inconsistency will be occurred
+	if err := aggregate.On(event); err != nil {
+		return err
+	}
+
+	if err := eventstore.Save(event.GetID(), event); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 //TxData Declaration
@@ -151,139 +187,4 @@ func NewTxData(jsonrpc string, method TxDataType, params Param, iCodeId string, 
 		ID:      id,
 		ICodeID: iCodeId,
 	}
-}
-
-//Transaction Repository interface
-type TransactionRepository interface {
-	Save(transaction Transaction) error
-	Remove(id TransactionId) error
-	FindById(id TransactionId) (*Transaction, error)
-	FindAll() ([]*Transaction, error)
-}
-
-var TRANSACTION_POOL_ID = "TRANSACTION_POOL"
-
-func LoadTransactionPool() TransactionPool {
-
-	pool := &TransactionPool{}
-	eventstore.Load(pool, TRANSACTION_POOL_ID)
-
-	return *pool
-}
-
-type TransactionPool struct {
-	midgard.AggregateModel
-	prepareTx map[TransactionId]Transaction
-	stagingTx map[TransactionId]Transaction
-	mux       sync.RWMutex
-}
-
-//Add transaction to transaction pool
-func (t *TransactionPool) Add(transaction Transaction) error {
-	t.mux.Lock()
-	defer t.mux.Unlock()
-
-	_, ok := t.prepareTx[transaction.TxId]
-
-	if ok {
-		return errors.New("transaction already exist")
-	}
-
-	event := &TxAddedPoolEvent{
-		EventModel: midgard.EventModel{
-			ID:   transaction.GetID(),
-			Type: "transaction.addedToPool",
-		},
-		Transaction: transaction,
-	}
-
-	return saveAndOn(t, event)
-}
-
-//Commit transaction to staging
-func (t *TransactionPool) CommitToStaging(id TransactionId) error {
-	t.mux.Lock()
-	defer t.mux.Unlock()
-
-	_, ok := t.prepareTx[id]
-
-	if !ok {
-		return errors.New("no transaction exist")
-	}
-
-	event := &TxCommitedToStageEvent{
-		EventModel: midgard.EventModel{
-			ID:   id,
-			Type: "transaction.commitedToStage",
-		},
-	}
-
-	return saveAndOn(t, event)
-}
-
-//Can delete only staging transactions
-//This function should be called when blockCommitted to blockchain
-//Check transaction in committed block and call this func
-func (t *TransactionPool) Delete(id TransactionId) error {
-	t.mux.Lock()
-	defer t.mux.Unlock()
-
-	_, ok := t.stagingTx[id]
-
-	if !ok {
-		return errors.New("transaction does not exist")
-	}
-
-	event := &TxDeletedFromPoolEvent{
-		EventModel: midgard.EventModel{
-			ID:   id,
-			Type: "transaction.deleteFromPool",
-		},
-	}
-
-	return saveAndOn(t, event)
-}
-
-//apply on aggrgate and publish to eventstore
-func saveAndOn(aggregate midgard.Aggregate, event midgard.Event) error {
-
-	//must do call on func first!!!
-	//after save events if aggregate.On failed then data inconsistency will be occurred
-	if err := aggregate.On(event); err != nil {
-		return err
-	}
-
-	if err := eventstore.Save(event.GetID(), event); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (t *TransactionPool) GetID() string {
-	return TRANSACTION_POOL_ID
-}
-
-func (t *TransactionPool) On(event midgard.Event) error {
-	t.mux.Lock()
-	defer t.mux.Unlock()
-
-	switch v := event.(type) {
-
-	case *TxAddedPoolEvent:
-		t.prepareTx[v.ID] = v.Transaction
-
-	case *TxCommitedToStageEvent:
-		tx := t.prepareTx[v.ID]
-		t.stagingTx[tx.TxId] = tx
-		delete(t.stagingTx, tx.TxId)
-
-	case *TxDeletedFromPoolEvent:
-		delete(t.stagingTx, v.ID)
-
-	default:
-		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
-	}
-
-	return nil
 }
