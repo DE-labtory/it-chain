@@ -17,16 +17,12 @@ const (
 	INVALID TransactionStatus = 1
 
 	General TransactionType = 0 + iota
-
-	CREATED TransactionStage = 0
-	STAGED  TransactionStage = 1
 )
 
 type TransactionId = string
 
 type TransactionStatus int
 type TransactionType int
-type TransactionStage int
 
 //TxData Declaration
 const (
@@ -57,10 +53,6 @@ type Transaction struct {
 	TxHash        string
 	TimeStamp     time.Time
 	TxData        TxData
-
-	//this attribute will be used only for checking resend
-	//this attribute is not a main attribute
-	Stage TransactionStage
 }
 
 // must implement id method
@@ -149,7 +141,6 @@ func CreateTransaction(publisherId string, txData TxData) (Transaction, error) {
 		Jsonrpc:       txData.Jsonrpc,
 		Method:        txData.Method,
 		Params:        txData.Params,
-		Stage:         CREATED,
 	}
 
 	tx := &Transaction{}

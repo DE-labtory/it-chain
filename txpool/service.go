@@ -49,26 +49,5 @@ func (t TxTransferService) TransferCreatedTxToLeader() error {
 
 	err = t.transferService.SendTransactionsToLeader(transactions, leader)
 
-	//if err != nil {
-	//	log.Println(err.Error())
-	//	return err
-	//}
-
-	//if err := t.removeTxs(transactions); err != nil {
-	//	log.Println(err.Error())
-	//	return err
-	//}
-
 	return nil
 }
-
-//func (t TxPeriodicTransferService) removeTxs(transactions []*Transaction) error {
-//
-//	for _, tx := range transactions {
-//		if err := t.txRepository.Remove(tx.TxId); err != nil {
-//			return err
-//		}
-//	}
-//
-//	return nil
-//}
