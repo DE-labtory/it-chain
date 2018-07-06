@@ -21,7 +21,7 @@ type BlockApi interface {
 type ReadOnlyBlockRepository interface {
 	NewEmptyBlock() (blockchain.Block, error)
 	GetLastBlock(block blockchain.Block) error
-	GetBlockByHeight(height uint64) (blockchain.Block, error)
+	GetBlockByHeight(block blockchain.Block, height uint64) error
 }
 
 type SyncCheckGrpcCommandService interface {
@@ -64,13 +64,15 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 		break
 
 	case "BlockRequestProtocol":
+		block := &blockchain.DefaultBlock{}
+
 		var height uint64
 		err := json.Unmarshal(command.Body, &height)
 		if err != nil {
 			return ErrBlockInfoDeliver
 		}
 
-		block, err := g.blockRepository.GetBlockByHeight(height)
+		err = g.blockRepository.GetBlockByHeight(block, height)
 		if err != nil {
 			return ErrGetBlock
 		}
