@@ -34,5 +34,5 @@ func (t TransactionApi) DeleteTransaction(id txpool.TransactionId) error {
 		return err
 	}
 
-	return txpool.DeleteTransaction(tx)
+	return txpool.DeleteTransaction(*tx)
 }

@@ -2,13 +2,11 @@ package txpool
 
 import (
 	"errors"
-	"log"
 )
 
 type TxpoolQueryService interface {
 	GetLeader() Leader
-	GetAllStagedTransactions() ([]Transaction, error)
-	GetAllCreatedTransactions() ([]Transaction, error)
+	GetAllTransactions() ([]Transaction, error)
 }
 
 type TransferService interface {
@@ -34,10 +32,10 @@ func NewTxPeriodicTransferService(queryService TxpoolQueryService, transferServi
 
 func (t TxTransferService) TransferCreatedTxToLeader() error {
 
-	transactions, err := t.txpoolQueryService.GetAllCreatedTransactions()
+	//todo timeStamp check
+	transactions, err := t.txpoolQueryService.GetAllTransactions()
 
 	if err != nil {
-		log.Println(err.Error())
 		return err
 	}
 

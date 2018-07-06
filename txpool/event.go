@@ -48,5 +48,5 @@ type LeaderChangedEvent struct {
 
 type BlockCommittedEvent struct {
 	midgard.EventModel
-	transactions []Transaction
+	Transactions []Transaction
 }
