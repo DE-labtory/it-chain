@@ -17,7 +17,7 @@ func (ba MockBlockApi) SyncedCheck(block blockchain.Block) error { return nil }
 type MockROBlockRepository struct {
 	NewEmptyBlockFunc    func() (blockchain.Block, error)
 	GetLastBlockFunc     func(block blockchain.Block) error
-	GetBlockByHeightFunc func(height uint64) (blockchain.Block, error)
+	GetBlockByHeightFunc func(block blockchain.Block, height uint64) error
 }
 
 func (br MockROBlockRepository) NewEmptyBlock() (blockchain.Block, error) {
@@ -27,8 +27,8 @@ func (br MockROBlockRepository) GetLastBlock(block blockchain.Block) error {
 	return br.GetLastBlockFunc(block)
 }
 
-func (br MockROBlockRepository) GetBlockByHeight(height uint64) (blockchain.Block, error) {
-	return br.GetBlockByHeightFunc(height)
+func (br MockROBlockRepository) GetBlockByHeight(block blockchain.Block, height uint64) error {
+	return br.GetBlockByHeightFunc(block, height)
 }
 
 type MockGrpcCommandService struct {
@@ -38,6 +38,10 @@ type MockGrpcCommandService struct {
 
 func (cs MockGrpcCommandService) SyncCheckResponse(block blockchain.Block) error {
 	return cs.SyncCheckResponseFunc(block)
+}
+
+func (cs MockGrpcCommandService) ResponseBlock(peerId blockchain.PeerId, block blockchain.Block) error {
+	return cs.ResponseBlockFunc(peerId, block)
 }
 
 func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testing.T) {
@@ -119,6 +123,52 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 	}
 }
 
-func TestGrpcCommandHandler_HandleGrpcCommand_BlockRequestProtocol(t *testing.T) {
-
-}
+//func TestGrpcCommandHandler_HandleGrpcCommand_BlockRequestProtocol(t *testing.T) {
+//	tests := map[string]struct {
+//		input struct {
+//			command blockchain.GrpcReceiveCommand
+//		}
+//		err error
+//	}{
+//		"success:": {
+//			input: struct {
+//				command blockchain.GrpcReceiveCommand
+//			}{
+//				command: blockchain.GrpcReceiveCommand{
+//					CommandModel: midgard.CommandModel{ID: "111"},
+//					Body:         nil,
+//					Protocol:     "RequestBlockProtocol",
+//				},
+//			},
+//			err: nil,
+//		},
+//
+//		"fail:": {
+//			input: struct {
+//				command blockchain.GrpcReceiveCommand
+//			}{
+//				command: blockchain.GrpcReceiveCommand{
+//					CommandModel: midgard.CommandModel{ID: "111"},
+//					Body:         nil,
+//					Protocol:     "RequestBlockProtocol",
+//				},
+//			},
+//			err: nil,
+//		},
+//	}
+//
+//	for testName, test := tests {
+//		t.Logf("running test case %s", testName)
+//
+//		blockApi := MockBlockApi{}
+//
+//		blockRepository := MockROBlockRepository{}
+//		blockRepository.GetBlockByHeightFunc = func(block blockchain.Block,height uint64) error {
+//
+//		}
+//
+//
+//
+//	}
+//
+//}

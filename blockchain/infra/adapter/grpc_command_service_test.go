@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"reflect"
+
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
 	"github.com/stretchr/testify/assert"
@@ -122,7 +123,7 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := GrpcCommandService.ResponseBlock(test.input.peerId, test.input.block)
+		err := GrpcCommandService.ResponseBlock(test.input.peerId, &test.input.block)
 		assert.Equal(t, err, test.err)
 	}
 

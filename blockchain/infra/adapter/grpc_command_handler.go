@@ -24,17 +24,18 @@ type ReadOnlyBlockRepository interface {
 	GetBlockByHeight(block blockchain.Block, height uint64) error
 }
 
-type SyncCheckGrpcCommandService interface {
+type GrpcCommandServiceInterface interface {
+	ResponseBlock(peerId blockchain.PeerId, block blockchain.Block) error
 	SyncCheckResponse(block blockchain.Block) error
 }
 
 type GrpcCommandHandler struct {
 	blockApi           BlockApi
 	blockRepository    ReadOnlyBlockRepository
-	grpcCommandService GrpcCommandService
+	grpcCommandService GrpcCommandServiceInterface
 }
 
-func NewGrpcCommandHandler(blockApi BlockApi, blockRepository ReadOnlyBlockRepository, grpcCommandService GrpcCommandService) *GrpcCommandHandler {
+func NewGrpcCommandHandler(blockApi BlockApi, blockRepository ReadOnlyBlockRepository, grpcCommandService GrpcCommandServiceInterface) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		blockApi:           blockApi,
 		blockRepository:    blockRepository,
