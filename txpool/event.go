@@ -23,7 +23,7 @@ type TxCreatedEvent struct {
 func (tx TxCreatedEvent) GetTransaction() Transaction {
 
 	return Transaction{
-		TxId:          TransactionId(tx.ID),
+		TxId:          TransactionId(tx.EventModel.ID),
 		PublishPeerId: tx.PublishPeerId,
 		TxStatus:      tx.TxStatus,
 		TxHash:        tx.TxHash,
@@ -43,7 +43,7 @@ type TxStagedEvent struct {
 }
 
 // when block
-type TxDeleteEvent struct {
+type TxDeletedEvent struct {
 	midgard.EventModel
 }
 

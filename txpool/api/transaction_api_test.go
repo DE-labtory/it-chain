@@ -42,7 +42,7 @@ func TestTransactionApi_CreateTransaction(t *testing.T) {
 
 	eventRepository := MockEventRepository{}
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, "gg", events[0].(*txpool.TxCreatedEvent).TxData.ID)
+		assert.Equal(t, "gg", events[0].(*txpool.TxCreatedEvent).ID)
 		return nil
 	}
 

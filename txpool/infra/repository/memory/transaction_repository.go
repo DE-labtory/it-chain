@@ -26,12 +26,6 @@ func (m MemoryTransactionRepository) Save(transaction txpool.Transaction) error 
 	m.mux.Lock()
 	defer m.mux.Unlock()
 
-	_, ok := m.transactions[transaction.TxId]
-
-	if ok {
-		return ErrAlreadyExist
-	}
-
 	m.transactions[transaction.TxId] = transaction
 
 	return nil

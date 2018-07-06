@@ -14,17 +14,17 @@ var ErrTxEmpty = errors.New("Empty transaction list proposed")
 type Publisher func(exchange string, topic string, data interface{}) (err error) //해당 publish함수는 midgard 에서 의존성 주입을 받기 위해 interface로 작성한다.
 //모든 의존성 주입은 컴포넌트.go 에서 이루어짐
 
-type GrpcCommandService struct {
+type TransferService struct {
 	publisher Publisher // midgard.client
 }
 
-func NewGrpcCommandService(publisher Publisher) *GrpcCommandService {
-	return &GrpcCommandService{
+func NewTransferService(publisher Publisher) *TransferService {
+	return &TransferService{
 		publisher: publisher,
 	}
 }
 
-func (gcs GrpcCommandService) SendLeaderTransactions(transactions []*txpool.Transaction, leader txpool.Leader) error {
+func (ts TransferService) SendLeaderTransactions(transactions []txpool.Transaction, leader txpool.Leader) error {
 
 	if len(transactions) == 0 {
 		return ErrTxEmpty
@@ -37,7 +37,7 @@ func (gcs GrpcCommandService) SendLeaderTransactions(transactions []*txpool.Tran
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, leader.LeaderId.ToString())
 
-	return gcs.publisher("Command", "message.deliver", deliverCommand)
+	return ts.publisher("Command", "message.deliver", deliverCommand)
 }
 
 func createGrpcDeliverCommand(protocol string, body interface{}) (txpool.GrpcDeliverCommand, error) {

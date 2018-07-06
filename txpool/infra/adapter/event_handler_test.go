@@ -12,8 +12,8 @@ import (
 type MockTransactionRepository struct {
 	SaveFunc     func(transaction txpool.Transaction) error
 	RemoveFunc   func(id txpool.TransactionId) error
-	FindByIdFunc func(id txpool.TransactionId) (*txpool.Transaction, error)
-	FindAllFunc  func() ([]*txpool.Transaction, error)
+	FindByIdFunc func(id txpool.TransactionId) (txpool.Transaction, error)
+	FindAllFunc  func() ([]txpool.Transaction, error)
 }
 
 func (m MockTransactionRepository) Save(transaction txpool.Transaction) error {
@@ -24,11 +24,11 @@ func (m MockTransactionRepository) Remove(id txpool.TransactionId) error {
 	return m.RemoveFunc(id)
 }
 
-func (m MockTransactionRepository) FindById(id txpool.TransactionId) (*txpool.Transaction, error) {
+func (m MockTransactionRepository) FindById(id txpool.TransactionId) (txpool.Transaction, error) {
 	return m.FindByIdFunc(id)
 }
 
-func (m MockTransactionRepository) FindAll() ([]*txpool.Transaction, error) {
+func (m MockTransactionRepository) FindAll() ([]txpool.Transaction, error) {
 	return m.FindAllFunc()
 }
 
@@ -55,11 +55,9 @@ func TestTxEventHandler_HandleTxCreatedEvent(t *testing.T) {
 		"handle success": {
 			input: txpool.TxCreatedEvent{
 				PublishPeerId: "1",
-				TxData: txpool.TxData{
-					ID:      "123",
-					Jsonrpc: "13",
-					ICodeID: "icode1",
-				},
+				ID:            "123",
+				Jsonrpc:       "13",
+				ICodeID:       "icode1",
 				EventModel: midgard.EventModel{
 					ID: "txID",
 				},
@@ -80,7 +78,7 @@ func TestTxEventHandler_HandleTxCreatedEvent(t *testing.T) {
 	}
 
 	mockLeaderRepo := MockLeaderRepository{}
-	event_handler := adapter.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
+	event_handler := adapter.NewRepositoryProjector(mockTxRepo, mockLeaderRepo)
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
@@ -122,7 +120,7 @@ func TestTxEventHandler_HandleTxDeletedEvent(t *testing.T) {
 		}
 
 		mockLeaderRepo := MockLeaderRepository{}
-		event_handler := adapter.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
+		event_handler := adapter.NewRepositoryProjector(mockTxRepo, mockLeaderRepo)
 
 		err := event_handler.HandleTxDeletedEvent(test.input)
 		assert.Equal(t, err, test.err)
@@ -158,12 +156,12 @@ func TestTxEventHandler_HandleLeaderChangedEvent(t *testing.T) {
 
 		mockLeaderRepo.SetLeaderFunc = func(leader txpool.Leader) {
 
-			assert.Equal(t, leader.GetID(), "leaderID")
+			assert.Equal(t, leader.LeaderId.Id, "leaderID")
 		}
 
-		event_handler := adapter.NewTxEventHandler(mockTxRepo, mockLeaderRepo)
+		projector := adapter.NewRepositoryProjector(mockTxRepo, mockLeaderRepo)
 
-		err := event_handler.HandleLeaderChangedEvent(test.input)
+		err := projector.HandleLeaderChangedEvent(test.input)
 		assert.Equal(t, err, test.err)
 	}
 }

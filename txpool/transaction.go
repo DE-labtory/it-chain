@@ -28,6 +28,27 @@ type TransactionStatus int
 type TransactionType int
 type TransactionStage int
 
+//TxData Declaration
+const (
+	Invoke TxDataType = "invoke"
+	Query  TxDataType = "query"
+)
+
+type TxDataType string
+
+type TxData struct {
+	Jsonrpc string
+	Method  TxDataType
+	Params  Param
+	ID      string
+	ICodeID string
+}
+
+type Param struct {
+	Function string
+	Args     []string
+}
+
 //Aggregate root must implement aggregate interface
 type Transaction struct {
 	TxId          TransactionId
@@ -38,6 +59,7 @@ type Transaction struct {
 	TxData        TxData
 
 	//this attribute will be used only for checking resend
+	//this attribute is not a main attribute
 	Stage TransactionStage
 }
 
@@ -131,11 +153,8 @@ func CreateTransaction(publisherId string, txData TxData) (Transaction, error) {
 	}
 
 	tx := &Transaction{}
-	saveAndOn(tx, event)
 
-	tx.On(event)
-
-	if err := eventstore.Save(tx.GetID(), event); err != nil {
+	if err := saveAndOn(tx, event); err != nil {
 		return *tx, err
 	}
 
@@ -156,35 +175,4 @@ func saveAndOn(aggregate midgard.Aggregate, event midgard.Event) error {
 	}
 
 	return nil
-}
-
-//TxData Declaration
-const (
-	Invoke TxDataType = "invoke"
-	Query  TxDataType = "query"
-)
-
-type TxDataType string
-
-type TxData struct {
-	Jsonrpc string
-	Method  TxDataType
-	Params  Param
-	ID      string
-	ICodeID string
-}
-
-type Param struct {
-	Function string
-	Args     []string
-}
-
-func NewTxData(jsonrpc string, method TxDataType, params Param, iCodeId string, id string) *TxData {
-	return &TxData{
-		Jsonrpc: jsonrpc,
-		Method:  method,
-		Params:  params,
-		ID:      id,
-		ICodeID: iCodeId,
-	}
 }

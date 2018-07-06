@@ -21,7 +21,7 @@ type RepositoryProjector struct {
 	leaderRepository txpool.LeaderRepository
 }
 
-func NewTxEventHandler(txRepository txpool.TransactionRepository, leaderRepository txpool.LeaderRepository) *RepositoryProjector {
+func NewRepositoryProjector(txRepository txpool.TransactionRepository, leaderRepository txpool.LeaderRepository) *RepositoryProjector {
 	return &RepositoryProjector{
 		txRepository:     txRepository,
 		leaderRepository: leaderRepository,
@@ -63,6 +63,26 @@ func (t RepositoryProjector) HandleTxDeletedEvent(txDeletedEvent txpool.TxDelete
 	}
 
 	return nil
+}
+
+//change transaction stage
+func (t RepositoryProjector) HandleTxStagedEvent(event txpool.TxStagedEvent) error {
+
+	txID := event.ID
+
+	if txID == "" {
+		return ErrNoEventID
+	}
+
+	tx, err := t.txRepository.FindById(txID)
+
+	if err != nil {
+		return err
+	}
+
+	tx.Stage = txpool.STAGED
+
+	return t.txRepository.Save(tx)
 }
 
 //update leader

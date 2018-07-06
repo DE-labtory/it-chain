@@ -5,50 +5,54 @@ import (
 	"log"
 )
 
-type GrpcCommandService interface {
-	SendLeaderTransactions(transactions []*Transaction, leader Leader) error
+type TxpoolQueryService interface {
+	GetLeader() Leader
+	GetAllStagedTransactions() ([]Transaction, error)
+	GetAllCreatedTransactions() ([]Transaction, error)
+}
+
+type TransferService interface {
+	SendTransactionsToLeader(transactions []Transaction, leader Leader) error
 }
 
 type BlockService interface {
 	ProposeBlock(transactions []Transaction) error
 }
 
-type TxPeriodicTransferService struct {
-	txRepository       TransactionRepository
-	leaderRepository   LeaderRepository
-	grpcCommandService GrpcCommandService
+type TxTransferService struct {
+	txpoolQueryService TxpoolQueryService
+	transferService    TransferService
 }
 
-func NewTxPeriodicTransferService(tr TransactionRepository, lr LeaderRepository, gcs GrpcCommandService) *TxPeriodicTransferService {
+func NewTxPeriodicTransferService(queryService TxpoolQueryService, transferService TransferService) *TxTransferService {
 
-	return &TxPeriodicTransferService{
-		txRepository:       tr,
-		leaderRepository:   lr,
-		grpcCommandService: gcs,
+	return &TxTransferService{
+		txpoolQueryService: queryService,
+		transferService:    transferService,
 	}
 }
 
-func (t TxPeriodicTransferService) TransferTxToLeader() error {
+func (t TxTransferService) TransferCreatedTxToLeader() error {
 
-	transactions, err := t.txRepository.FindAll()
+	transactions, err := t.txpoolQueryService.GetAllCreatedTransactions()
 
 	if err != nil {
 		log.Println(err.Error())
 		return err
 	}
 
-	leader := t.leaderRepository.GetLeader()
+	leader := t.txpoolQueryService.GetLeader()
 
-	if leader.StringLeaderId() == "" {
+	if leader.LeaderId.ToString() == "" {
 		return errors.New("there is no leader")
 	}
 
-	err = t.grpcCommandService.SendLeaderTransactions(transactions, leader)
+	err = t.transferService.SendTransactionsToLeader(transactions, leader)
 
-	if err != nil {
-		log.Println(err.Error())
-		return err
-	}
+	//if err != nil {
+	//	log.Println(err.Error())
+	//	return err
+	//}
 
 	//if err := t.removeTxs(transactions); err != nil {
 	//	log.Println(err.Error())
