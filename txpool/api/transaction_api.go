@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/it-chain-Engine/txpool"
 )
 
@@ -23,4 +24,15 @@ func (t TransactionApi) CreateTransaction(txData txpool.TxData) (txpool.Transact
 	}
 
 	return tx, nil
+}
+
+func (t TransactionApi) DeleteTransaction(id txpool.TransactionId) error {
+
+	tx := &txpool.Transaction{}
+
+	if err := eventstore.Load(tx, id); err != nil {
+		return err
+	}
+
+	return txpool.DeleteTransaction(tx)
 }

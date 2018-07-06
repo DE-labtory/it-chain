@@ -80,6 +80,9 @@ func (t *Transaction) On(event midgard.Event) error {
 			ICodeID: v.ICodeID,
 		}
 
+	case *TxDeletedEvent:
+		t.TxId = ""
+
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
 	}
@@ -150,6 +153,23 @@ func CreateTransaction(publisherId string, txData TxData) (Transaction, error) {
 	}
 
 	return *tx, nil
+}
+
+func DeleteTransaction(transaction Transaction) error {
+
+	event := &TxDeletedEvent{
+		EventModel: midgard.EventModel{
+			ID: transaction.TxId,
+		},
+	}
+
+	tx := &Transaction{}
+
+	if err := saveAndOn(tx, event); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 //apply on aggrgate and publish to eventstore

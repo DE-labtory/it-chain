@@ -17,7 +17,6 @@ type TxCreatedEvent struct {
 	Params        Param
 	ID            string
 	ICodeID       string
-	Stage         TransactionStage
 }
 
 func (tx TxCreatedEvent) GetTransaction() Transaction {
@@ -38,15 +37,16 @@ func (tx TxCreatedEvent) GetTransaction() Transaction {
 	}
 }
 
-type TxStagedEvent struct {
-	midgard.EventModel
-}
-
-// when block
+// when block committed check transaction and delete
 type TxDeletedEvent struct {
 	midgard.EventModel
 }
 
 type LeaderChangedEvent struct {
 	midgard.EventModel
+}
+
+type BlockCommittedEvent struct {
+	midgard.EventModel
+	transactions []Transaction
 }
