@@ -45,8 +45,11 @@ func TestGrpcCommandService_RequestLeaderInfo(t *testing.T) {
 	grpcCommandService := NewGrpcCommandService(publish)
 
 	for testName, test := range tests {
+
 		t.Logf("running test case %s", testName)
+
 		err := grpcCommandService.RequestLeaderInfo(test.input.connectionId)
+
 		assert.Equal(t, err, test.err)
 	}
 

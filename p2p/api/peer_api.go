@@ -140,5 +140,6 @@ func (peerApi *PeerApi) DeletePeer(id p2p.PeerId) error {
 }
 
 func (peerApi *PeerApi) FindById(id p2p.PeerId) (p2p.Peer, error) {
+
 	return peerApi.peerRepository.FindById(id)
 }

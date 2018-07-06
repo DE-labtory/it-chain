@@ -20,10 +20,12 @@ type LeaderApi struct {
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
 type ReadOnlyLeaderRepository interface {
+
 	GetLeader() p2p.Leader
 }
 
 type EventRepository interface { //midgard.Repository
+
 	Save(aggregateID string, events ...midgard.Event) error
 }
 
@@ -44,6 +46,7 @@ func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Leader) error {
 	}
 
 	events := make([]midgard.Event, 0)
+
 	leaderUpdatedEvent := p2p.LeaderUpdatedEvent{
 		EventModel: midgard.EventModel{
 			ID:   leader.LeaderId.ToString(),
@@ -52,6 +55,7 @@ func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Leader) error {
 	}
 
 	events = append(events, leaderUpdatedEvent)
+	
 	err := leaderApi.eventRepository.Save(leaderUpdatedEvent.GetID(), events...)
 
 	if err != nil {

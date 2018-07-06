@@ -68,7 +68,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 	case "PeerLeaderTableDeliverProtocol": //receive peer table
 
 		//1. receive peer table
-		_, oppositeLeader, oppositePeerList, _ := ReceiverPeerLeaderTable(command.Body)
+		_, oppositeLeader, oppositePeerList, _ := ReceivePeerLeaderTable(command.Body)
 
 		//2. update leader and peer list by info of node which has longer peer list
 		UpdateWithLongerPeerList(gch, oppositeLeader, oppositePeerList)
@@ -128,7 +128,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 	return nil
 }
 
-func ReceiverPeerLeaderTable(body []byte) (p2p.PeerLeaderTable, p2p.Leader, []p2p.Peer, error) {
+func ReceivePeerLeaderTable(body []byte) (p2p.PeerLeaderTable, p2p.Leader, []p2p.Peer, error) {
 
 	peerTable := p2p.PeerLeaderTable{}
 	if err := json.Unmarshal(body, &peerTable); err != nil {
@@ -144,14 +144,21 @@ func ReceiverPeerLeaderTable(body []byte) (p2p.PeerLeaderTable, p2p.Leader, []p2
 func UpdateWithLongerPeerList(gch *GrpcCommandHandler, oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer) error {
 
 	myPeerLeaderTable := gch.peerApi.GetPeerLeaderTable()
+
 	myPeerList, _ := myPeerLeaderTable.GetPeerList()
+
 	myLeader, _ := myPeerLeaderTable.GetLeader()
 
 	if len(myPeerList) < len(oppositePeerList) {
+
 		gch.leaderApi.UpdateLeader(oppositeLeader)
+
 		gch.peerApi.UpdatePeerList(oppositePeerList)
+
 	} else {
+
 		gch.leaderApi.UpdateLeader(myLeader)
+
 	}
 	return nil
 }
@@ -159,6 +166,7 @@ func UpdateWithLongerPeerList(gch *GrpcCommandHandler, oppositeLeader p2p.Leader
 func DialToUnConnectedNode(peerService GrpcCommandHandlerPeerService, peerApi GrpcCommandHandlerPeerApi, peerList []p2p.Peer) error {
 
 	for _, peer := range peerList {
+
 		//err is nil if there is matching peer
 		peer, err := peerApi.FindById(peer.PeerId)
 

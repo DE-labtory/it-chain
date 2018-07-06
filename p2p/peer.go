@@ -87,6 +87,7 @@ func PeerFilter(vs []Peer, f func(Peer) bool) []Peer {
 func GetMutuallyExclusivePeers(peers1 []Peer, peers2 []Peer) ([]Peer, []Peer) {
 
 	exclusivePeers1 := difference(peers1, peers2)
+
 	exclusivePeers2 := difference(peers2, peers1)
 
 	return exclusivePeers1, exclusivePeers2

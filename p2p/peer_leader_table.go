@@ -13,6 +13,7 @@ type PeerLeaderTable struct {
 }
 
 func NewPeerLeaderTable(leader Leader, peerList []Peer) *PeerLeaderTable {
+
 	return &PeerLeaderTable{
 		Leader:   leader,
 		PeerList: peerList,
@@ -20,15 +21,21 @@ func NewPeerLeaderTable(leader Leader, peerList []Peer) *PeerLeaderTable {
 }
 
 func (pt *PeerLeaderTable) GetLeader() (Leader, error) {
+
 	if pt.Leader.LeaderId.Id == "" {
+
 		return pt.Leader, ErrEmptyLeaderId
 	}
+
 	return pt.Leader, nil
 }
 
 func (pt *PeerLeaderTable) GetPeerList() ([]Peer, error) {
+
 	if len(pt.PeerList) == 0 {
+
 		return pt.PeerList, ErrEmptyPeerList
 	}
+
 	return pt.PeerList, nil
 }
