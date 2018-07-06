@@ -15,8 +15,9 @@ type MockBlockApi struct{}
 func (ba MockBlockApi) SyncedCheck(block blockchain.Block) error { return nil }
 
 type MockROBlockRepository struct {
-	NewEmptyBlockFunc func() (blockchain.Block, error)
-	GetLastBlockFunc  func(block blockchain.Block) error
+	NewEmptyBlockFunc    func() (blockchain.Block, error)
+	GetLastBlockFunc     func(block blockchain.Block) error
+	GetBlockByHeightFunc func(height uint64) (blockchain.Block, error)
 }
 
 func (br MockROBlockRepository) NewEmptyBlock() (blockchain.Block, error) {
@@ -26,11 +27,16 @@ func (br MockROBlockRepository) GetLastBlock(block blockchain.Block) error {
 	return br.GetLastBlockFunc(block)
 }
 
-type MockSyncCheckGrpcCommandService struct {
-	SyncCheckResponseFunc func(block blockchain.Block) error
+func (br MockROBlockRepository) GetBlockByHeight(height uint64) (blockchain.Block, error) {
+	return br.GetBlockByHeightFunc(height)
 }
 
-func (cs MockSyncCheckGrpcCommandService) SyncCheckResponse(block blockchain.Block) error {
+type MockGrpcCommandService struct {
+	SyncCheckResponseFunc func(block blockchain.Block) error
+	ResponseBlockFunc     func(peerId blockchain.PeerId, block blockchain.Block) error
+}
+
+func (cs MockGrpcCommandService) SyncCheckResponse(block blockchain.Block) error {
 	return cs.SyncCheckResponseFunc(block)
 }
 
@@ -100,7 +106,7 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 			return test.input.getLastBlockErr
 		}
 
-		grpcCommandService := MockSyncCheckGrpcCommandService{}
+		grpcCommandService := MockGrpcCommandService{}
 		grpcCommandService.SyncCheckResponseFunc = func(block blockchain.Block) error {
 			assert.Equal(t, block.GetHeight(), uint64(99887))
 			return test.input.syncCheckErr
@@ -111,4 +117,8 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 		err := grpcCommandHandler.HandleGrpcCommand(test.input.command)
 		assert.Equal(t, err, test.err)
 	}
+}
+
+func TestGrpcCommandHandler_HandleGrpcCommand_BlockRequestProtocol(t *testing.T) {
+
 }

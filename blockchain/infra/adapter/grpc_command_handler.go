@@ -21,7 +21,7 @@ type BlockApi interface {
 type ReadOnlyBlockRepository interface {
 	NewEmptyBlock() (blockchain.Block, error)
 	GetLastBlock(block blockchain.Block) error
-	GetBlockByHeight(blockHeight uint64) (blockchain.Block, error)
+	GetBlockByHeight(height uint64) (blockchain.Block, error)
 }
 
 type SyncCheckGrpcCommandService interface {
