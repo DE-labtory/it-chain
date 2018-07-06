@@ -111,3 +111,21 @@ func TestBlockSyncState(t *testing.T) {
 	// Then
 	assert.Equal(t, blockchain.DONE, syncState.IsProgressing())
 }
+
+func TestBlockSyncState_SetProgress(t *testing.T) {
+	// when
+	syncState := blockchain.NewBlockSyncState()
+
+	// when
+	syncState.SetProgress(blockchain.PROGRESSING)
+
+	// then
+	assert.Equal(t, blockchain.PROGRESSING, syncState.IsProgressing())
+
+
+	// when
+	syncState.SetProgress(blockchain.DONE)
+
+	// then
+	assert.Equal(t, blockchain.DONE, syncState.IsProgressing())
+}

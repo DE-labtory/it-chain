@@ -1,17 +1,19 @@
 package adapter_test
 
 import (
-	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/it-chain/midgard"
+	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
+
 	"errors"
+
+	"github.com/it-chain/midgard"
+	"github.com/stretchr/testify/assert"
 )
 
 type MockPeerRepository struct {
-	AddFunc func(peer blockchain.Peer) error
+	AddFunc    func(peer blockchain.Peer) error
 	RemoveFunc func(peer blockchain.PeerId) error
 }
 
@@ -23,7 +25,6 @@ func (nr MockPeerRepository) Remove(peerId blockchain.PeerId) error {
 }
 
 type MockEventListenerBlockApi struct {
-
 }
 
 func (api MockEventListenerBlockApi) AddBlockToPool(block blockchain.Block) {
@@ -34,41 +35,40 @@ func (api MockEventListenerBlockApi) CheckAndSaveBlockFromPool(height blockchain
 	return nil
 }
 
-
-func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
-	tests := map[string] struct {
+func TestRepositoryProjector_HandleNodeCreatedEvent(t *testing.T) {
+	tests := map[string]struct {
 		input struct {
-			ID string
-			peerId string
+			ID      string
+			peerId  string
 			address string
-			rpErr error
+			rpErr   error
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				ID string
-				peerId string
+				ID      string
+				peerId  string
 				address string
-				rpErr error
+				rpErr   error
 			}{ID: string("zf"), peerId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
 			err: nil,
 		},
 		"empty eventId test": {
 			input: struct {
-				ID string
-				peerId string
+				ID      string
+				peerId  string
 				address string
-				rpErr error
+				rpErr   error
 			}{ID: string(""), peerId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
 			err: adapter.ErrEmptyEventId,
 		},
 		"repository error test": {
 			input: struct {
-				ID string
-				peerId string
+				ID      string
+				peerId  string
 				address string
-				rpErr error
+				rpErr   error
 			}{ID: string("zf"), peerId: string("zf2"), address: string("11.22.33.44"), rpErr: errors.New("repository error")},
 			err: adapter.ErrNodeApi,
 		},
@@ -84,13 +84,8 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 			assert.Equal(t, peer.IpAddress, string("11.22.33.44"))
 			return test.input.rpErr
 		}
-		rp := adapter.RepositoryProjector{
-			PeerRepository: nr,
-		}
 
-		blockApi := MockEventListenerBlockApi{}
-
-		eventHandler := adapter.NewEventHandler(rp, blockApi)
+		repositoryProjector := adapter.RepositoryProjector{PeerRepository: nr}
 
 		event := blockchain.NodeCreatedEvent{
 			EventModel: midgard.EventModel{
@@ -105,7 +100,7 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 		}
 
 		// When
-		err := eventHandler.HandleNodeCreatedEvent(event)
+		err := repositoryProjector.HandleNodeCreatedEvent(event)
 
 		// Then
 		assert.Equal(t, err, test.err)
@@ -113,35 +108,35 @@ func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
 }
 
 func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
-	tests := map[string] struct {
+	tests := map[string]struct {
 		input struct {
-			ID string
+			ID     string
 			peerId string
-			rpErr error
+			rpErr  error
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				ID string
+				ID     string
 				peerId string
-				rpErr error
+				rpErr  error
 			}{ID: string("zf"), peerId: string("zf2"), rpErr: nil},
 			err: nil,
 		},
 		"empty eventId test": {
 			input: struct {
-				ID string
+				ID     string
 				peerId string
-				rpErr error
+				rpErr  error
 			}{ID: string(""), peerId: string("zf2"), rpErr: nil},
 			err: adapter.ErrEmptyEventId,
 		},
 		"repository error test": {
 			input: struct {
-				ID string
+				ID     string
 				peerId string
-				rpErr error
+				rpErr  error
 			}{ID: string("zf"), peerId: string("zf2"), rpErr: errors.New("repository error")},
 			err: adapter.ErrNodeApi,
 		},
@@ -156,13 +151,8 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 			assert.Equal(t, peerId.Id, string("zf2"))
 			return test.input.rpErr
 		}
-		rp := adapter.RepositoryProjector{
-			PeerRepository: nr,
-		}
 
-		blockApi := MockEventListenerBlockApi{}
-
-		eventHandler := adapter.NewEventHandler(rp, blockApi)
+		repositoryProjector := adapter.RepositoryProjector{PeerRepository: nr}
 
 		event := blockchain.NodeDeletedEvent{
 			EventModel: midgard.EventModel{
@@ -176,65 +166,66 @@ func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
 		}
 
 		// When
-		err := eventHandler.HandleNodeDeletedEvent(event)
+		err := repositoryProjector.HandleNodeDeletedEvent(event)
 
 		// Then
 		assert.Equal(t, err, test.err)
 	}
 }
 
-type MockEventRepository struct {}
+type MockEventRepository struct{}
 
 func (er MockEventRepository) Load(aggregate midgard.Aggregate, aggregateID string) error { return nil }
-func (er MockEventRepository) Save(aggregateID string, events ...midgard.Event) error { return nil }
-func (er MockEventRepository) Close() {}
+func (er MockEventRepository) Save(aggregateID string, events ...midgard.Event) error     { return nil }
+func (er MockEventRepository) Close()                                                     {}
 
-func TestEventHandler_HandleBlockQueuedEvent(t *testing.T) {
-	tests := map[string] struct {
-		input struct {
-			blockchain.BlockQueuedEvent
-		}
-		err error
-	} {
-		"success": {
-			input: struct {
-				blockchain.BlockQueuedEvent
-			}{BlockQueuedEvent: blockchain.BlockQueuedEvent{
-				Block: &blockchain.DefaultBlock{
-					Height: uint64(12),
-				},
-			}},
-			err: nil,
-		},
-		"block nil test": {
-			input: struct {
-				blockchain.BlockQueuedEvent
-			}{BlockQueuedEvent: blockchain.BlockQueuedEvent{
-				Block: nil,
-			}},
-			err: adapter.ErrBlockNil,
-		},
-	}
-
-	// When
-	nr := MockPeerRepository{}
-	er := MockEventRepository{}
-	rp := adapter.RepositoryProjector{
-		PeerRepository: nr,
-		EventRepository: er,
-	}
-
-	blockApi := MockEventListenerBlockApi{}
-
-	eventHandler := adapter.NewEventHandler(rp, blockApi)
-
-	for testName, test := range tests {
-		t.Logf("running test case %s", testName)
-
-		// When
-		err := eventHandler.HandleBlockQueuedEvent(test.input.BlockQueuedEvent)
-
-		// Then
-		assert.Equal(t, err, test.err)
-	}
-}
+//todo eventstore를 활용한 testcase재 작성필요
+//func TestEventHandler_HandleBlockAddToPoolEvent(t *testing.T) {
+//	tests := map[string]struct {
+//		input struct {
+//			blockchain.BlockAddToPoolEvent
+//		}
+//		err error
+//	}{
+//		"success": {
+//			input: struct {
+//				blockchain.BlockAddToPoolEvent
+//			}{BlockAddToPoolEvent: blockchain.BlockAddToPoolEvent{
+//				Block: &blockchain.DefaultBlock{
+//					Height: uint64(12),
+//				},
+//			}},
+//			err: nil,
+//		},
+//		"block nil test": {
+//			input: struct {
+//				blockchain.BlockAddToPoolEvent
+//			}{BlockAddToPoolEvent: blockchain.BlockAddToPoolEvent{
+//				Block: nil,
+//			}},
+//			err: adapter.ErrBlockNil,
+//		},
+//	}
+//
+//	// When
+//	nr := MockPeerRepository{}
+//	er := MockEventRepository{}
+//	rp := adapter.RepositoryProjector{
+//		PeerRepository:  nr,
+//		EventRepository: er,
+//	}
+//
+//	blockApi := MockEventListenerBlockApi{}
+//
+//	eventHandler := adapter.NewEventHandler(rp, blockApi)
+//
+//	for testName, test := range tests {
+//		t.Logf("running test case %s", testName)
+//
+//		// When
+//		err := eventHandler.HandleBlockAddToPoolEvent(test.input.BlockAddToPoolEvent)
+//
+//		// Then
+//		assert.Equal(t, err, test.err)
+//	}
+//}

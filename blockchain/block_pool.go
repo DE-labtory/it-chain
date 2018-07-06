@@ -14,12 +14,6 @@ type BlockPool interface {
 }
 
 
-// block queued events Aggregate id
-// BlockQueuedEvent들을 모아놓은 aggregate id 이다.
-// struct는 존재하지 않는다.
-var BLOCK_QUEUED_EVENTS_AID = "BLOCK_QUEUED_EVENTS_AID"
-
-
 var BLOCK_POOL_AID = "BLOCK_POOL_AID"
 
 type BlockPoolModel struct {
@@ -37,14 +31,10 @@ func NewBlockPool() *BlockPoolModel {
 }
 
 func (p *BlockPoolModel) Add(block Block) {
-	height := block.GetHeight()
-	p.Pool[height] = block
+	event := createBlockAddToPoolEvent(block)
+	eventstore.Save(BLOCK_POOL_AID, event)
 
-	addEvent := createBlockAddToPoolEvent(block)
-	eventstore.Save(BLOCK_POOL_AID, addEvent)
-
-	qEvent := createBlockQueuedEvent(block)
-	eventstore.Save(BLOCK_QUEUED_EVENTS_AID, qEvent)
+	p.On(&event)
 }
 
 func (p *BlockPoolModel) Get(height BlockHeight) Block {
@@ -52,19 +42,10 @@ func (p *BlockPoolModel) Get(height BlockHeight) Block {
 }
 
 func (p *BlockPoolModel) Delete(block Block) {
-	delete(p.Pool, block.GetHeight())
-
 	event := createBlockRemoveFromPoolEvent(block)
 	eventstore.Save(BLOCK_POOL_AID, event)
-}
 
-func createBlockQueuedEvent(block Block) BlockQueuedEvent {
-	return BlockQueuedEvent{
-		EventModel: midgard.EventModel{
-			ID: BLOCK_QUEUED_EVENTS_AID,
-		},
-		Block: block,
-	}
+	p.On(&event)
 }
 
 func createBlockAddToPoolEvent(block Block) BlockAddToPoolEvent {
@@ -132,22 +113,57 @@ func NewBlockSyncState() *BlockSyncState {
 	}
 }
 
-func (state *BlockSyncState) GetID() string {
+func (bss *BlockSyncState) GetID() string {
 	return BC_SYNC_STATE_AID
 }
 
-func (state *BlockSyncState) IsProgressing() ProgressState {
-	return state.isProgress
+func (bss *BlockSyncState) SetProgress(state ProgressState) {
+	if state == PROGRESSING {
+		bss.isProgress = PROGRESSING
+
+		event := createSyncStartEvent()
+		eventstore.Save(BC_SYNC_STATE_AID, event)
+
+		bss.On(SyncStartEvent{})
+
+	} else { // state == DONE
+		bss.isProgress = DONE
+
+		event := createSyncDoneEvent()
+		eventstore.Save(BC_SYNC_STATE_AID, event)
+
+		bss.On(SyncDoneEvent{})
+	}
 }
 
-func (state *BlockSyncState) On(event midgard.Event) error {
+func createSyncStartEvent() SyncStartEvent {
+	return SyncStartEvent{
+		EventModel: midgard.EventModel{
+			ID: BC_SYNC_STATE_AID,
+		},
+	}
+}
+
+func createSyncDoneEvent() SyncDoneEvent {
+	return SyncDoneEvent{
+		EventModel: midgard.EventModel{
+			ID: BC_SYNC_STATE_AID,
+		},
+	}
+}
+
+func (bss *BlockSyncState) IsProgressing() ProgressState {
+	return bss.isProgress
+}
+
+func (bss *BlockSyncState) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *SyncStartEvent:
-		state.isProgress = PROGRESSING
+		bss.isProgress = PROGRESSING
 
 	case *SyncDoneEvent:
-		state.isProgress = DONE
+		bss.isProgress = DONE
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
