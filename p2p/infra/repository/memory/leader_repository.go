@@ -22,17 +22,19 @@ func NewLeaderRepository(leader p2p.Leader) *LeaderRepository {
 
 // get leader method
 func (lr *LeaderRepository) GetLeader() p2p.Leader {
+
 	lr.mux.Lock()
 	defer lr.mux.Unlock()
+
 	return lr.leader
 }
 
 // set leader method
 func (lr *LeaderRepository) SetLeader(leader p2p.Leader) {
 
+
 	lr.mux.Lock()
 	defer lr.mux.Unlock()
 
 	lr.leader = leader
-
 }

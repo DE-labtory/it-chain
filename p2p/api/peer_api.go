@@ -101,42 +101,23 @@ func (peerApi *PeerApi) DeliverPeerLeaderTable(connectionId string) error {
 }
 
 // add a peer
-func (peerApi *PeerApi) AddPeer(peer p2p.Peer) error {
+func (peerApi *PeerApi) AddPeer(peer p2p.Peer) (p2p.Peer, error) {
 
-	event := p2p.PeerCreatedEvent{
-		EventModel: midgard.EventModel{
-			ID:   peer.GetID(),
-			Type: "peer.created",
-		},
-		IpAddress: peer.IpAddress,
+	if peer.PeerId.Id == ""{
+		return p2p.Peer{}, ErrEmptyPeerId
 	}
 
-	err := peerApi.eventRepository.Save(event.GetID(), event)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return p2p.NewPeer(peer.IpAddress, peer.PeerId)
 }
 
 // delete a peer
 func (peerApi *PeerApi) DeletePeer(id p2p.PeerId) error {
 
-	event := p2p.PeerDeletedEvent{
-		EventModel: midgard.EventModel{
-			ID:   id.ToString(),
-			Type: "peer.deleted",
-		},
+	if id.Id == ""{
+		return ErrEmptyPeerId
 	}
 
-	err := peerApi.eventRepository.Save(event.GetID(), event)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return p2p.DeletePeer(id)
 }
 
 func (peerApi *PeerApi) FindById(id p2p.PeerId) (p2p.Peer, error) {

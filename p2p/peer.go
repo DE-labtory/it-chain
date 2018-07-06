@@ -2,11 +2,11 @@ package p2p
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
-
 	"github.com/it-chain/it-chain-Engine/common"
+	"fmt"
 	"github.com/it-chain/midgard"
+	"errors"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 )
 
 type PeerTable map[string]Peer
@@ -22,8 +22,17 @@ type Peer struct {
 	PeerId    PeerId
 }
 
-func (n Peer) On(event midgard.Event) error {
+func (p *Peer) On(event midgard.Event) error {
+
 	switch v := event.(type) {
+	case *PeerCreatedEvent:
+		p.PeerId.Id = v.ID
+		p.IpAddress = v.IpAddress
+
+	case *PeerDeletedEvent:
+		p.PeerId.Id = ""
+		p.IpAddress = ""
+
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
 	}
@@ -37,17 +46,41 @@ func (n Peer) GetID() string {
 
 // 해당 노드의 ip와 Id로 새로운 피어를 생성한다.
 // tested
-func NewPeer(ipAddress string, id PeerId) *Peer {
-	return &Peer{
-		IpAddress: ipAddress,
-		PeerId:    id,
+func NewPeer(ipAddress string, id PeerId) (Peer, error) {
+
+	peer := Peer{}
+
+	event := PeerCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID:id.Id,
+			Type: "peer.created",
+		},
+		IpAddress:ipAddress,
+
 	}
+
+	peer.On(event)
+
+	return peer, eventstore.Save(id.Id, event)
+}
+
+func DeletePeer(peerId PeerId) error{
+
+	event := PeerDeletedEvent{
+		EventModel: midgard.EventModel{
+			ID:   peerId.Id,
+			Type: "peer.deleted",
+		},
+	}
+
+	return eventstore.Save(peerId.Id, event)
 }
 
 // p2p 구조체를 json 으로 인코딩한다.
 func (n Peer) Serialize() ([]byte, error) {
 	return common.Serialize(n)
 }
+
 
 // 입력받은 p2p 구조체에 해당 json 인코딩 바이트 배열을 deserialize 해서 저장한다.
 func Deserialize(b []byte, peer *Peer) error {

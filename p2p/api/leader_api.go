@@ -55,7 +55,7 @@ func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Leader) error {
 	}
 
 	events = append(events, leaderUpdatedEvent)
-	
+
 	err := leaderApi.eventRepository.Save(leaderUpdatedEvent.GetID(), events...)
 
 	if err != nil {

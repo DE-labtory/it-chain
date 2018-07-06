@@ -76,6 +76,7 @@ type RepositoryProjector struct {
 }
 
 func NewRepositoryProjector(peerRepository WriteOnlyPeerRepository, leaderRepository WriteOnlyLeaderRepository) *RepositoryProjector {
+
 	return &RepositoryProjector{
 		peerRepository:   peerRepository,
 		leaderRepository: leaderRepository,
@@ -110,6 +111,7 @@ func (projector *RepositoryProjector) HandlerPeerCreatedEvent(event p2p.PeerCrea
 	}
 
 	peer := p2p.NewPeer(event.IpAddress, p2p.PeerId{Id: event.ID})
+
 	projector.peerRepository.Save(*peer)
 
 	return nil
