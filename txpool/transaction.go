@@ -69,13 +69,13 @@ func (t *Transaction) On(event midgard.Event) error {
 
 		t.TxId = TransactionId(v.ID)
 		t.PublishPeerId = v.PublishPeerId
-		t.TxStatus = v.TxStatus
+		t.TxStatus = TransactionStatus(v.TxStatus)
 		t.TxHash = v.TxHash
 		t.TimeStamp = v.TimeStamp
 		t.TxData = TxData{
 			ID:      v.ID,
 			Params:  v.Params,
-			Method:  v.Method,
+			Method:  TxDataType(v.Method),
 			Jsonrpc: v.Jsonrpc,
 			ICodeID: v.ICodeID,
 		}
@@ -136,13 +136,13 @@ func CreateTransaction(publisherId string, txData TxData) (Transaction, error) {
 			Type: "transaction.created",
 		},
 		PublishPeerId: publisherId,
-		TxStatus:      VALID,
+		TxStatus:      int(VALID),
 		TxHash:        hash,
 		TimeStamp:     timeStamp,
 		ID:            txData.ID,
 		ICodeID:       txData.ICodeID,
 		Jsonrpc:       txData.Jsonrpc,
-		Method:        txData.Method,
+		Method:        string(txData.Method),
 		Params:        txData.Params,
 	}
 
