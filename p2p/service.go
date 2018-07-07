@@ -11,10 +11,10 @@ import (
 	"github.com/rs/xid"
 )
 
-type PeerService interface {
+type CommunicationService interface {
 	Dial(ipAddress string) error
 	DeliverLeaderInfo(connectionId string, leader Leader) error
-	DeliverPeerLeaderTable(connectionId string, peerLeaderTable PeerLeaderTable) error
+	DeliverPLTable(connectionId string, peerLeaderTable PLTable) error
 }
 
 type LeaderService interface{
@@ -48,6 +48,9 @@ func StartRandomTimeOut(es *ElectionService) {
 		select {
 
 		case <-timeout:
+			// when timed out
+			// 1. if state is ticking, be candidate and request vote
+			// 2. if state is candidate, reset state and left time
 			if election.GetState() == "Ticking" {
 
 				election.SetState("Candidate")
@@ -61,7 +64,7 @@ func StartRandomTimeOut(es *ElectionService) {
 					connectionIds = append(connectionIds, peer.PeerId.Id)
 				}
 
-				es.deliverRequestVoteMessages(connectionIds)
+				es.requestVote(connectionIds)
 
 			} else if election.GetState() == "Candidate" {
 				//reset time and state chane candidate -> ticking when timed in candidate state
@@ -72,20 +75,25 @@ func StartRandomTimeOut(es *ElectionService) {
 			es.electionRepository.SetElection(election)
 
 		case <-tick:
+			// count down left time while ticking
 			election.CountDownLeftTimeBy(1)
+
 			es.electionRepository.SetElection(election)
 
 		}
 	}
 }
 
-func (es *ElectionService) deliverRequestVoteMessages(connectionIds []string) error {
+func (es *ElectionService) requestVote(connectionIds []string) error {
 
+	// 1. create request vote message
+	// 2. send message
 	requestVoteMessage := RequestVoteMessage{}
 
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("PeerTableDeliver", requestVoteMessage)
 
 	for _, connectionId := range connectionIds {
+
 		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
 	}
 

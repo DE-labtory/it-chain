@@ -18,8 +18,8 @@ var ErrEmptyPeerList = errors.New("empty peer list proposed")
 
 type MockService struct{}
 
-func (ms MockService) GetPeerLeaderTable() p2p.PeerLeaderTable {
-	peerLeaderTable := p2p.PeerLeaderTable{
+func (ms MockService) GetPLTable() p2p.PLTable {
+	peerLeaderTable := p2p.PLTable{
 		Leader: p2p.Leader{
 			LeaderId: p2p.LeaderId{Id: "1"},
 		},
@@ -49,7 +49,7 @@ func (mpr MockLeaderRepository) GetLeader() p2p.Leader {
 
 type MockPeerApiGrpcCommandService struct{}
 
-func (mnms MockPeerApiGrpcCommandService) DeliverPeerLeaderTable(connectionId string, peerLeaderTable p2p.PeerLeaderTable) error {
+func (mnms MockPeerApiGrpcCommandService) DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error {
 	return nil
 }
 

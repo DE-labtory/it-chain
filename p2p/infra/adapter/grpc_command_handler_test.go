@@ -17,8 +17,8 @@ func (mla MockLeaderApi) DeliverLeaderInfo(connectionId string) {}
 
 type MockPeerApi struct{}
 
-func (mna MockPeerApi) GetPeerLeaderTable() p2p.PeerLeaderTable {
-	peerTable := p2p.PeerLeaderTable{
+func (mna MockPeerApi) GetPLTable() p2p.PLTable {
+	peerTable := p2p.PLTable{
 		Leader:   p2p.Leader{LeaderId: p2p.LeaderId{Id: "1"}},
 		PeerList: []p2p.Peer{p2p.Peer{PeerId: p2p.PeerId{Id: "2"}}},
 	}
@@ -33,7 +33,7 @@ func (mna MockPeerApi) GetPeerList() []p2p.Peer {
 	return peerList
 }
 func (mna MockPeerApi) UpdatePeerList(peerList []p2p.Peer) error         { return nil }
-func (mna MockPeerApi) DeliverPeerLeaderTable(connectionId string) error { return nil }
+func (mna MockPeerApi) DeliverPLTable(connectionId string) error { return nil }
 func (mna MockPeerApi) AddPeer(peer p2p.Peer)                            {}
 
 type MockCommandService struct{}
@@ -95,7 +95,7 @@ func TestGrpcCommandHandler_HandleMessageReceive(t *testing.T) {
 }
 
 //todo
-func TestReceiverPeerLeaderTable(t *testing.T) {
+func TestReceiverPLTable(t *testing.T) {
 
 }
 

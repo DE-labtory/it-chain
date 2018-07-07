@@ -161,41 +161,41 @@ func TestGrpcCommandService_RequestPeerList(t *testing.T) {
 	}
 }
 
-func TestGrpcCommandService_DeliverPeerLeaderTable(t *testing.T) {
+func TestGrpcCommandService_DeliverPLTable(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			connectionId string
-			peerTable    p2p.PeerLeaderTable
+			peerTable    p2p.PLTable
 		}
 		err error
 	}{
 		"empty peer list test": {
 			input: struct {
 				connectionId string
-				peerTable    p2p.PeerLeaderTable
+				peerTable    p2p.PLTable
 			}{
 				connectionId: "1",
-				peerTable:    p2p.PeerLeaderTable{},
+				peerTable:    p2p.PLTable{},
 			},
 			err: p2p.ErrEmptyPeerList,
 		},
 		"empty connection id test": {
 			input: struct {
 				connectionId string
-				peerTable    p2p.PeerLeaderTable
+				peerTable    p2p.PLTable
 			}{
 				connectionId: "",
-				peerTable:    p2p.PeerLeaderTable{},
+				peerTable:    p2p.PLTable{},
 			},
 			err: ErrEmptyPeerId,
 		},
 		"success": {
 			input: struct {
 				connectionId string
-				peerTable    p2p.PeerLeaderTable
+				peerTable    p2p.PLTable
 			}{
 				connectionId: "1",
-				peerTable: p2p.PeerLeaderTable{
+				peerTable: p2p.PLTable{
 					Leader: p2p.Leader{},
 					PeerList: []p2p.Peer{
 						{
@@ -224,7 +224,7 @@ func TestGrpcCommandService_DeliverPeerLeaderTable(t *testing.T) {
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := grpcCommandService.DeliverPeerLeaderTable(test.input.connectionId, test.input.peerTable)
+		err := grpcCommandService.DeliverPLTable(test.input.connectionId, test.input.peerTable)
 		assert.Equal(t, err, test.err)
 	}
 

@@ -20,26 +20,26 @@ type LeaderApi interface {
 }
 
 type GrpcCommandHandlerPeerApi interface {
-	GetPeerLeaderTable() p2p.PeerLeaderTable
+	GetPLTable() p2p.PLTable
 	GetPeerList() []p2p.Peer
 	FindById(peerId p2p.PeerId) (p2p.Peer, error)
 	UpdatePeerList(peerList []p2p.Peer) error
-	DeliverPeerLeaderTable(connectionId string) error
+	DeliverPLTable(connectionId string) error
 	AddPeer(peer p2p.Peer)
 }
 
-type GrpcCommandHandlerPeerService interface {
+type GrpcCommandHandlerCommunicationService interface {
 	Dial(ipAddress string) error
 }
 
 type GrpcCommandHandler struct {
 	leaderApi       LeaderApi
 	peerApi         GrpcCommandHandlerPeerApi
-	peerService     GrpcCommandHandlerPeerService
+	peerService     GrpcCommandHandlerCommunicationService
 	electionService p2p.ElectionService
 }
 
-func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi, peerService GrpcCommandHandlerPeerService) *GrpcCommandHandler {
+func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi, peerService GrpcCommandHandlerCommunicationService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		leaderApi:   leaderApi,
 		peerApi:     peerApi,
@@ -65,16 +65,16 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 		gch.leaderApi.UpdateLeader(leader)
 		break
 
-	case "PeerLeaderTableDeliverProtocol": //receive peer table
+	case "PLTableDeliverProtocol": //receive peer table
 
 		//1. receive peer table
-		_, oppositeLeader, oppositePeerList, _ := ReceivePeerLeaderTable(command.Body)
+		pLTable, _ := ReceivePLTableFromCommand(command)
 
 		//2. update leader and peer list by info of node which has longer peer list
-		UpdateWithLongerPeerList(gch, oppositeLeader, oppositePeerList)
+		UpdateWithLongerPeerList(gch, pLTable.Leader, pLTable.PeerList)
 
 		//3. dial according to peer table
-		DialToUnConnectedNode(gch.peerService, gch.peerApi, oppositePeerList)
+		DialToUnConnectedNode(gch.peerService, gch.peerApi, pLTable.PeerList)
 
 		break
 
@@ -128,26 +128,26 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 	return nil
 }
 
-func ReceivePeerLeaderTable(body []byte) (p2p.PeerLeaderTable, p2p.Leader, []p2p.Peer, error) {
+//
+func ReceivePLTableFromCommand(command p2p.GrpcReceiveCommand) (p2p.PLTable, error) {
 
-	peerTable := p2p.PeerLeaderTable{}
-	if err := json.Unmarshal(body, &peerTable); err != nil {
+	peerTable := p2p.PLTable{}
+
+	if err := json.Unmarshal(command.Body, &peerTable); err != nil {
 		//todo error 처리
-		return p2p.PeerLeaderTable{}, p2p.Leader{}, []p2p.Peer{}, ErrUnmarshal
+		return p2p.PLTable{}, ErrUnmarshal
 	}
-	peerList, _ := peerTable.GetPeerList()
-	leader, _ := peerTable.GetLeader()
 
-	return peerTable, leader, peerList, nil
+	return peerTable, nil
 }
 
 func UpdateWithLongerPeerList(gch *GrpcCommandHandler, oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer) error {
 
-	myPeerLeaderTable := gch.peerApi.GetPeerLeaderTable()
+	myPLTable := gch.peerApi.GetPLTable()
 
-	myPeerList, _ := myPeerLeaderTable.GetPeerList()
+	myPeerList, _ := myPLTable.GetPeerList()
 
-	myLeader, _ := myPeerLeaderTable.GetLeader()
+	myLeader, _ := myPLTable.GetLeader()
 
 	if len(myPeerList) < len(oppositePeerList) {
 
@@ -163,7 +163,7 @@ func UpdateWithLongerPeerList(gch *GrpcCommandHandler, oppositeLeader p2p.Leader
 	return nil
 }
 
-func DialToUnConnectedNode(peerService GrpcCommandHandlerPeerService, peerApi GrpcCommandHandlerPeerApi, peerList []p2p.Peer) error {
+func DialToUnConnectedNode(peerService GrpcCommandHandlerCommunicationService, peerApi GrpcCommandHandlerPeerApi, peerList []p2p.Peer) error {
 
 	for _, peer := range peerList {
 

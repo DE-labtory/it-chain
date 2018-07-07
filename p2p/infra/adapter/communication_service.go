@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-type PeerService struct {
+type CommunicationService struct {
 	publish Publish
 }
 
-func (ps *PeerService) Dial(ipAddress string) error {
+func (ps *CommunicationService) Dial(ipAddress string) error {
 	command := gateway.ConnectionCreateCommand{
 		Address: ipAddress,
 	}
@@ -19,7 +19,7 @@ func (ps *PeerService) Dial(ipAddress string) error {
 }
 
 //request leader information in p2p network to the node specified by peerId
-func (ps *PeerService) RequestLeaderInfo(connectionId string) error {
+func (ps *CommunicationService) RequestLeaderInfo(connectionId string) error {
 
 	if connectionId == "" {
 		return ErrEmptyPeerId
@@ -42,7 +42,7 @@ func (ps *PeerService) RequestLeaderInfo(connectionId string) error {
 }
 
 // command message which requests node list of specific node
-func (ps *PeerService) RequestPeerList(peerId p2p.PeerId) error {
+func (ps *CommunicationService) RequestPeerList(peerId p2p.PeerId) error {
 
 	if peerId.Id == "" {
 		return ErrEmptyPeerId
@@ -63,7 +63,7 @@ func (ps *PeerService) RequestPeerList(peerId p2p.PeerId) error {
 }
 
 
-func (ps *PeerService) DeliverPeerLeaderTable(connectionId string, peerLeaderTable p2p.PeerLeaderTable) error {
+func (ps *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error {
 
 	if connectionId == "" {
 		return ErrEmptyPeerId
@@ -74,8 +74,8 @@ func (ps *PeerService) DeliverPeerLeaderTable(connectionId string, peerLeaderTab
 	}
 
 	//create peer table message
-	peerLeaderTableMessage := p2p.PeerLeaderTableMessage{
-		PeerLeaderTable: peerLeaderTable,
+	peerLeaderTableMessage := p2p.PLTableMessage{
+		PLTable: peerLeaderTable,
 	}
 
 	grpcDeliverCommand, err := CreateGrpcDeliverCommand("PeerTableDeliver", peerLeaderTableMessage)

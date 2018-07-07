@@ -7,20 +7,20 @@ import (
 var ErrEmptyLeaderId = errors.New("empty leader id")
 var ErrEmptyPeerList = errors.New("empty peer list")
 
-type PeerLeaderTable struct {
+type PLTable struct {
 	Leader   Leader
 	PeerList []Peer
 }
 
-func NewPeerLeaderTable(leader Leader, peerList []Peer) *PeerLeaderTable {
+func NewPLTable(leader Leader, peerList []Peer) *PLTable {
 
-	return &PeerLeaderTable{
+	return &PLTable{
 		Leader:   leader,
 		PeerList: peerList,
 	}
 }
 
-func (pt *PeerLeaderTable) GetLeader() (Leader, error) {
+func (pt *PLTable) GetLeader() (Leader, error) {
 
 	if pt.Leader.LeaderId.Id == "" {
 
@@ -30,7 +30,7 @@ func (pt *PeerLeaderTable) GetLeader() (Leader, error) {
 	return pt.Leader, nil
 }
 
-func (pt *PeerLeaderTable) GetPeerList() ([]Peer, error) {
+func (pt *PLTable) GetPeerList() ([]Peer, error) {
 
 	if len(pt.PeerList) == 0 {
 

@@ -13,7 +13,7 @@ var ErrPeerApi = errors.New("problem in peer api")
 type EventHandlerPeerApi interface {
 	AddPeer(peer p2p.Peer) error
 	DeletePeer(id p2p.PeerId) error
-	DeliverPeerTable(connectionId string) error
+	DeliverPLTable(connectionId string) error
 }
 type EventHandler struct {
 	peerApi EventHandlerPeerApi
@@ -29,19 +29,22 @@ func NewEventHandler(peerApi EventHandlerPeerApi) *EventHandler {
 func (eh *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent) error {
 
 	//1. addPeer
+	peer := p2p.Peer{
+		PeerId:p2p.PeerId{
+			Id:event.ID,
+		},
+		IpAddress:event.Address,
 
-	peer := *p2p.NewPeer(event.Address, p2p.PeerId{Id: event.ID})
+	}
+
 	err := eh.peerApi.AddPeer(peer)
 
 	if err != nil {
-		return ErrPeerApi
+		return err
 	}
 
-	if event.Address == "" {
-		return ErrEmptyAddress
-	}
 	//2. send peer table
-	eh.peerApi.DeliverPeerTable(event.ID)
+	eh.peerApi.DeliverPLTable(event.ID)
 
 	return nil
 }
