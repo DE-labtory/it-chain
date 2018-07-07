@@ -28,3 +28,5 @@ type BlockRemoveFromPoolEvent struct {
 	midgard.EventModel
 	BlockHeight uint64
 }
+
+

@@ -40,6 +40,8 @@ func (p *BlockPoolModel) Add(block Block) error {
 	eventstore.Save(BLOCK_POOL_AID, event)
 
 	p.On(&event)
+
+	return nil
 }
 
 func (p *BlockPoolModel) Get(height BlockHeight) Block {
@@ -92,7 +94,11 @@ func (p *BlockPoolModel) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *BlockAddToPoolEvent:
-		(p.Pool)[v.BlockHeight] = v.Block
+		block, err := createBlockFromAddToPoolEvent(v)
+		if err != nil {
+			return err
+		}
+		(p.Pool)[v.Height] = block
 
 	case *BlockRemoveFromPoolEvent:
 		delete(p.Pool, v.BlockHeight)
@@ -102,6 +108,26 @@ func (p *BlockPoolModel) On(event midgard.Event) error {
 	}
 	return nil
 }
+
+func createBlockFromAddToPoolEvent(event *BlockAddToPoolEvent) (Block, error) {
+	var txList []Transaction
+	err := json.Unmarshal(event.TxList, txList)
+	if err != nil {
+		return &DefaultBlock{}, ErrTxListUnmarshal
+	}
+
+	return &DefaultBlock{
+		Seal: event.Seal,
+		PrevSeal: event.PrevSeal,
+		Height: event.Height,
+		TxList: txList,
+		TxSeal: event.TxSeal,
+		Timestamp: event.Timestamp,
+		Creator: event.Creator,
+	}, nil
+}
+
+var ErrTxListUnmarshal = errors.New("tx list unmarshal failed")
 
 
 // BlockSyncState Aggregate ID
