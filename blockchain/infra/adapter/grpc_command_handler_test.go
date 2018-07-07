@@ -123,52 +123,98 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 	}
 }
 
-//func TestGrpcCommandHandler_HandleGrpcCommand_BlockRequestProtocol(t *testing.T) {
-//	tests := map[string]struct {
-//		input struct {
-//			command blockchain.GrpcReceiveCommand
-//		}
-//		err error
-//	}{
-//		"success:": {
-//			input: struct {
-//				command blockchain.GrpcReceiveCommand
-//			}{
-//				command: blockchain.GrpcReceiveCommand{
-//					CommandModel: midgard.CommandModel{ID: "111"},
-//					Body:         nil,
-//					Protocol:     "RequestBlockProtocol",
-//				},
-//			},
-//			err: nil,
-//		},
-//
-//		"fail:": {
-//			input: struct {
-//				command blockchain.GrpcReceiveCommand
-//			}{
-//				command: blockchain.GrpcReceiveCommand{
-//					CommandModel: midgard.CommandModel{ID: "111"},
-//					Body:         nil,
-//					Protocol:     "RequestBlockProtocol",
-//				},
-//			},
-//			err: nil,
-//		},
-//	}
-//
-//	for testName, test := tests {
-//		t.Logf("running test case %s", testName)
-//
-//		blockApi := MockBlockApi{}
-//
-//		blockRepository := MockROBlockRepository{}
-//		blockRepository.GetBlockByHeightFunc = func(block blockchain.Block,height uint64) error {
-//
-//		}
-//
-//
-//
-//	}
-//
-//}
+func TestGrpcCommandHandler_HandleGrpcCommand_BlockRequestProtocol(t *testing.T) {
+	tests := map[string]struct {
+		input struct {
+			command blockchain.GrpcReceiveCommand
+			err     struct {
+				ErrBlockInfoDeliver error
+				ErrGetBlock         error
+				ErrResponseBlock    error
+			}
+		}
+		err error
+	}{
+		"success:": {
+			input: struct {
+				command blockchain.GrpcReceiveCommand
+				err     struct {
+					ErrBlockInfoDeliver error
+					ErrGetBlock         error
+					ErrResponseBlock    error
+				}
+			}{
+				command: blockchain.GrpcReceiveCommand{
+					CommandModel: midgard.CommandModel{ID: "111"},
+					Body:         []byte{48},
+					Protocol:     "RequestBlockProtocol",
+				},
+
+				err: struct {
+					ErrBlockInfoDeliver error
+					ErrGetBlock         error
+					ErrResponseBlock    error
+				}{
+					ErrBlockInfoDeliver: nil,
+					ErrGetBlock:         nil,
+					ErrResponseBlock:    nil,
+				},
+			},
+			err: nil,
+		},
+
+		"fail:": {
+			input: struct {
+				command blockchain.GrpcReceiveCommand
+				err     struct {
+					ErrBlockInfoDeliver error
+					ErrGetBlock         error
+					ErrResponseBlock    error
+				}
+			}{
+				command: blockchain.GrpcReceiveCommand{
+					CommandModel: midgard.CommandModel{ID: "111"},
+					Body:         []byte{48},
+					Protocol:     "RequestBlockProtocol",
+				},
+
+				err: struct {
+					ErrBlockInfoDeliver error
+					ErrGetBlock         error
+					ErrResponseBlock    error
+				}{
+					ErrBlockInfoDeliver: nil,
+					ErrGetBlock:         nil,
+					ErrResponseBlock:    nil,
+				},
+			},
+			err: nil,
+		},
+	}
+
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+
+		blockApi := MockBlockApi{}
+
+		blockRepository := MockROBlockRepository{}
+		blockRepository.GetBlockByHeightFunc = func(block blockchain.Block, height uint64) error {
+			block.SetHeight(height)
+			return test.input.err.ErrBlockInfoDeliver
+		}
+
+		grpcCommandService := MockGrpcCommandService{}
+		grpcCommandService.ResponseBlockFunc = func(peerId blockchain.PeerId, block blockchain.Block) error {
+			assert.Equal(t, 0, block.GetHeight())
+			return test.input.err.ErrResponseBlock
+		}
+
+		grpcCommandHandler := adapter.NewGrpcCommandHandler(blockApi, blockRepository, grpcCommandService)
+
+		err := grpcCommandHandler.HandleGrpcCommand(test.input.command)
+
+		assert.Equal(t, test.err, err)
+
+	}
+
+}
