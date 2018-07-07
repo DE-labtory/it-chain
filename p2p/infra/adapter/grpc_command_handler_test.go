@@ -100,6 +100,6 @@ func TestReceiverPLTable(t *testing.T) {
 }
 
 //todo
-func TestUpdateWithLongerPeerList(t *testing.T) {
+func TestUpdateLeaderWithLongerPeerList(t *testing.T) {
 
 }

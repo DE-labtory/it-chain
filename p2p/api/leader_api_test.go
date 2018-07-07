@@ -5,17 +5,10 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/p2p/api"
-	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
 )
 
-type MockEventRepository struct{}
-
-func (mer MockEventRepository) Save(aggregateID string, events ...midgard.Event) error { return nil }
-
 type MockReadOnlyLeaderRepository struct{}
-
-type MockGrpcCommandService struct {}
 
 func (mrolr MockReadOnlyLeaderRepository) GetLeader() p2p.Leader { return p2p.Leader{} }
 
@@ -46,27 +39,9 @@ func TestLeaderApi_UpdateLeader(t *testing.T) {
 	leaderApi := SetupLeaderApi()
 
 	for testName, test := range tests {
+
 		t.Logf("Running test case %s", testName)
 		err := leaderApi.UpdateLeader(test.input)
-		assert.Equal(t, err, test.err)
-	}
-}
-
-func TestLeaderApi_DeliverLeaderInfo(t *testing.T) {
-	tests := map[string]struct {
-		input string
-		err   error
-	}{
-		"proper node id test": {
-			input: "",
-			err:   api.ErrEmptyConnectionId,
-		},
-	}
-	leaderApi := SetupLeaderApi()
-
-	for testName, test := range tests {
-		t.Logf("running test case %s", testName)
-		err := leaderApi.DeliverLeaderInfo(test.input)
 		assert.Equal(t, err, test.err)
 	}
 }
@@ -74,8 +49,7 @@ func TestLeaderApi_DeliverLeaderInfo(t *testing.T) {
 func SetupLeaderApi() *api.LeaderApi {
 
 	leaderRepository := MockReadOnlyLeaderRepository{}
-	eventRepository := MockEventRepository{}
-	leaderApi := api.NewLeaderApi(leaderRepository, eventRepository, &p2p.Peer{PeerId: p2p.PeerId{Id: "123"}})
+	leaderApi := api.NewLeaderApi(leaderRepository, &p2p.Peer{PeerId: p2p.PeerId{Id: "123"}})
 
 	return leaderApi
 }

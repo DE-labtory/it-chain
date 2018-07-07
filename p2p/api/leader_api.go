@@ -2,18 +2,15 @@ package api
 
 import (
 	"errors"
-	"log"
 	"github.com/it-chain/it-chain-Engine/p2p"
-	"github.com/it-chain/midgard"
 )
 
-var ErrEmptyPeerId = errors.New("empty peer id requested")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 
 type LeaderApi struct {
 	leaderRepository   ReadOnlyLeaderRepository
-	eventRepository    EventRepository
+	peerApi PeerApi
 	myInfo             *p2p.Peer
 }
 
@@ -24,46 +21,54 @@ type ReadOnlyLeaderRepository interface {
 	GetLeader() p2p.Leader
 }
 
-type EventRepository interface { //midgard.Repository
-
-	Save(aggregateID string, events ...midgard.Event) error
-}
-
 func NewLeaderApi(
-	leaderRepository ReadOnlyLeaderRepository,
-	eventRepository EventRepository, myInfo *p2p.Peer) *LeaderApi {
+	leaderRepository ReadOnlyLeaderRepository, myInfo *p2p.Peer) *LeaderApi {
 
 	return &LeaderApi{
 		leaderRepository:   leaderRepository,
-		eventRepository:    eventRepository,
 		myInfo:             myInfo,
 	}
 }
 
 //todo update leader with ip address by peer!! not leader
-func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Leader) error {
+func (leaderApi *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
-	if leader.LeaderId.Id == "" {
-		return ErrEmptyLeaderId
+	peers := leaderApi.peerApi.GetPLTable().PeerList
+
+	for _, peer := range peers {
+
+		if peer.IpAddress == ipAddress {
+
+			leader := p2p.Leader{
+				LeaderId: p2p.LeaderId{Id: peer.PeerId.Id},
+			}
+
+			p2p.UpdateLeader(leader)
+		}
+
 	}
 
-	events := make([]midgard.Event, 0)
+	return nil
+}
 
-	leaderUpdatedEvent := p2p.LeaderUpdatedEvent{
-		EventModel: midgard.EventModel{
-			ID:   leader.LeaderId.ToString(),
-			Type: "leader.update",
-		},
+func (leaderApi *LeaderApi) UpdateLeaderWithLongerPeerList(oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer) error {
+
+	myPLTable := leaderApi.peerApi.GetPLTable()
+
+	myPeerList, _ := myPLTable.GetPeerList()
+
+	myLeader, _ := myPLTable.GetLeader()
+
+	if len(myPeerList) < len(oppositePeerList) {
+
+		leaderApi.UpdateLeader(oppositeLeader)
+
+		leaderApi.peerApi.UpdatePeerList(oppositePeerList)
+
+	} else {
+
+		leaderApi.UpdateLeader(myLeader)
+
 	}
-
-	events = append(events, leaderUpdatedEvent)
-
-	err := leaderApi.eventRepository.Save(leaderUpdatedEvent.GetID(), events...)
-
-	if err != nil {
-		log.Println(err.Error())
-		return err
-	}
-
-	return err
+	return nil
 }

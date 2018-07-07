@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/it-chain/midgard"
+	"log"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 )
 
 type LeaderId struct {
@@ -35,6 +37,35 @@ func (l *Leader) On(event midgard.Event) error {
 	}
 
 	return nil
+}
+
+func UpdateLeader(leader Leader) error{
+
+	if leader.LeaderId.Id == "" {
+		return ErrEmptyLeaderId
+	}
+
+	events := make([]midgard.Event, 0)
+
+	leaderUpdatedEvent := LeaderUpdatedEvent{
+		EventModel: midgard.EventModel{
+			ID:   leader.LeaderId.ToString(),
+			Type: "leader.update",
+		},
+	}
+
+	leader.On(leaderUpdatedEvent)
+
+	events = append(events, leaderUpdatedEvent)
+
+	err := eventstore.Save(leaderUpdatedEvent.GetID(), events...)
+
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+
+	return err
 }
 
 type LeaderRepository interface {

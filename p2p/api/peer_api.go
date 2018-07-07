@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/it-chain/it-chain-Engine/p2p"
-	"github.com/it-chain/midgard"
 )
 
 var ErrEmptyPeerList = errors.New("empty peer list proposed")
@@ -14,23 +13,24 @@ type ReadOnlyPeerRepository interface {
 	FindAll() ([]p2p.Peer, error)
 }
 
+type PeerApiCommunicationService interface{
+	DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error
+}
+
 type PeerApi struct {
 	peerRepository       ReadOnlyPeerRepository
 	leaderRepository     ReadOnlyLeaderRepository
-	eventRepository      EventRepository
-	communicationService p2p.CommunicationService
+	communicationService PeerApiCommunicationService
 }
 
 func NewPeerApi(
 	peerRepository ReadOnlyPeerRepository,
 	leaderRepository ReadOnlyLeaderRepository,
-	eventRepository EventRepository,
-	communicationService p2p.CommunicationService) *PeerApi {
+	communicationService PeerApiCommunicationService) *PeerApi {
 
 	return &PeerApi{
 		peerRepository:       peerRepository,
 		leaderRepository:     leaderRepository,
-		eventRepository:      eventRepository,
 		communicationService: communicationService,
 	}
 }
@@ -38,8 +38,6 @@ func NewPeerApi(
 func (peerApi *PeerApi) UpdatePeerList(peerList []p2p.Peer) error {
 
 	//둘다 존재할경우 무시, existPeerList에만 존재할경우 PeerDeletedEvent, peerList에 존재할경우 PeerCreatedEvent
-	var event midgard.Event
-
 	existPeerList, err := peerApi.peerRepository.FindAll()
 
 	if err != nil {
@@ -50,26 +48,12 @@ func (peerApi *PeerApi) UpdatePeerList(peerList []p2p.Peer) error {
 
 	for _, peer := range newPeers {
 
-		event = p2p.PeerCreatedEvent{
-			EventModel: midgard.EventModel{
-				ID:   peer.GetID(),
-				Type: "peer.created",
-			},
-			IpAddress: peer.IpAddress,
-		}
-
-		peerApi.eventRepository.Save(event.GetID(), event)
+		p2p.NewPeer(peer.IpAddress, peer.PeerId)
 	}
 
 	for _, peer := range disconnectedPeers {
-		event = p2p.PeerDeletedEvent{
-			EventModel: midgard.EventModel{
-				ID:   peer.GetID(),
-				Type: "peer.deleted",
-			},
-		}
 
-		peerApi.eventRepository.Save(event.GetID(), event)
+		p2p.DeletePeer(peer.PeerId)
 	}
 
 	return nil
@@ -88,34 +72,13 @@ func (peerApi *PeerApi) GetPLTable() p2p.PLTable {
 	return peerLeaderTable
 }
 
-//Deliver Peer table that consists of peerList and leader
+//Deliver Peer leader table that consists of peerList and leader
 func (peerApi *PeerApi) DeliverPLTable(connectionId string) error {
 
 	peerTable := peerApi.GetPLTable()
 	peerApi.communicationService.DeliverPLTable(connectionId, peerTable)
 
 	return nil
-}
-
-// add a peer
-func (peerApi *PeerApi) AddPeer(peer p2p.Peer) (p2p.Peer, error) {
-
-	if peer.PeerId.Id == "" {
-
-		return p2p.Peer{}, ErrEmptyPeerId
-	}
-
-	return p2p.NewPeer(peer.IpAddress, peer.PeerId)
-}
-
-// delete a peer
-func (peerApi *PeerApi) DeletePeer(id p2p.PeerId) error {
-
-	if id.Id == "" {
-		return ErrEmptyPeerId
-	}
-
-	return p2p.DeletePeer(id)
 }
 
 func (peerApi *PeerApi) FindById(id p2p.PeerId) (p2p.Peer, error) {

@@ -10,16 +10,16 @@ type CommunicationService struct {
 	publish Publish
 }
 
-func (ps *CommunicationService) Dial(ipAddress string) error {
+func (cs *CommunicationService) Dial(ipAddress string) error {
 	command := gateway.ConnectionCreateCommand{
 		Address: ipAddress,
 	}
-	ps.publish("Command", "connection.create", command)
+	cs.publish("Command", "connection.create", command)
 	return nil
 }
 
 //request leader information in p2p network to the node specified by peerId
-func (ps *CommunicationService) RequestLeaderInfo(connectionId string) error {
+func (cs *CommunicationService) RequestLeaderInfo(connectionId string) error {
 
 	if connectionId == "" {
 		return ErrEmptyPeerId
@@ -38,11 +38,11 @@ func (ps *CommunicationService) RequestLeaderInfo(connectionId string) error {
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, connectionId)
 
-	return ps.publish("Command", "message.deliver", deliverCommand)
+	return cs.publish("Command", "message.deliver", deliverCommand)
 }
 
 // command message which requests node list of specific node
-func (ps *CommunicationService) RequestPeerList(peerId p2p.PeerId) error {
+func (cs *CommunicationService) RequestPeerList(peerId p2p.PeerId) error {
 
 	if peerId.Id == "" {
 		return ErrEmptyPeerId
@@ -59,11 +59,11 @@ func (ps *CommunicationService) RequestPeerList(peerId p2p.PeerId) error {
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, peerId.ToString())
 
-	return ps.publish("Command", "message.deliver", deliverCommand)
+	return cs.publish("Command", "message.deliver", deliverCommand)
 }
 
 
-func (ps *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error {
+func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error {
 
 	if connectionId == "" {
 		return ErrEmptyPeerId
@@ -86,10 +86,10 @@ func (ps *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTa
 
 	grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
 
-	return ps.publish("Command", "message.deliver", grpcDeliverCommand)
+	return cs.publish("Command", "message.deliver", grpcDeliverCommand)
 }
 
-func (ls *LeaderService) DeliverLeaderInfo(connectionId string, leader p2p.Leader) error {
+func (cs *CommunicationService) DeliverLeaderInfo(connectionId string, leader p2p.Leader) error {
 
 	if connectionId == "" {
 		return ErrEmptyPeerId
@@ -107,5 +107,5 @@ func (ls *LeaderService) DeliverLeaderInfo(connectionId string, leader p2p.Leade
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, connectionId)
 
-	return ls.publish("Command", "message.deliver", deliverCommand)
+	return cs.publish("Command", "message.deliver", deliverCommand)
 }

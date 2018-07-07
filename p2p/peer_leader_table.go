@@ -2,6 +2,8 @@ package p2p
 
 import (
 	"github.com/pkg/errors"
+	"encoding/json"
+	"github.com/it-chain/it-chain-Engine/p2p/infra/adapter"
 )
 
 var ErrEmptyLeaderId = errors.New("empty leader id")
@@ -38,4 +40,18 @@ func (pt *PLTable) GetPeerList() ([]Peer, error) {
 	}
 
 	return pt.PeerList, nil
+}
+
+type PLTableService struct{}
+
+func (pLTableService *PLTableService) GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error) {
+
+	peerTable := PLTable{}
+
+	if err := json.Unmarshal(command.Body, &peerTable); err != nil {
+		//todo error 처리
+		return PLTable{}, adapter.ErrUnmarshal
+	}
+
+	return peerTable, nil
 }

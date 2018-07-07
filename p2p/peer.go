@@ -9,6 +9,9 @@ import (
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 )
 
+var ErrEmptyPeerId = errors.New("empty peer id requested")
+var ErrEmptyAddress = errors.New("empty ip address proposed")
+
 type PeerTable map[string]Peer
 
 // PeerId 선언
@@ -45,8 +48,15 @@ func (n Peer) GetID() string {
 }
 
 // 해당 노드의 ip와 Id로 새로운 피어를 생성한다.
-// tested
-func NewPeer(ipAddress string, id PeerId) (Peer, error) {
+func NewPeer(ipAddress string, id PeerId) error {
+
+	if id.Id == ""{
+		return ErrEmptyPeerId
+	}
+
+	if ipAddress == ""{
+		return ErrEmptyAddress
+	}
 
 	peer := Peer{}
 
@@ -61,7 +71,7 @@ func NewPeer(ipAddress string, id PeerId) (Peer, error) {
 
 	peer.On(event)
 
-	return peer, eventstore.Save(id.Id, event)
+	return eventstore.Save(id.Id, event)
 }
 
 func DeletePeer(peerId PeerId) error{

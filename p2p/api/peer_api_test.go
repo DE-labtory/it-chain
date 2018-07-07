@@ -11,33 +11,13 @@ import (
 
 var ErrEmptyPeerList = errors.New("empty peer list proposed")
 
-//todo make node api test
-//todo make fake dependencies 1. eventRepository 2. messageDispatcher 3. peerRepository
-//todo make test map
-//todo test continue
-
-type MockService struct{}
-
-func (ms MockService) GetPLTable() p2p.PLTable {
-	peerLeaderTable := p2p.PLTable{
-		Leader: p2p.Leader{
-			LeaderId: p2p.LeaderId{Id: "1"},
-		},
-		PeerList: []p2p.Peer{{
-			PeerId: p2p.PeerId{
-				Id: "2",
-			},
-		}},
-	}
-	return peerLeaderTable
-}
-
 type MockPeerRepository struct{}
 
 func (mnr MockPeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) {
 	peer := p2p.Peer{PeerId: id}
 	return peer, nil
 }
+
 func (mnr MockPeerRepository) FindAll() ([]p2p.Peer, error) { return nil, nil }
 
 type MockLeaderRepository struct{}
@@ -81,13 +61,11 @@ func TestPeerApi_UpdatePeerList(t *testing.T) {
 }
 
 func SetupPeerApi() *api.PeerApi {
-	mockService := MockService{}
 	peerRepository := MockPeerRepository{}
 	leaderRepository := MockLeaderRepository{}
-	eventRepository := MockEventRepository{}
-	grpcCommandService := MockCommunicationService{}
+	communicationService := MockCommunicationService{}
 
-	peerApi := api.NewPeerApi(mockService, peerRepository, leaderRepository, eventRepository, grpcCommandService)
+	peerApi := api.NewPeerApi(peerRepository, leaderRepository, communicationService)
 
 	return peerApi
 }
