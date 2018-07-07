@@ -9,17 +9,13 @@ import (
 	"github.com/magiconair/properties/assert"
 )
 
-type MockGrpcCommandService struct{}
-
-func (mms MockGrpcCommandService) DeliverLeaderInfo(connectionId string, leader p2p.Leader) error {
-	return nil
-}
-
 type MockEventRepository struct{}
 
 func (mer MockEventRepository) Save(aggregateID string, events ...midgard.Event) error { return nil }
 
 type MockReadOnlyLeaderRepository struct{}
+
+type MockGrpcCommandService struct {}
 
 func (mrolr MockReadOnlyLeaderRepository) GetLeader() p2p.Leader { return p2p.Leader{} }
 
@@ -56,32 +52,30 @@ func TestLeaderApi_UpdateLeader(t *testing.T) {
 	}
 }
 
-//func TestLeaderApi_DeliverLeaderInfo(t *testing.T) {
-//	tests := map[string]struct {
-//		input string
-//		err   error
-//	}{
-//		"proper node id test": {
-//			input: "",
-//			err:   api.ErrEmptyConnectionId,
-//		},
-//	}
-//	leaderApi := SetupLeaderApi()
-//
-//	for testName, test := range tests {
-//		t.Logf("running test case %s", testName)
-//		err := leaderApi.DeliverLeaderInfo(test.input)
-//		assert.Equal(t, err, test.err)
-//	}
-//}
+func TestLeaderApi_DeliverLeaderInfo(t *testing.T) {
+	tests := map[string]struct {
+		input string
+		err   error
+	}{
+		"proper node id test": {
+			input: "",
+			err:   api.ErrEmptyConnectionId,
+		},
+	}
+	leaderApi := SetupLeaderApi()
 
-//func SetupLeaderApi() *api.LeaderApi {
-//
-//	leaderRepository := MockReadOnlyLeaderRepository{}
-//	eventRepository := MockEventRepository{}
-//
-//	grpcCommandService := MockGrpcCommandService{}
-//	leaderApi := api.NewLeaderApi(leaderRepository, eventRepository, grpcCommandService, &p2p.Peer{PeerId: p2p.PeerId{Id: "123"}})
-//
-//	return leaderApi
-//}
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+		err := leaderApi.DeliverLeaderInfo(test.input)
+		assert.Equal(t, err, test.err)
+	}
+}
+
+func SetupLeaderApi() *api.LeaderApi {
+
+	leaderRepository := MockReadOnlyLeaderRepository{}
+	eventRepository := MockEventRepository{}
+	leaderApi := api.NewLeaderApi(leaderRepository, eventRepository, &p2p.Peer{PeerId: p2p.PeerId{Id: "123"}})
+
+	return leaderApi
+}

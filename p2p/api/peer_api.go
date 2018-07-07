@@ -9,27 +9,29 @@ import (
 
 var ErrEmptyPeerList = errors.New("empty peer list proposed")
 
-type PeerApiGrpcCommandService interface {
-	DeliverPLTable(connectionId string, peerTable p2p.PLTable) error
-}
 type ReadOnlyPeerRepository interface {
 	FindById(id p2p.PeerId) (p2p.Peer, error)
 	FindAll() ([]p2p.Peer, error)
 }
 
 type PeerApi struct {
-	peerRepository            ReadOnlyPeerRepository
-	leaderRepository          ReadOnlyLeaderRepository
-	eventRepository           EventRepository
-	peerApiGrpcCommandService PeerApiGrpcCommandService
+	peerRepository       ReadOnlyPeerRepository
+	leaderRepository     ReadOnlyLeaderRepository
+	eventRepository      EventRepository
+	communicationService p2p.CommunicationService
 }
 
-func NewPeerApi(peerRepository ReadOnlyPeerRepository, leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, peerApiGrpcCommandService PeerApiGrpcCommandService) *PeerApi {
+func NewPeerApi(
+	peerRepository ReadOnlyPeerRepository,
+	leaderRepository ReadOnlyLeaderRepository,
+	eventRepository EventRepository,
+	communicationService p2p.CommunicationService) *PeerApi {
+
 	return &PeerApi{
-		peerRepository:            peerRepository,
-		leaderRepository:          leaderRepository,
-		eventRepository:           eventRepository,
-		peerApiGrpcCommandService: peerApiGrpcCommandService,
+		peerRepository:       peerRepository,
+		leaderRepository:     leaderRepository,
+		eventRepository:      eventRepository,
+		communicationService: communicationService,
 	}
 }
 
@@ -90,7 +92,7 @@ func (peerApi *PeerApi) GetPLTable() p2p.PLTable {
 func (peerApi *PeerApi) DeliverPLTable(connectionId string) error {
 
 	peerTable := peerApi.GetPLTable()
-	peerApi.peerApiGrpcCommandService.DeliverPLTable(connectionId, peerTable)
+	peerApi.communicationService.DeliverPLTable(connectionId, peerTable)
 
 	return nil
 }
@@ -98,8 +100,8 @@ func (peerApi *PeerApi) DeliverPLTable(connectionId string) error {
 // add a peer
 func (peerApi *PeerApi) AddPeer(peer p2p.Peer) (p2p.Peer, error) {
 
-	if peer.PeerId.Id == ""{
-		
+	if peer.PeerId.Id == "" {
+
 		return p2p.Peer{}, ErrEmptyPeerId
 	}
 
@@ -109,7 +111,7 @@ func (peerApi *PeerApi) AddPeer(peer p2p.Peer) (p2p.Peer, error) {
 // delete a peer
 func (peerApi *PeerApi) DeletePeer(id p2p.PeerId) error {
 
-	if id.Id == ""{
+	if id.Id == "" {
 		return ErrEmptyPeerId
 	}
 

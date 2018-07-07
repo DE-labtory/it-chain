@@ -47,9 +47,9 @@ func (mpr MockLeaderRepository) GetLeader() p2p.Leader {
 	return leader
 }
 
-type MockPeerApiGrpcCommandService struct{}
+type MockCommunicationService struct{}
 
-func (mnms MockPeerApiGrpcCommandService) DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error {
+func (mnms MockCommunicationService) DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error {
 	return nil
 }
 
@@ -85,7 +85,7 @@ func SetupPeerApi() *api.PeerApi {
 	peerRepository := MockPeerRepository{}
 	leaderRepository := MockLeaderRepository{}
 	eventRepository := MockEventRepository{}
-	grpcCommandService := MockPeerApiGrpcCommandService{}
+	grpcCommandService := MockCommunicationService{}
 
 	peerApi := api.NewPeerApi(mockService, peerRepository, leaderRepository, eventRepository, grpcCommandService)
 

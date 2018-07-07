@@ -15,11 +15,9 @@ type CommunicationService interface {
 	Dial(ipAddress string) error
 	DeliverLeaderInfo(connectionId string, leader Leader) error
 	DeliverPLTable(connectionId string, peerLeaderTable PLTable) error
+
 }
 
-type LeaderService interface{
-	DeliverLeaderInfo(connectionId string, leader Leader) error
-}
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
 type ElectionService struct {

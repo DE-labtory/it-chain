@@ -29,7 +29,9 @@ type EventRepository interface { //midgard.Repository
 	Save(aggregateID string, events ...midgard.Event) error
 }
 
-func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, myInfo *p2p.Peer) *LeaderApi {
+func NewLeaderApi(
+	leaderRepository ReadOnlyLeaderRepository,
+	eventRepository EventRepository, myInfo *p2p.Peer) *LeaderApi {
 
 	return &LeaderApi{
 		leaderRepository:   leaderRepository,
