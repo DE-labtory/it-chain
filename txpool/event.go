@@ -9,11 +9,11 @@ import (
 type TxCreatedEvent struct {
 	midgard.EventModel
 	PublishPeerId string
-	TxStatus      TransactionStatus
+	TxStatus      int
 	TxHash        string
 	TimeStamp     time.Time
 	Jsonrpc       string
-	Method        TxDataType
+	Method        string
 	Params        Param
 	ID            string
 	ICodeID       string
@@ -24,12 +24,12 @@ func (tx TxCreatedEvent) GetTransaction() Transaction {
 	return Transaction{
 		TxId:          TransactionId(tx.EventModel.ID),
 		PublishPeerId: tx.PublishPeerId,
-		TxStatus:      tx.TxStatus,
+		TxStatus:      TransactionStatus(tx.TxStatus),
 		TxHash:        tx.TxHash,
 		TxData: TxData{
 			ICodeID: tx.ICodeID,
 			Jsonrpc: tx.Jsonrpc,
-			Method:  tx.Method,
+			Method:  TxDataType(tx.Method),
 			Params:  tx.Params,
 			ID:      tx.ID,
 		},
