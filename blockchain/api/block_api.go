@@ -67,6 +67,7 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(heightOnlyBlock blockchain.Block
 		// TODO: Start synchronize
 
 	} else if blockFromPool.GetHeight() == lastBlock.GetHeight() + 1 {
+		//
 		bApi.blockRepository.AddBlock(blockFromPool)
 		pool.Delete(blockFromPool)
 
