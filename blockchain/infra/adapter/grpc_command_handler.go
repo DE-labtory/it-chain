@@ -24,7 +24,7 @@ type ReadOnlyBlockRepository interface {
 	GetBlockByHeight(block blockchain.Block, height uint64) error
 }
 
-type GrpcCommandServiceInterface interface {
+type SyncGrpcCommandService interface {
 	ResponseBlock(peerId blockchain.PeerId, block blockchain.Block) error
 	SyncCheckResponse(block blockchain.Block) error
 }
@@ -32,10 +32,10 @@ type GrpcCommandServiceInterface interface {
 type GrpcCommandHandler struct {
 	blockApi           BlockApi
 	blockRepository    ReadOnlyBlockRepository
-	grpcCommandService GrpcCommandServiceInterface
+	grpcCommandService SyncGrpcCommandService
 }
 
-func NewGrpcCommandHandler(blockApi BlockApi, blockRepository ReadOnlyBlockRepository, grpcCommandService GrpcCommandServiceInterface) *GrpcCommandHandler {
+func NewGrpcCommandHandler(blockApi BlockApi, blockRepository ReadOnlyBlockRepository, grpcCommandService SyncGrpcCommandService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		blockApi:           blockApi,
 		blockRepository:    blockRepository,
@@ -65,6 +65,7 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 		break
 
 	case "BlockRequestProtocol":
+
 		block := &blockchain.DefaultBlock{}
 
 		var height uint64
