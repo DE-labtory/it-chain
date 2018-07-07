@@ -47,8 +47,7 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) {
 }
 
 // TODO
-func (bApi *BlockApi) CheckAndSaveBlockFromPool(heightOnlyBlock blockchain.Block) error {
-	height := heightOnlyBlock.GetHeight()
+func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
 	pool := bApi.loadBlockPool()
 
 	// Get block from pool

@@ -14,43 +14,6 @@ type RepositoryProjector struct {
 	PeerRepository blockchain.PeerRepository
 }
 
-/// Check 단계에서 임의의 노드를 선정하기 위해 노드를 저장한다.
-func (eh *RepositoryProjector) HandleNodeCreatedEvent(event blockchain.NodeCreatedEvent) error {
-	eventID := event.GetID()
-
-	if eventID == "" {
-		return ErrEmptyEventId
-	}
-
-	peer := event.Peer
-
-	err := eh.PeerRepository.Add(peer)
-
-	if err != nil {
-		return ErrNodeApi
-	}
-
-	return nil
-}
-
-func (eh *RepositoryProjector) HandleNodeDeletedEvent(event blockchain.NodeDeletedEvent) error {
-	eventID := event.GetID()
-
-	if eventID == "" {
-		return ErrEmptyEventId
-	}
-
-	peer := event.Peer
-
-	err := eh.PeerRepository.Remove(peer.PeerId)
-
-	if err != nil {
-		return ErrNodeApi
-	}
-
-	return nil
-}
-
 type EventHandler struct {
 	blockApi BlockApi
 }
@@ -62,10 +25,9 @@ func NewEventHandler(api BlockApi) *EventHandler {
 }
 
 func (eh *EventHandler) HandleBlockAddToPoolEvent(event blockchain.BlockAddToPoolEvent) error {
+	height := event.BlockHeight
 
-	block := event.Block
-
-	if block == nil {
+	if height < 0 {
 		return ErrBlockNil
 	}
 
@@ -74,7 +36,7 @@ func (eh *EventHandler) HandleBlockAddToPoolEvent(event blockchain.BlockAddToPoo
 
 	// TODO: sync state에 따라서 BlockApi 호출 여부 결정
 	if !syncState.IsProgressing() {
-		err := eh.blockApi.CheckAndSaveBlockFromPool(block)
+		err := eh.blockApi.CheckAndSaveBlockFromPool(height)
 
 		if err != nil {
 			return err
