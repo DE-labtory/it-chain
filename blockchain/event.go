@@ -1,6 +1,9 @@
 package blockchain
 
-import "github.com/it-chain/midgard"
+import (
+	"github.com/it-chain/midgard"
+	"time"
+)
 
 type SyncStartEvent struct {
 	midgard.EventModel
@@ -12,7 +15,13 @@ type SyncDoneEvent struct {
 
 type BlockAddToPoolEvent struct {
 	midgard.EventModel
-	BlockHeight uint64
+	Seal      []byte
+	PrevSeal  []byte
+	Height    uint64
+	TxList    []byte
+	TxSeal    [][]byte
+	Timestamp time.Time
+	Creator   []byte
 }
 
 type BlockRemoveFromPoolEvent struct {

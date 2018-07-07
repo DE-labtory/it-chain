@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
+	"encoding/json"
 )
 
 type BlockPool interface {
-	Add(block Block)
+	Add(block Block) error
 	Get(height BlockHeight) Block
 	Delete(height Block)
 }
@@ -30,8 +31,12 @@ func NewBlockPool() *BlockPoolModel {
 	}
 }
 
-func (p *BlockPoolModel) Add(block Block) {
-	event := createBlockAddToPoolEvent(block)
+func (p *BlockPoolModel) Add(block Block) error {
+	event, err := createBlockAddToPoolEvent(block)
+	if err != nil {
+		return err
+	}
+
 	eventstore.Save(BLOCK_POOL_AID, event)
 
 	p.On(&event)
@@ -48,21 +53,34 @@ func (p *BlockPoolModel) Delete(block Block) {
 	p.On(&event)
 }
 
-func createBlockAddToPoolEvent(block Block) BlockAddToPoolEvent {
+func createBlockAddToPoolEvent(block Block) (BlockAddToPoolEvent, error) {
+	txListBytes, err := json.Marshal(block.GetTxList())
+	if err != nil {
+		return BlockAddToPoolEvent{}, ErrTxListMarshal
+	}
+
 	return BlockAddToPoolEvent{
 		EventModel: midgard.EventModel{
 			ID: BLOCK_POOL_AID,
 		},
-		Block: block,
-	}
+		Seal: block.GetSeal(),
+		PrevSeal: block.GetPrevSeal(),
+		Height: block.GetHeight(),
+		TxList: txListBytes,
+		TxSeal: block.GetTxSeal(),
+		Timestamp: block.GetTimestamp(),
+		Creator: block.GetCreator(),
+	}, nil
 }
+
+var ErrTxListMarshal = errors.New("tx list marshal failed")
 
 func createBlockRemoveFromPoolEvent(block Block) BlockRemoveFromPoolEvent {
 	return BlockRemoveFromPoolEvent{
 		EventModel: midgard.EventModel{
 			ID: BLOCK_POOL_AID,
 		},
-		Block: block,
+		BlockHeight: block.GetHeight(),
 	}
 }
 
@@ -74,12 +92,10 @@ func (p *BlockPoolModel) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *BlockAddToPoolEvent:
-		block := v.Block
-		(p.Pool)[block.GetHeight()] = block
+		(p.Pool)[v.BlockHeight] = v.Block
 
 	case *BlockRemoveFromPoolEvent:
-		block := v.Block
-		delete(p.Pool, block.GetHeight())
+		delete(p.Pool, v.BlockHeight)
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
