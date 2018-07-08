@@ -17,40 +17,32 @@ var ErrBuildingTxSeal = errors.New("error when building TxSeal")
 
 func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 
+	//declare
 	GenesisBlock := &DefaultBlock{}
 	validator := DefaultValidator{}
+	TimeStamp := (time.Now()).Round(0)
 
+	//set
 	err := setBlockWithConfig(genesisconfFilePath, GenesisBlock)
 
 	if err != nil {
 		return nil, ErrSetConfig
 	}
 
-	GenesisBlock.SetTimestamp((time.Now()).Round(0))
-
-	Seal, err := validator.BuildSeal((time.Now()).Round(0), GenesisBlock.GetPrevSeal(), GenesisBlock.TxSeal, GenesisBlock.Creator)
+	//build
+	Seal, err := validator.BuildSeal(TimeStamp, GenesisBlock.PrevSeal, GenesisBlock.TxSeal, GenesisBlock.Creator)
 
 	if err != nil {
 		return nil, ErrBuildingSeal
 	}
 
-	createEvent := &BlockCreatedEvent{
-		EventModel: midgard.EventModel{
-			ID:   string(Seal),
-			Type: "block.created",
-		},
+	//create
+	createEvent := createBlockCreatedEvent(Seal, GenesisBlock.PrevSeal, GenesisBlock.Height, GenesisBlock.TxList, GenesisBlock.TxSeal, TimeStamp, GenesisBlock.Creator)
 
-		Seal:      Seal,
-		PrevSeal:  GenesisBlock.PrevSeal,
-		Height:    GenesisBlock.Height,
-		TxList:    GenesisBlock.TxList,
-		TxSeal:    GenesisBlock.TxSeal,
-		Timestamp: GenesisBlock.Timestamp,
-		Creator:   GenesisBlock.Creator,
-	}
-
+	//save
 	eventstore.Save(createEvent.GetID(), createEvent)
 
+	//on
 	GenesisBlock.On(createEvent)
 
 	return GenesisBlock, nil
@@ -58,49 +50,31 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 
 func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, Creator []byte) (Block, error) {
 
+	//declare
 	ProposedBlock := &DefaultBlock{}
 	validator := DefaultValidator{}
+	TimeStamp := (time.Now()).Round(0)
 
-	ProposedBlock.SetPrevSeal(prevSeal)
-
-	ProposedBlock.SetCreator(Creator)
-
-	for _, tx := range txList {
-		ProposedBlock.PutTx(tx)
-	}
-
-	txSeal, err := validator.BuildTxSeal(ProposedBlock.GetTxList())
+	//build
+	txSeal, err := validator.BuildTxSeal(txList)
 
 	if err != nil {
 		return nil, ErrBuildingTxSeal
 	}
 
-	ProposedBlock.SetTxSeal(txSeal)
-
-	ProposedBlock.SetTimestamp((time.Now()).Round(0))
-
-	Seal, err := validator.BuildSeal((time.Now()).Round(0), prevSeal, txSeal, Creator)
+	Seal, err := validator.BuildSeal(TimeStamp, prevSeal, txSeal, Creator)
 
 	if err != nil {
 		return nil, ErrBuildingSeal
 	}
 
-	createEvent := &BlockCreatedEvent{
-		EventModel: midgard.EventModel{
-			ID:   string(Seal),
-			Type: "block.created",
-		},
-		Seal:      Seal,
-		PrevSeal:  ProposedBlock.PrevSeal,
-		Height:    height,
-		TxList:    ProposedBlock.TxList,
-		TxSeal:    ProposedBlock.TxSeal,
-		Timestamp: ProposedBlock.Timestamp,
-		Creator:   ProposedBlock.Creator,
-	}
+	//create
+	createEvent := createBlockCreatedEvent(Seal, prevSeal, height, txList, txSeal, TimeStamp, Creator)
 
+	//save
 	eventstore.Save(createEvent.GetID(), createEvent)
 
+	//on
 	ProposedBlock.On(createEvent)
 
 	return ProposedBlock, nil
@@ -126,8 +100,8 @@ func setBlockWithConfig(filePath string, block Block) error {
 	return nil
 }
 
-func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []Transaction, txSeal [][]byte, creator []byte) BlockCreatedEvent {
-	return BlockCreatedEvent{
+func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []Transaction, txSeal [][]byte, timeStamp time.Time, creator []byte) *BlockCreatedEvent {
+	return &BlockCreatedEvent{
 		EventModel: midgard.EventModel{
 			ID:   string(seal),
 			Type: "block.created",
@@ -137,7 +111,7 @@ func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList
 		Height:    height,
 		TxList:    txList,
 		TxSeal:    txSeal,
-		Timestamp: (time.Now()).Round(0),
+		Timestamp: timeStamp,
 		Creator:   creator,
 	}
 }
