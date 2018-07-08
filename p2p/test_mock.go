@@ -37,9 +37,14 @@ func (mps *MockPeerService) FindAll () ([]Peer, error){
 type MockCommunicationService struct {
 
 	DialFunc func(ipAddress string) error
+	DeliverPLTableFunc func(connectionId string, pLTable PLTable) error
 }
 
 func (mcs *MockCommunicationService) Dial(ipAddress string) error {
 
 	return mcs.DialFunc(ipAddress)
+}
+func (mcs *MockCommunicationService) DeliverPLTable(connectionId string, pLTable PLTable) error{
+
+	return mcs.DeliverPLTableFunc(connectionId, pLTable)
 }

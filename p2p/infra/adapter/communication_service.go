@@ -42,28 +42,6 @@ func (cs *CommunicationService) RequestLeaderInfo(connectionId string) error {
 	return cs.publish("Command", "message.deliver", deliverCommand)
 }
 
-// command message which requests node list of specific node
-func (cs *CommunicationService) RequestPeerList(peerId p2p.PeerId) error {
-
-	if peerId.Id == "" {
-		return ErrEmptyPeerId
-	}
-	body := p2p.LeaderInfoRequestMessage{
-		TimeUnix: time.Now().Unix(),
-	}
-
-	deliverCommand, err := CreateGrpcDeliverCommand("PeerListRequestMessage", body)
-
-	if err != nil {
-		return err
-	}
-
-	deliverCommand.Recipients = append(deliverCommand.Recipients, peerId.ToString())
-
-	return cs.publish("Command", "message.deliver", deliverCommand)
-}
-
-
 func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error {
 
 	if connectionId == "" {
@@ -88,25 +66,4 @@ func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTa
 	grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
 
 	return cs.publish("Command", "message.deliver", grpcDeliverCommand)
-}
-
-func (cs *CommunicationService) DeliverLeaderInfo(connectionId string, leader p2p.Leader) error {
-
-	if connectionId == "" {
-		return ErrEmptyPeerId
-	}
-
-	if leader.LeaderId.Id == "" {
-		return ErrEmptyLeaderId
-	}
-
-	deliverCommand, err := CreateGrpcDeliverCommand("UpdateLeader", leader)
-
-	if err != nil {
-		return err
-	}
-
-	deliverCommand.Recipients = append(deliverCommand.Recipients, connectionId)
-
-	return cs.publish("Command", "message.deliver", deliverCommand)
 }

@@ -13,9 +13,7 @@ import (
 
 type CommunicationService interface {
 	Dial(ipAddress string) error
-	DeliverLeaderInfo(connectionId string, leader Leader) error
 	DeliverPLTable(connectionId string, peerLeaderTable PLTable) error
-
 }
 
 // injected later
