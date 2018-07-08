@@ -11,6 +11,7 @@ type CommunicationService struct {
 }
 
 func (cs *CommunicationService) Dial(ipAddress string) error {
+
 	command := gateway.ConnectionCreateCommand{
 		Address: ipAddress,
 	}

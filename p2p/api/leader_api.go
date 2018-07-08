@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+
 	"github.com/it-chain/it-chain-Engine/p2p"
 )
 
@@ -9,31 +10,23 @@ var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 
 type LeaderApi struct {
-	leaderRepository   ReadOnlyLeaderRepository
-	peerApi PeerApi
-	myInfo             *p2p.Peer
+	leaderService p2p.LeaderService
+	peerApi          PeerApi
 }
 
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
-type ReadOnlyLeaderRepository interface {
+func NewLeaderApi(leaderService p2p.LeaderService) LeaderApi {
 
-	GetLeader() p2p.Leader
-}
-
-func NewLeaderApi(
-	leaderRepository ReadOnlyLeaderRepository, myInfo *p2p.Peer) *LeaderApi {
-
-	return &LeaderApi{
-		leaderRepository:   leaderRepository,
-		myInfo:             myInfo,
+	return LeaderApi{
+		leaderService: leaderService,
 	}
 }
 
 //todo update leader with ip address by peer!! not leader
-func (leaderApi *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
+func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
-	peers := leaderApi.peerApi.GetPLTable().PeerList
+	peers := la.peerApi.GetPLTable().PeerList
 
 	for _, peer := range peers {
 
@@ -51,9 +44,9 @@ func (leaderApi *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 	return nil
 }
 
-func (leaderApi *LeaderApi) UpdateLeaderWithLongerPeerList(oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer) error {
+func (la *LeaderApi) UpdateLeaderWithLongerPeerList(oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer) error {
 
-	myPLTable := leaderApi.peerApi.GetPLTable()
+	myPLTable := la.peerApi.GetPLTable()
 
 	myPeerList, _ := myPLTable.GetPeerList()
 
@@ -61,13 +54,13 @@ func (leaderApi *LeaderApi) UpdateLeaderWithLongerPeerList(oppositeLeader p2p.Le
 
 	if len(myPeerList) < len(oppositePeerList) {
 
-		leaderApi.UpdateLeader(oppositeLeader)
+		la.leaderService.Set(oppositeLeader)
 
-		leaderApi.peerApi.UpdatePeerList(oppositePeerList)
+		la.peerApi.UpdatePeerList(oppositePeerList)
 
 	} else {
 
-		leaderApi.UpdateLeader(myLeader)
+		la.leaderService.Set(myLeader)
 
 	}
 	return nil

@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"encoding/json"
 	"github.com/it-chain/it-chain-Engine/p2p/infra/adapter"
+	"sync"
 )
 
 var ErrEmptyLeaderId = errors.New("empty leader id")
@@ -42,9 +43,19 @@ func (pt *PLTable) GetPeerList() ([]Peer, error) {
 	return pt.PeerList, nil
 }
 
-type PLTableService struct{}
+type PLTableService interface {
 
-func (pLTableService *PLTableService) GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error) {
+	GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error)
+	ClearPeerTable() error
+}
+
+// will be deleted after implemented in gateway api
+type PLTableServiceReplica struct{
+	mux sync.Mutex
+	peerTable PeerTable
+}
+
+func (pLTableService *PLTableServiceReplica) GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error) {
 
 	peerTable := PLTable{}
 
@@ -54,4 +65,18 @@ func (pLTableService *PLTableService) GetPLTableFromCommand(command GrpcReceiveC
 	}
 
 	return peerTable, nil
+}
+
+func (plts *PLTableServiceReplica) ClearPeerTable() {
+
+	plts.mux.Lock()
+
+	defer plts.mux.Unlock()
+
+	for key := range plts.peerTable {
+
+		delete(plts.peerTable, key)
+	}
+
+	plts.peerTable = make(map[string]Peer)
 }

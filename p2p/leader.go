@@ -9,12 +9,18 @@ import (
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 )
 
+type Leader struct {
+	LeaderId LeaderId
+}
+
 type LeaderId struct {
 	Id string
 }
 
-type Leader struct {
-	LeaderId LeaderId
+type LeaderService interface {
+
+	Get() Leader
+	Set(leader Leader) error
 }
 
 func (lid LeaderId) ToString() string {

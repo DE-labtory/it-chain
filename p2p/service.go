@@ -18,8 +18,15 @@ type CommunicationService interface {
 
 }
 
+// injected later
+// the actual implementation is done in gateway api
 type PeerService interface{
-	
+
+	Save(peer Peer) error
+	Remove(peer Peer) error
+	FindById(peerId PeerId) (Peer, error)
+	FindByAddress(ipAddress string) (Peer, error)
+	FindAll() ([]Peer, error)
 }
 
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.

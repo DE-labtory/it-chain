@@ -8,6 +8,12 @@ import (
 
 var ErrNoLeader = errors.New("there is no leader")
 
+type LeaderRepoitory interface{
+
+	GetLeader() p2p.Leader
+	SetLeader(leader p2p.Leader) error
+}
+
 type LeaderRepository struct {
 	leader p2p.Leader
 	mux    sync.Mutex
