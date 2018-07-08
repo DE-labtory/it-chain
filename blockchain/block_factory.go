@@ -106,20 +106,6 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 	return ProposedBlock, nil
 }
 
-func configFromJson(filePath string) ([]uint8, error) {
-	jsonFile, err := os.Open(filePath)
-	defer jsonFile.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	byteValue, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		return nil, err
-	}
-	return byteValue, nil
-}
-
 func setBlockWithConfig(filePath string, block Block) error {
 	jsonFile, err := os.Open(filePath)
 	defer jsonFile.Close()
@@ -138,4 +124,20 @@ func setBlockWithConfig(filePath string, block Block) error {
 	}
 
 	return nil
+}
+
+func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []Transaction, txSeal [][]byte, creator []byte) BlockCreatedEvent {
+	return BlockCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID:   string(seal),
+			Type: "block.created",
+		},
+		Seal:      seal,
+		PrevSeal:  prevSeal,
+		Height:    height,
+		TxList:    txList,
+		TxSeal:    txSeal,
+		Timestamp: (time.Now()).Round(0),
+		Creator:   creator,
+	}
 }
