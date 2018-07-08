@@ -102,12 +102,12 @@ func TestCreateGenesisBlock(t *testing.T) {
 
 	GenesisBlockConfigJson := []byte(`{
 								  "Seal":[],
-								  "prevSeal":[],
+								  "PrevSeal":[],
 								  "Height":0,
 								  "TxList":[],
-								  "txSeal":[],
-								  "timeStamp":"0001-01-01T00:00:00-00:00",
-								  "creator":[]
+								  "TxSeal":[],
+								  "TimeStamp":"0001-01-01T00:00:00-00:00",
+								  "Creator":[]
 								}`)
 
 	err = ioutil.WriteFile(GenesisFilePath, GenesisBlockConfigJson, 0644)
