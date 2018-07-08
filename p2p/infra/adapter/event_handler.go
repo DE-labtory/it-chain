@@ -115,7 +115,7 @@ func (projector *RepositoryProjector) HandlerPeerCreatedEvent(event p2p.PeerCrea
 
 	peer := p2p.NewPeer(event.IpAddress, p2p.PeerId{Id: event.ID})
 
-	projector.peerRepository.Save(*peer)
+	projector.peerRepository.Save(peer)
 
 	return nil
 }

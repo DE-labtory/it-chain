@@ -30,15 +30,6 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 		},
 	}
 
-	for testName, test := range tests {
-
-		t.Logf("running test case %s", testName)
-
-		communicationApi := api.CommunicationApi{}
-
-		assert.Equal(t, communicationApi.DialToUnConnectedNode(test.input.peerList), test.err)
-
-	}
 
 	mockPeerService := p2p.MockPeerService{}
 
@@ -53,6 +44,17 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 		}
 
 		return p2p.Peer{}, nil
+	}
+
+
+	for testName, test := range tests {
+
+		t.Logf("running test case %s", testName)
+
+		communicationApi := api.NewCommunicationApi(mockPeerService, p2p.MockCommunicationService{})
+
+		assert.Equal(t, communicationApi.DialToUnConnectedNode(test.input.peerList), test.err)
+
 	}
 }
 

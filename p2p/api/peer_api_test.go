@@ -61,11 +61,10 @@ func TestPeerApi_UpdatePeerList(t *testing.T) {
 }
 
 func SetupPeerApi() *api.PeerApi {
-	peerRepository := MockPeerRepository{}
-	leaderRepository := MockLeaderRepository{}
+	peerService := p2p.MockPeerService{}
 	communicationService := MockCommunicationService{}
 
-	peerApi := api.NewPeerApi(peerRepository, leaderRepository, communicationService)
+	peerApi := api.NewPeerApi(peerService, leaderService, communicationService)
 
 	return peerApi
 }

@@ -8,29 +8,24 @@ import (
 
 var ErrEmptyPeerList = errors.New("empty peer list proposed")
 
-type ReadOnlyPeerRepository interface {
-	FindById(id p2p.PeerId) (p2p.Peer, error)
-	FindAll() ([]p2p.Peer, error)
-}
-
 type PeerApiCommunicationService interface{
 	DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error
 }
 
 type PeerApi struct {
-	peerRepository       ReadOnlyPeerRepository
-	leaderRepository     ReadOnlyLeaderRepository
+	peerService p2p.PeerService
+	leaderService p2p.LeaderService
 	communicationService PeerApiCommunicationService
 }
 
 func NewPeerApi(
-	peerRepository ReadOnlyPeerRepository,
-	leaderRepository ReadOnlyLeaderRepository,
+	peerService p2p.PeerService,
+	leaderService p2p.LeaderService,
 	communicationService PeerApiCommunicationService) *PeerApi {
 
 	return &PeerApi{
-		peerRepository:       peerRepository,
-		leaderRepository:     leaderRepository,
+		peerService:     peerService,
+		leaderService: leaderService,
 		communicationService: communicationService,
 	}
 }
@@ -38,7 +33,7 @@ func NewPeerApi(
 func (peerApi *PeerApi) UpdatePeerList(peerList []p2p.Peer) error {
 
 	//둘다 존재할경우 무시, existPeerList에만 존재할경우 PeerDeletedEvent, peerList에 존재할경우 PeerCreatedEvent
-	existPeerList, err := peerApi.peerRepository.FindAll()
+	existPeerList, err := peerApi.peerService.FindAll()
 
 	if err != nil {
 		return err
@@ -61,8 +56,8 @@ func (peerApi *PeerApi) UpdatePeerList(peerList []p2p.Peer) error {
 
 func (peerApi *PeerApi) GetPLTable() p2p.PLTable {
 
-	leader := peerApi.leaderRepository.GetLeader()
-	peerList, _ := peerApi.peerRepository.FindAll()
+	leader := peerApi.leaderService.Get()
+	peerList, _ := peerApi.peerService.FindAll()
 
 	peerLeaderTable := p2p.PLTable{
 		Leader:   leader,
@@ -83,5 +78,5 @@ func (peerApi *PeerApi) DeliverPLTable(connectionId string) error {
 
 func (peerApi *PeerApi) FindById(id p2p.PeerId) (p2p.Peer, error) {
 
-	return peerApi.peerRepository.FindById(id)
+	return peerApi.peerService.FindById(id)
 }

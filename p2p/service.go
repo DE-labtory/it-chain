@@ -23,7 +23,7 @@ type CommunicationService interface {
 type PeerService interface{
 
 	Save(peer Peer) error
-	Remove(peer Peer) error
+	Remove(peerId PeerId) error
 	FindById(peerId PeerId) (Peer, error)
 	FindByAddress(ipAddress string) (Peer, error)
 	FindAll() ([]Peer, error)
@@ -34,7 +34,7 @@ type Publish func(exchange string, topic string, data interface{}) (err error) /
 type ElectionService struct {
 	mux                sync.Mutex
 	electionRepository ElectionRepository
-	peerRepository     PeerRepository
+	peerService     PeerService
 	publish            Publish
 }
 
@@ -65,7 +65,7 @@ func StartRandomTimeOut(es *ElectionService) {
 				election.SetState("Candidate")
 				es.electionRepository.SetElection(election)
 
-				peerList, _ := es.peerRepository.FindAll()
+				peerList, _ := es.peerService.FindAll()
 
 				connectionIds := make([]string, 0)
 
@@ -163,7 +163,7 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
 
-	peers, _ := es.peerRepository.FindAll()
+	peers, _ := es.peerService.FindAll()
 
 	for _, peer := range peers {
 		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, peer.PeerId.Id)
@@ -187,7 +187,7 @@ func (es *ElectionService) DecideToBeLeader(command GrpcReceiveCommand) error {
 	}
 
 	//	3. if counted is same with num of peer-1 set leader and publish
-	peers, _ := es.peerRepository.FindAll()
+	peers, _ := es.peerService.FindAll()
 	numOfPeers := len(peers)
 
 	if election.GetVoteCount() == numOfPeers-1 {

@@ -3,8 +3,16 @@ package api
 import "github.com/it-chain/it-chain-Engine/p2p"
 
 type CommunicationApi struct {
-	communicationService p2p.CommunicationService
 	peerService          p2p.PeerService
+	communicationService p2p.CommunicationService
+}
+
+func NewCommunicationApi(peerService p2p.PeerService,
+	communicationService p2p.CommunicationService) CommunicationApi{
+	return CommunicationApi{
+		peerService:peerService,
+		communicationService:communicationService,
+	}
 }
 
 func (ca *CommunicationApi) DialToUnConnectedNode(peerList []p2p.Peer) error {
