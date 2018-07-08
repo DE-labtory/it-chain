@@ -3,7 +3,6 @@ package blockchain_test
 import (
 	"testing"
 
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os"
@@ -31,6 +30,7 @@ func (m MockRepostiory) Save(aggregateID string, events ...midgard.Event) error 
 func (MockRepostiory) Close() {}
 
 func TestCreateGenesisBlock(t *testing.T) {
+	//given
 
 	tests := map[string]struct {
 		input struct {
@@ -52,7 +52,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 				Height:    uint64(0),
 				TxList:    make([]blockchain.Transaction, 0),
 				TxSeal:    make([][]byte, 0),
-				Timestamp: (time.Now()).Round(0),
+				Timestamp: (time.Now()).Round(100 * time.Millisecond),
 				Creator:   make([]byte, 0),
 			},
 
@@ -73,10 +73,21 @@ func TestCreateGenesisBlock(t *testing.T) {
 		},
 	}
 
+	timeStamp := (time.Now()).Round(100 * time.Millisecond)
+	prevSeal := make([]byte, 0)
+	txSeal := make([][]byte, 0)
+	creator := make([]byte, 0)
+	validator := blockchain.DefaultValidator{}
+	Seal, err := validator.BuildSeal(timeStamp, prevSeal, txSeal, creator)
+
+	if err != nil {
+		log.Println(err.Error())
+	}
+
 	repo := MockRepostiory{}
 
 	repo.saveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, aggregateID, events[0].GetID())
+		assert.Equal(t, string(Seal), aggregateID)
 		assert.Equal(t, 1, len(events))
 		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
 		return nil
@@ -91,32 +102,21 @@ func TestCreateGenesisBlock(t *testing.T) {
 
 	GenesisBlockConfigJson := []byte(`{
 								  "Seal":[],
-								  "PrevSeal":[],
+								  "prevSeal":[],
 								  "Height":0,
 								  "TxList":[],
-								  "TxSeal":[],
-								  "TimeStamp":"0001-01-01T00:00:00-00:00",
-								  "Creator":[]
+								  "txSeal":[],
+								  "timeStamp":"0001-01-01T00:00:00-00:00",
+								  "creator":[]
 								}`)
 
-	var tempBlock blockchain.DefaultBlock
-
-	err := json.Unmarshal(GenesisBlockConfigJson, &tempBlock)
-
-	if err != nil {
-		log.Println(err.Error())
-	}
-
-	GenesisBlockConfigByte, err := json.Marshal(tempBlock)
-
-	err = ioutil.WriteFile(GenesisFilePath, GenesisBlockConfigByte, 0644)
+	err = ioutil.WriteFile(GenesisFilePath, GenesisBlockConfigJson, 0644)
 
 	if err != nil {
 		log.Println(err.Error())
 	}
 
 	for testName, test := range tests {
-
 		t.Logf("Running test case %s", testName)
 
 		//when
@@ -134,7 +134,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 		assert.Equal(t, test.output.GetHeight(), GenesisBlock.GetHeight())
 		assert.Equal(t, test.output.GetTxList(), GenesisBlock.GetTxList())
 		assert.Equal(t, test.output.GetTxSeal(), GenesisBlock.GetTxSeal())
-		assert.Equal(t, test.output.GetTimestamp().String()[:19], GenesisBlock.GetTimestamp().String()[:19])
+		assert.Equal(t, test.output.GetTimestamp(), GenesisBlock.GetTimestamp())
 		assert.Equal(t, test.output.GetCreator(), GenesisBlock.GetCreator())
 
 	}
@@ -144,12 +144,13 @@ func TestCreateGenesisBlock(t *testing.T) {
 func TestCreateProposedBlock(t *testing.T) {
 
 	//given
+
 	tests := map[string]struct {
 		input struct {
 			prevSeal []byte
 			height   uint64
 			txList   []blockchain.Transaction
-			Creator  []byte
+			creator  []byte
 		}
 		output blockchain.Block
 		err    error
@@ -160,14 +161,14 @@ func TestCreateProposedBlock(t *testing.T) {
 				prevSeal []byte
 				height   uint64
 				txList   []blockchain.Transaction
-				Creator  []byte
+				creator  []byte
 			}{
 				prevSeal: []byte("prevseal"),
 				height:   1,
 				txList: []blockchain.Transaction{
 					&blockchain.DefaultTransaction{},
 				},
-				Creator: []byte("junksound"),
+				creator: []byte("junksound"),
 			},
 
 			output: &blockchain.DefaultBlock{
@@ -176,7 +177,7 @@ func TestCreateProposedBlock(t *testing.T) {
 				TxList: []blockchain.Transaction{
 					&blockchain.DefaultTransaction{},
 				},
-				Timestamp: (time.Now()).Round(0),
+				Timestamp: (time.Now()).Round(100 * time.Millisecond),
 				Creator:   []byte("junksound"),
 			},
 
@@ -189,12 +190,12 @@ func TestCreateProposedBlock(t *testing.T) {
 				prevSeal []byte
 				height   uint64
 				txList   []blockchain.Transaction
-				Creator  []byte
+				creator  []byte
 			}{
 				prevSeal: []byte("prevseal"),
 				height:   1,
-				txList:   []blockchain.Transaction{},
-				Creator:  []byte("junksound"),
+				txList:   nil,
+				creator:  []byte("junksound"),
 			},
 
 			output: nil,
@@ -208,14 +209,14 @@ func TestCreateProposedBlock(t *testing.T) {
 				prevSeal []byte
 				height   uint64
 				txList   []blockchain.Transaction
-				Creator  []byte
+				creator  []byte
 			}{
 				prevSeal: nil,
 				height:   1,
 				txList: []blockchain.Transaction{
 					&blockchain.DefaultTransaction{},
 				},
-				Creator: nil,
+				creator: nil,
 			},
 
 			output: nil,
@@ -224,10 +225,25 @@ func TestCreateProposedBlock(t *testing.T) {
 		},
 	}
 
+	timeStamp := (time.Now()).Round(100 * time.Millisecond)
+	prevSeal := []byte("prevseal")
+	txList := []blockchain.Transaction{
+		&blockchain.DefaultTransaction{},
+	}
+	creator := []byte("junksound")
+
+	validator := blockchain.DefaultValidator{}
+	txSeal, err := validator.BuildTxSeal(txList)
+	Seal, err := validator.BuildSeal(timeStamp, prevSeal, txSeal, creator)
+
+	if err != nil {
+		log.Println(err.Error())
+	}
+
 	repo := MockRepostiory{}
 
 	repo.saveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, aggregateID, events[0].GetID())
+		assert.Equal(t, string(Seal), aggregateID)
 		assert.Equal(t, 1, len(events))
 		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
 		return nil
@@ -245,7 +261,7 @@ func TestCreateProposedBlock(t *testing.T) {
 			test.input.prevSeal,
 			test.input.height,
 			test.input.txList,
-			test.input.Creator,
+			test.input.creator,
 		)
 
 		//then
@@ -259,7 +275,7 @@ func TestCreateProposedBlock(t *testing.T) {
 		assert.Equal(t, test.output.GetPrevSeal(), ProposedBlock.GetPrevSeal())
 		assert.Equal(t, test.output.GetHeight(), ProposedBlock.GetHeight())
 		assert.Equal(t, test.output.GetTxList(), ProposedBlock.GetTxList())
-		assert.Equal(t, test.output.GetTimestamp().String()[:19], ProposedBlock.GetTimestamp().String()[:19])
+		assert.Equal(t, test.output.GetTimestamp(), ProposedBlock.GetTimestamp())
 		assert.Equal(t, test.output.GetCreator(), ProposedBlock.GetCreator())
 	}
 
