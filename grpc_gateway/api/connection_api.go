@@ -3,23 +3,23 @@ package api
 import (
 	"log"
 
-	"github.com/it-chain/it-chain-Engine/gateway"
+	"github.com/it-chain/it-chain-Engine/grpc_gateway"
 	"github.com/it-chain/midgard"
 )
 
 type ConnectionApi struct {
 	eventRepository midgard.Repository
-	grpcService     gateway.GrpcService
+	grpcService     grpc_gateway.GrpcService
 }
 
-func NewConnectionApi(eventRepository midgard.Repository, grpcService gateway.GrpcService) *ConnectionApi {
+func NewConnectionApi(eventRepository midgard.Repository, grpcService grpc_gateway.GrpcService) *ConnectionApi {
 	return &ConnectionApi{
 		eventRepository: eventRepository,
 		grpcService:     grpcService,
 	}
 }
 
-func (c ConnectionApi) CreateConnection(command gateway.ConnectionCreateCommand) {
+func (c ConnectionApi) CreateConnection(command grpc_gateway.ConnectionCreateCommand) {
 
 	events := make([]midgard.Event, 0)
 
@@ -36,7 +36,7 @@ func (c ConnectionApi) CreateConnection(command gateway.ConnectionCreateCommand)
 		log.Printf("fail to dial [%s]", err)
 	}
 
-	events = append(events, gateway.ConnectionCreatedEvent{
+	events = append(events, grpc_gateway.ConnectionCreatedEvent{
 		EventModel: midgard.EventModel{
 			ID:   connection.ID,
 			Type: "connection.created",
@@ -53,16 +53,16 @@ func (c ConnectionApi) CreateConnection(command gateway.ConnectionCreateCommand)
 
 //다른 node와의 연결 close
 //todo close connection event 발생
-func (c ConnectionApi) CloseConnection(connection gateway.Connection) {
+func (c ConnectionApi) CloseConnection(connection grpc_gateway.Connection) {
 
 }
 
 //
-func (c ConnectionApi) OnConnection(connection gateway.Connection) {
+func (c ConnectionApi) OnConnection(connection grpc_gateway.Connection) {
 
 	events := make([]midgard.Event, 0)
 
-	events = append(events, gateway.ConnectionCreatedEvent{
+	events = append(events, grpc_gateway.ConnectionCreatedEvent{
 		EventModel: midgard.EventModel{
 			ID: connection.ID,
 		},
@@ -78,6 +78,6 @@ func (c ConnectionApi) OnConnection(connection gateway.Connection) {
 
 //연결된 node의 connection 종료
 //todo close connection event 발생
-func (c ConnectionApi) OnDisconnection(connection gateway.Connection) {
+func (c ConnectionApi) OnDisconnection(connection grpc_gateway.Connection) {
 
 }

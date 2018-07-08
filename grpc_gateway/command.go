@@ -1,4 +1,4 @@
-package gateway
+package grpc_gateway
 
 import (
 	"github.com/it-chain/midgard"

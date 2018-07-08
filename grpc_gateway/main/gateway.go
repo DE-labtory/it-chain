@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/it-chain/it-chain-Engine/conf"
-	"github.com/it-chain/it-chain-Engine/gateway"
-	"github.com/it-chain/it-chain-Engine/gateway/api"
-	"github.com/it-chain/it-chain-Engine/gateway/infra"
+	"github.com/it-chain/it-chain-Engine/grpc_gateway"
+	"github.com/it-chain/it-chain-Engine/grpc_gateway/api"
+	"github.com/it-chain/it-chain-Engine/grpc_gateway/infra"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/it-chain/midgard/store/leveldb"
@@ -25,8 +25,8 @@ func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 
 	//midgard EventStore
 	repository := midgard.NewRepo(leveldb.NewEventStore(
-		".gateway/eventStore",
-		leveldb.NewSerializer(gateway.ConnectionCreatedEvent{}, gateway.ConnectionDisconnectedEvent{}, gateway.ErrorCreatedEvent{}),
+		".grpc_gateway/eventStore",
+		leveldb.NewSerializer(grpc_gateway.ConnectionCreatedEvent{}, grpc_gateway.ConnectionDisconnectedEvent{}, grpc_gateway.ErrorCreatedEvent{}),
 	), rabbitmqClient)
 
 	//createHandler
@@ -43,7 +43,7 @@ func Start(ampqUrl string, grpcUrl string, keyPath string) error {
 		panic(err)
 	}
 
-	//shutdown gateway
+	//shutdown grpc_gateway
 	go func() {
 		for {
 			select {

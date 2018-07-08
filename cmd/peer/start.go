@@ -12,7 +12,7 @@ import (
 	"syscall"
 
 	"github.com/it-chain/it-chain-Engine/conf"
-	"github.com/it-chain/it-chain-Engine/gateway"
+	"github.com/it-chain/it-chain-Engine/grpc_gateway"
 	"github.com/urfave/cli"
 )
 
@@ -99,7 +99,7 @@ func start(damon bool) {
 
 	config := conf.GetConfiguration()
 
-	err = gateway.Start(config.Common.Messaging.Url, config.GrpcGateway.Ip, config.Authentication.KeyPath)
+	err = grpc_gateway.Start(config.Common.Messaging.Url, config.GrpcGateway.Ip, config.Authentication.KeyPath)
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -170,7 +170,7 @@ func GetValue(pidfile string) (int, error) {
 }
 
 func stopGateway() {
-	gateway.Stop()
+	grpc_gateway.Stop()
 	os.RemoveAll("my.pid")
 	log.Println("stopped by signal")
 }
