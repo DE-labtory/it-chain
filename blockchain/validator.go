@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"errors"
 
-	"fmt"
-
 	"time"
 
 	"github.com/it-chain/yggdrasill/common"
@@ -113,7 +111,6 @@ func (t *DefaultValidator) ValidateTransaction(txSeal [][]byte, transaction Tran
 // 인풋 파라미터의 block에 자동으로 할당해주지는 않는다.
 func (t *DefaultValidator) BuildSeal(timeStamp time.Time, prevSeal []byte, txSeal [][]byte, creator []byte) ([]byte, error) {
 	timestamp, err := timeStamp.MarshalText()
-	fmt.Println("testing: BuildSeal")
 	if err != nil {
 		return nil, err
 	}

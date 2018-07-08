@@ -20,7 +20,7 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	//declare
 	GenesisBlock := &DefaultBlock{}
 	validator := DefaultValidator{}
-	TimeStamp := (time.Now()).Round(0)
+	TimeStamp := (time.Now()).Round(100 * time.Millisecond)
 
 	//set
 	err := setBlockWithConfig(genesisconfFilePath, GenesisBlock)
@@ -48,12 +48,32 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	return GenesisBlock, nil
 }
 
+func setBlockWithConfig(filePath string, block Block) error {
+	jsonFile, err := os.Open(filePath)
+	defer jsonFile.Close()
+	if err != nil {
+		return err
+	}
+
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(byteValue, block)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, Creator []byte) (Block, error) {
 
 	//declare
 	ProposedBlock := &DefaultBlock{}
 	validator := DefaultValidator{}
-	TimeStamp := (time.Now()).Round(0)
+	TimeStamp := (time.Now()).Round(100 * time.Millisecond)
 
 	//build
 	txSeal, err := validator.BuildTxSeal(txList)
@@ -78,26 +98,6 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 	ProposedBlock.On(createEvent)
 
 	return ProposedBlock, nil
-}
-
-func setBlockWithConfig(filePath string, block Block) error {
-	jsonFile, err := os.Open(filePath)
-	defer jsonFile.Close()
-	if err != nil {
-		return err
-	}
-
-	byteValue, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(byteValue, block)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []Transaction, txSeal [][]byte, timeStamp time.Time, creator []byte) *BlockCreatedEvent {
