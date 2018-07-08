@@ -1,11 +1,13 @@
 package api
 
-import "github.com/it-chain/it-chain-Engine/icode/domain/model"
+import (
+	"github.com/it-chain/it-chain-Engine/icode"
+)
 
-//Api to import or store icode from outside
-type ItCodeStoreApi interface {
-	Clone(repositoryUrl string) (*model.ICodeMeta, error)
+type ICodeStoreApi interface {
+	//clone code from deploy info
+	Clone(repositoryUrl string) (*icode.Meta, error)
 
 	//push code to auth repo
-	Push(meta model.ICodeMeta) error
+	Push(meta icode.Meta) error
 }

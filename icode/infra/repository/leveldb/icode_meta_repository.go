@@ -1,54 +1,50 @@
 package leveldb
 
 import (
-	"encoding/json"
+	"errors"
 
-	"github.com/it-chain/it-chain-Engine/icode/domain/model"
+	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/icode"
 	"github.com/it-chain/leveldb-wrapper"
-	"github.com/pkg/errors"
 )
 
-type ICodeMetaRepository struct {
-	leveldb *leveldbwrapper.DB
-}
-
-func NewICodeMetaRepository(path string) *ICodeMetaRepository {
-
+func NewMetaRepository(path string) *MetaRepository {
 	db := leveldbwrapper.CreateNewDB(path)
 	db.Open()
-
-	return &ICodeMetaRepository{
-		leveldb: db,
+	return &MetaRepository{
+		levelDb: db,
 	}
 }
 
-func (i ICodeMetaRepository) Save(iCodeMeta model.ICodeMeta) error {
+type MetaRepository struct {
+	levelDb *leveldbwrapper.DB
+}
 
-	if iCodeMeta.ID.ToString() == "" {
+func (mr *MetaRepository) Save(meta icode.Meta) error {
+
+	if meta.ICodeID == "" {
 		return errors.New("ICodeMeta ID is empty")
 	}
 
-	b, err := iCodeMeta.Serialize()
+	b, err := common.Serialize(meta)
 
 	if err != nil {
 		return err
 	}
 
-	if err = i.leveldb.Put([]byte(iCodeMeta.ID), b, true); err != nil {
+	if err = mr.levelDb.Put([]byte(meta.ICodeID), b, true); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (i ICodeMetaRepository) Remove(id model.ICodeID) error {
-
-	return i.leveldb.Delete([]byte(id), true)
+func (mr *MetaRepository) Remove(id icode.ID) error {
+	return mr.levelDb.Delete([]byte(id), true)
 }
 
-func (i ICodeMetaRepository) FindByID(id model.ICodeID) (*model.ICodeMeta, error) {
-
-	b, err := i.leveldb.Get([]byte(id))
+func (mr *MetaRepository) FindById(id icode.ID) (*icode.Meta, error) {
+	b, err := mr.levelDb.Get([]byte(id))
 
 	if err != nil {
 		return nil, errors.New("NO")
@@ -58,9 +54,9 @@ func (i ICodeMetaRepository) FindByID(id model.ICodeID) (*model.ICodeMeta, error
 		return nil, nil
 	}
 
-	iCodeMeta := &model.ICodeMeta{}
+	iCodeMeta := &icode.Meta{}
 
-	err = json.Unmarshal(b, iCodeMeta)
+	err = common.Deserialize(b, iCodeMeta)
 
 	if err != nil {
 		return nil, err
@@ -69,15 +65,14 @@ func (i ICodeMetaRepository) FindByID(id model.ICodeID) (*model.ICodeMeta, error
 	return iCodeMeta, nil
 }
 
-func (i ICodeMetaRepository) FindAll() ([]*model.ICodeMeta, error) {
-
-	iter := i.leveldb.GetIteratorWithPrefix([]byte(""))
-	iCodeMetas := make([]*model.ICodeMeta, 0)
+func (mr *MetaRepository) FindAll() ([]*icode.Meta, error) {
+	iter := mr.levelDb.GetIteratorWithPrefix([]byte(""))
+	iCodeMetas := make([]*icode.Meta, 0)
 
 	for iter.Next() {
 		val := iter.Value()
-		iCodeMeta := &model.ICodeMeta{}
-		err := Deserialize(val, iCodeMeta)
+		iCodeMeta := &icode.Meta{}
+		err := common.Deserialize(val, iCodeMeta)
 
 		if err != nil {
 			return nil, err
@@ -89,16 +84,17 @@ func (i ICodeMetaRepository) FindAll() ([]*model.ICodeMeta, error) {
 	return iCodeMetas, nil
 }
 
-func (i ICodeMetaRepository) Close() {
-	i.leveldb.Close()
-}
-
-func Deserialize(b []byte, iCodeModel *model.ICodeMeta) error {
-	err := json.Unmarshal(b, iCodeModel)
-
+func (mr *MetaRepository) FindByGitURL(url string) (*icode.Meta, error) {
+	metas, err := mr.FindAll()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	for _, meta := range metas {
+		if meta.GitUrl == url {
+			return meta, nil
+		}
+	}
+
+	return &icode.Meta{}, nil
 }
