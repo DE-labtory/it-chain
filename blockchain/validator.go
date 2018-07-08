@@ -4,6 +4,10 @@ import (
 	"bytes"
 	"errors"
 
+	"fmt"
+
+	"time"
+
 	"github.com/it-chain/yggdrasill/common"
 )
 
@@ -107,13 +111,12 @@ func (t *DefaultValidator) ValidateTransaction(txSeal [][]byte, transaction Tran
 
 // BuildSeal 함수는 block 객체를 받아서 Seal 값을 만들고, Seal 값을 반환한다.
 // 인풋 파라미터의 block에 자동으로 할당해주지는 않는다.
-func (t *DefaultValidator) BuildSeal(block Block) ([]byte, error) {
-	timestamp, err := block.GetTimestamp().MarshalText()
+func (t *DefaultValidator) BuildSeal(timeStamp time.Time, prevSeal []byte, txSeal [][]byte, creator []byte) ([]byte, error) {
+	timestamp, err := timeStamp.MarshalText()
+	fmt.Println("testing: BuildSeal")
 	if err != nil {
 		return nil, err
 	}
-
-	prevSeal, txSeal, creator := block.GetPrevSeal(), block.GetTxSeal(), block.GetCreator()
 
 	if prevSeal == nil || txSeal == nil || creator == nil {
 		return nil, ErrInsufficientFields
