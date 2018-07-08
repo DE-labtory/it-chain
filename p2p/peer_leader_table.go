@@ -1,10 +1,10 @@
 package p2p
 
 import (
-	"github.com/pkg/errors"
 	"encoding/json"
-	"github.com/it-chain/it-chain-Engine/p2p/infra/adapter"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 var ErrEmptyLeaderId = errors.New("empty leader id")
@@ -44,14 +44,13 @@ func (pt *PLTable) GetPeerList() ([]Peer, error) {
 }
 
 type PLTableService interface {
-
 	GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error)
 	ClearPeerTable() error
 }
 
 // will be deleted after implemented in gateway api
-type PLTableServiceReplica struct{
-	mux sync.Mutex
+type PLTableServiceReplica struct {
+	mux       sync.Mutex
 	peerTable PeerTable
 }
 
@@ -61,7 +60,7 @@ func (pLTableService *PLTableServiceReplica) GetPLTableFromCommand(command GrpcR
 
 	if err := json.Unmarshal(command.Body, &peerTable); err != nil {
 		//todo error 처리
-		return PLTable{}, adapter.ErrUnmarshal
+		return PLTable{}, nil
 	}
 
 	return peerTable, nil

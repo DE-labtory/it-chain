@@ -8,7 +8,6 @@ import (
 	"github.com/magiconair/properties/assert"
 )
 
-
 func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
@@ -20,16 +19,15 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 			input: struct{ peerList []p2p.Peer }{
 				peerList: []p2p.Peer{
 					{
-						PeerId:p2p.PeerId{
-							Id:"1",
+						PeerId: p2p.PeerId{
+							Id: "1",
 						},
 					},
 				},
 			},
-			err:nil,
+			err: nil,
 		},
 	}
-
 
 	mockPeerService := &p2p.MockPeerService{}
 
@@ -37,15 +35,14 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 
 		peerList := MakeFakePeerList()
 
-		for _, peer := range peerList{
-			if peer.PeerId == peerId{
+		for _, peer := range peerList {
+			if peer.PeerId == peerId {
 				return peer, nil
 			}
 		}
 
 		return p2p.Peer{}, nil
 	}
-
 
 	for testName, test := range tests {
 
@@ -58,21 +55,21 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 	}
 }
 
-func MakeFakePeerList() []p2p.Peer{
+func MakeFakePeerList() []p2p.Peer {
 
 	peerList := make([]p2p.Peer, 0)
 	peerList = append(peerList, p2p.Peer{
-		PeerId:p2p.PeerId{
-			Id:"1",
+		PeerId: p2p.PeerId{
+			Id: "1",
 		},
-		IpAddress:"1",
+		IpAddress: "1",
 	})
 
 	peerList = append(peerList, p2p.Peer{
-		PeerId:p2p.PeerId{
-			Id:"2",
+		PeerId: p2p.PeerId{
+			Id: "2",
 		},
-		IpAddress:"2",
+		IpAddress: "2",
 	})
 
 	return peerList
