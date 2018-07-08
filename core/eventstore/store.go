@@ -138,4 +138,5 @@ func Close() {
 	}
 
 	Instance.repo.Close()
+	Instance = nil
 }

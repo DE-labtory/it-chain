@@ -14,9 +14,8 @@ func NewMessageApi(grpcService grpc_gateway.GrpcService) *MessageApi {
 	}
 }
 
-//todo validation rule added example( check length of recipent)
-func (c MessageApi) DeliverMessage(command grpc_gateway.GrpcDeliverCommand) {
+func (c MessageApi) DeliverMessage(body []byte, protocol string, ids ...string) {
 
 	//validation rule add
-	c.grpcService.SendMessages(command.Body, command.Protocol, command.Recipients...)
+	c.grpcService.SendMessages(body, protocol, ids...)
 }
