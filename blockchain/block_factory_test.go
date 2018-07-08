@@ -69,7 +69,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 
 			output: nil,
 
-			err: blockchain.ErrGetConfig,
+			err: blockchain.ErrSetConfig,
 		},
 	}
 
