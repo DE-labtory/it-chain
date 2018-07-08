@@ -54,18 +54,6 @@ func (peerApi *PeerApi) UpdatePeerList(peerList []p2p.Peer) error {
 	return nil
 }
 
-func (peerApi *PeerApi) GetPLTable() p2p.PLTable {
-
-	leader := peerApi.leaderService.Get()
-	peerList, _ := peerApi.peerService.FindAll()
-
-	peerLeaderTable := p2p.PLTable{
-		Leader:   leader,
-		PeerList: peerList,
-	}
-
-	return peerLeaderTable
-}
 
 //Deliver Peer leader table that consists of peerList and leader
 func (peerApi *PeerApi) DeliverPLTable(connectionId string) error {
