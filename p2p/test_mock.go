@@ -33,3 +33,13 @@ func (mps *MockPeerService) FindAll () ([]Peer, error){
 
 	return mps.FindAllFunc()
 }
+
+type MockCommunicationService struct {
+
+	DialFunc func(ipAddress string) error
+}
+
+func (mcs *MockCommunicationService) Dial(ipAddress string) error {
+
+	return mcs.DialFunc(ipAddress)
+}
