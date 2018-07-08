@@ -21,16 +21,16 @@ type Validator = common.Validator
 // DefaultValidator 객체는 Validator interface를 구현한 객체.
 type DefaultValidator struct{}
 
-// ValidateSeal 함수는 원래 Seal 값과 주어진 Seal 값(comparisonSeal)을 비교하여, 올바른지 검증한다.
-func (t *DefaultValidator) ValidateSeal(seal []byte, comparisonBlock Block) (bool, error) {
-
-	comparisonSeal, error := t.BuildSeal(comparisonBlock)
-
-	if error != nil {
-		return false, error
-	}
-	return bytes.Compare(seal, comparisonSeal) == 0, nil
-}
+//// ValidateSeal 함수는 원래 Seal 값과 주어진 Seal 값(comparisonSeal)을 비교하여, 올바른지 검증한다.
+//func (t *DefaultValidator) ValidateSeal(seal []byte, comparisonBlock Block) (bool, error) {
+//
+//	comparisonSeal, error := t.BuildSeal(comparisonBlock)
+//
+//	if error != nil {
+//		return false, error
+//	}
+//	return bytes.Compare(seal, comparisonSeal) == 0, nil
+//}
 
 // ValidateTxSeal 함수는 주어진 Transaction 리스트에 따라 주어진 transaction Seal을 검증함.
 func (t *DefaultValidator) ValidateTxSeal(txSeal [][]byte, txList []Transaction) (bool, error) {

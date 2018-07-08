@@ -11,7 +11,7 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-var ErrGetConfig = errors.New("error when get Config")
+var ErrSetConfig = errors.New("error when set Config")
 var ErrBuildingSeal = errors.New("error when building Seal")
 var ErrBuildingTxSeal = errors.New("error when building TxSeal")
 
@@ -20,17 +20,15 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	GenesisBlock := &DefaultBlock{}
 	validator := DefaultValidator{}
 
-	byteValue, err := configFromJson(genesisconfFilePath)
+	err := setBlockWithConfig(genesisconfFilePath, GenesisBlock)
 
 	if err != nil {
-		return nil, ErrGetConfig
+		return nil, ErrSetConfig
 	}
-
-	json.Unmarshal(byteValue, &GenesisBlock)
 
 	GenesisBlock.SetTimestamp((time.Now()).Round(0))
 
-	Seal, err := validator.BuildSeal(GenesisBlock)
+	Seal, err := validator.BuildSeal((time.Now()).Round(0), GenesisBlock.GetPrevSeal(), GenesisBlock.TxSeal, GenesisBlock.Creator)
 
 	if err != nil {
 		return nil, ErrBuildingSeal
@@ -81,7 +79,7 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 
 	ProposedBlock.SetTimestamp((time.Now()).Round(0))
 
-	Seal, err := validator.BuildSeal(ProposedBlock)
+	Seal, err := validator.BuildSeal((time.Now()).Round(0), prevSeal, txSeal, Creator)
 
 	if err != nil {
 		return nil, ErrBuildingSeal
@@ -120,4 +118,24 @@ func configFromJson(filePath string) ([]uint8, error) {
 		return nil, err
 	}
 	return byteValue, nil
+}
+
+func setBlockWithConfig(filePath string, block Block) error {
+	jsonFile, err := os.Open(filePath)
+	defer jsonFile.Close()
+	if err != nil {
+		return err
+	}
+
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(byteValue, block)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
