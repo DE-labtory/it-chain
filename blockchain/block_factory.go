@@ -68,6 +68,22 @@ func setBlockWithConfig(filePath string, block Block) error {
 	return nil
 }
 
+func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []Transaction, txSeal [][]byte, timeStamp time.Time, creator []byte) *BlockCreatedEvent {
+	return &BlockCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID:   string(seal),
+			Type: "block.created",
+		},
+		Seal:      seal,
+		PrevSeal:  prevSeal,
+		Height:    height,
+		TxList:    txList,
+		TxSeal:    txSeal,
+		Timestamp: timeStamp,
+		Creator:   creator,
+	}
+}
+
 func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, Creator []byte) (Block, error) {
 
 	//declare
@@ -98,20 +114,4 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 	ProposedBlock.On(createEvent)
 
 	return ProposedBlock, nil
-}
-
-func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []Transaction, txSeal [][]byte, timeStamp time.Time, creator []byte) *BlockCreatedEvent {
-	return &BlockCreatedEvent{
-		EventModel: midgard.EventModel{
-			ID:   string(seal),
-			Type: "block.created",
-		},
-		Seal:      seal,
-		PrevSeal:  prevSeal,
-		Height:    height,
-		TxList:    txList,
-		TxSeal:    txSeal,
-		Timestamp: timeStamp,
-		Creator:   creator,
-	}
 }
