@@ -8,6 +8,7 @@ import (
 
 var ErrNilBlock = errors.New("block is nil")
 var ErrSyncProcessing = errors.New("Sync is in progress")
+var ErrGetLastBlock = errors.New("failed get last block")
 
 type BlockApi struct {
 	blockQueryApi blockchain.BlockQueryApi
@@ -53,15 +54,16 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) e
 		return ErrNilBlock
 	}
 
-	lastBlock := &blockchain.DefaultBlock{}
-	bApi.blockQueryApi.GetLastBlock(lastBlock)
+	lastBlock, err := bApi.blockQueryApi.GetLastBlock()
+	if err != nil {
+		return ErrGetLastBlock
+	}
 
-	checkResult := compareHeight(blockFromPool.GetHeight(), lastBlock.GetHeight())
+	isSafeToSave := compareHeight(blockFromPool.GetHeight(), lastBlock.GetHeight())
 
-	// Create action based on check result
-	actionAfterCheck := blockchain.CreateActionAfterCheck(checkResult, pool, bApi.blockQueryApi)
+	action := blockchain.CreateSaveOrSyncAction(isSafeToSave, pool)
 
-	actionAfterCheck.DoAction(blockFromPool)
+	action.DoAction(blockFromPool)
 
 	return nil
 }

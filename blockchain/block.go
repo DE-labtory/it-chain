@@ -142,23 +142,23 @@ func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock
 
 // interface of api gateway query api
 type BlockQueryApi interface {
-	GetBlockByHeight(block Block, blockHeight uint64) error
-	GetBlockBySeal(block Block, seal []byte) error
-	GetBlockByTxID(block Block, txid string) error
-	GetLastBlock(block Block) error
-	GetTransactionByTxID(transaction Transaction, txid string) error
+	GetBlockByHeight(blockHeight uint64) (Block, error)
+	GetBlockBySeal(seal []byte) (Block, error)
+	GetBlockByTxID(txid string) (Block, error)
+	GetLastBlock() (Block, error)
+	GetTransactionByTxID(txid string) (Transaction, error)
 }
 
 
-type ActionAfterCheck interface {
+type Action interface {
 	DoAction(block Block)
 }
 
-func CreateActionAfterCheck(checkResult int64, pool BlockPool, qa BlockQueryApi) ActionAfterCheck {
+func CreateSaveOrSyncAction(checkResult int64, pool BlockPool) Action {
 	if checkResult > 0 {
 		return NewSyncAction()
 	} else if checkResult == 0 {
-		return NewSaveAction(pool, qa)
+		return NewSaveAction(pool)
 	} else {
 		fmt.Printf("got shorter height block")
 		return nil
@@ -178,13 +178,11 @@ func (syncAction *SyncAction) DoAction(block Block) {
 
 type SaveAction struct {
 	blockPool BlockPool
-	queryApi BlockQueryApi
 }
 
-func NewSaveAction(blockPool BlockPool, queryApi BlockQueryApi) *SaveAction {
+func NewSaveAction(blockPool BlockPool) *SaveAction {
 	return &SaveAction{
 		blockPool: blockPool,
-		queryApi: queryApi,
 	}
 }
 
