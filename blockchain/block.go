@@ -9,10 +9,10 @@ import (
 	"errors"
 
 	ygg "github.com/it-chain/yggdrasill/common"
-	"fmt"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"log"
 )
 
 var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
@@ -226,6 +226,6 @@ func NewDefaultAction() *DefaultAction{
 }
 
 func (defaultAction *DefaultAction) DoAction(block Block) error {
-	fmt.Printf("got shorter height block [%v]", block.GetHeight())
+	log.Printf("got shorter height block [%v]", block.GetHeight())
 	return nil
 }
