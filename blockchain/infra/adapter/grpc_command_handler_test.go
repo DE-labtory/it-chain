@@ -13,16 +13,15 @@ type MockSyncBlockApi struct {}
 func (ba MockSyncBlockApi) SyncedCheck(block blockchain.Block) error { return nil }
 
 type MockBlockQueryApi struct {
-	GetLastBlockFunc func(block blockchain.Block) error
+	GetLastBlockFunc func() (blockchain.Block, error)
 }
-func (br MockBlockQueryApi) GetLastBlock(block blockchain.Block) error {
-	return br.GetLastBlockFunc(block)
+func (br MockBlockQueryApi) GetLastBlock() (blockchain.Block, error) {
+	return br.GetLastBlockFunc()
 }
-func (br MockBlockQueryApi) AddBlock(block blockchain.Block) error { return nil}
-func (br MockBlockQueryApi) GetBlockByHeight(block blockchain.Block, blockHeight uint64) error { return nil }
-func (br MockBlockQueryApi) GetBlockBySeal(block blockchain.Block, seal []byte) error { return nil }
-func (br MockBlockQueryApi) GetBlockByTxID(block blockchain.Block, txid string) error { return nil }
-func (br MockBlockQueryApi) GetTransactionByTxID(transaction blockchain.Transaction, txid string) error { return nil }
+func (br MockBlockQueryApi) GetBlockByHeight(blockHeight uint64) (blockchain.Block, error) { return nil, nil }
+func (br MockBlockQueryApi) GetBlockBySeal(seal []byte) (blockchain.Block, error) { return nil, nil }
+func (br MockBlockQueryApi) GetBlockByTxID(txid string) (blockchain.Block, error) { return nil, nil }
+func (br MockBlockQueryApi) GetTransactionByTxID(txid string) (blockchain.Transaction, error) { return nil, nil }
 
 type MockSyncCheckGrpcCommandService struct {
 	SyncCheckResponseFunc func(block blockchain.Block) error
@@ -92,9 +91,8 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 		blockApi := MockSyncBlockApi{}
 
 		blockRepository := MockBlockQueryApi{}
-		blockRepository.GetLastBlockFunc = func(block blockchain.Block) error {
-			block.SetHeight(99887)
-			return test.input.getLastBlockErr
+		blockRepository.GetLastBlockFunc = func() (blockchain.Block, error) {
+			return &blockchain.DefaultBlock{Height: blockchain.BlockHeight(99887)},test.input.getLastBlockErr
 		}
 
 		grpcCommandService := MockSyncCheckGrpcCommandService{}

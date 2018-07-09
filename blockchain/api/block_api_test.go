@@ -11,16 +11,15 @@ import (
 )
 
 type MockBlockQueryApi struct {
-	GetLastBlockFunc func(block blockchain.Block) error
+	GetLastBlockFunc func() (blockchain.Block, error)
 }
-func (br MockBlockQueryApi) GetLastBlock(block blockchain.Block) error {
-	return br.GetLastBlockFunc(block)
+func (br MockBlockQueryApi) GetLastBlock() (blockchain.Block, error) {
+	return br.GetLastBlockFunc()
 }
-func (br MockBlockQueryApi) AddBlock(block blockchain.Block) error { return nil}
-func (br MockBlockQueryApi) GetBlockByHeight(block blockchain.Block, blockHeight uint64) error { return nil }
-func (br MockBlockQueryApi) GetBlockBySeal(block blockchain.Block, seal []byte) error { return nil }
-func (br MockBlockQueryApi) GetBlockByTxID(block blockchain.Block, txid string) error { return nil }
-func (br MockBlockQueryApi) GetTransactionByTxID(transaction blockchain.Transaction, txid string) error { return nil }
+func (br MockBlockQueryApi) GetBlockByHeight(blockHeight uint64) (blockchain.Block, error) { return nil, nil }
+func (br MockBlockQueryApi) GetBlockBySeal(seal []byte) (blockchain.Block, error) { return nil, nil }
+func (br MockBlockQueryApi) GetBlockByTxID(txid string) (blockchain.Block, error) { return nil, nil }
+func (br MockBlockQueryApi) GetTransactionByTxID(txid string) (blockchain.Transaction, error) { return nil, nil }
 
 type MockEventRepository struct {
 	LoadFunc func(aggregate midgard.Aggregate) error
@@ -88,11 +87,10 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 	}
 	// When
 	blockQueryApi := MockBlockQueryApi{}
-	blockQueryApi.GetLastBlockFunc = func(block blockchain.Block) error {
-		block = &blockchain.DefaultBlock{
+	blockQueryApi.GetLastBlockFunc = func() (blockchain.Block, error) {
+		return &blockchain.DefaultBlock{
 			Height: blockchain.BlockHeight(12),
-		}
-		return nil
+		}, nil
 	}
 	publisherId := "zf"
 	eventRepository := MockEventRepository{}

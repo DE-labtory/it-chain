@@ -160,8 +160,7 @@ func CreateSaveOrSyncAction(checkResult int64, pool BlockPool) Action {
 	} else if checkResult == 0 {
 		return NewSaveAction(pool)
 	} else {
-		fmt.Printf("got shorter height block")
-		return nil
+		return NewDefaultAction()
 	}
 }
 
@@ -188,4 +187,14 @@ func NewSaveAction(blockPool BlockPool) *SaveAction {
 
 func (saveAction *SaveAction) DoAction(block Block) {
 	saveAction.blockPool.Add(block)
+}
+
+type DefaultAction struct {}
+
+func NewDefaultAction() *DefaultAction{
+	return &DefaultAction{}
+}
+
+func (defaultAction *DefaultAction) DoAction(block Block) {
+	fmt.Printf("got shorter height block [%v]", block.GetHeight())
 }
