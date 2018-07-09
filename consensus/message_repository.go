@@ -29,16 +29,25 @@ func NewPrepareMsgRepository() PrepareMsgRepository {
 }
 
 func (pr *PrepareMsgRepositoryImpl) Save(prepareMsg PrepareMsg) {
+	pr.lock.Lock()
+	defer pr.lock.Unlock()
+
 	msgPool := pr.PreparePool[prepareMsg.ConsensusId]
 
 	pr.PreparePool[prepareMsg.ConsensusId] = append(msgPool, prepareMsg)
 }
 
 func (pr *PrepareMsgRepositoryImpl) Remove(id ConsensusId) {
+	pr.lock.Lock()
+	defer pr.lock.Unlock()
+
 	delete(pr.PreparePool, id)
 }
 
 func (pr *PrepareMsgRepositoryImpl) FindPrepareMsgsByConsensusID(id ConsensusId) []PrepareMsg {
+	pr.lock.Lock()
+	defer pr.lock.Unlock()
+
 	return pr.PreparePool[id]
 }
 
@@ -61,15 +70,24 @@ func NewCommitMsgRepository() CommitMsgRepository {
 }
 
 func (cr *CommitMsgRepositoryImpl) Save(commitMsg CommitMsg) {
+	cr.lock.Lock()
+	defer cr.lock.Unlock()
+
 	msgPool := cr.CommitPool[commitMsg.ConsensusId]
 
 	cr.CommitPool[commitMsg.ConsensusId] = append(msgPool, commitMsg)
 }
 
 func (cr *CommitMsgRepositoryImpl) Remove(id ConsensusId) {
+	cr.lock.Lock()
+	defer cr.lock.Unlock()
+
 	delete(cr.CommitPool, id)
 }
 
 func (cr *CommitMsgRepositoryImpl) FindCommitMsgsByConsensusID(id ConsensusId) []CommitMsg {
+	cr.lock.Lock()
+	defer cr.lock.Unlock()
+
 	return cr.CommitPool[id]
 }
