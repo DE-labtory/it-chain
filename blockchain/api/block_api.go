@@ -43,9 +43,7 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 }
 
 func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
-	syncState := blockchain.NewBlockSyncState()
-	eventstore.Load(syncState, blockchain.BC_SYNC_STATE_AID)
-	if !syncState.IsProgressing() {
+	if !bApi.SyncIsProgressing() {
 		return ErrSyncProcessing
 	}
 
@@ -69,6 +67,12 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) e
 	actionAfterCheck.DoAction(blockFromPool)
 
 	return nil
+}
+
+func (bApi *BlockApi) SyncIsProgressing() blockchain.ProgressState {
+	syncState := blockchain.NewBlockSyncState()
+	eventstore.Load(syncState, blockchain.BC_SYNC_STATE_AID)
+	return syncState.IsProgressing()
 }
 
 func (bApi *BlockApi) loadBlockPool() blockchain.BlockPool {
