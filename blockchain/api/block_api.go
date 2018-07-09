@@ -61,7 +61,7 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) e
 
 	isSafeToSave := compareHeight(blockFromPool.GetHeight(), lastBlock.GetHeight())
 
-	action := blockchain.CreateSaveOrSyncAction(isSafeToSave, pool)
+	action := blockchain.CreateSaveOrSyncAction(isSafeToSave)
 
 	action.DoAction(blockFromPool)
 

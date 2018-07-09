@@ -8,14 +8,17 @@ import (
 
 	"errors"
 
-	"github.com/it-chain/yggdrasill/common"
+	ygg "github.com/it-chain/yggdrasill/common"
 	"fmt"
+	"github.com/it-chain/midgard"
+	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 )
 
 var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
 var ErrTransactionType = errors.New("Wrong transaction type")
 
-type Block = common.Block
+type Block = ygg.Block
 
 type BlockHeight = uint64
 
@@ -151,14 +154,14 @@ type BlockQueryApi interface {
 
 
 type Action interface {
-	DoAction(block Block)
+	DoAction(block Block) error
 }
 
-func CreateSaveOrSyncAction(checkResult int64, pool BlockPool) Action {
+func CreateSaveOrSyncAction(checkResult int64) Action {
 	if checkResult > 0 {
 		return NewSyncAction()
 	} else if checkResult == 0 {
-		return NewSaveAction(pool)
+		return NewSaveAction()
 	} else {
 		return NewDefaultAction()
 	}
@@ -170,8 +173,9 @@ func NewSyncAction() *SyncAction {
 	return &SyncAction{}
 }
 
-func (syncAction *SyncAction) DoAction(block Block) {
+func (syncAction *SyncAction) DoAction(block Block) error {
 	// TODO: Start synchronize
+	return nil
 }
 
 
@@ -179,15 +183,41 @@ type SaveAction struct {
 	blockPool BlockPool
 }
 
-func NewSaveAction(blockPool BlockPool) *SaveAction {
-	return &SaveAction{
-		blockPool: blockPool,
-	}
+func NewSaveAction() *SaveAction {
+	return &SaveAction{}
 }
 
-func (saveAction *SaveAction) DoAction(block Block) {
-	saveAction.blockPool.Add(block)
+func (saveAction *SaveAction) DoAction(block Block) error {
+	event, err := createBlockCommittedEvent(block)
+	if err != nil {
+		return err
+	}
+	eventstore.Save(BC_LAST_BLOCK_AID, event)
+	return nil
 }
+
+func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
+	txListBytes, err := common.Serialize(block.GetTxSeal())
+	if err != nil {
+		return BlockCommittedEvent{}, ErrTxListMarshal
+	}
+
+	return BlockCommittedEvent{
+		EventModel: midgard.EventModel{
+			ID: BC_LAST_BLOCK_AID,
+		},
+		Seal: block.GetSeal(),
+		PrevSeal: block.GetPrevSeal(),
+		Height: block.GetHeight(),
+		TxList: txListBytes,
+		TxSeal: block.GetTxSeal(),
+		Timestamp: block.GetTimestamp(),
+		Creator: block.GetCreator(),
+	}, nil
+}
+
+// blockchain last block aggregate id
+var BC_LAST_BLOCK_AID = "BC_LAST_BLOCK_AID"
 
 type DefaultAction struct {}
 
@@ -195,6 +225,7 @@ func NewDefaultAction() *DefaultAction{
 	return &DefaultAction{}
 }
 
-func (defaultAction *DefaultAction) DoAction(block Block) {
+func (defaultAction *DefaultAction) DoAction(block Block) error {
 	fmt.Printf("got shorter height block [%v]", block.GetHeight())
+	return nil
 }
