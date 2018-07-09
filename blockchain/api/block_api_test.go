@@ -6,6 +6,8 @@ import (
 	"github.com/it-chain/it-chain-Engine/blockchain/api"
 	"github.com/magiconair/properties/assert"
 	"github.com/it-chain/midgard"
+	"fmt"
+	"errors"
 )
 
 type MockBlockQueryApi struct {
@@ -95,10 +97,21 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 	publisherId := "zf"
 	eventRepository := MockEventRepository{}
 	eventRepository.LoadFunc = func(aggregate midgard.Aggregate) error {
-		aggregate.(blockchain.BlockPool).Add(&blockchain.DefaultBlock{
-			Height: blockchain.BlockHeight(12),
-			TxList: []blockchain.Transaction{},
-		})
+		switch v := aggregate.(type) {
+		case blockchain.BlockPool:
+			aggregate.(blockchain.BlockPool).Add(&blockchain.DefaultBlock{
+				Height: blockchain.BlockHeight(12),
+				TxList: []blockchain.Transaction{},
+			})
+			break
+
+		case blockchain.SyncState:
+			aggregate.(blockchain.SyncState).SetProgress(blockchain.DONE)
+			break
+		default:
+			return errors.New(fmt.Sprintf("unhandled type [%s]", v))
+		}
+
 		return nil
 	}
 

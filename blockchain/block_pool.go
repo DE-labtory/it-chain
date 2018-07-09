@@ -139,6 +139,11 @@ const (
 	DONE ProgressState = false
 )
 
+
+type SyncState interface {
+	SetProgress(state ProgressState)
+}
+
 // 현재 블록 동기화가 진행 중인지 정보를 가진다.
 type BlockSyncState struct {
 	midgard.AggregateModel

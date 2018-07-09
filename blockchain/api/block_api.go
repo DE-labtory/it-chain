@@ -4,7 +4,6 @@ import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/pkg/errors"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
 )
 
 var ErrNilBlock = errors.New("block is nil")
@@ -43,7 +42,7 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 }
 
 func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
-	if !bApi.SyncIsProgressing() {
+	if bApi.SyncIsProgressing() {
 		return ErrSyncProcessing
 	}
 
@@ -71,7 +70,7 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) e
 
 func (bApi *BlockApi) SyncIsProgressing() blockchain.ProgressState {
 	syncState := blockchain.NewBlockSyncState()
-	eventstore.Load(syncState, blockchain.BC_SYNC_STATE_AID)
+	bApi.eventRepository.Load(syncState, blockchain.BC_SYNC_STATE_AID)
 	return syncState.IsProgressing()
 }
 
