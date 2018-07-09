@@ -30,8 +30,7 @@ func (bApi *BlockApi) SyncedCheck(block blockchain.Block) error {
 // 받은 block을 block pool에 추가한다.
 func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 	if block == nil {
-		fmt.Println("block is nil")
-		return nil
+		return ErrNilBlock
 	}
 
 	pool := bApi.loadBlockPool()
@@ -45,7 +44,6 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 // TODO
 func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
 	pool := bApi.loadBlockPool()
-
 	// Get block from pool
 	blockFromPool := pool.Get(height)
 

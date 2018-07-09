@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
-	"encoding/json"
+	"github.com/it-chain/it-chain-Engine/common"
 )
 
 type BlockPool interface {
@@ -56,7 +56,7 @@ func (p *BlockPoolModel) Delete(block Block) {
 }
 
 func createBlockAddToPoolEvent(block Block) (BlockAddToPoolEvent, error) {
-	txListBytes, err := json.Marshal(block.GetTxList())
+	txListBytes, err := common.Serialize(block.GetTxList())
 	if err != nil {
 		return BlockAddToPoolEvent{}, ErrTxListMarshal
 	}
@@ -111,11 +111,10 @@ func (p *BlockPoolModel) On(event midgard.Event) error {
 
 func createBlockFromAddToPoolEvent(event *BlockAddToPoolEvent) (Block, error) {
 	var txList []Transaction
-	err := json.Unmarshal(event.TxList, txList)
+	err := common.Deserialize(event.TxList, &txList)
 	if err != nil {
 		return &DefaultBlock{}, ErrTxListUnmarshal
 	}
-
 	return &DefaultBlock{
 		Seal: event.Seal,
 		PrevSeal: event.PrevSeal,

@@ -35,10 +35,8 @@ func TestBlockPoolModel_On(t *testing.T) {
 	pool := blockchain.NewBlockPool()
 
 	event1 := &blockchain.BlockAddToPoolEvent{
-		Block: &blockchain.DefaultBlock{
-			Height: 1,
-			Seal: []byte{0x1},
-		},
+		Height: 1,
+		Seal: []byte{0x1},
 	}
 	// when
 	err := pool.On(event1)
@@ -49,10 +47,8 @@ func TestBlockPoolModel_On(t *testing.T) {
 
 
 	event2 := &blockchain.BlockAddToPoolEvent{
-		Block: &blockchain.DefaultBlock{
-			Height: 2,
-			Seal: []byte{0x2},
-		},
+		Height: 2,
+		Seal: []byte{0x2},
 	}
 	// when
 	err2 := pool.On(event2)
@@ -65,10 +61,8 @@ func TestBlockPoolModel_On(t *testing.T) {
 
 	// Same height with event1, but different seal
 	event3 := &blockchain.BlockAddToPoolEvent{
-		Block: &blockchain.DefaultBlock{
-			Height: 1,
-			Seal: []byte{0x3},
-		},
+		Height: 1,
+		Seal: []byte{0x3},
 	}
 	// when
 	err3 := pool.On(event3)

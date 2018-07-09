@@ -137,6 +137,8 @@ func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock
 	return block
 }
 
+
+// interface of api gateway query api
 type BlockQueryApi interface {
 	AddBlock(block Block) error
 	GetBlockByHeight(block Block, blockHeight uint64) error
