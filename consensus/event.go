@@ -8,7 +8,7 @@ import (
 
 // Publish part
 
-type PrePrepareMsgCreatedEvent struct {
+type PrepareMsgAddedEvent struct {
 	midgard.EventModel
 	PrePrepareMsg struct {
 		ConsensusId   ConsensusId
@@ -17,59 +17,15 @@ type PrePrepareMsgCreatedEvent struct {
 	}
 }
 
-type PrepareMsgCreatedEvent struct {
-	midgard.EventModel
-	PrepareMsg struct {
-		ConsensusId   ConsensusId
-		SenderId      string
-		ProposedBlock []byte
-	}
-}
-
-type CommitMsgCreatedEvent struct {
+type CommitMsgAddedEvent struct {
 	midgard.EventModel
 	CommitMsg struct {
 		ConsensusId ConsensusId
 		SenderId    string
 	}
-}
-
-// todo : Blockchain 모듈 참고
-type BlockCreatedEvent struct {
-	midgard.EventModel
 }
 
 // Consume part
-
-type PrePrepareMsgArrivedEvent struct {
-	midgard.EventModel
-	PrePrepareMsg struct {
-		ConsensusId   ConsensusId
-		SenderId      string
-		ProposedBlock []byte
-	}
-}
-
-type PrepareMsgArrivedEvent struct {
-	midgard.EventModel
-	PrepareMsg struct {
-		ConsensusId   ConsensusId
-		SenderId      string
-		ProposedBlock []byte
-	}
-}
-
-type CommitMsgArrivedEvent struct {
-	midgard.EventModel
-	CommitMsg struct {
-		ConsensusId ConsensusId
-		SenderId    string
-	}
-}
-
-type ConsensusStartedEvent struct {
-	midgard.EventModel
-}
 
 type LeaderChangedEvent struct {
 	midgard.EventModel
@@ -84,6 +40,12 @@ type MemberJoinedEvent struct {
 type MemberRemovedEvent struct {
 	midgard.EventModel
 	MemberId string
+}
+
+// todo : consensus를 위해 필요하지 않나? -> 고민해볼것
+
+type ConsensusStartedEvent struct {
+	midgard.EventModel
 }
 
 type PrepareFinishedEvent struct {
