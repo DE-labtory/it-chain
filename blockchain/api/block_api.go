@@ -47,18 +47,16 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) e
 	}
 
 	pool := bApi.loadBlockPool()
-	// Get block from pool
+
 	blockFromPool := pool.Get(height)
 	if blockFromPool == nil {
 		return ErrNilBlock
 	}
 
-	// Get my last block
 	lastBlock := &blockchain.DefaultBlock{}
 	bApi.blockQueryApi.GetLastBlock(lastBlock)
 
-	// Compare height
-	checkResult := getCheckResult(blockFromPool.GetHeight(), lastBlock.GetHeight())
+	checkResult := compareHeight(blockFromPool.GetHeight(), lastBlock.GetHeight())
 
 	// Create action based on check result
 	actionAfterCheck := blockchain.CreateActionAfterCheck(checkResult, pool, bApi.blockQueryApi)
@@ -80,7 +78,7 @@ func (bApi *BlockApi) loadBlockPool() blockchain.BlockPool {
 	return pool
 }
 
-func getCheckResult(height1 uint64, height2 uint64) int64 {
+func compareHeight(height1 uint64, height2 uint64) int64 {
 	return int64(height1 - height2) - 1
 }
 

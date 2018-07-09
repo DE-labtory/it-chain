@@ -164,22 +164,15 @@ func (bss *BlockSyncState) GetID() string {
 }
 
 func (bss *BlockSyncState) SetProgress(state ProgressState) {
+	var event midgard.Event
 	if state == PROGRESSING {
-		bss.isProgress = PROGRESSING
-
-		event := createSyncStartEvent()
-		eventstore.Save(BC_SYNC_STATE_AID, event)
-
-		bss.On(SyncStartEvent{})
-
+		event = createSyncStartEvent()
 	} else { // state == DONE
-		bss.isProgress = DONE
-
-		event := createSyncDoneEvent()
-		eventstore.Save(BC_SYNC_STATE_AID, event)
-
-		bss.On(SyncDoneEvent{})
+		event = createSyncDoneEvent()
 	}
+	bss.SetProgress(state)
+	eventstore.Save(BC_SYNC_STATE_AID, event)
+	bss.On(event)
 }
 
 func createSyncStartEvent() SyncStartEvent {

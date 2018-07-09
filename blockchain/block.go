@@ -142,7 +142,6 @@ func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock
 
 // interface of api gateway query api
 type BlockQueryApi interface {
-	AddBlock(block Block) error
 	GetBlockByHeight(block Block, blockHeight uint64) error
 	GetBlockBySeal(block Block, seal []byte) error
 	GetBlockByTxID(block Block, txid string) error
@@ -190,6 +189,5 @@ func NewSaveAction(blockPool BlockPool, queryApi BlockQueryApi) *SaveAction {
 }
 
 func (saveAction *SaveAction) DoAction(block Block) {
-	saveAction.queryApi.AddBlock(block)
 	saveAction.blockPool.Add(block)
 }
