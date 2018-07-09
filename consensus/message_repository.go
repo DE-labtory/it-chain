@@ -17,33 +17,29 @@ type PrepareMsgRepository interface {
 }
 
 type PrepareMsgRepositoryImpl struct {
-	PreparePool map[ConsensusId]*[]PrepareMsg
+	PreparePool map[ConsensusId][]PrepareMsg
 	lock        *sync.RWMutex
 }
 
 func NewPrepareMsgRepository() PrepareMsgRepository {
 	return &PrepareMsgRepositoryImpl{
-		PreparePool: make(map[ConsensusId]*[]PrepareMsg, 0),
+		PreparePool: make(map[ConsensusId][]PrepareMsg, 0),
 		lock:        &sync.RWMutex{},
 	}
 }
 
 func (pr *PrepareMsgRepositoryImpl) Save(prepareMsg PrepareMsg) {
-	msgPool := *pr.PreparePool[prepareMsg.ConsensusId]
+	msgPool := pr.PreparePool[prepareMsg.ConsensusId]
 
-	if msgPool == nil {
-		msgPool = make([]PrepareMsg, 0)
-	}
-
-	msgPool = append(msgPool, prepareMsg)
+	pr.PreparePool[prepareMsg.ConsensusId] = append(msgPool, prepareMsg)
 }
 
 func (pr *PrepareMsgRepositoryImpl) Remove(id ConsensusId) {
-	*pr.PreparePool[id] = nil
+	delete(pr.PreparePool, id)
 }
 
 func (pr *PrepareMsgRepositoryImpl) FindPrepareMsgsByConsensusID(id ConsensusId) []PrepareMsg {
-	return *pr.PreparePool[id]
+	return pr.PreparePool[id]
 }
 
 type CommitMsgRepository interface {
