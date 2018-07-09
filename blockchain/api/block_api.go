@@ -2,7 +2,6 @@ package api
 
 import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
-	"fmt"
 	"github.com/pkg/errors"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
@@ -43,7 +42,6 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 	return nil
 }
 
-// TODO
 func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
 	syncState := blockchain.NewBlockSyncState()
 	eventstore.Load(syncState, blockchain.BC_SYNC_STATE_AID)
@@ -54,7 +52,6 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) e
 	pool := bApi.loadBlockPool()
 	// Get block from pool
 	blockFromPool := pool.Get(height)
-
 	if blockFromPool == nil {
 		return ErrNilBlock
 	}
@@ -64,18 +61,12 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) e
 	bApi.blockQueryApi.GetLastBlock(lastBlock)
 
 	// Compare height
-	if blockFromPool.GetHeight() > lastBlock.GetHeight() + 1 {
-		// TODO: Start synchronize
+	checkResult := getCheckResult(blockFromPool.GetHeight(), lastBlock.GetHeight())
 
-	} else if blockFromPool.GetHeight() == lastBlock.GetHeight() + 1 {
-		//
-		bApi.blockQueryApi.AddBlock(blockFromPool)
-		pool.Delete(blockFromPool)
+	// Create action based on check result
+	actionAfterCheck := blockchain.CreateActionAfterCheck(checkResult, pool, bApi.blockQueryApi)
 
-	} else {
-		// Got shorter height block, but this is not an error
-		fmt.Printf("got shorter height block [%d < %d]", blockFromPool.GetHeight(), lastBlock.GetHeight());
-	}
+	actionAfterCheck.DoAction(blockFromPool)
 
 	return nil
 }
@@ -85,3 +76,12 @@ func (bApi *BlockApi) loadBlockPool() blockchain.BlockPool {
 	bApi.eventRepository.Load(pool, blockchain.BLOCK_POOL_AID)
 	return pool
 }
+
+func getCheckResult(height1 uint64, height2 uint64) int64 {
+	return int64(height1 - height2) - 1
+}
+
+
+
+
+

@@ -9,12 +9,15 @@ import (
 	"errors"
 
 	"github.com/it-chain/yggdrasill/common"
+	"fmt"
 )
 
 var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
 var ErrTransactionType = errors.New("Wrong transaction type")
 
 type Block = common.Block
+
+type BlockHeight = uint64
 
 type DefaultBlock struct {
 	Seal      []byte
@@ -137,7 +140,6 @@ func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock
 	return block
 }
 
-
 // interface of api gateway query api
 type BlockQueryApi interface {
 	AddBlock(block Block) error
@@ -148,4 +150,46 @@ type BlockQueryApi interface {
 	GetTransactionByTxID(transaction Transaction, txid string) error
 }
 
-type BlockHeight = uint64
+
+type ActionAfterCheck interface {
+	DoAction(block Block)
+}
+
+func CreateActionAfterCheck(checkResult int64, pool BlockPool, qa BlockQueryApi) ActionAfterCheck {
+	if checkResult > 0 {
+		return NewSyncAction()
+	} else if checkResult == 0 {
+		return NewSaveAction(pool, qa)
+	} else {
+		fmt.Printf("got shorter height block")
+		return nil
+	}
+}
+
+type SyncAction struct {}
+
+func NewSyncAction() *SyncAction {
+	return &SyncAction{}
+}
+
+func (syncAction *SyncAction) DoAction(block Block) {
+	// TODO: Start synchronize
+}
+
+
+type SaveAction struct {
+	blockPool BlockPool
+	queryApi BlockQueryApi
+}
+
+func NewSaveAction(blockPool BlockPool, queryApi BlockQueryApi) *SaveAction {
+	return &SaveAction{
+		blockPool: blockPool,
+		queryApi: queryApi,
+	}
+}
+
+func (saveAction *SaveAction) DoAction(block Block) {
+	saveAction.queryApi.AddBlock(block)
+	saveAction.blockPool.Add(block)
+}
