@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
 )
 
 var ErrEmptyEventId = errors.New("empty event id proposed.")
@@ -27,16 +26,10 @@ func (eh *EventHandler) HandleBlockAddToPoolEvent(event blockchain.BlockAddToPoo
 		return ErrBlockNil
 	}
 
-	syncState := blockchain.NewBlockSyncState()
-	eventstore.Load(syncState, blockchain.BC_SYNC_STATE_AID)
+	err := eh.blockApi.CheckAndSaveBlockFromPool(height)
 
-	// TODO: sync state에 따라서 BlockApi 호출 여부 결정
-	if !syncState.IsProgressing() {
-		err := eh.blockApi.CheckAndSaveBlockFromPool(height)
-
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
 	}
 
 	return nil
