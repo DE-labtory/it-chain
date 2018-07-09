@@ -1,10 +1,16 @@
 package adapter
 
 import (
-	"github.com/it-chain/it-chain-Engine/blockchain"
 	"errors"
+
+	"encoding/json"
+
+	"github.com/it-chain/it-chain-Engine/blockchain"
 )
 
+var ErrBlockInfoDeliver = errors.New("block info deliver failed")
+var ErrGetBlock = errors.New("error when Getting block")
+var ErrResponseBlock = errors.New("error when response block")
 var ErrGetLastBlock = errors.New("error when get last block")
 var ErrSyncCheckResponse = errors.New("error when sync check response")
 
@@ -50,7 +56,24 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 		break
 
 	case "BlockRequestProtocol":
-		//TODO: Construct 과정을 위해서 상대방에게 block을 보내준다.
+
+		block := &blockchain.DefaultBlock{}
+
+		var height uint64
+		err := json.Unmarshal(command.Body, &height)
+		if err != nil {
+			return ErrBlockInfoDeliver
+		}
+
+		err = g.blockRepository.GetBlockByHeight(block, height)
+		if err != nil {
+			return ErrGetBlock
+		}
+
+		err = g.grpcCommandService.ResponseBlock(command.FromPeer.PeerId, block)
+		if err != nil {
+			return ErrResponseBlock
+		}
 		break
 
 	case "BlockResponseProtocol":
