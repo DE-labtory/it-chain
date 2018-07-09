@@ -1,6 +1,9 @@
 package consensus
 
-import "github.com/it-chain/midgard"
+import (
+	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/midgard"
+)
 
 // todo : Consensus로 시작하는 네이밍
 
@@ -8,17 +11,28 @@ import "github.com/it-chain/midgard"
 
 type PrePrepareMsgCreatedEvent struct {
 	midgard.EventModel
-	PrePrepareMsg PrePrepareMsg
+	PrePrepareMsg struct {
+		ConsensusId   ConsensusId
+		SenderId      string
+		ProposedBlock blockchain.Block
+	}
 }
 
 type PrepareMsgCreatedEvent struct {
 	midgard.EventModel
-	PrepareMsg PrepareMsg
+	PrepareMsg struct {
+		ConsensusId   ConsensusId
+		SenderId      string
+		ProposedBlock blockchain.Block
+	}
 }
 
 type CommitMsgCreatedEvent struct {
 	midgard.EventModel
-	CommitMsg CommitMsg
+	CommitMsg struct {
+		ConsensusId ConsensusId
+		SenderId    string
+	}
 }
 
 // todo : Blockchain 모듈 참고
@@ -30,17 +44,28 @@ type BlockCreatedEvent struct {
 
 type PrePrepareMsgArrivedEvent struct {
 	midgard.EventModel
-	PrePrepareMsg PrePrepareMsg
+	PrePrepareMsg struct {
+		ConsensusId   ConsensusId
+		SenderId      string
+		ProposedBlock blockchain.Block
+	}
 }
 
 type PrepareMsgArrivedEvent struct {
 	midgard.EventModel
-	PrepareMsg PrepareMsg
+	PrepareMsg struct {
+		ConsensusId   ConsensusId
+		SenderId      string
+		ProposedBlock blockchain.Block
+	}
 }
 
 type CommitMsgArrivedEvent struct {
 	midgard.EventModel
-	CommitMsg CommitMsg
+	CommitMsg struct {
+		ConsensusId ConsensusId
+		SenderId    string
+	}
 }
 
 type ConsensusStartedEvent struct {
