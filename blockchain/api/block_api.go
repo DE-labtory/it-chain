@@ -36,14 +36,18 @@ func (bApi *BlockApi) SyncedCheck(block blockchain.Block) error {
 	return nil
 }
 // 받은 block을 block pool에 추가한다.
-func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) {
+func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 	if block == nil {
 		fmt.Println("block is nil")
-		return
+		return nil
 	}
 
 	pool := bApi.loadBlockPool()
-	pool.Add(block)
+	err := pool.Add(block)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // TODO
