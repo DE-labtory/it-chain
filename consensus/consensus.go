@@ -21,8 +21,7 @@ func NewConsensusId(id string) ConsensusId {
 
 type Consensus struct {
 	ConsensusID     ConsensusId
-	// todo : what is "Representativ"?
-	//Representatives []*Representative
+	Representatives []*Representative
 	Block           ProposedBlock
 	CurrentState    State
 }

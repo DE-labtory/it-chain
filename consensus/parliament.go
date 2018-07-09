@@ -65,7 +65,7 @@ func (p *Parliament) ChangeLeader(leader *Leader) (*LeaderChangedEvent, error) {
 		EventModel: midgard.EventModel{
 			ID: p.GetID(),
 		},
-		LeaderId: leader.LeaderId,
+		LeaderId: leader.GetId(),
 	}
 
 	p.On(&leaderChangedEvent)
@@ -92,7 +92,7 @@ func (p *Parliament) AddMember(member *Member) (*MemberJoinedEvent, error) {
 		EventModel: midgard.EventModel{
 			ID: p.GetID(),
 		},
-		MemberId: member.MemberId,
+		MemberId: member.GetId(),
 	}
 
 	p.On(&memberJoinedEvent)
@@ -111,7 +111,7 @@ func (p *Parliament) RemoveMember(memberID MemberId) (*MemberRemovedEvent, error
 		EventModel: midgard.EventModel{
 			ID: p.GetID(),
 		},
-		MemberId: memberID,
+		MemberId: memberID.ToString(),
 	}
 
 	p.On(&memberRemovedEvent)
@@ -155,13 +155,17 @@ func (p *Parliament) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *LeaderChangedEvent:
-		p.Leader = &Leader{LeaderId: v.LeaderId}
+		p.Leader = &Leader{
+			LeaderId: LeaderId{v.LeaderId},
+		}
 
 	case *MemberJoinedEvent:
-		p.Members = append(p.Members, &Member{MemberId: v.MemberId})
+		p.Members = append(p.Members, &Member{
+			MemberId: MemberId{v.MemberId},
+		})
 
 	case *MemberRemovedEvent:
-		index := p.findIndexOfMember(v.MemberId.ToString())
+		index := p.findIndexOfMember(v.MemberId)
 
 		if index != -1 {
 			p.Members = append(p.Members[:index], p.Members[index+1:]...)

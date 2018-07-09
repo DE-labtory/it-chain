@@ -49,25 +49,25 @@ type ConsensusStartedEvent struct {
 
 type LeaderChangedEvent struct {
 	midgard.EventModel
-	LeaderId LeaderId
+	LeaderId string
 }
 
 type MemberJoinedEvent struct {
 	midgard.EventModel
-	MemberId MemberId
+	MemberId string
 }
 
 type MemberRemovedEvent struct {
 	midgard.EventModel
-	MemberId MemberId
+	MemberId string
 }
 
 type PrepareFinishedEvent struct {
 	midgard.EventModel
-	ConsensusId ConsensusId
+	ConsensusId string
 }
 
 type ConsensusFinishedEvent struct {
 	midgard.EventModel
-	ConsensusId ConsensusId
+	ConsensusId string
 }
