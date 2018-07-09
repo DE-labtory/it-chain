@@ -1,7 +1,6 @@
 package consensus
 
 import (
-	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/midgard"
 )
 
@@ -14,7 +13,7 @@ type PrePrepareMsgCreatedEvent struct {
 	PrePrepareMsg struct {
 		ConsensusId   ConsensusId
 		SenderId      string
-		ProposedBlock blockchain.Block
+		ProposedBlock []byte
 	}
 }
 
@@ -23,7 +22,7 @@ type PrepareMsgCreatedEvent struct {
 	PrepareMsg struct {
 		ConsensusId   ConsensusId
 		SenderId      string
-		ProposedBlock blockchain.Block
+		ProposedBlock []byte
 	}
 }
 
@@ -47,7 +46,7 @@ type PrePrepareMsgArrivedEvent struct {
 	PrePrepareMsg struct {
 		ConsensusId   ConsensusId
 		SenderId      string
-		ProposedBlock blockchain.Block
+		ProposedBlock []byte
 	}
 }
 
@@ -56,7 +55,7 @@ type PrepareMsgArrivedEvent struct {
 	PrepareMsg struct {
 		ConsensusId   ConsensusId
 		SenderId      string
-		ProposedBlock blockchain.Block
+		ProposedBlock []byte
 	}
 }
 
