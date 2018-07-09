@@ -9,7 +9,7 @@ import (
 var ErrBlockNil = errors.New("Block nil error");
 
 type BlockApi interface {
-	AddBlockToPool(block blockchain.Block)
+	AddBlockToPool(block blockchain.Block) error
 	CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error
 }
 

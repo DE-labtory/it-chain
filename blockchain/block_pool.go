@@ -82,7 +82,7 @@ func createBlockRemoveFromPoolEvent(block Block) BlockRemoveFromPoolEvent {
 		EventModel: midgard.EventModel{
 			ID: BLOCK_POOL_AID,
 		},
-		BlockHeight: block.GetHeight(),
+		Height: block.GetHeight(),
 	}
 }
 
@@ -101,7 +101,7 @@ func (p *BlockPoolModel) On(event midgard.Event) error {
 		(p.Pool)[v.Height] = block
 
 	case *BlockRemoveFromPoolEvent:
-		delete(p.Pool, v.BlockHeight)
+		delete(p.Pool, v.Height)
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))

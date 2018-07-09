@@ -9,13 +9,13 @@ import (
 )
 
 type MockBlockApi struct {
-	AddBlockToPoolFunc func(block blockchain.Block)
+	AddBlockToPoolFunc func(block blockchain.Block) error
 }
-func (api MockBlockApi) AddBlockToPool(block blockchain.Block) {
-	api.AddBlockToPoolFunc(block)
+func (api MockBlockApi) AddBlockToPool(block blockchain.Block) error {
+	return api.AddBlockToPoolFunc(block)
 }
 
-func (api MockBlockApi) CheckAndSaveBlockFromPool(height blockchain.Block) error {
+func (api MockBlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
 	return nil
 }
 
@@ -53,8 +53,9 @@ func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 	}
 
 	blockApi := MockBlockApi{}
-	blockApi.AddBlockToPoolFunc = func(block blockchain.Block) {
+	blockApi.AddBlockToPoolFunc = func(block blockchain.Block) error {
 		assert.Equal(t, block.GetHeight(), uint64(99887))
+		return nil
 	}
 
 	commandHandler := adapter.NewCommandHandler(blockApi)

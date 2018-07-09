@@ -7,25 +7,17 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-type BlockRepository interface {
-	GetValidator() blockchain.Validator
-	GetLastBlock(block blockchain.Block) error
-	AddBlock(block blockchain.Block) error
-	NewEmptyBlock() (blockchain.Block, error)
-	Close()
-}
-
 var ErrNilBlock = errors.New("block is nil")
 
 type BlockApi struct {
-	blockRepository BlockRepository
+	blockQueryApi blockchain.BlockQueryApi
 	eventRepository midgard.EventRepository
 	publisherId          string
 }
 
-func NewBlockApi(blockRepository BlockRepository, eventRepository midgard.EventRepository, publisherId string) (BlockApi, error) {
+func NewBlockApi(blockQueryApi blockchain.BlockQueryApi, eventRepository midgard.EventRepository, publisherId string) (BlockApi, error) {
 	return BlockApi{
-		blockRepository: blockRepository,
+		blockQueryApi: blockQueryApi,
 		eventRepository: eventRepository,
 		publisherId:          publisherId,
 	}, nil
@@ -63,7 +55,7 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) e
 
 	// Get my last block
 	lastBlock := &blockchain.DefaultBlock{}
-	bApi.blockRepository.GetLastBlock(lastBlock)
+	bApi.blockQueryApi.GetLastBlock(lastBlock)
 
 	// Compare height
 	if blockFromPool.GetHeight() > lastBlock.GetHeight() + 1 {
@@ -71,7 +63,7 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) e
 
 	} else if blockFromPool.GetHeight() == lastBlock.GetHeight() + 1 {
 		//
-		bApi.blockRepository.AddBlock(blockFromPool)
+		bApi.blockQueryApi.AddBlock(blockFromPool)
 		pool.Delete(blockFromPool)
 
 	} else {

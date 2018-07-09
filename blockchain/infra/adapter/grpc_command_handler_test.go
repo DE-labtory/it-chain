@@ -12,16 +12,17 @@ import (
 type MockSyncBlockApi struct {}
 func (ba MockSyncBlockApi) SyncedCheck(block blockchain.Block) error { return nil }
 
-type MockROBlockRepository struct {
-	NewEmptyBlockFunc func() (blockchain.Block, error)
+type MockBlockQueryApi struct {
 	GetLastBlockFunc func(block blockchain.Block) error
 }
-func (br MockROBlockRepository) NewEmptyBlock() (blockchain.Block, error) {
-	return br.NewEmptyBlockFunc()
-}
-func (br MockROBlockRepository) GetLastBlock(block blockchain.Block) error {
+func (br MockBlockQueryApi) GetLastBlock(block blockchain.Block) error {
 	return br.GetLastBlockFunc(block)
 }
+func (br MockBlockQueryApi) AddBlock(block blockchain.Block) error { return nil}
+func (br MockBlockQueryApi) GetBlockByHeight(block blockchain.Block, blockHeight uint64) error { return nil }
+func (br MockBlockQueryApi) GetBlockBySeal(block blockchain.Block, seal []byte) error { return nil }
+func (br MockBlockQueryApi) GetBlockByTxID(block blockchain.Block, txid string) error { return nil }
+func (br MockBlockQueryApi) GetTransactionByTxID(transaction blockchain.Transaction, txid string) error { return nil }
 
 type MockSyncCheckGrpcCommandService struct {
 	SyncCheckResponseFunc func(block blockchain.Block) error
@@ -90,7 +91,7 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 
 		blockApi := MockSyncBlockApi{}
 
-		blockRepository := MockROBlockRepository{}
+		blockRepository := MockBlockQueryApi{}
 		blockRepository.GetLastBlockFunc = func(block blockchain.Block) error {
 			block.SetHeight(99887)
 			return test.input.getLastBlockErr

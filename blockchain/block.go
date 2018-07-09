@@ -137,15 +137,13 @@ func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock
 	return block
 }
 
-type BlockQueryService interface {
-	NewEmptyBlock() (Block, error)
+type BlockQueryApi interface {
 	AddBlock(block Block) error
 	GetBlockByHeight(block Block, blockHeight uint64) error
 	GetBlockBySeal(block Block, seal []byte) error
 	GetBlockByTxID(block Block, txid string) error
 	GetLastBlock(block Block) error
 	GetTransactionByTxID(transaction Transaction, txid string) error
-	GetBlockCreator() string
 }
 
 type BlockHeight = uint64

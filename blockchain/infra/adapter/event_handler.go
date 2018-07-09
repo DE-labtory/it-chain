@@ -10,10 +10,6 @@ import (
 var ErrEmptyEventId = errors.New("empty event id proposed.")
 var ErrNodeApi = errors.New("problem in node api")
 
-type RepositoryProjector struct {
-	PeerRepository blockchain.PeerRepository
-}
-
 type EventHandler struct {
 	blockApi BlockApi
 }
@@ -25,7 +21,7 @@ func NewEventHandler(api BlockApi) *EventHandler {
 }
 
 func (eh *EventHandler) HandleBlockAddToPoolEvent(event blockchain.BlockAddToPoolEvent) error {
-	height := event.BlockHeight
+	height := event.Height
 
 	if height < 0 {
 		return ErrBlockNil

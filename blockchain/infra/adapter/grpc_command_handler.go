@@ -12,24 +12,20 @@ type SyncBlockApi interface {
 	SyncedCheck(block blockchain.Block) error
 }
 
-type BlockQueryService interface {
-	GetLastBlock(block blockchain.Block) error
-}
-
 type SyncCheckGrpcCommandService interface {
 	SyncCheckResponse(block blockchain.Block) error
 }
 
 type GrpcCommandHandler struct {
 	blockApi SyncBlockApi
-	blockQueryService BlockQueryService
+	blockQueryApi blockchain.BlockQueryApi
 	grpcCommandService SyncCheckGrpcCommandService
 }
 
-func NewGrpcCommandHandler(blockApi SyncBlockApi, blockQueryService BlockQueryService, grpcCommandService SyncCheckGrpcCommandService) *GrpcCommandHandler {
+func NewGrpcCommandHandler(blockApi SyncBlockApi, blockQueryService blockchain.BlockQueryApi, grpcCommandService SyncCheckGrpcCommandService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		blockApi: blockApi,
-		blockQueryService: blockQueryService,
+		blockQueryApi: blockQueryService,
 		grpcCommandService: grpcCommandService,
 	}
 }
@@ -40,7 +36,7 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 		//TODO: 상대방의 SyncCheck를 위해서 자신의 last block을 보내준다.
 		block := &blockchain.DefaultBlock{}
 
-		err := g.blockQueryService.GetLastBlock(block)
+		err := g.blockQueryApi.GetLastBlock(block)
 		if err != nil {
 			return ErrGetLastBlock
 		}
