@@ -49,31 +49,27 @@ type CommitMsgRepository interface {
 }
 
 type CommitMsgRepositoryImpl struct {
-	CommitPool map[ConsensusId]*[]CommitMsg
+	CommitPool map[ConsensusId][]CommitMsg
 	lock       *sync.RWMutex
 }
 
 func NewCommitMsgRepository() CommitMsgRepository {
 	return &CommitMsgRepositoryImpl{
-		CommitPool: make(map[ConsensusId]*[]CommitMsg, 0),
+		CommitPool: make(map[ConsensusId][]CommitMsg, 0),
 		lock:       &sync.RWMutex{},
 	}
 }
 
 func (cr *CommitMsgRepositoryImpl) Save(commitMsg CommitMsg) {
-	msgPool := *cr.CommitPool[commitMsg.ConsensusId]
+	msgPool := cr.CommitPool[commitMsg.ConsensusId]
 
-	if msgPool == nil {
-		msgPool = make([]CommitMsg, 0)
-	}
-
-	msgPool = append(msgPool, commitMsg)
+	cr.CommitPool[commitMsg.ConsensusId] = append(msgPool, commitMsg)
 }
 
 func (cr *CommitMsgRepositoryImpl) Remove(id ConsensusId) {
-	*cr.CommitPool[id] = nil
+	delete(cr.CommitPool, id)
 }
 
 func (cr *CommitMsgRepositoryImpl) FindCommitMsgsByConsensusID(id ConsensusId) []CommitMsg {
-	return *cr.CommitPool[id]
+	return cr.CommitPool[id]
 }
