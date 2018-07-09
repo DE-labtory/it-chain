@@ -8,7 +8,6 @@ import (
 
 	"errors"
 
-	"github.com/it-chain/yggdrasill"
 	"github.com/it-chain/yggdrasill/common"
 )
 
@@ -138,9 +137,14 @@ func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock
 	return block
 }
 
-type Repository interface {
-	yggdrasill.BlockStorageManager
+type BlockQueryService interface {
 	NewEmptyBlock() (Block, error)
+	AddBlock(block Block) error
+	GetBlockByHeight(block Block, blockHeight uint64) error
+	GetBlockBySeal(block Block, seal []byte) error
+	GetBlockByTxID(block Block, txid string) error
+	GetLastBlock(block Block) error
+	GetTransactionByTxID(transaction Transaction, txid string) error
 	GetBlockCreator() string
 }
 
