@@ -16,6 +16,7 @@ var ErrSetConfig = errors.New("error when set Config")
 var ErrBuildingSeal = errors.New("error when building Seal")
 var ErrBuildingTxSeal = errors.New("error when building TxSeal")
 var ErrCreatingEvent = errors.New("error when creating Event")
+var ErrOnEvent = errors.New("error while On Event")
 
 func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 
@@ -48,7 +49,10 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	eventstore.Save(createEvent.GetID(), createEvent)
 
 	//on
-	GenesisBlock.On(createEvent)
+	err = GenesisBlock.On(createEvent)
+	if err != nil {
+		return nil, ErrOnEvent
+	}
 
 	return GenesisBlock, nil
 }
@@ -73,16 +77,11 @@ func setBlockWithConfig(filePath string, block Block) error {
 	return nil
 }
 
-//ToDo: ConvertType 만들어서 인풋: []Transaction -> 아웃풋: []DefaultTransaction 으로 만들어줘야 함.
-//[]blockchain.Transaction{
-//&blockchain.DefaultTransaction{},
-//}
-
 func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []Transaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*BlockCreatedEvent, error) {
 	txListBytes, err := common.Serialize(txList)
 
 	if err != nil {
-		return &BlockCreatedEvent{}, ErrTxListMarshal
+		return &BlockCreatedEvent{}, err
 	}
 
 	return &BlockCreatedEvent{
@@ -130,7 +129,10 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 	eventstore.Save(createEvent.GetID(), createEvent)
 
 	//on
-	ProposedBlock.On(createEvent)
+	err = ProposedBlock.On(createEvent)
+	if err != nil {
+		return nil, ErrOnEvent
+	}
 
 	return ProposedBlock, nil
 }
