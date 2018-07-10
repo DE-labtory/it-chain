@@ -62,6 +62,13 @@ func (m *Meta) On(event midgard.Event) error {
 		m.GitUrl = v.GitUrl
 		m.ICodeID = v.ID
 		m.RepositoryName = v.RepositoryName
+	case *MetaDeletedEvent:
+		m.ICodeID = ""
+		m.RepositoryName = ""
+		m.GitUrl = ""
+		m.Path = ""
+		m.CommitHash = ""
+		m.Version = Version{}
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
 	}
