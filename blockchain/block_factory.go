@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
@@ -14,6 +15,7 @@ import (
 var ErrSetConfig = errors.New("error when set Config")
 var ErrBuildingSeal = errors.New("error when building Seal")
 var ErrBuildingTxSeal = errors.New("error when building TxSeal")
+var ErrCreatingEvent = errors.New("error when creating Event")
 
 func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 
@@ -37,7 +39,10 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	}
 
 	//create
-	createEvent := createBlockCreatedEvent(Seal, GenesisBlock.PrevSeal, GenesisBlock.Height, GenesisBlock.TxList, GenesisBlock.TxSeal, TimeStamp, GenesisBlock.Creator)
+	createEvent, err := createBlockCreatedEvent(Seal, GenesisBlock.PrevSeal, GenesisBlock.Height, GenesisBlock.TxList, GenesisBlock.TxSeal, TimeStamp, GenesisBlock.Creator)
+	if err != nil {
+		return nil, ErrCreatingEvent
+	}
 
 	//save
 	eventstore.Save(createEvent.GetID(), createEvent)
@@ -68,7 +73,18 @@ func setBlockWithConfig(filePath string, block Block) error {
 	return nil
 }
 
-func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []Transaction, txSeal [][]byte, timeStamp time.Time, creator []byte) *BlockCreatedEvent {
+//ToDo: ConvertType 만들어서 인풋: []Transaction -> 아웃풋: []DefaultTransaction 으로 만들어줘야 함.
+//[]blockchain.Transaction{
+//&blockchain.DefaultTransaction{},
+//}
+
+func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []Transaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*BlockCreatedEvent, error) {
+	txListBytes, err := common.Serialize(txList)
+
+	if err != nil {
+		return &BlockCreatedEvent{}, ErrTxListMarshal
+	}
+
 	return &BlockCreatedEvent{
 		EventModel: midgard.EventModel{
 			ID:   string(seal),
@@ -77,11 +93,11 @@ func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList
 		Seal:      seal,
 		PrevSeal:  prevSeal,
 		Height:    height,
-		TxList:    txList,
+		TxList:    txListBytes,
 		TxSeal:    txSeal,
 		Timestamp: timeStamp,
 		Creator:   creator,
-	}
+	}, nil
 }
 
 func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, Creator []byte) (Block, error) {
@@ -105,7 +121,10 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 	}
 
 	//create
-	createEvent := createBlockCreatedEvent(Seal, prevSeal, height, txList, txSeal, TimeStamp, Creator)
+	createEvent, err := createBlockCreatedEvent(Seal, prevSeal, height, txList, txSeal, TimeStamp, Creator)
+	if err != nil {
+		return nil, ErrCreatingEvent
+	}
 
 	//save
 	eventstore.Save(createEvent.GetID(), createEvent)

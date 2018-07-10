@@ -160,12 +160,3 @@ func calculateHash(b []byte) []byte {
 	hashValue.Write(b)
 	return hashValue.Sum(nil)
 }
-
-func convertType(txList []*DefaultTransaction) []Transaction {
-	convTxList := make([]Transaction, 0)
-	for _, tx := range txList {
-		convTxList = append(convTxList, tx)
-	}
-
-	return convTxList
-}
