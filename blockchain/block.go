@@ -10,9 +10,9 @@ import (
 
 	ygg "github.com/it-chain/yggdrasill/common"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"log"
+	"github.com/it-chain/it-chain-Engine/common"
 )
 
 var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
@@ -133,14 +133,28 @@ func (block *DefaultBlock) IsPrev(serializedPrevBlock []byte) bool {
 	return bytes.Compare(prevBlock.GetSeal(), block.GetPrevSeal()) == 0
 }
 
-func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock {
-	block := &DefaultBlock{}
+// This is from #279 @junk-sound
+func deserializeTxList(txList []byte) ([]Transaction, error) {
+	DefaultTxList := []*DefaultTransaction{}
 
-	block.SetPrevSeal(prevSeal)
-	block.SetHeight(height)
-	block.SetCreator(creator)
+	err := common.Deserialize(txList, &DefaultTxList)
 
-	return block
+	if err != nil {
+		return nil, err
+	}
+	TxList := convertTxType(DefaultTxList)
+
+	return TxList, nil
+}
+
+func convertTxType(txList []*DefaultTransaction) []Transaction {
+	convTxList := make([]Transaction, 0)
+
+	for _, tx := range txList {
+		convTxList = append(convTxList, tx)
+	}
+
+	return convTxList
 }
 
 // interface of api gateway query api
@@ -198,22 +212,12 @@ func (saveAction *SaveAction) DoAction(block Block) error {
 }
 
 func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
-	txListBytes, err := common.Serialize(block.GetTxSeal())
-	if err != nil {
-		return BlockCommittedEvent{}, ErrTxListMarshal
-	}
-
+	seal := string(block.GetSeal())
 	return BlockCommittedEvent{
 		EventModel: midgard.EventModel{
-			ID: string(block.GetSeal()),
+			ID: seal,
 		},
-		Seal: block.GetSeal(),
-		PrevSeal: block.GetPrevSeal(),
-		Height: block.GetHeight(),
-		TxList: txListBytes,
-		TxSeal: block.GetTxSeal(),
-		Timestamp: block.GetTimestamp(),
-		Creator: block.GetCreator(),
+		Seal: seal,
 	}, nil
 }
 

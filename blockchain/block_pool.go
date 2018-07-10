@@ -110,11 +110,11 @@ func (p *BlockPoolModel) On(event midgard.Event) error {
 }
 
 func createBlockFromAddToPoolEvent(event *BlockAddToPoolEvent) (Block, error) {
-	var txList []Transaction
-	err := common.Deserialize(event.TxList, &txList)
+	txList, err := deserializeTxList(event.TxList)
 	if err != nil {
 		return &DefaultBlock{}, ErrTxListUnmarshal
 	}
+
 	return &DefaultBlock{
 		Seal: event.Seal,
 		PrevSeal: event.PrevSeal,
