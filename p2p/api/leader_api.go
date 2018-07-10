@@ -15,16 +15,10 @@ type LeaderApi struct {
 	pLTableApi PLTableApi
 }
 
-type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
-
 func NewLeaderApi(
-	leaderService p2p.LeaderService,
-	pLTableService p2p.PLTableService,
 	pLTableApi PLTableApi) LeaderApi {
 
 	return LeaderApi{
-		leaderService: leaderService,
-		pLTableService: pLTableService,
 		pLTableApi:pLTableApi,
 	}
 }
@@ -32,7 +26,9 @@ func NewLeaderApi(
 //todo update leader with ip address by peer!! not leader
 func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
-	peers := la.pLTableApi.GetPLTable().PeerList
+	pLTable, _ := la.pLTableApi.GetPLTable()
+
+	peers := pLTable.PeerList
 
 	for _, peer := range peers {
 
@@ -52,7 +48,7 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
 func (la *LeaderApi) UpdateLeaderWithLongerPeerList(oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer) error {
 
-	myPLTable := la.pLTableApi.GetPLTable()
+	myPLTable, _ := la.pLTableApi.GetPLTable()
 
 	myPeerList, _ := myPLTable.GetPeerList()
 

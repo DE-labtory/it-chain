@@ -12,17 +12,15 @@ import (
 var ErrEmptyPeerId = errors.New("empty peer id requested")
 var ErrEmptyAddress = errors.New("empty ip address proposed")
 
-type PeerTable map[string]Peer
-
-// PeerId 선언
-type PeerId struct {
-	Id string
-}
-
 // 노드 구조체 선언.
 type Peer struct {
 	IpAddress string
 	PeerId    PeerId
+}
+
+// PeerId 선언
+type PeerId struct {
+	Id string
 }
 
 func (p *Peer) On(event midgard.Event) error {
@@ -106,15 +104,6 @@ func Deserialize(b []byte, peer *Peer) error {
 // conver peerId to String
 func (peerId PeerId) ToString() string {
 	return string(peerId.Id)
-}
-
-// peer repository 인터페이스를 정의한다.
-type PeerRepository interface {
-	Save(peer Peer) error
-	Remove(id PeerId) error
-	FindById(id PeerId) (Peer, error)
-	FindAll() ([]Peer, error)
-	FindByAddress(ipAddress string) (Peer, error)
 }
 
 func PeerFilter(vs []Peer, f func(Peer) bool) []Peer {

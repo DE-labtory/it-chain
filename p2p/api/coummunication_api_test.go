@@ -6,6 +6,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/p2p"
 	"github.com/it-chain/it-chain-Engine/p2p/api"
 	"github.com/magiconair/properties/assert"
+	"github.com/it-chain/it-chain-Engine/p2p/test/mock"
 )
 
 func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
@@ -29,7 +30,7 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 		},
 	}
 
-	mockPeerService := &p2p.MockPeerService{}
+	mockPeerService := &mock.MockPeerService{}
 
 	mockPeerService.FindByIdFunc = func(peerId p2p.PeerId) (p2p.Peer, error) {
 
@@ -48,7 +49,7 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 
 		t.Logf("running test case %s", testName)
 
-		communicationApi := api.NewCommunicationApi(mockPeerService, &p2p.MockCommunicationService{})
+		communicationApi := api.NewCommunicationApi(mockPeerService, &mock.MockCommunicationService{})
 
 		assert.Equal(t, communicationApi.DialToUnConnectedNode(test.input.peerList), test.err)
 

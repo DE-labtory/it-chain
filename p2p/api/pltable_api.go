@@ -8,7 +8,7 @@ type PLTableApi struct {
 }
 
 
-func (plta *PLTableApi) GetPLTable() p2p.PLTable {
+func (plta *PLTableApi) GetPLTable() (p2p.PLTable, error) {
 
 	leader := plta.leaderService.Get()
 	peerList, _ := plta.peerService.FindAll()
@@ -18,5 +18,5 @@ func (plta *PLTableApi) GetPLTable() p2p.PLTable {
 		PeerList: peerList,
 	}
 
-	return peerLeaderTable
+	return peerLeaderTable, nil
 }

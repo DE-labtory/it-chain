@@ -1,9 +1,6 @@
 package p2p
 
 import (
-	"encoding/json"
-	"sync"
-
 	"github.com/pkg/errors"
 )
 
@@ -43,39 +40,3 @@ func (pt *PLTable) GetPeerList() ([]Peer, error) {
 	return pt.PeerList, nil
 }
 
-type PLTableService interface {
-	GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error)
-	ClearPeerTable() error
-}
-
-// will be deleted after implemented in gateway api
-type PLTableServiceReplica struct {
-	mux       sync.Mutex
-	peerTable PeerTable
-}
-
-func (pLTableService *PLTableServiceReplica) GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error) {
-
-	peerTable := PLTable{}
-
-	if err := json.Unmarshal(command.Body, &peerTable); err != nil {
-		//todo error 처리
-		return PLTable{}, nil
-	}
-
-	return peerTable, nil
-}
-
-func (plts *PLTableServiceReplica) ClearPeerTable() {
-
-	plts.mux.Lock()
-
-	defer plts.mux.Unlock()
-
-	for key := range plts.peerTable {
-
-		delete(plts.peerTable, key)
-	}
-
-	plts.peerTable = make(map[string]Peer)
-}

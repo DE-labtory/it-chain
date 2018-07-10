@@ -19,7 +19,6 @@ type LeaderId struct {
 
 type LeaderService interface {
 
-	Get() Leader
 	Set(leader Leader) error
 }
 
@@ -72,9 +71,4 @@ func UpdateLeader(leader Leader) error{
 	}
 
 	return err
-}
-
-type LeaderRepository interface {
-	GetLeader() Leader
-	SetLeader(leader Leader)
 }

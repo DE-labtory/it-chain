@@ -5,6 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"encoding/json"
+
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/midgard"
@@ -18,21 +20,56 @@ type CommunicationService interface {
 
 // injected later
 // the actual implementation is done in gateway api
-type PeerService interface{
+type PeerService interface {
 
 	Save(peer Peer) error
 	Remove(peerId PeerId) error
-	FindById(peerId PeerId) (Peer, error)
-	FindByAddress(ipAddress string) (Peer, error)
-	FindAll() ([]Peer, error)
 }
+
+type PLTableService interface {
+
+	GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error)
+	ClearPeerTable() error
+}
+
+// will be deleted after implemented in gateway api
+type PLTableServiceReplica struct {
+	mux     sync.Mutex
+	pLTable PLTable
+}
+
+func (pLTableService *PLTableServiceReplica) GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error) {
+
+	peerTable := PLTable{}
+
+	if err := json.Unmarshal(command.Body, &peerTable); err != nil {
+		//todo error 처리
+		return PLTable{}, nil
+	}
+
+	return peerTable, nil
+}
+
+//func (plts *PLTableServiceReplica) ClearPeerTable() {
+//
+//	plts.mux.Lock()
+//
+//	defer plts.mux.Unlock()
+//
+//	for key := range plts.pLTable.PeerList {
+//
+//		delete(plts.pLTable, key)
+//	}
+//
+//	plts.peerTable = make(map[string]Peer)
+//}
 
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
 type ElectionService struct {
 	mux                sync.Mutex
 	electionRepository ElectionRepository
-	peerService     PeerService
+	peerService        PeerService
 	publish            Publish
 }
 
