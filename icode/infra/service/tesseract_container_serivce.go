@@ -7,6 +7,9 @@ import (
 	"github.com/it-chain/it-chain-Engine/icode"
 	"github.com/it-chain/tesseract"
 	"github.com/it-chain/tesseract/cellcode/cell"
+	"encoding/json"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/midgard"
 )
 
 type TesseractContainerService struct {
@@ -38,21 +41,60 @@ func (cs TesseractContainerService) StartContainer(meta icode.Meta) error {
 
 func (cs TesseractContainerService) ExecuteTransaction(tx icode.Transaction) (*icode.Result, error) {
 	containerId, found := cs.containerIdMap[tx.TxData.ICodeID]
+
 	if !found {
 		return nil, errors.New(fmt.Sprintf("no container for iCode : %s", tx.TxData.ICodeID))
 	}
-	tesseractTxInfo = cell.TxInfo{
+
+	tesseractTxInfo := cell.TxInfo{
 		Method: tx.TxData.Method,
 		ID:     tx.TxData.ID,
-		Params: tx.TxData.Params,
+		Params: cell.Params{
+			Function: tx.TxData.Params.Function,
+			Args:     tx.TxData.Params.Args,
+		},
 	}
-	cs.tesseract.QueryOrInvoke(containerId)
-	return nil, nil
+
+	res, err := cs.tesseract.QueryOrInvoke(containerId, tesseractTxInfo)
+
+	if err != nil {
+		return nil, err
+	}
+	var data map[string]string
+	var isSuccess bool
+
+	switch res.Result {
+	case "Success":
+		isSuccess = true
+		err = json.Unmarshal(res.Data, data)
+		if err != nil {
+			return nil, err
+		}
+	case "Error":
+		isSuccess = false
+		data = nil
+	default:
+		return nil, errors.New(fmt.Sprintf("Unknown pb response result %s", res.Result))
+	}
+
+	result := &icode.Result{
+		Data:    data,
+		TxId:    tx.TxId,
+		Success: isSuccess,
+	}
+	return result, nil
 }
 
 func (cs TesseractContainerService) StopContainer(id icode.ID) error {
-	panic("implement please")
-	return nil
+	cs.tesseract.Clients[cs.containerIdMap[id]].Close()
+	delete(cs.containerIdMap, id)
+	deletedEvent := icode.MetaDeletedEvent{
+		EventModel: midgard.EventModel{
+			ID:   id,
+			Type: "meta.deleted",
+		},
+	}
+	return eventstore.Save(id,deletedEvent)
 }
 
 // start containers in repos
