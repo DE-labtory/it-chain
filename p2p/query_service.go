@@ -11,3 +11,8 @@ type PeerQueryService interface {
 	FindAll() ([]Peer, error)
 	FindByAddress(ipAddress string) (Peer, error)
 }
+
+type PLTableQueryService interface{
+
+
+}
