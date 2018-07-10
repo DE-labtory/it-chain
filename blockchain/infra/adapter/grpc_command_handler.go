@@ -1,10 +1,16 @@
 package adapter
 
 import (
-	"github.com/it-chain/it-chain-Engine/blockchain"
 	"errors"
+
+	"encoding/json"
+
+	"github.com/it-chain/it-chain-Engine/blockchain"
 )
 
+var ErrBlockInfoDeliver = errors.New("block info deliver failed")
+var ErrGetBlock = errors.New("error when Getting block")
+var ErrResponseBlock = errors.New("error when response block")
 var ErrGetLastBlock = errors.New("error when get last block")
 var ErrSyncCheckResponse = errors.New("error when sync check response")
 
@@ -13,23 +19,26 @@ type BlockApi interface {
 }
 
 type ReadOnlyBlockRepository interface {
+	NewEmptyBlock() (blockchain.Block, error)
 	GetLastBlock(block blockchain.Block) error
+	GetBlockByHeight(block blockchain.Block, height uint64) error
 }
 
-type SyncCheckGrpcCommandService interface {
+type SyncGrpcCommandService interface {
+	ResponseBlock(peerId blockchain.PeerId, block blockchain.Block) error
 	SyncCheckResponse(block blockchain.Block) error
 }
 
 type GrpcCommandHandler struct {
-	blockApi BlockApi
-	blockRepository ReadOnlyBlockRepository
-	grpcCommandService SyncCheckGrpcCommandService
+	blockApi           BlockApi
+	blockRepository    ReadOnlyBlockRepository
+	grpcCommandService SyncGrpcCommandService
 }
 
-func NewGrpcCommandHandler(blockApi BlockApi, blockRepository ReadOnlyBlockRepository, grpcCommandService SyncCheckGrpcCommandService) *GrpcCommandHandler {
+func NewGrpcCommandHandler(blockApi BlockApi, blockRepository ReadOnlyBlockRepository, grpcCommandService SyncGrpcCommandService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
-		blockApi: blockApi,
-		blockRepository: blockRepository,
+		blockApi:           blockApi,
+		blockRepository:    blockRepository,
 		grpcCommandService: grpcCommandService,
 	}
 }
@@ -56,7 +65,24 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 		break
 
 	case "BlockRequestProtocol":
-		//TODO: Construct 과정을 위해서 상대방에게 block을 보내준다.
+
+		block := &blockchain.DefaultBlock{}
+
+		var height uint64
+		err := json.Unmarshal(command.Body, &height)
+		if err != nil {
+			return ErrBlockInfoDeliver
+		}
+
+		err = g.blockRepository.GetBlockByHeight(block, height)
+		if err != nil {
+			return ErrGetBlock
+		}
+
+		err = g.grpcCommandService.ResponseBlock(command.FromPeer.PeerId, block)
+		if err != nil {
+			return ErrResponseBlock
+		}
 		break
 
 	case "BlockResponseProtocol":
