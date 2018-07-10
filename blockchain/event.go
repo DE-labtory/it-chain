@@ -6,6 +6,10 @@ import (
 	"github.com/it-chain/midgard"
 )
 
+type NodeUpdateEvent struct {
+	midgard.EventModel
+}
+
 type SyncStartEvent struct {
 	midgard.EventModel
 }
