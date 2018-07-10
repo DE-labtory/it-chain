@@ -192,7 +192,8 @@ func (saveAction *SaveAction) DoAction(block Block) error {
 	if err != nil {
 		return err
 	}
-	eventstore.Save(BC_LAST_BLOCK_AID, event)
+	blockId := string(block.GetSeal())
+	eventstore.Save(blockId, event)
 	return nil
 }
 
@@ -204,7 +205,7 @@ func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
 
 	return BlockCommittedEvent{
 		EventModel: midgard.EventModel{
-			ID: BC_LAST_BLOCK_AID,
+			ID: string(block.GetSeal()),
 		},
 		Seal: block.GetSeal(),
 		PrevSeal: block.GetPrevSeal(),
@@ -215,9 +216,6 @@ func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
 		Creator: block.GetCreator(),
 	}, nil
 }
-
-// blockchain last block aggregate id
-var BC_LAST_BLOCK_AID = "BC_LAST_BLOCK_AID"
 
 type DefaultAction struct {}
 
