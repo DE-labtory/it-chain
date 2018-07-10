@@ -13,20 +13,21 @@ import (
 	"github.com/rs/xid"
 )
 
-type CommunicationService interface {
+type ICommunicationService interface {
+
 	Dial(ipAddress string) error
 	DeliverPLTable(connectionId string, peerLeaderTable PLTable) error
 }
 
 // injected later
 // the actual implementation is done in gateway api
-type PeerService interface {
+type IPeerService interface {
 
 	Save(peer Peer) error
 	Remove(peerId PeerId) error
 }
 
-type PLTableService interface {
+type IPLTableService interface {
 
 	GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error)
 	ClearPeerTable() error
@@ -70,6 +71,7 @@ type ElectionService struct {
 	mux                sync.Mutex
 	electionRepository ElectionRepository
 	peerService        PeerService
+	peerQueryService PeerQueryService
 	publish            Publish
 }
 
@@ -100,7 +102,7 @@ func StartRandomTimeOut(es *ElectionService) {
 				election.SetState("Candidate")
 				es.electionRepository.SetElection(election)
 
-				peerList, _ := es.peerService.FindAll()
+				peerList, _ := es.peerQueryService.FindAll()
 
 				connectionIds := make([]string, 0)
 
@@ -198,7 +200,7 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
 
-	peers, _ := es.peerService.FindAll()
+	peers, _ := es.peerQueryService.FindAll()
 
 	for _, peer := range peers {
 		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, peer.PeerId.Id)
@@ -222,7 +224,7 @@ func (es *ElectionService) DecideToBeLeader(command GrpcReceiveCommand) error {
 	}
 
 	//	3. if counted is same with num of peer-1 set leader and publish
-	peers, _ := es.peerService.FindAll()
+	peers, _ := es.peerQueryService.FindAll()
 	numOfPeers := len(peers)
 
 	if election.GetVoteCount() == numOfPeers-1 {

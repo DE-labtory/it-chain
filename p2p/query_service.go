@@ -7,12 +7,12 @@ type LeaderQueryService interface {
 
 type PeerQueryService interface {
 
-	FindById(id PeerId) (Peer, error)
+	FindById(peerId PeerId) (Peer, error)
 	FindAll() ([]Peer, error)
 	FindByAddress(ipAddress string) (Peer, error)
 }
 
 type PLTableQueryService interface{
 
-
+	GetPLTable() (PLTable, error)
 }

@@ -8,24 +8,26 @@ import (
 
 var ErrEmptyPeerList = errors.New("empty peer list proposed")
 
-type PeerApiCommunicationService interface{
-	DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error
-}
-
 type PeerApi struct {
-	peerService p2p.PeerService
-	leaderService p2p.LeaderService
-	communicationService PeerApiCommunicationService
+	peerService          p2p.IPeerService
+	peerQueryService     p2p.PeerQueryService
+	pLTableQueryService  p2p.PLTableQueryService
+	leaderService        p2p.LeaderService
+	communicationService p2p.ICommunicationService
 }
 
 func NewPeerApi(
-	peerService p2p.PeerService,
+	peerService p2p.IPeerService,
+	peerQueryService p2p.PeerQueryService,
+	pLTableQueryService p2p.PLTableQueryService,
 	leaderService p2p.LeaderService,
-	communicationService PeerApiCommunicationService) *PeerApi {
+	communicationService p2p.ICommunicationService) *PeerApi {
 
 	return &PeerApi{
-		peerService:     peerService,
-		leaderService: leaderService,
+		peerService:          peerService,
+		peerQueryService:peerQueryService,
+		pLTableQueryService:pLTableQueryService,
+		leaderService:        leaderService,
 		communicationService: communicationService,
 	}
 }
@@ -33,7 +35,7 @@ func NewPeerApi(
 func (peerApi *PeerApi) UpdatePeerList(peerList []p2p.Peer) error {
 
 	//둘다 존재할경우 무시, existPeerList에만 존재할경우 PeerDeletedEvent, peerList에 존재할경우 PeerCreatedEvent
-	existPeerList, err := peerApi.peerService.FindAll()
+	existPeerList, err := peerApi.peerQueryService.FindAll()
 
 	if err != nil {
 		return err
@@ -54,11 +56,10 @@ func (peerApi *PeerApi) UpdatePeerList(peerList []p2p.Peer) error {
 	return nil
 }
 
-
 //Deliver Peer leader table that consists of peerList and leader
 func (peerApi *PeerApi) DeliverPLTable(connectionId string) error {
 
-	peerTable := peerApi.GetPLTable()
+	peerTable, _ := peerApi.pLTableQueryService.GetPLTable()
 	peerApi.communicationService.DeliverPLTable(connectionId, peerTable)
 
 	return nil
@@ -66,5 +67,5 @@ func (peerApi *PeerApi) DeliverPLTable(connectionId string) error {
 
 func (peerApi *PeerApi) FindById(id p2p.PeerId) (p2p.Peer, error) {
 
-	return peerApi.peerService.FindById(id)
+	return peerApi.peerQueryService.FindById(id)
 }

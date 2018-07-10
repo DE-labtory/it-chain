@@ -8,25 +8,26 @@ import (
 
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 var ErrEmptyConnectionId = errors.New("empty connection id proposed")
+var ErrNoMatchingPeerWithIpAddress = errors.New("no matching peer with ip address")
 
 type LeaderApi struct {
-	leaderService  p2p.LeaderService
-	pLTableService p2p.PLTableService
-	pLTableApi PLTableApi
+	leaderService       p2p.ILeaderService
+	pLTableQueryService p2p.PLTableQueryService
 }
 
-func NewLeaderApi(
-	pLTableApi PLTableApi) LeaderApi {
+func NewLeaderApi(leaderService p2p.ILeaderService, pLTableQueryService p2p.PLTableQueryService) LeaderApi {
 
 	return LeaderApi{
-		pLTableApi:pLTableApi,
+		leaderService:       leaderService,
+		pLTableQueryService: pLTableQueryService,
 	}
 }
 
-//todo update leader with ip address by peer!! not leader
 func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
-	pLTable, _ := la.pLTableApi.GetPLTable()
+	//1. loop peer list and find specific address
+	//2. update specific peer as leader
+	pLTable, _ := la.pLTableQueryService.GetPLTable()
 
 	peers := pLTable.PeerList
 
@@ -34,21 +35,19 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
 		if peer.IpAddress == ipAddress {
 
-			leader := p2p.Leader{
-				LeaderId: p2p.LeaderId{Id: peer.PeerId.Id},
-			}
+			p2p.UpdateLeader(peer)
 
-			p2p.UpdateLeader(leader)
+			return nil
 		}
 
 	}
 
-	return nil
+	return ErrNoMatchingPeerWithIpAddress
 }
 
 func (la *LeaderApi) UpdateLeaderWithLongerPeerList(oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer) error {
 
-	myPLTable, _ := la.pLTableApi.GetPLTable()
+	myPLTable, _ := la.pLTableQueryService.GetPLTable()
 
 	myPeerList, _ := myPLTable.GetPeerList()
 

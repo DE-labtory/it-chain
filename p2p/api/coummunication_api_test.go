@@ -30,11 +30,11 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 		},
 	}
 
-	mockPeerService := &mock.MockPeerService{}
+	mockPeerQueryService := &mock.MockPeerQueryService{}
 
-	mockPeerService.FindByIdFunc = func(peerId p2p.PeerId) (p2p.Peer, error) {
+	mockPeerQueryService.FindByIdFunc = func(peerId p2p.PeerId) (p2p.Peer, error) {
 
-		peerList := MakeFakePeerList()
+		peerList := mock.MakeFakePeerList()
 
 		for _, peer := range peerList {
 			if peer.PeerId == peerId {
@@ -49,29 +49,9 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 
 		t.Logf("running test case %s", testName)
 
-		communicationApi := api.NewCommunicationApi(mockPeerService, &mock.MockCommunicationService{})
+		communicationApi := api.NewCommunicationApi(mockPeerQueryService, &mock.MockCommunicationService{})
 
 		assert.Equal(t, communicationApi.DialToUnConnectedNode(test.input.peerList), test.err)
 
 	}
-}
-
-func MakeFakePeerList() []p2p.Peer {
-
-	peerList := make([]p2p.Peer, 0)
-	peerList = append(peerList, p2p.Peer{
-		PeerId: p2p.PeerId{
-			Id: "1",
-		},
-		IpAddress: "1",
-	})
-
-	peerList = append(peerList, p2p.Peer{
-		PeerId: p2p.PeerId{
-			Id: "2",
-		},
-		IpAddress: "2",
-	})
-
-	return peerList
 }

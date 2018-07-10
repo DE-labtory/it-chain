@@ -4,9 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/it-chain/midgard"
-	"log"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/midgard"
 )
 
 type Leader struct {
@@ -15,11 +14,6 @@ type Leader struct {
 
 type LeaderId struct {
 	Id string
-}
-
-type LeaderService interface {
-
-	Set(leader Leader) error
 }
 
 func (lid LeaderId) ToString() string {
@@ -44,7 +38,11 @@ func (l *Leader) On(event midgard.Event) error {
 	return nil
 }
 
-func UpdateLeader(leader Leader) error{
+func UpdateLeader(peer Peer) error {
+
+	leader := Leader{
+		LeaderId: LeaderId{Id: peer.PeerId.Id},
+	}
 
 	if leader.LeaderId.Id == "" {
 		return ErrEmptyLeaderId
@@ -63,12 +61,6 @@ func UpdateLeader(leader Leader) error{
 
 	events = append(events, leaderUpdatedEvent)
 
-	err := eventstore.Save(leaderUpdatedEvent.GetID(), events...)
+	return eventstore.Save(leaderUpdatedEvent.GetID(), events...)
 
-	if err != nil {
-		log.Println(err.Error())
-		return err
-	}
-
-	return err
 }

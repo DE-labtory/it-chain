@@ -1,6 +1,8 @@
 package mock
 
-import "github.com/it-chain/it-chain-Engine/p2p"
+import (
+	"github.com/it-chain/it-chain-Engine/p2p"
+)
 
 type MockPeerService struct {
 
@@ -36,6 +38,15 @@ func (mps *MockPeerService) FindAll () ([]p2p.Peer, error){
 	return mps.FindAllFunc()
 }
 
+type MockLeaderService struct {
+	SetFunc func(leader p2p.Leader) error
+}
+
+func (ls *MockLeaderService) Set(leader p2p.Leader) error {
+
+	return ls.SetFunc(leader)
+}
+
 type MockCommunicationService struct {
 
 	DialFunc func(ipAddress string) error
@@ -46,7 +57,38 @@ func (mcs *MockCommunicationService) Dial(ipAddress string) error {
 
 	return mcs.DialFunc(ipAddress)
 }
+
 func (mcs *MockCommunicationService) DeliverPLTable(connectionId string, pLTable p2p.PLTable) error{
 
 	return mcs.DeliverPLTableFunc(connectionId, pLTable)
+}
+
+type MockPeerQueryService struct{
+
+	FindByIdFunc func(peerId p2p.PeerId) (p2p.Peer, error)
+	FindAllFunc func() ([]p2p.Peer, error)
+	FindByAddressFunc func(ipAddress string) (p2p.Peer, error)
+}
+
+func (mpqs *MockPeerQueryService) FindById(peerId p2p.PeerId) (p2p.Peer, error){
+
+	return mpqs.FindByIdFunc(peerId)
+}
+
+func (mpqs *MockPeerQueryService) FindAll() ([]p2p.Peer, error){
+
+	return mpqs.FindAll()
+}
+
+func (mpqs *MockPeerQueryService) FindByAddress(ipAddress string) (p2p.Peer, error){
+
+	return mpqs.FindByAddress(ipAddress)
+}
+
+type MockPLTableQueryService struct{
+	GetPLTableFunc func() (p2p.PLTable, error)
+}
+
+func (mpltqs *MockPLTableQueryService) GetPLTable() (p2p.PLTable, error){
+	return mpltqs.GetPLTableFunc()
 }

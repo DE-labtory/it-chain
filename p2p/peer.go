@@ -89,7 +89,6 @@ func (n Peer) Serialize() ([]byte, error) {
 	return common.Serialize(n)
 }
 
-
 // 입력받은 p2p 구조체에 해당 json 인코딩 바이트 배열을 deserialize 해서 저장한다.
 func Deserialize(b []byte, peer *Peer) error {
 	err := json.Unmarshal(b, peer)
