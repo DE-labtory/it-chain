@@ -17,6 +17,7 @@ import (
 )
 
 var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
+var ErrDeserializingTxList = errors.New("err when deserailizing TxList")
 
 type Block = ygg.Block
 
@@ -148,39 +149,12 @@ func (block *DefaultBlock) IsPrev(serializedPrevBlock []byte) bool {
 	return bytes.Compare(prevBlock.GetSeal(), block.GetPrevSeal()) == 0
 }
 
-// This is from #279 @junk-sound
-func deserializeTxList(txList []byte) ([]Transaction, error) {
-	DefaultTxList := []*DefaultTransaction{}
-
-	err := common.Deserialize(txList, &DefaultTxList)
-
-	if err != nil {
-		return nil, err
-	}
-	TxList := convertTxType(DefaultTxList)
-
-	return TxList, nil
-}
-
-func convertTxType(txList []*DefaultTransaction) []Transaction {
-	convTxList := make([]Transaction, 0)
-
-	for _, tx := range txList {
-		convTxList = append(convTxList, tx)
-	}
-
-	return convTxList
-}
-
 // interface of api gateway query api
 type BlockQueryApi interface {
 	GetBlockByHeight(height uint64) (Block, error)
 	GetBlockBySeal(seal []byte) (Block, error)
 	GetBlockByTxID(txid string) (Block, error)
 	GetLastBlock() (Block, error)
-	GetTransactionByTxID(txid string) (Transaction, error)
-	GetBlockByHeightOfOtherPeer(peerId PeerId, height uint64) (Block, error)
-	GetLastBlockOfOtherPeer(peerId PeerId) (Block, error)
 }
 
 type Action interface {
@@ -208,11 +182,16 @@ func (block *DefaultBlock) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *BlockCreatedEvent:
+		TxList, err := deserializeTxList(v.TxList)
+
+		if err != nil {
+			return ErrDeserializingTxList
+		}
 
 		block.Seal = v.Seal
 		block.PrevSeal = v.PrevSeal
 		block.Height = v.Height
-		block.TxList = v.TxList
+		block.TxList = TxList
 		block.TxSeal = v.TxSeal
 		block.Timestamp = v.Timestamp
 		block.Creator = v.Creator
@@ -222,6 +201,30 @@ func (block *DefaultBlock) On(event midgard.Event) error {
 	}
 
 	return nil
+}
+
+func deserializeTxList(txList []byte) ([]Transaction, error) {
+	DefaultTxList := []*DefaultTransaction{}
+
+	err := common.Deserialize(txList, &DefaultTxList)
+
+	if err != nil {
+		return nil, err
+	}
+	TxList := convertTxType(DefaultTxList)
+
+	return TxList, nil
+
+}
+
+func convertTxType(txList []*DefaultTransaction) []Transaction {
+	convTxList := make([]Transaction, 0)
+
+	for _, tx := range txList {
+		convTxList = append(convTxList, tx)
+	}
+
+	return convTxList
 }
 
 func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock {

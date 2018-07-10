@@ -6,6 +6,10 @@ import (
 	"github.com/it-chain/midgard"
 )
 
+type NodeUpdateEvent struct {
+	midgard.EventModel
+}
+
 type SyncStartEvent struct {
 	midgard.EventModel
 }
@@ -47,7 +51,7 @@ type BlockCreatedEvent struct {
 	Seal      []byte
 	PrevSeal  []byte
 	Height    uint64
-	TxList    []Transaction
+	TxList    []byte
 	TxSeal    [][]byte
 	Timestamp time.Time
 	Creator   []byte
