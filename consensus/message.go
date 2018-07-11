@@ -1,14 +1,13 @@
 package consensus
 
 import (
-	"github.com/it-chain/it-chain-Engine/blockchain"
 	"encoding/json"
 )
 
 type PrePrepareMsg struct {
 	ConsensusId   ConsensusId
 	SenderId      string
-	ProposedBlock blockchain.Block
+	ProposedBlock ProposedBlock
 }
 
 func (pp PrePrepareMsg) ToByte() ([]byte, error) {
@@ -22,7 +21,7 @@ func (pp PrePrepareMsg) ToByte() ([]byte, error) {
 type PrepareMsg struct {
 	ConsensusId   ConsensusId
 	SenderId      string
-	ProposedBlock blockchain.Block
+	ProposedBlock ProposedBlock
 }
 
 func (p PrepareMsg) ToByte() ([]byte, error) {
@@ -45,5 +44,3 @@ func (c CommitMsg) ToByte() ([]byte, error) {
 	}
 	return data, nil
 }
-
-

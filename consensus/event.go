@@ -44,15 +44,18 @@ type MemberRemovedEvent struct {
 
 // todo : consensus를 위해 필요하지 않나? -> 고민해볼것
 
+// Preprepare msg를 받았을 때
 type ConsensusStartedEvent struct {
 	midgard.EventModel
 }
 
-type PrepareFinishedEvent struct {
+// Prepare msg를 받아서 commit msg를 받는 상태가 될 때
+type ConsensusPreparedEvent struct {
 	midgard.EventModel
 	ConsensusId string
 }
 
+// Commit msg를 받아서 consensus가 끝났을 때
 type ConsensusFinishedEvent struct {
 	midgard.EventModel
 	ConsensusId string
