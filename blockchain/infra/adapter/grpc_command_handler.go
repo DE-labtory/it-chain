@@ -14,31 +14,25 @@ var ErrResponseBlock = errors.New("error when response block")
 var ErrGetLastBlock = errors.New("error when get last block")
 var ErrSyncCheckResponse = errors.New("error when sync check response")
 
-type BlockApi interface {
+type SyncBlockApi interface {
 	SyncedCheck(block blockchain.Block) error
 }
 
-type ReadOnlyBlockRepository interface {
-	NewEmptyBlock() (blockchain.Block, error)
-	GetLastBlock(block blockchain.Block) error
-	GetBlockByHeight(block blockchain.Block, height uint64) error
-}
-
-type SyncGrpcCommandService interface {
-	ResponseBlock(peerId blockchain.PeerId, block blockchain.Block) error
+type SyncCheckGrpcCommandService interface {
 	SyncCheckResponse(block blockchain.Block) error
+	ResponseBlock(peerId blockchain.PeerId, block blockchain.Block) error
 }
 
 type GrpcCommandHandler struct {
-	blockApi           BlockApi
-	blockRepository    ReadOnlyBlockRepository
-	grpcCommandService SyncGrpcCommandService
+	blockApi SyncBlockApi
+	blockQueryApi blockchain.BlockQueryApi
+	grpcCommandService SyncCheckGrpcCommandService
 }
 
-func NewGrpcCommandHandler(blockApi BlockApi, blockRepository ReadOnlyBlockRepository, grpcCommandService SyncGrpcCommandService) *GrpcCommandHandler {
+func NewGrpcCommandHandler(blockApi SyncBlockApi, blockQueryService blockchain.BlockQueryApi, grpcCommandService SyncCheckGrpcCommandService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
-		blockApi:           blockApi,
-		blockRepository:    blockRepository,
+		blockApi: blockApi,
+		blockQueryApi: blockQueryService,
 		grpcCommandService: grpcCommandService,
 	}
 }
@@ -47,9 +41,7 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 	switch command.Protocol {
 	case "SyncCheckRequestProtocol":
 		//TODO: 상대방의 SyncCheck를 위해서 자신의 last block을 보내준다.
-		block := &blockchain.DefaultBlock{}
-
-		err := g.blockRepository.GetLastBlock(block)
+		block, err := g.blockQueryApi.GetLastBlock()
 		if err != nil {
 			return ErrGetLastBlock
 		}
@@ -65,16 +57,13 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 		break
 
 	case "BlockRequestProtocol":
-
-		block := &blockchain.DefaultBlock{}
-
 		var height uint64
 		err := json.Unmarshal(command.Body, &height)
 		if err != nil {
 			return ErrBlockInfoDeliver
 		}
 
-		err = g.blockRepository.GetBlockByHeight(block, height)
+		block, err := g.blockQueryApi.GetBlockByHeight(height)
 		if err != nil {
 			return ErrGetBlock
 		}
