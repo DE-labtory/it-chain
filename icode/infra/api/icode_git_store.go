@@ -67,7 +67,7 @@ func NewICodeGitStoreApi(authUserID string, authUserPW string) (*ICodeGitStoreAp
 	}, nil
 }
 
-func (gApi *ICodeGitStoreApi) Clone(repositoryUrl string) (*icode.Meta, error) {
+func (gApi *ICodeGitStoreApi) Clone(baseSavePath string, repositoryUrl string) (*icode.Meta, error) {
 	name := getNameFromGitUrl(repositoryUrl)
 
 	if name == "" {
@@ -75,15 +75,15 @@ func (gApi *ICodeGitStoreApi) Clone(repositoryUrl string) (*icode.Meta, error) {
 	}
 
 	//check file already exist
-	if _, err := os.Stat(conf.GetConfiguration().Icode.ICodeSavePath + "/" + name); err == nil {
+	if _, err := os.Stat(baseSavePath + "/" + name); err == nil {
 		// if iCode already exist, remove that
-		err = os.RemoveAll(conf.GetConfiguration().Icode.ICodeSavePath + "/" + name)
+		err = os.RemoveAll(baseSavePath + "/" + name)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	r, err := git.PlainClone(conf.GetConfiguration().Icode.ICodeSavePath+"/"+name, false, &git.CloneOptions{
+	r, err := git.PlainClone(baseSavePath+"/"+name, false, &git.CloneOptions{
 		URL:               repositoryUrl,
 		Auth:              gApi.sshAuth,
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
