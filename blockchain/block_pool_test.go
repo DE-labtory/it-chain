@@ -29,6 +29,13 @@ func TestBlockPoolModel(t *testing.T) {
 
 	// Then
 	assert.Equal(t, nil, pool.Get(blockchain.BlockHeight(2)))
+
+
+	// when
+	aggregateID := pool.GetID()
+
+	// Then
+	assert.Equal(t, blockchain.BLOCK_POOL_AID, aggregateID)
 }
 
 func TestBlockPoolModel_On(t *testing.T) {

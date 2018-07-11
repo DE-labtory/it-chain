@@ -19,6 +19,7 @@ func NewEventHandler(api BlockApi) *EventHandler {
 	}
 }
 
+// TODO: write test case
 func (eh *EventHandler) HandleBlockAddToPoolEvent(event blockchain.BlockAddToPoolEvent) error {
 	height := event.Height
 
