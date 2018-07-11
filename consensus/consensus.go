@@ -116,6 +116,19 @@ func (c *Consensus) On(event midgard.Event) error {
 			SenderId:    v.CommitMsg.SenderId,
 		})
 
+	case *ConsensusStartedEvent:
+		c.CurrentState = PREPARE_STATE
+		c.PrepareMsgPool.RemoveAllMsgs()
+		c.CommitMsgPool.RemoveAllMsgs()
+
+	case *ConsensusPreparedEvent:
+		c.CurrentState = COMMIT_STATE
+
+	case *ConsensusFinishedEvent:
+		c.CurrentState = IDLE_STATE
+		c.PrepareMsgPool.RemoveAllMsgs()
+		c.CommitMsgPool.RemoveAllMsgs()
+
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
 	}

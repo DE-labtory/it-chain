@@ -52,11 +52,9 @@ type ConsensusStartedEvent struct {
 // Prepare msg를 받아서 commit msg를 받는 상태가 될 때
 type ConsensusPreparedEvent struct {
 	midgard.EventModel
-	ConsensusId string
 }
 
 // Commit msg를 받아서 consensus가 끝났을 때
 type ConsensusFinishedEvent struct {
 	midgard.EventModel
-	ConsensusId string
 }
