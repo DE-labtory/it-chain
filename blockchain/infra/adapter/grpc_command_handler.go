@@ -20,6 +20,7 @@ type SyncBlockApi interface {
 
 type SyncCheckGrpcCommandService interface {
 	SyncCheckResponse(block blockchain.Block) error
+	ResponseBlock(peerId blockchain.PeerId, block blockchain.Block) error
 }
 
 type GrpcCommandHandler struct {
@@ -56,16 +57,13 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 		break
 
 	case "BlockRequestProtocol":
-
-		block := &blockchain.DefaultBlock{}
-
 		var height uint64
 		err := json.Unmarshal(command.Body, &height)
 		if err != nil {
 			return ErrBlockInfoDeliver
 		}
 
-		err = g.blockRepository.GetBlockByHeight(block, height)
+		block, err := g.blockQueryApi.GetBlockByHeight(height)
 		if err != nil {
 			return ErrGetBlock
 		}
