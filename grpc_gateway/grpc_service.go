@@ -1,4 +1,4 @@
-package gateway
+package grpc_gateway
 
 type GrpcService interface {
 	Dial(address string) (Connection, error)

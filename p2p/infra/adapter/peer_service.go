@@ -1,9 +1,10 @@
 package adapter
 
 import (
-	"github.com/it-chain/it-chain-Engine/gateway"
-	"github.com/it-chain/it-chain-Engine/p2p"
 	"time"
+
+	"github.com/it-chain/it-chain-Engine/grpc_gateway"
+	"github.com/it-chain/it-chain-Engine/p2p"
 )
 
 type PeerService struct {
@@ -11,7 +12,7 @@ type PeerService struct {
 }
 
 func (ps *PeerService) Dial(ipAddress string) error {
-	command := gateway.ConnectionCreateCommand{
+	command := grpc_gateway.ConnectionCreateCommand{
 		Address: ipAddress,
 	}
 	ps.publish("Command", "connection.create", command)
@@ -62,7 +63,6 @@ func (ps *PeerService) RequestPeerList(peerId p2p.PeerId) error {
 	return ps.publish("Command", "message.deliver", deliverCommand)
 }
 
-
 func (ps *PeerService) DeliverPeerLeaderTable(connectionId string, peerLeaderTable p2p.PeerLeaderTable) error {
 
 	if connectionId == "" {
@@ -88,4 +88,3 @@ func (ps *PeerService) DeliverPeerLeaderTable(connectionId string, peerLeaderTab
 
 	return ps.publish("Command", "message.deliver", grpcDeliverCommand)
 }
-

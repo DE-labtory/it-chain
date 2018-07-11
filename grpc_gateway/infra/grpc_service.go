@@ -1,15 +1,16 @@
-package adapter
+package infra
 
 import (
-	"errors"
 	"log"
 	"sync"
+
+	"errors"
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/bifrost/server"
 	"github.com/it-chain/heimdall/key"
-	"github.com/it-chain/it-chain-Engine/gateway"
+	"github.com/it-chain/it-chain-Engine/grpc_gateway"
 	"github.com/it-chain/midgard"
 )
 
@@ -18,8 +19,8 @@ var ErrConnAlreadyExist = errors.New("connection is already exist")
 type Publish func(exchange string, topic string, data interface{}) (err error)
 
 type ConnectionHandler interface {
-	OnConnection(connection gateway.Connection) error
-	OnDisconnection(connection gateway.Connection) error
+	OnConnection(connection grpc_gateway.Connection)
+	OnDisconnection(connection grpc_gateway.Connection)
 }
 
 type GrpcHostService struct {
@@ -53,17 +54,17 @@ func (g *GrpcHostService) SetHandler(connectionHandler ConnectionHandler) {
 	g.connectionHandler = connectionHandler
 }
 
-func (g *GrpcHostService) Dial(address string) (gateway.Connection, error) {
+func (g *GrpcHostService) Dial(address string) (grpc_gateway.Connection, error) {
 
 	connection, err := client.Dial(g.buildDialOption(address))
 
 	if err != nil {
-		return gateway.Connection{}, err
+		return grpc_gateway.Connection{}, err
 	}
 
 	if g.connStore.Exist(connection.GetID()) {
 		connection.Close()
-		return gateway.Connection{}, ErrConnAlreadyExist
+		return grpc_gateway.Connection{}, ErrConnAlreadyExist
 	}
 
 	g.connStore.Add(connection)
@@ -73,8 +74,8 @@ func (g *GrpcHostService) Dial(address string) (gateway.Connection, error) {
 	return toGatewayConnectionModel(connection), nil
 }
 
-func toGatewayConnectionModel(connection bifrost.Connection) gateway.Connection {
-	return gateway.Connection{
+func toGatewayConnectionModel(connection bifrost.Connection) grpc_gateway.Connection {
+	return grpc_gateway.Connection{
 		AggregateModel: midgard.AggregateModel{
 			ID: connection.GetID(),
 		},
@@ -235,7 +236,7 @@ type MessageHandler struct {
 
 func (r MessageHandler) ServeRequest(msg bifrost.Message) {
 
-	err := r.publish("Command", "message.receive", gateway.GrpcReceiveCommand{
+	err := r.publish("Command", "message.receive", grpc_gateway.GrpcReceiveCommand{
 		Body:         msg.Data,
 		ConnectionID: msg.Conn.GetID(),
 	})
