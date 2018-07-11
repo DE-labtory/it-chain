@@ -1,4 +1,4 @@
-package adapter_test
+package infra_test
 
 import (
 	"testing"
@@ -9,9 +9,8 @@ import (
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/heimdall/key"
-	"github.com/it-chain/it-chain-Engine/gateway"
-	"github.com/it-chain/it-chain-Engine/gateway/infra"
-	"github.com/it-chain/it-chain-Engine/gateway/infra/adapter"
+	"github.com/it-chain/it-chain-Engine/grpc_gateway"
+	"github.com/it-chain/it-chain-Engine/grpc_gateway/infra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -53,7 +52,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 	//given
 	tests := map[string]struct {
 		input  bifrost.Message
-		output gateway.GrpcReceiveCommand
+		output grpc_gateway.GrpcReceiveCommand
 		err    error
 	}{
 		"success": {
@@ -63,7 +62,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 					ID: "123",
 				},
 			},
-			output: gateway.GrpcReceiveCommand{
+			output: grpc_gateway.GrpcReceiveCommand{
 				Body:         []byte("hello world"),
 				ConnectionID: "123",
 			},
@@ -76,14 +75,14 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 		//then
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.receive")
-		assert.Equal(t, data, gateway.GrpcReceiveCommand{
+		assert.Equal(t, data, grpc_gateway.GrpcReceiveCommand{
 			Body:         []byte("hello world"),
 			ConnectionID: "123",
 		})
 		return nil
 	}
 
-	messageHandler := adapter.NewMessageHandler(publish)
+	messageHandler := infra.NewMessageHandler(publish)
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
@@ -109,11 +108,11 @@ func TestMemConnectionStore_Add(t *testing.T) {
 		"add same id": {
 			input:  MockConn{ID: "123"},
 			output: MockConn{ID: "123"},
-			err:    adapter.ErrConnAlreadyExist,
+			err:    infra.ErrConnAlreadyExist,
 		},
 	}
 
-	connectionStore := adapter.NewMemConnectionStore()
+	connectionStore := infra.NewMemConnectionStore()
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
@@ -147,7 +146,7 @@ func TestMemConnectionStore_Find(t *testing.T) {
 		},
 	}
 
-	connectionStore := adapter.NewMemConnectionStore()
+	connectionStore := infra.NewMemConnectionStore()
 	connectionStore.Add(MockConn{ID: "123"})
 
 	for testName, test := range tests {
@@ -181,7 +180,7 @@ func TestMemConnectionStore_Delete(t *testing.T) {
 		},
 	}
 
-	connectionStore := adapter.NewMemConnectionStore()
+	connectionStore := infra.NewMemConnectionStore()
 	connectionStore.Add(MockConn{ID: "123"})
 
 	for testName, test := range tests {
@@ -196,23 +195,23 @@ func TestMemConnectionStore_Delete(t *testing.T) {
 }
 
 type MockHandler struct {
-	OnConnectionFunc    func(connection gateway.Connection) error
-	OnDisconnectionFunc func(connection gateway.Connection) error
+	OnConnectionFunc    func(connection grpc_gateway.Connection)
+	OnDisconnectionFunc func(connection grpc_gateway.Connection)
 }
 
-func (m *MockHandler) OnConnection(connection gateway.Connection) error {
-	return m.OnConnectionFunc(connection)
+func (m *MockHandler) OnConnection(connection grpc_gateway.Connection) {
+	m.OnConnectionFunc(connection)
 }
 
-func (m *MockHandler) OnDisconnection(connection gateway.Connection) error {
-	return m.OnDisconnectionFunc(connection)
+func (m *MockHandler) OnDisconnection(connection grpc_gateway.Connection) {
+	m.OnDisconnectionFunc(connection)
 }
 
-var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish func(exchange string, topic string, data interface{}) error) (*adapter.GrpcHostService, func()) {
+var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish func(exchange string, topic string, data interface{}) error) (*infra.GrpcHostService, func()) {
 
 	pri, pub := infra.LoadKeyPair(keyPath, "ECDSA256")
 
-	hostService := adapter.NewGrpcHostService(pri, pub, publish)
+	hostService := infra.NewGrpcHostService(pri, pub, publish)
 
 	go hostService.Listen(ip)
 
@@ -238,7 +237,7 @@ func TestGrpcHostService_Dial(t *testing.T) {
 		"dial exist connection": {
 			input:  "127.0.0.1:7777",
 			output: "",
-			err:    adapter.ErrConnAlreadyExist,
+			err:    infra.ErrConnAlreadyExist,
 		},
 	}
 
@@ -251,14 +250,12 @@ func TestGrpcHostService_Dial(t *testing.T) {
 	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client", publish)
 
 	handler := &MockHandler{}
-	handler.OnConnectionFunc = func(connection gateway.Connection) error {
+	handler.OnConnectionFunc = func(connection grpc_gateway.Connection) {
 		fmt.Println(connection)
-		return nil
 	}
 
-	handler.OnDisconnectionFunc = func(connection gateway.Connection) error {
+	handler.OnDisconnectionFunc = func(connection grpc_gateway.Connection) {
 		fmt.Println("connection is closing", connection)
-		return nil
 	}
 
 	defer tearDown1()
@@ -311,7 +308,7 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.receive")
-		assert.Equal(t, data, gateway.GrpcReceiveCommand{
+		assert.Equal(t, data, grpc_gateway.GrpcReceiveCommand{
 			Body:         publishedData,
 			ConnectionID: connID,
 		})
@@ -325,14 +322,12 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 	defer tearDown2()
 
 	handler := &MockHandler{}
-	handler.OnConnectionFunc = func(connection gateway.Connection) error {
+	handler.OnConnectionFunc = func(connection grpc_gateway.Connection) {
 		connID = connection.ID
-		return nil
 	}
 
-	handler.OnDisconnectionFunc = func(connection gateway.Connection) error {
+	handler.OnDisconnectionFunc = func(connection grpc_gateway.Connection) {
 		fmt.Println("connection is closing", connection)
-		return nil
 	}
 
 	serverHostService.SetHandler(handler)
@@ -366,7 +361,7 @@ func TestGrpcHostService_Close(t *testing.T) {
 		"dial exist connection": {
 			input:  "127.0.0.1:7777",
 			output: "",
-			err:    adapter.ErrConnAlreadyExist,
+			err:    infra.ErrConnAlreadyExist,
 		},
 	}
 
@@ -384,17 +379,14 @@ func TestGrpcHostService_Close(t *testing.T) {
 	var connID string
 
 	handler := &MockHandler{}
-	handler.OnConnectionFunc = func(connection gateway.Connection) error {
+	handler.OnConnectionFunc = func(connection grpc_gateway.Connection) {
 		fmt.Println(connection)
 		connID = connection.ID
-		return nil
 	}
 
-	handler.OnDisconnectionFunc = func(connection gateway.Connection) error {
+	handler.OnDisconnectionFunc = func(connection grpc_gateway.Connection) {
 		fmt.Println("connection is closing", connection)
 		assert.Equal(t, connID, connection.ID)
-
-		return nil
 	}
 
 	serverHostService.SetHandler(handler)
