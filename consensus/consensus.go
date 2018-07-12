@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"encoding/json"
+
 	"github.com/it-chain/midgard"
 )
 
@@ -15,6 +17,34 @@ const (
 	PREPARE_STATE    State = "PrepareState"
 	COMMIT_STATE     State = "CommitState"
 )
+
+var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
+
+type ProposedBlock struct {
+	Seal []byte
+	body []byte
+}
+
+func (block *ProposedBlock) Serialize() ([]byte, error) {
+	data, err := json.Marshal(block)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (block *ProposedBlock) Deserialize(serializedBlock []byte) error {
+	if len(serializedBlock) == 0 {
+		return ErrDecodingEmptyBlock
+	}
+
+	err := json.Unmarshal(serializedBlock, block)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 type RepresentativeId string
 
@@ -28,6 +58,144 @@ func (r Representative) GetID() string {
 
 func NewRepresentative(Id string) *Representative {
 	return &Representative{Id: RepresentativeId(Id)}
+}
+
+type PrePrepareMsg struct {
+	ConsensusId    ConsensusId
+	SenderId       string
+	Representative []*Representative
+	ProposedBlock  ProposedBlock
+}
+
+func (pp PrePrepareMsg) ToByte() ([]byte, error) {
+	data, err := json.Marshal(pp)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+type PrepareMsg struct {
+	ConsensusId ConsensusId
+	SenderId    string
+	BlockHash   []byte
+}
+
+func (p PrepareMsg) ToByte() ([]byte, error) {
+	data, err := json.Marshal(p)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+type CommitMsg struct {
+	ConsensusId ConsensusId
+	SenderId    string
+}
+
+func (c CommitMsg) ToByte() ([]byte, error) {
+	data, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+type PrepareMsgPool struct {
+	messages []PrepareMsg
+}
+
+func NewPrepareMsgPool() PrepareMsgPool {
+	return PrepareMsgPool{
+		messages: make([]PrepareMsg, 0),
+	}
+}
+
+func (pmp *PrepareMsgPool) Save(prepareMsg *PrepareMsg) error {
+	if prepareMsg == nil {
+		return errors.New("Prepare msg is nil")
+	}
+
+	senderID := prepareMsg.SenderId
+	index := pmp.findIndexOfPrepareMsg(senderID)
+
+	if index != -1 {
+		return errors.New(fmt.Sprintf("Already exist member [%s]", senderID))
+	}
+
+	blockHash := prepareMsg.BlockHash
+
+	if blockHash == nil {
+		return errors.New("Block hash is nil")
+	}
+
+	pmp.messages = append(pmp.messages, *prepareMsg)
+
+	return nil
+}
+
+func (pmp *PrepareMsgPool) RemoveAllMsgs() {
+	pmp.messages = make([]PrepareMsg, 0)
+}
+
+func (pmp *PrepareMsgPool) Get() []PrepareMsg {
+	return pmp.messages
+}
+
+func (pmp *PrepareMsgPool) findIndexOfPrepareMsg(senderID string) int {
+	for i, msg := range pmp.messages {
+		if msg.SenderId == senderID {
+			return i
+		}
+	}
+
+	return -1
+}
+
+type CommitMsgPool struct {
+	messages []CommitMsg
+}
+
+func NewCommitMsgPool() CommitMsgPool {
+	return CommitMsgPool{
+		messages: make([]CommitMsg, 0),
+	}
+}
+
+func (cmp *CommitMsgPool) Save(commitMsg *CommitMsg) error {
+	if commitMsg == nil {
+		return errors.New("Commit msg is nil")
+	}
+
+	senderID := commitMsg.SenderId
+	index := cmp.findIndexOfCommitMsg(senderID)
+
+	if index != -1 {
+		return errors.New(fmt.Sprintf("Already exist member [%s]", senderID))
+	}
+
+	cmp.messages = append(cmp.messages, *commitMsg)
+
+	return nil
+}
+
+func (cmp *CommitMsgPool) RemoveAllMsgs() {
+	cmp.messages = make([]CommitMsg, 0)
+}
+
+func (cmp *CommitMsgPool) Get() []CommitMsg {
+	return cmp.messages
+}
+
+func (cmp *CommitMsgPool) findIndexOfCommitMsg(senderID string) int {
+	for i, msg := range cmp.messages {
+		if msg.SenderId == senderID {
+			return i
+		}
+	}
+
+	return -1
 }
 
 type ConsensusId struct {
