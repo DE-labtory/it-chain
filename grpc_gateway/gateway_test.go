@@ -1,4 +1,4 @@
-package gateway_test
+package grpc_gateway_test
 
 import (
 	"testing"
@@ -13,12 +13,12 @@ func TestStart(t *testing.T) {
 	//keyPath := "~test"
 	//grpcUrl := "127.0.0.1:7777"
 	//
-	//go gateway.Start(amqpUrl, grpcUrl, keyPath)
+	//go grpc_gateway.Start(amqpUrl, grpcUrl, keyPath)
 	//
 	//defer func() {
 	//	os.RemoveAll(keyPath)
 	//	os.RemoveAll("~test2")
-	//	gateway.Stop()
+	//	grpc_gateway.Stop()
 	//}()
 	//
 	//wg.Wait()

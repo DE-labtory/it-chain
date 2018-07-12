@@ -4,7 +4,6 @@ var quit = make(chan bool)
 
 // todo bifrost server kill방법
 func Start(ampqUrl string, grpcUrl string, keyPath string) error {
-
 	////create rabbitmq client
 	//rabbitmqClient := rabbitmq.Connect(ampqUrl)
 	//

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"reflect"
+
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
 	"github.com/stretchr/testify/assert"
@@ -56,7 +57,6 @@ func TestGrpcCommandService_RequestBlock(t *testing.T) {
 		err := GrpcCommandService.RequestBlock(test.input.peerId, test.input.height)
 		assert.Equal(t, err, test.err)
 	}
-
 }
 
 func TestGrpcCommandService_ResponseBlock(t *testing.T) {

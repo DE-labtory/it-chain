@@ -26,17 +26,12 @@ func NewGrpcCommandService(publish Publish) *GrpcCommandService {
 	}
 }
 
-
 func (gcs *GrpcCommandService) RequestBlock(peerId blockchain.PeerId, height uint64) error {
-
-
 	if peerId.Id == "" {
 		return ErrEmptyNodeId
 	}
 
-	body := blockchain.DefaultBlock{
-		Height: height,
-	}
+	body := height
 
 	deliverCommand, err := createGrpcDeliverCommand("BlockRequestProtocol", body)
 	if err != nil {
@@ -47,7 +42,6 @@ func (gcs *GrpcCommandService) RequestBlock(peerId blockchain.PeerId, height uin
 
 	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
-
 
 func (gcs *GrpcCommandService) ResponseBlock(peerId blockchain.PeerId, block blockchain.Block) error {
 	if peerId.Id == "" {
