@@ -13,9 +13,11 @@ var ErrGetBlock = errors.New("error when Getting block")
 var ErrResponseBlock = errors.New("error when response block")
 var ErrGetLastBlock = errors.New("error when get last block")
 var ErrSyncCheckResponse = errors.New("error when sync check response")
+var ErrAddBlock = errors.New("error when adding block")
 
 type SyncBlockApi interface {
 	SyncedCheck(block blockchain.Block) error
+	AddBlock(block blockchain.Block) error
 }
 
 type SyncCheckGrpcCommandService interface {
@@ -24,15 +26,15 @@ type SyncCheckGrpcCommandService interface {
 }
 
 type GrpcCommandHandler struct {
-	blockApi SyncBlockApi
-	blockQueryApi blockchain.BlockQueryApi
+	blockApi           SyncBlockApi
+	blockQueryApi      blockchain.BlockQueryApi
 	grpcCommandService SyncCheckGrpcCommandService
 }
 
 func NewGrpcCommandHandler(blockApi SyncBlockApi, blockQueryService blockchain.BlockQueryApi, grpcCommandService SyncCheckGrpcCommandService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
-		blockApi: blockApi,
-		blockQueryApi: blockQueryService,
+		blockApi:           blockApi,
+		blockQueryApi:      blockQueryService,
 		grpcCommandService: grpcCommandService,
 	}
 }
@@ -76,6 +78,17 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 
 	case "BlockResponseProtocol":
 		//TODO: Construct 과정에서 block을 받는다.
+		var block blockchain.DefaultBlock
+		err := json.Unmarshal(command.Body, &block)
+		if err != nil {
+			return ErrBlockInfoDeliver
+		}
+
+		err = g.blockApi.AddBlock(&block)
+		if err != nil {
+			return ErrAddBlock
+		}
+
 		break
 	}
 
