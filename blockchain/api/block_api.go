@@ -39,15 +39,15 @@ func (bApi *BlockApi) construct() error {
 	syncState := blockchain.NewBlockSyncState()
 	syncState.SetProgress(blockchain.PROGRESSING)
 
-	// 0.5 Peer객체 셋팅: 다른 함수 써야함.
+	// 1 Peer객체 셋팅: 다른 함수 써야함.
 	anonymousPeerId := blockchain.PeerId{Id: "anonymous"}
 
-	// 1. cashe에 상대방의 lastBlock의 height 저장.
-	yourLastBlock, err := bApi.blockQueryApi.GetLastBlock()
+	// 2. cashe에 상대방의 lastBlock의 height 저장.
+	yourLastBlock, err := bApi.blockQueryApi.GetLastBlockOfOtherPeer(anonymousPeerId)
 	if err != nil {
 		return err
 	}
-	// 2. 나의 라스트 헤이트 세팅: 이벤트 스토어에서 나의 lastBlock 가져옴. 하나도 없을 경우 0, 있다면 마지막.
+	// 3. 나의 라스트 헤이트 세팅: 이벤트 스토어에서 나의 lastBlock 가져옴. 하나도 없을 경우 0, 있다면 마지막.
 	myLastBlock, err := bApi.blockQueryApi.GetLastBlock()
 	if err != nil {
 		return err
@@ -55,15 +55,18 @@ func (bApi *BlockApi) construct() error {
 
 	myLastHeight := myLastBlock.GetHeight()
 
-	// 3. while 문 사용: 나의 lastHeight와 상대방의 last height 비교
+	// 4. while 문 사용: 나의 lastHeight와 상대방의 last height 비교
 	for yourLastBlock.GetHeight() <= myLastHeight {
 
-		// 4. 리퀘스트 블록: 내가 하나도 없을 경우에 0, 있다면 lastHeight + 1을 요청
-		bApi.SyncService.RequestBlock(anonymousPeerId, myLastHeight)
-		// 5. 이벤트 스토어에 세이브.
-		blockchain.CommitBlock(nil)
+		// 5. 리퀘스트 블록: 내가 하나도 없을 경우에 0, 있다면 lastHeight + 1을 요청
+		retrievedBlock, err := bApi.blockQueryApi.GetBlockByHeightOfOtherPeer(anonymousPeerId, myLastHeight+1)
+		if err != nil {
+			return err
+		}
+		// 6. 이벤트 스토어에 세이브.
+		blockchain.CommitBlock(retrievedBlock)
 
-		// 6. 나의 last height 다시 세팅.
+		// 7. 나의 last height 다시 세팅.
 		myLastHeight++
 
 	}
@@ -72,6 +75,11 @@ func (bApi *BlockApi) construct() error {
 	syncState.SetProgress(blockchain.DONE)
 
 	return nil
+	//ToDo: 1에 대한 함수 작성.
+	//ToDo: 2는 api-gateway 알고 다시 작성.
+	//ToDo: 4에서 myLastHeight가 nil일 경우 대응,
+	//ToDo: 5에서 RequestBlock을 다른 노드의 apiGateway에서 가져오는 걸로 변경.
+	//ToDo: 4~7까지 하나의 함수로 묶기.
 }
 
 func (bApi *BlockApi) SaveBlock(block blockchain.Block) error {

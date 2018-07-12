@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	ygg "github.com/it-chain/yggdrasill/common"
@@ -150,7 +151,7 @@ func (block *DefaultBlock) IsPrev(serializedPrevBlock []byte) bool {
 
 // interface of api gateway query api
 type BlockQueryApi interface {
-	GetBlockByHeight(blockHeight uint64) (Block, error)
+	GetBlockByHeight(height uint64) (Block, error)
 	GetBlockBySeal(seal []byte) (Block, error)
 	GetBlockByTxID(txid string) (Block, error)
 	GetLastBlock() (Block, error)
@@ -241,12 +242,22 @@ func CommitBlock(block Block) error {
 	return nil
 }
 func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
-	seal := string(block.GetSeal())
+	txListBytes, err := common.Serialize(block.GetTxList())
+	if err != nil {
+		return BlockCommittedEvent{}, ErrTxListMarshal
+	}
+
 	return BlockCommittedEvent{
 		EventModel: midgard.EventModel{
-			ID: seal,
+			ID: BLOCK_POOL_AID,
 		},
-		Seal: seal,
+		Seal:      block.GetSeal(),
+		PrevSeal:  block.GetPrevSeal(),
+		Height:    block.GetHeight(),
+		TxList:    txListBytes,
+		TxSeal:    block.GetTxSeal(),
+		Timestamp: block.GetTimestamp(),
+		Creator:   block.GetCreator(),
 	}, nil
 }
 
