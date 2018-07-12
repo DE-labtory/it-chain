@@ -306,13 +306,13 @@ func (c *Consensus) On(event midgard.Event) error {
 			SenderId:    v.CommitMsg.SenderId,
 		})
 
-	case *ConsensusStartedEvent:
+	case *ConsensusPrePreparedEvent:
 		c.Start()
 
 	case *ConsensusPreparedEvent:
 		c.ToCommitState()
 
-	case *ConsensusFinishedEvent:
+	case *ConsensusCommittedEvent:
 		c.ToIdleState()
 
 	default:
