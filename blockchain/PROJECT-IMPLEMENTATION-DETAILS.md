@@ -124,3 +124,26 @@ After finishing Construct step, check whether there's next block of synchronizin
 *  Construct step can take some times, we should think about disconnecting with network while Construct step proceeds. There's can be two cases: (1) Synchronizing node can be disconnected with network (2) Target Node can be disconnected with network.
     1. **If synchronizing node disconnect with network**, then when connect to network, start synchronization again. For example, if node construct from 101th to 10000th blocks, but disconnect  after construct 500th block. Then when this node connect to network start synchronization from 501th block.
     2. **If Target Node disconnect with network**, this is same as first case, start synchronization again from Check step. Select different Target Node again then construct from node's next block.
+
+### Author
+
+[@zerofruit](https://github.com/zerofruit)
+
+
+
+
+## ConfirmBlockCommand
+
+`ConfirmBlockCommand` is command which sent with consensused block
+
+### How to handle
+
+In blockchain component, if we receive `ConfirmBlockCommand`, save confirmed block to `BlockPool`. This block is not directly saved to blockchain.
+
+![blockchain-blocksync-seq](../doc/images/blockchain-HandleConfirmBlockCommand-implementation-seq.png)
+
+`CommandHandler` call `BlockApi` with `AddBlockToPool`.  Using `BlockPool `,  `BlockApi` save confirmed block. After  `BlockPool`  receiving block, save `BlockAddToPoolEvent` to `EventStore`. Finally update itself with `On` function.
+
+
+
+ 
