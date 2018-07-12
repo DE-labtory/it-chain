@@ -8,28 +8,8 @@ import (
 	"github.com/it-chain/midgard"
 	"fmt"
 	"errors"
+	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
 )
-
-type MockBlockQueryApi struct {
-	GetLastBlockFunc func() (blockchain.Block, error)
-}
-func (br MockBlockQueryApi) GetLastBlock() (blockchain.Block, error) {
-	return br.GetLastBlockFunc()
-}
-func (br MockBlockQueryApi) GetBlockByHeight(blockHeight uint64) (blockchain.Block, error) { return nil, nil }
-func (br MockBlockQueryApi) GetBlockBySeal(seal []byte) (blockchain.Block, error) { return nil, nil }
-func (br MockBlockQueryApi) GetBlockByTxID(txid string) (blockchain.Block, error) { return nil, nil }
-func (br MockBlockQueryApi) GetTransactionByTxID(txid string) (blockchain.Transaction, error) { return nil, nil }
-
-type MockEventRepository struct {
-	LoadFunc func(aggregate midgard.Aggregate) error
-}
-
-func (er MockEventRepository) Load(aggregate midgard.Aggregate, aggregateID string) error {
-	return er.LoadFunc(aggregate)
-}
-func (er MockEventRepository) Save(aggregateID string, events ...midgard.Event) error {return nil}
-func (er MockEventRepository) Close() {}
 
 func TestBlockApi_AddBlockToPool(t *testing.T) {
 	tests := map[string] struct {
@@ -46,9 +26,9 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 		},
 	}
 
-	blockRepository := MockBlockQueryApi{}
+	blockRepository := mock.MockBlockQueryApi{}
 	publisherId := "zf"
-	eventRepository := MockEventRepository{}
+	eventRepository := mock.MockEventRepository{}
 	eventRepository.LoadFunc = func(aggregate midgard.Aggregate) error {
 		// predefine block pool
 		aggregate = blockchain.NewBlockPool()
@@ -86,14 +66,14 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 		},
 	}
 	// When
-	blockQueryApi := MockBlockQueryApi{}
+	blockQueryApi := mock.MockBlockQueryApi{}
 	blockQueryApi.GetLastBlockFunc = func() (blockchain.Block, error) {
 		return &blockchain.DefaultBlock{
 			Height: blockchain.BlockHeight(12),
 		}, nil
 	}
 	publisherId := "zf"
-	eventRepository := MockEventRepository{}
+	eventRepository := mock.MockEventRepository{}
 	eventRepository.LoadFunc = func(aggregate midgard.Aggregate) error {
 		switch v := aggregate.(type) {
 		case blockchain.BlockPool:
