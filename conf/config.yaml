@@ -1,3 +1,4 @@
+configname: ""
 common:
   bootnodeip: 127.0.0.1:4444
   nodeip: 127.0.0.1:4444
