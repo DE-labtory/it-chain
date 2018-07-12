@@ -118,7 +118,13 @@ func (gApi *ICodeGitStoreApi) Push(meta icode.Meta) error {
 		return errors.New(fmt.Sprintf("Invalid iCodeMeta Path [%s]", iCodePath))
 	}
 
-	err := changeRemote(iCodePath, gApi.AuthGitUser.GetHTMLURL()+"/"+meta.RepositoryName)
+	err := gApi.createRepository(meta.RepositoryName)
+
+	if err != nil {
+		return err
+	}
+
+	err = changeRemote(iCodePath, gApi.AuthGitUser.GetHTMLURL()+"/"+meta.RepositoryName)
 
 	if err != nil {
 		return err
