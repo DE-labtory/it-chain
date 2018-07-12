@@ -128,6 +128,7 @@ After finishing Construct step, check whether there's next block of synchronizin
 ### Author
 
 [@zerofruit](https://github.com/zerofruit)
+[@junk-sound](https://github.com/junk-sound)
 
 
 
