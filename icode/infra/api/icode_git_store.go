@@ -83,8 +83,6 @@ func (gApi *ICodeGitStoreApi) Clone(baseSavePath string, repositoryUrl string) (
 		}
 	}
 
-
-
 	r, err := git.PlainClone(baseSavePath+"/"+name, false, &git.CloneOptions{
 		URL:               repositoryUrl,
 		Auth:              gApi.sshAuth,
@@ -145,6 +143,15 @@ func (gApi *ICodeGitStoreApi) Push(meta icode.Meta) error {
 
 	return nil
 
+}
+
+func (gApi *ICodeGitStoreApi) createRepository(name string) error {
+	ctx := context.Background()
+	_, _, err := gApi.authClient.Repositories.Create(ctx, "", &github.Repository{
+		Name:    &name,
+		Private: &[]bool{false}[0],
+	})
+	return err
 }
 
 func getNameFromGitUrl(gitUrl string) string {
