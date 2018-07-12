@@ -50,8 +50,8 @@ func NewICodeGitStoreApi(authUserID string, authUserPW string) (*ICodeGitStoreAp
 			return nil, err
 		}
 		confSshPath = currentUser.HomeDir + "/.ssh/id_rsa"
-	}
 
+	}
 	sshAuth, err := ssh.NewPublicKeysFromFile("git", confSshPath, "")
 	if err != nil {
 		return nil, err
@@ -83,6 +83,8 @@ func (gApi *ICodeGitStoreApi) Clone(baseSavePath string, repositoryUrl string) (
 		}
 	}
 
+
+
 	r, err := git.PlainClone(baseSavePath+"/"+name, false, &git.CloneOptions{
 		URL:               repositoryUrl,
 		Auth:              gApi.sshAuth,
@@ -106,7 +108,7 @@ func (gApi *ICodeGitStoreApi) Clone(baseSavePath string, repositoryUrl string) (
 		return nil, err
 	}
 
-	metaData := icode.NewMeta(name, repositoryUrl, conf.GetConfiguration().Icode.ICodeSavePath+"/"+name, commitHash)
+	metaData := icode.NewMeta(name, repositoryUrl, baseSavePath+"/"+name, commitHash)
 	return metaData, nil
 }
 

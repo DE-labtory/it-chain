@@ -36,7 +36,7 @@ func NewMeta(repositoryName string, gitUrl string, path string, commitHash strin
 	}
 	eventstore.Save(createEvent.GetID(), createEvent)
 	m := Meta{}
-	m.On(createEvent)
+	m.On(&createEvent)
 	return &m
 }
 
