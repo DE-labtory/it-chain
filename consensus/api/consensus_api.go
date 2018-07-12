@@ -7,15 +7,28 @@ import (
 
 type ConsensusApi struct {
 	eventRepository *midgard.Repository
+	consensus       consensus.Consensus
+	parliament      consensus.Parliament
 }
 
-func NewConsensusApi(eventRepository *midgard.Repository) ConsensusApi {
+func NewConsensusApi(eventRepository *midgard.Repository, consensus consensus.Consensus, parliament consensus.Parliament) ConsensusApi {
 	return ConsensusApi{
 		eventRepository: eventRepository,
+		consensus:       consensus,
+		parliament:      parliament,
 	}
 }
 
 func (cApi ConsensusApi) StartConsensus(userId consensus.MemberId, block consensus.ProposedBlock) error {
+	parliament := cApi.parliament
+
+	if parliament.IsNeedConsensus() {
+		cApi.consensus.Start()
+
+	} else {
+
+	}
+
 	return nil
 }
 

@@ -10,3 +10,9 @@ type MessageService interface {
 
 type ParliamentService interface {
 }
+
+type ElectionService interface {
+}
+
+type ConsensusService interface {
+}
