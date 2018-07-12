@@ -142,8 +142,12 @@ In blockchain component, if we receive `ConfirmBlockCommand`, save confirmed blo
 
 ![blockchain-blocksync-seq](../doc/images/blockchain-HandleConfirmBlockCommand-implementation-seq.png)
 
-`CommandHandler` call `BlockApi` with `AddBlockToPool`.  Using `BlockPool `,  `BlockApi` save confirmed block. After  `BlockPool`  receiving block, save `BlockAddToPoolEvent` to `EventStore`. Finally update itself with `On` function.
 
 
+## BlockAddToPoolEvent
 
- 
+`BlockAddToPoolEvent` is event which is published as block is added to `BlockPool`. 
+
+### How to handle
+
+![blockchain-blocksync-seq](../doc/images/blockchain-HandleBlockAddToPoolEvent-implementation-seq.png)
