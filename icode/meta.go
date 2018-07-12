@@ -13,6 +13,13 @@ type Version struct {
 }
 
 type ID = string
+type Status = int
+
+const (
+	UNDEPLOYED = iota
+	DEPLOYED
+	DEPLOY_FAIL
+)
 
 type Meta struct {
 	ICodeID        ID
@@ -21,6 +28,7 @@ type Meta struct {
 	Path           string
 	CommitHash     string
 	Version        Version
+	Status         Status
 }
 
 func NewMeta(repositoryName string, gitUrl string, path string, commitHash string) *Meta {
@@ -69,6 +77,7 @@ func (m *Meta) On(event midgard.Event) error {
 		m.Path = ""
 		m.CommitHash = ""
 		m.Version = Version{}
+		m.Status = UNDEPLOYED
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
 	}

@@ -6,9 +6,6 @@ import (
 
 	"errors"
 
-	"strings"
-
-	"github.com/google/go-github/github"
 	"github.com/it-chain/it-chain-Engine/icode"
 	"github.com/it-chain/it-chain-Engine/icode/infra/api"
 	"github.com/stretchr/testify/assert"
@@ -60,11 +57,42 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 }
 
 func TestNewICodeGitStoreApi(t *testing.T) {
-	id := "testid"
-	pw := "testpw"
-	icodeApi, err := api.NewICodeGitStoreApi(id, pw)
-	tp := github.BasicAuthTransport{
-		Username: strings.TrimSpace(authUserID),
-		Password: strings.TrimSpace(authUserPW),
+	type Input struct {
+		Id string
+		Pw string
+	}
+
+	//given
+	tests := map[string]struct {
+		Input  Input
+		Output string
+	}{
+		"validAccountCase": {
+			Input: Input{
+				// for test, write valid github id,pw
+				Id: "validId",
+				Pw: "validPw",
+			},
+			Output: "",
+		},
+		"invalidAccountCase": {
+			Input: Input{
+				Id: "invalidId",
+				Pw: "invalidPw",
+			},
+			Output: "GET https://api.github.com/user: 401 Bad credentials []",
+		},
+	}
+
+	for testName, test := range tests {
+		t.Logf("Running %s test, case: %s", t.Name(), testName)
+		//when
+		_, err := api.NewICodeGitStoreApi(test.Input.Id, test.Input.Pw)
+
+		if err != nil {
+			assert.Equal(t, err.Error(), test.Output)
+		} else {
+			assert.Equal(t, "", test.Output)
+		}
 	}
 }
