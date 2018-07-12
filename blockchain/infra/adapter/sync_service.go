@@ -16,17 +16,17 @@ var ErrEmptyBlockSeal = errors.New("empty block seal")
 // ToDo: 구현.(gitId:junk-sound)
 type Publish func(exchange string, topic string, data interface{}) (err error)
 
-type GrpcCommandService struct {
+type SyncService struct {
 	publish Publish // midgard.client.Publish
 }
 
-func NewGrpcCommandService(publish Publish) *GrpcCommandService {
-	return &GrpcCommandService{
+func NewGrpcCommandService(publish Publish) *SyncService {
+	return &SyncService{
 		publish: publish,
 	}
 }
 
-func (gcs *GrpcCommandService) RequestBlock(peerId blockchain.PeerId, height uint64) error {
+func (ss *SyncService) RequestBlock(peerId blockchain.PeerId, height uint64) error {
 	if peerId.Id == "" {
 		return ErrEmptyNodeId
 	}
@@ -40,10 +40,10 @@ func (gcs *GrpcCommandService) RequestBlock(peerId blockchain.PeerId, height uin
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, peerId.ToString())
 
-	return gcs.publish("Command", "message.deliver", deliverCommand)
+	return ss.publish("Command", "message.deliver", deliverCommand)
 }
 
-func (gcs *GrpcCommandService) ResponseBlock(peerId blockchain.PeerId, block blockchain.Block) error {
+func (ss *SyncService) ResponseBlock(peerId blockchain.PeerId, block blockchain.Block) error {
 	if peerId.Id == "" {
 		return ErrEmptyNodeId
 	}
@@ -61,11 +61,11 @@ func (gcs *GrpcCommandService) ResponseBlock(peerId blockchain.PeerId, block blo
 
 	deliverCommand.Recipients = append(deliverCommand.Recipients, peerId.ToString())
 
-	return gcs.publish("Command", "message.deliver", deliverCommand)
+	return ss.publish("Command", "message.deliver", deliverCommand)
 }
 
 // TODO "SyncCheckResponseProtocol"을 통해서 last block을 전달한다.
-func (gcs *GrpcCommandService) SyncCheckResponse(block blockchain.Block) error {
+func (ss *SyncService) SyncCheckResponse(block blockchain.Block) error {
 	return nil
 }
 
