@@ -12,9 +12,9 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 
 	// case 1 : save
 	pMsg := PrepareMsg{
-		ConsensusId:   ConsensusId{"c1"},
-		SenderId:      "s1",
-		ProposedBlock: make([]byte, 0),
+		ConsensusId: ConsensusId{"c1"},
+		SenderId:    "s1",
+		BlockHash:   make([]byte, 0),
 	}
 
 	// when
@@ -25,9 +25,9 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 
 	// case 2 : save
 	pMsg = PrepareMsg{
-		ConsensusId:   ConsensusId{"c1"},
-		SenderId:      "s2",
-		ProposedBlock: make([]byte, 0),
+		ConsensusId: ConsensusId{"c1"},
+		SenderId:    "s2",
+		BlockHash:   make([]byte, 0),
 	}
 
 	// when
@@ -38,9 +38,9 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 
 	// case 3 : same sender
 	pMsg = PrepareMsg{
-		ConsensusId:   ConsensusId{"c1"},
-		SenderId:      "s2",
-		ProposedBlock: make([]byte, 0),
+		ConsensusId: ConsensusId{"c1"},
+		SenderId:    "s2",
+		BlockHash:   make([]byte, 0),
 	}
 
 	// when
@@ -49,11 +49,11 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 	// then
 	assert.Equal(t, 2, len(pPool.messages))
 
-	// case 4 : proposed block is is nil
+	// case 4 : block hash is is nil
 	pMsg = PrepareMsg{
-		ConsensusId:   ConsensusId{"c1"},
-		SenderId:      "s3",
-		ProposedBlock: nil,
+		ConsensusId: ConsensusId{"c1"},
+		SenderId:    "s3",
+		BlockHash:   nil,
 	}
 
 	// when
@@ -68,9 +68,9 @@ func TestPrepareMsgPool_RemoveAllMsgs(t *testing.T) {
 	pPool := NewPrepareMsgPool()
 
 	pMsg := PrepareMsg{
-		ConsensusId:   ConsensusId{"c1"},
-		SenderId:      "s1",
-		ProposedBlock: make([]byte, 0),
+		ConsensusId: ConsensusId{"c1"},
+		SenderId:    "s1",
+		BlockHash:   make([]byte, 0),
 	}
 
 	pPool.Save(&pMsg)

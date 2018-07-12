@@ -73,10 +73,10 @@ func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) (*PrepareMsgAddedEven
 			ID: c.ConsensusID.Id,
 		},
 		PrepareMsg: struct {
-			ConsensusId   ConsensusId
-			SenderId      string
-			ProposedBlock []byte
-		}{ConsensusId: prepareMsg.ConsensusId, SenderId: prepareMsg.SenderId, ProposedBlock: prepareMsg.ProposedBlock},
+			ConsensusId ConsensusId
+			SenderId    string
+			BlockHash   []byte
+		}{ConsensusId: prepareMsg.ConsensusId, SenderId: prepareMsg.SenderId, BlockHash: prepareMsg.BlockHash},
 	}
 
 	c.On(&prepareMsgAddedEvent)
@@ -109,9 +109,9 @@ func (c *Consensus) On(event midgard.Event) error {
 
 	case *PrepareMsgAddedEvent:
 		c.PrepareMsgPool.Save(&PrepareMsg{
-			ConsensusId:   v.PrepareMsg.ConsensusId,
-			SenderId:      v.PrepareMsg.SenderId,
-			ProposedBlock: v.PrepareMsg.ProposedBlock,
+			ConsensusId: v.PrepareMsg.ConsensusId,
+			SenderId:    v.PrepareMsg.SenderId,
+			BlockHash:   v.PrepareMsg.BlockHash,
 		})
 
 	case *CommitMsgAddedEvent:
