@@ -11,6 +11,7 @@ import (
 	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/it-chain/midgard/store/leveldb"
 	"github.com/stretchr/testify/assert"
+	"github.com/it-chain/midgard/store"
 )
 
 //need rabbitmq
@@ -19,7 +20,7 @@ func TestTxCommandHandler_HandleTxCreate(t *testing.T) {
 	//given
 	client := rabbitmq.Connect("")
 	path := "test"
-	store := leveldb.NewEventStore(path, leveldb.NewSerializer(txpool.TxCreatedEvent{}, txpool.TxDeletedEvent{}))
+	store := leveldb.NewEventStore(path, store.NewSerializer(txpool.TxCreatedEvent{}, txpool.TxDeletedEvent{}))
 
 	defer os.RemoveAll(path)
 

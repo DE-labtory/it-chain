@@ -27,7 +27,6 @@ func NewGrpcCommandService(publish Publish) *GrpcCommandService {
 }
 
 func (gcs *GrpcCommandService) RequestBlock(peerId blockchain.PeerId, height uint64) error {
-
 	if peerId.Id == "" {
 		return ErrEmptyNodeId
 	}

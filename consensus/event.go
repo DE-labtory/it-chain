@@ -1,43 +1,60 @@
 package consensus
 
-import "github.com/it-chain/midgard"
+import (
+	"github.com/it-chain/midgard"
+)
 
 // todo : Consensus로 시작하는 네이밍
 
 // Publish part
 
-type ConsensusMessagePublishedEvent struct {
+type PrepareMsgAddedEvent struct {
 	midgard.EventModel
-	ConsensusMsg string
+	PrepareMsg struct {
+		ConsensusId ConsensusId
+		SenderId    string
+		BlockHash   []byte
+	}
 }
 
-// todo : Blockchain 모듈 참고
-type BlockCreatedEvent struct {
+type CommitMsgAddedEvent struct {
 	midgard.EventModel
+	CommitMsg struct {
+		ConsensusId ConsensusId
+		SenderId    string
+	}
 }
 
 // Consume part
 
-type ConsensusMessageArrivedEvent struct {
-	midgard.EventModel
-	ConsensusMsg string
-}
-
-type ConsensusStartedEvent struct {
-	midgard.EventModel
-}
-
 type LeaderChangedEvent struct {
 	midgard.EventModel
-	LeaderId LeaderId
+	LeaderId string
 }
 
 type MemberJoinedEvent struct {
 	midgard.EventModel
-	MemberId MemberId
+	MemberId string
 }
 
 type MemberRemovedEvent struct {
 	midgard.EventModel
-	MemberId MemberId
+	MemberId string
+}
+
+// todo : consensus를 위해 필요하지 않나? -> 고민해볼것
+
+// Preprepare msg를 받았을 때
+type ConsensusStartedEvent struct {
+	midgard.EventModel
+}
+
+// Prepare msg를 받아서 commit msg를 받는 상태가 될 때
+type ConsensusPreparedEvent struct {
+	midgard.EventModel
+}
+
+// Commit msg를 받아서 consensus가 끝났을 때
+type ConsensusFinishedEvent struct {
+	midgard.EventModel
 }

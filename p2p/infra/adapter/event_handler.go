@@ -29,7 +29,6 @@ func NewEventHandler(peerApi EventHandlerPeerApi) *EventHandler {
 func (eh *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent) error {
 
 	//1. addPeer
-
 	peer := *p2p.NewPeer(event.Address, p2p.PeerId{Id: event.ID})
 	err := eh.peerApi.AddPeer(peer)
 

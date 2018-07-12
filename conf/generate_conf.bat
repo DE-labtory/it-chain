@@ -11,11 +11,15 @@ if not exist %BAT_PATH%/main/conf_file_generator.go (
 	exit 1
 )
 
+SET CONFIG_NAME=config
+IF NOT * == %1* (
+    SET CONFIG_NAME=%1
+)
 echo Build generator files...
 go build -o main/GeneratorBuildFile.exe main/conf_file_generator.go
 echo trying to excute generator...
-%BAT_PATH%/main/GeneratorBuildFile.exe
+%BAT_PATH%/main/GeneratorBuildFile.exe -name %CONFIG_NAME%
 echo trying to remove excuted generator...
 del "%BAT_PATH%\main\GeneratorBuildFile.exe"
-echo conf file generate finish!!!
+echo %CONFIG_NAME%.yaml generate finish!!!
 pause
