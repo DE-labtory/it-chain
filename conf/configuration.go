@@ -11,7 +11,7 @@ import (
 )
 
 // it-chain 설정을 저장하는 구조체에 대한 포인터 instance를 선언한다.
-var instance *Configuration
+var instance = &Configuration{}
 
 // 특정 함수를 한번만 수행하기 위한 sync.Once 를 once로 선언하고 필요한 경우
 // once.Do(func(){}) 로 호출하여 사용하도록 한다.
@@ -19,6 +19,7 @@ var once sync.Once
 
 // it-chain 에 필요한 각종 설정을 저장하는 구조체이다.
 type Configuration struct {
+	configName     string
 	Common         common.CommonConfiguration
 	Txpool         model.TxpoolConfiguration
 	Consensus      model.ConsensusConfiguration
@@ -30,17 +31,21 @@ type Configuration struct {
 }
 
 // it-chain의 각종 설정을 받아온다.
+func SetConfigName(name string) {
+	instance.configName = name
+}
 func GetConfiguration() *Configuration {
-
+	if instance.configName == "" {
+		instance.configName = "config"
+	}
 	// 최초로 go application의 configuration을 해당 파일을 통해 설정한다.
 	once.Do(func() {
 
 		// instance를 it-chain 설정에 관한 구조체의 포인터로 지정한다.
-		instance = &Configuration{}
 
 		// Go language의 환경변수와 내부 디렉터리 구조를 통해 config 파일이 저장된 위치와 파일명을 잡아준다.
 		path := os.Getenv("GOPATH") + "/src/github.com/it-chain/it-chain-Engine/conf"
-		viper.SetConfigName("config")
+		viper.SetConfigName(instance.configName)
 		viper.AddConfigPath(path)
 
 		if err := viper.ReadInConfig(); err != nil {
