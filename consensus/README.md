@@ -62,3 +62,7 @@ Consensus Module에서 다루는 핵심 데이터
 ## Publish Command
 
 - BlockCreateCommand
+- ConsensusMsgSendCommand
+  - PreprepareMsg (leader)
+  - PrepareMsg
+  - CommitMsg
