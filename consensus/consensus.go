@@ -84,7 +84,7 @@ func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) (*PrepareMsgAddedEven
 	return &prepareMsgAddedEvent, nil
 }
 
-func (c *Consensus) SaveCommitMsg(commitMsg CommitMsg) (*CommitMsgAddedEvent, error) {
+func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) (*CommitMsgAddedEvent, error) {
 	if c.ConsensusID.Id != commitMsg.ConsensusId.Id {
 		return nil, errors.New("Consensus ID is not same")
 	}
