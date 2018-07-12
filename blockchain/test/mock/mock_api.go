@@ -13,3 +13,11 @@ func (api MockBlockApi) AddBlockToPool(block blockchain.Block) error {
 func (api MockBlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
 	return api.CheckAndSaveBlockFromPoolFunc(height)
 }
+
+type MockSyncBlockApi struct {
+	SyncedCheckFunc func(block blockchain.Block) error
+}
+
+func (ba MockSyncBlockApi) SyncedCheck(block blockchain.Block) error {
+	return ba.SyncedCheckFunc(block)
+}
