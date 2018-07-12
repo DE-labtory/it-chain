@@ -42,10 +42,6 @@ type TxDeletedEvent struct {
 	midgard.EventModel
 }
 
-type LeaderChangedEvent struct {
-	midgard.EventModel
-}
-
 type BlockCommittedEvent struct {
 	midgard.EventModel
 	Transactions []Transaction

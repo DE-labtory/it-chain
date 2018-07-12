@@ -3,6 +3,8 @@ package api_test
 import (
 	"testing"
 
+	"fmt"
+
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"github.com/it-chain/it-chain-Engine/txpool/api"
@@ -54,6 +56,38 @@ func TestTransactionApi_CreateTransaction(t *testing.T) {
 		t.Logf("running test case %s", testName)
 
 		_, err := transactionApi.CreateTransaction(test.input.txData)
+
+		assert.Equal(t, test.err, err)
+	}
+}
+
+func TestTransactionApi_DeleteTransaction(t *testing.T) {
+
+	tests := map[string]struct {
+		input string
+		err   error
+	}{
+		"success": {
+			input: "transactionID",
+			err:   nil,
+		},
+	}
+
+	eventRepository := MockEventRepository{}
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		fmt.Println(aggregateID)
+		assert.Equal(t, "transactionID", events[0].(*txpool.TxDeletedEvent).ID)
+		return nil
+	}
+
+	eventstore.InitForMock(eventRepository)
+
+	transactionApi := api.NewTransactionApi("zf")
+
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+
+		err := transactionApi.DeleteTransaction(test.input)
 
 		assert.Equal(t, test.err, err)
 	}
