@@ -9,6 +9,12 @@ type PrepareMsgPool struct {
 	messages []PrepareMsg
 }
 
+func NewPrepareMsgPool() PrepareMsgPool {
+	return PrepareMsgPool{
+		messages: make([]PrepareMsg, 0),
+	}
+}
+
 func (pmp *PrepareMsgPool) Save(prepareMsg *PrepareMsg) error {
 	if prepareMsg == nil {
 		return errors.New("Prepare msg is nil")
@@ -52,6 +58,12 @@ func (pmp *PrepareMsgPool) findIndexOfPrepareMsg(senderID string) int {
 
 type CommitMsgPool struct {
 	messages []CommitMsg
+}
+
+func NewCommitMsgPool() CommitMsgPool {
+	return CommitMsgPool{
+		messages: make([]CommitMsg, 0),
+	}
 }
 
 func (cmp *CommitMsgPool) Save(commitMsg *CommitMsg) error {

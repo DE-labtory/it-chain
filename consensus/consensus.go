@@ -59,6 +59,10 @@ func (c *Consensus) ToCommitState() {
 	c.CurrentState = COMMIT_STATE
 }
 
+func (c *Consensus) ToIdleState() {
+	c.CurrentState = IDLE_STATE
+}
+
 func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) (*PrepareMsgAddedEvent, error) {
 	if c.ConsensusID.Id != prepareMsg.ConsensusId.Id {
 		return nil, errors.New("Consensus ID is not same")
@@ -117,17 +121,13 @@ func (c *Consensus) On(event midgard.Event) error {
 		})
 
 	case *ConsensusStartedEvent:
-		c.CurrentState = PREPARE_STATE
-		c.PrepareMsgPool.RemoveAllMsgs()
-		c.CommitMsgPool.RemoveAllMsgs()
+		c.Start()
 
 	case *ConsensusPreparedEvent:
-		c.CurrentState = COMMIT_STATE
+		c.ToCommitState()
 
 	case *ConsensusFinishedEvent:
-		c.CurrentState = IDLE_STATE
-		c.PrepareMsgPool.RemoveAllMsgs()
-		c.CommitMsgPool.RemoveAllMsgs()
+		c.ToIdleState()
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
