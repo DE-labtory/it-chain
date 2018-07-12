@@ -5,9 +5,10 @@ import (
 )
 
 type PrePrepareMsg struct {
-	ConsensusId   ConsensusId
-	SenderId      string
-	ProposedBlock ProposedBlock
+	ConsensusId    ConsensusId
+	SenderId       string
+	Representative []*Representative
+	ProposedBlock  ProposedBlock
 }
 
 func (pp PrePrepareMsg) ToByte() ([]byte, error) {

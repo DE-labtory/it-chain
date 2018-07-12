@@ -53,7 +53,7 @@ func TestParliament_ChangeLeader(t *testing.T) {
 	event, _ := p.ChangeLeader(l)
 
 	assert.Equal(t, "leader", event.LeaderId)
-	assert.Equal(t, l.GetId(), p.Leader.GetId())
+	assert.Equal(t, l.GetID(), p.Leader.GetID())
 }
 
 func TestParliament_AddMember(t *testing.T) {
@@ -124,20 +124,10 @@ func TestParliament_FindByPeerID(t *testing.T) {
 	// case 1
 	member := p.FindByPeerID("member")
 
-	assert.Equal(t, "member", member.GetId())
+	assert.Equal(t, "member", member.GetID())
 
 	// case 2
 	member = p.FindByPeerID("nonmember")
 
 	assert.Nil(t, member)
-}
-
-func TestParliamentRepositoryImpl_SetParliament(t *testing.T) {
-	pr := NewParliamentRepository()
-	p := NewParliament()
-	p.ParliamentId = ParliamentId("NewParliamentID")
-
-	pr.SetParliament(p)
-
-	assert.Equal(t, "NewParliamentID", pr.GetParliament().GetID())
 }
