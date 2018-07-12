@@ -1,8 +1,9 @@
 package api
 
 import (
+	"errors"
+
 	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/pkg/errors"
 	"github.com/it-chain/midgard"
 )
 
@@ -11,16 +12,16 @@ var ErrSyncProcessing = errors.New("Sync is in progress")
 var ErrGetLastBlock = errors.New("failed get last block")
 
 type BlockApi struct {
-	blockQueryApi blockchain.BlockQueryApi
+	blockQueryApi   blockchain.BlockQueryApi
 	eventRepository midgard.EventRepository
-	publisherId          string
+	publisherId     string
 }
 
 func NewBlockApi(blockQueryApi blockchain.BlockQueryApi, eventRepository midgard.EventRepository, publisherId string) (BlockApi, error) {
 	return BlockApi{
-		blockQueryApi: blockQueryApi,
+		blockQueryApi:   blockQueryApi,
 		eventRepository: eventRepository,
-		publisherId:          publisherId,
+		publisherId:     publisherId,
 	}, nil
 }
 
@@ -28,6 +29,17 @@ func NewBlockApi(blockQueryApi blockchain.BlockQueryApi, eventRepository midgard
 func (bApi *BlockApi) SyncedCheck(block blockchain.Block) error {
 	return nil
 }
+
+func (bApi *BlockApi) SaveBlock(block blockchain.Block) error {
+	if block == nil {
+		return ErrNilBlock
+	}
+
+	action := blockchain.CreateSaveOrSyncAction(0)
+	action.DoAction(block)
+	return nil
+}
+
 // 받은 block을 block pool에 추가한다.
 func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 	if block == nil {
@@ -81,10 +93,5 @@ func (bApi *BlockApi) loadBlockPool() blockchain.BlockPool {
 }
 
 func compareHeight(height1 uint64, height2 uint64) int64 {
-	return int64(height1 - height2) - 1
+	return int64(height1-height2) - 1
 }
-
-
-
-
-

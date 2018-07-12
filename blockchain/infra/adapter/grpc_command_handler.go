@@ -17,7 +17,7 @@ var ErrAddBlock = errors.New("error when adding block")
 
 type SyncBlockApi interface {
 	SyncedCheck(block blockchain.Block) error
-	AddBlock(block blockchain.Block) error
+	SaveBlock(block blockchain.Block) error
 }
 
 type SyncCheckGrpcCommandService interface {
@@ -84,7 +84,7 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 			return ErrBlockInfoDeliver
 		}
 
-		err = g.blockApi.AddBlock(&block)
+		err = g.blockApi.SaveBlock(&block)
 		if err != nil {
 			return ErrAddBlock
 		}
