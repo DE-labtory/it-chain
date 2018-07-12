@@ -1,15 +1,19 @@
 package api
 
 import (
-	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/consensus"
+	"github.com/it-chain/midgard"
 )
 
 type ConsensusApi struct {
 	eventRepository *midgard.Repository
 }
 
-// todo : Event Sourcing 첨가
+func NewConsensusApi(eventRepository *midgard.Repository) ConsensusApi {
+	return ConsensusApi{
+		eventRepository: eventRepository,
+	}
+}
 
 func (cApi ConsensusApi) StartConsensus(userId consensus.MemberId, block consensus.ProposedBlock) error {
 	return nil
