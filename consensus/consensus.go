@@ -16,6 +16,20 @@ const (
 	COMMIT_STATE     State = "CommitState"
 )
 
+type RepresentativeId string
+
+type Representative struct {
+	Id RepresentativeId
+}
+
+func (r Representative) GetID() string {
+	return string(r.Id)
+}
+
+func NewRepresentative(Id string) *Representative {
+	return &Representative{Id: RepresentativeId(Id)}
+}
+
 type ConsensusId struct {
 	Id string
 }
@@ -33,6 +47,10 @@ type Consensus struct {
 	CurrentState    State
 	PrepareMsgPool  PrepareMsgPool
 	CommitMsgPool   CommitMsgPool
+}
+
+func (c *Consensus) GetID() string {
+	return c.ConsensusID.Id
 }
 
 func (c *Consensus) Start() {
