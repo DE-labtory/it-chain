@@ -29,7 +29,7 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 	blockRepository := mock.MockBlockQueryApi{}
 	publisherId := "zf"
 	eventRepository := mock.MockEventRepository{}
-	eventRepository.LoadFunc = func(aggregate midgard.Aggregate) error {
+	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
 		// predefine block pool
 		aggregate = blockchain.NewBlockPool()
 		return nil
@@ -74,7 +74,7 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 	}
 	publisherId := "zf"
 	eventRepository := mock.MockEventRepository{}
-	eventRepository.LoadFunc = func(aggregate midgard.Aggregate) error {
+	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
 		switch v := aggregate.(type) {
 		case blockchain.BlockPool:
 			aggregate.(blockchain.BlockPool).Add(&blockchain.DefaultBlock{
@@ -105,4 +105,26 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 		// Then
 		assert.Equal(t, test.err, err)
 	}
+}
+
+func TestBlockApi_SyncedCheck(t *testing.T) {
+	// TODO:
+}
+
+func TestBlockApi_SyncIsProgressing(t *testing.T) {
+	// when
+	blockQueryApi := mock.MockBlockQueryApi{}
+	eventRepository := mock.MockEventRepository{}
+	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
+		assert.Equal(t, blockchain.BC_SYNC_STATE_AID, aggregateID)
+		return nil
+	}
+	publisherId := "zf"
+
+	// when
+	blockApi, _ := api.NewBlockApi(blockQueryApi, eventRepository, publisherId)
+
+	// then
+	state := blockApi.SyncIsProgressing()
+	assert.Equal(t, blockchain.DONE, state)
 }
