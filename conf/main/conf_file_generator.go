@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 
+	"flag"
+
 	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/it-chain-Engine/conf/model"
 	"github.com/it-chain/it-chain-Engine/conf/model/common"
@@ -23,10 +25,12 @@ type inner struct {
 
 func main() {
 	path, _ := os.Getwd()
-	if _, err := os.Stat(path + "/config.yaml"); err == nil {
+	configName := flag.String("name", "config", "config file name")
+	flag.Parse()
+	if _, err := os.Stat(path + "/" + *configName + ".yaml"); err == nil {
 		for i := 0; ; i++ {
-			if _, err := os.Stat(path + "/config_bak" + strconv.Itoa(i) + ".yaml"); os.IsNotExist(err) {
-				os.Rename(path+"/config.yaml", path+"/config_bak"+strconv.Itoa(i)+".yaml")
+			if _, err := os.Stat(path + "/" + *configName + "_bak" + strconv.Itoa(i) + ".yaml"); os.IsNotExist(err) {
+				os.Rename(path+"/"+*configName+".yaml", path+"/"+*configName+"_bak"+strconv.Itoa(i)+".yaml")
 				break
 			}
 		}
@@ -44,7 +48,7 @@ func main() {
 	}
 
 	output, _ := yaml.Marshal(&confInfo)
-	err := ioutil.WriteFile(path+"/config.yaml", output, 0644)
+	err := ioutil.WriteFile(path+"/"+*configName+".yaml", output, 0644)
 
 	if err != nil {
 		fmt.Println(err.Error())
