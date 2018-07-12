@@ -178,11 +178,13 @@ func convertTxType(txList []*DefaultTransaction) []Transaction {
 
 // interface of api gateway query api
 type BlockQueryApi interface {
-	GetBlockByHeight(blockHeight uint64) (Block, error)
+	GetBlockByHeight(height uint64) (Block, error)
 	GetBlockBySeal(seal []byte) (Block, error)
 	GetBlockByTxID(txid string) (Block, error)
 	GetLastBlock() (Block, error)
 	GetTransactionByTxID(txid string) (Transaction, error)
+	GetBlockByHeightOfOtherPeer(peerId PeerId, height uint64) (Block, error)
+	GetLastBlockOfOtherPeer(peerId PeerId) (Block, error)
 }
 
 type Action interface {
@@ -240,12 +242,22 @@ func CommitBlock(block Block) error {
 	return nil
 }
 func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
-	seal := string(block.GetSeal())
+	txListBytes, err := common.Serialize(block.GetTxList())
+	if err != nil {
+		return BlockCommittedEvent{}, ErrTxListMarshal
+	}
+
 	return BlockCommittedEvent{
 		EventModel: midgard.EventModel{
-			ID: seal,
+			ID: BLOCK_POOL_AID,
 		},
-		Seal: seal,
+		Seal:      block.GetSeal(),
+		PrevSeal:  block.GetPrevSeal(),
+		Height:    block.GetHeight(),
+		TxList:    txListBytes,
+		TxSeal:    block.GetTxSeal(),
+		Timestamp: block.GetTimestamp(),
+		Creator:   block.GetCreator(),
 	}, nil
 }
 
