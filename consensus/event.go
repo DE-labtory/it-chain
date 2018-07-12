@@ -11,9 +11,9 @@ import (
 type PrepareMsgAddedEvent struct {
 	midgard.EventModel
 	PrepareMsg struct {
-		ConsensusId   ConsensusId
-		SenderId      string
-		ProposedBlock []byte
+		ConsensusId ConsensusId
+		SenderId    string
+		BlockHash   []byte
 	}
 }
 

@@ -19,9 +19,9 @@ func (pp PrePrepareMsg) ToByte() ([]byte, error) {
 }
 
 type PrepareMsg struct {
-	ConsensusId   ConsensusId
-	SenderId      string
-	ProposedBlock ProposedBlock
+	ConsensusId ConsensusId
+	SenderId    string
+	BlockHash   []byte
 }
 
 func (p PrepareMsg) ToByte() ([]byte, error) {

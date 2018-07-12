@@ -11,17 +11,19 @@ func TestConsensus_SavePrepareMsg(t *testing.T) {
 	c := Consensus{
 		ConsensusID:     NewConsensusId("c1"),
 		Representatives: nil,
-		Block:           nil,
-		CurrentState:    IDLE_STATE,
-		PrepareMsgPool:  NewPrepareMsgPool(),
-		CommitMsgPool:   NewCommitMsgPool(),
+		Block: ProposedBlock{
+			Seal: make([]byte, 0),
+		},
+		CurrentState:   IDLE_STATE,
+		PrepareMsgPool: NewPrepareMsgPool(),
+		CommitMsgPool:  NewCommitMsgPool(),
 	}
 
 	// case 1 : save
 	pMsg := PrepareMsg{
-		ConsensusId:   NewConsensusId("c1"),
-		SenderId:      "s1",
-		ProposedBlock: make([]byte, 0),
+		ConsensusId: NewConsensusId("c1"),
+		SenderId:    "s1",
+		BlockHash:   make([]byte, 0),
 	}
 
 	// when
@@ -33,9 +35,9 @@ func TestConsensus_SavePrepareMsg(t *testing.T) {
 
 	// case 2 : incorrect consensus ID
 	pMsg = PrepareMsg{
-		ConsensusId:   NewConsensusId("c2"),
-		SenderId:      "s1",
-		ProposedBlock: make([]byte, 0),
+		ConsensusId: NewConsensusId("c2"),
+		SenderId:    "s1",
+		BlockHash:   make([]byte, 0),
 	}
 
 	// when
@@ -50,10 +52,12 @@ func TestConsensus_SaveCommitMsg(t *testing.T) {
 	c := Consensus{
 		ConsensusID:     NewConsensusId("c1"),
 		Representatives: nil,
-		Block:           nil,
-		CurrentState:    IDLE_STATE,
-		PrepareMsgPool:  NewPrepareMsgPool(),
-		CommitMsgPool:   NewCommitMsgPool(),
+		Block: ProposedBlock{
+			Seal: make([]byte, 0),
+		},
+		CurrentState:   IDLE_STATE,
+		PrepareMsgPool: NewPrepareMsgPool(),
+		CommitMsgPool:  NewCommitMsgPool(),
 	}
 
 	// case 1 : save

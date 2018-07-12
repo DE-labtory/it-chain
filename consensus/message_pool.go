@@ -27,10 +27,10 @@ func (pmp *PrepareMsgPool) Save(prepareMsg *PrepareMsg) error {
 		return errors.New(fmt.Sprintf("Already exist member [%s]", senderID))
 	}
 
-	proposedBlock := prepareMsg.ProposedBlock
+	blockHash := prepareMsg.BlockHash
 
-	if proposedBlock == nil {
-		return errors.New("Proposed block is nil")
+	if blockHash == nil {
+		return errors.New("Block hash is nil")
 	}
 
 	pmp.messages = append(pmp.messages, *prepareMsg)
