@@ -1,5 +1,5 @@
 package yggdrasill
-//
+
 //import (
 //	"github.com/it-chain/it-chain-Engine/blockchain"
 //	"github.com/it-chain/leveldb-wrapper"
@@ -45,6 +45,4 @@ package yggdrasill
 //	return b.Creator
 //}
 //
-//func (b *BlockRepository) AddBlock(block blockchain.Block) error {
-//	return b.BlockStorage.AddBlock(block)
 //}

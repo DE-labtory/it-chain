@@ -8,11 +8,12 @@ import (
 
 	"errors"
 
-	ygg "github.com/it-chain/yggdrasill/common"
-	"github.com/it-chain/midgard"
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"log"
+
 	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/midgard"
+	ygg "github.com/it-chain/yggdrasill/common"
 )
 
 var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
@@ -184,7 +185,6 @@ type BlockQueryApi interface {
 	GetTransactionByTxID(txid string) (Transaction, error)
 }
 
-
 type Action interface {
 	DoAction(block Block) error
 }
@@ -200,18 +200,16 @@ func CreateSaveOrSyncAction(checkResult int64) Action {
 	}
 }
 
-type SyncAction struct {}
+type SyncAction struct{}
 
 func NewSyncAction() *SyncAction {
 	return &SyncAction{}
 }
 
-
 func (syncAction *SyncAction) DoAction(block Block) error {
 	// TODO: Start synchronize
 	return nil
 }
-
 
 type SaveAction struct {
 	blockPool BlockPool
@@ -232,6 +230,15 @@ func (saveAction *SaveAction) DoAction(block Block) error {
 	return nil
 }
 
+func CommitBlock(block Block) error {
+	event, err := createBlockCommittedEvent(block)
+	if err != nil {
+		return err
+	}
+	blockId := string(block.GetSeal())
+	eventstore.Save(blockId, event)
+	return nil
+}
 func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
 	seal := string(block.GetSeal())
 	return BlockCommittedEvent{
@@ -242,9 +249,9 @@ func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
 	}, nil
 }
 
-type DefaultAction struct {}
+type DefaultAction struct{}
 
-func NewDefaultAction() *DefaultAction{
+func NewDefaultAction() *DefaultAction {
 	return &DefaultAction{}
 }
 
