@@ -3,12 +3,13 @@ package p2p
 import (
 	"encoding/json"
 	"errors"
-
 	"fmt"
 
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/midgard"
 )
+
+type PeerTable map[string]Peer
 
 // PeerId 선언
 type PeerId struct {
@@ -68,8 +69,9 @@ func (peerId PeerId) ToString() string {
 type PeerRepository interface {
 	Save(peer Peer) error
 	Remove(id PeerId) error
-	FindById(id PeerId) (*Peer, error)
+	FindById(id PeerId) (Peer, error)
 	FindAll() ([]Peer, error)
+	FindByAddress(ipAddress string) (Peer, error)
 }
 
 func PeerFilter(vs []Peer, f func(Peer) bool) []Peer {

@@ -1,6 +1,6 @@
 # 블록체인 <a name="BlockChain"></a>
 
-![blockchain-implemeneation-logical](../images/blockchain-implemeneation-logical.png)
+![blockchain-implemeneation-logical](../doc/images/blockchain-implemeneation-logical.png)
 
 - 블록체인(BlockChain)
 
@@ -19,7 +19,7 @@
   머클 트리는 이진 트리이고 각 리프노드들은 블록 안의 트랜잭션의 해쉬값을 가진다. 루트 노드는 전체 트랜잭션을 나타내는 해쉬 값을 가진다. 여기서 전체 트랜잭션을 나타내는 해쉬값은 리프 노드부터 각각 자식 노드들의 해쉬 값들을 해쉬한 값을 말한다. 머클 트리는 O(1)시간만에 트랜잭션 정보들이 바뀌었는지 머클 트리의 루트 해쉬값을 통해서 확인할 수 있다. 더불어, 머클 트리는 원장 안에 있는 트랜잭션들의 유효성을 효율적으로 검증할 수 있다. 왜냐하면 블록 헤더는 머클 트리의 루트 노드의 해쉬 값을 가지고 있고 다음 블록은 현재 블록의 해쉬 값을 블록 헤더에 가지고 있기 때문이다. 그리고 머클 트리는 머클 경로(트랜잭션의 루트 노드까지의 자식 노드)를 구할 수 있기 때문에 특정 트랜잭션의 유효성을 O(lgN)시간 만에 구할 수 있다는 장점이 있다.
 
 
-  ![blockchain-implementation-merkletree](../images/blockchain-implementation-merkletree.png)
+  ![blockchain-implementation-merkletree](../doc/images/blockchain-implementation-merkletree.png)
 
 ## Database <a name="DB"></a>
 블록체인은 구성에 따라 여러 유형의 데이터베이스에 저장된다. 현재는 levelhelper와 filehelper의 기능이 추가되어져 있다. 기본 DB는 levelDB이다. 블록의 해시값이나 블록의 번호, 트랜잭션 ID를 가지고 블록을 검색할 수 있다. 또한 트랜잭션ID를 가지고 해당하는 트랜잭션을 검색 가능하다. 만약 다른 데이터베이스를 사용하길 원한다면 blockchainleveldb에서 구현하고 blockchain_db_interface를 수정하세요.
@@ -99,14 +99,14 @@
 
 ### 확인(Check)
 
-![blockchain-blocksync-seq](../images/blockchain-blocksync-check-implementation-seq.PNG)
+![blockchain-blocksync-seq](../doc/images/blockchain-blocksync-check-implementation-seq.PNG)
 
 먼저 확인(Check)은 임의의 노드에게 Blockchain 길이와 lastSeal을 받아와서 자신의 마지막 block의 height와 lastSeal을 비교하여 같은지를 확인한다. 같다면 동기화(Synchronize)는 중단되고 그렇지 않다면 구축(Construct) 단계로 넘어간다.
 
 
 ### 구축(Check), 재구축(PostConstruct)
 
-![blockchain-blocksync-seq](../images/blockchain-blocksync-construct-implementation-seq.PNG)
+![blockchain-blocksync-seq](../doc/images/blockchain-blocksync-construct-implementation-seq.PNG)
 
 구축(Construct)단계에서는 확인(Check)과정에서 선정된 노드를 대상으로 RequestBlock을 통해 block을 요청하고 BlockResponseProtocol로 응답받은 block을 받게된다. AddBlock에서는 추가할 블록이 다음 블록이 맞는지 확인하고 blockchain에 추가하게된다. 그리고 위 과정은 구축 단계 시작할 때의 노드의 blockchain을 모두 가져올 때 까지 진행된다. 즉 구축 단계 시작 이후로 노드가 쌓은 block들은 추가하지 않는다. 이런 구축 단계 이후 합의를 통해 확정된 block들은 BlockPool에 보관하게된다. 블록을 요청하고, 응답 받고,  blockchain에 추가하는 과정은 동기적으로 진행된다.(block을 요청하고, blockchain에 추가하는 두 가지 프로세스를 Producer-Consumer 패턴으로 구현하는 것도 하나의 방법이 될 수 있다.)
 

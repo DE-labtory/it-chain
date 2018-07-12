@@ -1,6 +1,6 @@
 package common
 
-import   (
+import (
 	"fmt"
 	"go/build"
 	"path/filepath"
@@ -8,11 +8,11 @@ import   (
 	"github.com/spf13/viper"
 )
 
-func init(){
+func init() {
 	initConfig()
 }
 
-func initConfig(){
+func initConfig() {
 
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("config")
@@ -22,7 +22,7 @@ func initConfig(){
 	//viper.AddConfigPath("./conf")
 
 	err := viper.ReadInConfig() // Find and read the config file
-	if err != nil { // Handle errors reading the config file
+	if err != nil {             // Handle errors reading the config file
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))
 	}
 }

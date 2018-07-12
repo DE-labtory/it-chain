@@ -1,7 +1,7 @@
 # it-chain
 
 
-<p align="center"><img src="./images/logo.png" width="250px" height="250px"></p>
+<p align="center"><img src="./doc/images/logo.png" width="250px" height="250px"></p>
 
 ## Overview
 
@@ -11,42 +11,30 @@ The it-chain is an easily modifiable block chain that can fit into any domain. T
 
 **The development is not completed yet. The beta version will be released in August.** 
 
-<br/>
-
 ## Logical Architecture of `it-chain`
-![](./images/it-chain-logical-view-architecture-r5.png)
+![](./doc/images/it-chain-logical-view-architecture-r5.png)
 
 The `it-chain` is implemented as six independently operating core components(txpool, Consensus, Blockchain, Peer, Authentication, iCode), each communicating via the Asynchronous Message Queue Protocol (AMQP). AMQP is an event bus connector that generates and distributes events for internal core components according to external messages coming into the gateway, and each core component receives and operates events that it has already registered.
 
 A more detailed explanation is given below.
 [LOGICAL ARCHITECTURE KR](doc/LOGICAL-ARCHITECTURE-KR.md)
 
-<br/>
-
 ## Requirements
 
 - Go-lang >= 1.9
 - Docker >= 17.12.0
 
-<br/>
-
 ## Implementation Details
 Core implementation decisions can be found in the Project Implementation Details. <br>
 [PROJECT IMPLEMENTATION DETAILS](doc/PROJECT-IMPLEMENTATION-DETAILS.md)
-
-<br/>
 
 ## Contribution
 Contribution Guide <br>
 [CONTRIBUTION](CONTRIBUTION.md)
 
-<br/>
-
 ## License
 
 It-Chain Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the [LICENSE](LICENSE) file.
-
-<br/>
 
 ## Designed by
 @Hyemin choi<br>

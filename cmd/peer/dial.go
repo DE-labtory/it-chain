@@ -10,7 +10,7 @@ import (
 	"reflect"
 
 	"github.com/it-chain/it-chain-Engine/conf"
-	"github.com/it-chain/it-chain-Engine/gateway"
+	"github.com/it-chain/it-chain-Engine/grpc_gateway"
 	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/urfave/cli"
 )
@@ -36,7 +36,7 @@ var wg = sync.WaitGroup{}
 type ErrorEventHandler struct {
 }
 
-func (e ErrorEventHandler) ErrorCreated(error gateway.ErrorCreatedEvent) {
+func (e ErrorEventHandler) ErrorCreated(error grpc_gateway.ErrorCreatedEvent) {
 	fmt.Println(error)
 	//wg.Done()
 }
@@ -44,7 +44,7 @@ func (e ErrorEventHandler) ErrorCreated(error gateway.ErrorCreatedEvent) {
 type ConnectionEventHandler struct {
 }
 
-func (e ErrorEventHandler) ConnectionCreated(event gateway.ConnectionCreatedEvent) {
+func (e ErrorEventHandler) ConnectionCreated(event grpc_gateway.ConnectionCreatedEvent) {
 	fmt.Println(event)
 	//wg.Done()
 }
@@ -60,7 +60,7 @@ func dial(peerAddress string) {
 	client.Subscribe("Event", "Error", &ErrorEventHandler{})
 	client.Subscribe("Event", "Connection", &ConnectionEventHandler{})
 
-	command := gateway.ConnectionCreateCommand{
+	command := grpc_gateway.ConnectionCreateCommand{
 		Address: peerAddress,
 	}
 

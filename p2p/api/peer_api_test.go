@@ -9,21 +9,47 @@ import (
 	"github.com/magiconair/properties/assert"
 )
 
-var ErrEmptyPeerList = errors.New("empty node list proposed")
+var ErrEmptyPeerList = errors.New("empty peer list proposed")
 
 //todo make node api test
-//todo make fake dependencies 1. eventRepository 2. messageDispatcher 3. nodeRepository
+//todo make fake dependencies 1. eventRepository 2. messageDispatcher 3. peerRepository
 //todo make test map
 //todo test continue
 
-type MockPeerRepository struct {}
+type MockService struct{}
 
-func (mnr MockPeerRepository) FindById(id p2p.PeerId) (*p2p.Peer, error) { return nil, nil }
-func (mnr MockPeerRepository) FindAll() ([]p2p.Peer, error)              { return nil, nil }
+func (ms MockService) GetPeerLeaderTable() p2p.PeerLeaderTable {
+	peerLeaderTable := p2p.PeerLeaderTable{
+		Leader: p2p.Leader{
+			LeaderId: p2p.LeaderId{Id: "1"},
+		},
+		PeerList: []p2p.Peer{{
+			PeerId: p2p.PeerId{
+				Id: "2",
+			},
+		}},
+	}
+	return peerLeaderTable
+}
 
-type MockPeerMessageService struct{}
+type MockPeerRepository struct{}
 
-func (mnms MockPeerMessageService) DeliverPeerList(nodeId p2p.PeerId, nodeList []p2p.Peer) error {
+func (mnr MockPeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) {
+	peer := p2p.Peer{PeerId: id}
+	return peer, nil
+}
+func (mnr MockPeerRepository) FindAll() ([]p2p.Peer, error) { return nil, nil }
+
+type MockLeaderRepository struct{}
+
+func (mpr MockLeaderRepository) GetLeader() p2p.Leader {
+	leader := p2p.Leader{LeaderId: p2p.LeaderId{Id: "1"}}
+	return leader
+}
+
+type MockPeerApiGrpcCommandService struct{}
+
+func (mnms MockPeerApiGrpcCommandService) DeliverPeerLeaderTable(connectionId string, peerLeaderTable p2p.PeerLeaderTable) error {
 	return nil
 }
 
@@ -45,21 +71,23 @@ func TestPeerApi_UpdatePeerList(t *testing.T) {
 		},
 	}
 
-	nodeApi := SetupPeerApi()
+	peerApi := SetupPeerApi()
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := nodeApi.UpdatePeerList(test.input)
+		err := peerApi.UpdatePeerList(test.input)
 		assert.Equal(t, err, test.err)
 	}
 }
 
 func SetupPeerApi() *api.PeerApi {
-	nodeRepository := MockPeerRepository{}
+	mockService := MockService{}
+	peerRepository := MockPeerRepository{}
+	leaderRepository := MockLeaderRepository{}
 	eventRepository := MockEventRepository{}
-	messageService := MockPeerMessageService{}
+	grpcCommandService := MockPeerApiGrpcCommandService{}
 
-	nodeApi := api.NewPeerApi(nodeRepository, eventRepository, messageService)
+	peerApi := api.NewPeerApi(mockService, peerRepository, leaderRepository, eventRepository, grpcCommandService)
 
-	return nodeApi
+	return peerApi
 }
