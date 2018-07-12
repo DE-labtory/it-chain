@@ -6,6 +6,8 @@ import (
 
 	"errors"
 
+	"context"
+
 	"github.com/it-chain/it-chain-Engine/icode"
 	"github.com/it-chain/it-chain-Engine/icode/infra/api"
 	"github.com/stretchr/testify/assert"
@@ -95,4 +97,24 @@ func TestNewICodeGitStoreApi(t *testing.T) {
 			assert.Equal(t, "", test.Output)
 		}
 	}
+}
+
+//todo push를 어떻게 확인할지. 단순 레포 리스트만확인하면 createRepo테스트임. push 함수의 err만 체크해도되는지?
+func TestICodeGitStoreApi_Push(t *testing.T) {
+	validId := "validId"
+	validPw := "validPw"
+	baseTempPath := "./.tmp"
+	os.RemoveAll(baseTempPath)
+	defer os.RemoveAll(baseTempPath)
+
+	storeApi, err := api.NewICodeGitStoreApi(validId, validPw)
+
+	assert.NoError(t, err)
+	meta, err := storeApi.Clone(baseTempPath, "git@github.com:it-chain/heimdall.git")
+	err = storeApi.Push(*meta)
+	assert.NoError(t, err)
+
+	ctx := context.Background()
+	_, err = storeApi.AuthClient.Repositories.Delete(ctx, validId, meta.RepositoryName)
+	assert.NoError(t, err)
 }

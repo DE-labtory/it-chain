@@ -22,7 +22,7 @@ import (
 )
 
 type ICodeGitStoreApi struct {
-	authClient  *github.Client
+	AuthClient  *github.Client
 	AuthGitUser *github.User
 	authUserID  string
 	authUserPW  string
@@ -58,7 +58,7 @@ func NewICodeGitStoreApi(authUserID string, authUserPW string) (*ICodeGitStoreAp
 	}
 
 	return &ICodeGitStoreApi{
-		authClient:  client,
+		AuthClient:  client,
 		AuthGitUser: gitUser,
 		authUserID:  authUserID,
 		authUserPW:  authUserPW,
@@ -153,7 +153,7 @@ func (gApi *ICodeGitStoreApi) Push(meta icode.Meta) error {
 
 func (gApi *ICodeGitStoreApi) createRepository(name string) error {
 	ctx := context.Background()
-	_, _, err := gApi.authClient.Repositories.Create(ctx, "", &github.Repository{
+	_, _, err := gApi.AuthClient.Repositories.Create(ctx, "", &github.Repository{
 		Name:    &name,
 		Private: &[]bool{false}[0],
 	})

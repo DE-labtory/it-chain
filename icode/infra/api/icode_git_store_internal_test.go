@@ -32,7 +32,7 @@ func TestCreateRepository(t *testing.T) {
 		assert.NoError(t, err, "레포생성 실패")
 
 		//then
-		repos, _, err := storeApi.authClient.Repositories.List(context.Background(), validId, nil)
+		repos, _, err := storeApi.AuthClient.Repositories.List(context.Background(), validId, nil)
 		assert.NoError(t, err, "레포 목록 불러오기 실패")
 		found := false
 		for _, repo := range repos {
@@ -47,7 +47,7 @@ func TestCreateRepository(t *testing.T) {
 		//after
 		//생성확인후 삭제로직
 		ctx := context.Background()
-		_, err = storeApi.authClient.Repositories.Delete(ctx, validId, test.Input)
+		_, err = storeApi.AuthClient.Repositories.Delete(ctx, validId, test.Input)
 		assert.NoError(t, err, "레포생성후 삭제실패")
 	}
 }
