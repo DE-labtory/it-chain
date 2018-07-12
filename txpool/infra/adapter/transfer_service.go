@@ -31,6 +31,7 @@ func (ts TransferService) SendLeaderTransactions(transactions []txpool.Transacti
 	}
 
 	deliverCommand, err := createGrpcDeliverCommand("SendLeaderTransactionsProtocol", transactions)
+
 	if err != nil {
 		return err
 	}
@@ -43,6 +44,7 @@ func (ts TransferService) SendLeaderTransactions(transactions []txpool.Transacti
 func createGrpcDeliverCommand(protocol string, body interface{}) (txpool.GrpcDeliverCommand, error) {
 
 	data, err := common.Serialize(body)
+
 	if err != nil {
 		return txpool.GrpcDeliverCommand{}, err
 	}

@@ -16,12 +16,6 @@ type ProposeBlockCommand struct {
 	Transactions []Transaction
 }
 
-type SendTransactionsCommand struct {
-	midgard.CommandModel
-	Transactions []*Transaction
-	Leader
-}
-
 type GrpcDeliverCommand struct {
 	midgard.CommandModel
 	Recipients []string

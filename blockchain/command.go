@@ -46,10 +46,3 @@ type GrpcReceiveCommand struct {
 	Protocol     string
 	FromPeer     Peer
 }
-
-type GrpcDeliverCommand struct {
-	CommandModel midgard.CommandModel
-	Recipients []string
-	Body       []byte
-	Protocol   string
-}
