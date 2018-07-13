@@ -6,10 +6,12 @@ import (
 
 	"path/filepath"
 
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/it-chain-Engine/icode"
 	"github.com/it-chain/it-chain-Engine/icode/api"
 	api2 "github.com/it-chain/it-chain-Engine/icode/infra/api"
 	"github.com/it-chain/it-chain-Engine/icode/infra/service"
+	"github.com/it-chain/midgard"
 	"github.com/it-chain/tesseract"
 	"github.com/stretchr/testify/assert"
 )
@@ -32,7 +34,7 @@ func TestICodeApi_Deploy(t *testing.T) {
 	storeApi, err := api2.NewICodeGitStoreApi(backupGitId, backupGitPw)
 	assert.NoError(t, err, "err in newIcodeGitStoreApi")
 	icodeApi := api.NewIcodeApi(containerService, storeApi, mockRepo)
-	err = icodeApi.Deploy(baseSaveUrl, icodeGitUrl)
+	_, err = icodeApi.Deploy(baseSaveUrl, icodeGitUrl)
 	assert.NoError(t, err, "err in deploy")
 
 	// todo event handler가없어서 icode 정보를 저장하지못하고잇음. 따라서 undeploy가 불가능 수동 삭제해줘야함
@@ -48,6 +50,7 @@ func TestICodeApi_UnDeploy(t *testing.T) {
 	backupGitId := "validId"
 	backupGitPw := "validPw"
 	shPath := GOPATH + "/src/github.com/it-chain/tesseract/sh/default_setup.sh"
+	eventstore.InitForMock(mockEventStore{})
 	//set mock repo
 	mockMeta := &icode.Meta{
 		RepositoryName: "test_icode",
@@ -71,8 +74,10 @@ func TestICodeApi_UnDeploy(t *testing.T) {
 
 func GetMockRepo(testName string, mockData *icode.Meta) icode.ReadOnlyMetaRepository {
 	if testName == "deploy" {
-		return &mockRepo{}
-	} else if testName == "unDeploy" {
+		return &mockRepo{
+			MockMeta: &icode.Meta{},
+		}
+	} else {
 		return &mockRepo{
 			MockMeta: mockData,
 		}
@@ -96,4 +101,17 @@ func (m *mockRepo) FindAll() ([]*icode.Meta, error) {
 	list := make([]*icode.Meta, 0)
 	list = append(list, m.MockMeta)
 	return list, nil
+}
+
+type mockEventStore struct {
+}
+
+func (m mockEventStore) Load(aggregate midgard.Aggregate, aggregateID string) error {
+	return nil
+}
+func (m mockEventStore) Save(aggregateID string, events ...midgard.Event) error {
+	return nil
+}
+func (m mockEventStore) Close() {
+
 }
