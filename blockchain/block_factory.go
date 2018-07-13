@@ -23,7 +23,7 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	//declare
 	GenesisBlock := &DefaultBlock{}
 	validator := DefaultValidator{}
-	TimeStamp := (time.Now()).Round(100 * time.Millisecond)
+	TimeStamp := (time.Now()).Round(0)
 
 	//set
 	err := setBlockWithConfig(genesisconfFilePath, GenesisBlock)
@@ -104,7 +104,7 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 	//declare
 	ProposedBlock := &DefaultBlock{}
 	validator := DefaultValidator{}
-	TimeStamp := (time.Now()).Round(100 * time.Millisecond)
+	TimeStamp := (time.Now()).Round(0)
 
 	//build
 	txSeal, err := validator.BuildTxSeal(txList)
