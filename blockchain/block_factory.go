@@ -96,6 +96,7 @@ func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList
 		TxSeal:    txSeal,
 		Timestamp: timeStamp,
 		Creator:   creator,
+		State:     Created,
 	}, nil
 }
 
