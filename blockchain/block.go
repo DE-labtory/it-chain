@@ -243,16 +243,6 @@ func (saveAction *SaveAction) DoAction(block Block) error {
 	return nil
 }
 
-func CommitBlock(block Block) error {
-	event, err := createBlockCommittedEvent(block)
-	if err != nil {
-		return err
-	}
-	blockId := string(block.GetSeal())
-	eventstore.Save(blockId, event)
-	return nil
-}
-
 type DefaultAction struct{}
 
 func NewDefaultAction() *DefaultAction {
