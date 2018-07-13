@@ -89,7 +89,7 @@ func (bApi *BlockApi) loadBlockPool() blockchain.BlockPool {
 	return pool
 }
 
-func (bApi *BlockApi) CompareLastBlockHeightWith(callback GetTargetBlockFunc) (blockchain.BlockHeight, error) {
+func (bApi *BlockApi) CompareLastBlockHeightWith(callback GetTargetBlockFunc) (uint64, error) {
 	targetBlock := callback()
 
 	lastBlock, err := bApi.blockQueryApi.GetLastBlock()
