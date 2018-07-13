@@ -2,13 +2,8 @@ package api
 
 import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/pkg/errors"
 	"github.com/it-chain/midgard"
 )
-
-var ErrNilBlock = errors.New("block is nil")
-var ErrSyncProcessing = errors.New("Sync is in progress")
-var ErrGetLastBlock = errors.New("failed get last block")
 
 type BlockApi struct {
 	blockQueryApi blockchain.BlockQueryApi
