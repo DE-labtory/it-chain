@@ -11,7 +11,6 @@ import (
 	ygg "github.com/it-chain/yggdrasill/common"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
-	"log"
 	"github.com/it-chain/it-chain-Engine/common"
 )
 
@@ -185,44 +184,8 @@ type BlockQueryApi interface {
 }
 
 
-type Action interface {
-	DoAction(block Block) error
-}
 
-// TODO: Write test case
-func CreateSaveOrSyncAction(checkResult int64) Action {
-	if checkResult > 0 {
-		return NewSyncAction()
-	} else if checkResult == 0 {
-		return NewSaveAction()
-	} else {
-		return NewDefaultAction()
-	}
-}
-
-type SyncAction struct {}
-
-func NewSyncAction() *SyncAction {
-	return &SyncAction{}
-}
-
-
-func (syncAction *SyncAction) DoAction(block Block) error {
-	// TODO: Start synchronize
-	return nil
-}
-
-
-type SaveAction struct {
-	blockPool BlockPool
-}
-
-func NewSaveAction() *SaveAction {
-	return &SaveAction{}
-}
-
-// TODO: Write test case
-func (saveAction *SaveAction) DoAction(block Block) error {
+func CommitBlock(block Block) error {
 	event, err := createBlockCommittedEvent(block)
 	if err != nil {
 		return err
@@ -240,16 +203,4 @@ func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
 		},
 		Seal: seal,
 	}, nil
-}
-
-type DefaultAction struct {}
-
-func NewDefaultAction() *DefaultAction{
-	return &DefaultAction{}
-}
-
-// TODO: Write test case
-func (defaultAction *DefaultAction) DoAction(block Block) error {
-	log.Printf("got shorter height block [%v]", block.GetHeight())
-	return nil
 }
