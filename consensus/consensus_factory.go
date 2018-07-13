@@ -17,3 +17,24 @@ func CreateConsensus(parliament Parliament, block ProposedBlock) (*Consensus, er
 		CommitMsgPool:   NewCommitMsgPool(),
 	}, nil
 }
+
+func CreatePrePrepareMsg(consensus Consensus) PrePrepareMsg {
+	return PrePrepareMsg{
+		ConsensusId:    consensus.ConsensusID,
+		Representative: consensus.Representatives,
+		ProposedBlock:  consensus.Block,
+	}
+}
+
+func CreatePrepareMsg(consensus Consensus) PrepareMsg {
+	return PrepareMsg{
+		ConsensusId: consensus.ConsensusID,
+		BlockHash:   consensus.Block.Seal,
+	}
+}
+
+func CreateCommitMsg(consensus Consensus) CommitMsg {
+	return CommitMsg{
+		ConsensusId: consensus.ConsensusID,
+	}
+}
