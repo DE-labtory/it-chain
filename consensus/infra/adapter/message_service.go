@@ -25,3 +25,10 @@ func (m MessageService) BroadcastMsg(Msg c.Serializable, representatives []*c.Re
 func (m MessageService) CreateConfirmedBlock(block c.ProposedBlock) {
 
 }
+
+func (m MessageService) IsLeaderMessage(msg c.PrePrepareMsg, leader c.Leader) bool {
+	if msg.SenderId == leader.GetID() {
+		return true
+	}
+	return false
+}

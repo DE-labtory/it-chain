@@ -6,9 +6,11 @@ import (
 )
 
 type ConsensusApi struct {
-	eventRepository *midgard.Repository
-	consensus       c.Consensus
-	parliament      c.Parliament
+	eventRepository  *midgard.Repository
+	consensus        c.Consensus
+	parliament       c.Parliament
+	msgService       c.MessageService
+	consensusService c.ConsensusService
 }
 
 func NewConsensusApi(eventRepository *midgard.Repository, consensus c.Consensus, parliament c.Parliament) ConsensusApi {
@@ -19,31 +21,44 @@ func NewConsensusApi(eventRepository *midgard.Repository, consensus c.Consensus,
 	}
 }
 
-// todo
 func (cApi ConsensusApi) StartConsensus(userId c.MemberId, block c.ProposedBlock) error {
-	//parliament := cApi.parliament
-	//
-	//if parliament.IsNeedConsensus() {
-	//	consensus, err := c.CreateConsensus(parliament, block)
-	//
-	//	if err != nil {
-	//		return err
-	//	}
-	//
-	//	consensus.Start()
-	//	cApi.consensus = *consensus
-	//
-	//	PrePrepareMsg := c.CreatePrePrepareMsg(*consensus)
-	//
-	//} else {
-	//
-	//}
-	//
+	parliament := cApi.parliament
+
+	if parliament.IsNeedConsensus() {
+		consensus, err := c.CreateConsensus(parliament, block)
+
+		if err != nil {
+			return err
+		}
+
+		consensus.Start()
+		cApi.consensus = *consensus
+
+		PrePrepareMsg := c.CreatePrePrepareMsg(*consensus)
+		// BroadcastMsg(PrePrepareMsg)
+	} else {
+		// config 따라 다름...
+	}
+
 	return nil
 }
 
 func (cApi ConsensusApi) ReceivePrePrepareMsg(msg c.PrePrepareMsg) {
-	return
+	mService := cApi.msgService
+	parliament := cApi.parliament
+
+	if mService.IsLeaderMessage(msg, *parliament.Leader) {
+		cService := cApi.consensusService
+
+		cService.ConstructConsensus(msg)
+		cApi.consensus.Start()
+
+		PrepareMsg := c.CreatePrepareMsg(cApi.consensus)
+		// BroadcastMsg(PrepareMsg)
+		cApi.consensus.ToPrepareState()
+	} else {
+		return
+	}
 }
 
 func (cApi ConsensusApi) ReceivePrepareMsg(msg c.PrepareMsg) {

@@ -80,7 +80,7 @@ func (p *Parliament) IsNeedConsensus() bool {
 
 	numOfMember = numOfMember + len(p.Members)
 
-	if numOfMember >= 1 {
+	if numOfMember >= 4 {
 		return true
 	}
 

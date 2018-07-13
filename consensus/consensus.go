@@ -222,7 +222,7 @@ func (c *Consensus) GetID() string {
 }
 
 func (c *Consensus) Start() {
-	c.CurrentState = PREPARE_STATE
+	c.CurrentState = PREPREPARE_STATE
 }
 
 func (c *Consensus) IsPrepareState() bool {
@@ -239,6 +239,10 @@ func (c *Consensus) IsCommitState() bool {
 		return true
 	}
 	return false
+}
+
+func (c *Consensus) ToPrepareState() {
+	c.CurrentState = PREPARE_STATE
 }
 
 func (c *Consensus) ToCommitState() {
