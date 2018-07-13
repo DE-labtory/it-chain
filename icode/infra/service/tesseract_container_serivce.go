@@ -89,7 +89,14 @@ func (cs TesseractContainerService) ExecuteTransaction(tx icode.Transaction) (*i
 }
 
 func (cs TesseractContainerService) StopContainer(id icode.ID) error {
-	cs.tesseract.Clients[cs.containerIdMap[id]].Close()
+	containerId := cs.containerIdMap[id]
+	if containerId == "" {
+		return errors.New(fmt.Sprintf("no container with icode id %s:", id))
+	}
+	err := cs.tesseract.StopContainerById(containerId)
+	if err != nil {
+		return err
+	}
 	delete(cs.containerIdMap, id)
 	deletedEvent := icode.MetaDeletedEvent{
 		EventModel: midgard.EventModel{
