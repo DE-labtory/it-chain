@@ -7,9 +7,6 @@ import (
 	"github.com/rs/xid"
 )
 
-//kind of error
-
-
 // ToDo: 구현.(gitId:junk-sound)
 type Publish func(exchange string, topic string, data interface{}) (err error)
 

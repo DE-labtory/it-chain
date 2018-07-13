@@ -2,13 +2,11 @@ package blockchain
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"os"
 	"time"
 )
 
-var ErrGetConfig = errors.New("error when get Config")
 
 func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 

@@ -9,7 +9,6 @@ import (
 	"github.com/magiconair/properties/assert"
 )
 
-//todo eventstore를 활용한 testcase재 작성필요
 func TestEventHandler_HandleBlockAddToPoolEvent(t *testing.T) {
 	tests := map[string]struct {
 		input struct {

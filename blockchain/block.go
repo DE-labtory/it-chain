@@ -6,8 +6,6 @@ import (
 
 	"bytes"
 
-	"errors"
-
 	ygg "github.com/it-chain/yggdrasill/common"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
@@ -15,8 +13,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/common"
 )
 
-var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
-var ErrTransactionType = errors.New("Wrong transaction type")
+
 
 type Block = ygg.Block
 
