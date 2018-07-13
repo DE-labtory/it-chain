@@ -63,16 +63,17 @@ func (cs TesseractContainerService) ExecuteTransaction(tx icode.Transaction) (*i
 	if err != nil {
 		return nil, err
 	}
-	var data map[string]string
+	var data = make(map[string]string)
 	var isSuccess bool
 
 	switch res.Result {
 	case "Success":
 		isSuccess = true
-		err = json.Unmarshal(res.Data, data)
+		err = json.Unmarshal(res.Data, &data)
 		if err != nil {
 			return nil, err
 		}
+
 	case "Error":
 		isSuccess = false
 		data = nil

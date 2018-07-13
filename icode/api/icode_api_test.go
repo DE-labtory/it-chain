@@ -131,7 +131,8 @@ func TestICodeApi_Invoke(t *testing.T) {
 	// icode 정보 주입
 	txInvoke.TxData.ID = meta.ICodeID
 	txInvoke.TxData.ICodeID = meta.ICodeID
-
+	txQuery.TxData.ID = meta.ICodeID
+	txQuery.TxData.ICodeID = meta.ICodeID
 	// Txs 데이터 준비
 	invokeTxs := make([]icode.Transaction, 0)
 	invokeTxs = append(invokeTxs, txInvoke)
