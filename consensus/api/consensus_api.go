@@ -19,25 +19,26 @@ func NewConsensusApi(eventRepository *midgard.Repository, consensus c.Consensus,
 	}
 }
 
+// todo
 func (cApi ConsensusApi) StartConsensus(userId c.MemberId, block c.ProposedBlock) error {
-	parliament := cApi.parliament
-
-	if parliament.IsNeedConsensus() {
-		consensus, err := c.CreateConsensus(parliament, block)
-
-		if err != nil {
-			return err
-		}
-
-		consensus.Start()
-		cApi.consensus = *consensus
-
-		PrePrepareMsg := c.CreatePrePrepareMsg(*consensus)
-
-	} else {
-
-	}
-
+	//parliament := cApi.parliament
+	//
+	//if parliament.IsNeedConsensus() {
+	//	consensus, err := c.CreateConsensus(parliament, block)
+	//
+	//	if err != nil {
+	//		return err
+	//	}
+	//
+	//	consensus.Start()
+	//	cApi.consensus = *consensus
+	//
+	//	PrePrepareMsg := c.CreatePrePrepareMsg(*consensus)
+	//
+	//} else {
+	//
+	//}
+	//
 	return nil
 }
 
