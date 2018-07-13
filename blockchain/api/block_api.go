@@ -12,83 +12,36 @@ var ErrSyncProcessing = errors.New("Sync is in progress")
 var ErrGetLastBlock = errors.New("failed get last block")
 
 type BlockApi struct {
-	blockQueryApi   blockchain.BlockQueryApi
+	syncService     blockchain.SyncService
+	peerService     blockchain.PeerService
+	blockService    blockchain.BlockService
 	eventRepository midgard.EventRepository
 	publisherId     string
-	SyncService     blockchain.SyncService
 }
 
-func NewBlockApi(blockQueryApi blockchain.BlockQueryApi, eventRepository midgard.EventRepository, publisherId string) (BlockApi, error) {
+func NewBlockApi(syncService blockchain.SyncService, peerService blockchain.PeerService, blockService blockchain.BlockService, eventRepository midgard.EventRepository, publisherId string) (BlockApi, error) {
 	return BlockApi{
-		blockQueryApi:   blockQueryApi,
+		syncService:     syncService,
+		peerService:     peerService,
+		blockService:    blockService,
 		eventRepository: eventRepository,
 		publisherId:     publisherId,
 	}, nil
 }
 
-func (bApi *BlockApi) Synchronize() {}
+// ToDo: 임의의 노드와 블록 체인을 동기화합니다.
+func (bApi *BlockApi) Synchronize() error {
 
-// TODO: Check 과정에서 임의의 노드에게서 받은 blockchain 정보로 동기화 되었는지 확인한다.
-func (bApi *BlockApi) SyncedCheck(block blockchain.Block) error {
-	return nil
-}
-
-func (bApi *BlockApi) construct() error {
-
-	// 0. 싱크 프로세싱 스테이트 변경: True SetProgress(Processing)
-	syncState := blockchain.NewBlockSyncState()
-	syncState.SetProgress(blockchain.PROGRESSING)
-
-	// 1 Peer객체 셋팅: 다른 함수 써야함.
-	anonymousPeerId := blockchain.PeerId{Id: "anonymous"}
-
-	// 2. cashe에 상대방의 lastBlock의 height 저장.
-	yourLastBlock, err := bApi.blockQueryApi.GetLastBlockOfOtherPeer(anonymousPeerId)
-	if err != nil {
-		return err
-	}
-	// 3. 나의 라스트 헤이트 세팅: 이벤트 스토어에서 나의 lastBlock 가져옴. 하나도 없을 경우 0, 있다면 마지막.
-	myLastBlock, err := bApi.blockQueryApi.GetLastBlock()
+	// peer random으로 가져오기
+	peer, err := bApi.peerService.GetRandomPeer()
 	if err != nil {
 		return err
 	}
 
-	myLastHeight := myLastBlock.GetHeight()
+	bApi.syncService.SyncedCheck(peer)
 
-	// 4. while 문 사용: 나의 lastHeight와 상대방의 last height 비교
-	for yourLastBlock.GetHeight() <= myLastHeight {
+	bApi.syncService.Construct(peer)
 
-		// 5. 리퀘스트 블록: 내가 하나도 없을 경우에 0, 있다면 lastHeight + 1을 요청
-		retrievedBlock, err := bApi.blockQueryApi.GetBlockByHeightOfOtherPeer(anonymousPeerId, myLastHeight+1)
-		if err != nil {
-			return err
-		}
-		// 6. 이벤트 스토어에 세이브.
-		blockchain.CommitBlock(retrievedBlock)
-
-		// 7. 나의 last height 다시 세팅.
-		myLastHeight++
-
-	}
-
-	// 7. 싱크 프로세싱 스테이트 변경: False
-	syncState.SetProgress(blockchain.DONE)
-
-	return nil
-	//ToDo: 1에 대한 함수 작성.
-	//ToDo: 2는 api-gateway 알고 다시 작성.
-	//ToDo: 4에서 myLastHeight가 nil일 경우 대응,
-	//ToDo: 5에서 RequestBlock을 다른 노드의 apiGateway에서 가져오는 걸로 변경.
-	//ToDo: 4~7까지 하나의 함수로 묶기.
-}
-
-func (bApi *BlockApi) SaveBlock(block blockchain.Block) error {
-	if block == nil {
-		return ErrNilBlock
-	}
-
-	action := blockchain.NewSaveAction()
-	action.DoAction(block)
 	return nil
 }
 
