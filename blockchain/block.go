@@ -11,14 +11,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	ygg "github.com/it-chain/yggdrasill/common"
 )
 
 var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
-var ErrDeserializingTxList = errors.New("err when deserailizing TxList")
 
 type Block = ygg.Block
 
@@ -202,30 +200,6 @@ func (block *DefaultBlock) On(event midgard.Event) error {
 	}
 
 	return nil
-}
-
-func deserializeTxList(txList []byte) ([]Transaction, error) {
-	DefaultTxList := []*DefaultTransaction{}
-
-	err := common.Deserialize(txList, &DefaultTxList)
-
-	if err != nil {
-		return nil, err
-	}
-	TxList := convertTxType(DefaultTxList)
-
-	return TxList, nil
-
-}
-
-func convertTxType(txList []*DefaultTransaction) []Transaction {
-	convTxList := make([]Transaction, 0)
-
-	for _, tx := range txList {
-		convTxList = append(convTxList, tx)
-	}
-
-	return convTxList
 }
 
 func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock {
