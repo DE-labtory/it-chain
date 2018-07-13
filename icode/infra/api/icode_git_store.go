@@ -12,6 +12,8 @@ import (
 
 	"os"
 
+	"log"
+
 	"github.com/google/go-github/github"
 	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/it-chain-Engine/icode"
@@ -107,6 +109,8 @@ func (gApi *ICodeGitStoreApi) Clone(baseSavePath string, repositoryUrl string) (
 	}
 
 	metaData := icode.NewMeta(name, repositoryUrl, baseSavePath+"/"+name, commitHash)
+	log.Println("meta created")
+	log.Println(*metaData)
 	return metaData, nil
 }
 

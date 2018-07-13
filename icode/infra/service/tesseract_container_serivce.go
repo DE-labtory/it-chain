@@ -4,12 +4,13 @@ import (
 	"errors"
 	"fmt"
 
+	"encoding/json"
+
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/it-chain-Engine/icode"
+	"github.com/it-chain/midgard"
 	"github.com/it-chain/tesseract"
 	"github.com/it-chain/tesseract/cellcode/cell"
-	"encoding/json"
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
-	"github.com/it-chain/midgard"
 )
 
 type TesseractContainerService struct {
@@ -18,9 +19,11 @@ type TesseractContainerService struct {
 	containerIdMap map[icode.ID]string // key : iCodeId, value : containerId
 }
 
-func NewTesseractContainerService(config tesseract.Config) *TesseractContainerService {
+func NewTesseractContainerService(config tesseract.Config, repository icode.ReadOnlyMetaRepository) *TesseractContainerService {
 	tesseractObj := &TesseractContainerService{
-		tesseract: tesseract.New(config),
+		tesseract:      tesseract.New(config),
+		repository:     repository,
+		containerIdMap: make(map[icode.ID]string, 0),
 	}
 	tesseractObj.InitContainers()
 	return tesseractObj
@@ -94,7 +97,7 @@ func (cs TesseractContainerService) StopContainer(id icode.ID) error {
 			Type: "meta.deleted",
 		},
 	}
-	return eventstore.Save(id,deletedEvent)
+	return eventstore.Save(id, deletedEvent)
 }
 
 // start containers in repos
@@ -106,4 +109,5 @@ func (cs *TesseractContainerService) InitContainers() error {
 	for _, meta := range metas {
 		cs.StartContainer(*meta)
 	}
+	return nil
 }
