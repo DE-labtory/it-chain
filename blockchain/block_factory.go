@@ -137,3 +137,26 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 
 	return ProposedBlock, nil
 }
+
+func createBlockCommittedEvent(block Block) (*BlockCommittedEvent, error) {
+
+	aggregateId := string(block.GetSeal())
+
+	return &BlockCommittedEvent{
+		EventModel: midgard.EventModel{
+			ID: aggregateId,
+		},
+		State: Committed,
+	}, nil
+}
+
+func createBlockStagedEvent(block Block) (*BlockStagedEvent, error) {
+	aggregateId := string(block.GetSeal())
+
+	return &BlockStagedEvent{
+		EventModel: midgard.EventModel{
+			ID: aggregateId,
+		},
+		State: Staged,
+	}, nil
+}
