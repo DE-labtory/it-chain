@@ -148,6 +148,10 @@ func TestICodeApi_Invoke(t *testing.T) {
 	// 결과 확인
 	assert.NoError(t, err, "err in query")
 	assert.Equal(t, "0", queryResult.Data["A"], "diff in A data")
+
+	// docker close
+	err = icodeApi.UnDeploy(meta.ICodeID)
+	assert.NoError(t, err)
 }
 
 func GetMockRepo(testName string, mockData *icode.Meta) icode.ReadOnlyMetaRepository {

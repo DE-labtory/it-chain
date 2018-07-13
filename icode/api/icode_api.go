@@ -3,6 +3,8 @@ package api
 import (
 	"errors"
 
+	"fmt"
+
 	"github.com/it-chain/it-chain-Engine/icode"
 )
 
@@ -65,6 +67,7 @@ func (iApi ICodeApi) Invoke(txs []icode.Transaction) []icode.Result {
 	for _, tx := range txs {
 		result, err := iApi.ContainerService.ExecuteTransaction(tx)
 		if err != nil {
+			fmt.Println(fmt.Sprintf("error in invoke tx, err : %s", err.Error()))
 			result = &icode.Result{
 				TxId:    tx.TxId,
 				Data:    nil,
