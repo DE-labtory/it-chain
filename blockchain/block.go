@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	ygg "github.com/it-chain/yggdrasill/common"
@@ -249,25 +248,6 @@ func CommitBlock(block Block) error {
 	blockId := string(block.GetSeal())
 	eventstore.Save(blockId, event)
 	return nil
-}
-func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
-	txListBytes, err := common.Serialize(block.GetTxList())
-	if err != nil {
-		return BlockCommittedEvent{}, ErrTxListMarshal
-	}
-
-	return BlockCommittedEvent{
-		EventModel: midgard.EventModel{
-			ID: BLOCK_POOL_AID,
-		},
-		Seal:      block.GetSeal(),
-		PrevSeal:  block.GetPrevSeal(),
-		Height:    block.GetHeight(),
-		TxList:    txListBytes,
-		TxSeal:    block.GetTxSeal(),
-		Timestamp: block.GetTimestamp(),
-		Creator:   block.GetCreator(),
-	}, nil
 }
 
 type DefaultAction struct{}
