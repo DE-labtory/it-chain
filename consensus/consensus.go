@@ -314,10 +314,10 @@ func (c *Consensus) On(event midgard.Event) error {
 		c.Start()
 
 	case *ConsensusPreparedEvent:
-		c.ToCommitState()
+		c.ToPrepareState()
 
 	case *ConsensusCommittedEvent:
-		c.ToIdleState()
+		c.ToCommitState()
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
