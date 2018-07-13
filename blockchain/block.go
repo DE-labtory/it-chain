@@ -22,6 +22,14 @@ type Block = ygg.Block
 
 type BlockHeight = uint64
 
+type BlockState = string
+
+const (
+	Created   BlockState = "Created"
+	Staged    BlockState = "Staged"
+	Committed BlockState = "Committed"
+)
+
 type DefaultBlock struct {
 	Seal      []byte
 	PrevSeal  []byte
@@ -30,6 +38,7 @@ type DefaultBlock struct {
 	TxSeal    [][]byte
 	Timestamp time.Time
 	Creator   []byte
+	State     BlockState
 }
 
 // TODO: Write test case
@@ -194,6 +203,7 @@ func (block *DefaultBlock) On(event midgard.Event) error {
 		block.TxSeal = v.TxSeal
 		block.Timestamp = v.Timestamp
 		block.Creator = v.Creator
+		block.State = v.State
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
