@@ -49,13 +49,24 @@ func TestICodeApi_UnDeploy(t *testing.T) {
 	backupGitPw := "validPw"
 	shPath := GOPATH + "/src/github.com/it-chain/tesseract/sh/default_setup.sh"
 	//set mock repo
-	mockRepo := GetMockRepo("deploy", nil)
+	mockMeta := &icode.Meta{
+		RepositoryName: "test_icode",
+		GitUrl:         "git@github.com:hea9549/test_icode",
+		Path:           filepath.Join(baseSaveUrl, "test_icode"),
+	}
+	mockRepo := GetMockRepo("unDeploy", mockMeta)
 
 	tesseractConfig := tesseract.Config{ShPath: shPath}
 	containerService := service.NewTesseractContainerService(tesseractConfig, mockRepo)
 	storeApi, err := api2.NewICodeGitStoreApi(backupGitId, backupGitPw)
 	assert.NoError(t, err, "err in newIcodeGitStoreApi")
 	icodeApi := api.NewIcodeApi(containerService, storeApi, mockRepo)
+	meta, err := icodeApi.Deploy(baseSaveUrl, icodeGitUrl)
+	assert.NoError(t, err, "err in deploy")
+	mockMeta = meta
+	err = icodeApi.UnDeploy(mockMeta.ICodeID)
+	assert.NoError(t, err, "err in unDeploy")
+
 }
 
 func GetMockRepo(testName string, mockData *icode.Meta) icode.ReadOnlyMetaRepository {

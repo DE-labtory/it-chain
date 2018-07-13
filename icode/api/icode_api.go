@@ -20,27 +20,27 @@ func NewIcodeApi(containerService icode.ContainerService, storeApi ICodeStoreApi
 	}
 }
 
-func (iApi ICodeApi) Deploy(baseSaveUrl string, gitUrl string) error {
+func (iApi ICodeApi) Deploy(baseSaveUrl string, gitUrl string) (*icode.Meta, error) {
 	// check for already in repository
 	meta, err := iApi.MetaRepository.FindByGitURL(gitUrl)
 	if meta.ICodeID != "" {
-		return errors.New("Already deployed")
+		return nil, errors.New("already deployed")
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// clone meta. in clone function, metaCreatedEvent will publish
 	meta, err = iApi.StoreApi.Clone(baseSaveUrl, gitUrl)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	//start ICode with container
 	if err = iApi.ContainerService.StartContainer(*meta); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return meta, nil
 }
 
 func (iApi ICodeApi) UnDeploy(id icode.ID) error {
