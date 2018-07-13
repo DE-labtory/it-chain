@@ -26,8 +26,14 @@ func NewBlockApi(blockQueryApi blockchain.BlockQueryApi, eventRepository midgard
 
 // blockchain이 동기화 되었는지 확인한다.
 func (bApi *BlockApi) SyncedCheck(block blockchain.Block) error {
+	getBlockFunc := func() (blockchain.Block) {
+		return block
+	}
+	bApi.CompareLastBlockHeightWith(getBlockFunc)
 	return nil
 }
+
+
 // 받은 block을 block pool에 추가한다.
 func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 	if block == nil {
