@@ -30,11 +30,10 @@ func (eh *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent)
 
 	//1. addPeer
 	peer := p2p.Peer{
-		PeerId:p2p.PeerId{
-			Id:event.ID,
+		PeerId: p2p.PeerId{
+			Id: event.ID,
 		},
-		IpAddress:event.Address,
-
+		IpAddress: event.Address,
 	}
 
 	err := eh.peerApi.AddPeer(peer)
@@ -65,26 +64,8 @@ func (eh *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconne
 	return nil
 }
 
-type WriteOnlyPeerRepository interface {
-	Save(data p2p.Peer) error
-}
 
-type WriteOnlyLeaderRepository interface {
-	SetLeader(leader p2p.Leader)
-}
-
-type RepositoryProjector struct {
-	peerRepository   WriteOnlyPeerRepository
-	leaderRepository WriteOnlyLeaderRepository
-}
-
-func NewRepositoryProjector(peerRepository WriteOnlyPeerRepository, leaderRepository WriteOnlyLeaderRepository) *RepositoryProjector {
-
-	return &RepositoryProjector{
-		peerRepository:   peerRepository,
-		leaderRepository: leaderRepository,
-	}
-}
+type RepositoryProjector struct {}
 
 //save Leader when LeaderReceivedEvent Detected, publish updated info to network
 func (projector *RepositoryProjector) HandleLeaderUpdatedEvent(event p2p.LeaderUpdatedEvent) error {
@@ -93,11 +74,11 @@ func (projector *RepositoryProjector) HandleLeaderUpdatedEvent(event p2p.LeaderU
 		return ErrEmptyPeerId
 	}
 
-	leader := p2p.Leader{
-		LeaderId: p2p.LeaderId{Id: event.ID},
+	peer := p2p.Peer{
+		PeerId: p2p.PeerId{Id: event.ID},
 	}
 
-	projector.leaderRepository.SetLeader(leader)
+	p2p.UpdateLeader(peer)
 
 	return nil
 
@@ -113,9 +94,6 @@ func (projector *RepositoryProjector) HandlerPeerCreatedEvent(event p2p.PeerCrea
 		return ErrEmptyAddress
 	}
 
-	peer := p2p.NewPeer(event.IpAddress, p2p.PeerId{Id: event.ID})
+	return p2p.NewPeer(event.IpAddress, p2p.PeerId{Id: event.ID})
 
-	projector.peerRepository.Save(peer)
-
-	return nil
 }
