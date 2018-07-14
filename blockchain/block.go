@@ -197,7 +197,8 @@ func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
 	seal := string(block.GetSeal())
 	return BlockCommittedEvent{
 		EventModel: midgard.EventModel{
-			ID: seal,
+			ID:   seal,
+			Type: "block.commited",
 		},
 		State: Committed,
 	}, nil
@@ -222,7 +223,8 @@ func StageBlock(block Block) error {
 func createBlockStagedEvent(block Block) (BlockStagedEvent, error) {
 	return BlockStagedEvent{
 		EventModel: midgard.EventModel{
-			ID: string(block.GetSeal()),
+			ID:   string(block.GetSeal()),
+			Type: "block.staged",
 		},
 		State: Staged,
 	}, nil

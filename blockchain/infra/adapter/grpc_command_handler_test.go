@@ -49,6 +49,7 @@ func (cs MockGrpcCommandService) ResponseBlock(peerId blockchain.PeerId, block b
 	return cs.ResponseBlockFunc(peerId, block)
 }
 
+// TODO:
 func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testing.T) {
 	tests := map[string]struct {
 		input struct {

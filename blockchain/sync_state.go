@@ -55,7 +55,8 @@ func (bss *BlockSyncState) SetProgress(state ProgressState) {
 func createSyncStartEvent() *SyncStartEvent {
 	return &SyncStartEvent{
 		EventModel: midgard.EventModel{
-			ID: BC_SYNC_STATE_AID,
+			ID:   BC_SYNC_STATE_AID,
+			Type: "sync.started",
 		},
 	}
 }
@@ -63,7 +64,8 @@ func createSyncStartEvent() *SyncStartEvent {
 func createSyncDoneEvent() *SyncDoneEvent {
 	return &SyncDoneEvent{
 		EventModel: midgard.EventModel{
-			ID: BC_SYNC_STATE_AID,
+			ID:   BC_SYNC_STATE_AID,
+			Type: "sync.done",
 		},
 	}
 }
