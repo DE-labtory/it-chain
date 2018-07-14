@@ -9,31 +9,40 @@ import (
 type TxCreatedEvent struct {
 	midgard.EventModel
 	PublishPeerId string
-	TxStatus      TransactionStatus
+	TxStatus      int
 	TxHash        string
 	TimeStamp     time.Time
-	TxData        TxData
+	Jsonrpc       string
+	Method        string
+	Params        Param
+	ID            string
+	ICodeID       string
 }
 
 func (tx TxCreatedEvent) GetTransaction() Transaction {
 
 	return Transaction{
-		TxId:          TransactionId(tx.ID),
+		TxId:          TransactionId(tx.EventModel.ID),
 		PublishPeerId: tx.PublishPeerId,
-		TxStatus:      tx.TxStatus,
+		TxStatus:      TransactionStatus(tx.TxStatus),
 		TxHash:        tx.TxHash,
-		TxData:        tx.TxData,
+		TxData: TxData{
+			ICodeID: tx.ICodeID,
+			Jsonrpc: tx.Jsonrpc,
+			Method:  TxDataType(tx.Method),
+			Params:  tx.Params,
+			ID:      tx.ID,
+		},
+		TimeStamp: tx.TimeStamp,
 	}
 }
 
-type TxReceivedEvent struct {
-	midgard.EventModel
-}
-
-type LeaderChangedEvent struct {
-	midgard.EventModel
-}
-
+// when block committed check transaction and delete
 type TxDeletedEvent struct {
 	midgard.EventModel
+}
+
+type BlockCommittedEvent struct {
+	midgard.EventModel
+	Transactions []Transaction
 }

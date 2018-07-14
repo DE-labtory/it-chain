@@ -1,12 +1,13 @@
 package adapter
 
 import (
+	"errors"
+
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/txpool"
-	"errors"
 )
 
-var ErrBlockNil = errors.New("Block nil error");
+var ErrBlockNil = errors.New("Block nil error")
 
 type BlockApi interface {
 	AddBlockToPool(block blockchain.Block) error

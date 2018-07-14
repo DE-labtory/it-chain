@@ -1,18 +1,10 @@
 package adapter
 
 import (
-	"errors"
-
 	"encoding/json"
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
 )
-
-var ErrBlockInfoDeliver = errors.New("block info deliver failed")
-var ErrGetBlock = errors.New("error when Getting block")
-var ErrResponseBlock = errors.New("error when response block")
-var ErrGetLastBlock = errors.New("error when get last block")
-var ErrSyncCheckResponse = errors.New("error when sync check response")
 
 type SyncBlockApi interface {
 	SyncedCheck(block blockchain.Block) error
@@ -24,15 +16,15 @@ type SyncCheckGrpcCommandService interface {
 }
 
 type GrpcCommandHandler struct {
-	blockApi SyncBlockApi
-	blockQueryApi blockchain.BlockQueryApi
+	blockApi           SyncBlockApi
+	blockQueryApi      blockchain.BlockQueryApi
 	grpcCommandService SyncCheckGrpcCommandService
 }
 
 func NewGrpcCommandHandler(blockApi SyncBlockApi, blockQueryService blockchain.BlockQueryApi, grpcCommandService SyncCheckGrpcCommandService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
-		blockApi: blockApi,
-		blockQueryApi: blockQueryService,
+		blockApi:           blockApi,
+		blockQueryApi:      blockQueryService,
 		grpcCommandService: grpcCommandService,
 	}
 }

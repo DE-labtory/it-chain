@@ -5,8 +5,13 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/it-chain/yggdrasill/common"
+	"errors"
+
+	"github.com/it-chain/it-chain-Engine/common"
+	ygg "github.com/it-chain/yggdrasill/common"
 )
+
+var ErrDeserializingTxList = errors.New("err when deserailizing TxList")
 
 // Status 변수는 Transaction의 상태를 Unconfirmed, Confirmed, Unknown 중 하나로 표현함.
 type Status int
@@ -31,7 +36,7 @@ const (
 	Query  TxDataType = "query"
 )
 
-type Transaction = common.Transaction
+type Transaction = ygg.Transaction
 
 // Params 구조체는 Jsonrpc에서 invoke하는 함수의 패러미터를 정의한다.
 type Params struct {
@@ -161,8 +166,23 @@ func calculateHash(b []byte) []byte {
 	return hashValue.Sum(nil)
 }
 
-func convertType(txList []*DefaultTransaction) []Transaction {
+func deserializeTxList(txList []byte) ([]Transaction, error) {
+	DefaultTxList := []*DefaultTransaction{}
+
+	err := common.Deserialize(txList, &DefaultTxList)
+
+	if err != nil {
+		return nil, err
+	}
+	TxList := convertTxType(DefaultTxList)
+
+	return TxList, nil
+
+}
+
+func convertTxType(txList []*DefaultTransaction) []Transaction {
 	convTxList := make([]Transaction, 0)
+
 	for _, tx := range txList {
 		convTxList = append(convTxList, tx)
 	}
