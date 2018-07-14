@@ -30,15 +30,10 @@ type IPLTableService interface {
 	ClearPeerTable() error
 }
 
-<<<<<<< HEAD
-type LeaderService interface {
-	DeliverLeaderInfo(connectionId string, leader Leader) error
-=======
 // will be deleted after implemented in gateway api
 type PLTableServiceReplica struct {
 	mux     sync.Mutex
 	pLTable PLTable
->>>>>>> upstream/develop
 }
 
 func (pLTableService *PLTableServiceReplica) GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error) {

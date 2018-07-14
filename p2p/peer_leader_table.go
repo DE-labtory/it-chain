@@ -1,7 +1,7 @@
 package p2p
 
 import (
-	"github.com/pkg/errors"
+	"errors"
 )
 
 var ErrEmptyLeaderId = errors.New("empty leader id")
@@ -39,4 +39,3 @@ func (pt *PLTable) GetPeerList() ([]Peer, error) {
 
 	return pt.PeerList, nil
 }
-
