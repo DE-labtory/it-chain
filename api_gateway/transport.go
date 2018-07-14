@@ -2,15 +2,12 @@ package api_gateway
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
-	"github.com/gorilla/mux"
-
-	"encoding/json"
-
-	"github.com/go-kit/kit/examples/shipping/cargo"
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
+	"github.com/gorilla/mux"
 )
 
 func MakeHandler(bs TransactionQueryApi, logger kitlog.Logger) http.Handler {
@@ -56,8 +53,8 @@ type errorer interface {
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	switch err {
-	case cargo.ErrUnknown:
-		w.WriteHeader(http.StatusNotFound)
+	//case cargo.ErrUnknown:
+	//	w.WriteHeader(http.StatusNotFound)
 	//case ErrInvalidArgument:
 	//	w.WriteHeader(http.StatusBadRequest)
 	default:
