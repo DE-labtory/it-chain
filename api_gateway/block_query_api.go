@@ -8,6 +8,18 @@ type BlockQueryApi struct {
 	commitedBlockRepository CommitedBlockRepository
 }
 
+func (b BlockQueryApi) GetStagedBlockByHeight(height uint64) (blockchain.Block, error) {
+	return b.stagedBlockRepository.GetBlockByHeight(height)
+}
+
+func (b BlockQueryApi) GetStagedBlockById(blockId string) (blockchain.Block, error) {
+	return b.stagedBlockRepository.GetBlockById(blockId)
+}
+
+func (b BlockQueryApi) GetLastCommitedBlock() (blockchain.Block, error) {
+	return b.commitedBlockRepository.GetLastBlock()
+}
+
 type CreatedBlockRepository interface {
 }
 
