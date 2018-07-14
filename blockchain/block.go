@@ -6,17 +6,14 @@ import (
 
 	"bytes"
 
-	"errors"
-
-	"fmt"
-	"log"
-
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	ygg "github.com/it-chain/yggdrasill/common"
-)
 
-var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
+	"errors"
+	"fmt"
+	"log"
+)
 
 type Block = ygg.Block
 

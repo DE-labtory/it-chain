@@ -2,9 +2,10 @@ package blockchain_test
 
 import (
 	"testing"
+
 	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/stretchr/testify/assert"
 	"github.com/it-chain/midgard"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBlockPoolModel(t *testing.T) {
@@ -20,7 +21,6 @@ func TestBlockPoolModel(t *testing.T) {
 	// Then
 	assert.Equal(t, uint64(2), pool.Get(blockchain.BlockHeight(2)).GetHeight())
 
-
 	// When
 	block2 := &blockchain.DefaultBlock{
 		Height: blockchain.BlockHeight(2),
@@ -29,7 +29,6 @@ func TestBlockPoolModel(t *testing.T) {
 
 	// Then
 	assert.Equal(t, nil, pool.Get(blockchain.BlockHeight(2)))
-
 
 	// when
 	aggregateID := pool.GetID()
@@ -43,7 +42,7 @@ func TestBlockPoolModel_On(t *testing.T) {
 
 	event1 := &blockchain.BlockAddToPoolEvent{
 		Height: 1,
-		Seal: []byte{0x1},
+		Seal:   []byte{0x1},
 	}
 	// when
 	err := pool.On(event1)
@@ -52,10 +51,9 @@ func TestBlockPoolModel_On(t *testing.T) {
 	assert.Equal(t, blockchain.BlockHeight(1), pool.Pool[blockchain.BlockHeight(1)].GetHeight())
 	assert.Equal(t, []byte{0x1}, pool.Pool[blockchain.BlockHeight(1)].GetSeal())
 
-
 	event2 := &blockchain.BlockAddToPoolEvent{
 		Height: 2,
-		Seal: []byte{0x2},
+		Seal:   []byte{0x2},
 	}
 	// when
 	err2 := pool.On(event2)
@@ -64,12 +62,10 @@ func TestBlockPoolModel_On(t *testing.T) {
 	assert.Equal(t, blockchain.BlockHeight(2), pool.Pool[blockchain.BlockHeight(2)].GetHeight())
 	assert.Equal(t, []byte{0x2}, pool.Pool[blockchain.BlockHeight(2)].GetSeal())
 
-
-
 	// Same height with event1, but different seal
 	event3 := &blockchain.BlockAddToPoolEvent{
 		Height: 1,
-		Seal: []byte{0x3},
+		Seal:   []byte{0x3},
 	}
 	// when
 	err3 := pool.On(event3)
@@ -87,8 +83,6 @@ func TestBlockSyncState(t *testing.T) {
 	// then
 	assert.Equal(t, blockchain.BC_SYNC_STATE_AID, syncState.GetID())
 
-
-
 	// When
 	event1 := &blockchain.SyncStartEvent{
 		EventModel: midgard.EventModel{
@@ -99,7 +93,6 @@ func TestBlockSyncState(t *testing.T) {
 
 	// Then
 	assert.Equal(t, blockchain.PROGRESSING, syncState.IsProgressing())
-
 
 	// When
 	event2 := &blockchain.SyncDoneEvent{
@@ -122,7 +115,6 @@ func TestBlockSyncState_SetProgress(t *testing.T) {
 
 	// then
 	assert.Equal(t, blockchain.PROGRESSING, syncState.IsProgressing())
-
 
 	// when
 	syncState.SetProgress(blockchain.DONE)

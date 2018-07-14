@@ -1,13 +1,8 @@
 package adapter
 
 import (
-	"errors"
-
 	"github.com/it-chain/it-chain-Engine/blockchain"
 )
-
-var ErrEmptyEventId = errors.New("empty event id proposed.")
-var ErrNodeApi = errors.New("problem in node api")
 
 type EventHandler struct {
 	blockApi BlockApi
@@ -21,17 +16,23 @@ func NewEventHandler(api BlockApi) *EventHandler {
 
 // TODO: write test case
 func (eh *EventHandler) HandleBlockAddToPoolEvent(event blockchain.BlockAddToPoolEvent) error {
-	height := event.Height
-
-	if height < 0 {
-		return ErrBlockNil
+	if err := isBlockHasMissingProperty(event); err != nil {
+		return err
 	}
-
+	height := event.Height
 	err := eh.blockApi.CheckAndSaveBlockFromPool(height)
 
 	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func isBlockHasMissingProperty(event blockchain.BlockAddToPoolEvent) error {
+	if event.Seal == nil || event.PrevSeal == nil || event.Height == 0 ||
+		event.TxList == nil || event.TxSeal == nil || event.Timestamp.IsZero() || event.Creator == nil {
+		return ErrBlockMissingProperties
+	}
 	return nil
 }
