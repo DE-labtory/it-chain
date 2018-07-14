@@ -35,11 +35,11 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 		return ErrNilBlock
 	}
 
-	pool := bApi.loadBlockPool()
-	err := pool.Add(block)
+	err := blockchain.SaveBlockStagedEventToEventStore(block)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -48,14 +48,17 @@ func (bApi *BlockApi) CommitBlockFromPoolOrSync(height blockchain.BlockHeight) e
 		return ErrSyncProcessing
 	}
 
-	blockFromPool := bApi.loadBlockPool().Get(height)
-
-	diff, err := bApi.CompareLastBlockHeightWith(blockFromPool)
+	block, err := bApi.blockQueryApi.GetBlockByHeight(height)
 	if err != nil {
 		return err
 	}
 
-	bApi.commitBlockOrSyncByHeightDifference(diff, blockFromPool)
+	diff, err := bApi.CompareLastBlockHeightWith(block)
+	if err != nil {
+		return err
+	}
+
+	bApi.commitBlockOrSyncByHeightDifference(diff, block)
 
 	return nil
 }

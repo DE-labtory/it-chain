@@ -3,10 +3,24 @@ package blockchain
 import (
 	"errors"
 	"fmt"
+
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/it-chain-Engine/common"
 )
+
+func SaveBlockStagedEventToEventStore(block Block) error {
+	event, err := createBlockStagedEvent(block)
+	if err != nil {
+		return err
+	}
+
+	err = eventstore.Save(string(block.GetSeal()), event)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 type BlockPool interface {
 	Add(block Block) error
@@ -14,12 +28,11 @@ type BlockPool interface {
 	Delete(height Block)
 }
 
-
 var BLOCK_POOL_AID = "BLOCK_POOL_AID"
 
 type BlockPoolModel struct {
 	midgard.AggregateModel
-	Pool map[BlockHeight] Block
+	Pool map[BlockHeight]Block
 }
 
 func NewBlockPool() *BlockPoolModel {
@@ -27,12 +40,12 @@ func NewBlockPool() *BlockPoolModel {
 		AggregateModel: midgard.AggregateModel{
 			ID: BLOCK_POOL_AID,
 		},
-		Pool: make(map[BlockHeight] Block),
+		Pool: make(map[BlockHeight]Block),
 	}
 }
 
 func (p *BlockPoolModel) Add(block Block) error {
-	event, err := createBlockAddToPoolEvent(block)
+	event, err := createBlockStagedEvent(block)
 	if err != nil {
 		return err
 	}
@@ -55,23 +68,12 @@ func (p *BlockPoolModel) Delete(block Block) {
 	p.On(&event)
 }
 
-func createBlockAddToPoolEvent(block Block) (BlockAddToPoolEvent, error) {
-	txListBytes, err := common.Serialize(block.GetTxList())
-	if err != nil {
-		return BlockAddToPoolEvent{}, ErrTxListMarshal
-	}
-
-	return BlockAddToPoolEvent{
+func createBlockStagedEvent(block Block) (BlockStagedEvent, error) {
+	return BlockStagedEvent{
 		EventModel: midgard.EventModel{
-			ID: BLOCK_POOL_AID,
+			ID: string(block.GetSeal()),
 		},
-		Seal: block.GetSeal(),
-		PrevSeal: block.GetPrevSeal(),
-		Height: block.GetHeight(),
-		TxList: txListBytes,
-		TxSeal: block.GetTxSeal(),
-		Timestamp: block.GetTimestamp(),
-		Creator: block.GetCreator(),
+		State: Staged,
 	}, nil
 }
 
@@ -100,9 +102,6 @@ func (p *BlockPoolModel) On(event midgard.Event) error {
 		}
 		(p.Pool)[v.Height] = block
 
-	case *BlockRemoveFromPoolEvent:
-		delete(p.Pool, v.Height)
-
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
 	}
@@ -116,18 +115,17 @@ func createBlockFromAddToPoolEvent(event *BlockAddToPoolEvent) (Block, error) {
 	}
 
 	return &DefaultBlock{
-		Seal: event.Seal,
-		PrevSeal: event.PrevSeal,
-		Height: event.Height,
-		TxList: txList,
-		TxSeal: event.TxSeal,
+		Seal:      event.Seal,
+		PrevSeal:  event.PrevSeal,
+		Height:    event.Height,
+		TxList:    txList,
+		TxSeal:    event.TxSeal,
 		Timestamp: event.Timestamp,
-		Creator: event.Creator,
+		Creator:   event.Creator,
 	}, nil
 }
 
 var ErrTxListUnmarshal = errors.New("tx list unmarshal failed")
-
 
 // BlockSyncState Aggregate ID
 var BC_SYNC_STATE_AID = "BC_SYNC_STATE_AID"
@@ -136,9 +134,8 @@ type ProgressState bool
 
 const (
 	PROGRESSING ProgressState = true
-	DONE ProgressState = false
+	DONE        ProgressState = false
 )
-
 
 type SyncState interface {
 	SetProgress(state ProgressState)
@@ -155,7 +152,7 @@ func NewBlockSyncState() *BlockSyncState {
 		AggregateModel: midgard.AggregateModel{
 			ID: BC_SYNC_STATE_AID,
 		},
-		isProgress:DONE,
+		isProgress: DONE,
 	}
 }
 
@@ -209,5 +206,3 @@ func (bss *BlockSyncState) On(event midgard.Event) error {
 
 	return nil
 }
-
-
