@@ -2,7 +2,6 @@ package api
 
 import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/it-chain/midgard"
 	"github.com/pkg/errors"
 )
 
@@ -11,16 +10,14 @@ var ErrSyncProcessing = errors.New("Sync is in progress")
 var ErrGetLastBlock = errors.New("failed get last block")
 
 type BlockApi struct {
-	blockQueryApi   blockchain.BlockQueryApi
-	eventRepository midgard.EventRepository
-	publisherId     string
+	blockQueryApi blockchain.BlockQueryApi
+	publisherId   string
 }
 
-func NewBlockApi(blockQueryApi blockchain.BlockQueryApi, eventRepository midgard.EventRepository, publisherId string) (BlockApi, error) {
+func NewBlockApi(blockQueryApi blockchain.BlockQueryApi, publisherId string) (BlockApi, error) {
 	return BlockApi{
-		blockQueryApi:   blockQueryApi,
-		eventRepository: eventRepository,
-		publisherId:     publisherId,
+		blockQueryApi: blockQueryApi,
+		publisherId:   publisherId,
 	}, nil
 }
 
@@ -43,12 +40,12 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 	return nil
 }
 
-func (bApi *BlockApi) CommitBlockFromPoolOrSync(height blockchain.BlockHeight) error {
+func (bApi *BlockApi) CommitBlockFromPoolOrSync(blockId string) error {
 	if bApi.SyncIsProgressing() {
 		return ErrSyncProcessing
 	}
 
-	block, err := bApi.blockQueryApi.GetBlockByHeight(height)
+	block, err := bApi.blockQueryApi.GetStagedBlockById(blockId)
 	if err != nil {
 		return err
 	}
@@ -79,7 +76,7 @@ func (bApi *BlockApi) SyncIsProgressing() blockchain.ProgressState {
 }
 
 func (bApi *BlockApi) CompareLastBlockHeightWith(targetBlock blockchain.Block) (uint64, error) {
-	lastBlock, err := bApi.blockQueryApi.GetLastBlock()
+	lastBlock, err := bApi.blockQueryApi.GetLastCommitedBlock()
 	if err != nil {
 		return 0, ErrGetLastBlock
 	}

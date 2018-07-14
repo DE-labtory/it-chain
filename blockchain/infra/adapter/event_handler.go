@@ -15,14 +15,14 @@ func NewEventHandler(api BlockApi) *EventHandler {
 }
 
 // TODO: write test case
-func (eh *EventHandler) HandleBlockAddToPoolEvent(event blockchain.BlockAddToPoolEvent) error {
-	height := event.Height
+func (eh *EventHandler) HandleBlockAddToPoolEvent(event blockchain.BlockStagedEvent) error {
+	blockId := event.ID
 
-	if height < 0 {
+	if blockId == "" {
 		return ErrBlockNil
 	}
 
-	err := eh.blockApi.CheckAndSaveBlockFromPool(height)
+	err := eh.blockApi.CommitBlockFromPoolOrSync(blockId)
 
 	if err != nil {
 		return err

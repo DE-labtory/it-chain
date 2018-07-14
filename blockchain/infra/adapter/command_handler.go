@@ -11,7 +11,7 @@ var ErrBlockNil = errors.New("Block nil error")
 
 type BlockApi interface {
 	AddBlockToPool(block blockchain.Block) error
-	CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error
+	CommitBlockFromPoolOrSync(blockId string) error
 }
 
 type CommandHandler struct {

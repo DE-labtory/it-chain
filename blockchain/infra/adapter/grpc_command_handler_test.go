@@ -19,16 +19,11 @@ type MockBlockQueryApi struct {
 	GetBlockByHeightFunc func(blockHeight blockchain.BlockHeight) (blockchain.Block, error)
 }
 
-func (br MockBlockQueryApi) GetLastBlock() (blockchain.Block, error) {
+func (br MockBlockQueryApi) GetLastCommitedBlock() (blockchain.Block, error) {
 	return br.GetLastBlockFunc()
 }
-func (br MockBlockQueryApi) GetBlockByHeight(blockHeight uint64) (blockchain.Block, error) {
+func (br MockBlockQueryApi) GetStagedBlockByHeight(blockHeight uint64) (blockchain.Block, error) {
 	return br.GetBlockByHeightFunc(blockHeight)
-}
-func (br MockBlockQueryApi) GetBlockBySeal(seal []byte) (blockchain.Block, error) { return nil, nil }
-func (br MockBlockQueryApi) GetBlockByTxID(txid string) (blockchain.Block, error) { return nil, nil }
-func (br MockBlockQueryApi) GetTransactionByTxID(txid string) (blockchain.Transaction, error) {
-	return nil, nil
 }
 
 type MockGrpcCommandService struct {

@@ -8,6 +8,8 @@ import (
 
 	"errors"
 
+	"fmt"
+
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	ygg "github.com/it-chain/yggdrasill/common"
@@ -36,6 +38,33 @@ type DefaultBlock struct {
 	Timestamp time.Time
 	Creator   []byte
 	State     BlockState
+}
+
+func (block *DefaultBlock) On(event midgard.Event) error {
+
+	switch v := event.(type) {
+
+	case *BlockCreatedEvent:
+		TxList, err := deserializeTxList(v.TxList)
+
+		if err != nil {
+			return ErrDeserializingTxList
+		}
+
+		block.Seal = v.Seal
+		block.PrevSeal = v.PrevSeal
+		block.Height = v.Height
+		block.TxList = TxList
+		block.TxSeal = v.TxSeal
+		block.Timestamp = v.Timestamp
+		block.Creator = v.Creator
+		block.State = v.State
+
+	default:
+		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
+	}
+
+	return nil
 }
 
 // TODO: Write test case

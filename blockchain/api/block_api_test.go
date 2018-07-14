@@ -21,9 +21,13 @@ func (br MockBlockQueryApi) GetLastBlock() (blockchain.Block, error) {
 func (br MockBlockQueryApi) GetBlockByHeight(blockHeight uint64) (blockchain.Block, error) {
 	return nil, nil
 }
-func (br MockBlockQueryApi) GetBlockBySeal(seal []byte) (blockchain.Block, error) { return nil, nil }
-func (br MockBlockQueryApi) GetBlockByTxID(txid string) (blockchain.Block, error) { return nil, nil }
-func (br MockBlockQueryApi) GetTransactionByTxID(txid string) (blockchain.Transaction, error) {
+func (br MockBlockQueryApi) GetStagedBlockByHeight(blockHeight uint64) (blockchain.Block, error) {
+	return nil, nil
+}
+func (br MockBlockQueryApi) GetStagedBlockById(blockId string) (blockchain.Block, error) {
+	return nil, nil
+}
+func (br MockBlockQueryApi) GetLastCommitedBlock() (blockchain.Block, error) {
 	return nil, nil
 }
 
@@ -52,16 +56,10 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 		},
 	}
 
-	blockRepository := MockBlockQueryApi{}
+	blockQueryApi := MockBlockQueryApi{}
 	publisherId := "zf"
-	eventRepository := MockEventRepository{}
-	eventRepository.LoadFunc = func(aggregate midgard.Aggregate) error {
-		// predefine block pool
-		aggregate = blockchain.NewBlockPool()
-		return nil
-	}
 
-	blockApi, _ := api.NewBlockApi(blockRepository, eventRepository, publisherId)
+	blockApi, _ := api.NewBlockApi(blockQueryApi, publisherId)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -125,7 +123,7 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 		t.Logf("running test case %s", testName)
 
 		// When
-		err := blockApi.CheckAndSaveBlockFromPool(test.input.height)
+		err := blockApi.CommitBlockFromPoolOrSync(test.input.height)
 
 		// Then
 		assert.Equal(t, test.err, err)
