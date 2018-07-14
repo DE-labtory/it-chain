@@ -1,9 +1,13 @@
 package icode
 
 import (
+	"fmt"
+
 	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/it-chain-Engine/icode"
+	"github.com/it-chain/midgard"
 	"github.com/it-chain/midgard/bus/rabbitmq"
+	"github.com/rs/xid"
 	"github.com/urfave/cli"
 )
 
@@ -26,8 +30,12 @@ func deploy(gitUrl string, sshPath string) {
 	client := rabbitmq.Connect(config.Common.Messaging.Url)
 	defer client.Close()
 	command := icode.DeployCommand{
+		CommandModel: midgard.CommandModel{
+			ID: xid.New().String(),
+		},
 		Url:     gitUrl,
 		SshPath: sshPath,
 	}
+	fmt.Println(fmt.Sprintf("deploying ID : %s", command.GetID()))
 	client.Publish("Command", "icode.deploy", command)
 }

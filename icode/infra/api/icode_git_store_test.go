@@ -15,6 +15,7 @@ import (
 
 func TestICodeGitStoreApi_Clone(t *testing.T) {
 	baseTempPath := "./.tmp"
+	sshPath := ""
 	os.RemoveAll(baseTempPath)
 	defer os.RemoveAll(baseTempPath)
 
@@ -42,7 +43,7 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("Running %s test, case: %s", t.Name(), testName)
 		//when
-		meta, err := icodeApi.Clone(baseTempPath, test.InputGitURL)
+		meta, err := icodeApi.Clone(testName, baseTempPath, test.InputGitURL, sshPath)
 		if meta != nil {
 			// icode ID 는 랜덤이기때문에 실데이터에서 주입
 			// commit hash 는 repo 상황에따라 바뀌기 때문에 주입
@@ -104,13 +105,14 @@ func TestICodeGitStoreApi_Push(t *testing.T) {
 	validId := "validId"
 	validPw := "validPw"
 	baseTempPath := "./.tmp"
+	sshPath := ""
 	os.RemoveAll(baseTempPath)
 	defer os.RemoveAll(baseTempPath)
 
 	storeApi, err := api.NewICodeGitStoreApi(validId, validPw)
 
 	assert.NoError(t, err)
-	meta, err := storeApi.Clone(baseTempPath, "git@github.com:it-chain/heimdall.git")
+	meta, err := storeApi.Clone("1", baseTempPath, "git@github.com:it-chain/heimdall.git", sshPath)
 	err = storeApi.Push(*meta)
 	assert.NoError(t, err)
 

@@ -21,7 +21,7 @@ func NewDeployCommandHandler(icodeApi api.ICodeApi) *DeployCommandHandler {
 
 func (d *DeployCommandHandler) HandleDeployCommand(command icode.DeployCommand) {
 
-	_, err := d.icodeApi.Deploy(conf.GetConfiguration().Icode.ICodeSavePath, command.Url, command.SshPath)
+	_, err := d.icodeApi.Deploy(command.GetID(), conf.GetConfiguration().Icode.ICodeSavePath, command.Url, command.SshPath)
 	if err != nil {
 		log.Println(fmt.Sprintf("error in handle deploy command %s", err.Error()))
 	}

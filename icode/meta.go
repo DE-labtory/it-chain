@@ -8,7 +8,6 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
-	"github.com/rs/xid"
 )
 
 type Version struct {
@@ -34,10 +33,10 @@ type Meta struct {
 	Status         MetaStatus
 }
 
-func NewMeta(repositoryName string, gitUrl string, path string, commitHash string) *Meta {
+func NewMeta(id string, repositoryName string, gitUrl string, path string, commitHash string) *Meta {
 	createEvent := MetaCreatedEvent{
 		EventModel: midgard.EventModel{
-			ID:   xid.New().String(),
+			ID:   id,
 			Type: "meta.created",
 		},
 		RepositoryName: repositoryName,

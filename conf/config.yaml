@@ -1,4 +1,3 @@
-configname: ""
 common:
   bootnodeip: 127.0.0.1:4444
   nodeip: 127.0.0.1:4444
@@ -22,6 +21,9 @@ icode:
   repositorypath: empty
   sshpath: default
   icodesavepath: ./.tmp
+  authid: hea9549
+  authpw: gotjddl99
+  shpath: /home/hea9549/go/src/github.com/it-chain/tesseract/sh/default_setup.sh
 grpcgateway:
   empty: empty
   ip: 127.0.0.1:13579

@@ -61,7 +61,7 @@ func NewICodeGitStoreApi(authUserID string, authUserPW string) (*ICodeGitStoreAp
 	}, nil
 }
 
-func (gApi *ICodeGitStoreApi) Clone(baseSavePath string, repositoryUrl string, sshPath string) (*icode.Meta, error) {
+func (gApi *ICodeGitStoreApi) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (*icode.Meta, error) {
 	name := getNameFromGitUrl(repositoryUrl)
 
 	if name == "" {
@@ -105,7 +105,7 @@ func (gApi *ICodeGitStoreApi) Clone(baseSavePath string, repositoryUrl string, s
 		return nil, err
 	}
 
-	metaData := icode.NewMeta(name, repositoryUrl, baseSavePath+"/"+name, commitHash)
+	metaData := icode.NewMeta(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash)
 	return metaData, nil
 }
 
