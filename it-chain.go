@@ -8,8 +8,9 @@ import (
 
 	"net"
 
+	"sync"
+
 	"github.com/it-chain/it-chain-Engine/cmd/icode"
-	"github.com/it-chain/it-chain-Engine/cmd/peer"
 	"github.com/it-chain/it-chain-Engine/conf"
 	icodeApi "github.com/it-chain/it-chain-Engine/icode/api"
 	icodeAdapter "github.com/it-chain/it-chain-Engine/icode/infra/adapter"
@@ -52,7 +53,6 @@ func main() {
 		},
 	}
 	app.Commands = []cli.Command{}
-	app.Commands = append(app.Commands, peer.PeerCmd())
 	app.Commands = append(app.Commands, icode.IcodeCmd())
 	app.Action = func(c *cli.Context) error {
 		configName := c.String("config")
@@ -82,6 +82,10 @@ func start() error {
 	initTxPool()
 	initIcode()
 	initPeer()
+	// wait group for test
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	wg.Wait()
 	return nil
 }
 
