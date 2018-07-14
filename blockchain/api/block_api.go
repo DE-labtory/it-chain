@@ -14,16 +14,14 @@ var ErrGetLastBlock = errors.New("failed get last block")
 type BlockApi struct {
 	syncService     blockchain.SyncService
 	peerService     blockchain.PeerService
-	blockService    blockchain.BlockService
 	eventRepository midgard.EventRepository
 	publisherId     string
 }
 
-func NewBlockApi(syncService blockchain.SyncService, peerService blockchain.PeerService, blockService blockchain.BlockService, eventRepository midgard.EventRepository, publisherId string) (BlockApi, error) {
+func NewBlockApi(syncService blockchain.SyncService, peerService blockchain.PeerService, eventRepository midgard.EventRepository, publisherId string) (BlockApi, error) {
 	return BlockApi{
 		syncService:     syncService,
 		peerService:     peerService,
-		blockService:    blockService,
 		eventRepository: eventRepository,
 		publisherId:     publisherId,
 	}, nil
@@ -32,15 +30,25 @@ func NewBlockApi(syncService blockchain.SyncService, peerService blockchain.Peer
 // ToDo: 임의의 노드와 블록 체인을 동기화합니다.
 func (bApi *BlockApi) Synchronize() error {
 
+	// 싱크 프로세싱 스테이트 변경
+	syncState := blockchain.NewBlockSyncState()
+	syncState.SetProgress(blockchain.PROGRESSING)
+
 	// peer random으로 가져오기
 	peer, err := bApi.peerService.GetRandomPeer()
+
 	if err != nil {
 		return err
 	}
 
-	bApi.syncService.SyncedCheck(peer)
+	// sync 하기
+	if err = bApi.syncService.Sync(peer); err != nil {
+		return err
+	}
 
-	bApi.syncService.Construct(peer)
+	syncState.SetProgress(blockchain.DONE)
+
+	//event.save
 
 	return nil
 }
@@ -57,6 +65,10 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 		return err
 	}
 	return nil
+}
+
+func (bApi *BlockApi) retrieveAndCommitBlock() {
+
 }
 
 func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {

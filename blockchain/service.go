@@ -2,30 +2,34 @@ package blockchain
 
 import "github.com/it-chain/it-chain-Engine/core/eventstore"
 
-type BlockService interface {
+type BlockQueryService interface {
+	BlockQueryInnerService
+	BlockQueryOuterService
+}
+
+type BlockQueryInnerService interface {
 	GetLastBlock() (Block, error)
 }
 
-type PeerService interface {
-	PeerInnerService
-	PeerOuterService
+type BlockQueryOuterService interface {
+	GetLastBlockFromPeer(peer Peer) (Block, error)
+	GetBlockByHeightFromPeer(peer Peer, height BlockHeight) (Block, error)
 }
 
-type PeerInnerService interface {
+type PeerService interface {
 	GetRandomPeer() (Peer, error)
 }
 
-type PeerOuterService interface {
-	GetLastBlock(peer Peer) (Block, error)
-	GetBlockByHeight(peer Peer, height BlockHeight) (Block, error)
-}
-
 func CommitBlock(block Block) error {
+
 	event, err := createBlockCommittedEvent(block)
+
 	if err != nil {
 		return err
 	}
+
 	blockId := string(block.GetSeal())
 	eventstore.Save(blockId, event)
+
 	return nil
 }
