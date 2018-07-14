@@ -127,11 +127,11 @@ func createBlockFromAddToPoolEvent(event *BlockAddToPoolEvent) (Block, error) {
 // BlockSyncState Aggregate ID
 var BC_SYNC_STATE_AID = "BC_SYNC_STATE_AID"
 
-type SyncedState = bool
+type isSynced bool
 
 const (
-	SYNCED   SyncedState = true
-	UNSYNCED SyncedState = false
+	SYNCED   isSynced = true
+	UNSYNCED isSynced = false
 )
 
 type ProgressState bool
@@ -149,7 +149,6 @@ type SyncState interface {
 type BlockSyncState struct {
 	midgard.AggregateModel
 	isProgress ProgressState
-	isSynced   SyncedState
 }
 
 func NewBlockSyncState() *BlockSyncState {

@@ -21,28 +21,27 @@ func NewBlockApi(syncService blockchain.SyncService, peerService blockchain.Peer
 	}, nil
 }
 
-// ToDo: 임의의 노드와 블록 체인을 동기화합니다.
+// Synchronize blockchain with a peer in p2p network
 func (bApi *BlockApi) Synchronize() error {
 
-	// 싱크 프로세싱 스테이트 변경
+	// Set syncState : Progressing
 	syncState := blockchain.NewBlockSyncState()
 	syncState.SetProgress(blockchain.PROGRESSING)
 
-	// peer random으로 가져오기
+	// Get a random peer in p2p network
 	peer, err := bApi.peerService.GetRandomPeer()
 
 	if err != nil {
 		return err
 	}
 
-	// sync 하기
-	if err = bApi.syncService.Sync(peer); err != nil {
+	// Synchronize blockchain with a random peer
+	if err = bApi.syncService.SyncWithPeer(peer); err != nil {
 		return err
 	}
 
+	// Set syncState : Done
 	syncState.SetProgress(blockchain.DONE)
-
-	//event.save
 
 	return nil
 }

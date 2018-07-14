@@ -4,54 +4,54 @@ type SyncService struct {
 	blockQueryService BlockQueryService
 }
 
-// TODO: 임의의 노드와 동기화 되었는지 확인한다.
-func (ss *SyncService) syncedCheck(peer Peer) SyncedState {
+// Check if Synchronizing blockchain with given peer is needed
+func (ss *SyncService) syncedCheck(peer Peer) isSynced {
 
-	// 내가 첫 번째 노드일 경우
-	if peer == nil {
-		return true
+	// If nil peer is given(when i'm the first node of p2p network) : Synced
+	if peer.IpAddress == "" {
+		return SYNCED
 	}
 
-	// lastBlock Get
+	// Get last block of my blockChain
 	lastBlock, err := ss.blockQueryService.GetLastBlock()
 	if err != nil {
 	}
 
-	// standardBlock Get
+	// Get last block of other peer's blockChain
 	standardBlock, err := ss.blockQueryService.GetLastBlockFromPeer(peer)
 	if err != nil {
 	}
 
-	// Compare lastBlock vs standardBlock
+	// Compare last block vs standard block
 	if lastBlock.GetHeight() < standardBlock.GetHeight() {
-		return false
+		return UNSYNCED
 	}
 
-	return true
+	return SYNCED
 }
 
-// ToDo: 임의의 노드와 동기화하기 위해 구축 작업(동기화와 같은 의미)을 진행한다.
+// Construct blockchain to synchronize with a given peer
 func (ss *SyncService) construct(peer Peer) error {
 
-	// lastBlock Get
+	// Get last block of my blockChain
 	lastBlock, err := ss.blockQueryService.GetLastBlock()
 	if err != nil {
 	}
 
-	// lastHeight Set
+	// Set last height
 	lastHeight := lastBlock.GetHeight()
 
-	// standardBlock Get
+	// Get last block of other peer's blockChain
 	standardBlock, err := ss.blockQueryService.GetLastBlockFromPeer(peer)
 	if err != nil {
 	}
 
-	// standardHeight Set
+	// Set standard height
 	standardHeight := standardBlock.GetHeight()
 
+	// Get blocks from other peer's blockchain and commit them
 	for lastHeight < standardHeight {
 
-		// transaction 단위
 		targetHeight := setTargetHeight(lastHeight)
 
 		retrievedBlock, err := ss.blockQueryService.GetBlockByHeightFromPeer(peer, targetHeight)
@@ -74,9 +74,10 @@ func raiseHeight(height *BlockHeight) {
 	*height++
 }
 
-func (ss *SyncService) Sync(peer Peer) error {
+// Check if Synchronizing whth given peer is need and Construct to synchronize
+func (ss *SyncService) SyncWithPeer(peer Peer) error {
 
-	if state := ss.syncedCheck(peer); state == true {
+	if state := ss.syncedCheck(peer); state == SYNCED {
 		return nil
 	}
 
