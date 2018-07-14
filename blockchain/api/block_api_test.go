@@ -26,9 +26,9 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 		},
 	}
 
-	blockRepository := mock.MockBlockQueryApi{}
+	blockRepository := mock.BlockQueryApi{}
 	publisherId := "zf"
-	eventRepository := mock.MockEventRepository{}
+	eventRepository := mock.EventRepository{}
 	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
 		// predefine block pool
 		aggregate = blockchain.NewBlockPool()
@@ -66,14 +66,14 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 		},
 	}
 	// When
-	blockQueryApi := mock.MockBlockQueryApi{}
+	blockQueryApi := mock.BlockQueryApi{}
 	blockQueryApi.GetLastBlockFunc = func() (blockchain.Block, error) {
 		return &blockchain.DefaultBlock{
 			Height: blockchain.BlockHeight(12),
 		}, nil
 	}
 	publisherId := "zf"
-	eventRepository := mock.MockEventRepository{}
+	eventRepository := mock.EventRepository{}
 	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
 		switch v := aggregate.(type) {
 		case blockchain.BlockPool:
@@ -113,8 +113,8 @@ func TestBlockApi_SyncedCheck(t *testing.T) {
 
 func TestBlockApi_SyncIsProgressing(t *testing.T) {
 	// when
-	blockQueryApi := mock.MockBlockQueryApi{}
-	eventRepository := mock.MockEventRepository{}
+	blockQueryApi := mock.BlockQueryApi{}
+	eventRepository := mock.EventRepository{}
 	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
 		assert.Equal(t, blockchain.BC_SYNC_STATE_AID, aggregateID)
 		return nil

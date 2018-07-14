@@ -57,7 +57,7 @@ func TestEventHandler_HandleBlockAddToPoolEvent(t *testing.T) {
 
 	}
 
-	blockApi := mock.MockBlockApi{}
+	blockApi := mock.BlockApi{}
 	blockApi.CheckAndSaveBlockFromPoolFunc = func(height blockchain.BlockHeight) error {
 		assert.Equal(t, height, uint64(12))
 		return nil

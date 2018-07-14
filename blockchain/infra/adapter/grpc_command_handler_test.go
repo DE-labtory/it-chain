@@ -72,12 +72,12 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 
 		blockApi := mock.MockSyncBlockApi{}
 
-		blockRepository := mock.MockBlockQueryApi{}
+		blockRepository := mock.BlockQueryApi{}
 		blockRepository.GetLastBlockFunc = func() (blockchain.Block, error) {
 			return &blockchain.DefaultBlock{Height: blockchain.BlockHeight(99887)},test.input.getLastBlockErr
 		}
 
-		grpcCommandService := mock.MockSyncCheckGrpcCommandService{}
+		grpcCommandService := mock.SyncCheckGrpcCommandService{}
 		grpcCommandService.SyncCheckResponseFunc = func(block blockchain.Block) error {
 			assert.Equal(t, block.GetHeight(), uint64(99887))
 			return test.input.syncCheckErr
@@ -206,14 +206,14 @@ func TestGrpcCommandHandler_HandleGrpcCommand_BlockRequestProtocol(t *testing.T)
 
 		blockApi := mock.MockSyncBlockApi{}
 
-		blockQueryApi := mock.MockBlockQueryApi{}
+		blockQueryApi := mock.BlockQueryApi{}
 		blockQueryApi.GetBlockByHeightFunc = func(height uint64) (blockchain.Block ,error) {
 			return &blockchain.DefaultBlock{
 				Height: blockchain.BlockHeight(12),
 			}, test.input.err.ErrGetBlock
 		}
 
-		grpcCommandService := mock.MockSyncCheckGrpcCommandService{}
+		grpcCommandService := mock.SyncCheckGrpcCommandService{}
 		grpcCommandService.ResponseBlockFunc = func(peerId blockchain.PeerId, block blockchain.Block) error {
 			return test.input.err.ErrResponseBlock
 		}
