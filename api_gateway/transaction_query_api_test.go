@@ -4,7 +4,11 @@ import (
 	"os"
 	"testing"
 
+	"time"
+
 	"github.com/it-chain/it-chain-Engine/txpool"
+	"github.com/it-chain/midgard"
+	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,7 +42,6 @@ func TestTransactionRepository_Save(t *testing.T) {
 	assert.Equal(t, transaction, *t2)
 	assert.Equal(t, 1, len(snapshot))
 	assert.Equal(t, nil, err)
-
 }
 
 func TestTransactionRepository_Remove(t *testing.T) {
@@ -156,4 +159,73 @@ func TestTransactionRepository_FindAll(t *testing.T) {
 
 	assert.Equal(t, transactions, transactions2)
 	assert.Equal(t, nil, err2)
+}
+
+func TestTransactionQueryApi_FindUncommittedTransactions(t *testing.T) {
+
+	api, client, tearDown := setApiUp(t)
+
+	defer tearDown()
+
+	err := client.Publish("Event", "transaction.created", txpool.TxCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID:      "1123",
+			Time:    time.Now(),
+			Type:    "transaction.created",
+			Version: 3,
+		},
+		ID:      "1",
+		ICodeID: "2",
+		TxHash:  "123",
+		Jsonrpc: "123",
+	})
+
+	assert.NoError(t, err)
+
+	err = client.Publish("Event", "transaction.created", txpool.TxCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID: "2",
+		},
+		ID:      "2",
+		ICodeID: "2",
+		TxHash:  "123",
+		Jsonrpc: "123",
+	})
+
+	assert.NoError(t, err)
+
+	err = client.Publish("Event", "transaction.created", txpool.TxCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID: "3",
+		},
+		ID:      "3",
+		ICodeID: "2",
+		TxHash:  "123",
+		Jsonrpc: "123",
+	})
+
+	assert.NoError(t, err)
+
+	txs, err := api.FindUncommittedTransactions()
+
+	assert.Equal(t, len(txs), 3)
+}
+
+func setApiUp(t *testing.T) (TransactionQueryApi, *rabbitmq.Client, func()) {
+
+	dbPath := "./.test"
+	client := rabbitmq.Connect("")
+
+	repo := NewTransactionRepository(dbPath)
+
+	txQueryApi := TransactionQueryApi{transactionRepository: repo}
+	txEventListener := &TransactionEventListener{transactionRepository: repo}
+
+	err := client.Subscribe("Event", "transaction.*", txEventListener)
+	assert.NoError(t, err)
+
+	return txQueryApi, client, func() {
+		os.RemoveAll(dbPath)
+		client.Close()
+	}
 }
