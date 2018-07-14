@@ -29,7 +29,6 @@ func (cApi ConsensusApi) StartConsensus(userId c.MemberId, block c.ProposedBlock
 		}
 
 		consensus.Start()
-		cApi.consensus = consensus
 
 		PrePrepareMsg := c.CreatePrePrepareMsg(*consensus)
 		cApi.msgService.BroadcastMsg(PrePrepareMsg, consensus.Representatives)
