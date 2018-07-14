@@ -33,6 +33,7 @@ func (b BlockQueryApi) GetCommitedBlockByHeight(height uint64) (blockchain.Block
 }
 
 type BlockPoolRepository interface {
+	AddCreatedBlock(block blockchain.Block) error
 	GetStagedBlockByHeight(blockHeight uint64) (blockchain.Block, error)
 	GetStagedBlockById(blockId string) (blockchain.Block, error)
 }
@@ -50,6 +51,10 @@ func NewBlockpoolRepositoryImpl() *BlockPoolRepositoryImpl {
 	return &BlockPoolRepositoryImpl{
 		Blocks: make([]blockchain.Block, 0),
 	}
+}
+
+func (bpr *BlockPoolRepositoryImpl) AddCreatedBlock(block blockchain.Block) error {
+
 }
 
 func (bpr *BlockPoolRepositoryImpl) GetStagedBlockByHeight(blockHeight uint64) (blockchain.Block, error) {
@@ -91,4 +96,12 @@ func (cbr *CommitedBlockRepositoryImpl) GetBlockByHeight(height uint64) (blockch
 	cbr.mux.Lock()
 	defer cbr.mux.Unlock()
 
+	block := &blockchain.DefaultBlock{}
+
+	err := cbr.BlockStorageManager.GetBlockByHeight(block, height)
+	if err != nil {
+		return nil, ErrGetCommitedBlock
+	}
+
+	return block, nil
 }
