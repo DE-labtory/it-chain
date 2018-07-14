@@ -1,26 +1,27 @@
 package api_test
 
 import (
-	"github.com/it-chain/it-chain-Engine/blockchain"
-	"testing"
-	"github.com/it-chain/it-chain-Engine/blockchain/api"
-	"github.com/magiconair/properties/assert"
-	"github.com/it-chain/midgard"
-	"fmt"
 	"errors"
+	"fmt"
+	"testing"
+
+	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/it-chain-Engine/blockchain/api"
 	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
+	"github.com/it-chain/midgard"
+	"github.com/magiconair/properties/assert"
 )
 
 func TestBlockApi_AddBlockToPool(t *testing.T) {
-	tests := map[string] struct {
+	tests := map[string]struct {
 		input struct {
 			block blockchain.Block
 		}
-	} {
+	}{
 		"success": {
 			input: struct {
 				block blockchain.Block
-			} {block: &blockchain.DefaultBlock{
+			}{block: &blockchain.DefaultBlock{
 				Height: uint64(11),
 			}},
 		},
@@ -44,24 +45,23 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 	}
 }
 
-
 func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
-	tests := map[string] struct {
+	tests := map[string]struct {
 		input struct {
 			height blockchain.BlockHeight
 		}
 		err error
-	} {
+	}{
 		"success": {
 			input: struct {
 				height blockchain.BlockHeight
-			}{height: blockchain.BlockHeight(12),},
+			}{height: blockchain.BlockHeight(12)},
 			err: nil,
 		},
 		"block nil test": {
 			input: struct {
 				height blockchain.BlockHeight
-			}{height: blockchain.BlockHeight(144),},
+			}{height: blockchain.BlockHeight(144)},
 			err: api.ErrNilBlock,
 		},
 	}

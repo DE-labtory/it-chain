@@ -6,11 +6,10 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
-	"github.com/stretchr/testify/assert"
-	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
+	"github.com/it-chain/midgard"
+	"github.com/stretchr/testify/assert"
 )
-
 
 func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testing.T) {
 	tests := map[string]struct {
@@ -74,7 +73,7 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 
 		blockRepository := mock.BlockQueryApi{}
 		blockRepository.GetLastBlockFunc = func() (blockchain.Block, error) {
-			return &blockchain.DefaultBlock{Height: blockchain.BlockHeight(99887)},test.input.getLastBlockErr
+			return &blockchain.DefaultBlock{Height: blockchain.BlockHeight(99887)}, test.input.getLastBlockErr
 		}
 
 		grpcCommandService := mock.SyncCheckGrpcCommandService{}
@@ -207,7 +206,7 @@ func TestGrpcCommandHandler_HandleGrpcCommand_BlockRequestProtocol(t *testing.T)
 		blockApi := mock.MockSyncBlockApi{}
 
 		blockQueryApi := mock.BlockQueryApi{}
-		blockQueryApi.GetBlockByHeightFunc = func(height uint64) (blockchain.Block ,error) {
+		blockQueryApi.GetBlockByHeightFunc = func(height uint64) (blockchain.Block, error) {
 			return &blockchain.DefaultBlock{
 				Height: blockchain.BlockHeight(12),
 			}, test.input.err.ErrGetBlock

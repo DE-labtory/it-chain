@@ -6,10 +6,12 @@ import (
 
 	"bytes"
 
-	ygg "github.com/it-chain/yggdrasill/common"
-	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/midgard"
+	ygg "github.com/it-chain/yggdrasill/common"
 
+	"errors"
+	"fmt"
 	"log"
 )
 

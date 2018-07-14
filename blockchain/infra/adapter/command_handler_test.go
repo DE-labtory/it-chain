@@ -2,24 +2,25 @@ package adapter_test
 
 import (
 	"testing"
-	"github.com/it-chain/midgard"
+
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
-	"github.com/stretchr/testify/assert"
 	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
+	"github.com/it-chain/midgard"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
-	tests := map[string] struct {
+	tests := map[string]struct {
 		input struct {
 			command blockchain.ConfirmBlockCommand
 		}
 		err error
-	} {
+	}{
 		"success": {
 			input: struct {
 				command blockchain.ConfirmBlockCommand
-			} {
+			}{
 				command: blockchain.ConfirmBlockCommand{
 					CommandModel: midgard.CommandModel{ID: "zf"},
 					Block: &blockchain.DefaultBlock{
@@ -32,10 +33,10 @@ func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 		"block nil error test": {
 			input: struct {
 				command blockchain.ConfirmBlockCommand
-			} {
+			}{
 				command: blockchain.ConfirmBlockCommand{
 					CommandModel: midgard.CommandModel{ID: "zf"},
-					Block: nil,
+					Block:        nil,
 				},
 			},
 			err: adapter.ErrBlockNil,

@@ -3,8 +3,8 @@ package mock
 import "github.com/it-chain/midgard"
 
 type EventRepository struct {
-	LoadFunc func(aggregate midgard.Aggregate, aggregateID string) error
-	SaveFunc func(aggregateID string, events ...midgard.Event) error
+	LoadFunc  func(aggregate midgard.Aggregate, aggregateID string) error
+	SaveFunc  func(aggregateID string, events ...midgard.Event) error
 	CloseFunc func()
 }
 

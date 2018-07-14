@@ -16,15 +16,15 @@ type SyncCheckGrpcCommandService interface {
 }
 
 type GrpcCommandHandler struct {
-	blockApi SyncBlockApi
-	blockQueryApi blockchain.BlockQueryApi
+	blockApi           SyncBlockApi
+	blockQueryApi      blockchain.BlockQueryApi
 	grpcCommandService SyncCheckGrpcCommandService
 }
 
 func NewGrpcCommandHandler(blockApi SyncBlockApi, blockQueryService blockchain.BlockQueryApi, grpcCommandService SyncCheckGrpcCommandService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
-		blockApi: blockApi,
-		blockQueryApi: blockQueryService,
+		blockApi:           blockApi,
+		blockQueryApi:      blockQueryService,
 		grpcCommandService: grpcCommandService,
 	}
 }
