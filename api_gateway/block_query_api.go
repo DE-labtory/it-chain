@@ -2,11 +2,14 @@ package api_gateway
 
 import (
 	"errors"
+	"sync"
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/yggdrasill"
 )
 
 var ErrNoStagedBlock = errors.New("Error can not find staged block")
+var ErrGetCommitedBlock = errors.New("Error in getting commited block")
 
 type BlockQueryApi struct {
 	blockpoolRepository     BlockPoolRepository
@@ -64,4 +67,28 @@ func (bpr *BlockPoolRepositoryImpl) GetStagedBlockById(blockId string) (blockcha
 		}
 	}
 	return nil, ErrNoStagedBlock
+}
+
+type CommitedBlockRepositoryImpl struct {
+	mux *sync.RWMutex
+	yggdrasill.BlockStorageManager
+}
+
+func (cbr *CommitedBlockRepositoryImpl) GetLastBlock() (blockchain.Block, error) {
+	cbr.mux.Lock()
+	defer cbr.mux.Unlock()
+
+	block := &blockchain.DefaultBlock{}
+
+	err := cbr.BlockStorageManager.GetLastBlock(block)
+	if err != nil {
+		return nil, ErrGetCommitedBlock
+	}
+
+	return block, nil
+}
+func (cbr *CommitedBlockRepositoryImpl) GetBlockByHeight(height uint64) (blockchain.Block, error) {
+	cbr.mux.Lock()
+	defer cbr.mux.Unlock()
+
 }
