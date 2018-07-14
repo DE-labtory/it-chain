@@ -8,9 +8,6 @@ import (
 
 	"errors"
 
-	"fmt"
-	"log"
-
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	ygg "github.com/it-chain/yggdrasill/common"
@@ -156,72 +153,7 @@ type BlockQueryApi interface {
 	GetLastBlock() (Block, error)
 }
 
-type Action interface {
-	DoAction(block Block) error
-}
-
-// TODO: Write test case
-func CreateSaveOrSyncAction(checkResult int64) Action {
-	if checkResult > 0 {
-		return NewSyncAction()
-	} else if checkResult == 0 {
-		return NewSaveAction()
-	} else {
-		return NewDefaultAction()
-	}
-}
-
-type SyncAction struct{}
-
-func NewSyncAction() *SyncAction {
-	return &SyncAction{}
-}
-func (block *DefaultBlock) On(event midgard.Event) error {
-
-	switch v := event.(type) {
-
-	case *BlockCreatedEvent:
-		TxList, err := deserializeTxList(v.TxList)
-
-		if err != nil {
-			return ErrDeserializingTxList
-		}
-
-		block.Seal = v.Seal
-		block.PrevSeal = v.PrevSeal
-		block.Height = v.Height
-		block.TxList = TxList
-		block.TxSeal = v.TxSeal
-		block.Timestamp = v.Timestamp
-		block.Creator = v.Creator
-
-	default:
-		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
-	}
-
-	return nil
-}
-
-func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock {
-	block := &DefaultBlock{}
-	return block
-}
-
-func (syncAction *SyncAction) DoAction(block Block) error {
-	// TODO: Start synchronize
-	return nil
-}
-
-type SaveAction struct {
-	blockPool BlockPool
-}
-
-func NewSaveAction() *SaveAction {
-	return &SaveAction{}
-}
-
-// TODO: Write test case
-func (saveAction *SaveAction) DoAction(block Block) error {
+func CommitBlock(block Block) error {
 	event, err := createBlockCommittedEvent(block)
 	if err != nil {
 		return err
@@ -239,16 +171,4 @@ func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
 		},
 		Seal: seal,
 	}, nil
-}
-
-type DefaultAction struct{}
-
-func NewDefaultAction() *DefaultAction {
-	return &DefaultAction{}
-}
-
-// TODO: Write test case
-func (defaultAction *DefaultAction) DoAction(block Block) error {
-	log.Printf("got shorter height block [%v]", block.GetHeight())
-	return nil
 }

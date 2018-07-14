@@ -1,13 +1,8 @@
 package adapter
 
 import (
-	"errors"
-
 	"github.com/it-chain/it-chain-Engine/blockchain"
 )
-
-var ErrEmptyEventId = errors.New("empty event id proposed.")
-var ErrNodeApi = errors.New("problem in node api")
 
 type EventHandler struct {
 	blockApi BlockApi

@@ -2,8 +2,8 @@ package api
 
 import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/pkg/errors"
 	"github.com/it-chain/midgard"
+	"github.com/pkg/errors"
 )
 
 var ErrNilBlock = errors.New("block is nil")
@@ -11,23 +11,24 @@ var ErrSyncProcessing = errors.New("Sync is in progress")
 var ErrGetLastBlock = errors.New("failed get last block")
 
 type BlockApi struct {
-	blockQueryApi blockchain.BlockQueryApi
+	blockQueryApi   blockchain.BlockQueryApi
 	eventRepository midgard.EventRepository
-	publisherId          string
+	publisherId     string
 }
 
 func NewBlockApi(blockQueryApi blockchain.BlockQueryApi, eventRepository midgard.EventRepository, publisherId string) (BlockApi, error) {
 	return BlockApi{
-		blockQueryApi: blockQueryApi,
+		blockQueryApi:   blockQueryApi,
 		eventRepository: eventRepository,
-		publisherId:          publisherId,
+		publisherId:     publisherId,
 	}, nil
 }
 
-// TODO: Check 과정에서 임의의 노드에게서 받은 blockchain 정보로 동기화 되었는지 확인한다.
+// TODO: blockchain이 동기화 되었는지 확인한다.
 func (bApi *BlockApi) SyncedCheck(block blockchain.Block) error {
 	return nil
 }
+
 // 받은 block을 block pool에 추가한다.
 func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 	if block == nil {
@@ -42,29 +43,29 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 	return nil
 }
 
-func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
+func (bApi *BlockApi) CommitBlockFromPoolOrSync(height blockchain.BlockHeight) error {
 	if bApi.SyncIsProgressing() {
 		return ErrSyncProcessing
 	}
 
-	pool := bApi.loadBlockPool()
+	blockFromPool := bApi.loadBlockPool().Get(height)
 
-	blockFromPool := pool.Get(height)
-	if blockFromPool == nil {
-		return ErrNilBlock
-	}
-
-	lastBlock, err := bApi.blockQueryApi.GetLastBlock()
+	diff, err := bApi.CompareLastBlockHeightWith(blockFromPool)
 	if err != nil {
-		return ErrGetLastBlock
+		return err
 	}
 
-	isSafeToSave := compareHeight(blockFromPool.GetHeight(), lastBlock.GetHeight())
+	bApi.commitBlockOrSyncByHeightDifference(diff, blockFromPool)
 
-	action := blockchain.CreateSaveOrSyncAction(isSafeToSave)
+	return nil
+}
 
-	action.DoAction(blockFromPool)
-
+func (bApi *BlockApi) commitBlockOrSyncByHeightDifference(diff uint64, block blockchain.Block) error {
+	if diff > 1 {
+		// TODO: Start synchronize
+	} else if diff == 1 {
+		return blockchain.CommitBlock(block)
+	}
 	return nil
 }
 
@@ -80,11 +81,11 @@ func (bApi *BlockApi) loadBlockPool() blockchain.BlockPool {
 	return pool
 }
 
-func compareHeight(height1 uint64, height2 uint64) int64 {
-	return int64(height1 - height2) - 1
+func (bApi *BlockApi) CompareLastBlockHeightWith(targetBlock blockchain.Block) (uint64, error) {
+	lastBlock, err := bApi.blockQueryApi.GetLastBlock()
+	if err != nil {
+		return 0, ErrGetLastBlock
+	}
+
+	return targetBlock.GetHeight() - lastBlock.GetHeight(), nil
 }
-
-
-
-
-
