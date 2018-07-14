@@ -11,7 +11,11 @@ fi
 echo "Build generator file..."
 go build -o main/GeneratorBuildFile main/conf_file_generator.go
 echo "trying to excute generator..."
-./main/GeneratorBuildFile
+confFileName="config"
+if [$# -ge 1];then
+    confFileName=$1
+fi
+./main/GeneratorBuildFile $confFileName
 echo "trying to remove excuted generator..."
 rm -rf main/GeneratorBuildFile
 echo "conf file generate finish!!!"

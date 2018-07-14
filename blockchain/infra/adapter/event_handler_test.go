@@ -1,159 +1,73 @@
 package adapter_test
 
 import (
+	"testing"
+	"time"
+
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/it-chain/midgard"
-	"errors"
+	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
+	"github.com/magiconair/properties/assert"
 )
 
-type MockPeerRepository struct {
-	AddFunc func(peer blockchain.Peer) error
-	RemoveFunc func(peer blockchain.PeerId) error
-}
-
-func (nr MockPeerRepository) Add(peer blockchain.Peer) error {
-	return nr.AddFunc(peer)
-}
-func (nr MockPeerRepository) Remove(peerId blockchain.PeerId) error {
-	return nr.RemoveFunc(peerId)
-}
-
-
-func TestEventHandler_HandleNodeCreatedEvent(t *testing.T) {
-	tests := map[string] struct {
+func TestEventHandler_HandleBlockAddToPoolEvent(t *testing.T) {
+	tests := map[string]struct {
 		input struct {
-			ID string
-			peerId string
-			address string
-			rpErr error
+			blockchain.BlockAddToPoolEvent
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				ID string
-				peerId string
-				address string
-				rpErr error
-			}{ID: string("zf"), peerId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
+				blockchain.BlockAddToPoolEvent
+			}{BlockAddToPoolEvent: blockchain.BlockAddToPoolEvent{
+				Seal:      []byte{0x1},
+				PrevSeal:  []byte{0x1},
+				Height:    uint64(12),
+				TxList:    []byte{0x1},
+				TxSeal:    [][]byte{{0x1}},
+				Timestamp: time.Now(),
+				Creator:   []byte{0x1},
+			}},
 			err: nil,
 		},
-		"empty eventId test": {
+		"event w/o height test": {
 			input: struct {
-				ID string
-				peerId string
-				address string
-				rpErr error
-			}{ID: string(""), peerId: string("zf2"), address: string("11.22.33.44"), rpErr: nil},
-			err: adapter.ErrEmptyEventId,
+				blockchain.BlockAddToPoolEvent
+			}{BlockAddToPoolEvent: blockchain.BlockAddToPoolEvent{
+				Seal:      []byte{0x1},
+				PrevSeal:  []byte{0x1},
+				TxList:    []byte{0x1},
+				TxSeal:    [][]byte{{0x1}},
+				Timestamp: time.Now(),
+				Creator:   []byte{0x1},
+			}},
+			err: adapter.ErrBlockMissingProperties,
 		},
-		"repository error test": {
+		"event w/o seal, prevseal test": {
 			input: struct {
-				ID string
-				peerId string
-				address string
-				rpErr error
-			}{ID: string("zf"), peerId: string("zf2"), address: string("11.22.33.44"), rpErr: errors.New("repository error")},
-			err: adapter.ErrNodeApi,
+				blockchain.BlockAddToPoolEvent
+			}{BlockAddToPoolEvent: blockchain.BlockAddToPoolEvent{
+				TxList:    []byte{0x1},
+				TxSeal:    [][]byte{{0x1}},
+				Timestamp: time.Now(),
+				Creator:   []byte{0x1},
+			}},
+			err: adapter.ErrBlockMissingProperties,
 		},
 	}
+
+	blockApi := mock.BlockApi{}
+	blockApi.CheckAndSaveBlockFromPoolFunc = func(height blockchain.BlockHeight) error {
+		assert.Equal(t, height, uint64(12))
+		return nil
+	}
+	eventHandler := adapter.NewEventHandler(blockApi)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		nr := MockPeerRepository{}
-		nr.AddFunc = func(peer blockchain.Peer) error {
-			assert.Equal(t, peer.PeerId.Id, string("zf2"))
-			assert.Equal(t, peer.IpAddress, string("11.22.33.44"))
-			return test.input.rpErr
-		}
-		rp := adapter.RepositoryProjector{
-			PeerRepository: nr,
-		}
-
-		eventHandler := adapter.NewEventHandler(rp)
-
-		event := blockchain.NodeCreatedEvent{
-			EventModel: midgard.EventModel{
-				ID: test.input.ID,
-			},
-			Peer: blockchain.Peer{
-				PeerId: blockchain.PeerId{
-					test.input.peerId,
-				},
-				IpAddress: test.input.address,
-			},
-		}
-		err := eventHandler.HandleNodeCreatedEvent(event)
-
-		assert.Equal(t, err, test.err)
-	}
-}
-
-func TestEventHandler_HandleNodeDeletedEvent(t *testing.T) {
-	tests := map[string] struct {
-		input struct {
-			ID string
-			peerId string
-			rpErr error
-		}
-		err error
-	}{
-		"success": {
-			input: struct {
-				ID string
-				peerId string
-				rpErr error
-			}{ID: string("zf"), peerId: string("zf2"), rpErr: nil},
-			err: nil,
-		},
-		"empty eventId test": {
-			input: struct {
-				ID string
-				peerId string
-				rpErr error
-			}{ID: string(""), peerId: string("zf2"), rpErr: nil},
-			err: adapter.ErrEmptyEventId,
-		},
-		"repository error test": {
-			input: struct {
-				ID string
-				peerId string
-				rpErr error
-			}{ID: string("zf"), peerId: string("zf2"), rpErr: errors.New("repository error")},
-			err: adapter.ErrNodeApi,
-		},
-	}
-
-	for testName, test := range tests {
-		t.Logf("running test case %s", testName)
-
-		nr := MockPeerRepository{}
-		nr.RemoveFunc = func(peerId blockchain.PeerId) error {
-			assert.Equal(t, peerId.Id, string("zf2"))
-			return test.input.rpErr
-		}
-		rp := adapter.RepositoryProjector{
-			PeerRepository: nr,
-		}
-
-		eventHandler := adapter.NewEventHandler(rp)
-
-		event := blockchain.NodeDeletedEvent{
-			EventModel: midgard.EventModel{
-				ID: test.input.ID,
-			},
-			Peer: blockchain.Peer{
-				PeerId: blockchain.PeerId{
-					test.input.peerId,
-				},
-			},
-		}
-		err := eventHandler.HandleNodeDeletedEvent(event)
+		err := eventHandler.HandleBlockAddToPoolEvent(test.input.BlockAddToPoolEvent)
 
 		assert.Equal(t, err, test.err)
 	}

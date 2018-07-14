@@ -4,7 +4,11 @@ import "github.com/it-chain/midgard"
 
 type TxCreateCommand struct {
 	midgard.CommandModel
-	TxData
+	Jsonrpc string
+	Method  TxDataType
+	Params  Param
+	ID      string
+	ICodeID string
 }
 
 type ProposeBlockCommand struct {
@@ -12,14 +16,9 @@ type ProposeBlockCommand struct {
 	Transactions []Transaction
 }
 
-type SendTransactionsCommand struct {
+type GrpcDeliverCommand struct {
 	midgard.CommandModel
-	Transactions []*Transaction
-	Leader
-}
-
-type MessageDeliverCommand struct {
-	midgard.CommandModel
-	Transactions []*Transaction
-	Leader
+	Recipients []string
+	Body       []byte
+	Protocol   string
 }

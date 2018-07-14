@@ -2,6 +2,7 @@ package consensus
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -51,8 +52,8 @@ func TestParliament_ChangeLeader(t *testing.T) {
 
 	event, _ := p.ChangeLeader(l)
 
-	assert.Equal(t, "leader", event.LeaderId.ToString())
-	assert.Equal(t, l.GetId(), p.Leader.GetId())
+	assert.Equal(t, "leader", event.LeaderId)
+	assert.Equal(t, l.GetID(), p.Leader.GetID())
 }
 
 func TestParliament_AddMember(t *testing.T) {
@@ -61,7 +62,7 @@ func TestParliament_AddMember(t *testing.T) {
 
 	event, _ := p.AddMember(m)
 
-	assert.Equal(t, "member", event.MemberId.ToString())
+	assert.Equal(t, "member", event.MemberId)
 	assert.Equal(t, 1, len(p.Members))
 }
 
@@ -79,7 +80,7 @@ func TestParliament_RemoveMember(t *testing.T) {
 	// case2
 	event, _ = p.RemoveMember(m.MemberId)
 
-	assert.Equal(t, "member", event.MemberId.ToString())
+	assert.Equal(t, "member", event.MemberId)
 	assert.Equal(t, 0, len(p.Members))
 }
 
@@ -90,7 +91,7 @@ func TestParliament_ValidateRepresentative(t *testing.T) {
 	var representatives1 []*Representative
 	for i := 0; i < 3; i++ {
 		p.AddMember(&Member{
-			MemberId:MemberId{string(i)},
+			MemberId: MemberId{string(i)},
 		})
 
 		representatives1 = append(representatives1, &Representative{
@@ -117,28 +118,16 @@ func TestParliament_ValidateRepresentative(t *testing.T) {
 
 func TestParliament_FindByPeerID(t *testing.T) {
 	p := NewParliament()
-	m := &Member{MemberId:MemberId{"member"}}
+	m := &Member{MemberId: MemberId{"member"}}
 	p.AddMember(m)
 
 	// case 1
 	member := p.FindByPeerID("member")
 
-	assert.Equal(t, "member", member.GetId())
+	assert.Equal(t, "member", member.GetID())
 
 	// case 2
 	member = p.FindByPeerID("nonmember")
 
 	assert.Nil(t, member)
 }
-
-func TestParliamentRepositoryImpl_SetParliament(t *testing.T) {
-	pr := NewParliamentRepository()
-	p := NewParliament()
-	p.ParliamentId = ParliamentId("NewParliamentID")
-
-	pr.SetParliament(p)
-
-	assert.Equal(t, "NewParliamentID", pr.GetParliament().GetID())
-}
-
-

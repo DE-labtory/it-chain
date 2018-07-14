@@ -43,7 +43,6 @@ func InitDefault() {
 
 //todo path, dbname from viper
 func initDefaultStore() (midgard.EventStore, store.EventSerializer) {
-
 	if Instance != nil {
 		panic("eventstore is already initialized")
 	}
@@ -79,14 +78,12 @@ func InitForMock(repository midgard.EventRepository) {
 
 //todo CustomMongoStore init part
 func InitMongoStore(path string, dbname string, publisher midgard.Publisher, events ...midgard.Event) {
-
 	if Instance != nil {
 		panic("eventstore is already initialized")
 	}
 }
 
 func InitLevelDBStore(path string, publisher midgard.Publisher, events ...midgard.Event) {
-
 	if Instance != nil {
 		panic("eventstore is already initialized")
 	}

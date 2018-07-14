@@ -36,7 +36,7 @@ func (eh *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent)
 		IpAddress: event.Address,
 	}
 
-	err := eh.peerApi.AddPeer(peer)
+	err := p2p.NewPeer(peer.IpAddress, peer.PeerId)
 
 	if err != nil {
 		return err

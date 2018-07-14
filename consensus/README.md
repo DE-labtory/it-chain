@@ -21,25 +21,48 @@ Consensus Module에서 다루는 핵심 데이터
   - PreprepareMsg
   - PrepareMsg
   - CommitMsg
-- Paliament(P2P Network의 구성원)
+- Parliament(P2P Network의 구성원)
 
 
 
 ## Consume Event
 
 - Parliament변경
-  - LeaderChangeEvent
-  -  PeerConnectEvent
-  -  PeerDisConnectEvent
-- 합의할 Block 준비완료
-- ConsensusMessageArriveEvent(3 type)
+  - LeaderChangedEvent
+  - MemberJoinedEvent
+  - MemberRemovedEvent
+- Block 저장 완료
+
+
+
+
+## Publish Event
+
+- Consensus 관련
+  - ConsensusStartEvent (Preprepare Msg를 받았을 때)
+  - ConsensusPreparedEvent (Prepare Msg를 보냈을 때)
+  - ConsensusCommittedEvent (Commit Msg를 보냈을 때)
+  - ConsensusFinishedEvent (블록을 저장했을 때)
+- ConsensusMessageAddedEvent(3 type)
   - PreprepareMsg
   - PrepareMsg
   - CommitMsg
 
 
 
-## Publish Event
+## Consume Command
 
-- BlockConfirmEvent
-- ConsensusMessagePublishEvent
+- PreprepareMsg 받음
+- PrepareMsg 받음
+- CommitMsg 받음
+
+
+
+
+## Publish Command
+
+- BlockCreateCommand
+- ConsensusMsgSendCommand
+  - PreprepareMsg (leader)
+  - PrepareMsg
+  - CommitMsg

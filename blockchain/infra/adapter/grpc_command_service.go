@@ -1,17 +1,11 @@
 package adapter
 
 import (
-	"errors"
-
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
-
-//kind of error
-var ErrEmptyNodeId = errors.New("empty nodeid proposed")
-var ErrEmptyBlockSeal = errors.New("empty block seal")
 
 // ToDo: 구현.(gitId:junk-sound)
 type Publish func(exchange string, topic string, data interface{}) (err error)
@@ -27,7 +21,6 @@ func NewGrpcCommandService(publish Publish) *GrpcCommandService {
 }
 
 func (gcs *GrpcCommandService) RequestBlock(peerId blockchain.PeerId, height uint64) error {
-
 	if peerId.Id == "" {
 		return ErrEmptyNodeId
 	}
