@@ -1,80 +1,86 @@
 package api
 
 import (
-	"github.com/it-chain/it-chain-Engine/icode/domain/model"
-	"github.com/it-chain/it-chain-Engine/icode/domain/repository"
-	"github.com/it-chain/it-chain-Engine/icode/domain/service"
+	"fmt"
+
+	"github.com/it-chain/it-chain-Engine/icode"
 )
 
-//ICode의 Invoke, Query, 검증 수행
 type ICodeApi struct {
-	iCodeMetaRepository repository.ICodeMetaRepository
-	containerService    service.ContainerService
-	itCodeStoreApi      ItCodeStoreApi
+	ContainerService icode.ContainerService
+	StoreApi         ICodeStoreApi
 }
 
-//Get ICode from git and start ICode container, push to backup server
-func (iApi ICodeApi) Deploy(gitUrl string) error {
-
-	//clone from git
-	iCodeMeta, err := iApi.itCodeStoreApi.Clone(gitUrl)
-
-	if err != nil {
-		return err
+func NewIcodeApi(containerService icode.ContainerService, storeApi ICodeStoreApi) *ICodeApi {
+	return &ICodeApi{
+		ContainerService: containerService,
+		StoreApi:         storeApi,
 	}
-
-	//start ICode with container
-	if err = iApi.containerService.Start(*iCodeMeta); err != nil {
-		return err
-	}
-
-	//save ICode meta
-	if err = iApi.iCodeMetaRepository.Save(*iCodeMeta); err != nil {
-		return err
-	}
-
-	//push to backup server
-	err = iApi.itCodeStoreApi.Push(iCodeMeta)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
-//UnDeploy ICode
-func (iApi ICodeApi) UnDeploy(id model.ICodeID) error {
-
-	err := iApi.containerService.Stop(id)
-
-	if err != nil {
-		return err
+func (iApi ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath string) (*icode.Meta, error) {
+	// check for already in repository
+	/*meta, err := iApi.MetaRepository.FindByGitURL(gitUrl)
+	if meta.ICodeID != "" {
+		return nil, errors.New("already deployed")
 	}
-
-	err = iApi.iCodeMetaRepository.Remove(id)
-
 	if err != nil {
-		return err
+		return nil, err
 	}
+	*/
 
-	return nil
-}
-
-//Invoke transactions on ICode
-//todo async parallel execute
-func (iApi ICodeApi) Invoke(txs []model.Transaction) {
-
-}
-
-//Query transactions on ICode (Read Only transaction request on ICode)
-func (iApi ICodeApi) Query(tx model.Transaction) (*model.Result, error) {
-
-	result, err := iApi.containerService.Run(tx)
-
+	// clone meta. in clone function, metaCreatedEvent will publish
+	meta, err := iApi.StoreApi.Clone(id, baseSaveUrl, gitUrl, sshPath)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	//start ICode with container
+	if err = iApi.ContainerService.StartContainer(*meta); err != nil {
+		return nil, err
+	}
+	return meta, nil
+}
+
+func (iApi ICodeApi) UnDeploy(id icode.ID) error {
+	// stop iCode container
+	err := iApi.ContainerService.StopContainer(id)
+	if err != nil {
+		return err
+	}
+
+	// publish meta delete event
+	err = icode.DeleteMeta(id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//todo need asnyc process
+func (iApi ICodeApi) Invoke(tx icode.Transaction) *icode.Result {
+	result, err := iApi.ContainerService.ExecuteTransaction(tx)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("error in invoke tx, err : %s", err.Error()))
+		result = &icode.Result{
+			TxId:    tx.TxId,
+			Data:    nil,
+			Success: false,
+		}
+	}
+	return result
+}
+
+func (iApi ICodeApi) Query(tx icode.Transaction) *icode.Result {
+	result, err := iApi.ContainerService.ExecuteTransaction(tx)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("error in invoke tx, err : %s", err.Error()))
+		result = &icode.Result{
+			TxId:    tx.TxId,
+			Data:    nil,
+			Success: false,
+		}
+	}
+	return result
 }
