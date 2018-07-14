@@ -33,7 +33,7 @@ func (b BlockQueryApi) GetCommitedBlockByHeight(height uint64) (blockchain.Block
 }
 
 type BlockPoolRepository interface {
-	AddCreatedBlock(block blockchain.Block) error
+	AddCreatedBlock(block blockchain.Block)
 	GetStagedBlockByHeight(blockHeight uint64) (blockchain.Block, error)
 	GetStagedBlockById(blockId string) (blockchain.Block, error)
 }
@@ -53,8 +53,8 @@ func NewBlockpoolRepositoryImpl() *BlockPoolRepositoryImpl {
 	}
 }
 
-func (bpr *BlockPoolRepositoryImpl) AddCreatedBlock(block blockchain.Block) error {
-
+func (bpr *BlockPoolRepositoryImpl) AddCreatedBlock(block blockchain.Block) {
+	bpr.Blocks = append(bpr.Blocks, block)
 }
 
 func (bpr *BlockPoolRepositoryImpl) GetStagedBlockByHeight(blockHeight uint64) (blockchain.Block, error) {
