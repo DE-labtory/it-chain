@@ -1,18 +1,12 @@
 package adapter
 
 import (
-	"errors"
-
 	"encoding/json"
+	"errors"
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
 )
 
-var ErrBlockInfoDeliver = errors.New("block info deliver failed")
-var ErrGetBlock = errors.New("error when Getting block")
-var ErrResponseBlock = errors.New("error when response block")
-var ErrGetLastBlock = errors.New("error when get last block")
-var ErrSyncCheckResponse = errors.New("error when sync check response")
 var ErrAddBlock = errors.New("error when adding block")
 
 type SyncBlockApi interface {

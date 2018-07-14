@@ -83,7 +83,6 @@ func InitMongoStore(path string, dbname string, publisher midgard.Publisher, eve
 	}
 }
 
-//
 func InitLevelDBStore(path string, publisher midgard.Publisher, events ...midgard.Event) {
 	if Instance != nil {
 		panic("eventstore is already initialized")
@@ -128,6 +127,7 @@ func Load(aggregate midgard.Aggregate, aggregateID string) error {
 
 	return Instance.repo.Load(aggregate, aggregateID)
 }
+
 func Close() {
 
 	if Instance == nil {

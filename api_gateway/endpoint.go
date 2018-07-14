@@ -10,6 +10,7 @@ import (
 // https://github.com/marcusolsson/goddd/blob/master/booking/endpoint.go
 func makeFindUncommittedTransactionsEndpoint(t TransactionQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		//logic
 		return t.FindUncommittedTransactions(), nil
 	}
 }

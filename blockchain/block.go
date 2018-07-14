@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"bytes"
-
 	"errors"
 	"fmt"
 	"log"
@@ -14,8 +13,6 @@ import (
 	"github.com/it-chain/midgard"
 	ygg "github.com/it-chain/yggdrasill/common"
 )
-
-var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
 
 type Block = ygg.Block
 

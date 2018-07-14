@@ -2,7 +2,6 @@ package blockchain
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"os"
 	"time"
@@ -11,12 +10,6 @@ import (
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
-
-var ErrSetConfig = errors.New("error when set Config")
-var ErrBuildingSeal = errors.New("error when building Seal")
-var ErrBuildingTxSeal = errors.New("error when building TxSeal")
-var ErrCreatingEvent = errors.New("error when creating Event")
-var ErrOnEvent = errors.New("error while On Event")
 
 func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 

@@ -1,55 +1,36 @@
 package api_test
 
 import (
-	"github.com/it-chain/it-chain-Engine/blockchain"
-	"testing"
-	"github.com/it-chain/it-chain-Engine/blockchain/api"
-	"github.com/magiconair/properties/assert"
-	"github.com/it-chain/midgard"
-	"fmt"
 	"errors"
+	"fmt"
+	"testing"
+
+	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/it-chain-Engine/blockchain/api"
+	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
+	"github.com/it-chain/midgard"
+	"github.com/magiconair/properties/assert"
 )
 
-type MockBlockQueryApi struct {
-	GetLastBlockFunc func() (blockchain.Block, error)
-}
-func (br MockBlockQueryApi) GetLastBlock() (blockchain.Block, error) {
-	return br.GetLastBlockFunc()
-}
-func (br MockBlockQueryApi) GetBlockByHeight(blockHeight uint64) (blockchain.Block, error) { return nil, nil }
-func (br MockBlockQueryApi) GetBlockBySeal(seal []byte) (blockchain.Block, error) { return nil, nil }
-func (br MockBlockQueryApi) GetBlockByTxID(txid string) (blockchain.Block, error) { return nil, nil }
-func (br MockBlockQueryApi) GetTransactionByTxID(txid string) (blockchain.Transaction, error) { return nil, nil }
-
-type MockEventRepository struct {
-	LoadFunc func(aggregate midgard.Aggregate) error
-}
-
-func (er MockEventRepository) Load(aggregate midgard.Aggregate, aggregateID string) error {
-	return er.LoadFunc(aggregate)
-}
-func (er MockEventRepository) Save(aggregateID string, events ...midgard.Event) error {return nil}
-func (er MockEventRepository) Close() {}
-
 func TestBlockApi_AddBlockToPool(t *testing.T) {
-	tests := map[string] struct {
+	tests := map[string]struct {
 		input struct {
 			block blockchain.Block
 		}
-	} {
+	}{
 		"success": {
 			input: struct {
 				block blockchain.Block
-			} {block: &blockchain.DefaultBlock{
+			}{block: &blockchain.DefaultBlock{
 				Height: uint64(11),
 			}},
 		},
 	}
 
-	blockRepository := MockBlockQueryApi{}
+	blockRepository := mock.BlockQueryApi{}
 	publisherId := "zf"
-	eventRepository := MockEventRepository{}
-	eventRepository.LoadFunc = func(aggregate midgard.Aggregate) error {
+	eventRepository := mock.EventRepository{}
+	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
 		// predefine block pool
 		aggregate = blockchain.NewBlockPool()
 		return nil
@@ -64,37 +45,36 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 	}
 }
 
-
 func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
-	tests := map[string] struct {
+	tests := map[string]struct {
 		input struct {
 			height blockchain.BlockHeight
 		}
 		err error
-	} {
+	}{
 		"success": {
 			input: struct {
 				height blockchain.BlockHeight
-			}{height: blockchain.BlockHeight(12),},
+			}{height: blockchain.BlockHeight(12)},
 			err: nil,
 		},
 		"block nil test": {
 			input: struct {
 				height blockchain.BlockHeight
-			}{height: blockchain.BlockHeight(144),},
+			}{height: blockchain.BlockHeight(144)},
 			err: api.ErrNilBlock,
 		},
 	}
 	// When
-	blockQueryApi := MockBlockQueryApi{}
+	blockQueryApi := mock.BlockQueryApi{}
 	blockQueryApi.GetLastBlockFunc = func() (blockchain.Block, error) {
 		return &blockchain.DefaultBlock{
 			Height: blockchain.BlockHeight(12),
 		}, nil
 	}
 	publisherId := "zf"
-	eventRepository := MockEventRepository{}
-	eventRepository.LoadFunc = func(aggregate midgard.Aggregate) error {
+	eventRepository := mock.EventRepository{}
+	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
 		switch v := aggregate.(type) {
 		case blockchain.BlockPool:
 			aggregate.(blockchain.BlockPool).Add(&blockchain.DefaultBlock{
@@ -125,4 +105,26 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 		// Then
 		assert.Equal(t, test.err, err)
 	}
+}
+
+func TestBlockApi_SyncedCheck(t *testing.T) {
+	// TODO:
+}
+
+func TestBlockApi_SyncIsProgressing(t *testing.T) {
+	// when
+	blockQueryApi := mock.BlockQueryApi{}
+	eventRepository := mock.EventRepository{}
+	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
+		assert.Equal(t, blockchain.BC_SYNC_STATE_AID, aggregateID)
+		return nil
+	}
+	publisherId := "zf"
+
+	// when
+	blockApi, _ := api.NewBlockApi(blockQueryApi, eventRepository, publisherId)
+
+	// then
+	state := blockApi.SyncIsProgressing()
+	assert.Equal(t, blockchain.DONE, state)
 }

@@ -18,11 +18,14 @@ type Publish func(exchange string, topic string, data interface{}) (err error) /
 
 // message dispatcher sends messages to other nodes in p2p network
 type GrpcCommandService struct {
+
 	publish Publish // midgard.client.Publish
 }
 
 func NewGrpcCommandService(publish Publish) *GrpcCommandService {
+
 	return &GrpcCommandService{
+
 		publish: publish,
 	}
 }
@@ -36,6 +39,7 @@ func CreateGrpcDeliverCommand(protocol string, body interface{}) (p2p.GrpcDelive
 	}
 
 	return p2p.GrpcDeliverCommand{
+
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
