@@ -3,57 +3,92 @@ package api_test
 import (
 	"testing"
 
-	"os"
+	"fmt"
 
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"github.com/it-chain/it-chain-Engine/txpool/api"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/midgard/bus/rabbitmq"
-	"github.com/it-chain/midgard/store/leveldb"
 	"github.com/stretchr/testify/assert"
-	"github.com/it-chain/midgard/store"
 )
 
-//need rabbitmq
-func TestTxCommandHandler_HandleTxCreate(t *testing.T) {
+type MockEventRepository struct {
+	SaveFunc func(aggregateID string, events ...midgard.Event) error
+}
 
-	//given
-	client := rabbitmq.Connect("")
-	path := "test"
-	store := leveldb.NewEventStore(path, store.NewSerializer(txpool.TxCreatedEvent{}, txpool.TxDeletedEvent{}))
+func (rp MockEventRepository) Load(aggregate midgard.Aggregate, aggregateID string) error {
+	return nil
+}
 
-	defer os.RemoveAll(path)
+func (rp MockEventRepository) Save(aggregateID string, events ...midgard.Event) error {
+	return rp.SaveFunc(aggregateID, events...)
+}
 
-	repo := midgard.NewRepo(store, client)
+func (rp MockEventRepository) Close() {}
 
-	txCommandHandler := api.NewTransactionApi(repo, "1")
+func TestTransactionApi_CreateTransaction(t *testing.T) {
 
-	//when
-	txID := "123"
-	txCreatedCommand := txpool.TxCreateCommand{
-		TxData: txpool.TxData{
-			ID:      "1",
-			ICodeID: "123",
-			Params: txpool.Param{
-				Args:     []string{},
-				Function: "func1",
-			},
-			Method:  "invoke",
-			Jsonrpc: "json1.0",
-		},
-		CommandModel: midgard.CommandModel{
-			ID: txID,
+	tests := map[string]struct {
+		input struct {
+			txData txpool.TxData
+		}
+		err error
+	}{
+		"success": {
+			input: struct {
+				txData txpool.TxData
+			}{txData: txpool.TxData{ID: "gg"}},
+			err: nil,
 		},
 	}
 
-	//when
-	txCommandHandler.CreateTransaction(txID, txCreatedCommand.TxData)
+	eventRepository := MockEventRepository{}
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.Equal(t, "gg", events[0].(*txpool.TxCreatedEvent).ID)
+		return nil
+	}
 
-	//then
-	tx := &txpool.Transaction{}
-	err := repo.Load(tx, txID)
-	assert.NoError(t, err)
+	eventstore.InitForMock(eventRepository)
 
-	assert.Equal(t, tx.TxData, txCreatedCommand.TxData)
-	assert.Equal(t, tx.TxId, tx.TxId)
+	transactionApi := api.NewTransactionApi("zf")
+
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+
+		_, err := transactionApi.CreateTransaction(test.input.txData)
+
+		assert.Equal(t, test.err, err)
+	}
+}
+
+func TestTransactionApi_DeleteTransaction(t *testing.T) {
+
+	tests := map[string]struct {
+		input string
+		err   error
+	}{
+		"success": {
+			input: "transactionID",
+			err:   nil,
+		},
+	}
+
+	eventRepository := MockEventRepository{}
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		fmt.Println(aggregateID)
+		assert.Equal(t, "transactionID", events[0].(*txpool.TxDeletedEvent).ID)
+		return nil
+	}
+
+	eventstore.InitForMock(eventRepository)
+
+	transactionApi := api.NewTransactionApi("zf")
+
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+
+		err := transactionApi.DeleteTransaction(test.input)
+
+		assert.Equal(t, test.err, err)
+	}
 }

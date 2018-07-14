@@ -1,14 +1,15 @@
 package txpool
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 
-	"encoding/json"
-
 	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
+	"github.com/rs/xid"
 )
 
 const (
@@ -18,14 +19,31 @@ const (
 	General TransactionType = 0 + iota
 )
 
-type TransactionId string
-
-func (tId TransactionId) ToString() string {
-	return string(tId)
-}
+type TransactionId = string
 
 type TransactionStatus int
 type TransactionType int
+
+//TxData Declaration
+const (
+	Invoke TxDataType = "invoke"
+	Query  TxDataType = "query"
+)
+
+type TxDataType string
+
+type TxData struct {
+	Jsonrpc string
+	Method  TxDataType
+	Params  Param
+	ID      string
+	ICodeID string
+}
+
+type Param struct {
+	Function string
+	Args     []string
+}
 
 //Aggregate root must implement aggregate interface
 type Transaction struct {
@@ -48,12 +66,22 @@ func (t *Transaction) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *TxCreatedEvent:
+
 		t.TxId = TransactionId(v.ID)
 		t.PublishPeerId = v.PublishPeerId
-		t.TxStatus = v.TxStatus
+		t.TxStatus = TransactionStatus(v.TxStatus)
 		t.TxHash = v.TxHash
 		t.TimeStamp = v.TimeStamp
-		t.TxData = v.TxData
+		t.TxData = TxData{
+			ID:      v.ID,
+			Params:  v.Params,
+			Method:  TxDataType(v.Method),
+			Jsonrpc: v.Jsonrpc,
+			ICodeID: v.ICodeID,
+		}
+
+	case *TxDeletedEvent:
+		t.TxId = ""
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
@@ -96,41 +124,66 @@ func CalTxHash(txData TxData, publishPeerId string, txId TransactionId, timeStam
 	return common.ComputeSHA256(hashArgs)
 }
 
-//TxData Declaration
-const (
-	Invoke TxDataType = "invoke"
-	Query  TxDataType = "query"
-)
+func CreateTransaction(publisherId string, txData TxData) (Transaction, error) {
 
-type TxDataType string
+	id := xid.New().String()
+	timeStamp := time.Now()
+	hash := CalTxHash(txData, publisherId, TransactionId(id), timeStamp)
 
-type TxData struct {
-	Jsonrpc string
-	Method  TxDataType
-	Params  Param
-	ID      string
-	ICodeID string
-}
-
-type Param struct {
-	Function string
-	Args     []string
-}
-
-func NewTxData(jsonrpc string, method TxDataType, params Param, iCodeId string, id string) *TxData {
-	return &TxData{
-		Jsonrpc: jsonrpc,
-		Method:  method,
-		Params:  params,
-		ID:      id,
-		ICodeID: iCodeId,
+	event := &TxCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID:   id,
+			Type: "transaction.created",
+		},
+		PublishPeerId: publisherId,
+		TxStatus:      int(VALID),
+		TxHash:        hash,
+		TimeStamp:     timeStamp,
+		ID:            txData.ID,
+		ICodeID:       txData.ICodeID,
+		Jsonrpc:       txData.Jsonrpc,
+		Method:        string(txData.Method),
+		Params:        txData.Params,
 	}
+
+	tx := &Transaction{}
+
+	if err := saveAndOn(tx, event); err != nil {
+		return *tx, err
+	}
+
+	return *tx, nil
 }
 
-//Transaction Repository interface
-type TransactionRepository interface {
-	Save(transaction Transaction) error
-	Remove(id TransactionId) error
-	FindById(id TransactionId) (*Transaction, error)
-	FindAll() ([]*Transaction, error)
+func DeleteTransaction(transaction Transaction) error {
+
+	event := &TxDeletedEvent{
+		EventModel: midgard.EventModel{
+			ID: transaction.TxId,
+		},
+	}
+
+	tx := &Transaction{}
+
+	if err := saveAndOn(tx, event); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//apply on aggrgate and publish to eventstore
+func saveAndOn(aggregate midgard.Aggregate, event midgard.Event) error {
+
+	//must do call on func first!!!
+	//after save events if aggregate.On failed then data inconsistency will be occurred
+	if err := aggregate.On(event); err != nil {
+		return err
+	}
+
+	if err := eventstore.Save(event.GetID(), event); err != nil {
+		return err
+	}
+
+	return nil
 }
