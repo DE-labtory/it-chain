@@ -11,7 +11,7 @@ import (
 
 var ErrEmptyPeerId = errors.New("empty peer id requested")
 var ErrEmptyAddress = errors.New("empty ip address proposed")
-
+var ErrNoMatchingPeerId = errors.New("no matching peer id")
 // 노드 구조체 선언.
 type Peer struct {
 	IpAddress string

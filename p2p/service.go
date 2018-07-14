@@ -14,7 +14,6 @@ import (
 )
 
 type ICommunicationService interface {
-
 	Dial(ipAddress string) error
 	DeliverPLTable(connectionId string, peerLeaderTable PLTable) error
 }
@@ -22,13 +21,11 @@ type ICommunicationService interface {
 // injected later
 // the actual implementation is done in gateway api
 type IPeerService interface {
-
 	Save(peer Peer) error
 	Remove(peerId PeerId) error
 }
 
 type IPLTableService interface {
-
 	GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error)
 	ClearPeerTable() error
 }
@@ -70,8 +67,8 @@ type Publish func(exchange string, topic string, data interface{}) (err error) /
 type ElectionService struct {
 	mux                sync.Mutex
 	electionRepository ElectionRepository
-	peerService        PeerService
-	peerQueryService PeerQueryService
+	peerService        IPeerService
+	peerQueryService   PeerQueryService
 	publish            Publish
 }
 
