@@ -23,8 +23,8 @@ type UpdateLeaderMessage struct {
 	Peer Peer
 }
 
-type PeerLeaderTableMessage struct {
-	PeerLeaderTable PeerLeaderTable
+type PLTableMessage struct {
+	PLTable PLTable
 }
 
 type RequestVoteMessage struct{}

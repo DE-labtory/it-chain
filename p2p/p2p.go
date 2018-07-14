@@ -2,12 +2,11 @@ package p2p
 
 //todo implement it!
 func init() {
-	//peerRepository, _ := memory.NewPeerRepository()
 	//publisher := rabbitmq.Connect("")
 	//eventRepository := midgard.NewRepo(store, publisher)
 	//publisher :=
 	//grpcCommandService := adapter.NewGrpcCommandService(publisher)
-	//peerApi := api.NewPeerApi(peerRepository, eventRepository, grpcCommandService)
+	//peerApi := api.NewPeerApi(eventRepository, grpcCommandService)
 	////myIp := conf.GetConfiguration().Common.NodeIp
 	//
 	//config := conf.GetConfiguration()
