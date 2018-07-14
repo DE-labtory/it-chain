@@ -10,7 +10,9 @@ import (
 )
 
 type MockBlockQueryApi struct {
-	GetLastBlockFunc func() (blockchain.Block, error)
+	GetLastBlockFunc         func() (blockchain.Block, error)
+	GetStagedBlockByIdFunc   func(blockId string) (blockchain.Block, error)
+	GetLastCommitedBlockFunc func() (blockchain.Block, error)
 }
 
 func (br MockBlockQueryApi) GetLastBlock() (blockchain.Block, error) {
@@ -23,10 +25,10 @@ func (br MockBlockQueryApi) GetStagedBlockByHeight(blockHeight uint64) (blockcha
 	return nil, nil
 }
 func (br MockBlockQueryApi) GetStagedBlockById(blockId string) (blockchain.Block, error) {
-	return nil, nil
+	return br.GetStagedBlockByIdFunc(blockId)
 }
 func (br MockBlockQueryApi) GetLastCommitedBlock() (blockchain.Block, error) {
-	return nil, nil
+	return br.GetLastCommitedBlockFunc()
 }
 
 type MockEventRepository struct {
@@ -66,7 +68,7 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 	}
 }
 
-func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
+func TestBlockApi_CommitBlockFromPoolOrSync(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			height  blockchain.BlockHeight
@@ -81,17 +83,16 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 			}{height: blockchain.BlockHeight(12), blockId: "zf"},
 			err: nil,
 		},
-		"block nil test": {
-			input: struct {
-				height  blockchain.BlockHeight
-				blockId string
-			}{height: blockchain.BlockHeight(144), blockId: "zf"},
-			err: api.ErrNilBlock,
-		},
 	}
 	// When
 	blockQueryApi := MockBlockQueryApi{}
-	blockQueryApi.GetLastBlockFunc = func() (blockchain.Block, error) {
+	blockQueryApi.GetStagedBlockByIdFunc = func(blockId string) (blockchain.Block, error) {
+		assert.Equal(t, "zf", blockId)
+		return &blockchain.DefaultBlock{
+			Height: blockchain.BlockHeight(12),
+		}, nil
+	}
+	blockQueryApi.GetLastCommitedBlockFunc = func() (blockchain.Block, error) {
 		return &blockchain.DefaultBlock{
 			Height: blockchain.BlockHeight(12),
 		}, nil

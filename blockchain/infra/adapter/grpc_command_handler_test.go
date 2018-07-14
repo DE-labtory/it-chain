@@ -4,6 +4,8 @@ import (
 	"errors"
 	"testing"
 
+	"fmt"
+
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
 	"github.com/it-chain/midgard"
@@ -114,6 +116,7 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 
 		grpcCommandService := MockGrpcCommandService{}
 		grpcCommandService.SyncCheckResponseFunc = func(block blockchain.Block) error {
+			fmt.Println(block)
 			assert.Equal(t, block.GetHeight(), uint64(99887))
 			return test.input.syncCheckErr
 		}
