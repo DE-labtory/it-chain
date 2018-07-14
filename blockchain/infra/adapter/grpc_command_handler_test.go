@@ -25,6 +25,15 @@ func (br MockBlockQueryApi) GetLastCommitedBlock() (blockchain.Block, error) {
 func (br MockBlockQueryApi) GetStagedBlockByHeight(blockHeight uint64) (blockchain.Block, error) {
 	return br.GetBlockByHeightFunc(blockHeight)
 }
+func (br MockBlockQueryApi) GetStagedBlockById(blockId string) (blockchain.Block, error) {
+	return nil, nil
+}
+func (br MockBlockQueryApi) GetBlockByHeight(height blockchain.BlockHeight) (blockchain.Block, error) {
+	return nil, nil
+}
+func (br MockBlockQueryApi) GetLastBlock() (blockchain.Block, error) {
+	return nil, nil
+}
 
 type MockGrpcCommandService struct {
 	SyncCheckResponseFunc func(block blockchain.Block) error

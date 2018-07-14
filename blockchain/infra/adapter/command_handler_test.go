@@ -14,10 +14,9 @@ type MockBlockApi struct {
 }
 
 func (api MockBlockApi) AddBlockToPool(block blockchain.Block) error {
-	return api.AddBlockToPoolFunc(block)
+	return nil
 }
-
-func (api MockBlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
+func (api MockBlockApi) CommitBlockFromPoolOrSync(blockId string) error {
 	return nil
 }
 

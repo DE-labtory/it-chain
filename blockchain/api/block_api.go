@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/pkg/errors"
 )
 
@@ -71,7 +72,7 @@ func (bApi *BlockApi) commitBlockOrSyncByHeightDifference(diff uint64, block blo
 
 func (bApi *BlockApi) SyncIsProgressing() blockchain.ProgressState {
 	syncState := blockchain.NewBlockSyncState()
-	bApi.eventRepository.Load(syncState, blockchain.BC_SYNC_STATE_AID)
+	eventstore.Load(syncState, blockchain.BC_SYNC_STATE_AID)
 	return syncState.IsProgressing()
 }
 
