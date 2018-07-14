@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"time"
+
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
@@ -13,10 +15,11 @@ type Version struct {
 }
 
 type ID = string
-type Status = int
+type MetaStatus = int
 
 const (
-	UNDEPLOYED = iota
+	READY = iota
+	UNDEPLOYED
 	DEPLOYED
 	DEPLOY_FAIL
 )
@@ -28,7 +31,7 @@ type Meta struct {
 	Path           string
 	CommitHash     string
 	Version        Version
-	Status         Status
+	Status         MetaStatus
 }
 
 func NewMeta(repositoryName string, gitUrl string, path string, commitHash string) *Meta {
@@ -57,6 +60,17 @@ func DeleteMeta(metaId ID) error {
 	})
 }
 
+func ChangeMetaStatus(metaId ID, status MetaStatus) error {
+	return eventstore.Save(metaId, MetaStatusChangeEvent{
+		EventModel: midgard.EventModel{
+			ID:   metaId,
+			Type: "meta.statusChange",
+			Time: time.Now(),
+		},
+		Status: DEPLOYED,
+	})
+}
+
 func (m Meta) GetID() string {
 	return m.ICodeID
 }
@@ -70,14 +84,11 @@ func (m *Meta) On(event midgard.Event) error {
 		m.GitUrl = v.GitUrl
 		m.ICodeID = v.ID
 		m.RepositoryName = v.RepositoryName
+		m.Status = READY
 	case *MetaDeletedEvent:
-		m.ICodeID = ""
-		m.RepositoryName = ""
-		m.GitUrl = ""
-		m.Path = ""
-		m.CommitHash = ""
-		m.Version = Version{}
 		m.Status = UNDEPLOYED
+	case *MetaStatusChangeEvent:
+		m.Status = v.Status
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
 	}

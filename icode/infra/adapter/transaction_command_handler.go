@@ -6,6 +6,9 @@ type CommandHandler struct {
 	iCodeApi api.ICodeApi
 }
 
-func NewCommandHandler(codeApi api.ICodeApi) *CommandHandler {
+func NewCommandHandler(icodeApi api.ICodeApi) *CommandHandler {
 
+	return &CommandHandler{
+		iCodeApi: icodeApi,
+	}
 }

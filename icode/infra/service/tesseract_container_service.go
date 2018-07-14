@@ -15,17 +15,14 @@ import (
 
 type TesseractContainerService struct {
 	tesseract      *tesseract.Tesseract
-	repository     icode.ReadOnlyMetaRepository
 	containerIdMap map[icode.ID]string // key : iCodeId, value : containerId
 }
 
-func NewTesseractContainerService(config tesseract.Config, repository icode.ReadOnlyMetaRepository) *TesseractContainerService {
+func NewTesseractContainerService(config tesseract.Config) *TesseractContainerService {
 	tesseractObj := &TesseractContainerService{
 		tesseract:      tesseract.New(config),
-		repository:     repository,
 		containerIdMap: make(map[icode.ID]string, 0),
 	}
-	tesseractObj.InitContainers()
 	return tesseractObj
 }
 
@@ -36,9 +33,11 @@ func (cs TesseractContainerService) StartContainer(meta icode.Meta) error {
 	}
 	containerId, err := cs.tesseract.SetupContainer(tesseractIcodeInfo)
 	if err != nil {
+		icode.ChangeMetaStatus(meta.GetID(), icode.DEPLOY_FAIL)
 		return err
 	}
 	cs.containerIdMap[meta.ICodeID] = containerId
+	icode.ChangeMetaStatus(meta.GetID(), icode.DEPLOYED)
 	return nil
 }
 
@@ -106,16 +105,4 @@ func (cs TesseractContainerService) StopContainer(id icode.ID) error {
 		},
 	}
 	return eventstore.Save(id, deletedEvent)
-}
-
-// start containers in repos
-func (cs *TesseractContainerService) InitContainers() error {
-	metas, err := cs.repository.FindAll()
-	if err != nil {
-		return err
-	}
-	for _, meta := range metas {
-		cs.StartContainer(*meta)
-	}
-	return nil
 }

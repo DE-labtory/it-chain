@@ -16,3 +16,8 @@ type MetaCreatedEvent struct {
 type MetaDeletedEvent struct {
 	midgard.EventModel
 }
+
+type MetaStatusChangeEvent struct {
+	midgard.EventModel
+	Status MetaStatus
+}

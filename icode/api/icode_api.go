@@ -1,8 +1,6 @@
 package api
 
 import (
-	"errors"
-
 	"fmt"
 
 	"github.com/it-chain/it-chain-Engine/icode"
@@ -11,29 +9,28 @@ import (
 type ICodeApi struct {
 	ContainerService icode.ContainerService
 	StoreApi         ICodeStoreApi
-	MetaRepository   icode.ReadOnlyMetaRepository
 }
 
-func NewIcodeApi(containerService icode.ContainerService, storeApi ICodeStoreApi, repository icode.ReadOnlyMetaRepository) *ICodeApi {
+func NewIcodeApi(containerService icode.ContainerService, storeApi ICodeStoreApi) *ICodeApi {
 	return &ICodeApi{
 		ContainerService: containerService,
 		StoreApi:         storeApi,
-		MetaRepository:   repository,
 	}
 }
 
 func (iApi ICodeApi) Deploy(baseSaveUrl string, gitUrl string) (*icode.Meta, error) {
 	// check for already in repository
-	meta, err := iApi.MetaRepository.FindByGitURL(gitUrl)
+	/*meta, err := iApi.MetaRepository.FindByGitURL(gitUrl)
 	if meta.ICodeID != "" {
 		return nil, errors.New("already deployed")
 	}
 	if err != nil {
 		return nil, err
 	}
+	*/
 
 	// clone meta. in clone function, metaCreatedEvent will publish
-	meta, err = iApi.StoreApi.Clone(baseSaveUrl, gitUrl)
+	meta, err := iApi.StoreApi.Clone(baseSaveUrl, gitUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -62,29 +59,28 @@ func (iApi ICodeApi) UnDeploy(id icode.ID) error {
 }
 
 //todo need asnyc process
-func (iApi ICodeApi) Invoke(txs []icode.Transaction) []icode.Result {
-	resultData := make([]icode.Result, 0)
-	for _, tx := range txs {
-		result, err := iApi.ContainerService.ExecuteTransaction(tx)
-		if err != nil {
-			fmt.Println(fmt.Sprintf("error in invoke tx, err : %s", err.Error()))
-			result = &icode.Result{
-				TxId:    tx.TxId,
-				Data:    nil,
-				Success: false,
-			}
+func (iApi ICodeApi) Invoke(tx icode.Transaction) *icode.Result {
+	result, err := iApi.ContainerService.ExecuteTransaction(tx)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("error in invoke tx, err : %s", err.Error()))
+		result = &icode.Result{
+			TxId:    tx.TxId,
+			Data:    nil,
+			Success: false,
 		}
-		resultData = append(resultData, *result)
 	}
-	return resultData
+	return result
 }
 
-func (iApi ICodeApi) Query(tx icode.Transaction) (*icode.Result, error) {
+func (iApi ICodeApi) Query(tx icode.Transaction) *icode.Result {
 	result, err := iApi.ContainerService.ExecuteTransaction(tx)
-
 	if err != nil {
-		return nil, err
+		fmt.Println(fmt.Sprintf("error in invoke tx, err : %s", err.Error()))
+		result = &icode.Result{
+			TxId:    tx.TxId,
+			Data:    nil,
+			Success: false,
+		}
 	}
-
-	return result, nil
+	return result
 }

@@ -1,6 +1,8 @@
 package icode
 
-import "github.com/it-chain/midgard"
+import (
+	"github.com/it-chain/midgard"
+)
 
 type TransactionExecuteCommand struct {
 	midgard.CommandModel
@@ -13,4 +15,14 @@ type DeployCommand struct {
 }
 type UnDeployCommand struct {
 	midgard.CommandModel
+}
+
+type BlockExecuteCommand struct {
+	midgard.CommandModel
+	Block []byte
+}
+
+type BlockResultCommand struct {
+	midgard.CommandModel
+	TxResults []Result
 }

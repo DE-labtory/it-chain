@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/it-chain-Engine/icode"
 	"github.com/it-chain/it-chain-Engine/icode/api"
 )
@@ -19,7 +20,8 @@ func NewDeployCommandHandler(icodeApi api.ICodeApi) *DeployCommandHandler {
 }
 
 func (d *DeployCommandHandler) HandleDeployCommand(command icode.DeployCommand) {
-	err := d.icodeApi.Deploy(command.Url)
+
+	_, err := d.icodeApi.Deploy(conf.GetConfiguration().Icode.ICodeSavePath, command.Url)
 	if err != nil {
 		log.Println(fmt.Sprintf("error in handle deploy command %s", err.Error()))
 	}

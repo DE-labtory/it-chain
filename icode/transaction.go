@@ -2,22 +2,26 @@ package icode
 
 import "time"
 
-type TransactionId = string
-
-type Transaction struct {
-	TxId          TransactionId
-	PublishPeerId string
-	TxHash        string
-	TimeStamp     time.Time
-	TxData        TxData
-}
+const (
+	Ready = iota
+	ExcuteSuccess
+	ExcuteFail
+)
 
 const (
 	Invoke TxDataType = "invoke"
 	Query  TxDataType = "query"
 )
 
+type TransactionId = string
+type TxStatus = int
 type TxDataType = string
+
+type Transaction struct {
+	TxId      TransactionId
+	TimeStamp time.Time
+	TxData    TxData
+}
 
 type TxData struct {
 	Jsonrpc string
