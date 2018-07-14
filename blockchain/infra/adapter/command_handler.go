@@ -10,7 +10,7 @@ import (
 var ErrBlockNil = errors.New("Block nil error")
 
 type BlockApi interface {
-	AddBlockToPool(block blockchain.Block) error
+	StageBlock(block blockchain.Block) error
 	CommitBlockFromPoolOrSync(blockId string) error
 }
 
@@ -55,7 +55,7 @@ func (h *CommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlo
 		return ErrBlockNil
 	}
 
-	h.blockApi.AddBlockToPool(block)
+	h.blockApi.StageBlock(block)
 
 	return nil
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/magiconair/properties/assert"
 )
 
-func TestBlockApi_AddBlockToPool(t *testing.T) {
+func TestBlockApi_StageBlock(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			block blockchain.Block
@@ -32,7 +32,7 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		blockApi.AddBlockToPool(test.input.block)
+		blockApi.StageBlock(test.input.block)
 	}
 }
 
