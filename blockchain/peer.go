@@ -10,7 +10,7 @@ func (peerId PeerId) ToString() string {
 
 type Peer struct {
 	IpAddress string
-	PeerId PeerId
+	PeerId    PeerId
 }
 
 type PeerRepository interface {

@@ -154,14 +154,6 @@ func (block *DefaultBlock) IsPrev(serializedPrevBlock []byte) bool {
 	return bytes.Compare(prevBlock.GetSeal(), block.GetPrevSeal()) == 0
 }
 
-// interface of api gateway query api
-type BlockQueryApi interface {
-	GetBlockByHeight(blockHeight uint64) (Block, error)
-	GetBlockBySeal(seal []byte) (Block, error)
-	GetBlockByTxID(txid string) (Block, error)
-	GetLastBlock() (Block, error)
-}
-
 func CommitBlock(block Block) error {
 	event, err := createBlockCommittedEvent(block)
 	if err != nil {
@@ -179,5 +171,30 @@ func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
 			ID: seal,
 		},
 		State: Committed,
+	}, nil
+}
+
+func StageBlock(block Block) error {
+	event, err := createBlockStagedEvent(block)
+	if err != nil {
+		return err
+	}
+
+	blockId := string(block.GetSeal())
+
+	err = eventstore.Save(blockId, event)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createBlockStagedEvent(block Block) (BlockStagedEvent, error) {
+	return BlockStagedEvent{
+		EventModel: midgard.EventModel{
+			ID: string(block.GetSeal()),
+		},
+		State: Staged,
 	}, nil
 }

@@ -5,8 +5,7 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-
-type MockEventListenerBlockApi struct {}
+type MockEventListenerBlockApi struct{}
 
 func (api MockEventListenerBlockApi) AddBlockToPool(block blockchain.Block) error {
 	return nil

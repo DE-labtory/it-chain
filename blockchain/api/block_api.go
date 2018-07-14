@@ -35,7 +35,7 @@ func (bApi *BlockApi) AddBlockToPool(block blockchain.Block) error {
 		return ErrNilBlock
 	}
 
-	err := blockchain.SaveBlockStagedEventToEventStore(block)
+	err := blockchain.StageBlock(block)
 	if err != nil {
 		return err
 	}
@@ -76,12 +76,6 @@ func (bApi *BlockApi) SyncIsProgressing() blockchain.ProgressState {
 	syncState := blockchain.NewBlockSyncState()
 	bApi.eventRepository.Load(syncState, blockchain.BC_SYNC_STATE_AID)
 	return syncState.IsProgressing()
-}
-
-func (bApi *BlockApi) loadBlockPool() blockchain.BlockPool {
-	pool := blockchain.NewBlockPool()
-	bApi.eventRepository.Load(pool, blockchain.BLOCK_POOL_AID)
-	return pool
 }
 
 func (bApi *BlockApi) CompareLastBlockHeightWith(targetBlock blockchain.Block) (uint64, error) {
