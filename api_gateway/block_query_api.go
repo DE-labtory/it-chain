@@ -20,6 +20,10 @@ func (b BlockQueryApi) GetLastCommitedBlock() (blockchain.Block, error) {
 	return b.commitedBlockRepository.GetLastBlock()
 }
 
+func (b BlockQueryApi) GetCommitedBlockByHeight(height uint64) (blockchain.Block, error) {
+	return b.commitedBlockRepository.GetBlockByHeight(height)
+}
+
 type CreatedBlockRepository interface {
 }
 
@@ -30,4 +34,5 @@ type StagedBlockRepository interface {
 
 type CommitedBlockRepository interface {
 	GetLastBlock() (blockchain.Block, error)
+	GetBlockByHeight(height uint64) (blockchain.Block, error)
 }
