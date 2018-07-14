@@ -76,7 +76,7 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 		blockApi := mock.MockSyncBlockApi{}
 
 		blockRepository := mock.BlockQueryApi{}
-		blockRepository.GetLastBlockFunc = func() (blockchain.Block, error) {
+		blockRepository.GetLastCommitedBlockFunc = func() (blockchain.Block, error) {
 			return &blockchain.DefaultBlock{Height: blockchain.BlockHeight(99887)}, test.input.getLastBlockErr
 		}
 
@@ -211,7 +211,7 @@ func TestGrpcCommandHandler_HandleGrpcCommand_BlockRequestProtocol(t *testing.T)
 		blockApi := mock.MockSyncBlockApi{}
 
 		blockQueryApi := mock.BlockQueryApi{}
-		blockQueryApi.GetBlockByHeightFunc = func(height uint64) (blockchain.Block, error) {
+		blockQueryApi.GetCommitedBlockByHeightFunc = func(height uint64) (blockchain.Block, error) {
 			return &blockchain.DefaultBlock{
 				Height: blockchain.BlockHeight(12),
 			}, test.input.err.ErrGetBlock
