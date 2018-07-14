@@ -19,6 +19,7 @@ import (
 func TestICodeApi_Deploy(t *testing.T) {
 	//set data
 	baseSaveUrl := "./.tmp"
+	sshPath := ""
 	baseSaveUrl, err := filepath.Abs(baseSaveUrl)
 	assert.NoError(t, err)
 	GOPATH := os.Getenv("GOPATH")
@@ -33,7 +34,7 @@ func TestICodeApi_Deploy(t *testing.T) {
 	storeApi, err := api2.NewICodeGitStoreApi(backupGitId, backupGitPw)
 	assert.NoError(t, err, "err in newIcodeGitStoreApi")
 	icodeApi := api.NewIcodeApi(containerService, storeApi)
-	_, err = icodeApi.Deploy(baseSaveUrl, icodeGitUrl)
+	_, err = icodeApi.Deploy("1", baseSaveUrl, icodeGitUrl, sshPath)
 	assert.NoError(t, err, "err in deploy")
 }
 
@@ -41,6 +42,7 @@ func TestICodeApi_UnDeploy(t *testing.T) {
 	//set data
 	baseSaveUrl := "./.tmp"
 	baseSaveUrl, err := filepath.Abs(baseSaveUrl)
+	sshPath := ""
 	assert.NoError(t, err)
 	GOPATH := os.Getenv("GOPATH")
 	icodeGitUrl := "git@github.com:hea9549/test_icode"
@@ -59,7 +61,7 @@ func TestICodeApi_UnDeploy(t *testing.T) {
 	storeApi, err := api2.NewICodeGitStoreApi(backupGitId, backupGitPw)
 	assert.NoError(t, err, "err in newIcodeGitStoreApi")
 	icodeApi := api.NewIcodeApi(containerService, storeApi)
-	meta, err := icodeApi.Deploy(baseSaveUrl, icodeGitUrl)
+	meta, err := icodeApi.Deploy("1", baseSaveUrl, icodeGitUrl, sshPath)
 	assert.NoError(t, err, "err in deploy")
 	mockMeta = meta
 	err = icodeApi.UnDeploy(mockMeta.ICodeID)
@@ -70,6 +72,7 @@ func TestICodeApi_UnDeploy(t *testing.T) {
 func TestICodeApi_Invoke(t *testing.T) {
 	baseSaveUrl := "./.tmp"
 	baseSaveUrl, err := filepath.Abs(baseSaveUrl)
+	sshPath := ""
 	assert.NoError(t, err)
 	GOPATH := os.Getenv("GOPATH")
 	icodeGitUrl := "git@github.com:hea9549/test_icode"
@@ -116,7 +119,7 @@ func TestICodeApi_Invoke(t *testing.T) {
 	icodeApi := api.NewIcodeApi(containerService, storeApi)
 
 	// deploy 시도
-	meta, err := icodeApi.Deploy(baseSaveUrl, icodeGitUrl)
+	meta, err := icodeApi.Deploy("1", baseSaveUrl, icodeGitUrl, sshPath)
 	assert.NoError(t, err, "err in deploy")
 
 	// icode 정보 주입
