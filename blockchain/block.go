@@ -6,17 +6,12 @@ import (
 
 	"bytes"
 
-	"errors"
-
 	ygg "github.com/it-chain/yggdrasill/common"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
-	"log"
-	"github.com/it-chain/it-chain-Engine/common"
-)
 
-var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
-var ErrTransactionType = errors.New("Wrong transaction type")
+	"log"
+)
 
 type Block = ygg.Block
 
@@ -49,7 +44,6 @@ func (block *DefaultBlock) SetHeight(height uint64) {
 
 // TODO: Write test case
 func (block *DefaultBlock) PutTx(transaction Transaction) error {
-
 	if block.TxList == nil {
 		block.TxList = make([]Transaction, 0)
 	}
@@ -57,8 +51,6 @@ func (block *DefaultBlock) PutTx(transaction Transaction) error {
 	block.TxList = append(block.TxList, transaction)
 
 	return nil
-
-	return ErrTransactionType
 }
 
 // TODO: Write test case
@@ -151,39 +143,13 @@ func (block *DefaultBlock) IsPrev(serializedPrevBlock []byte) bool {
 	return bytes.Compare(prevBlock.GetSeal(), block.GetPrevSeal()) == 0
 }
 
-// This is from #279 @junk-sound
-func deserializeTxList(txList []byte) ([]Transaction, error) {
-	DefaultTxList := []*DefaultTransaction{}
-
-	err := common.Deserialize(txList, &DefaultTxList)
-
-	if err != nil {
-		return nil, err
-	}
-	TxList := convertTxType(DefaultTxList)
-
-	return TxList, nil
-}
-
-func convertTxType(txList []*DefaultTransaction) []Transaction {
-	convTxList := make([]Transaction, 0)
-
-	for _, tx := range txList {
-		convTxList = append(convTxList, tx)
-	}
-
-	return convTxList
-}
-
 // interface of api gateway query api
 type BlockQueryApi interface {
 	GetBlockByHeight(blockHeight uint64) (Block, error)
 	GetBlockBySeal(seal []byte) (Block, error)
 	GetBlockByTxID(txid string) (Block, error)
 	GetLastBlock() (Block, error)
-	GetTransactionByTxID(txid string) (Transaction, error)
 }
-
 
 type Action interface {
 	DoAction(block Block) error
@@ -200,18 +166,46 @@ func CreateSaveOrSyncAction(checkResult int64) Action {
 	}
 }
 
-type SyncAction struct {}
+type SyncAction struct{}
 
 func NewSyncAction() *SyncAction {
 	return &SyncAction{}
 }
+func (block *DefaultBlock) On(event midgard.Event) error {
 
+	switch v := event.(type) {
+
+	case *BlockCreatedEvent:
+		TxList, err := deserializeTxList(v.TxList)
+
+		if err != nil {
+			return ErrDeserializingTxList
+		}
+
+		block.Seal = v.Seal
+		block.PrevSeal = v.PrevSeal
+		block.Height = v.Height
+		block.TxList = TxList
+		block.TxSeal = v.TxSeal
+		block.Timestamp = v.Timestamp
+		block.Creator = v.Creator
+
+	default:
+		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
+	}
+
+	return nil
+}
+
+func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock {
+	block := &DefaultBlock{}
+	return block
+}
 
 func (syncAction *SyncAction) DoAction(block Block) error {
 	// TODO: Start synchronize
 	return nil
 }
-
 
 type SaveAction struct {
 	blockPool BlockPool
@@ -242,9 +236,9 @@ func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
 	}, nil
 }
 
-type DefaultAction struct {}
+type DefaultAction struct{}
 
-func NewDefaultAction() *DefaultAction{
+func NewDefaultAction() *DefaultAction {
 	return &DefaultAction{}
 }
 

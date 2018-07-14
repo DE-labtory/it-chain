@@ -75,7 +75,7 @@ func createBlockAddToPoolEvent(block Block) (BlockAddToPoolEvent, error) {
 	}, nil
 }
 
-var ErrTxListMarshal = errors.New("tx list marshal failed")
+
 
 func createBlockRemoveFromPoolEvent(block Block) BlockRemoveFromPoolEvent {
 	return BlockRemoveFromPoolEvent{
@@ -125,8 +125,6 @@ func createBlockFromAddToPoolEvent(event *BlockAddToPoolEvent) (Block, error) {
 		Creator: event.Creator,
 	}, nil
 }
-
-var ErrTxListUnmarshal = errors.New("tx list unmarshal failed")
 
 
 // BlockSyncState Aggregate ID
