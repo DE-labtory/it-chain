@@ -12,8 +12,6 @@ import (
 
 	"os"
 
-	"log"
-
 	"github.com/google/go-github/github"
 	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/it-chain-Engine/icode"
@@ -29,7 +27,6 @@ type ICodeGitStoreApi struct {
 	authUserID  string
 	authUserPW  string
 	name        string
-	sshAuth     *ssh.PublicKeys
 }
 
 func NewICodeGitStoreApi(authUserID string, authUserPW string) (*ICodeGitStoreApi, error) {
@@ -54,10 +51,6 @@ func NewICodeGitStoreApi(authUserID string, authUserPW string) (*ICodeGitStoreAp
 		confSshPath = currentUser.HomeDir + "/.ssh/id_rsa"
 
 	}
-	sshAuth, err := ssh.NewPublicKeysFromFile("git", confSshPath, "")
-	if err != nil {
-		return nil, err
-	}
 
 	return &ICodeGitStoreApi{
 		AuthClient:  client,
@@ -65,11 +58,10 @@ func NewICodeGitStoreApi(authUserID string, authUserPW string) (*ICodeGitStoreAp
 		authUserID:  authUserID,
 		authUserPW:  authUserPW,
 		name:        gitUser.GetLogin(),
-		sshAuth:     sshAuth,
 	}, nil
 }
 
-func (gApi *ICodeGitStoreApi) Clone(baseSavePath string, repositoryUrl string) (*icode.Meta, error) {
+func (gApi *ICodeGitStoreApi) Clone(baseSavePath string, repositoryUrl string, sshPath string) (*icode.Meta, error) {
 	name := getNameFromGitUrl(repositoryUrl)
 
 	if name == "" {
@@ -85,9 +77,14 @@ func (gApi *ICodeGitStoreApi) Clone(baseSavePath string, repositoryUrl string) (
 		}
 	}
 
+	sshAuth, err := ssh.NewPublicKeysFromFile("git", sshPath, "")
+	if err != nil {
+		return nil, err
+	}
+
 	r, err := git.PlainClone(baseSavePath+"/"+name, false, &git.CloneOptions{
 		URL:               repositoryUrl,
-		Auth:              gApi.sshAuth,
+		Auth:              sshAuth,
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 	})
 
@@ -109,8 +106,6 @@ func (gApi *ICodeGitStoreApi) Clone(baseSavePath string, repositoryUrl string) (
 	}
 
 	metaData := icode.NewMeta(name, repositoryUrl, baseSavePath+"/"+name, commitHash)
-	log.Println("meta created")
-	log.Println(*metaData)
 	return metaData, nil
 }
 

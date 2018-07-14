@@ -11,7 +11,8 @@ type TransactionExecuteCommand struct {
 
 type DeployCommand struct {
 	midgard.CommandModel
-	Url string
+	Url     string
+	SshPath string
 }
 type UnDeployCommand struct {
 	midgard.CommandModel
