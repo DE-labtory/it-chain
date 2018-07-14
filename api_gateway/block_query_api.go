@@ -58,5 +58,10 @@ func (bpr *BlockPoolRepositoryImpl) GetStagedBlockByHeight(blockHeight uint64) (
 	return nil, ErrNoStagedBlock
 }
 func (bpr *BlockPoolRepositoryImpl) GetStagedBlockById(blockId string) (blockchain.Block, error) {
-
+	for _, block := range bpr.Blocks {
+		if string(block.GetSeal()) == blockId {
+			return block, nil
+		}
+	}
+	return nil, ErrNoStagedBlock
 }
