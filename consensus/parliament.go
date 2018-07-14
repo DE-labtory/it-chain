@@ -5,8 +5,47 @@ import (
 	"fmt"
 
 	"github.com/it-chain/midgard"
-	"sync"
 )
+
+type LeaderId struct {
+	Id string
+}
+
+func (lid LeaderId) ToString() string {
+	return string(lid.Id)
+}
+
+type Leader struct {
+	LeaderId LeaderId
+}
+
+func (l *Leader) StringLeaderId() string {
+	return l.LeaderId.ToString()
+}
+
+func (l Leader) GetID() string {
+	return l.StringLeaderId()
+}
+
+type MemberId struct {
+	Id string
+}
+
+func (mid MemberId) ToString() string {
+	return string(mid.Id)
+}
+
+type Member struct {
+	MemberId MemberId
+}
+
+func (m *Member) StringMemberId() string {
+	return m.MemberId.ToString()
+}
+
+func (m Member) GetID() string {
+	return m.StringMemberId()
+}
 
 type ParliamentId string
 
@@ -65,7 +104,7 @@ func (p *Parliament) ChangeLeader(leader *Leader) (*LeaderChangedEvent, error) {
 		EventModel: midgard.EventModel{
 			ID: p.GetID(),
 		},
-		LeaderId: leader.LeaderId,
+		LeaderId: leader.GetID(),
 	}
 
 	p.On(&leaderChangedEvent)
@@ -78,21 +117,21 @@ func (p *Parliament) AddMember(member *Member) (*MemberJoinedEvent, error) {
 		return nil, errors.New("Member is nil")
 	}
 
-	if member.GetId() == "" {
-		return nil, errors.New(fmt.Sprintf("Need Valid PeerID [%s]", member.GetId()))
+	if member.GetID() == "" {
+		return nil, errors.New(fmt.Sprintf("Need Valid PeerID [%s]", member.GetID()))
 	}
 
-	index := p.findIndexOfMember(member.GetId())
+	index := p.findIndexOfMember(member.GetID())
 
 	if index != -1 {
-		return nil, errors.New(fmt.Sprintf("Already exist member [%s]", member.GetId()))
+		return nil, errors.New(fmt.Sprintf("Already exist member [%s]", member.GetID()))
 	}
 
 	memberJoinedEvent := MemberJoinedEvent{
 		EventModel: midgard.EventModel{
-			ID: member.GetId(),
+			ID: p.GetID(),
 		},
-		MemberId: member.MemberId,
+		MemberId: member.GetID(),
 	}
 
 	p.On(&memberJoinedEvent)
@@ -109,9 +148,9 @@ func (p *Parliament) RemoveMember(memberID MemberId) (*MemberRemovedEvent, error
 
 	memberRemovedEvent := MemberRemovedEvent{
 		EventModel: midgard.EventModel{
-			ID: memberID.ToString(),
+			ID: p.GetID(),
 		},
-		MemberId: memberID,
+		MemberId: memberID.ToString(),
 	}
 
 	p.On(&memberRemovedEvent)
@@ -121,7 +160,7 @@ func (p *Parliament) RemoveMember(memberID MemberId) (*MemberRemovedEvent, error
 
 func (p *Parliament) ValidateRepresentative(representatives []*Representative) bool {
 	for _, representatives := range representatives {
-		index := p.findIndexOfMember(representatives.GetIdString())
+		index := p.findIndexOfMember(representatives.GetID())
 
 		if index == -1 {
 			return false
@@ -155,13 +194,17 @@ func (p *Parliament) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *LeaderChangedEvent:
-		p.Leader = &Leader{LeaderId:v.LeaderId}
+		p.Leader = &Leader{
+			LeaderId: LeaderId{v.LeaderId},
+		}
 
 	case *MemberJoinedEvent:
-		p.Members = append(p.Members, &Member{MemberId: v.MemberId})
+		p.Members = append(p.Members, &Member{
+			MemberId: MemberId{v.MemberId},
+		})
 
 	case *MemberRemovedEvent:
-		index := p.findIndexOfMember(v.MemberId.ToString())
+		index := p.findIndexOfMember(v.MemberId)
 
 		if index != -1 {
 			p.Members = append(p.Members[:index], p.Members[index+1:]...)
@@ -172,32 +215,4 @@ func (p *Parliament) On(event midgard.Event) error {
 	}
 
 	return nil
-}
-
-type ParliamentRepository interface {
-	GetParliament() *Parliament
-	SetParliament(parliament Parliament)
-}
-
-type ParliamentRepositoryImpl struct {
-	lock       *sync.RWMutex
-	parliament Parliament
-}
-
-func NewParliamentRepository() ParliamentRepository {
-	return &ParliamentRepositoryImpl{
-		lock:       &sync.RWMutex{},
-		parliament: NewParliament(),
-	}
-}
-
-func (pr *ParliamentRepositoryImpl) GetParliament() *Parliament {
-	return &pr.parliament
-}
-
-func (pr *ParliamentRepositoryImpl) SetParliament(parliament Parliament) {
-	pr.lock.Lock()
-	defer pr.lock.Unlock()
-
-	pr.parliament = parliament
 }

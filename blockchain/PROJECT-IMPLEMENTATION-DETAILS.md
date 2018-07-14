@@ -86,3 +86,69 @@ Block's metadata is saved in leveldb or other key-value database. Block body is 
 ### Author
 
 [@emperorhan](https://github.com/emperorhan)
+
+
+
+## Synchronizing Blockchain
+
+Synchronizing takes three steps: Check, Construct, PostConstruct
+
+### Check
+
+![blockchain-blocksync-seq](../doc/images/blockchain-blocksync-check-implementation-seq.PNG)
+
+In Check step, node takes length of blockchain and last seal from arbitrary node in the network then compare with its own last block's height and seal. if both are same then synchronizing process is done, otherwise proceed to next step: Construct.
+
+### Construct, PostConstruct
+
+![blockchain-blocksync-seq](../doc/images/blockchain-blocksync-construct-implementation-seq.PNG)
+
+In Construct step, we send grpc message that request block to the node which was chosen in Check step (now let call this node as 'Target Node' for just convenience) and with `BlockResponseProtocol` we can receive block that we request. From `AddBlock` we validate that block is right block to add to blockchain. And those process continues until 'last' block of Target Node is added to the blockchain. 'Last' means the height of Target Node's last block we snapped when we start Construct step. In other words, blocks that chained after starting Construct step will not requested to Target Node. Those blocks that were consensused during Synchronizing process will be saved to `BlockPool`. Three procedures: Request, response and add to blockchain are proceed synchronously.
+
+`RequestBlock` worked by using our last block's height. With our last block's height we request next block to Target Node. In the case of node is newbie to network, that node request blocks to Target Node from start to end. Otherwise request blocks from next block of node's last block to the end.
+
+After finishing Construct step, check whether there's next block of synchronizing node's last block which was chained during Construct step. If there's next block, start PostConstruct step. PostConstruct means after finishing construct blockchain with Construct step, add blocks additionally with `BlockPool`'s blocks. After complete PostConstruct step, All of the synchronizing blockchain process completes.
+
+### When synchronizing should proceed?
+
+* When entering node is newbie to network
+* When after node re-connected (this case apply timeout)
+* At PostConstruct step, when the difference of block pool's block height is larger than one then that of last block which was chained during Construct step.
+
+
+### Handle Exception Case
+
+* Those nodes which are proceeding synchronization can't participate in consensus. But consensused blocks are saved to BlockPool. And after completing Construct step, those blocks may added to blockchain.
+    1. **If the difference of block pool's block height is large as one than that of last block which was chained during Construct step**, then validate previous hash and if valid add to blockchain
+    2. **If the difference of block pool's block height is larger than one than that of last block which was chained during Construct step**, then this means that there's node who has block which height is larger than that of last block so select another Target Node then proceed synchronization again until construct block which height is one less than that of block pool's block. If these step done, then continue with 1 or 2 step
+*  Construct step can take some times, we should think about disconnecting with network while Construct step proceeds. There's can be two cases: (1) Synchronizing node can be disconnected with network (2) Target Node can be disconnected with network.
+    1. **If synchronizing node disconnect with network**, then when connect to network, start synchronization again. For example, if node construct from 101th to 10000th blocks, but disconnect  after construct 500th block. Then when this node connect to network start synchronization from 501th block.
+    2. **If Target Node disconnect with network**, this is same as first case, start synchronization again from Check step. Select different Target Node again then construct from node's next block.
+
+### Author
+
+[@zerofruit](https://github.com/zerofruit)
+[@junk-sound](https://github.com/junk-sound)
+
+
+
+
+## ConfirmBlockCommand
+
+`ConfirmBlockCommand` is command which sent with consensused block
+
+### How to handle
+
+In blockchain component, if we receive `ConfirmBlockCommand`, save confirmed block to `BlockPool`. This block is not directly saved to blockchain.
+
+![blockchain-blocksync-seq](../doc/images/blockchain-HandleConfirmBlockCommand-implementation-seq.png)
+
+
+
+## BlockAddToPoolEvent
+
+`BlockAddToPoolEvent` is event which is published as block is added to `BlockPool`. 
+
+### How to handle
+
+![blockchain-blocksync-seq](../doc/images/blockchain-HandleBlockAddToPoolEvent-implementation-seq.png)
