@@ -44,15 +44,14 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	if err != nil {
 		return nil, ErrCreatingEvent
 	}
-
-	//save
-	eventstore.Save(createEvent.GetID(), createEvent)
-
 	//on
 	err = GenesisBlock.On(createEvent)
 	if err != nil {
 		return nil, ErrOnEvent
 	}
+
+	//save
+	eventstore.Save(createEvent.GetID(), createEvent)
 
 	return GenesisBlock, nil
 }

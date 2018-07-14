@@ -48,8 +48,8 @@ func (bss *BlockSyncState) SetProgress(state ProgressState) {
 	} else { // state == DONE
 		event = createSyncDoneEvent()
 	}
-	eventstore.Save(BC_SYNC_STATE_AID, event)
 	bss.On(event)
+	eventstore.Save(BC_SYNC_STATE_AID, event)
 }
 
 func createSyncStartEvent() *SyncStartEvent {

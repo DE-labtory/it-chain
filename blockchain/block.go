@@ -183,6 +183,7 @@ func (block *DefaultBlock) IsPrev(serializedPrevBlock []byte) bool {
 	return bytes.Compare(prevBlock.GetSeal(), block.GetPrevSeal()) == 0
 }
 
+// TODO: Write test case
 func CommitBlock(block Block) error {
 	event, err := createBlockCommittedEvent(block)
 	if err != nil {
@@ -204,6 +205,7 @@ func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
 	}, nil
 }
 
+// TODO: Write test case
 func StageBlock(block Block) error {
 	event, err := createBlockStagedEvent(block)
 	if err != nil {
