@@ -5,41 +5,9 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/api"
-	"github.com/it-chain/midgard"
+	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
 	"github.com/magiconair/properties/assert"
 )
-
-type MockBlockQueryApi struct {
-	GetLastBlockFunc         func() (blockchain.Block, error)
-	GetStagedBlockByIdFunc   func(blockId string) (blockchain.Block, error)
-	GetLastCommitedBlockFunc func() (blockchain.Block, error)
-}
-
-func (br MockBlockQueryApi) GetLastBlock() (blockchain.Block, error) {
-	return br.GetLastBlockFunc()
-}
-func (br MockBlockQueryApi) GetBlockByHeight(blockHeight uint64) (blockchain.Block, error) {
-	return nil, nil
-}
-func (br MockBlockQueryApi) GetStagedBlockByHeight(blockHeight uint64) (blockchain.Block, error) {
-	return nil, nil
-}
-func (br MockBlockQueryApi) GetStagedBlockById(blockId string) (blockchain.Block, error) {
-	return br.GetStagedBlockByIdFunc(blockId)
-}
-func (br MockBlockQueryApi) GetLastCommitedBlock() (blockchain.Block, error) {
-	return br.GetLastCommitedBlockFunc()
-}
-
-type MockEventRepository struct {
-	LoadFunc func(aggregate midgard.Aggregate) error
-}
-
-func (er MockEventRepository) Load(aggregate midgard.Aggregate, aggregateID string) error {
-	return er.LoadFunc(aggregate)
-}
-func (er MockEventRepository) Save(aggregateID string, events ...midgard.Event) error { return nil }
-func (er MockEventRepository) Close()                                                 {}
 
 func TestBlockApi_AddBlockToPool(t *testing.T) {
 	tests := map[string]struct {
@@ -56,7 +24,7 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 		},
 	}
 
-	blockQueryApi := MockBlockQueryApi{}
+	blockQueryApi := mock.BlockQueryApi{}
 	publisherId := "zf"
 
 	blockApi, _ := api.NewBlockApi(blockQueryApi, publisherId)
@@ -85,9 +53,10 @@ func TestBlockApi_CommitBlockFromPoolOrSync(t *testing.T) {
 		},
 	}
 	// When
-	blockQueryApi := MockBlockQueryApi{}
+	blockQueryApi := mock.BlockQueryApi{}
 	blockQueryApi.GetStagedBlockByIdFunc = func(blockId string) (blockchain.Block, error) {
 		assert.Equal(t, "zf", blockId)
+
 		return &blockchain.DefaultBlock{
 			Height: blockchain.BlockHeight(12),
 		}, nil
@@ -111,4 +80,21 @@ func TestBlockApi_CommitBlockFromPoolOrSync(t *testing.T) {
 		// Then
 		assert.Equal(t, test.err, err)
 	}
+}
+
+func TestBlockApi_SyncedCheck(t *testing.T) {
+	// TODO:
+}
+
+func TestBlockApi_SyncIsProgressing(t *testing.T) {
+	// when
+	blockQueryApi := mock.BlockQueryApi{}
+	publisherId := "zf"
+
+	// when
+	blockApi, _ := api.NewBlockApi(blockQueryApi, publisherId)
+
+	// then
+	state := blockApi.SyncIsProgressing()
+	assert.Equal(t, blockchain.DONE, state)
 }

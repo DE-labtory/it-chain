@@ -5,20 +5,10 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
+	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
-
-type MockBlockApi struct {
-	AddBlockToPoolFunc func(block blockchain.Block) error
-}
-
-func (api MockBlockApi) AddBlockToPool(block blockchain.Block) error {
-	return nil
-}
-func (api MockBlockApi) CommitBlockFromPoolOrSync(blockId string) error {
-	return nil
-}
 
 func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 	tests := map[string]struct {
@@ -53,7 +43,7 @@ func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 		},
 	}
 
-	blockApi := MockBlockApi{}
+	blockApi := mock.BlockApi{}
 	blockApi.AddBlockToPoolFunc = func(block blockchain.Block) error {
 		assert.Equal(t, block.GetHeight(), uint64(99887))
 		return nil

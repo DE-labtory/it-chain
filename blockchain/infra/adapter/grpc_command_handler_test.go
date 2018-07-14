@@ -10,44 +10,9 @@ import (
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
 )
-
-type MockSyncBlockApi struct{}
-
-func (ba MockSyncBlockApi) SyncedCheck(block blockchain.Block) error { return nil }
-
-type MockBlockQueryApi struct {
-	GetLastBlockFunc     func() (blockchain.Block, error)
-	GetBlockByHeightFunc func(blockHeight blockchain.BlockHeight) (blockchain.Block, error)
-}
-
-func (br MockBlockQueryApi) GetLastCommitedBlock() (blockchain.Block, error) {
-	return br.GetLastBlockFunc()
-}
-func (br MockBlockQueryApi) GetStagedBlockByHeight(blockHeight uint64) (blockchain.Block, error) {
-	return br.GetBlockByHeightFunc(blockHeight)
-}
-func (br MockBlockQueryApi) GetStagedBlockById(blockId string) (blockchain.Block, error) {
-	return nil, nil
-}
-func (br MockBlockQueryApi) GetBlockByHeight(height blockchain.BlockHeight) (blockchain.Block, error) {
-	return nil, nil
-}
-func (br MockBlockQueryApi) GetLastBlock() (blockchain.Block, error) {
-	return nil, nil
-}
-
-type MockGrpcCommandService struct {
-	SyncCheckResponseFunc func(block blockchain.Block) error
-	ResponseBlockFunc     func(peerId blockchain.PeerId, block blockchain.Block) error
-}
-
-func (cs MockGrpcCommandService) SyncCheckResponse(block blockchain.Block) error {
-	return cs.SyncCheckResponseFunc(block)
-}
-func (cs MockGrpcCommandService) ResponseBlock(peerId blockchain.PeerId, block blockchain.Block) error {
-	return cs.ResponseBlockFunc(peerId, block)
-}
 
 // TODO:
 func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testing.T) {
@@ -108,14 +73,14 @@ func TestGrpcCommandHandler_HandleGrpcCommand_SyncCheckRequestProtocol(t *testin
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		blockApi := MockSyncBlockApi{}
+		blockApi := mock.MockSyncBlockApi{}
 
-		blockRepository := MockBlockQueryApi{}
+		blockRepository := mock.BlockQueryApi{}
 		blockRepository.GetLastBlockFunc = func() (blockchain.Block, error) {
 			return &blockchain.DefaultBlock{Height: blockchain.BlockHeight(99887)}, test.input.getLastBlockErr
 		}
 
-		grpcCommandService := MockGrpcCommandService{}
+		grpcCommandService := mock.SyncCheckGrpcCommandService{}
 		grpcCommandService.SyncCheckResponseFunc = func(block blockchain.Block) error {
 			fmt.Println(block)
 			assert.Equal(t, block.GetHeight(), uint64(99887))
@@ -243,16 +208,16 @@ func TestGrpcCommandHandler_HandleGrpcCommand_BlockRequestProtocol(t *testing.T)
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		blockApi := MockSyncBlockApi{}
+		blockApi := mock.MockSyncBlockApi{}
 
-		blockQueryApi := MockBlockQueryApi{}
+		blockQueryApi := mock.BlockQueryApi{}
 		blockQueryApi.GetBlockByHeightFunc = func(height uint64) (blockchain.Block, error) {
 			return &blockchain.DefaultBlock{
 				Height: blockchain.BlockHeight(12),
 			}, test.input.err.ErrGetBlock
 		}
 
-		grpcCommandService := MockGrpcCommandService{}
+		grpcCommandService := mock.SyncCheckGrpcCommandService{}
 		grpcCommandService.ResponseBlockFunc = func(peerId blockchain.PeerId, block blockchain.Block) error {
 			return test.input.err.ErrResponseBlock
 		}

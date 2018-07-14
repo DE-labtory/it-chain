@@ -3,12 +3,7 @@ package api
 import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
-	"github.com/pkg/errors"
 )
-
-var ErrNilBlock = errors.New("block is nil")
-var ErrSyncProcessing = errors.New("Sync is in progress")
-var ErrGetLastBlock = errors.New("failed get last block")
 
 type BlockApi struct {
 	blockQueryApi blockchain.BlockQueryApi
@@ -81,6 +76,5 @@ func (bApi *BlockApi) CompareLastBlockHeightWith(targetBlock blockchain.Block) (
 	if err != nil {
 		return 0, ErrGetLastBlock
 	}
-
 	return targetBlock.GetHeight() - lastBlock.GetHeight(), nil
 }
