@@ -9,13 +9,11 @@ import (
 
 var ErrNoEventID = errors.New("no event id ")
 
-//////////////Event Handler
-
-type EventHandler struct {
+type BlockCommittedEventHandler struct {
 	transactionApi api.TransactionApi
 }
 
-func (e EventHandler) HandleBlockCommittedEvent(event txpool.BlockCommittedEvent) error {
+func (e BlockCommittedEventHandler) HandleBlockCommittedEvent(event txpool.BlockCommittedEvent) error {
 
 	txs := event.Transactions
 

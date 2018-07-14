@@ -1,11 +1,6 @@
 package txpool
 
-import (
-	"errors"
-)
-
 type TxpoolQueryService interface {
-	GetLeader() Leader
 	GetAllTransactions() ([]Transaction, error)
 }
 
@@ -17,35 +12,47 @@ type BlockService interface {
 	ProposeBlock(transactions []Transaction) error
 }
 
-type TxTransferService struct {
+type BlockProposalService struct {
 	txpoolQueryService TxpoolQueryService
-	transferService    TransferService
+	blockService       BlockService
+	publisher          Publisher
 }
 
-func NewTxPeriodicTransferService(queryService TxpoolQueryService, transferService TransferService) *TxTransferService {
+type Publisher func(exchange string, topic string, data interface{}) (err error)
 
-	return &TxTransferService{
+func NewBlockProposalService(queryService TxpoolQueryService, blockService BlockService, publisher Publisher) *BlockProposalService {
+
+	return &BlockProposalService{
+		publisher:          publisher,
 		txpoolQueryService: queryService,
-		transferService:    transferService,
+		blockService:       blockService,
 	}
 }
 
-func (t TxTransferService) TransferCreatedTxToLeader() error {
+func (b BlockProposalService) ProposeBlock() error {
 
-	//todo timeStamp check
-	transactions, err := t.txpoolQueryService.GetAllTransactions()
+	// todo transaction size, number of tx
+	transactions, err := b.txpoolQueryService.GetAllTransactions()
 
 	if err != nil {
 		return err
 	}
 
-	leader := t.txpoolQueryService.GetLeader()
+	// todo filter txs based on time stamp
+	//filterdTxs := filter(transactions, func(transaction Transaction) bool {
+	//
+	//	return
+	//})
 
-	if leader.LeaderId.ToString() == "" {
-		return errors.New("there is no leader")
+	return b.blockService.ProposeBlock(transactions)
+}
+
+func filter(vs []Transaction, f func(Transaction) bool) []Transaction {
+	vsf := make([]Transaction, 0)
+	for _, v := range vs {
+		if f(v) {
+			vsf = append(vsf, v)
+		}
 	}
-
-	err = t.transferService.SendTransactionsToLeader(transactions, leader)
-
-	return nil
+	return vsf
 }
