@@ -54,13 +54,19 @@ func (pId ParliamentId) ToString() string {
 }
 
 type Parliament struct {
+	midgard.AggregateModel
 	ParliamentId ParliamentId
 	Leader       *Leader
 	Members      []*Member
 }
 
-func NewParliament() Parliament {
-	return Parliament{
+var PARLIAMENT_AID = "PARLIAMENT_AID"
+
+func NewParliament() *Parliament {
+	return &Parliament{
+		AggregateModel: midgard.AggregateModel{
+			ID: PARLIAMENT_AID,
+		},
 		ParliamentId: ParliamentId("0"),
 		Members:      make([]*Member, 0),
 		Leader:       nil,

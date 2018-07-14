@@ -1,6 +1,9 @@
 package consensus
 
-import "github.com/rs/xid"
+import (
+	"github.com/it-chain/midgard"
+	"github.com/rs/xid"
+)
 
 func CreateConsensus(parliament Parliament, block ProposedBlock) (*Consensus, error) {
 	representatives, err := Elect(parliament)
@@ -9,6 +12,9 @@ func CreateConsensus(parliament Parliament, block ProposedBlock) (*Consensus, er
 	}
 
 	return &Consensus{
+		AggregateModel: midgard.AggregateModel{
+			ID: CONSENSUS_AID,
+		},
 		ConsensusID:     ConsensusId{xid.New().String()},
 		Representatives: representatives,
 		Block:           block,

@@ -209,6 +209,7 @@ func NewConsensusId(id string) ConsensusId {
 }
 
 type Consensus struct {
+	midgard.AggregateModel
 	ConsensusID     ConsensusId
 	Representatives []*Representative
 	Block           ProposedBlock
@@ -216,6 +217,8 @@ type Consensus struct {
 	PrepareMsgPool  PrepareMsgPool
 	CommitMsgPool   CommitMsgPool
 }
+
+var CONSENSUS_AID = "CONSENSUS_AID"
 
 func (c *Consensus) GetID() string {
 	return c.ConsensusID.Id
