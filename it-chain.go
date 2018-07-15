@@ -8,9 +8,16 @@ import (
 
 	"net"
 
+	"sync"
+
 	"github.com/it-chain/it-chain-Engine/cmd/icode"
-	"github.com/it-chain/it-chain-Engine/cmd/peer"
 	"github.com/it-chain/it-chain-Engine/conf"
+	icodeApi "github.com/it-chain/it-chain-Engine/icode/api"
+	icodeAdapter "github.com/it-chain/it-chain-Engine/icode/infra/adapter"
+	icodeInfra "github.com/it-chain/it-chain-Engine/icode/infra/api"
+	icodeService "github.com/it-chain/it-chain-Engine/icode/infra/service"
+	"github.com/it-chain/midgard/bus/rabbitmq"
+	"github.com/it-chain/tesseract"
 	"github.com/urfave/cli"
 )
 
@@ -46,7 +53,6 @@ func main() {
 		},
 	}
 	app.Commands = []cli.Command{}
-	app.Commands = append(app.Commands, peer.PeerCmd())
 	app.Commands = append(app.Commands, icode.IcodeCmd())
 	app.Action = func(c *cli.Context) error {
 		configName := c.String("config")
@@ -76,6 +82,10 @@ func start() error {
 	initTxPool()
 	initIcode()
 	initPeer()
+	// wait group for test
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	wg.Wait()
 	return nil
 }
 
@@ -83,6 +93,30 @@ func initGateway() error {
 	return nil
 }
 func initIcode() error {
+	config := conf.GetConfiguration()
+	mqClient := rabbitmq.Connect(config.Common.Messaging.Url)
+
+	// service generate
+	commandService := icodeAdapter.NewCommandService(mqClient.Publish)
+
+	// api generate
+	storeApi, err := icodeInfra.NewICodeGitStoreApi(config.Icode.AuthId, config.Icode.AuthPw)
+	if err != nil {
+		return err
+	}
+	containerService := icodeService.NewTesseractContainerService(tesseract.Config{
+		ShPath: config.Icode.ShPath,
+	})
+	api := icodeApi.NewIcodeApi(containerService, storeApi)
+
+	// handler generate
+	deployHandler := icodeAdapter.NewDeployCommandHandler(*api)
+	unDeployHandler := icodeAdapter.NewUnDeployCommandHandler(*api)
+	blockCommandHandler := icodeAdapter.NewBlockCommandHandler(*api, commandService)
+
+	mqClient.Subscribe("Command", "icode.deploy", deployHandler)
+	mqClient.Subscribe("Command", "icode.undeploy", unDeployHandler)
+	mqClient.Subscribe("Command", "block.excute", blockCommandHandler)
 	return nil
 }
 func initPeer() error {

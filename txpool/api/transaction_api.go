@@ -1,48 +1,38 @@
 package api
 
 import (
-	"time"
-
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/it-chain-Engine/txpool"
-	"github.com/it-chain/midgard"
 )
 
 type TransactionApi struct {
-	eventRepository *midgard.Repository
-	publisherId     string
+	publisherId string
 }
 
-func NewTransactionApi(eventRepository *midgard.Repository, publisherId string) TransactionApi {
+func NewTransactionApi(publisherId string) TransactionApi {
 	return TransactionApi{
-		publisherId:     publisherId,
-		eventRepository: eventRepository,
+		publisherId: publisherId,
 	}
 }
 
-func (t TransactionApi) CreateTransaction(txID string, txData txpool.TxData) error {
+func (t TransactionApi) CreateTransaction(txData txpool.TxData) (txpool.Transaction, error) {
 
-	events := make([]midgard.Event, 0)
-
-	timeStamp := time.Now()
-	hash := txpool.CalTxHash(txData, t.publisherId, txpool.TransactionId(txID), timeStamp)
-
-	events = append(events, txpool.TxCreatedEvent{
-		EventModel: midgard.EventModel{
-			ID:   txID,
-			Type: "Transaction",
-		},
-		PublishPeerId: t.publisherId,
-		TxStatus:      txpool.VALID,
-		TxHash:        hash,
-		TimeStamp:     timeStamp,
-		TxData:        txData,
-	})
-
-	err := t.eventRepository.Save(txID, events...)
+	tx, err := txpool.CreateTransaction(t.publisherId, txData)
 
 	if err != nil {
+		return tx, err
+	}
+
+	return tx, nil
+}
+
+func (t TransactionApi) DeleteTransaction(id txpool.TransactionId) error {
+
+	tx := &txpool.Transaction{}
+
+	if err := eventstore.Load(tx, id); err != nil {
 		return err
 	}
 
-	return nil
+	return txpool.DeleteTransaction(*tx)
 }

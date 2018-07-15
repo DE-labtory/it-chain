@@ -19,18 +19,19 @@ func NewTxCommandHandler(transactionApi api.TransactionApi) *TxCommandHandler {
 
 func (t *TxCommandHandler) HandleTxCreateCommand(txCreateCommand txpool.TxCreateCommand) {
 
-	txID := txCreateCommand.GetID()
-
-	if txID == "" {
-		log.Println("need id")
-		return
+	txData := txpool.TxData{
+		ID:      txCreateCommand.ID,
+		ICodeID: txCreateCommand.ICodeID,
+		Jsonrpc: txCreateCommand.Jsonrpc,
+		Method:  txCreateCommand.Method,
+		Params:  txCreateCommand.Params,
 	}
 
-	txData := txCreateCommand.TxData
-	err := t.transactionApi.CreateTransaction(txID, txData)
+	tx, err := t.transactionApi.CreateTransaction(txData)
 
 	if err != nil {
 		log.Println(err.Error())
 	}
 
+	log.Printf("transactions are created [%s]", tx)
 }

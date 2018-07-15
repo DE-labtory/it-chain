@@ -22,7 +22,7 @@ func NewTransactionRepository(path string) *TransactionRepository {
 }
 
 func (tr TransactionRepository) Save(transaction txpool.Transaction) error {
-	if transaction.TxId.ToString() == "" {
+	if transaction.TxId == "" {
 		return errors.New("transaction ID is empty")
 	}
 
