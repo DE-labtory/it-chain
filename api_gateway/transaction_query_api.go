@@ -6,10 +6,8 @@ import (
 
 	"log"
 
-	"fmt"
-
 	"github.com/it-chain/it-chain-Engine/txpool"
-	leveldbwrapper "github.com/it-chain/leveldb-wrapper"
+	"github.com/it-chain/leveldb-wrapper"
 )
 
 // this is an api only for querying current state which is repository of transaction
@@ -37,12 +35,6 @@ type TransactionEventListener struct {
 
 // this function listens to TxCreatedEvent and update repository
 func (t TransactionEventListener) HandleTransactionCreatedEvent(event txpool.TxCreatedEvent) {
-
-	fmt.Println(event.ICodeID)
-	fmt.Println(event.EventModel.Version)
-	fmt.Println(event.EventModel.Time)
-	fmt.Println(event.EventModel.GetID())
-	fmt.Println(event.Jsonrpc)
 
 	tx := event.GetTransaction()
 	err := t.transactionRepository.Save(tx)

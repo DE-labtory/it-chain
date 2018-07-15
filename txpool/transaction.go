@@ -36,7 +36,6 @@ type TxData struct {
 	Jsonrpc string
 	Method  TxDataType
 	Params  Param
-	ID      string
 	ICodeID string
 }
 
@@ -73,7 +72,6 @@ func (t *Transaction) On(event midgard.Event) error {
 		t.TxHash = v.TxHash
 		t.TimeStamp = v.TimeStamp
 		t.TxData = TxData{
-			ID:      v.ID,
 			Params:  v.Params,
 			Method:  TxDataType(v.Method),
 			Jsonrpc: v.Jsonrpc,
@@ -139,7 +137,6 @@ func CreateTransaction(publisherId string, txData TxData) (Transaction, error) {
 		TxStatus:      int(VALID),
 		TxHash:        hash,
 		TimeStamp:     timeStamp,
-		ID:            txData.ID,
 		ICodeID:       txData.ICodeID,
 		Jsonrpc:       txData.Jsonrpc,
 		Method:        string(txData.Method),

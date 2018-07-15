@@ -21,7 +21,7 @@ func TestTransactionRepository_Save(t *testing.T) {
 	transaction := txpool.Transaction{
 		TxId: "888",
 		TxData: txpool.TxData{
-			ID: "889",
+			ICodeID: "889",
 		},
 	}
 
@@ -53,7 +53,7 @@ func TestTransactionRepository_Remove(t *testing.T) {
 	transaction := txpool.Transaction{
 		TxId: "888",
 		TxData: txpool.TxData{
-			ID: "889",
+			ICodeID: "889",
 		},
 	}
 
@@ -87,7 +87,7 @@ func TestTransactionRepository_FindById(t *testing.T) {
 	transaction := txpool.Transaction{
 		TxId: "888",
 		TxData: txpool.TxData{
-			ID: "889",
+			ICodeID: "889",
 		},
 	}
 
@@ -148,7 +148,7 @@ func TestTransactionRepository_FindAll(t *testing.T) {
 	t1 := txpool.Transaction{
 		TxId: "888",
 		TxData: txpool.TxData{
-			ID: "889",
+			ICodeID: "889",
 		},
 	}
 	tr.Save(t1)
@@ -174,7 +174,6 @@ func TestTransactionQueryApi_FindUncommittedTransactions(t *testing.T) {
 			Type:    "transaction.created",
 			Version: 3,
 		},
-		ID:      "1",
 		ICodeID: "2",
 		TxHash:  "123",
 		Jsonrpc: "123",
@@ -186,7 +185,6 @@ func TestTransactionQueryApi_FindUncommittedTransactions(t *testing.T) {
 		EventModel: midgard.EventModel{
 			ID: "2",
 		},
-		ID:      "2",
 		ICodeID: "2",
 		TxHash:  "123",
 		Jsonrpc: "123",
@@ -198,7 +196,6 @@ func TestTransactionQueryApi_FindUncommittedTransactions(t *testing.T) {
 		EventModel: midgard.EventModel{
 			ID: "3",
 		},
-		ID:      "3",
 		ICodeID: "2",
 		TxHash:  "123",
 		Jsonrpc: "123",
@@ -206,8 +203,10 @@ func TestTransactionQueryApi_FindUncommittedTransactions(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	txs, err := api.FindUncommittedTransactions()
+	//wait until sync from event
+	time.Sleep(1 * time.Second)
 
+	txs, err := api.FindUncommittedTransactions()
 	assert.Equal(t, len(txs), 3)
 }
 
