@@ -14,11 +14,11 @@ func NewCommunicationApi(pLTableQueryService p2p.PLTableQueryService, communicat
 	}
 }
 
-func (ca *CommunicationApi) DialToUnConnectedNode(peerList []p2p.Peer) error {
+func (ca *CommunicationApi) DialToUnConnectedNode(peerTable map[string]p2p.Peer) error {
 
 	//1. find unconnected peer
 	//2. dial to unconnected peer
-	for _, peer := range peerList {
+	for _, peer := range peerTable {
 
 		//err is nil if there is matching peer
 		peer, err := ca.pLTableQueryService.FindPeerById(peer.PeerId)

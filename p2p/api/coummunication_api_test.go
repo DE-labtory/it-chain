@@ -12,20 +12,18 @@ import (
 func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			peerList []p2p.Peer
+			peerTable map[string]p2p.Peer
 		}
 		err error
 	}{
 		"success": {
-			input: struct{ peerList []p2p.Peer }{
-				peerList: []p2p.Peer{
-					{
-						PeerId: p2p.PeerId{
-							Id: "1",
-						},
+			input: struct{ peerTable map[string]p2p.Peer }{peerTable: map[string]p2p.Peer{
+				"1":{
+					PeerId:p2p.PeerId{
+						Id:"1",
 					},
 				},
-			},
+			}},
 			err: nil,
 		},
 	}
@@ -33,9 +31,9 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 	mockPLTableQueryService :=&mock.MockPLTableQueryService{}
 	mockPLTableQueryService.FindPeerByIdFunc = func(peerId p2p.PeerId) (p2p.Peer, error) {
 
-		peerList := mock.MakeFakePeerList()
+		peerTable := mock.MakeFakePeerTable()
 
-		for _, peer := range peerList {
+		for _, peer := range peerTable {
 			if peer.PeerId == peerId {
 				return peer, nil
 			}
@@ -50,7 +48,7 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 
 		communicationApi := api.NewCommunicationApi(mockPLTableQueryService, &mock.MockCommunicationService{})
 
-		assert.Equal(t, communicationApi.DialToUnConnectedNode(test.input.peerList), test.err)
+		assert.Equal(t, communicationApi.DialToUnConnectedNode(test.input.peerTable), test.err)
 
 	}
 }

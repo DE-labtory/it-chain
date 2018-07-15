@@ -11,7 +11,7 @@ type CommunicationService struct {
 
 func (cs *CommunicationService) Dial(ipAddress string) error {
 
-	command := ConnectionCreatedCommand{
+	command := p2p.ConnectionCreateCommand{
 		Address: ipAddress,
 	}
 	cs.publish("Command", "connection.create", command)
@@ -24,8 +24,8 @@ func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTa
 		return ErrEmptyPeerId
 	}
 
-	if len(peerLeaderTable.PeerList) == 0 {
-		return p2p.ErrEmptyPeerList
+	if len(peerLeaderTable.PeerTable) == 0 {
+		return p2p.ErrEmptyPeerTable
 	}
 
 	//create peer table message

@@ -29,7 +29,7 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 	//2. update specific peer as leader
 	pLTable, _ := la.pLTableQueryService.GetPLTable()
 
-	peers := pLTable.PeerList
+	peers := pLTable.PeerTable
 
 	for _, peer := range peers {
 
@@ -45,17 +45,15 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 	return ErrNoMatchingPeerWithIpAddress
 }
 
-func (la *LeaderApi) UpdateLeaderWithLongerPeerList(oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer) error {
+func (la *LeaderApi) UpdateLeaderWithLargePeerTable(oppositePLTable p2p.PLTable) error {
 
 	myPLTable, _ := la.pLTableQueryService.GetPLTable()
 
-	myPeerList, _ := myPLTable.GetPeerList()
-
 	myLeader, _ := myPLTable.GetLeader()
 
-	if len(myPeerList) < len(oppositePeerList) {
+	if len(myPLTable.PeerTable) < len(oppositePLTable.PeerTable) {
 
-		la.leaderService.Set(oppositeLeader)
+		la.leaderService.Set(oppositePLTable.Leader)
 
 	} else {
 

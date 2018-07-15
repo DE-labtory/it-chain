@@ -9,49 +9,6 @@ import (
 	"github.com/magiconair/properties/assert"
 )
 
-func TestPeerApi_UpdatePeerList(t *testing.T) {
-
-	tests := map[string]struct {
-		input []p2p.Peer
-		err   error
-	}{
-		"success": {
-			input: []p2p.Peer{
-				{
-					PeerId: p2p.PeerId{
-						Id: "1",
-					},
-					IpAddress: "1",
-				},
-				{
-					PeerId: p2p.PeerId{
-						Id: "2",
-					},
-					IpAddress: "2",
-				},
-				{
-					PeerId: p2p.PeerId{
-						Id: "3",
-					},
-					IpAddress: "3",
-				},
-			},
-			err: nil,
-		},
-	}
-
-	peerApi := SetupPeerApi()
-
-	for testName, test := range tests {
-
-		t.Logf("running test case %s", testName)
-
-		err := peerApi.UpdatePeerList(test.input)
-
-		assert.Equal(t, err, test.err)
-	}
-}
-
 func TestPeerApi_DeliverPLTable(t *testing.T) {
 
 	tests := map[string]struct {
@@ -67,24 +24,12 @@ func TestPeerApi_DeliverPLTable(t *testing.T) {
 						Id: "1",
 					},
 				},
-				PeerList: []p2p.Peer{
-					{
-						PeerId: p2p.PeerId{
-							Id: "1",
-						},
-						IpAddress: "1",
+				PeerTable:map[string]p2p.Peer{
+					"1":p2p.Peer{
+						PeerId:p2p.PeerId{Id:"1"},
 					},
-					{
-						PeerId: p2p.PeerId{
-							Id: "2",
-						},
-						IpAddress: "2",
-					},
-					{
-						PeerId: p2p.PeerId{
-							Id: "3",
-						},
-						IpAddress: "3",
+					"2":p2p.Peer{
+						PeerId:p2p.PeerId{Id:"2"},
 					},
 				},
 			}},

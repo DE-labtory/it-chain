@@ -64,22 +64,3 @@ func (eh *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconne
 	return nil
 }
 
-
-type RepositoryProjector struct {}
-
-//save Leader when LeaderReceivedEvent Detected, publish updated info to network
-
-//
-//func (projector *RepositoryProjector) HandlerPeerCreatedEvent(event p2p.PeerCreatedEvent) error {
-//
-//	if event.ID == "" {
-//		return ErrEmptyPeerId
-//	}
-//
-//	if event.IpAddress == "" {
-//		return ErrEmptyAddress
-//	}
-//
-//	return p2p.NewPeer(event.IpAddress, p2p.PeerId{Id: event.ID})
-//
-//}
