@@ -49,7 +49,7 @@ type ElectionService struct {
 	mux                sync.Mutex
 	electionRepository ElectionRepository
 	peerService        IPeerService
-	peerQueryService   PeerQueryService
+	pLTableQueryService   PLTableQueryService
 	publish            Publish
 }
 
@@ -80,7 +80,9 @@ func StartRandomTimeOut(es *ElectionService) {
 				election.SetState("Candidate")
 				es.electionRepository.SetElection(election)
 
-				peerList, _ := es.peerQueryService.FindAll()
+				pLTable, _ := es.pLTableQueryService.GetPLTable()
+
+				peerList := pLTable.PeerList
 
 				connectionIds := make([]string, 0)
 
@@ -178,9 +180,9 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
 
-	peers, _ := es.peerQueryService.FindAll()
+	pLTable, _ := es.pLTableQueryService.GetPLTable()
 
-	for _, peer := range peers {
+	for _, peer := range pLTable.PeerList {
 		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, peer.PeerId.Id)
 	}
 
@@ -202,8 +204,8 @@ func (es *ElectionService) DecideToBeLeader(command GrpcReceiveCommand) error {
 	}
 
 	//	3. if counted is same with num of peer-1 set leader and publish
-	peers, _ := es.peerQueryService.FindAll()
-	numOfPeers := len(peers)
+	pLTable, _ := es.pLTableQueryService.GetPLTable()
+	numOfPeers := len(pLTable.PeerList)
 
 	if election.GetVoteCount() == numOfPeers-1 {
 

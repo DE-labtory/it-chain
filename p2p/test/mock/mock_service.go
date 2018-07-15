@@ -12,31 +12,6 @@ type MockPeerService struct {
 	FindAllFunc       func() ([]p2p.Peer, error)
 }
 
-func (mps *MockPeerService) Save(peer p2p.Peer) error {
-
-	return mps.SaveFunc(peer)
-}
-
-func (mps *MockPeerService) Remove(peerId p2p.PeerId) error {
-
-	return mps.RemoveFunc(peerId)
-}
-
-func (mps *MockPeerService) FindById(peerId p2p.PeerId) (p2p.Peer, error) {
-
-	return mps.FindByIdFunc(peerId)
-}
-
-func (mps *MockPeerService) FindByAddress(ipAddress string) (p2p.Peer, error) {
-
-	return mps.FindByAddressFunc(ipAddress)
-}
-
-func (mps *MockPeerService) FindAll() ([]p2p.Peer, error) {
-
-	return mps.FindAllFunc()
-}
-
 type MockLeaderService struct {
 	SetFunc func(leader p2p.Leader) error
 }
@@ -61,34 +36,31 @@ func (mcs *MockCommunicationService) DeliverPLTable(connectionId string, pLTable
 	return mcs.DeliverPLTableFunc(connectionId, pLTable)
 }
 
-type MockPeerQueryService struct {
-	FindByIdFunc      func(peerId p2p.PeerId) (p2p.Peer, error)
-	FindAllFunc       func() ([]p2p.Peer, error)
-	FindByAddressFunc func(ipAddress string) (p2p.Peer, error)
-}
-
-func (mpqs *MockPeerQueryService) FindById(peerId p2p.PeerId) (p2p.Peer, error) {
-
-	return mpqs.FindByIdFunc(peerId)
-}
-
-func (mpqs *MockPeerQueryService) FindAll() ([]p2p.Peer, error) {
-
-	return mpqs.FindAllFunc()
-}
-
-func (mpqs *MockPeerQueryService) FindByAddress(ipAddress string) (p2p.Peer, error) {
-
-	return mpqs.FindByAddress(ipAddress)
-}
 
 type MockPLTableQueryService struct {
-
-	GetPLTableFunc func() (p2p.PLTable, error)
+	GetPLTableFunc        func() (p2p.PLTable, error)
+	GetLeaderFunc         func() (p2p.Leader, error)
+	FindPeerByIdFunc      func(peerId p2p.PeerId) (p2p.Peer, error)
+	FindPeerByAddressFunc func(ipAddress string) (p2p.Peer, error)
 }
 
 func (mpltqs *MockPLTableQueryService) GetPLTable() (p2p.PLTable, error) {
 
-
 	return mpltqs.GetPLTableFunc()
 }
+
+func (mpltqs *MockPLTableQueryService) GetLeader() (p2p.Leader, error){
+
+	return mpltqs.GetLeaderFunc()
+}
+
+func (mpltqs *MockPLTableQueryService) FindPeerById(peerId p2p.PeerId) (p2p.Peer, error) {
+
+	return mpltqs.FindPeerByIdFunc(peerId)
+}
+
+func (mpltqs *MockPLTableQueryService) FindPeerByAddress(ipAddress string) (p2p.Peer, error) {
+
+	return mpltqs.FindPeerByAddressFunc(ipAddress)
+}
+

@@ -84,6 +84,7 @@ func DeletePeer(peerId PeerId) error{
 	return eventstore.Save(peerId.Id, event)
 }
 
+
 // p2p 구조체를 json 으로 인코딩한다.
 func (n Peer) Serialize() ([]byte, error) {
 	return common.Serialize(n)
