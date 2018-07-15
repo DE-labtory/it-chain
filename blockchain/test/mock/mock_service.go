@@ -3,10 +3,10 @@ package mock
 import "github.com/it-chain/it-chain-Engine/blockchain"
 
 type SyncService struct {
-	blockQueryService BlockQueryService
+	BlockQueryService BlockQueryService
 	SyncWithPeerFunc  func(peer blockchain.Peer) error
-	syncedCheckFunc   func(peer blockchain.Peer) (blockchain.IsSynced, error)
-	constructFunc     func(peer blockchain.Peer) error
+	SyncedCheckFunc   func(peer blockchain.Peer) (blockchain.IsSynced, error)
+	ConstructFunc     func(peer blockchain.Peer) error
 }
 
 func (ss SyncService) SyncWithPeer(peer blockchain.Peer) error {
@@ -14,11 +14,11 @@ func (ss SyncService) SyncWithPeer(peer blockchain.Peer) error {
 }
 
 func (ss SyncService) syncedCheck(peer blockchain.Peer) (blockchain.IsSynced, error) {
-	return ss.syncedCheckFunc(peer)
+	return ss.SyncedCheckFunc(peer)
 }
 
 func (ss SyncService) construct(peer blockchain.Peer) error {
-	return ss.constructFunc(peer)
+	return ss.ConstructFunc(peer)
 }
 
 type BlockQueryService struct {
