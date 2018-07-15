@@ -30,7 +30,7 @@ gRPC 의 서버의 모든 기능을 수행한다.
 
 **GrpcDeliverCommand**
 Command used for deliver message to other node
-```go
+```
 type GrpcDeliverCommand struct {
 	midgard.CommandModel
 	Recipients []string
@@ -41,7 +41,7 @@ type GrpcDeliverCommand struct {
 
 **GrpcReceiveCommand**
 Command used for receive message from other node
-```go
+```
 type GrpcReceiveCommand struct {
 	midgard.CommandModel
 	Body         []byte

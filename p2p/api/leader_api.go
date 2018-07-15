@@ -2,62 +2,65 @@ package api
 
 import (
 	"errors"
-	"log"
+
 	"github.com/it-chain/it-chain-Engine/p2p"
-	"github.com/it-chain/midgard"
 )
 
-var ErrEmptyPeerId = errors.New("empty peer id requested")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 var ErrEmptyConnectionId = errors.New("empty connection id proposed")
+var ErrNoMatchingPeerWithIpAddress = errors.New("no matching peer with ip address")
 
 type LeaderApi struct {
-	leaderRepository   ReadOnlyLeaderRepository
-	eventRepository    EventRepository
-	myInfo             *p2p.Peer
+	leaderService       p2p.ILeaderService
+	pLTableQueryService p2p.PLTableQueryService
 }
 
-type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
+func NewLeaderApi(leaderService p2p.ILeaderService, pLTableQueryService p2p.PLTableQueryService) LeaderApi {
 
-type ReadOnlyLeaderRepository interface {
-	GetLeader() p2p.Leader
-}
-
-type EventRepository interface { //midgard.Repository
-	Save(aggregateID string, events ...midgard.Event) error
-}
-
-func NewLeaderApi(leaderRepository ReadOnlyLeaderRepository, eventRepository EventRepository, myInfo *p2p.Peer) *LeaderApi {
-
-	return &LeaderApi{
-		leaderRepository:   leaderRepository,
-		eventRepository:    eventRepository,
-		myInfo:             myInfo,
+	return LeaderApi{
+		leaderService:       leaderService,
+		pLTableQueryService: pLTableQueryService,
 	}
 }
 
-//todo update leader with ip address by peer!! not leader
-func (leaderApi *LeaderApi) UpdateLeader(leader p2p.Leader) error {
+func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
-	if leader.LeaderId.Id == "" {
-		return ErrEmptyLeaderId
+	//1. loop peer list and find specific address
+	//2. update specific peer as leader
+	pLTable, _ := la.pLTableQueryService.GetPLTable()
+
+	peers := pLTable.PeerList
+
+	for _, peer := range peers {
+
+		if peer.IpAddress == ipAddress {
+
+			p2p.UpdateLeader(peer)
+
+			return nil
+		}
+
 	}
 
-	events := make([]midgard.Event, 0)
-	leaderUpdatedEvent := p2p.LeaderUpdatedEvent{
-		EventModel: midgard.EventModel{
-			ID:   leader.LeaderId.ToString(),
-			Type: "leader.update",
-		},
+	return ErrNoMatchingPeerWithIpAddress
+}
+
+func (la *LeaderApi) UpdateLeaderWithLongerPeerList(oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer) error {
+
+	myPLTable, _ := la.pLTableQueryService.GetPLTable()
+
+	myPeerList, _ := myPLTable.GetPeerList()
+
+	myLeader, _ := myPLTable.GetLeader()
+
+	if len(myPeerList) < len(oppositePeerList) {
+
+		la.leaderService.Set(oppositeLeader)
+
+	} else {
+
+		la.leaderService.Set(myLeader)
+
 	}
-
-	events = append(events, leaderUpdatedEvent)
-	err := leaderApi.eventRepository.Save(leaderUpdatedEvent.GetID(), events...)
-
-	if err != nil {
-		log.Println(err.Error())
-		return err
-	}
-
-	return err
+	return nil
 }

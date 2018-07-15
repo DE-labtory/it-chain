@@ -26,15 +26,18 @@ func NewPeerRepository() (PeerRepository, error) {
 	}, nil
 }
 
-// 새로운 p2p 를 leveldb에 저장
+// done in peer service named save
 func (pr *PeerRepository) Save(data p2p.Peer) error {
+
 	pr.mux.Lock()
 	defer pr.mux.Unlock()
+
 	// return empty peerID error if peerID is null
 	if data.PeerId.Id == "" {
 		return ErrEmptyPeerId
 	}
 	_, exist := pr.peerTable[data.PeerId.Id]
+
 	if exist {
 		return ErrExistPeer
 	}
@@ -44,10 +47,12 @@ func (pr *PeerRepository) Save(data p2p.Peer) error {
 	return nil
 }
 
-// p2p 삭제
+// done in peer service
 func (pr *PeerRepository) Remove(id p2p.PeerId) error {
+
 	pr.mux.Lock()
 	defer pr.mux.Unlock()
+
 	if id.Id == "" {
 		return ErrEmptyPeerId
 	}
@@ -59,10 +64,11 @@ func (pr *PeerRepository) Remove(id p2p.PeerId) error {
 	}
 
 	delete(pr.peerTable, id.Id)
+
 	return nil
 }
 
-// p2p 읽어옴
+// done in peer service
 func (pr *PeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) {
 	pr.mux.Lock()
 	defer pr.mux.Unlock()
@@ -79,7 +85,7 @@ func (pr *PeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) {
 	return v, nil
 }
 
-// 모든 피어 검색
+// done in peer service
 func (pr *PeerRepository) FindAll() ([]p2p.Peer, error) {
 	pr.mux.Lock()
 	defer pr.mux.Unlock()
@@ -96,14 +102,6 @@ func (pr *PeerRepository) FindAll() ([]p2p.Peer, error) {
 	return peers, nil
 }
 
-func (pr *PeerRepository) ClearPeerTable() {
-	pr.mux.Lock()
-	defer pr.mux.Unlock()
-	for key := range pr.peerTable {
-		delete(pr.peerTable, key)
-	}
-	pr.peerTable = make(map[string]p2p.Peer)
-}
 
 func (pr *PeerRepository) FindByAddress(ipAddress string) (p2p.Peer, error) {
 
@@ -117,4 +115,5 @@ func (pr *PeerRepository) FindByAddress(ipAddress string) (p2p.Peer, error) {
 		}
 	}
 
+	return p2p.Peer{}, nil
 }

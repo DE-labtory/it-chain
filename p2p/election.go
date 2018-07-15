@@ -55,6 +55,7 @@ func (election *Election) GetState() string {
 }
 
 func (election *Election) GetLeftTime() int64{
+
 	election.mux.Lock()
 	defer election.mux.Unlock()
 
@@ -91,6 +92,7 @@ type ElectionRepository struct {
 }
 
 func (er ElectionRepository) GetElection() Election{
+
 	er.mux.Lock()
 	defer er.mux.Unlock()
 
@@ -98,6 +100,7 @@ func (er ElectionRepository) GetElection() Election{
 }
 
 func (er ElectionRepository) SetElection(election Election) error {
+
 	er.mux.Lock()
 	defer er.mux.Unlock()
 

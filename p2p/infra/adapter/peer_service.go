@@ -63,28 +63,3 @@ func (ps *PeerService) RequestPeerList(peerId p2p.PeerId) error {
 	return ps.publish("Command", "message.deliver", deliverCommand)
 }
 
-func (ps *PeerService) DeliverPeerLeaderTable(connectionId string, peerLeaderTable p2p.PeerLeaderTable) error {
-
-	if connectionId == "" {
-		return ErrEmptyPeerId
-	}
-
-	if len(peerLeaderTable.PeerList) == 0 {
-		return p2p.ErrEmptyPeerList
-	}
-
-	//create peer table message
-	peerLeaderTableMessage := p2p.PeerLeaderTableMessage{
-		PeerLeaderTable: peerLeaderTable,
-	}
-
-	grpcDeliverCommand, err := CreateGrpcDeliverCommand("PeerTableDeliver", peerLeaderTableMessage)
-
-	if err != nil {
-		return err
-	}
-
-	grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
-
-	return ps.publish("Command", "message.deliver", grpcDeliverCommand)
-}

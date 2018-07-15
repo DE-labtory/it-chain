@@ -5,27 +5,70 @@ import (
 	"sync"
 	"time"
 
+	"encoding/json"
+
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
 
-type PeerService interface {
+type ICommunicationService interface {
 	Dial(ipAddress string) error
-	DeliverLeaderInfo(connectionId string, leader Leader) error
-	DeliverPeerLeaderTable(connectionId string, peerLeaderTable PeerLeaderTable) error
+	DeliverPLTable(connectionId string, peerLeaderTable PLTable) error
 }
 
-type LeaderService interface{
-	DeliverLeaderInfo(connectionId string, leader Leader) error
+// injected later
+// the actual implementation is done in gateway api
+type IPeerService interface {
+	Save(peer Peer) error
+	Remove(peerId PeerId) error
 }
+
+type IPLTableService interface {
+	GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error)
+	ClearPeerTable() error
+}
+
+// will be deleted after implemented in gateway api
+type PLTableServiceReplica struct {
+	mux     sync.Mutex
+	pLTable PLTable
+}
+
+func (pLTableService *PLTableServiceReplica) GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error) {
+
+	peerTable := PLTable{}
+
+	if err := json.Unmarshal(command.Body, &peerTable); err != nil {
+		//todo error 처리
+		return PLTable{}, nil
+	}
+
+	return peerTable, nil
+}
+
+//func (plts *PLTableServiceReplica) ClearPeerTable() {
+//
+//	plts.mux.Lock()
+//
+//	defer plts.mux.Unlock()
+//
+//	for key := range plts.pLTable.PeerList {
+//
+//		delete(plts.pLTable, key)
+//	}
+//
+//	plts.peerTable = make(map[string]Peer)
+//}
+
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
 type ElectionService struct {
 	mux                sync.Mutex
 	electionRepository ElectionRepository
-	peerRepository     PeerRepository
+	peerService        IPeerService
+	peerQueryService   PeerQueryService
 	publish            Publish
 }
 
@@ -48,12 +91,15 @@ func StartRandomTimeOut(es *ElectionService) {
 		select {
 
 		case <-timeout:
+			// when timed out
+			// 1. if state is ticking, be candidate and request vote
+			// 2. if state is candidate, reset state and left time
 			if election.GetState() == "Ticking" {
 
 				election.SetState("Candidate")
 				es.electionRepository.SetElection(election)
 
-				peerList, _ := es.peerRepository.FindAll()
+				peerList, _ := es.peerQueryService.FindAll()
 
 				connectionIds := make([]string, 0)
 
@@ -61,7 +107,7 @@ func StartRandomTimeOut(es *ElectionService) {
 					connectionIds = append(connectionIds, peer.PeerId.Id)
 				}
 
-				es.deliverRequestVoteMessages(connectionIds)
+				es.requestVote(connectionIds)
 
 			} else if election.GetState() == "Candidate" {
 				//reset time and state chane candidate -> ticking when timed in candidate state
@@ -72,20 +118,25 @@ func StartRandomTimeOut(es *ElectionService) {
 			es.electionRepository.SetElection(election)
 
 		case <-tick:
+			// count down left time while ticking
 			election.CountDownLeftTimeBy(1)
+
 			es.electionRepository.SetElection(election)
 
 		}
 	}
 }
 
-func (es *ElectionService) deliverRequestVoteMessages(connectionIds []string) error {
+func (es *ElectionService) requestVote(connectionIds []string) error {
 
+	// 1. create request vote message
+	// 2. send message
 	requestVoteMessage := RequestVoteMessage{}
 
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("PeerTableDeliver", requestVoteMessage)
 
 	for _, connectionId := range connectionIds {
+
 		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
 	}
 
@@ -146,7 +197,7 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
 
-	peers, _ := es.peerRepository.FindAll()
+	peers, _ := es.peerQueryService.FindAll()
 
 	for _, peer := range peers {
 		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, peer.PeerId.Id)
@@ -170,7 +221,7 @@ func (es *ElectionService) DecideToBeLeader(command GrpcReceiveCommand) error {
 	}
 
 	//	3. if counted is same with num of peer-1 set leader and publish
-	peers, _ := es.peerRepository.FindAll()
+	peers, _ := es.peerQueryService.FindAll()
 	numOfPeers := len(peers)
 
 	if election.GetVoteCount() == numOfPeers-1 {
