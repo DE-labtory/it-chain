@@ -3,16 +3,16 @@ package mock
 import "github.com/it-chain/it-chain-Engine/blockchain"
 
 type BlockApi struct {
-	AddBlockToPoolFunc            func(block blockchain.Block) error
-	CheckAndSaveBlockFromPoolFunc func(height blockchain.BlockHeight) error
+	StageBlockFunc                func(block blockchain.Block) error
+	CommitBlockFromPoolOrSyncFunc func(blockId string) error
 }
 
-func (api BlockApi) AddBlockToPool(block blockchain.Block) error {
-	return api.AddBlockToPoolFunc(block)
+func (api BlockApi) StageBlock(block blockchain.Block) error {
+	return api.StageBlockFunc(block)
 }
 
-func (api BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
-	return api.CheckAndSaveBlockFromPoolFunc(height)
+func (api BlockApi) CommitBlockFromPoolOrSync(blockId string) error {
+	return api.CommitBlockFromPoolOrSyncFunc(blockId)
 }
 
 type MockSyncBlockApi struct {

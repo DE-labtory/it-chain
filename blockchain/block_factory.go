@@ -37,7 +37,6 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	if err != nil {
 		return nil, ErrCreatingEvent
 	}
-
 	//on
 	err = GenesisBlock.On(createEvent)
 	if err != nil {

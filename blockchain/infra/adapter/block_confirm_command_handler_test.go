@@ -44,7 +44,7 @@ func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 	}
 
 	blockApi := mock.BlockApi{}
-	blockApi.AddBlockToPoolFunc = func(block blockchain.Block) error {
+	blockApi.StageBlockFunc = func(block blockchain.Block) error {
 		assert.Equal(t, block.GetHeight(), uint64(99887))
 		return nil
 	}

@@ -18,23 +18,20 @@ type SyncDoneEvent struct {
 	midgard.EventModel
 }
 
-type BlockAddToPoolEvent struct {
-	midgard.EventModel
-	Seal      []byte
-	PrevSeal  []byte
-	Height    uint64
-	TxList    []byte
-	TxSeal    [][]byte
-	Timestamp time.Time
-	Creator   []byte
-}
-
 type BlockRemoveFromPoolEvent struct {
 	midgard.EventModel
 	Height uint64
 }
 
-// event when block is saved to event store
+type BlockStagedEvent struct {
+	midgard.EventModel
+	State string
+}
+
+type BlockCommittedEvent struct {
+	midgard.EventModel
+	State string
+}
 
 type BlockCreatedEvent struct {
 	midgard.EventModel
@@ -46,14 +43,4 @@ type BlockCreatedEvent struct {
 	Timestamp time.Time
 	Creator   []byte
 	State     string
-}
-
-type BlockStagedEvent struct {
-	midgard.EventModel
-	State string
-}
-
-type BlockCommittedEvent struct {
-	midgard.EventModel
-	State string
 }

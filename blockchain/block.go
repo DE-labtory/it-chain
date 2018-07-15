@@ -7,9 +7,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"log"
 
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	ygg "github.com/it-chain/yggdrasill/common"
 )
@@ -55,10 +53,10 @@ func (block *DefaultBlock) SetHeight(height uint64) {
 // TODO: Write test case
 func (block *DefaultBlock) PutTx(transaction Transaction) error {
 	if block.TxList == nil {
-		block.TxList = make([]Transaction, 0)
+		block.TxList = make([]*DefaultTransaction, 0)
 	}
 
-	block.TxList = append(block.TxList, transaction)
+	block.TxList = append(block.TxList, transaction.(*DefaultTransaction))
 
 	return nil
 }
@@ -131,7 +129,6 @@ func (block *DefaultBlock) Deserialize(serializedBlock []byte) error {
 	if len(serializedBlock) == 0 {
 		return ErrDecodingEmptyBlock
 	}
-
 	err := json.Unmarshal(serializedBlock, block)
 	if err != nil {
 		return err
@@ -153,34 +150,10 @@ func (block *DefaultBlock) IsPrev(serializedPrevBlock []byte) bool {
 	return bytes.Compare(prevBlock.GetSeal(), block.GetPrevSeal()) == 0
 }
 
-// interface of api gateway query api
-type BlockQueryApi interface {
-	GetBlockByHeight(height uint64) (Block, error)
-	GetBlockBySeal(seal []byte) (Block, error)
-	GetBlockByTxID(txid string) (Block, error)
-	GetLastBlock() (Block, error)
-}
-
 type Action interface {
 	DoAction(block Block) error
 }
 
-// TODO: Write test case
-func CreateSaveOrSyncAction(checkResult int64) Action {
-	if checkResult > 0 {
-		return NewSyncAction()
-	} else if checkResult == 0 {
-		return NewSaveAction()
-	} else {
-		return NewDefaultAction()
-	}
-}
-
-type SyncAction struct{}
-
-func NewSyncAction() *SyncAction {
-	return &SyncAction{}
-}
 func (block *DefaultBlock) On(event midgard.Event) error {
 
 	switch v := event.(type) {
@@ -211,43 +184,7 @@ func (block *DefaultBlock) On(event midgard.Event) error {
 	return nil
 }
 
-func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock {
-	block := &DefaultBlock{}
-	return block
-}
-
-func (syncAction *SyncAction) DoAction(block Block) error {
-	// TODO: Start synchronize
-	return nil
-}
-
-type SaveAction struct {
-	blockPool BlockPool
-}
-
-func NewSaveAction() *SaveAction {
-	return &SaveAction{}
-}
-
-// TODO: Write test case
-func (saveAction *SaveAction) DoAction(block Block) error {
-	event, err := createBlockCommittedEvent(block)
-	if err != nil {
-		return err
-	}
-	blockId := string(block.GetSeal())
-	eventstore.Save(blockId, event)
-	return nil
-}
-
-type DefaultAction struct{}
-
-func NewDefaultAction() *DefaultAction {
-	return &DefaultAction{}
-}
-
-// TODO: Write test case
-func (defaultAction *DefaultAction) DoAction(block Block) error {
-	log.Printf("got shorter height block [%v]", block.GetHeight())
-	return nil
+func IsBlockHasAllProperties(block Block) bool {
+	return !(block.GetSeal() == nil || block.GetPrevSeal() == nil || block.GetHeight() == 0 ||
+		block.GetTxList() == nil || block.GetCreator() == nil || block.GetTimestamp().IsZero())
 }

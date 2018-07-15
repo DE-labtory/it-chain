@@ -2,64 +2,37 @@ package adapter_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
 	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
+	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
 )
 
 func TestEventHandler_HandleBlockAddToPoolEvent(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			blockchain.BlockAddToPoolEvent
+			blockchain.BlockStagedEvent
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				blockchain.BlockAddToPoolEvent
-			}{BlockAddToPoolEvent: blockchain.BlockAddToPoolEvent{
-				Seal:      []byte{0x1},
-				PrevSeal:  []byte{0x1},
-				Height:    uint64(12),
-				TxList:    []byte{0x1},
-				TxSeal:    [][]byte{{0x1}},
-				Timestamp: time.Now(),
-				Creator:   []byte{0x1},
+				blockchain.BlockStagedEvent
+			}{BlockStagedEvent: blockchain.BlockStagedEvent{
+				EventModel: midgard.EventModel{
+					ID: "zf",
+				},
+				State: blockchain.Staged,
 			}},
 			err: nil,
-		},
-		"event w/o height test": {
-			input: struct {
-				blockchain.BlockAddToPoolEvent
-			}{BlockAddToPoolEvent: blockchain.BlockAddToPoolEvent{
-				Seal:      []byte{0x1},
-				PrevSeal:  []byte{0x1},
-				TxList:    []byte{0x1},
-				TxSeal:    [][]byte{{0x1}},
-				Timestamp: time.Now(),
-				Creator:   []byte{0x1},
-			}},
-			err: adapter.ErrBlockMissingProperties,
-		},
-		"event w/o seal, prevseal test": {
-			input: struct {
-				blockchain.BlockAddToPoolEvent
-			}{BlockAddToPoolEvent: blockchain.BlockAddToPoolEvent{
-				TxList:    []byte{0x1},
-				TxSeal:    [][]byte{{0x1}},
-				Timestamp: time.Now(),
-				Creator:   []byte{0x1},
-			}},
-			err: adapter.ErrBlockMissingProperties,
 		},
 	}
 
 	blockApi := mock.BlockApi{}
-	blockApi.CheckAndSaveBlockFromPoolFunc = func(height blockchain.BlockHeight) error {
-		assert.Equal(t, height, uint64(12))
+	blockApi.CommitBlockFromPoolOrSyncFunc = func(blockId string) error {
+		assert.Equal(t, blockId, "zf")
 		return nil
 	}
 	eventHandler := adapter.NewEventHandler(blockApi)
@@ -67,7 +40,7 @@ func TestEventHandler_HandleBlockAddToPoolEvent(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		err := eventHandler.HandleBlockAddToPoolEvent(test.input.BlockAddToPoolEvent)
+		err := eventHandler.HandleBlockAddToPoolEvent(test.input.BlockStagedEvent)
 
 		assert.Equal(t, err, test.err)
 	}
