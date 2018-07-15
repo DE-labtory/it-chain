@@ -17,24 +17,24 @@ var ErrAddCommitingBlock = errors.New("Error in add block which is going to be c
 var ErrNewBlockStorage = errors.New("Error in construct block storage")
 
 type BlockQueryApi struct {
-	blockpoolRepository     BlockPoolRepository
-	commitedBlockRepository CommitedBlockRepository
+	BlockpoolRepository     BlockPoolRepository
+	CommitedBlockRepository CommitedBlockRepository
 }
 
 func (b BlockQueryApi) GetStagedBlockByHeight(height uint64) (blockchain.Block, error) {
-	return b.blockpoolRepository.GetStagedBlockByHeight(height)
+	return b.BlockpoolRepository.GetStagedBlockByHeight(height)
 }
 
 func (b BlockQueryApi) GetStagedBlockById(blockId string) (blockchain.Block, error) {
-	return b.blockpoolRepository.GetStagedBlockById(blockId)
+	return b.BlockpoolRepository.GetStagedBlockById(blockId)
 }
 
 func (b BlockQueryApi) GetLastCommitedBlock() (blockchain.Block, error) {
-	return b.commitedBlockRepository.GetLastBlock()
+	return b.CommitedBlockRepository.GetLastBlock()
 }
 
 func (b BlockQueryApi) GetCommitedBlockByHeight(height uint64) (blockchain.Block, error) {
-	return b.commitedBlockRepository.GetBlockByHeight(height)
+	return b.CommitedBlockRepository.GetBlockByHeight(height)
 }
 
 type BlockPoolRepository interface {

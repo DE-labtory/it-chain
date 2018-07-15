@@ -1,6 +1,8 @@
 package api
 
-import "github.com/it-chain/it-chain-Engine/blockchain"
+import (
+	"github.com/it-chain/it-chain-Engine/blockchain"
+)
 
 type CreateBlockApi struct {
 	blockQueryApi blockchain.BlockQueryApi
@@ -14,10 +16,10 @@ func NewCreateBlockApi(blockQueryApi blockchain.BlockQueryApi, publisherId strin
 	}
 }
 
-func (b *CreateBlockApi) CreateBlock(txList []blockchain.Transaction) error {
+func (b *CreateBlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error) {
 	lastBlock, err := b.blockQueryApi.GetLastCommitedBlock()
 	if err != nil {
-		return ErrGetLastBlock
+		return nil, ErrGetLastBlock
 	}
 
 	prevSeal := lastBlock.GetSeal()
@@ -25,7 +27,10 @@ func (b *CreateBlockApi) CreateBlock(txList []blockchain.Transaction) error {
 	defaultTxList := blockchain.ConvertTxTypeToDefaultTransaction(txList)
 	creator := []byte(b.publisherId)
 
-	blockchain.CreateProposedBlock(prevSeal, height, defaultTxList, creator)
+	block, err := blockchain.CreateProposedBlock(prevSeal, height, defaultTxList, creator)
+	if err != nil {
+		return nil, err
+	}
 
-	return nil
+	return block, nil
 }
