@@ -69,7 +69,7 @@ func setBlockWithConfig(filePath string, block Block) error {
 	return nil
 }
 
-func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []Transaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*BlockCreatedEvent, error) {
+func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []*DefaultTransaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*BlockCreatedEvent, error) {
 	txListBytes, err := common.Serialize(txList)
 
 	if err != nil {
@@ -91,7 +91,7 @@ func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList
 	}, nil
 }
 
-func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, Creator []byte) (Block, error) {
+func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransaction, Creator []byte) (Block, error) {
 
 	//declare
 	ProposedBlock := &DefaultBlock{}
@@ -99,7 +99,7 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 	TimeStamp := (time.Now()).Round(0)
 
 	//build
-	txSeal, err := validator.BuildTxSeal(txList)
+	txSeal, err := validator.BuildTxSeal(convertTxType(txList))
 
 	if err != nil {
 		return nil, ErrBuildingTxSeal

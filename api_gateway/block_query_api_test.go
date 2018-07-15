@@ -9,6 +9,7 @@ import (
 
 	"github.com/it-chain/it-chain-Engine/api_gateway"
 	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/yggdrasill/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -107,10 +108,15 @@ func TestCommitedBlockRepositoryImpl(t *testing.T) {
 	assert.NoError(t, err)
 
 	// when
-	block, err2 := cbr.GetLastBlock()
+	block3, err2 := cbr.GetLastBlock()
 	// then
 	assert.NoError(t, err2)
-	assert.Equal(t, blockchain.BlockHeight(1), block.GetHeight())
+	assert.Equal(t, blockchain.BlockHeight(1), block3.GetHeight())
+
+	// when
+	block4, err3 := cbr.GetBlockByHeight(blockchain.BlockHeight(1))
+	assert.NoError(t, err3)
+	assert.Equal(t, 4, len(block4.GetTxList()))
 
 }
 
@@ -218,7 +224,7 @@ func getTime() time.Time {
 }
 
 func convertTxListType(txList []*blockchain.DefaultTransaction) []blockchain.Transaction {
-	convTxList := make([]blockchain.Transaction, 0)
+	convTxList := make([]common.Transaction, 0)
 	for _, tx := range txList {
 		convTxList = append(convTxList, tx)
 	}

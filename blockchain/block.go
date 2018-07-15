@@ -30,7 +30,7 @@ type DefaultBlock struct {
 	Seal      []byte
 	PrevSeal  []byte
 	Height    uint64
-	TxList    []Transaction
+	TxList    []*DefaultTransaction
 	TxSeal    [][]byte
 	Timestamp time.Time
 	Creator   []byte
@@ -42,7 +42,7 @@ func (block *DefaultBlock) On(event midgard.Event) error {
 	switch v := event.(type) {
 
 	case *BlockCreatedEvent:
-		TxList, err := deserializeTxList(v.TxList)
+		TxList, err := deserializeDefaultTxList(v.TxList)
 
 		if err != nil {
 			return ErrDeserializingTxList
@@ -82,10 +82,10 @@ func (block *DefaultBlock) SetHeight(height uint64) {
 // TODO: Write test case
 func (block *DefaultBlock) PutTx(transaction Transaction) error {
 	if block.TxList == nil {
-		block.TxList = make([]Transaction, 0)
+		block.TxList = make([]*DefaultTransaction, 0)
 	}
 
-	block.TxList = append(block.TxList, transaction)
+	block.TxList = append(block.TxList, transaction.(*DefaultTransaction))
 
 	return nil
 }
@@ -158,7 +158,6 @@ func (block *DefaultBlock) Deserialize(serializedBlock []byte) error {
 	if len(serializedBlock) == 0 {
 		return ErrDecodingEmptyBlock
 	}
-
 	err := json.Unmarshal(serializedBlock, block)
 	if err != nil {
 		return err
