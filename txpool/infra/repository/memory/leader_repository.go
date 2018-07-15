@@ -25,9 +25,4 @@ func (lr *MemoryLeaderRepository) GetLeader() txpool.Leader {
 	return lr.currentLeader
 }
 
-func (lr *MemoryLeaderRepository) SetLeader(leader txpool.Leader) {
-	lr.lock.Lock()
-	defer lr.lock.Unlock()
 
-	lr.currentLeader = leader
-}
