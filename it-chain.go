@@ -14,6 +14,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/api_gateway"
 	"github.com/it-chain/it-chain-Engine/cmd/icode"
 	"github.com/it-chain/it-chain-Engine/conf"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	icodeApi "github.com/it-chain/it-chain-Engine/icode/api"
 	icodeAdapter "github.com/it-chain/it-chain-Engine/icode/infra/adapter"
 	icodeInfra "github.com/it-chain/it-chain-Engine/icode/infra/api"
@@ -63,8 +64,10 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 		configName := c.String("config")
 		conf.SetConfigName(configName)
+		eventstore.InitDefault()
 		return start()
 	}
+
 	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
@@ -179,6 +182,7 @@ func initIcode() error {
 	mqClient.Subscribe("Command", "icode.deploy", deployHandler)
 	mqClient.Subscribe("Command", "icode.undeploy", unDeployHandler)
 	mqClient.Subscribe("Command", "block.excute", blockCommandHandler)
+
 	return nil
 
 }

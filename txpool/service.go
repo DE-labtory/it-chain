@@ -1,5 +1,7 @@
 package txpool
 
+import "log"
+
 type TxpoolQueryService interface {
 	FindUncommittedTransactions() ([]Transaction, error)
 }
@@ -28,10 +30,14 @@ func NewBlockProposalService(queryService TxpoolQueryService, blockService Block
 	}
 }
 
+// todo do not delete transaction immediately
+// todo transaction will be deleted when block are committed
 func (b BlockProposalService) ProposeBlock() error {
 
 	// todo transaction size, number of tx
 	transactions, err := b.txpoolQueryService.FindUncommittedTransactions()
+
+	log.Printf("proposing transactions [%s]", transactions)
 
 	if err != nil {
 		return err
@@ -43,7 +49,21 @@ func (b BlockProposalService) ProposeBlock() error {
 	//	return
 	//})
 
-	return b.blockService.ProposeBlock(transactions)
+	if len(transactions) == 0 {
+		return nil
+	}
+
+	err = b.blockService.ProposeBlock(transactions)
+
+	if err != nil {
+		return err
+	}
+
+	for _, tx := range transactions {
+		DeleteTransaction(tx)
+	}
+
+	return nil
 }
 
 func filter(vs []Transaction, f func(Transaction) bool) []Transaction {

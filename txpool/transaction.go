@@ -156,7 +156,8 @@ func DeleteTransaction(transaction Transaction) error {
 
 	event := &TxDeletedEvent{
 		EventModel: midgard.EventModel{
-			ID: transaction.TxId,
+			ID:   transaction.TxId,
+			Type: "transaction.deleted",
 		},
 	}
 
