@@ -5,11 +5,13 @@ import (
 	"sync"
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/leveldb-wrapper"
 	"github.com/it-chain/yggdrasill"
 )
 
 var ErrNoStagedBlock = errors.New("Error can not find staged block")
 var ErrGetCommitedBlock = errors.New("Error in getting commited block")
+var ErrNewBlockStorage = errors.New("Error in construct block storage")
 
 type BlockQueryApi struct {
 	blockpoolRepository     BlockPoolRepository
@@ -77,6 +79,24 @@ func (bpr *BlockPoolRepositoryImpl) GetStagedBlockById(blockId string) (blockcha
 type CommitedBlockRepositoryImpl struct {
 	mux *sync.RWMutex
 	yggdrasill.BlockStorageManager
+}
+
+func NewCommitedBlockRepositoryImpl(dbPath string) (*CommitedBlockRepositoryImpl, error) {
+	validator := new(blockchain.DefaultValidator)
+	db := leveldbwrapper.CreateNewDB(dbPath)
+	opts := map[string]interface{}{
+		"db_path": dbPath,
+	}
+
+	blockStorage, err := yggdrasill.NewBlockStorage(db, validator, opts)
+	if err != nil {
+		return nil, ErrNewBlockStorage
+	}
+
+	return &CommitedBlockRepositoryImpl{
+		mux:                 &sync.RWMutex{},
+		BlockStorageManager: blockStorage,
+	}, nil
 }
 
 func (cbr *CommitedBlockRepositoryImpl) GetLastBlock() (blockchain.Block, error) {
