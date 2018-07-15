@@ -55,6 +55,7 @@ func TestCreateBlockApi_CreateBlock(t *testing.T) {
 
 }
 
+// TODO: move to mock package
 func getNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
 	validator := &blockchain.DefaultValidator{}
 	testingTime := getTime()
@@ -74,6 +75,7 @@ func getNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
 	return block
 }
 
+// TODO: move to mock package
 func newEmptyBlock(prevSeal []byte, height uint64, creator []byte) *blockchain.DefaultBlock {
 	block := &blockchain.DefaultBlock{}
 
@@ -84,6 +86,7 @@ func newEmptyBlock(prevSeal []byte, height uint64, creator []byte) *blockchain.D
 	return block
 }
 
+// TODO: move to mock package
 func getTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 	return []*blockchain.DefaultTransaction{
 		{
@@ -153,11 +156,13 @@ func getTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 	}
 }
 
+// TODO: move to mock package
 func getTime() time.Time {
 	testingTime, _ := time.Parse("Jan 2, 2006 at 3:04pm (MST)", "Feb 3, 2013 at 7:54pm (UTC)")
 	return testingTime
 }
 
+// TODO: move to mock package
 func convertTxListType(txList []*blockchain.DefaultTransaction) []blockchain.Transaction {
 	convTxList := make([]blockchain.Transaction, 0)
 	for _, tx := range txList {
