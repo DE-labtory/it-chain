@@ -19,6 +19,7 @@ func NewBlockExecuteService(publisher Publisher) BlockExecuteService {
 	}
 }
 
+// TODO: When SOLO mode, Send BlockExeucteCommand to icode, otherwise send it to Consensus
 func (c BlockExecuteService) ExecuteBlock(block blockchain.Block) error {
 	if !blockchain.IsBlockHasAllProperties(block) {
 		return errors.New("Block has missing properties")

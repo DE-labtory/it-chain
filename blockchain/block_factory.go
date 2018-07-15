@@ -69,28 +69,6 @@ func setBlockWithConfig(filePath string, block Block) error {
 	return nil
 }
 
-func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []*DefaultTransaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*BlockCreatedEvent, error) {
-	txListBytes, err := common.Serialize(txList)
-
-	if err != nil {
-		return &BlockCreatedEvent{}, err
-	}
-
-	return &BlockCreatedEvent{
-		EventModel: midgard.EventModel{
-			ID:   string(seal),
-			Type: "block.created",
-		},
-		Seal:      seal,
-		PrevSeal:  prevSeal,
-		Height:    height,
-		TxList:    txListBytes,
-		TxSeal:    txSeal,
-		Timestamp: timeStamp,
-		Creator:   creator,
-	}, nil
-}
-
 func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransaction, Creator []byte) (Block, error) {
 
 	//declare
@@ -127,4 +105,27 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransa
 	eventstore.Save(createEvent.GetID(), createEvent)
 
 	return ProposedBlock, nil
+}
+
+func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []*DefaultTransaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*BlockCreatedEvent, error) {
+	txListBytes, err := common.Serialize(txList)
+
+	if err != nil {
+		return &BlockCreatedEvent{}, err
+	}
+
+	return &BlockCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID:   string(seal),
+			Type: "block.created",
+		},
+		Seal:      seal,
+		PrevSeal:  prevSeal,
+		Height:    height,
+		TxList:    txListBytes,
+		TxSeal:    txSeal,
+		Timestamp: timeStamp,
+		Creator:   creator,
+		State:     Created,
+	}, nil
 }
