@@ -13,6 +13,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/api_gateway"
 	blockchainApi "github.com/it-chain/it-chain-Engine/blockchain/api"
 	blockchainAdapter "github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
+	"github.com/it-chain/it-chain-Engine/cmd/blockchain"
 	"github.com/it-chain/it-chain-Engine/cmd/icode"
 	"github.com/it-chain/it-chain-Engine/conf"
 	icodeApi "github.com/it-chain/it-chain-Engine/icode/api"
@@ -57,6 +58,7 @@ func main() {
 	}
 	app.Commands = []cli.Command{}
 	app.Commands = append(app.Commands, icode.IcodeCmd())
+	app.Commands = append(app.Commands, blockchain.BlockchainCmd())
 	app.Action = func(c *cli.Context) error {
 		configName := c.String("config")
 		conf.SetConfigName(configName)
