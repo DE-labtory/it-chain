@@ -32,12 +32,12 @@ func (bApi *BlockApi) Synchronize() error {
 	peer, err := bApi.peerService.GetRandomPeer()
 
 	if err != nil {
-		return err
+		return ErrGetRandomPeer
 	}
 
 	// Synchronize blockchain with a random peer
 	if err = bApi.syncService.SyncWithPeer(peer); err != nil {
-		return err
+		return ErrSyncWithPeer
 	}
 
 	// Set syncState : Done

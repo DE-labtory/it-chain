@@ -131,6 +131,7 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 	return ProposedBlock, nil
 }
 
+//ToDo: test case 작성
 func CreateRetrievedBlock(retrievedBlock Block) (Block, error) {
 
 	//declare
