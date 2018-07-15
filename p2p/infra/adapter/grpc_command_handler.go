@@ -41,7 +41,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 		pLTable, _ := gch.pLTableService.GetPLTableFromCommand(command)
 
 		//2. update leader and peer list by info of node which has longer peer list
-		gch.leaderApi.UpdateLeaderWithLargePeerTable(pLTable.Leader, pLTable.PeerTable)
+		gch.leaderApi.UpdateLeaderWithLargePeerTable(pLTable)
 
 		//3. dial according to peer table
 		gch.communicationApi.DialToUnConnectedNode(pLTable.PeerTable)
