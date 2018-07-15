@@ -6,20 +6,22 @@ import (
 
 type CreateBlockApi struct {
 	blockQueryApi blockchain.BlockQueryApi
+	blockService  blockchain.BlockService
 	publisherId   string
 }
 
-func NewCreateBlockApi(blockQueryApi blockchain.BlockQueryApi, publisherId string) *CreateBlockApi {
+func NewCreateBlockApi(blockQueryApi blockchain.BlockQueryApi, blockService blockchain.BlockService, publisherId string) *CreateBlockApi {
 	return &CreateBlockApi{
 		blockQueryApi: blockQueryApi,
+		blockService:  blockService,
 		publisherId:   publisherId,
 	}
 }
 
-func (b *CreateBlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.Block, error) {
+func (b *CreateBlockApi) CreateBlock(txList []blockchain.Transaction) error {
 	lastBlock, err := b.blockQueryApi.GetLastCommitedBlock()
 	if err != nil {
-		return nil, ErrGetLastBlock
+		return ErrGetLastBlock
 	}
 
 	prevSeal := lastBlock.GetSeal()
@@ -29,8 +31,13 @@ func (b *CreateBlockApi) CreateBlock(txList []blockchain.Transaction) (blockchai
 
 	block, err := blockchain.CreateProposedBlock(prevSeal, height, defaultTxList, creator)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return block, nil
+	err = b.blockService.ExecuteBlock(block)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
