@@ -32,6 +32,9 @@ Core implementation decisions can be found in the Project Implementation Details
 Contribution Guide <br>
 [CONTRIBUTION](CONTRIBUTION.md)
 
+## Contact
+Slack URL : https://it-chain-opensource.slack.com/
+
 ## License
 
 It-Chain Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the [LICENSE](LICENSE) file.
