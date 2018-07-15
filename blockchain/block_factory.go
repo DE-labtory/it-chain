@@ -172,15 +172,3 @@ func createBlockStagedEvent(block Block) (*BlockStagedEvent, error) {
 		State: Staged,
 	}, nil
 }
-
-func createBlockCommittedEvent(block Block) (*BlockCommittedEvent, error) {
-
-	aggregateId := string(block.GetSeal())
-
-	return &BlockCommittedEvent{
-		EventModel: midgard.EventModel{
-			ID: aggregateId,
-		},
-		State: Committed,
-	}, nil
-}
