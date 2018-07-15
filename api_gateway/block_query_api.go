@@ -21,19 +21,26 @@ type BlockQueryApi struct {
 	CommitedBlockRepository CommitedBlockRepository
 }
 
-func (b BlockQueryApi) GetStagedBlockByHeight(height uint64) (blockchain.Block, error) {
+func NewBlockQueryApi(blockpoolRepo BlockPoolRepository, commitedBlockRepo CommitedBlockRepository) *BlockQueryApi {
+	return &BlockQueryApi{
+		BlockpoolRepository:     blockpoolRepo,
+		CommitedBlockRepository: commitedBlockRepo,
+	}
+}
+
+func (b *BlockQueryApi) GetStagedBlockByHeight(height uint64) (blockchain.Block, error) {
 	return b.BlockpoolRepository.GetStagedBlockByHeight(height)
 }
 
-func (b BlockQueryApi) GetStagedBlockById(blockId string) (blockchain.Block, error) {
+func (b *BlockQueryApi) GetStagedBlockById(blockId string) (blockchain.Block, error) {
 	return b.BlockpoolRepository.GetStagedBlockById(blockId)
 }
 
-func (b BlockQueryApi) GetLastCommitedBlock() (blockchain.Block, error) {
+func (b *BlockQueryApi) GetLastCommitedBlock() (blockchain.Block, error) {
 	return b.CommitedBlockRepository.GetLastBlock()
 }
 
-func (b BlockQueryApi) GetCommitedBlockByHeight(height uint64) (blockchain.Block, error) {
+func (b *BlockQueryApi) GetCommitedBlockByHeight(height uint64) (blockchain.Block, error) {
 	return b.CommitedBlockRepository.GetBlockByHeight(height)
 }
 

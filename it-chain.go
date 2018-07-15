@@ -10,6 +10,8 @@ import (
 
 	"sync"
 
+	"github.com/it-chain/it-chain-Engine/api_gateway"
+	blockchainApi "github.com/it-chain/it-chain-Engine/blockchain/api"
 	blockchainAdapter "github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
 	"github.com/it-chain/it-chain-Engine/cmd/icode"
 	"github.com/it-chain/it-chain-Engine/conf"
@@ -131,9 +133,30 @@ func initConsensus() error {
 	return nil
 }
 func initBlockchain() error {
+	dbPath := "./blockchain"
+	publisherId := "publisherId" // TODO:
 	config := conf.GetConfiguration()
 	mqClient := rabbitmq.Connect(config.Common.Messaging.Url)
 
-	commandService := blockchainAdapter.NewCommandHandler()
+	// TODO: Should be moved
+	// generate query api
+	blockPoolRepository := api_gateway.NewBlockpoolRepositoryImpl()
+	commitedBlockRepository, err := api_gateway.NewCommitedBlockRepositoryImpl(dbPath)
+	if err != nil {
+		return err
+	}
+	blockQueryApi := api_gateway.NewBlockQueryApi(blockPoolRepository, commitedBlockRepository)
+
+	// generate service
+	blockExecuteService := blockchainAdapter.NewBlockExecuteService(mqClient.Publish)
+
+	// generate api
+	createBlockApi := blockchainApi.NewCreateBlockApi(blockQueryApi, blockExecuteService, publisherId)
+
+	// generate handler
+	blockCreateHandler := blockchainAdapter.NewBlockCreateCommandHandler(createBlockApi)
+
+	mqClient.Subscribe("Command", "block.propose", blockCreateHandler)
+
 	return nil
 }
