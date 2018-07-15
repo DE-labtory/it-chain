@@ -59,7 +59,12 @@ func (ss *SyncService) construct(peer Peer) error {
 			return err
 		}
 
-		CommitBlock(retrievedBlock)
+		createdBlock, err := CreateRetrievedBlock(retrievedBlock)
+		if err != nil {
+			return err
+		}
+
+		CommitBlock(createdBlock)
 
 		raiseHeight(&lastHeight)
 	}
