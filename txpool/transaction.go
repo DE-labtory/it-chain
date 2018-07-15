@@ -160,9 +160,7 @@ func DeleteTransaction(transaction Transaction) error {
 		},
 	}
 
-	tx := &Transaction{}
-
-	if err := saveAndOn(tx, event); err != nil {
+	if err := saveAndOn(&transaction, event); err != nil {
 		return err
 	}
 
