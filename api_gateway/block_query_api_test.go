@@ -8,6 +8,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestBlockPoolRepositoryImpl_AddCreatedBlock(t *testing.T) {
+	bpr := api_gateway.NewBlockpoolRepositoryImpl()
+
+	// when
+	block1 := &blockchain.DefaultBlock{
+		Seal:   []byte{0x1},
+		Height: blockchain.BlockHeight(1),
+	}
+	// when
+	bpr.AddCreatedBlock(block1)
+
+	// then
+	assert.Equal(t, 1, len(bpr.Blocks))
+	assert.Equal(t, []byte{0x1}, bpr.Blocks[0].GetSeal())
+}
+
 func TestBlockPoolRepositoryImpl_GetStagedBlockByHeight(t *testing.T) {
 	bpr := api_gateway.NewBlockpoolRepositoryImpl()
 
