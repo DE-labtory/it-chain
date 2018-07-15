@@ -44,7 +44,7 @@ func (h *CommandHandler) HandleProposeBlockCommand(command blockchain.ProposeBlo
 }
 
 // TODO: yggdrasill/impl/Transaction과 txpool/Transaction이 다름.
-func convertTxList(txList []txpool.Transaction) ([]blockchain.Transaction, error) {
+func ConvertTxList(txList []txpool.Transaction) ([]blockchain.Transaction, error) {
 	return nil, nil
 }
 
