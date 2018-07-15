@@ -39,8 +39,7 @@ func TestCreateBlockApi_CreateBlock(t *testing.T) {
 	assert.NoError(t, err)
 
 	// when
-	queryApi := api_gateway.BlockQueryApi{}
-	queryApi.CommitedBlockRepository = blockRepository
+	queryApi := api_gateway.NewBlockQueryApi(nil, blockRepository)
 
 	// when
 	blockApi := api.NewCreateBlockApi(queryApi, blockService, "zf")
