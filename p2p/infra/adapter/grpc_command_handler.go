@@ -13,37 +13,21 @@ var ErrPeerListDeliver = errors.New("peer list deliver failed")
 var ErrPeerDeliver = errors.New("peer deliver failed")
 var ErrUnmarshal = errors.New("error during unmarshal")
 
-type LeaderApi interface {
-	UpdateLeaderWithAddress(ipAddress string) error
-	DeliverLeaderInfo(connectionId string)
-}
-
-type GrpcCommandHandlerPeerApi interface {
-	GetPLTable() p2p.PLTable
-	GetPeerList() []p2p.Peer
-	FindById(peerId p2p.PeerId) (p2p.Peer, error)
-	UpdatePeerList(peerList []p2p.Peer) error
-	DeliverPLTable(connectionId string) error
-	AddPeer(peer p2p.Peer)
-	UpdateLeaderWithLongerPeerList(leader p2p.Leader, peerList []p2p.Peer) error
-}
 
 type GrpcCommandHandlerCommunicationService interface {
 	Dial(ipAddress string) error
 }
 
 type GrpcCommandHandler struct {
-	leaderApi        LeaderApi
-	peerApi          GrpcCommandHandlerPeerApi
+	leaderApi        api.LeaderApi
 	electionService  p2p.ElectionService
 	communicationApi api.CommunicationApi
 	pLTableService   p2p.PLTableService
 }
 
-func NewGrpcCommandHandler(leaderApi LeaderApi, peerApi GrpcCommandHandlerPeerApi, peerService GrpcCommandHandlerCommunicationService) *GrpcCommandHandler {
+func NewGrpcCommandHandler(leaderApi api.LeaderApi) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
 		leaderApi: leaderApi,
-		peerApi:   peerApi,
 	}
 }
 
@@ -51,21 +35,16 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 
 	switch command.Protocol {
 
-	case "LeaderInfoRequestProtocol":
-		gch.leaderApi.DeliverLeaderInfo(command.ConnectionID)
-		break
-
-
 	case "PLTableDeliverProtocol": //receive peer table
 
 		//1. receive peer table
 		pLTable, _ := gch.pLTableService.GetPLTableFromCommand(command)
 
 		//2. update leader and peer list by info of node which has longer peer list
-		gch.peerApi.UpdateLeaderWithLongerPeerList(pLTable.Leader, pLTable.PeerList)
+		gch.leaderApi.UpdateLeaderWithLargePeerTable(pLTable.Leader, pLTable.PeerTable)
 
 		//3. dial according to peer table
-		gch.communicationApi.DialToUnConnectedNode(pLTable.PeerList)
+		gch.communicationApi.DialToUnConnectedNode(pLTable.PeerTable)
 
 		break
 

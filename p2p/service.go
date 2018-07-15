@@ -35,7 +35,7 @@ type IPLTableService interface {
 //
 //	defer plts.mux.Unlock()
 //
-//	for key := range plts.pLTable.PeerList {
+//	for key := range plts.pLTable.PeerTable {
 //
 //		delete(plts.pLTable, key)
 //	}
@@ -82,7 +82,7 @@ func StartRandomTimeOut(es *ElectionService) {
 
 				pLTable, _ := es.pLTableQueryService.GetPLTable()
 
-				peerList := pLTable.PeerList
+				peerList := pLTable.PeerTable
 
 				connectionIds := make([]string, 0)
 
@@ -182,7 +182,7 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 
 	pLTable, _ := es.pLTableQueryService.GetPLTable()
 
-	for _, peer := range pLTable.PeerList {
+	for _, peer := range pLTable.PeerTable {
 		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, peer.PeerId.Id)
 	}
 
@@ -205,7 +205,7 @@ func (es *ElectionService) DecideToBeLeader(command GrpcReceiveCommand) error {
 
 	//	3. if counted is same with num of peer-1 set leader and publish
 	pLTable, _ := es.pLTableQueryService.GetPLTable()
-	numOfPeers := len(pLTable.PeerList)
+	numOfPeers := len(pLTable.PeerTable)
 
 	if election.GetVoteCount() == numOfPeers-1 {
 
