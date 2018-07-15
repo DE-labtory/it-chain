@@ -36,6 +36,7 @@ const (
 	Query  TxDataType = "query"
 )
 
+type TransactionId = string
 type Transaction = ygg.Transaction
 
 // Params 구조체는 Jsonrpc에서 invoke하는 함수의 패러미터를 정의한다.
@@ -55,7 +56,7 @@ type TxData struct {
 
 // DefaultTransaction 구조체는 Transaction 인터페이스의 기본 구현체이다.
 type DefaultTransaction struct {
-	ID        string
+	ID        TransactionId
 	Status    Status
 	PeerID    string
 	Timestamp time.Time
