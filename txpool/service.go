@@ -1,7 +1,7 @@
 package txpool
 
 type TxpoolQueryService interface {
-	GetAllTransactions() ([]Transaction, error)
+	FindUncommittedTransactions() ([]Transaction, error)
 }
 
 type TransferService interface {
@@ -20,10 +20,9 @@ type BlockProposalService struct {
 
 type Publisher func(exchange string, topic string, data interface{}) (err error)
 
-func NewBlockProposalService(queryService TxpoolQueryService, blockService BlockService, publisher Publisher) *BlockProposalService {
+func NewBlockProposalService(queryService TxpoolQueryService, blockService BlockService) *BlockProposalService {
 
 	return &BlockProposalService{
-		publisher:          publisher,
 		txpoolQueryService: queryService,
 		blockService:       blockService,
 	}
@@ -32,7 +31,7 @@ func NewBlockProposalService(queryService TxpoolQueryService, blockService Block
 func (b BlockProposalService) ProposeBlock() error {
 
 	// todo transaction size, number of tx
-	transactions, err := b.txpoolQueryService.GetAllTransactions()
+	transactions, err := b.txpoolQueryService.FindUncommittedTransactions()
 
 	if err != nil {
 		return err

@@ -37,6 +37,7 @@ func decodeFindAllUncommittedTransactionsRequest(_ context.Context, r *http.Requ
 }
 
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
+
 	if e, ok := response.(errorer); ok && e.error() != nil {
 		encodeError(ctx, e.error(), w)
 		return nil

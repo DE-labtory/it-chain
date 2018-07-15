@@ -3,16 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
-	"time"
-
-	"net"
-
-	"sync"
-
 	"os/signal"
 	"syscall"
+	"time"
 
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/it-chain/it-chain-Engine/api_gateway"
@@ -22,6 +18,10 @@ import (
 	icodeAdapter "github.com/it-chain/it-chain-Engine/icode/infra/adapter"
 	icodeInfra "github.com/it-chain/it-chain-Engine/icode/infra/api"
 	icodeService "github.com/it-chain/it-chain-Engine/icode/infra/service"
+	"github.com/it-chain/it-chain-Engine/txpool"
+	txpoolApi "github.com/it-chain/it-chain-Engine/txpool/api"
+	txpoolAdapter "github.com/it-chain/it-chain-Engine/txpool/infra/adapter"
+	txpoolBatch "github.com/it-chain/it-chain-Engine/txpool/infra/batch"
 	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/it-chain/tesseract"
 	"github.com/urfave/cli"
@@ -72,30 +72,46 @@ func main() {
 }
 
 func start() error {
+
 	configuration := conf.GetConfiguration()
 	ln, err := net.Listen("tcp", configuration.Common.NodeIp)
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Can't listen on %q: %s\n", conf.GetConfiguration().GrpcGateway.Ip, err)
 		return err
 	}
+
 	err = ln.Close()
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Couldn't stop listening on %q: %s\n", conf.GetConfiguration().GrpcGateway.Ip, err)
 		return err
 	}
 
-	initGateway()
+	errs := make(chan error, 2)
+
+	initGateway(errs)
 	initTxPool()
 	initIcode()
 	initPeer()
-	// wait group for test
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	wg.Wait()
+
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGINT)
+		errs <- fmt.Errorf("%s", <-c)
+	}()
+
+	log.Println("terminated", <-errs)
+
 	return nil
 }
 
-func initGateway() error {
+//todo other way to inject each query Api to component
+var txQueryApi api_gateway.TransactionQueryApi
+
+func initGateway(errs chan error) error {
+
+	log.Println("gateway is running...")
 
 	config := conf.GetConfiguration()
 	ipAddress := config.Common.NodeIp
@@ -107,17 +123,18 @@ func initGateway() error {
 
 	//set service and repo
 	dbPath := "./.test"
-	client := rabbitmq.Connect("")
+	mqClient := rabbitmq.Connect(config.Common.Messaging.Url)
 
 	repo := api_gateway.NewTransactionRepository(dbPath)
 
-	txQueryApi := api_gateway.NewTransactionQueryApi(repo)
+	txQueryApi = api_gateway.NewTransactionQueryApi(repo)
 	txEventListener := api_gateway.NewTransactionEventListener(repo)
 
 	//set mux
 	mux := http.NewServeMux()
 	httpLogger := kitlog.With(logger, "component", "http")
-	err := client.Subscribe("Event", "transaction.*", txEventListener)
+
+	err := mqClient.Subscribe("Event", "transaction.*", &txEventListener)
 
 	if err != nil {
 		panic(err)
@@ -126,23 +143,17 @@ func initGateway() error {
 	mux.Handle("/", api_gateway.MakeHandler(txQueryApi, httpLogger))
 	http.Handle("/", mux)
 
-	errs := make(chan error, 2)
-
 	go func() {
 		log.Println("transport", "http", "address", ipAddress, "msg", "listening")
 		errs <- http.ListenAndServe(ipAddress, nil)
 	}()
-	go func() {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, syscall.SIGINT)
-		errs <- fmt.Errorf("%s", <-c)
-	}()
-
-	log.Println("terminated", <-errs)
 
 	return nil
 }
+
 func initIcode() error {
+
+	log.Println("icode is running...")
 
 	config := conf.GetConfiguration()
 	mqClient := rabbitmq.Connect(config.Common.Messaging.Url)
@@ -169,11 +180,40 @@ func initIcode() error {
 	mqClient.Subscribe("Command", "icode.undeploy", unDeployHandler)
 	mqClient.Subscribe("Command", "block.excute", blockCommandHandler)
 	return nil
+
 }
+
 func initPeer() error {
 	return nil
 }
+
 func initTxPool() error {
+
+	log.Println("txpool is running...")
+
+	config := conf.GetConfiguration()
+	mqClient := rabbitmq.Connect(config.Common.Messaging.Url)
+
+	//todo get id from pubkey
+	tmpPeerID := "tmp peer 1"
+
+	//service
+	blockService := txpoolAdapter.NewBlockService(mqClient.Publish)
+	blockProposalService := txpool.NewBlockProposalService(txQueryApi, blockService)
+
+	//infra
+	txApi := txpoolApi.NewTransactionApi(tmpPeerID)
+	txCommandHandler := txpoolAdapter.NewTxCommandHandler(txApi)
+
+	//10초마다 block propose
+	txpoolBatch.GetTimeOutBatcherInstance().Run(blockProposalService.ProposeBlock, time.Second*10)
+
+	err := mqClient.Subscribe("Command", "transaction.create", txCommandHandler)
+
+	if err != nil {
+		panic(err)
+	}
+
 	return nil
 }
 func initConsensus() error {
