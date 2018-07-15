@@ -37,15 +37,14 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	if err != nil {
 		return nil, ErrCreatingEvent
 	}
-
-	//save
-	eventstore.Save(createEvent.GetID(), createEvent)
-
 	//on
 	err = GenesisBlock.On(createEvent)
 	if err != nil {
 		return nil, ErrOnEvent
 	}
+
+	//save
+	eventstore.Save(createEvent.GetID(), createEvent)
 
 	return GenesisBlock, nil
 }
@@ -70,7 +69,45 @@ func setBlockWithConfig(filePath string, block Block) error {
 	return nil
 }
 
-func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []Transaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*BlockCreatedEvent, error) {
+func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransaction, Creator []byte) (Block, error) {
+
+	//declare
+	ProposedBlock := &DefaultBlock{}
+	validator := DefaultValidator{}
+	TimeStamp := (time.Now()).Round(0)
+
+	//build
+	txSeal, err := validator.BuildTxSeal(ConvertTxTypeToTransaction(txList))
+
+	if err != nil {
+		return nil, ErrBuildingTxSeal
+	}
+
+	Seal, err := validator.BuildSeal(TimeStamp, prevSeal, txSeal, Creator)
+
+	if err != nil {
+		return nil, ErrBuildingSeal
+	}
+
+	//create
+	createEvent, err := createBlockCreatedEvent(Seal, prevSeal, height, txList, txSeal, TimeStamp, Creator)
+	if err != nil {
+		return nil, ErrCreatingEvent
+	}
+
+	//on
+	err = ProposedBlock.On(createEvent)
+	if err != nil {
+		return nil, ErrOnEvent
+	}
+
+	//save
+	eventstore.Save(createEvent.GetID(), createEvent)
+
+	return ProposedBlock, nil
+}
+
+func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []*DefaultTransaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*BlockCreatedEvent, error) {
 	txListBytes, err := common.Serialize(txList)
 
 	if err != nil {
@@ -89,43 +126,6 @@ func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList
 		TxSeal:    txSeal,
 		Timestamp: timeStamp,
 		Creator:   creator,
+		State:     Created,
 	}, nil
-}
-
-func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, Creator []byte) (Block, error) {
-
-	//declare
-	ProposedBlock := &DefaultBlock{}
-	validator := DefaultValidator{}
-	TimeStamp := (time.Now()).Round(0)
-
-	//build
-	txSeal, err := validator.BuildTxSeal(txList)
-
-	if err != nil {
-		return nil, ErrBuildingTxSeal
-	}
-
-	Seal, err := validator.BuildSeal(TimeStamp, prevSeal, txSeal, Creator)
-
-	if err != nil {
-		return nil, ErrBuildingSeal
-	}
-
-	//create
-	createEvent, err := createBlockCreatedEvent(Seal, prevSeal, height, txList, txSeal, TimeStamp, Creator)
-	if err != nil {
-		return nil, ErrCreatingEvent
-	}
-
-	//save
-	eventstore.Save(createEvent.GetID(), createEvent)
-
-	//on
-	err = ProposedBlock.On(createEvent)
-	if err != nil {
-		return nil, ErrOnEvent
-	}
-
-	return ProposedBlock, nil
 }

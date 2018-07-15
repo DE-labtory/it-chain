@@ -33,7 +33,7 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 	switch command.Protocol {
 	case "SyncCheckRequestProtocol":
 		//TODO: 상대방의 SyncCheck를 위해서 자신의 last block을 보내준다.
-		block, err := g.blockQueryApi.GetLastBlock()
+		block, err := g.blockQueryApi.GetLastCommitedBlock()
 		if err != nil {
 			return ErrGetLastBlock
 		}
@@ -55,7 +55,7 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 			return ErrBlockInfoDeliver
 		}
 
-		block, err := g.blockQueryApi.GetBlockByHeight(height)
+		block, err := g.blockQueryApi.GetCommitedBlockByHeight(height)
 		if err != nil {
 			return ErrGetBlock
 		}

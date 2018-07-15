@@ -12,21 +12,56 @@ import (
 
 	"errors"
 	"fmt"
-	"log"
 )
 
 type Block = ygg.Block
 
 type BlockHeight = uint64
 
+type BlockState = string
+
+const (
+	Created   BlockState = "Created"
+	Staged    BlockState = "Staged"
+	Committed BlockState = "Committed"
+)
+
 type DefaultBlock struct {
 	Seal      []byte
 	PrevSeal  []byte
 	Height    uint64
-	TxList    []Transaction
+	TxList    []*DefaultTransaction
 	TxSeal    [][]byte
 	Timestamp time.Time
 	Creator   []byte
+	State     BlockState
+}
+
+func (block *DefaultBlock) On(event midgard.Event) error {
+
+	switch v := event.(type) {
+
+	case *BlockCreatedEvent:
+		TxList, err := deserializeDefaultTxList(v.TxList)
+
+		if err != nil {
+			return ErrDeserializingTxList
+		}
+
+		block.Seal = v.Seal
+		block.PrevSeal = v.PrevSeal
+		block.Height = v.Height
+		block.TxList = TxList
+		block.TxSeal = v.TxSeal
+		block.Timestamp = v.Timestamp
+		block.Creator = v.Creator
+		block.State = v.State
+
+	default:
+		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
+	}
+
+	return nil
 }
 
 // TODO: Write test case
@@ -47,10 +82,10 @@ func (block *DefaultBlock) SetHeight(height uint64) {
 // TODO: Write test case
 func (block *DefaultBlock) PutTx(transaction Transaction) error {
 	if block.TxList == nil {
-		block.TxList = make([]Transaction, 0)
+		block.TxList = make([]*DefaultTransaction, 0)
 	}
 
-	block.TxList = append(block.TxList, transaction)
+	block.TxList = append(block.TxList, transaction.(*DefaultTransaction))
 
 	return nil
 }
@@ -123,7 +158,6 @@ func (block *DefaultBlock) Deserialize(serializedBlock []byte) error {
 	if len(serializedBlock) == 0 {
 		return ErrDecodingEmptyBlock
 	}
-
 	err := json.Unmarshal(serializedBlock, block)
 	if err != nil {
 		return err
@@ -145,80 +179,8 @@ func (block *DefaultBlock) IsPrev(serializedPrevBlock []byte) bool {
 	return bytes.Compare(prevBlock.GetSeal(), block.GetPrevSeal()) == 0
 }
 
-// interface of api gateway query api
-type BlockQueryApi interface {
-	GetBlockByHeight(blockHeight uint64) (Block, error)
-	GetBlockBySeal(seal []byte) (Block, error)
-	GetBlockByTxID(txid string) (Block, error)
-	GetLastBlock() (Block, error)
-}
-
-type Action interface {
-	DoAction(block Block) error
-}
-
 // TODO: Write test case
-func CreateSaveOrSyncAction(checkResult int64) Action {
-	if checkResult > 0 {
-		return NewSyncAction()
-	} else if checkResult == 0 {
-		return NewSaveAction()
-	} else {
-		return NewDefaultAction()
-	}
-}
-
-type SyncAction struct{}
-
-func NewSyncAction() *SyncAction {
-	return &SyncAction{}
-}
-func (block *DefaultBlock) On(event midgard.Event) error {
-
-	switch v := event.(type) {
-
-	case *BlockCreatedEvent:
-		TxList, err := deserializeTxList(v.TxList)
-
-		if err != nil {
-			return ErrDeserializingTxList
-		}
-
-		block.Seal = v.Seal
-		block.PrevSeal = v.PrevSeal
-		block.Height = v.Height
-		block.TxList = TxList
-		block.TxSeal = v.TxSeal
-		block.Timestamp = v.Timestamp
-		block.Creator = v.Creator
-
-	default:
-		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
-	}
-
-	return nil
-}
-
-func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock {
-	block := &DefaultBlock{}
-	return block
-}
-
-func (syncAction *SyncAction) DoAction(block Block) error {
-	// TODO: Start synchronize
-	return nil
-}
-
-type SaveAction struct {
-	blockPool BlockPool
-}
-
-func NewSaveAction() *SaveAction {
-	return &SaveAction{}
-}
-
-// TODO: Write test case
-func (saveAction *SaveAction) DoAction(block Block) error {
+func CommitBlock(block Block) error {
 	event, err := createBlockCommittedEvent(block)
 	if err != nil {
 		return err
@@ -232,20 +194,41 @@ func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
 	seal := string(block.GetSeal())
 	return BlockCommittedEvent{
 		EventModel: midgard.EventModel{
-			ID: seal,
+			ID:   seal,
+			Type: "block.commited",
 		},
-		Seal: seal,
+		State: Committed,
 	}, nil
 }
 
-type DefaultAction struct{}
+// TODO: Write test case
+func StageBlock(block Block) error {
+	event, err := createBlockStagedEvent(block)
+	if err != nil {
+		return err
+	}
 
-func NewDefaultAction() *DefaultAction {
-	return &DefaultAction{}
+	blockId := string(block.GetSeal())
+
+	err = eventstore.Save(blockId, event)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// TODO: Write test case
-func (defaultAction *DefaultAction) DoAction(block Block) error {
-	log.Printf("got shorter height block [%v]", block.GetHeight())
-	return nil
+func createBlockStagedEvent(block Block) (BlockStagedEvent, error) {
+	return BlockStagedEvent{
+		EventModel: midgard.EventModel{
+			ID:   string(block.GetSeal()),
+			Type: "block.staged",
+		},
+		State: Staged,
+	}, nil
+}
+
+func IsBlockHasAllProperties(block Block) bool {
+	return !(block.GetSeal() == nil || block.GetPrevSeal() == nil || block.GetHeight() == 0 ||
+		block.GetTxList() == nil || block.GetCreator() == nil || block.GetTimestamp().IsZero())
 }
