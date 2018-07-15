@@ -227,3 +227,8 @@ func createBlockStagedEvent(block Block) (BlockStagedEvent, error) {
 		State: Staged,
 	}, nil
 }
+
+func IsBlockHasAllProperties(block Block) bool {
+	return !(block.GetSeal() == nil || block.GetPrevSeal() == nil || block.GetHeight() == 0 ||
+		block.GetTxList() == nil || block.GetCreator() == nil || block.GetTimestamp().IsZero())
+}

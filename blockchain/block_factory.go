@@ -99,7 +99,7 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransa
 	TimeStamp := (time.Now()).Round(0)
 
 	//build
-	txSeal, err := validator.BuildTxSeal(convertTxType(txList))
+	txSeal, err := validator.BuildTxSeal(ConvertTxTypeToTransaction(txList))
 
 	if err != nil {
 		return nil, ErrBuildingTxSeal

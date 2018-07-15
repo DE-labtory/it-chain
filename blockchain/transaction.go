@@ -179,25 +179,35 @@ func deserializeDefaultTxList(txList []byte) ([]*DefaultTransaction, error) {
 	return DefaultTxList, nil
 }
 
-func deserializeTxList(txList []byte) ([]Transaction, error) {
-	DefaultTxList := []*DefaultTransaction{}
+//func deserializeTxList(txList []byte) ([]Transaction, error) {
+//	DefaultTxList := []*DefaultTransaction{}
+//
+//	err := common.Deserialize(txList, &DefaultTxList)
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//	TxList := convertTxType(DefaultTxList)
+//
+//	return TxList, nil
+//
+//}
 
-	err := common.Deserialize(txList, &DefaultTxList)
-
-	if err != nil {
-		return nil, err
-	}
-	TxList := convertTxType(DefaultTxList)
-
-	return TxList, nil
-
-}
-
-func convertTxType(txList []*DefaultTransaction) []Transaction {
+func ConvertTxTypeToTransaction(txList []*DefaultTransaction) []Transaction {
 	convTxList := make([]Transaction, 0)
 
 	for _, tx := range txList {
 		convTxList = append(convTxList, tx)
+	}
+
+	return convTxList
+}
+
+func ConvertTxTypeToDefaultTransaction(txList []Transaction) []*DefaultTransaction {
+	convTxList := make([]*DefaultTransaction, 0)
+
+	for _, tx := range txList {
+		convTxList = append(convTxList, tx.(*DefaultTransaction))
 	}
 
 	return convTxList

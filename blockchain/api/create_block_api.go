@@ -20,7 +20,12 @@ func (b *CreateBlockApi) CreateBlock(txList []blockchain.Transaction) error {
 		return ErrGetLastBlock
 	}
 
-	//blockchain.CreateProposedBlock(lastBlock.GetSeal(), lastBlock.GetHeight() + 1, )
+	prevSeal := lastBlock.GetSeal()
+	height := lastBlock.GetHeight() + 1
+	defaultTxList := blockchain.ConvertTxTypeToDefaultTransaction(txList)
+	creator := []byte(b.publisherId)
+
+	blockchain.CreateProposedBlock(prevSeal, height, defaultTxList, creator)
 
 	return nil
 }
