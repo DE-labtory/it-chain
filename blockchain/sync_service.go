@@ -25,7 +25,7 @@ func (ss *SyncService) SyncWithPeer(peer Peer) error {
 }
 
 // Check if Synchronizing blockchain with given peer is needed
-func (ss *SyncService) syncedCheck(peer Peer) (isSynced, error) {
+func (ss *SyncService) syncedCheck(peer Peer) (IsSynced, error) {
 
 	// If nil peer is given(when i'm the first node of p2p network) : Synced
 	if peer.IpAddress == "" {

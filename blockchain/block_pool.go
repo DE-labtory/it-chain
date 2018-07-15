@@ -127,11 +127,11 @@ func createBlockFromAddToPoolEvent(event *BlockAddToPoolEvent) (Block, error) {
 // BlockSyncState Aggregate ID
 var BC_SYNC_STATE_AID = "BC_SYNC_STATE_AID"
 
-type isSynced bool
+type IsSynced bool
 
 const (
-	SYNCED   isSynced = true
-	UNSYNCED isSynced = false
+	SYNCED   IsSynced = true
+	UNSYNCED IsSynced = false
 )
 
 type ProgressState bool
