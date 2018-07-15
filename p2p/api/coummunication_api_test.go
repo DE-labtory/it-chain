@@ -30,9 +30,8 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 		},
 	}
 
-	mockPeerQueryService := &mock.MockPeerQueryService{}
-
-	mockPeerQueryService.FindByIdFunc = func(peerId p2p.PeerId) (p2p.Peer, error) {
+	mockPLTableQueryService :=&mock.MockPLTableQueryService{}
+	mockPLTableQueryService.FindPeerByIdFunc = func(peerId p2p.PeerId) (p2p.Peer, error) {
 
 		peerList := mock.MakeFakePeerList()
 
@@ -49,7 +48,7 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 
 		t.Logf("running test case %s", testName)
 
-		communicationApi := api.NewCommunicationApi(mockPeerQueryService, &mock.MockCommunicationService{})
+		communicationApi := api.NewCommunicationApi(mockPLTableQueryService, &mock.MockCommunicationService{})
 
 		assert.Equal(t, communicationApi.DialToUnConnectedNode(test.input.peerList), test.err)
 
