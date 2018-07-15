@@ -8,6 +8,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/api_gateway"
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/api"
+	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,6 +16,12 @@ func TestCreateBlockApi_CreateBlock(t *testing.T) {
 	dbPath := "./.db"
 	blockRepository, err := api_gateway.NewCommitedBlockRepositoryImpl(dbPath)
 	assert.NoError(t, err)
+
+	blockService := mock.BlockService{}
+	blockService.ExecuteBlockFunc = func(block blockchain.Block) error {
+		assert.Equal(t, blockchain.BlockHeight(2), block.GetHeight())
+		return nil
+	}
 
 	defer func() {
 		blockRepository.Close()
@@ -36,17 +43,15 @@ func TestCreateBlockApi_CreateBlock(t *testing.T) {
 	queryApi.CommitedBlockRepository = blockRepository
 
 	// when
-	blockApi := api.NewCreateBlockApi(queryApi, "zf")
+	blockApi := api.NewCreateBlockApi(queryApi, blockService, "zf")
 
 	txList := blockchain.ConvertTxTypeToTransaction(getTxList(time.Now()))
 
 	// when
-	createdBlock, err := blockApi.CreateBlock(txList)
+	err = blockApi.CreateBlock(txList)
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, blockchain.BlockHeight(2), createdBlock.GetHeight())
-	assert.Equal(t, block2.GetSeal(), createdBlock.GetPrevSeal())
 
 }
 
