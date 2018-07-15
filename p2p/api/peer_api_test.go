@@ -54,13 +54,13 @@ func SetupPeerApi() *api.PeerApi {
 
 	pLTableQueryService.FindPeerByIdFunc = func(peerId p2p.PeerId) (p2p.Peer, error) {
 
-		peerList := mock.MakeFakePeerList()
+		pLTable := mock.MakeFakePLTable()
 
 		if peerId.Id ==""{
 			return p2p.Peer{PeerId:p2p.PeerId{Id:""}, IpAddress:""}, p2p.ErrEmptyPeerId
 		}
 
-		for _, peer := range peerList {
+		for _, peer := range pLTable.PeerTable {
 			if peer.PeerId == peerId {
 
 				return peer, nil
