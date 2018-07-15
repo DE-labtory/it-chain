@@ -4,6 +4,10 @@ import (
 	"errors"
 	"sync"
 
+	"log"
+
+	"fmt"
+
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/leveldb-wrapper"
 	"github.com/it-chain/yggdrasill"
@@ -11,6 +15,7 @@ import (
 
 var ErrNoStagedBlock = errors.New("Error can not find staged block")
 var ErrGetCommitedBlock = errors.New("Error in getting commited block")
+var ErrAddCommitingBlock = errors.New("Error in add block which is going to be commited")
 var ErrNewBlockStorage = errors.New("Error in construct block storage")
 
 type BlockQueryApi struct {
@@ -99,6 +104,18 @@ func NewCommitedBlockRepositoryImpl(dbPath string) (*CommitedBlockRepositoryImpl
 	}, nil
 }
 
+func (cbr *CommitedBlockRepositoryImpl) AddBlock(block blockchain.Block) error {
+	cbr.mux.Lock()
+	defer cbr.mux.Unlock()
+
+	err := cbr.BlockStorageManager.AddBlock(block)
+	if err != nil {
+		log.Fatal(err)
+		return ErrAddCommitingBlock
+	}
+	return nil
+}
+
 func (cbr *CommitedBlockRepositoryImpl) GetLastBlock() (blockchain.Block, error) {
 	cbr.mux.Lock()
 	defer cbr.mux.Unlock()
@@ -106,6 +123,9 @@ func (cbr *CommitedBlockRepositoryImpl) GetLastBlock() (blockchain.Block, error)
 	block := &blockchain.DefaultBlock{}
 
 	err := cbr.BlockStorageManager.GetLastBlock(block)
+	fmt.Println(block.GetHeight())
+	fmt.Println(block.GetTxList())
+	fmt.Println(err)
 	if err != nil {
 		return nil, ErrGetCommitedBlock
 	}
@@ -119,6 +139,9 @@ func (cbr *CommitedBlockRepositoryImpl) GetBlockByHeight(height uint64) (blockch
 	block := &blockchain.DefaultBlock{}
 
 	err := cbr.BlockStorageManager.GetBlockByHeight(block, height)
+	fmt.Println(block.GetHeight())
+	fmt.Println(block.GetTxList())
+	fmt.Println(err)
 	if err != nil {
 		return nil, ErrGetCommitedBlock
 	}
