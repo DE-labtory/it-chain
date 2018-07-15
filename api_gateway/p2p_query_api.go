@@ -11,69 +11,34 @@ type PLTableQueryApi struct {
 	pLTable p2p.PLTable
 }
 
-func (pqa *PLTableQueryApi) FindById(peerId p2p.PeerId) (p2p.Peer, error) {
+func (pltqa *PLTableQueryApi) GetPLTable() (p2p.PLTable, error){
 
-	pqa.mux.Lock()
-	defer pqa.mux.Unlock()
-	v, exist := pqa.peerTable[id.Id]
+	return pltqa.pLTable, nil
+}
 
-	if id.Id == "" {
-		return v, ErrEmptyPeerId
+func (pltqa *PLTableQueryApi) FindPeerById(peerId p2p.PeerId) (p2p.Peer, error) {
+
+	pltqa.mux.Lock()
+	defer pltqa.mux.Unlock()
+	v, exist := pltqa.pLTable.PeerTable[peerId.Id]
+
+	if peerId.Id == "" {
+		return v, p2p.ErrEmptyPeerId
 	}
 	//no matching id
 	if !exist {
-		return v, ErrNoMatchingPeer
+		return v, p2p.ErrNoMatchingPeerId
 	}
 
 	return v, nil
 }
 
-func (pqa *PLTableQueryApi) FindAll() ([]p2p.Peer, error) {
+func (pltqa *PLTableQueryApi) FindPeerByAddress(ipAddress string) (p2p.Peer, error) {
 
-}
+	pltqa.mux.Lock()
+	defer pltqa.mux.Unlock()
 
-func (pqa *PLTableQueryApi) FindByAddress(ipAddress string) (p2p.Peer, error) {
-
-}
-
-type PLTableQueryService interface {
-	GetPLTable() (PLTable, error)
-}
-type PeerRepository struct {
-	peerTable map[string]p2p.Peer
-	mux       sync.Mutex
-}
-
-// 새로운 p2p repo 생성
-func NewPeerRepository() (PeerRepository, error) {
-	return PeerRepository{
-		peerTable: make(map[string]p2p.Peer),
-	}, nil
-}
-
-// done in peer service
-func (pr *PeerRepository) FindAll() ([]p2p.Peer, error) {
-	pr.mux.Lock()
-	defer pr.mux.Unlock()
-	peers := make([]p2p.Peer, 0)
-
-	if len(pr.peerTable) == 0 {
-		return peers, ErrEmptyPeerTable
-	}
-
-	for _, value := range pr.peerTable {
-		peers = append(peers, value)
-	}
-
-	return peers, nil
-}
-
-func (pr *PeerRepository) FindByAddress(ipAddress string) (p2p.Peer, error) {
-
-	pr.mux.Lock()
-	defer pr.mux.Unlock()
-
-	for _, peer := range pr.peerTable {
+	for _, peer := range pltqa.pLTable.PeerTable {
 
 		if peer.IpAddress == ipAddress {
 			return peer, nil
@@ -82,3 +47,9 @@ func (pr *PeerRepository) FindByAddress(ipAddress string) (p2p.Peer, error) {
 
 	return p2p.Peer{}, nil
 }
+
+type PeerRepository struct {
+	peerTable map[string]p2p.Peer
+	mux       sync.Mutex
+}
+
