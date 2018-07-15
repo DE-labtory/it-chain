@@ -1,18 +1,133 @@
 package api_test
 
 import (
-	"errors"
-	"fmt"
 	"testing"
+
+	"errors"
+
+	"log"
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/it-chain-Engine/blockchain/api"
 	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
-	"github.com/it-chain/midgard"
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestBlockApi_AddBlockToPool(t *testing.T) {
+func TestBlockApi_Synchronize(t *testing.T) {
+
+	//given
+	tests := map[string]struct {
+		input struct {
+			peerService struct {
+				peer blockchain.Peer
+				err  error
+			}
+			SyncWithPeerErr error
+			err             error
+		}
+		err error
+	}{
+		"success": {
+			input: struct {
+				peerService struct {
+					peer blockchain.Peer
+					err  error
+				}
+				SyncWithPeerErr error
+				err             error
+			}{
+				peerService: struct {
+					peer blockchain.Peer
+					err  error
+				}{
+					peer: blockchain.Peer{
+						IpAddress: "junksound",
+					},
+					err: nil,
+				},
+				SyncWithPeerErr: nil,
+			},
+			err: nil,
+		},
+		"fail 1: without Peer": {
+			input: struct {
+				peerService struct {
+					peer blockchain.Peer
+					err  error
+				}
+				SyncWithPeerErr error
+				err             error
+			}{
+				peerService: struct {
+					peer blockchain.Peer
+					err  error
+				}{
+					peer: blockchain.Peer{},
+					err:  errors.New("error without peer"),
+				},
+			},
+			err: api.ErrGetRandomPeer,
+		},
+
+		"fail 2: without Peer": {
+			input: struct {
+				peerService struct {
+					peer blockchain.Peer
+					err  error
+				}
+				SyncWithPeerErr error
+				err             error
+			}{
+				peerService: struct {
+					peer blockchain.Peer
+					err  error
+				}{
+					peer: blockchain.Peer{
+						IpAddress: "junksound",
+					},
+					err: nil,
+				},
+				SyncWithPeerErr: errors.New("error when SyncWithPeer"),
+			},
+			err: api.ErrSyncWithPeer,
+		},
+	}
+
+	syncService := &mock.SyncService{}
+
+	peerService := &mock.PeerService{}
+
+	blockQueryService := &mock.BlockQueryService{}
+
+	repo := &mock.EventRepository{}
+
+	bApi, err := api.NewBlockApi(syncService, peerService, blockQueryService, repo, "junksound")
+
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+
+		peerService.GetRandomPeerFunc = func() (blockchain.Peer, error) {
+			return test.input.peerService.peer, test.input.peerService.err
+		}
+
+		syncService.SyncWithPeerFunc = func(peer blockchain.Peer) error {
+			return test.input.SyncWithPeerErr
+		}
+
+		//when
+		err = bApi.Synchronize()
+
+		//then
+		assert.Equal(t, test.err, err)
+
+	}
+}
+
+func TestBlockApi_StageBlock(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			block blockchain.Block
@@ -27,80 +142,72 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 		},
 	}
 
-	blockRepository := mock.BlockQueryApi{}
-	publisherId := "zf"
-	eventRepository := mock.EventRepository{}
-	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
-		// predefine block pool
-		aggregate = blockchain.NewBlockPool()
-		return nil
-	}
+	syncService := &mock.SyncService{}
 
-	blockApi, _ := api.NewBlockApi(blockRepository, eventRepository, publisherId)
+	peerService := &mock.PeerService{}
+
+	blockQueryService := &mock.BlockQueryService{}
+
+	repo := &mock.EventRepository{}
+	publisherId := "zf"
+
+	blockApi, _ := api.NewBlockApi(syncService, peerService, blockQueryService, repo, publisherId)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		blockApi.AddBlockToPool(test.input.block)
+		blockApi.StageBlock(test.input.block)
 	}
 }
 
-func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
+func TestBlockApi_CommitBlockFromPoolOrSync(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			height blockchain.BlockHeight
+			height  blockchain.BlockHeight
+			blockId string
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				height blockchain.BlockHeight
-			}{height: blockchain.BlockHeight(12)},
+				height  blockchain.BlockHeight
+				blockId string
+			}{height: blockchain.BlockHeight(12), blockId: "zf"},
 			err: nil,
-		},
-		"block nil test": {
-			input: struct {
-				height blockchain.BlockHeight
-			}{height: blockchain.BlockHeight(144)},
-			err: api.ErrNilBlock,
 		},
 	}
 	// When
-	blockQueryApi := mock.BlockQueryApi{}
-	blockQueryApi.GetLastBlockFunc = func() (blockchain.Block, error) {
+
+	syncService := &mock.SyncService{}
+
+	peerService := &mock.PeerService{}
+
+	blockQueryService := &mock.BlockQueryService{}
+
+	blockQueryService.GetStagedBlockByIdFunc = func(blockId string) (blockchain.Block, error) {
+		assert.Equal(t, "zf", blockId)
+
 		return &blockchain.DefaultBlock{
 			Height: blockchain.BlockHeight(12),
 		}, nil
 	}
-	publisherId := "zf"
-	eventRepository := mock.EventRepository{}
-	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
-		switch v := aggregate.(type) {
-		case blockchain.BlockPool:
-			aggregate.(blockchain.BlockPool).Add(&blockchain.DefaultBlock{
-				Height: blockchain.BlockHeight(12),
-				TxList: []blockchain.Transaction{},
-			})
-			break
-
-		case blockchain.SyncState:
-			aggregate.(blockchain.SyncState).SetProgress(blockchain.DONE)
-			break
-		default:
-			return errors.New(fmt.Sprintf("unhandled type [%s]", v))
-		}
-
-		return nil
+	blockQueryService.GetLastCommitedBlockFunc = func() (blockchain.Block, error) {
+		return &blockchain.DefaultBlock{
+			Height: blockchain.BlockHeight(12),
+		}, nil
 	}
 
+	repo := &mock.EventRepository{}
+	publisherId := "zf"
+
 	// When
-	blockApi, _ := api.NewBlockApi(blockQueryApi, eventRepository, publisherId)
+	blockApi, _ := api.NewBlockApi(syncService, peerService, blockQueryService, repo, publisherId)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
 		// When
-		err := blockApi.CheckAndSaveBlockFromPool(test.input.height)
+		err := blockApi.CommitBlockFromPoolOrSync(test.input.blockId)
 
 		// Then
 		assert.Equal(t, test.err, err)
@@ -113,16 +220,18 @@ func TestBlockApi_SyncedCheck(t *testing.T) {
 
 func TestBlockApi_SyncIsProgressing(t *testing.T) {
 	// when
-	blockQueryApi := mock.BlockQueryApi{}
-	eventRepository := mock.EventRepository{}
-	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
-		assert.Equal(t, blockchain.BC_SYNC_STATE_AID, aggregateID)
-		return nil
-	}
+	syncService := &mock.SyncService{}
+
+	peerService := &mock.PeerService{}
+
+	blockQueryService := &mock.BlockQueryService{}
+
+	repo := &mock.EventRepository{}
+
 	publisherId := "zf"
 
 	// when
-	blockApi, _ := api.NewBlockApi(blockQueryApi, eventRepository, publisherId)
+	blockApi, _ := api.NewBlockApi(syncService, peerService, blockQueryService, repo, publisherId)
 
 	// then
 	state := blockApi.SyncIsProgressing()

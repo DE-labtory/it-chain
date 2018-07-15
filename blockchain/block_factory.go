@@ -37,15 +37,14 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	if err != nil {
 		return nil, ErrCreatingEvent
 	}
-
-	//save
-	eventstore.Save(createEvent.GetID(), createEvent)
-
 	//on
 	err = GenesisBlock.On(createEvent)
 	if err != nil {
 		return nil, ErrOnEvent
 	}
+
+	//save
+	eventstore.Save(createEvent.GetID(), createEvent)
 
 	return GenesisBlock, nil
 }
@@ -89,6 +88,7 @@ func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList
 		TxSeal:    txSeal,
 		Timestamp: timeStamp,
 		Creator:   creator,
+		State:     Created,
 	}, nil
 }
 
@@ -118,14 +118,56 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 		return nil, ErrCreatingEvent
 	}
 
-	//save
-	eventstore.Save(createEvent.GetID(), createEvent)
-
 	//on
 	err = ProposedBlock.On(createEvent)
 	if err != nil {
 		return nil, ErrOnEvent
 	}
 
+	//save
+	eventstore.Save(createEvent.GetID(), createEvent)
+
 	return ProposedBlock, nil
+}
+
+//ToDo: test case 작성
+func CreateRetrievedBlock(retrievedBlock Block) (Block, error) {
+
+	//declare
+	RetrievedBlock := &DefaultBlock{}
+	Seal := retrievedBlock.GetSeal()
+	PrevSeal := retrievedBlock.GetPrevSeal()
+	Height := retrievedBlock.GetHeight()
+	TxList := retrievedBlock.GetTxList()
+	TxSeal := retrievedBlock.GetTxSeal()
+	TimeStamp := retrievedBlock.GetTimestamp()
+	Creator := retrievedBlock.GetCreator()
+
+	//create
+	createEvent, err := createBlockCreatedEvent(Seal, PrevSeal, Height, TxList, TxSeal, TimeStamp, Creator)
+	if err != nil {
+		return nil, ErrCreatingEvent
+	}
+
+	//on
+	err = RetrievedBlock.On(createEvent)
+	if err != nil {
+		return nil, ErrOnEvent
+	}
+
+	//save
+	eventstore.Save(createEvent.GetID(), createEvent)
+
+	return RetrievedBlock, nil
+}
+
+func createBlockStagedEvent(block Block) (*BlockStagedEvent, error) {
+	aggregateId := string(block.GetSeal())
+
+	return &BlockStagedEvent{
+		EventModel: midgard.EventModel{
+			ID: aggregateId,
+		},
+		State: Staged,
+	}, nil
 }

@@ -15,24 +15,18 @@ func NewEventHandler(api BlockApi) *EventHandler {
 }
 
 // TODO: write test case
-func (eh *EventHandler) HandleBlockAddToPoolEvent(event blockchain.BlockAddToPoolEvent) error {
-	if err := isBlockHasMissingProperty(event); err != nil {
-		return err
+func (eh *EventHandler) HandleBlockAddToPoolEvent(event blockchain.BlockStagedEvent) error {
+	blockId := event.ID
+
+	if blockId == "" {
+		return ErrBlockNil
 	}
-	height := event.Height
-	err := eh.blockApi.CheckAndSaveBlockFromPool(height)
+
+	err := eh.blockApi.CommitBlockFromPoolOrSync(blockId)
 
 	if err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func isBlockHasMissingProperty(event blockchain.BlockAddToPoolEvent) error {
-	if event.Seal == nil || event.PrevSeal == nil || event.Height == 0 ||
-		event.TxList == nil || event.TxSeal == nil || event.Timestamp.IsZero() || event.Creator == nil {
-		return ErrBlockMissingProperties
-	}
 	return nil
 }

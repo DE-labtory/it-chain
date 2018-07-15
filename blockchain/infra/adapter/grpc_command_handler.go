@@ -2,12 +2,16 @@ package adapter
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
 )
 
+var ErrAddBlock = errors.New("error when adding block")
+
 type SyncBlockApi interface {
 	SyncedCheck(block blockchain.Block) error
+	SaveBlock(block blockchain.Block) error
 }
 
 type SyncCheckGrpcCommandService interface {
@@ -33,7 +37,7 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 	switch command.Protocol {
 	case "SyncCheckRequestProtocol":
 		//TODO: 상대방의 SyncCheck를 위해서 자신의 last block을 보내준다.
-		block, err := g.blockQueryApi.GetLastBlock()
+		block, err := g.blockQueryApi.GetLastCommitedBlock()
 		if err != nil {
 			return ErrGetLastBlock
 		}
@@ -55,7 +59,7 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 			return ErrBlockInfoDeliver
 		}
 
-		block, err := g.blockQueryApi.GetBlockByHeight(height)
+		block, err := g.blockQueryApi.GetCommitedBlockByHeight(height)
 		if err != nil {
 			return ErrGetBlock
 		}
@@ -68,6 +72,17 @@ func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCom
 
 	case "BlockResponseProtocol":
 		//TODO: Construct 과정에서 block을 받는다.
+		var block blockchain.DefaultBlock
+		err := json.Unmarshal(command.Body, &block)
+		if err != nil {
+			return ErrBlockInfoDeliver
+		}
+
+		err = g.blockApi.SaveBlock(&block)
+		if err != nil {
+			return ErrAddBlock
+		}
+
 		break
 	}
 

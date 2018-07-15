@@ -9,29 +9,15 @@ import (
 	"time"
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
 
-type MockRepostiory struct {
-	loadFunc func(aggregate midgard.Aggregate, aggregateID string) error
-	saveFunc func(aggregateID string, events ...midgard.Event) error
-}
-
-func (m MockRepostiory) Load(aggregate midgard.Aggregate, aggregateID string) error {
-	return m.loadFunc(aggregate, aggregateID)
-}
-
-func (m MockRepostiory) Save(aggregateID string, events ...midgard.Event) error {
-	return m.saveFunc(aggregateID, events...)
-}
-
-func (MockRepostiory) Close() {}
-
 func TestCreateGenesisBlock(t *testing.T) {
-	//given
 
+	//given
 	tests := map[string]struct {
 		input struct {
 			ConfigFilePath string
@@ -50,7 +36,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 			output: &blockchain.DefaultBlock{
 				PrevSeal:  make([]byte, 0),
 				Height:    uint64(0),
-				TxList:    make([]blockchain.Transaction, 0),
+				TxList:    make([]*blockchain.DefaultTransaction, 0),
 				TxSeal:    make([][]byte, 0),
 				Timestamp: (time.Now()).Round(0),
 				Creator:   make([]byte, 0),
@@ -73,13 +59,15 @@ func TestCreateGenesisBlock(t *testing.T) {
 		},
 	}
 
-	repo := MockRepostiory{}
+	repo := mock.EventRepository{}
 
-	repo.saveFunc = func(aggregateID string, events ...midgard.Event) error {
+	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
 		assert.Equal(t, 1, len(events))
 		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
 		return nil
 	}
+
+	repo.CloseFunc = func() {}
 
 	eventstore.InitForMock(repo)
 	defer eventstore.Close()
@@ -137,7 +125,7 @@ func TestCreateProposedBlock(t *testing.T) {
 		input struct {
 			prevSeal []byte
 			height   uint64
-			txList   []blockchain.Transaction
+			txList   []*blockchain.DefaultTransaction
 			creator  []byte
 		}
 		output blockchain.Block
@@ -148,12 +136,12 @@ func TestCreateProposedBlock(t *testing.T) {
 			input: struct {
 				prevSeal []byte
 				height   uint64
-				txList   []blockchain.Transaction
+				txList   []*blockchain.DefaultTransaction
 				creator  []byte
 			}{
 				prevSeal: []byte("prevseal"),
 				height:   1,
-				txList: []blockchain.Transaction{
+				txList: []*blockchain.DefaultTransaction{
 					&blockchain.DefaultTransaction{},
 				},
 				creator: []byte("junksound"),
@@ -162,7 +150,7 @@ func TestCreateProposedBlock(t *testing.T) {
 			output: &blockchain.DefaultBlock{
 				PrevSeal: []byte("prevseal"),
 				Height:   1,
-				TxList: []blockchain.Transaction{
+				TxList: []*blockchain.DefaultTransaction{
 					&blockchain.DefaultTransaction{},
 				},
 				Timestamp: (time.Now()).Round(0),
@@ -177,7 +165,7 @@ func TestCreateProposedBlock(t *testing.T) {
 			input: struct {
 				prevSeal []byte
 				height   uint64
-				txList   []blockchain.Transaction
+				txList   []*blockchain.DefaultTransaction
 				creator  []byte
 			}{
 				prevSeal: []byte("prevseal"),
@@ -196,12 +184,12 @@ func TestCreateProposedBlock(t *testing.T) {
 			input: struct {
 				prevSeal []byte
 				height   uint64
-				txList   []blockchain.Transaction
+				txList   []*blockchain.DefaultTransaction
 				creator  []byte
 			}{
 				prevSeal: nil,
 				height:   1,
-				txList: []blockchain.Transaction{
+				txList: []*blockchain.DefaultTransaction{
 					&blockchain.DefaultTransaction{},
 				},
 				creator: nil,
@@ -213,13 +201,15 @@ func TestCreateProposedBlock(t *testing.T) {
 		},
 	}
 
-	repo := MockRepostiory{}
+	repo := mock.EventRepository{}
 
-	repo.saveFunc = func(aggregateID string, events ...midgard.Event) error {
+	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
 		assert.Equal(t, 1, len(events))
 		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
 		return nil
 	}
+
+	repo.CloseFunc = func() {}
 
 	eventstore.InitForMock(repo)
 	defer eventstore.Close()

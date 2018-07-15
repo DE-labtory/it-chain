@@ -35,11 +35,13 @@ func MakeHandler(bs TransactionQueryApi, logger kitlog.Logger) http.Handler {
 
 // this return nil because this request body is empty
 func decodeFindAllUncommittedTransactionsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-
+	// DTO
 	return nil, nil
 }
 
+// serialize
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
+
 	if e, ok := response.(errorer); ok && e.error() != nil {
 		encodeError(ctx, e.error(), w)
 		return nil

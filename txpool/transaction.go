@@ -53,6 +53,7 @@ type Transaction struct {
 	TxHash        string
 	TimeStamp     time.Time
 	TxData        TxData
+	Signature     []byte
 }
 
 // must implement id method
