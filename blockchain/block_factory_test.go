@@ -50,7 +50,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 			output: &blockchain.DefaultBlock{
 				PrevSeal:  make([]byte, 0),
 				Height:    uint64(0),
-				TxList:    make([]blockchain.Transaction, 0),
+				TxList:    make([]*blockchain.DefaultTransaction, 0),
 				TxSeal:    make([][]byte, 0),
 				Timestamp: (time.Now()).Round(0),
 				Creator:   make([]byte, 0),
@@ -137,7 +137,7 @@ func TestCreateProposedBlock(t *testing.T) {
 		input struct {
 			prevSeal []byte
 			height   uint64
-			txList   []blockchain.Transaction
+			txList   []*blockchain.DefaultTransaction
 			creator  []byte
 		}
 		output blockchain.Block
@@ -148,12 +148,12 @@ func TestCreateProposedBlock(t *testing.T) {
 			input: struct {
 				prevSeal []byte
 				height   uint64
-				txList   []blockchain.Transaction
+				txList   []*blockchain.DefaultTransaction
 				creator  []byte
 			}{
 				prevSeal: []byte("prevseal"),
 				height:   1,
-				txList: []blockchain.Transaction{
+				txList: []*blockchain.DefaultTransaction{
 					&blockchain.DefaultTransaction{},
 				},
 				creator: []byte("junksound"),
@@ -162,7 +162,7 @@ func TestCreateProposedBlock(t *testing.T) {
 			output: &blockchain.DefaultBlock{
 				PrevSeal: []byte("prevseal"),
 				Height:   1,
-				TxList: []blockchain.Transaction{
+				TxList: []*blockchain.DefaultTransaction{
 					&blockchain.DefaultTransaction{},
 				},
 				Timestamp: (time.Now()).Round(0),
@@ -177,7 +177,7 @@ func TestCreateProposedBlock(t *testing.T) {
 			input: struct {
 				prevSeal []byte
 				height   uint64
-				txList   []blockchain.Transaction
+				txList   []*blockchain.DefaultTransaction
 				creator  []byte
 			}{
 				prevSeal: []byte("prevseal"),
@@ -196,12 +196,12 @@ func TestCreateProposedBlock(t *testing.T) {
 			input: struct {
 				prevSeal []byte
 				height   uint64
-				txList   []blockchain.Transaction
+				txList   []*blockchain.DefaultTransaction
 				creator  []byte
 			}{
 				prevSeal: nil,
 				height:   1,
-				txList: []blockchain.Transaction{
+				txList: []*blockchain.DefaultTransaction{
 					&blockchain.DefaultTransaction{},
 				},
 				creator: nil,

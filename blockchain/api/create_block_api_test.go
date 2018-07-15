@@ -98,7 +98,6 @@ func getTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 				Jsonrpc: "jsonRPC01",
 				Method:  "invoke",
 				Params: blockchain.Params{
-					Type:     0,
 					Function: "function01",
 					Args:     []string{"arg1", "arg2"},
 				},
@@ -114,7 +113,6 @@ func getTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 				Jsonrpc: "jsonRPC02",
 				Method:  "invoke",
 				Params: blockchain.Params{
-					Type:     0,
 					Function: "function02",
 					Args:     []string{"arg1", "arg2"},
 				},
@@ -130,7 +128,6 @@ func getTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 				Jsonrpc: "jsonRPC03",
 				Method:  "invoke",
 				Params: blockchain.Params{
-					Type:     0,
 					Function: "function03",
 					Args:     []string{"arg1", "arg2"},
 				},
@@ -146,7 +143,6 @@ func getTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 				Jsonrpc: "jsonRPC04",
 				Method:  "invoke",
 				Params: blockchain.Params{
-					Type:     0,
 					Function: "function04",
 					Args:     []string{"arg1", "arg2"},
 				},
