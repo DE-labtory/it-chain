@@ -41,7 +41,6 @@ type Transaction = ygg.Transaction
 
 // Params 구조체는 Jsonrpc에서 invoke하는 함수의 패러미터를 정의한다.
 type Params struct {
-	Type     int
 	Function string
 	Args     []string
 }
@@ -145,9 +144,8 @@ func NewTxData(jsonrpc string, method TxDataType, params Params, contractID stri
 }
 
 // NewParams 함수는 새로운 Params 객체를 반환한다. (포인터가 아니라 객체 자체를 반환한다.)
-func NewParams(paramsType int, function string, args []string) Params {
+func NewParams(function string, args []string) Params {
 	return Params{
-		Type:     paramsType,
 		Function: function,
 		Args:     args,
 	}

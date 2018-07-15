@@ -10,6 +10,7 @@ import (
 
 	"sync"
 
+	blockchainAdapter "github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
 	"github.com/it-chain/it-chain-Engine/cmd/icode"
 	"github.com/it-chain/it-chain-Engine/conf"
 	icodeApi "github.com/it-chain/it-chain-Engine/icode/api"
@@ -82,6 +83,7 @@ func start() error {
 	initTxPool()
 	initIcode()
 	initPeer()
+	initBlockchain()
 	// wait group for test
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -126,5 +128,12 @@ func initTxPool() error {
 	return nil
 }
 func initConsensus() error {
+	return nil
+}
+func initBlockchain() error {
+	config := conf.GetConfiguration()
+	mqClient := rabbitmq.Connect(config.Common.Messaging.Url)
+
+	commandService := blockchainAdapter.NewCommandHandler()
 	return nil
 }
