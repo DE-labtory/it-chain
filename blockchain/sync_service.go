@@ -4,6 +4,26 @@ type SyncService struct {
 	blockQueryService BlockQueryService
 }
 
+// Check if Synchronizing whth given peer is need and Construct to synchronize
+func (ss *SyncService) SyncWithPeer(peer Peer) error {
+
+	state, err := ss.syncedCheck(peer)
+
+	if err != nil {
+		return ErrSyncedCheck
+	}
+
+	if state == SYNCED {
+		return nil
+	}
+
+	if err := ss.construct(peer); err != nil {
+		return ErrConstruct
+	}
+
+	return nil
+}
+
 // Check if Synchronizing blockchain with given peer is needed
 func (ss *SyncService) syncedCheck(peer Peer) (isSynced, error) {
 
@@ -79,24 +99,4 @@ func setTargetHeight(lastHeight BlockHeight) BlockHeight {
 
 func raiseHeight(height *BlockHeight) {
 	*height++
-}
-
-// Check if Synchronizing whth given peer is need and Construct to synchronize
-func (ss *SyncService) SyncWithPeer(peer Peer) error {
-
-	state, err := ss.syncedCheck(peer)
-
-	if err != nil {
-		return ErrSyncedCheck
-	}
-
-	if state == SYNCED {
-		return nil
-	}
-
-	if err := ss.construct(peer); err != nil {
-		return ErrConstruct
-	}
-
-	return nil
 }
