@@ -3,21 +3,20 @@ package mock
 import "github.com/it-chain/it-chain-Engine/blockchain"
 
 type SyncService struct {
-	BlockQueryService BlockQueryService
-	SyncWithPeerFunc  func(peer blockchain.Peer) error
-	SyncedCheckFunc   func(peer blockchain.Peer) (blockchain.IsSynced, error)
-	ConstructFunc     func(peer blockchain.Peer) error
+	SyncWithPeerFunc func(peer blockchain.Peer) error
+	SyncedCheckFunc  func(peer blockchain.Peer) (blockchain.IsSynced, error)
+	ConstructFunc    func(peer blockchain.Peer) error
 }
 
 func (ss SyncService) SyncWithPeer(peer blockchain.Peer) error {
 	return ss.SyncWithPeerFunc(peer)
 }
 
-func (ss SyncService) syncedCheck(peer blockchain.Peer) (blockchain.IsSynced, error) {
+func (ss SyncService) SyncedCheck(peer blockchain.Peer) (blockchain.IsSynced, error) {
 	return ss.SyncedCheckFunc(peer)
 }
 
-func (ss SyncService) construct(peer blockchain.Peer) error {
+func (ss SyncService) Construct(peer blockchain.Peer) error {
 	return ss.ConstructFunc(peer)
 }
 

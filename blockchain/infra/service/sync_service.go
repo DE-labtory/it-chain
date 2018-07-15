@@ -11,7 +11,7 @@ type SyncService struct {
 // Check if Synchronizing whth given peer is need and Construct to synchronize
 func (ss *SyncService) SyncWithPeer(peer blockchain.Peer) error {
 
-	state, err := ss.syncedCheck(peer)
+	state, err := ss.SyncedCheck(peer)
 
 	if err != nil {
 		return blockchain.ErrSyncedCheck
@@ -21,7 +21,7 @@ func (ss *SyncService) SyncWithPeer(peer blockchain.Peer) error {
 		return nil
 	}
 
-	if err := ss.construct(peer); err != nil {
+	if err := ss.Construct(peer); err != nil {
 		return blockchain.ErrConstruct
 	}
 
@@ -29,7 +29,7 @@ func (ss *SyncService) SyncWithPeer(peer blockchain.Peer) error {
 }
 
 // Check if Synchronizing blockchain with given peer is needed
-func (ss *SyncService) syncedCheck(peer blockchain.Peer) (blockchain.IsSynced, error) {
+func (ss *SyncService) SyncedCheck(peer blockchain.Peer) (blockchain.IsSynced, error) {
 
 	// If nil peer is given(when i'm the first node of p2p network) : Synced
 	if peer.IpAddress == "" {
@@ -57,7 +57,7 @@ func (ss *SyncService) syncedCheck(peer blockchain.Peer) (blockchain.IsSynced, e
 }
 
 // Construct blockchain to synchronize with a given peer
-func (ss *SyncService) construct(peer blockchain.Peer) error {
+func (ss *SyncService) Construct(peer blockchain.Peer) error {
 
 	// Get last block of my blockChain
 	lastBlock, err := ss.blockQueryService.GetLastBlock()
