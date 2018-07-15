@@ -6,8 +6,6 @@ import (
 
 	"log"
 
-	"fmt"
-
 	"github.com/it-chain/it-chain-Engine/blockchain"
 	"github.com/it-chain/leveldb-wrapper"
 	"github.com/it-chain/yggdrasill"
@@ -123,9 +121,6 @@ func (cbr *CommitedBlockRepositoryImpl) GetLastBlock() (blockchain.Block, error)
 	block := &blockchain.DefaultBlock{}
 
 	err := cbr.BlockStorageManager.GetLastBlock(block)
-	fmt.Println(block.GetHeight())
-	fmt.Println(block.GetTxList())
-	fmt.Println(err)
 	if err != nil {
 		return nil, ErrGetCommitedBlock
 	}
@@ -139,9 +134,6 @@ func (cbr *CommitedBlockRepositoryImpl) GetBlockByHeight(height uint64) (blockch
 	block := &blockchain.DefaultBlock{}
 
 	err := cbr.BlockStorageManager.GetBlockByHeight(block, height)
-	fmt.Println(block.GetHeight())
-	fmt.Println(block.GetTxList())
-	fmt.Println(err)
 	if err != nil {
 		return nil, ErrGetCommitedBlock
 	}
