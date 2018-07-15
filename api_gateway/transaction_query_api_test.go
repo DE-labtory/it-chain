@@ -210,6 +210,45 @@ func TestTransactionQueryApi_FindUncommittedTransactions(t *testing.T) {
 	assert.Equal(t, len(txs), 3)
 }
 
+func TestTransactionEventListener_HandleTransactionDeletedEvent(t *testing.T) {
+
+	api, client, tearDown := setApiUp(t)
+
+	defer tearDown()
+
+	err := client.Publish("Event", "transaction.created", txpool.TxCreatedEvent{
+		EventModel: midgard.EventModel{
+			ID:      "1123",
+			Time:    time.Now(),
+			Type:    "transaction.created",
+			Version: 3,
+		},
+		ICodeID: "2",
+		TxHash:  "123",
+		Jsonrpc: "123",
+	})
+
+	assert.NoError(t, err)
+
+	//wait until sync from event
+	time.Sleep(1 * time.Second)
+	txs, err := api.FindUncommittedTransactions()
+	assert.Equal(t, len(txs), 1)
+
+	err = client.Publish("Event", "transaction.deleted", txpool.TxDeletedEvent{
+		EventModel: midgard.EventModel{
+			ID: "1123",
+		},
+	})
+
+	//wait until sync from event
+	time.Sleep(1 * time.Second)
+
+	txs, err = api.FindUncommittedTransactions()
+	assert.Equal(t, len(txs), 0)
+
+}
+
 func setApiUp(t *testing.T) (TransactionQueryApi, *rabbitmq.Client, func()) {
 
 	dbPath := "./.test"

@@ -3,7 +3,6 @@ package api_gateway
 import (
 	"encoding/json"
 	"errors"
-
 	"log"
 
 	"github.com/it-chain/it-chain-Engine/txpool"
@@ -13,6 +12,12 @@ import (
 // this is an api only for querying current state which is repository of transaction
 type TransactionQueryApi struct {
 	transactionRepository TransactionPoolRepository
+}
+
+func NewTransactionQueryApi(transactionRepository TransactionPoolRepository) TransactionQueryApi {
+	return TransactionQueryApi{
+		transactionRepository: transactionRepository,
+	}
 }
 
 // find all transactions that are created by not committed as a block
@@ -25,6 +30,7 @@ func (t TransactionQueryApi) FindUncommittedTransactions() ([]txpool.Transaction
 type TransactionPoolRepository interface {
 	FindAll() ([]txpool.Transaction, error)
 	Save(transaction txpool.Transaction) error
+	Remove(id txpool.TransactionId) error
 }
 
 // this is an event_handler which listen all events related to transaction and update repository
@@ -33,11 +39,26 @@ type TransactionEventListener struct {
 	transactionRepository TransactionPoolRepository
 }
 
+func NewTransactionEventListener(transactionRepository TransactionPoolRepository) TransactionEventListener {
+	return TransactionEventListener{
+		transactionRepository: transactionRepository,
+	}
+}
+
 // this function listens to TxCreatedEvent and update repository
 func (t TransactionEventListener) HandleTransactionCreatedEvent(event txpool.TxCreatedEvent) {
 
 	tx := event.GetTransaction()
 	err := t.transactionRepository.Save(tx)
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+}
+
+func (t TransactionEventListener) HandleTransactionDeletedEvent(event txpool.TxDeletedEvent) {
+
+	err := t.transactionRepository.Remove(event.GetID())
 
 	if err != nil {
 		log.Fatal(err.Error())

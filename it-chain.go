@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -10,6 +11,11 @@ import (
 
 	"sync"
 
+	"os/signal"
+	"syscall"
+
+	kitlog "github.com/go-kit/kit/log"
+	"github.com/it-chain/it-chain-Engine/api_gateway"
 	"github.com/it-chain/it-chain-Engine/cmd/icode"
 	"github.com/it-chain/it-chain-Engine/conf"
 	icodeApi "github.com/it-chain/it-chain-Engine/icode/api"
@@ -90,9 +96,54 @@ func start() error {
 }
 
 func initGateway() error {
+
+	config := conf.GetConfiguration()
+	ipAddress := config.Common.NodeIp
+
+	//set log
+	var logger kitlog.Logger
+	logger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
+	logger = kitlog.With(logger, "ts", kitlog.DefaultTimestampUTC)
+
+	//set service and repo
+	dbPath := "./.test"
+	client := rabbitmq.Connect("")
+
+	repo := api_gateway.NewTransactionRepository(dbPath)
+
+	txQueryApi := api_gateway.NewTransactionQueryApi(repo)
+	txEventListener := api_gateway.NewTransactionEventListener(repo)
+
+	//set mux
+	mux := http.NewServeMux()
+	httpLogger := kitlog.With(logger, "component", "http")
+	err := client.Subscribe("Event", "transaction.*", txEventListener)
+
+	if err != nil {
+		panic(err)
+	}
+
+	mux.Handle("/", api_gateway.MakeHandler(txQueryApi, httpLogger))
+	http.Handle("/", mux)
+
+	errs := make(chan error, 2)
+
+	go func() {
+		log.Println("transport", "http", "address", ipAddress, "msg", "listening")
+		errs <- http.ListenAndServe(ipAddress, nil)
+	}()
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGINT)
+		errs <- fmt.Errorf("%s", <-c)
+	}()
+
+	log.Println("terminated", <-errs)
+
 	return nil
 }
 func initIcode() error {
+
 	config := conf.GetConfiguration()
 	mqClient := rabbitmq.Connect(config.Common.Messaging.Url)
 
