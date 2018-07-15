@@ -70,6 +70,7 @@ func (pr *PeerRepository) Remove(id p2p.PeerId) error {
 
 // done in peer service
 func (pr *PeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) {
+
 	pr.mux.Lock()
 	defer pr.mux.Unlock()
 	v, exist := pr.peerTable[id.Id]
@@ -87,6 +88,7 @@ func (pr *PeerRepository) FindById(id p2p.PeerId) (p2p.Peer, error) {
 
 // done in peer service
 func (pr *PeerRepository) FindAll() ([]p2p.Peer, error) {
+
 	pr.mux.Lock()
 	defer pr.mux.Unlock()
 	peers := make([]p2p.Peer, 0)
@@ -101,7 +103,6 @@ func (pr *PeerRepository) FindAll() ([]p2p.Peer, error) {
 
 	return peers, nil
 }
-
 
 func (pr *PeerRepository) FindByAddress(ipAddress string) (p2p.Peer, error) {
 
