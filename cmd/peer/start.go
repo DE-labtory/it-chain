@@ -36,7 +36,9 @@ func StartCmd() cli.Command {
 			},
 		},
 		Action: func(c *cli.Context) error {
+
 			fmt.Println("peer is starting...")
+
 			address = c.Args().Get(0)
 
 			if address != "" {
@@ -44,6 +46,7 @@ func StartCmd() cli.Command {
 			}
 
 			start(c.Bool("damon"))
+
 			return nil
 		},
 	}

@@ -5,8 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"encoding/json"
-
 	"github.com/it-chain/it-chain-Engine/common"
 	"github.com/it-chain/it-chain-Engine/conf"
 	"github.com/it-chain/midgard"
@@ -30,23 +28,6 @@ type IPLTableService interface {
 	ClearPeerTable() error
 }
 
-// will be deleted after implemented in gateway api
-type PLTableServiceReplica struct {
-	mux     sync.Mutex
-	pLTable PLTable
-}
-
-func (pLTableService *PLTableServiceReplica) GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error) {
-
-	peerTable := PLTable{}
-
-	if err := json.Unmarshal(command.Body, &peerTable); err != nil {
-		//todo error 처리
-		return PLTable{}, nil
-	}
-
-	return peerTable, nil
-}
 
 //func (plts *PLTableServiceReplica) ClearPeerTable() {
 //
