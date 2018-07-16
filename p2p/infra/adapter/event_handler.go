@@ -5,21 +5,17 @@ import (
 	"log"
 
 	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/it-chain-Engine/p2p/api"
 )
 
 var ErrEmptyAddress = errors.New("empty address proposed")
 var ErrPeerApi = errors.New("problem in peer api")
 
-type EventHandlerPeerApi interface {
-	AddPeer(peer p2p.Peer) error
-	DeletePeer(id p2p.PeerId) error
-	DeliverPLTable(connectionId string) error
-}
 type EventHandler struct {
-	peerApi EventHandlerPeerApi
+	peerApi api.PeerApi
 }
 
-func NewEventHandler(peerApi EventHandlerPeerApi) *EventHandler {
+func NewEventHandler(peerApi api.PeerApi) *EventHandler {
 	return &EventHandler{
 		peerApi: peerApi,
 	}

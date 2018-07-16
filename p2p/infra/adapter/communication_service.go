@@ -14,7 +14,9 @@ func (cs *CommunicationService) Dial(ipAddress string) error {
 	command := p2p.ConnectionCreateCommand{
 		Address: ipAddress,
 	}
+
 	cs.publish("Command", "connection.create", command)
+
 	return nil
 }
 
