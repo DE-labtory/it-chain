@@ -3,8 +3,6 @@ package api_test
 import (
 	"testing"
 
-	"fmt"
-
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/it-chain-Engine/txpool"
 	"github.com/it-chain/it-chain-Engine/txpool/api"
@@ -14,10 +12,11 @@ import (
 
 type MockEventRepository struct {
 	SaveFunc func(aggregateID string, events ...midgard.Event) error
+	LoadFunc func(aggregate midgard.Aggregate, aggregateID string) error
 }
 
 func (rp MockEventRepository) Load(aggregate midgard.Aggregate, aggregateID string) error {
-	return nil
+	return rp.LoadFunc(aggregate, aggregateID)
 }
 
 func (rp MockEventRepository) Save(aggregateID string, events ...midgard.Event) error {
@@ -37,14 +36,14 @@ func TestTransactionApi_CreateTransaction(t *testing.T) {
 		"success": {
 			input: struct {
 				txData txpool.TxData
-			}{txData: txpool.TxData{ID: "gg"}},
+			}{txData: txpool.TxData{ICodeID: "gg"}},
 			err: nil,
 		},
 	}
 
 	eventRepository := MockEventRepository{}
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, "gg", events[0].(*txpool.TxCreatedEvent).ID)
+		assert.Equal(t, "gg", events[0].(*txpool.TxCreatedEvent).ICodeID)
 		return nil
 	}
 
@@ -74,9 +73,15 @@ func TestTransactionApi_DeleteTransaction(t *testing.T) {
 	}
 
 	eventRepository := MockEventRepository{}
+	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
+
+		aggregate.(*txpool.Transaction).TxId = "transactionID"
+		return nil
+	}
+
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		fmt.Println(aggregateID)
-		assert.Equal(t, "transactionID", events[0].(*txpool.TxDeletedEvent).ID)
+
+		assert.Equal(t, "transactionID", events[0].(*txpool.TxDeletedEvent).GetID())
 		return nil
 	}
 
