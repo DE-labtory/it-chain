@@ -7,8 +7,8 @@ type CommunicationApi struct {
 	communicationService p2p.ICommunicationService
 }
 
-func NewCommunicationApi(pLTableQueryService p2p.PLTableQueryService, communicationService p2p.ICommunicationService) CommunicationApi {
-	return CommunicationApi{
+func NewCommunicationApi(pLTableQueryService p2p.PLTableQueryService, communicationService p2p.ICommunicationService) *CommunicationApi {
+	return &CommunicationApi{
 		pLTableQueryService:pLTableQueryService,
 		communicationService: communicationService,
 	}
@@ -28,6 +28,18 @@ func (ca *CommunicationApi) DialToUnConnectedNode(peerTable map[string]p2p.Peer)
 			ca.communicationService.Dial(peer.IpAddress)
 		}
 	}
+
+	return nil
+}
+
+//Deliver Peer leader table that consists of peerList and leader
+func (ca *CommunicationApi) DeliverPLTable(connectionId string) error {
+
+	//1. get peer table
+	peerTable, _ := ca.pLTableQueryService.GetPLTable()
+
+	//2. deliver peer table
+	ca.communicationService.DeliverPLTable(connectionId, peerTable)
 
 	return nil
 }
