@@ -8,16 +8,16 @@ import (
 	"github.com/it-chain/it-chain-Engine/p2p/api"
 )
 
-var ErrEmptyAddress = errors.New("empty address proposed")
 var ErrPeerApi = errors.New("problem in peer api")
 
 type EventHandler struct {
-	peerApi api.PeerApi
+	communicationApi api.ICommunicationApi
 }
 
-func NewEventHandler(peerApi api.PeerApi) *EventHandler {
+func NewEventHandler(communicationApi api.ICommunicationApi) *EventHandler {
+
 	return &EventHandler{
-		peerApi: peerApi,
+		communicationApi: communicationApi,
 	}
 }
 
@@ -39,7 +39,7 @@ func (eh *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent)
 	}
 
 	//2. send peer table
-	eh.peerApi.DeliverPLTable(event.ID)
+	eh.communicationApi.DeliverPLTable(event.ID)
 
 	return nil
 }
@@ -51,7 +51,7 @@ func (eh *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconne
 		return ErrEmptyPeerId
 	}
 
-	err := eh.peerApi.DeletePeer(p2p.PeerId{Id: event.ID})
+	err := p2p.DeletePeer(p2p.PeerId{Id: event.ID})
 
 	if err != nil {
 		log.Println(err)

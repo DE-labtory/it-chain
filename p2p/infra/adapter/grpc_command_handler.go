@@ -13,21 +13,26 @@ var ErrPeerListDeliver = errors.New("peer list deliver failed")
 var ErrPeerDeliver = errors.New("peer deliver failed")
 var ErrUnmarshal = errors.New("error during unmarshal")
 
-
 type GrpcCommandHandlerCommunicationService interface {
 	Dial(ipAddress string) error
 }
 
 type GrpcCommandHandler struct {
-	leaderApi        api.LeaderApi
+	leaderApi        api.ILeaderApi
 	electionService  p2p.ElectionService
-	communicationApi api.CommunicationApi
-	pLTableService   p2p.PLTableService
+	communicationApi api.ICommunicationApi
+	pLTableService   p2p.IPLTableService
 }
 
-func NewGrpcCommandHandler(leaderApi api.LeaderApi) *GrpcCommandHandler {
+func NewGrpcCommandHandler(
+	leaderApi api.ILeaderApi,
+	electionService p2p.ElectionService, communicationApi api.ICommunicationApi,
+	pLTableService p2p.IPLTableService) *GrpcCommandHandler {
 	return &GrpcCommandHandler{
-		leaderApi: leaderApi,
+		leaderApi:        leaderApi,
+		electionService:  electionService,
+		communicationApi: communicationApi,
+		pLTableService:   pLTableService,
 	}
 }
 
