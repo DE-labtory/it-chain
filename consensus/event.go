@@ -4,9 +4,17 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-// todo : Consensus로 시작하는 네이밍
-
 // Publish part
+
+type PrePrepareMsgAddedEvent struct {
+	midgard.EventModel
+	PrePrepareMsg struct {
+		ConsensusId    ConsensusId
+		SenderId       string
+		Representative []*Representative
+		ProposedBlock  ProposedBlock
+	}
+}
 
 type PrepareMsgAddedEvent struct {
 	midgard.EventModel
@@ -23,6 +31,38 @@ type CommitMsgAddedEvent struct {
 		ConsensusId ConsensusId
 		SenderId    string
 	}
+}
+
+type ConsensusCreatedEvent struct {
+	midgard.EventModel
+	Consensus struct {
+		ConsensusID     ConsensusId
+		Representatives []*Representative
+		Block           ProposedBlock
+		CurrentState    State
+		PrepareMsgPool  PrepareMsgPool
+		CommitMsgPool   CommitMsgPool
+	}
+}
+
+// Preprepare msg를 보냈을 때
+type ConsensusPrePreparedEvent struct {
+	midgard.EventModel
+}
+
+// Prepare msg를 보냈을 때
+type ConsensusPreparedEvent struct {
+	midgard.EventModel
+}
+
+// Commit msg를 보냈을 때
+type ConsensusCommittedEvent struct {
+	midgard.EventModel
+}
+
+// block 저장이 끝나 state가 idle이 될 때
+type ConsensusFinishedEvent struct {
+	midgard.EventModel
 }
 
 // Consume part
@@ -42,19 +82,7 @@ type MemberRemovedEvent struct {
 	MemberId string
 }
 
-// todo : consensus를 위해 필요하지 않나? -> 고민해볼것
-
-// Preprepare msg를 받았을 때
-type ConsensusStartedEvent struct {
-	midgard.EventModel
-}
-
-// Prepare msg를 받아서 commit msg를 받는 상태가 될 때
-type ConsensusPreparedEvent struct {
-	midgard.EventModel
-}
-
-// Commit msg를 받아서 consensus가 끝났을 때
-type ConsensusFinishedEvent struct {
+// block이 저장되었을 때
+type BlockSavedEvent struct {
 	midgard.EventModel
 }
