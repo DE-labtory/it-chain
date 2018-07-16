@@ -6,16 +6,6 @@ import (
 
 // Publish part
 
-type PrePrepareMsgAddedEvent struct {
-	midgard.EventModel
-	PrePrepareMsg struct {
-		ConsensusId    ConsensusId
-		SenderId       string
-		Representative []*Representative
-		ProposedBlock  ProposedBlock
-	}
-}
-
 type PrepareMsgAddedEvent struct {
 	midgard.EventModel
 	PrepareMsg struct {

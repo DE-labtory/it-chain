@@ -6,6 +6,7 @@ import (
 
 	"encoding/json"
 
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
 
@@ -217,12 +218,23 @@ type Consensus struct {
 	CommitMsgPool   CommitMsgPool
 }
 
+func NewConsensus() Consensus {
+	return Consensus{
+		ConsensusID:     ConsensusId{""},
+		Representatives: nil,
+		Block:           nil,
+		CurrentState:    "",
+		PrepareMsgPool:  NewPrepareMsgPool(),
+		CommitMsgPool:   NewCommitMsgPool(),
+	}
+}
+
 func (c *Consensus) GetID() string {
 	return c.ConsensusID.Id
 }
 
 func (c *Consensus) Start() {
-	c.CurrentState = PREPARE_STATE
+	c.CurrentState = PREPREPARE_STATE
 }
 
 func (c *Consensus) IsPrepareState() bool {
@@ -241,6 +253,10 @@ func (c *Consensus) IsCommitState() bool {
 	return false
 }
 
+func (c *Consensus) ToPrepareState() {
+	c.CurrentState = PREPARE_STATE
+}
+
 func (c *Consensus) ToCommitState() {
 	c.CurrentState = COMMIT_STATE
 }
@@ -249,9 +265,9 @@ func (c *Consensus) ToIdleState() {
 	c.CurrentState = IDLE_STATE
 }
 
-func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) (*PrepareMsgAddedEvent, error) {
+func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) error {
 	if c.ConsensusID.Id != prepareMsg.ConsensusId.Id {
-		return nil, errors.New("Consensus ID is not same")
+		return errors.New("Consensus ID is not same")
 	}
 
 	prepareMsgAddedEvent := PrepareMsgAddedEvent{
@@ -265,14 +281,20 @@ func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) (*PrepareMsgAddedEven
 		}{ConsensusId: prepareMsg.ConsensusId, SenderId: prepareMsg.SenderId, BlockHash: prepareMsg.BlockHash},
 	}
 
-	c.On(&prepareMsgAddedEvent)
+	if err := eventstore.Save(c.GetID(), prepareMsgAddedEvent); err != nil {
+		return err
+	}
 
-	return &prepareMsgAddedEvent, nil
+	if err := c.On(&prepareMsgAddedEvent); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) (*CommitMsgAddedEvent, error) {
+func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) error {
 	if c.ConsensusID.Id != commitMsg.ConsensusId.Id {
-		return nil, errors.New("Consensus ID is not same")
+		return errors.New("Consensus ID is not same")
 	}
 
 	commitMsgAddedEvent := CommitMsgAddedEvent{
@@ -285,9 +307,15 @@ func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) (*CommitMsgAddedEvent, e
 		}{ConsensusId: commitMsg.ConsensusId, SenderId: commitMsg.SenderId},
 	}
 
-	c.On(&commitMsgAddedEvent)
+	if err := eventstore.Save(c.GetID(), commitMsgAddedEvent); err != nil {
+		return err
+	}
 
-	return &commitMsgAddedEvent, nil
+	if err := c.On(&commitMsgAddedEvent); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Consensus) On(event midgard.Event) error {
@@ -306,10 +334,21 @@ func (c *Consensus) On(event midgard.Event) error {
 			SenderId:    v.CommitMsg.SenderId,
 		})
 
-	case *ConsensusStartedEvent:
+	case *ConsensusCreatedEvent:
+		c.ConsensusID = v.Consensus.ConsensusID
+		c.Representatives = v.Consensus.Representatives
+		c.Block = v.Consensus.Block
+		c.Start()
+		c.PrepareMsgPool = v.Consensus.PrepareMsgPool
+		c.CommitMsgPool = v.Consensus.CommitMsgPool
+
+	case *ConsensusPrePreparedEvent:
 		c.Start()
 
 	case *ConsensusPreparedEvent:
+		c.ToPrepareState()
+
+	case *ConsensusCommittedEvent:
 		c.ToCommitState()
 
 	case *ConsensusFinishedEvent:
