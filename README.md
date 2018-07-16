@@ -46,4 +46,4 @@ It-Chain Project source code files are made available under the Apache License, 
 
 ## Sponsorship
 
-<p><a href="http://bigpicturelabs.io">Bigpicture Labs</a> <img src="./doc/images/[sponsorship]bigpicturelab.jpeg" align="middle" width="120px" height="95px"></p>
+<p><a href="http://bigpicturelabs.io">bigpicturelabs inc.</a> <img src="./doc/images/[sponsorship]bigpicturelab.jpeg" align="middle" width="120px" height="95px"></p>
