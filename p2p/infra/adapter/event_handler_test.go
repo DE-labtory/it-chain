@@ -7,6 +7,8 @@ import (
 	"github.com/it-chain/it-chain-Engine/p2p/infra/adapter"
 	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
+	"github.com/it-chain/it-chain-Engine/p2p/test/mock"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 )
 
 func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
@@ -23,17 +25,24 @@ func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
 				nodeId  string
 				address string
 			}{nodeId: string("123"), address: string("123")},
-			err: nil,
+			err: eventstore.ErrNilStore,
 		},
 		"empty address test": {
 			input: struct {
 				nodeId  string
 				address string
 			}{nodeId: string("123"), address: string("")},
-			err: adapter.ErrEmptyAddress,
+			err: p2p.ErrEmptyAddress,
 		},
 	}
-	eventHandler := adapter.NewEventHandler(EventHandlerMockPeerApi{})
+
+	communicationApi := &mock.MockCommunicationApi{}
+
+	communicationApi.DeliverPLTableFunc = func(connectionId string) error {
+		return nil
+	}
+
+	eventHandler := adapter.NewEventHandler(communicationApi)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -65,7 +74,9 @@ func TestEventHandler_HandleConnDisconnectedEvent(t *testing.T) {
 		},
 	}
 
-	eventHandler := adapter.NewEventHandler(EventHandlerMockPeerApi{})
+	communicationApi := &mock.MockCommunicationApi{}
+
+	eventHandler := adapter.NewEventHandler(communicationApi)
 
 	for testName, test := range tests {
 
@@ -82,54 +93,4 @@ func TestEventHandler_HandleConnDisconnectedEvent(t *testing.T) {
 		assert.Equal(t, err, test.err)
 
 	}
-}
-
-type MockPeerRepository struct{}
-
-func (nr MockPeerRepository) Save(data p2p.Peer) error { return nil }
-
-type MockLeaderRepository struct{}
-
-func (lr MockLeaderRepository) SetLeader(leader p2p.Leader) {}
-
-func TestRepositoryProjector_HandleLeaderUpdatedEvent(t *testing.T) {
-	repositoryProjector := SetupRepositoryProjector()
-
-	tests := map[string]struct {
-		input struct {
-			id string
-		}
-		err error
-	}{
-		"success": {
-			input: struct {
-				id string
-			}{id: "123"},
-			err: nil,
-		},
-		"empty node id test": {
-			input: struct {
-				id string
-			}{id: string("")},
-			err: adapter.ErrEmptyPeerId,
-		},
-	}
-
-	for testName, test := range tests {
-		t.Logf("running test case %s", testName)
-		event := p2p.LeaderUpdatedEvent{
-			EventModel: midgard.EventModel{
-				ID: test.input.id,
-			},
-		}
-		err := repositoryProjector.HandleLeaderUpdatedEvent(event)
-		assert.Equal(t, err, test.err)
-	}
-}
-
-func SetupRepositoryProjector() *adapter.RepositoryProjector {
-
-	repositoryProjector := adapter.NewRepositoryProjector(MockPeerRepository{}, MockLeaderRepository{})
-
-	return repositoryProjector
 }

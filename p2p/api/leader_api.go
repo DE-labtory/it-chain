@@ -10,6 +10,12 @@ var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 var ErrNoMatchingPeerWithIpAddress = errors.New("no matching peer with ip address")
 
+type ILeaderApi interface {
+
+	UpdateLeaderWithAddress(ipAddress string) error
+	UpdateLeaderWithLargePeerTable(oppositePLTable p2p.PLTable) error
+}
+
 type LeaderApi struct {
 	leaderService       p2p.ILeaderService
 	pLTableQueryService p2p.PLTableQueryService

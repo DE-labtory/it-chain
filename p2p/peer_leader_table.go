@@ -13,7 +13,6 @@ type PLTable struct {
 	PeerTable map[string]Peer
 }
 
-
 func NewPLTable(leader Leader, peerTable map[string]Peer) *PLTable {
 
 	return &PLTable{

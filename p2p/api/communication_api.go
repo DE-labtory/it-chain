@@ -2,14 +2,19 @@ package api
 
 import "github.com/it-chain/it-chain-Engine/p2p"
 
+type ICommunicationApi interface {
+	DialToUnConnectedNode(peerTable map[string]p2p.Peer) error
+	DeliverPLTable(connectionId string) error
+}
+
 type CommunicationApi struct {
-	pLTableQueryService     p2p.PLTableQueryService
+	pLTableQueryService  p2p.PLTableQueryService
 	communicationService p2p.ICommunicationService
 }
 
 func NewCommunicationApi(pLTableQueryService p2p.PLTableQueryService, communicationService p2p.ICommunicationService) *CommunicationApi {
 	return &CommunicationApi{
-		pLTableQueryService:pLTableQueryService,
+		pLTableQueryService:  pLTableQueryService,
 		communicationService: communicationService,
 	}
 }

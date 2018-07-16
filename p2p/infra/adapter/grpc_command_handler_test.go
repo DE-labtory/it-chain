@@ -8,6 +8,7 @@ import (
 	"github.com/it-chain/it-chain-Engine/p2p/infra/adapter"
 	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
+	"github.com/it-chain/it-chain-Engine/p2p/test/mock"
 )
 
 
@@ -43,11 +44,15 @@ func TestGrpcCommandHandler_HandleMessageReceive(t *testing.T) {
 		"peer leader table deliver test empty leader id": {},
 	}
 
-	leaderApi := MockLeader{}
-	peerApi := MockPeerApi{}
-	commandService := MockCommandService{}
+	leaderApi := &mock.MockLeaderApi{}
 
-	messageHandler := adapter.NewGrpcCommandHandler(leaderApi, peerApi, commandService)
+	electionService := p2p.ElectionService{}
+
+	communicationApi := &mock.MockCommunicationApi{}
+
+	pLTableService := &mock.MockPLTableService{}
+
+	messageHandler := adapter.NewGrpcCommandHandler(leaderApi, electionService, communicationApi, pLTableService)
 
 	for testName, test := range tests {
 		grpcReceiveCommand := p2p.GrpcReceiveCommand{

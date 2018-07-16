@@ -1,7 +1,6 @@
 package adapter
 
 import (
-	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/it-chain/it-chain-Engine/p2p"
 )
 
