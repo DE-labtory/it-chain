@@ -8,6 +8,13 @@ type CommunicationService struct {
 	publish Publish
 }
 
+func NewCommunicationService(publish Publish) *CommunicationService{
+
+	return &CommunicationService{
+		publish:publish,
+	}
+}
+
 func (cs *CommunicationService) Dial(ipAddress string) error {
 
 	command := p2p.ConnectionCreateCommand{
@@ -22,7 +29,7 @@ func (cs *CommunicationService) Dial(ipAddress string) error {
 func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error {
 
 	if connectionId == "" {
-		return ErrEmptyPeerId
+		return ErrEmptyConnectionId
 	}
 
 	if len(peerLeaderTable.PeerTable) == 0 {
