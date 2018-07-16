@@ -119,6 +119,16 @@ func (pltrepo *PLTableRepository) SetLeader(peer p2p.Peer) error{
 	return nil
 }
 
+func (pltrepo *PLTableRepository) Delete(id string) error{
+
+	pltrepo.mux.Lock()
+	defer pltrepo.mux.Unlock()
+
+	delete(pltrepo.pLTable.PeerTable, id)
+
+	return nil
+}
+
 type P2PEventHandler struct {
 	pLTableRepository PLTableRepository
 }
@@ -133,6 +143,13 @@ func (peh *P2PEventHandler) PeerCreatedEventHandler(event p2p.PeerCreatedEvent) 
 	}
 
 	peh.pLTableRepository.Save(peer)
+
+	return nil
+}
+
+func (peh *P2PEventHandler) PeerDeletedEventHandler(event p2p.PeerCreatedEvent) error{
+
+	peh.pLTableRepository.Delete(event.ID)
 
 	return nil
 }
