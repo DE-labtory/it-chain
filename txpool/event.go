@@ -15,7 +15,6 @@ type TxCreatedEvent struct {
 	Jsonrpc       string
 	Method        string
 	Params        Param
-	ID            string
 	ICodeID       string
 }
 
@@ -31,7 +30,6 @@ func (tx TxCreatedEvent) GetTransaction() Transaction {
 			Jsonrpc: tx.Jsonrpc,
 			Method:  TxDataType(tx.Method),
 			Params:  tx.Params,
-			ID:      tx.ID,
 		},
 		TimeStamp: tx.TimeStamp,
 	}
