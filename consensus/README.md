@@ -39,11 +39,12 @@ Consensus Module에서 다루는 핵심 데이터
 ## Publish Event
 
 - Consensus 관련
-  - ConsensusStartEvent (Preprepare Msg를 받았을 때)
+  - ConsensusPrePreparedEvent (Preprepare Msg를 보냈을 때)
   - ConsensusPreparedEvent (Prepare Msg를 보냈을 때)
   - ConsensusCommittedEvent (Commit Msg를 보냈을 때)
-  - ConsensusFinishedEvent (블록을 저장했을 때)
-- ConsensusMessageAddedEvent(3 type)
+  - ConsensusFinishedEvent (블록을 저장했을 때 IDLE 상태가 된다)
+
+- ConsensusMessageAddedEvent (3 types)
   - PreprepareMsg
   - PrepareMsg
   - CommitMsg
@@ -61,8 +62,8 @@ Consensus Module에서 다루는 핵심 데이터
 
 ## Publish Command
 
-- BlockCreateCommand
-- ConsensusMsgSendCommand
+- CreateBlockCommand
+- SendConsensusMsgCommand
   - PreprepareMsg (leader)
   - PrepareMsg
   - CommitMsg
