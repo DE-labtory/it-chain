@@ -43,3 +43,7 @@ It-Chain Project source code files are made available under the Apache License, 
 @Hyemin choi<br>
 @Jieun Oh<br>
 @Jongmo Moon<br>
+
+## Sponsorship
+
+<p><a href="http://bigpicturelabs.io">Bigpicture Labs</a> <img src="./doc/images/[sponsorship]bigpicturelab.jpeg" align="middle" width="120px" height="95px"></p>
