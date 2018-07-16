@@ -6,6 +6,7 @@ import (
 
 	"encoding/json"
 
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
 
@@ -209,6 +210,7 @@ func NewConsensusId(id string) ConsensusId {
 }
 
 type Consensus struct {
+	midgard.AggregateModel
 	ConsensusID     ConsensusId
 	Representatives []*Representative
 	Block           ProposedBlock
@@ -217,12 +219,28 @@ type Consensus struct {
 	CommitMsgPool   CommitMsgPool
 }
 
+var CONSENSUS_AID = "CONSENSUS_AID"
+
 func (c *Consensus) GetID() string {
 	return c.ConsensusID.Id
 }
 
-func (c *Consensus) Start() {
-	c.CurrentState = PREPARE_STATE
+func (c *Consensus) Start() error {
+	event := ConsensusPrePreparedEvent{
+		EventModel: midgard.EventModel{
+			ID: c.GetID(),
+		},
+	}
+
+	err := eventstore.Save(CONSENSUS_AID, event)
+
+	if err != nil {
+		return err
+	}
+
+	err = c.On(event)
+
+	return err
 }
 
 func (c *Consensus) IsPrepareState() bool {
@@ -241,17 +259,63 @@ func (c *Consensus) IsCommitState() bool {
 	return false
 }
 
-func (c *Consensus) ToCommitState() {
-	c.CurrentState = COMMIT_STATE
+func (c *Consensus) ToPrepareState() error {
+	event := ConsensusPreparedEvent{
+		EventModel: midgard.EventModel{
+			ID: c.GetID(),
+		},
+	}
+
+	err := eventstore.Save(CONSENSUS_AID, event)
+
+	if err != nil {
+		return err
+	}
+
+	err = c.On(&event)
+
+	return err
 }
 
-func (c *Consensus) ToIdleState() {
-	c.CurrentState = IDLE_STATE
+func (c *Consensus) ToCommitState() error {
+	event := ConsensusCommittedEvent{
+		EventModel: midgard.EventModel{
+			ID: c.GetID(),
+		},
+	}
+
+	err := eventstore.Save(CONSENSUS_AID, event)
+
+	if err != nil {
+		return err
+	}
+
+	err = c.On(&event)
+
+	return err
 }
 
-func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) (*PrepareMsgAddedEvent, error) {
+func (c *Consensus) ToIdleState() error {
+	event := ConsensusFinishedEvent{
+		EventModel: midgard.EventModel{
+			ID: c.GetID(),
+		},
+	}
+
+	err := eventstore.Save(CONSENSUS_AID, event)
+
+	if err != nil {
+		return err
+	}
+
+	err = c.On(&event)
+
+	return err
+}
+
+func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) error {
 	if c.ConsensusID.Id != prepareMsg.ConsensusId.Id {
-		return nil, errors.New("Consensus ID is not same")
+		return errors.New("Consensus ID is not same")
 	}
 
 	prepareMsgAddedEvent := PrepareMsgAddedEvent{
@@ -265,14 +329,20 @@ func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) (*PrepareMsgAddedEven
 		}{ConsensusId: prepareMsg.ConsensusId, SenderId: prepareMsg.SenderId, BlockHash: prepareMsg.BlockHash},
 	}
 
-	c.On(&prepareMsgAddedEvent)
+	err := eventstore.Save(CONSENSUS_AID, prepareMsgAddedEvent)
 
-	return &prepareMsgAddedEvent, nil
+	if err != nil {
+		return err
+	}
+
+	err = c.On(&prepareMsgAddedEvent)
+
+	return err
 }
 
-func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) (*CommitMsgAddedEvent, error) {
+func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) error {
 	if c.ConsensusID.Id != commitMsg.ConsensusId.Id {
-		return nil, errors.New("Consensus ID is not same")
+		return errors.New("Consensus ID is not same")
 	}
 
 	commitMsgAddedEvent := CommitMsgAddedEvent{
@@ -285,9 +355,15 @@ func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) (*CommitMsgAddedEvent, e
 		}{ConsensusId: commitMsg.ConsensusId, SenderId: commitMsg.SenderId},
 	}
 
-	c.On(&commitMsgAddedEvent)
+	err := eventstore.Save(CONSENSUS_AID, commitMsgAddedEvent)
 
-	return &commitMsgAddedEvent, nil
+	if err != nil {
+		return err
+	}
+
+	err = c.On(&commitMsgAddedEvent)
+
+	return err
 }
 
 func (c *Consensus) On(event midgard.Event) error {
@@ -306,14 +382,17 @@ func (c *Consensus) On(event midgard.Event) error {
 			SenderId:    v.CommitMsg.SenderId,
 		})
 
-	case *ConsensusStartedEvent:
-		c.Start()
+	case *ConsensusPrePreparedEvent:
+		c.CurrentState = PREPREPARE_STATE
 
 	case *ConsensusPreparedEvent:
-		c.ToCommitState()
+		c.CurrentState = PREPARE_STATE
+
+	case *ConsensusCommittedEvent:
+		c.CurrentState = COMMIT_STATE
 
 	case *ConsensusFinishedEvent:
-		c.ToIdleState()
+		c.CurrentState = IDLE_STATE
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
