@@ -3,6 +3,11 @@ package consensus
 import (
 	"testing"
 
+	"errors"
+
+	"github.com/it-chain/it-chain-Engine/consensus/test/mock"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -154,6 +159,8 @@ func TestConsensus_SavePrepareMsg(t *testing.T) {
 		CommitMsgPool:  NewCommitMsgPool(),
 	}
 
+	eventRepository := mock.MockEventRepository{}
+
 	// case 1 : save
 	pMsg := PrepareMsg{
 		ConsensusId: NewConsensusId("c1"),
@@ -161,10 +168,18 @@ func TestConsensus_SavePrepareMsg(t *testing.T) {
 		BlockHash:   make([]byte, 0),
 	}
 
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.Equal(t, "c1", events[0].(PrepareMsgAddedEvent).PrepareMsg.ConsensusId.Id)
+		assert.Equal(t, "s1", events[0].(PrepareMsgAddedEvent).PrepareMsg.SenderId)
+		return nil
+	}
+	eventstore.InitForMock(eventRepository)
+
 	// when
-	c.SavePrepareMsg(&pMsg)
+	err := c.SavePrepareMsg(&pMsg)
 
 	// then
+	assert.Nil(t, err)
 	assert.Equal(t, 1, len(c.PrepareMsgPool.messages))
 
 	// case 2 : incorrect consensus ID
@@ -174,10 +189,18 @@ func TestConsensus_SavePrepareMsg(t *testing.T) {
 		BlockHash:   make([]byte, 0),
 	}
 
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.Equal(t, "c2", events[0].(PrepareMsgAddedEvent).PrepareMsg.ConsensusId.Id)
+		assert.Equal(t, "s1", events[0].(PrepareMsgAddedEvent).PrepareMsg.SenderId)
+		return errors.New("Consensus ID is not same")
+	}
+	eventstore.InitForMock(eventRepository)
+
 	// when
-	c.SavePrepareMsg(&pMsg)
+	err = c.SavePrepareMsg(&pMsg)
 
 	//then
+	assert.NotNil(t, err)
 	assert.Equal(t, 1, len(c.PrepareMsgPool.messages))
 }
 
@@ -194,16 +217,26 @@ func TestConsensus_SaveCommitMsg(t *testing.T) {
 		CommitMsgPool:  NewCommitMsgPool(),
 	}
 
+	eventRepository := mock.MockEventRepository{}
+
 	// case 1 : save
 	cMsg := CommitMsg{
 		ConsensusId: NewConsensusId("c1"),
 		SenderId:    "s1",
 	}
 
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.Equal(t, "c1", events[0].(CommitMsgAddedEvent).CommitMsg.ConsensusId.Id)
+		assert.Equal(t, "s1", events[0].(CommitMsgAddedEvent).CommitMsg.SenderId)
+		return nil
+	}
+	eventstore.InitForMock(eventRepository)
+
 	// when
-	c.SaveCommitMsg(&cMsg)
+	err := c.SaveCommitMsg(&cMsg)
 
 	// then
+	assert.Nil(t, err)
 	assert.Equal(t, 1, len(c.CommitMsgPool.messages))
 
 	// case 2 : incorrect consensus ID
@@ -212,9 +245,17 @@ func TestConsensus_SaveCommitMsg(t *testing.T) {
 		SenderId:    "s1",
 	}
 
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.Equal(t, "c2", events[0].(CommitMsgAddedEvent).CommitMsg.ConsensusId.Id)
+		assert.Equal(t, "s1", events[0].(CommitMsgAddedEvent).CommitMsg.SenderId)
+		return errors.New("Consensus ID is not same")
+	}
+	eventstore.InitForMock(eventRepository)
+
 	// when
-	c.SaveCommitMsg(&cMsg)
+	err = c.SaveCommitMsg(&cMsg)
 
 	//then
+	assert.NotNil(t, err)
 	assert.Equal(t, 1, len(c.CommitMsgPool.messages))
 }

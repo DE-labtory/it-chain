@@ -274,7 +274,7 @@ func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) error {
 		return err
 	}
 
-	if err := eventstore.Save(c.GetID(), prepareMsgAddedEvent); err != nil {
+	if err := eventstore.Save(prepareMsgAddedEvent.ID, prepareMsgAddedEvent); err != nil {
 		return err
 	}
 

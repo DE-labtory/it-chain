@@ -3,6 +3,9 @@ package consensus
 import (
 	"testing"
 
+	"github.com/it-chain/it-chain-Engine/consensus/test/mock"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,41 +50,90 @@ func TestParliament_HasLeader(t *testing.T) {
 }
 
 func TestParliament_ChangeLeader(t *testing.T) {
+	// given
 	p := NewParliament()
 	l := &Leader{LeaderId: LeaderId{"leader"}}
+	eventRepository := mock.MockEventRepository{}
 
-	p.ChangeLeader(l)
+	// when
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.Equal(t, "leader", events[0].(LeaderChangedEvent).LeaderId)
+		return nil
+	}
+	eventstore.InitForMock(eventRepository)
 
+	err := p.ChangeLeader(l)
+
+	// then
+	assert.Nil(t, err)
 	assert.Equal(t, l.GetID(), p.Leader.GetID())
 }
 
 func TestParliament_AddMember(t *testing.T) {
+	// given
 	p := NewParliament()
 	m := &Member{MemberId: MemberId{"member"}}
+	eventRepository := mock.MockEventRepository{}
 
-	p.AddMember(m)
+	// when
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.Equal(t, "member", events[0].(MemberJoinedEvent).MemberId)
+		return nil
+	}
+	eventstore.InitForMock(eventRepository)
 
+	err := p.AddMember(m)
+
+	// then
+	assert.Nil(t, err)
 	assert.Equal(t, 1, len(p.Members))
 }
 
 func TestParliament_RemoveMember(t *testing.T) {
+	// given
 	p := NewParliament()
 	m := &Member{MemberId: MemberId{"member"}}
+	eventRepository := mock.MockEventRepository{}
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		return nil
+	}
+	eventstore.InitForMock(eventRepository)
 	p.AddMember(m)
 
 	// case 1
-	p.RemoveMember(MemberId{"nonmember"})
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.NotEqual(t, m.MemberId.Id, events[0].(MemberRemovedEvent).MemberId)
+		return nil
+	}
+	eventstore.InitForMock(eventRepository)
 
+	err := p.RemoveMember(MemberId{"nonmember"})
+
+	// then
+	assert.Nil(t, err)
 	assert.Equal(t, 1, len(p.Members))
 
 	// case2
-	p.RemoveMember(m.MemberId)
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.Equal(t, m.MemberId.Id, events[0].(MemberRemovedEvent).MemberId)
+		return nil
+	}
+	eventstore.InitForMock(eventRepository)
 
+	err = p.RemoveMember(m.MemberId)
+
+	// then
+	assert.Nil(t, err)
 	assert.Equal(t, 0, len(p.Members))
 }
 
 func TestParliament_ValidateRepresentative(t *testing.T) {
 	p := NewParliament()
+	eventRepository := mock.MockEventRepository{}
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		return nil
+	}
+	eventstore.InitForMock(eventRepository)
 
 	// case 1
 	var representatives1 []*Representative
@@ -115,6 +167,11 @@ func TestParliament_ValidateRepresentative(t *testing.T) {
 func TestParliament_FindByPeerID(t *testing.T) {
 	p := NewParliament()
 	m := &Member{MemberId: MemberId{"member"}}
+	eventRepository := mock.MockEventRepository{}
+	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		return nil
+	}
+	eventstore.InitForMock(eventRepository)
 	p.AddMember(m)
 
 	// case 1
