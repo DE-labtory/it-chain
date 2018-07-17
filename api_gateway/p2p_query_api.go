@@ -10,37 +10,37 @@ import (
 
 var ErrPeerExists = errors.New("peer already exists")
 
-type PLTableQueryApi struct {
+type PeerQueryApi struct {
 	mux               sync.Mutex
-	pLTableRepository PLTableRepository
+	peerRepository PeerRepository
 }
 
-func (pltqa *PLTableQueryApi) GetPLTable() (p2p.PLTable, error) {
+func (pqa *PeerQueryApi) GetPLTable() (p2p.PLTable, error) {
 
-	return pltqa.pLTableRepository.GetPLTable()
+	return pqa.peerRepository.GetPLTable()
 }
 
-func (pltqa *PLTableQueryApi) GetLeader() (p2p.Leader, error) {
+func (pqa *PeerQueryApi) GetLeader() (p2p.Leader, error) {
 
-	return pltqa.pLTableRepository.GetLeader()
+	return pqa.peerRepository.GetLeader()
 }
 
-func (pltqa *PLTableQueryApi) FindPeerById(peerId p2p.PeerId) (p2p.Peer, error) {
+func (pqa *PeerQueryApi) FindPeerById(peerId p2p.PeerId) (p2p.Peer, error) {
 
-	return pltqa.pLTableRepository.FindPeerById(peerId)
+	return pqa.peerRepository.FindPeerById(peerId)
 }
 
-func (pltqa *PLTableQueryApi) FindPeerByAddress(ipAddress string) (p2p.Peer, error) {
+func (pqa *PeerQueryApi) FindPeerByAddress(ipAddress string) (p2p.Peer, error) {
 
-	return pltqa.pLTableRepository.FindPeerByAddress(ipAddress)
+	return pqa.peerRepository.FindPeerByAddress(ipAddress)
 }
 
-type PLTableRepository struct {
+type PeerRepository struct {
 	mux     sync.Mutex
 	pLTable p2p.PLTable
 }
 
-func (pltrepo *PLTableRepository) GetPLTable() (p2p.PLTable, error) {
+func (pltrepo *PeerRepository) GetPLTable() (p2p.PLTable, error) {
 
 	pltrepo.mux.Lock()
 	defer pltrepo.mux.Unlock()
@@ -48,12 +48,12 @@ func (pltrepo *PLTableRepository) GetPLTable() (p2p.PLTable, error) {
 	return pltrepo.pLTable, nil
 }
 
-func (pltrepo *PLTableRepository) GetLeader() (p2p.Leader, error) {
+func (pltrepo *PeerRepository) GetLeader() (p2p.Leader, error) {
 
 	return pltrepo.pLTable.Leader, nil
 }
 
-func (pltrepo *PLTableRepository) FindPeerById(peerId p2p.PeerId) (p2p.Peer, error) {
+func (pltrepo *PeerRepository) FindPeerById(peerId p2p.PeerId) (p2p.Peer, error) {
 
 	pltrepo.mux.Lock()
 	defer pltrepo.mux.Unlock()
@@ -70,7 +70,7 @@ func (pltrepo *PLTableRepository) FindPeerById(peerId p2p.PeerId) (p2p.Peer, err
 	return v, nil
 }
 
-func (pltrepo *PLTableRepository) FindPeerByAddress(ipAddress string) (p2p.Peer, error) {
+func (pltrepo *PeerRepository) FindPeerByAddress(ipAddress string) (p2p.Peer, error) {
 
 	pltrepo.mux.Lock()
 	defer pltrepo.mux.Unlock()
@@ -85,7 +85,7 @@ func (pltrepo *PLTableRepository) FindPeerByAddress(ipAddress string) (p2p.Peer,
 	return p2p.Peer{}, nil
 }
 
-func (pltrepo *PLTableRepository) Save(peer p2p.Peer) error {
+func (pltrepo *PeerRepository) Save(peer p2p.Peer) error {
 
 	pltrepo.mux.Lock()
 	defer pltrepo.mux.Unlock()
@@ -103,7 +103,7 @@ func (pltrepo *PLTableRepository) Save(peer p2p.Peer) error {
 	return nil
 }
 
-func (pltrepo *PLTableRepository) SetLeader(peer p2p.Peer) error{
+func (pltrepo *PeerRepository) SetLeader(peer p2p.Peer) error{
 
 	pltrepo.mux.Lock()
 	defer pltrepo.mux.Unlock()
@@ -119,7 +119,7 @@ func (pltrepo *PLTableRepository) SetLeader(peer p2p.Peer) error{
 	return nil
 }
 
-func (pltrepo *PLTableRepository) Delete(id string) error{
+func (pltrepo *PeerRepository) Delete(id string) error{
 
 	pltrepo.mux.Lock()
 	defer pltrepo.mux.Unlock()
@@ -130,7 +130,7 @@ func (pltrepo *PLTableRepository) Delete(id string) error{
 }
 
 type P2PEventHandler struct {
-	pLTableRepository PLTableRepository
+	peerRepository PeerRepository
 }
 
 func (peh *P2PEventHandler) PeerCreatedEventHandler(event p2p.PeerCreatedEvent) error{
@@ -142,14 +142,14 @@ func (peh *P2PEventHandler) PeerCreatedEventHandler(event p2p.PeerCreatedEvent) 
 		IpAddress:event.IpAddress,
 	}
 
-	peh.pLTableRepository.Save(peer)
+	peh.peerRepository.Save(peer)
 
 	return nil
 }
 
 func (peh *P2PEventHandler) PeerDeletedEventHandler(event p2p.PeerCreatedEvent) error{
 
-	peh.pLTableRepository.Delete(event.ID)
+	peh.peerRepository.Delete(event.ID)
 
 	return nil
 }
@@ -160,7 +160,7 @@ func (peh *P2PEventHandler) HandleLeaderUpdatedEvent(event p2p.LeaderUpdatedEven
 		PeerId: p2p.PeerId{Id: event.ID},
 	}
 
-	peh.pLTableRepository.SetLeader(peer)
+	peh.peerRepository.SetLeader(peer)
 
 	return nil
 

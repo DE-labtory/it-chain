@@ -18,14 +18,14 @@ type ILeaderApi interface {
 
 type LeaderApi struct {
 	leaderService       p2p.ILeaderService
-	pLTableQueryService p2p.PLTableQueryService
+	peerQueryService p2p.PeerQueryService
 }
 
-func NewLeaderApi(leaderService p2p.ILeaderService, pLTableQueryService p2p.PLTableQueryService) LeaderApi {
+func NewLeaderApi(leaderService p2p.ILeaderService, peerQueryService p2p.PeerQueryService) LeaderApi {
 
 	return LeaderApi{
 		leaderService:       leaderService,
-		pLTableQueryService: pLTableQueryService,
+		peerQueryService: peerQueryService,
 	}
 }
 
@@ -33,7 +33,7 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
 	//1. loop peer list and find specific address
 	//2. update specific peer as leader
-	pLTable, _ := la.pLTableQueryService.GetPLTable()
+	pLTable, _ := la.peerQueryService.GetPLTable()
 
 	peers := pLTable.PeerTable
 
@@ -53,7 +53,7 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
 func (la *LeaderApi) UpdateLeaderWithLargePeerTable(oppositePLTable p2p.PLTable) error {
 
-	myPLTable, _ := la.pLTableQueryService.GetPLTable()
+	myPLTable, _ := la.peerQueryService.GetPLTable()
 
 	myLeader, _ := myPLTable.GetLeader()
 

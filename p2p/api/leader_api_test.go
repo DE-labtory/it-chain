@@ -161,15 +161,15 @@ func SetupLeaderApi() api.LeaderApi {
 		return nil
 	}
 
-	mockPLTableQueryService := &mock.MockPLTableQueryService{}
+	mockPeerQueryService := &mock.MockPeerQueryService{}
 
-	mockPLTableQueryService.GetPLTableFunc = func() (p2p.PLTable, error) {
+	mockPeerQueryService.GetPLTableFunc = func() (p2p.PLTable, error) {
 
 
 		return mock.MakeFakePLTable(), nil
 	}
 
-	leaderApi := api.NewLeaderApi(leaderService, mockPLTableQueryService)
+	leaderApi := api.NewLeaderApi(leaderService, mockPeerQueryService)
 
 	return leaderApi
 }

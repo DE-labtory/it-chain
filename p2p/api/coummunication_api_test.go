@@ -28,8 +28,8 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 		},
 	}
 
-	mockPLTableQueryService :=&mock.MockPLTableQueryService{}
-	mockPLTableQueryService.FindPeerByIdFunc = func(peerId p2p.PeerId) (p2p.Peer, error) {
+	mockPeerQueryService :=&mock.MockPeerQueryService{}
+	mockPeerQueryService.FindPeerByIdFunc = func(peerId p2p.PeerId) (p2p.Peer, error) {
 
 		peerTable := mock.MakeFakePeerTable()
 
@@ -46,7 +46,7 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 
 		t.Logf("running test case %s", testName)
 
-		communicationApi := api.NewCommunicationApi(mockPLTableQueryService, &mock.MockCommunicationService{})
+		communicationApi := api.NewCommunicationApi(mockPeerQueryService, &mock.MockCommunicationService{})
 
 		assert.Equal(t, communicationApi.DialToUnConnectedNode(test.input.peerTable), test.err)
 
@@ -95,9 +95,9 @@ func TestCommunicationApi_DeliverPLTable(t *testing.T) {
 
 func SetupCommunicationApi() *api.CommunicationApi {
 
-	pLTableQueryService := &mock.MockPLTableQueryService{}
+	peerQueryService := &mock.MockPeerQueryService{}
 
-	pLTableQueryService.FindPeerByIdFunc = func(peerId p2p.PeerId) (p2p.Peer, error) {
+	peerQueryService.FindPeerByIdFunc = func(peerId p2p.PeerId) (p2p.Peer, error) {
 
 		pLTable := mock.MakeFakePLTable()
 
@@ -116,7 +116,7 @@ func SetupCommunicationApi() *api.CommunicationApi {
 	}
 
 
-	pLTableQueryService.GetPLTableFunc = func() (p2p.PLTable, error) {
+	peerQueryService.GetPLTableFunc = func() (p2p.PLTable, error) {
 
 		return mock.MakeFakePLTable(), nil
 	}
@@ -127,7 +127,7 @@ func SetupCommunicationApi() *api.CommunicationApi {
 		return nil
 	}
 
-	communicationApi := api.NewCommunicationApi(pLTableQueryService, communicationService)
+	communicationApi := api.NewCommunicationApi(peerQueryService, communicationService)
 
 	return communicationApi
 }
