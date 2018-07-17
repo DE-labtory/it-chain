@@ -8,13 +8,13 @@ type ICommunicationApi interface {
 }
 
 type CommunicationApi struct {
-	pLTableQueryService  p2p.PLTableQueryService
+	peerQueryService  p2p.PeerQueryService
 	communicationService p2p.ICommunicationService
 }
 
-func NewCommunicationApi(pLTableQueryService p2p.PLTableQueryService, communicationService p2p.ICommunicationService) *CommunicationApi {
+func NewCommunicationApi(peerQueryService p2p.PeerQueryService, communicationService p2p.ICommunicationService) *CommunicationApi {
 	return &CommunicationApi{
-		pLTableQueryService:  pLTableQueryService,
+		peerQueryService:  peerQueryService,
 		communicationService: communicationService,
 	}
 }
@@ -26,7 +26,7 @@ func (ca *CommunicationApi) DialToUnConnectedNode(peerTable map[string]p2p.Peer)
 	for _, peer := range peerTable {
 
 		//err is nil if there is matching peer
-		peer, err := ca.pLTableQueryService.FindPeerById(peer.PeerId)
+		peer, err := ca.peerQueryService.FindPeerById(peer.PeerId)
 
 		//dial if no peer matching peer id
 		if err != nil {
@@ -41,7 +41,7 @@ func (ca *CommunicationApi) DialToUnConnectedNode(peerTable map[string]p2p.Peer)
 func (ca *CommunicationApi) DeliverPLTable(connectionId string) error {
 
 	//1. get peer table
-	peerTable, _ := ca.pLTableQueryService.GetPLTable()
+	peerTable, _ := ca.peerQueryService.GetPLTable()
 
 	//2. deliver peer table
 	ca.communicationService.DeliverPLTable(connectionId, peerTable)

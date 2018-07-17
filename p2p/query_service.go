@@ -1,6 +1,6 @@
 package p2p
 
-type PLTableQueryService interface {
+type PeerQueryService interface {
 
 	GetPLTable() (PLTable, error)
 	GetLeader() (Leader, error)
