@@ -2,7 +2,6 @@ language: go
 go:
  - 1.9.4
  - release
- - master
 
 # Don't email me the results of the test runs.
 notifications:
