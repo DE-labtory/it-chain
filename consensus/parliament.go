@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
 
@@ -95,9 +96,9 @@ func (p *Parliament) HasLeader() bool {
 	return true
 }
 
-func (p *Parliament) ChangeLeader(leader *Leader) (*LeaderChangedEvent, error) {
+func (p *Parliament) ChangeLeader(leader *Leader) error {
 	if leader == nil {
-		return nil, errors.New("Leader is nil")
+		return errors.New("Leader is nil")
 	}
 
 	leaderChangedEvent := LeaderChangedEvent{
@@ -107,24 +108,30 @@ func (p *Parliament) ChangeLeader(leader *Leader) (*LeaderChangedEvent, error) {
 		LeaderId: leader.GetID(),
 	}
 
-	p.On(&leaderChangedEvent)
+	if err := eventstore.Save(p.GetID(), leaderChangedEvent); err != nil {
+		return err
+	}
 
-	return &leaderChangedEvent, nil
+	if err := p.On(&leaderChangedEvent); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (p *Parliament) AddMember(member *Member) (*MemberJoinedEvent, error) {
+func (p *Parliament) AddMember(member *Member) error {
 	if member == nil {
-		return nil, errors.New("Member is nil")
+		return errors.New("Member is nil")
 	}
 
 	if member.GetID() == "" {
-		return nil, errors.New(fmt.Sprintf("Need Valid PeerID [%s]", member.GetID()))
+		return errors.New(fmt.Sprintf("Need Valid PeerID [%s]", member.GetID()))
 	}
 
 	index := p.findIndexOfMember(member.GetID())
 
 	if index != -1 {
-		return nil, errors.New(fmt.Sprintf("Already exist member [%s]", member.GetID()))
+		return errors.New(fmt.Sprintf("Already exist member [%s]", member.GetID()))
 	}
 
 	memberJoinedEvent := MemberJoinedEvent{
@@ -134,16 +141,22 @@ func (p *Parliament) AddMember(member *Member) (*MemberJoinedEvent, error) {
 		MemberId: member.GetID(),
 	}
 
-	p.On(&memberJoinedEvent)
+	if err := eventstore.Save(p.GetID(), memberJoinedEvent); err != nil {
+		return err
+	}
 
-	return &memberJoinedEvent, nil
+	if err := p.On(&memberJoinedEvent); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (p *Parliament) RemoveMember(memberID MemberId) (*MemberRemovedEvent, error) {
+func (p *Parliament) RemoveMember(memberID MemberId) error {
 	index := p.findIndexOfMember(memberID.ToString())
 
 	if index == -1 {
-		return nil, nil
+		return nil
 	}
 
 	memberRemovedEvent := MemberRemovedEvent{
@@ -153,9 +166,15 @@ func (p *Parliament) RemoveMember(memberID MemberId) (*MemberRemovedEvent, error
 		MemberId: memberID.ToString(),
 	}
 
-	p.On(&memberRemovedEvent)
+	if err := eventstore.Save(p.GetID(), memberRemovedEvent); err != nil {
+		return err
+	}
 
-	return &memberRemovedEvent, nil
+	if err := p.On(&memberRemovedEvent); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (p *Parliament) ValidateRepresentative(representatives []*Representative) bool {
