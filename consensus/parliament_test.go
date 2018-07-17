@@ -50,9 +50,8 @@ func TestParliament_ChangeLeader(t *testing.T) {
 	p := NewParliament()
 	l := &Leader{LeaderId: LeaderId{"leader"}}
 
-	event, _ := p.ChangeLeader(l)
+	p.ChangeLeader(l)
 
-	assert.Equal(t, "leader", event.LeaderId)
 	assert.Equal(t, l.GetID(), p.Leader.GetID())
 }
 
@@ -60,9 +59,8 @@ func TestParliament_AddMember(t *testing.T) {
 	p := NewParliament()
 	m := &Member{MemberId: MemberId{"member"}}
 
-	event, _ := p.AddMember(m)
+	p.AddMember(m)
 
-	assert.Equal(t, "member", event.MemberId)
 	assert.Equal(t, 1, len(p.Members))
 }
 
@@ -72,15 +70,13 @@ func TestParliament_RemoveMember(t *testing.T) {
 	p.AddMember(m)
 
 	// case 1
-	event, _ := p.RemoveMember(MemberId{"nonmember"})
+	p.RemoveMember(MemberId{"nonmember"})
 
-	assert.Nil(t, event)
 	assert.Equal(t, 1, len(p.Members))
 
 	// case2
-	event, _ = p.RemoveMember(m.MemberId)
+	p.RemoveMember(m.MemberId)
 
-	assert.Equal(t, "member", event.MemberId)
 	assert.Equal(t, 0, len(p.Members))
 }
 

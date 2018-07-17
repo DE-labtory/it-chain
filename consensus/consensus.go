@@ -218,17 +218,6 @@ type Consensus struct {
 	CommitMsgPool   CommitMsgPool
 }
 
-func NewConsensus() Consensus {
-	return Consensus{
-		ConsensusID:     ConsensusId{""},
-		Representatives: nil,
-		Block:           nil,
-		CurrentState:    "",
-		PrepareMsgPool:  NewPrepareMsgPool(),
-		CommitMsgPool:   NewCommitMsgPool(),
-	}
-}
-
 func (c *Consensus) GetID() string {
 	return c.ConsensusID.Id
 }
@@ -281,11 +270,11 @@ func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) error {
 		}{ConsensusId: prepareMsg.ConsensusId, SenderId: prepareMsg.SenderId, BlockHash: prepareMsg.BlockHash},
 	}
 
-	if err := eventstore.Save(c.GetID(), prepareMsgAddedEvent); err != nil {
+	if err := c.On(&prepareMsgAddedEvent); err != nil {
 		return err
 	}
 
-	if err := c.On(&prepareMsgAddedEvent); err != nil {
+	if err := eventstore.Save(c.GetID(), prepareMsgAddedEvent); err != nil {
 		return err
 	}
 
@@ -307,11 +296,11 @@ func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) error {
 		}{ConsensusId: commitMsg.ConsensusId, SenderId: commitMsg.SenderId},
 	}
 
-	if err := eventstore.Save(c.GetID(), commitMsgAddedEvent); err != nil {
+	if err := c.On(&commitMsgAddedEvent); err != nil {
 		return err
 	}
 
-	if err := c.On(&commitMsgAddedEvent); err != nil {
+	if err := eventstore.Save(c.GetID(), commitMsgAddedEvent); err != nil {
 		return err
 	}
 

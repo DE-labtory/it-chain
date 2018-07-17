@@ -162,11 +162,10 @@ func TestConsensus_SavePrepareMsg(t *testing.T) {
 	}
 
 	// when
-	event, _ := c.SavePrepareMsg(&pMsg)
+	c.SavePrepareMsg(&pMsg)
 
 	// then
 	assert.Equal(t, 1, len(c.PrepareMsgPool.messages))
-	assert.Equal(t, c.ConsensusID.Id, event.ID)
 
 	// case 2 : incorrect consensus ID
 	pMsg = PrepareMsg{
@@ -202,11 +201,10 @@ func TestConsensus_SaveCommitMsg(t *testing.T) {
 	}
 
 	// when
-	event, _ := c.SaveCommitMsg(&cMsg)
+	c.SaveCommitMsg(&cMsg)
 
 	// then
 	assert.Equal(t, 1, len(c.CommitMsgPool.messages))
-	assert.Equal(t, c.ConsensusID.Id, event.ID)
 
 	// case 2 : incorrect consensus ID
 	cMsg = CommitMsg{
