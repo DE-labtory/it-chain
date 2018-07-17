@@ -108,11 +108,11 @@ func (p *Parliament) ChangeLeader(leader *Leader) error {
 		LeaderId: leader.GetID(),
 	}
 
-	if err := eventstore.Save(p.GetID(), leaderChangedEvent); err != nil {
+	if err := p.On(&leaderChangedEvent); err != nil {
 		return err
 	}
 
-	if err := p.On(&leaderChangedEvent); err != nil {
+	if err := eventstore.Save(p.GetID(), leaderChangedEvent); err != nil {
 		return err
 	}
 
@@ -141,11 +141,11 @@ func (p *Parliament) AddMember(member *Member) error {
 		MemberId: member.GetID(),
 	}
 
-	if err := eventstore.Save(p.GetID(), memberJoinedEvent); err != nil {
+	if err := p.On(&memberJoinedEvent); err != nil {
 		return err
 	}
 
-	if err := p.On(&memberJoinedEvent); err != nil {
+	if err := eventstore.Save(p.GetID(), memberJoinedEvent); err != nil {
 		return err
 	}
 
@@ -166,11 +166,11 @@ func (p *Parliament) RemoveMember(memberID MemberId) error {
 		MemberId: memberID.ToString(),
 	}
 
-	if err := eventstore.Save(p.GetID(), memberRemovedEvent); err != nil {
+	if err := p.On(&memberRemovedEvent); err != nil {
 		return err
 	}
 
-	if err := p.On(&memberRemovedEvent); err != nil {
+	if err := eventstore.Save(p.GetID(), memberRemovedEvent); err != nil {
 		return err
 	}
 
