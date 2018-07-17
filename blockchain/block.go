@@ -46,12 +46,17 @@ func (block *DefaultBlock) SetHeight(height uint64) {
 
 // TODO: Write test case
 func (block *DefaultBlock) PutTx(transaction Transaction) error {
-	if block.TxList == nil {
-		block.TxList = make([]*DefaultTransaction, 0)
-	}
-	block.TxList = append(block.TxList, transaction.(*DefaultTransaction))
+	convTx, ok := transaction.(*DefaultTransaction)
+	if ok {
+		if block.TxList == nil {
+			block.TxList = make([]*DefaultTransaction, 0)
+		}
+		block.TxList = append(block.TxList, convTx)
 
-	return nil
+		return nil
+	}
+
+	return ErrTransactionType
 }
 
 // TODO: Write test case
