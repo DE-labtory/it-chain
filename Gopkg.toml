@@ -50,7 +50,7 @@
   name = "github.com/it-chain/yggdrasill"
 
 [[constraint]]
-  name = "github.com/pkg/errors"
+  name = "errors"
   version = "0.8.0"
 
 [[constraint]]

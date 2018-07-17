@@ -1,59 +1,54 @@
-# P2P Component
-## 서론
-Peer 서비스는 피어노드의 생성, 삭제, 열람, 리더 노드의 선정 및 변경 등의 역할을 수행합니다.
+# P2P Component Scenario
+**table of contents**
 
-## API
+| scenario name                      | content                                     |
+|:---------------------------------- |:------------------------------------------- |
+| initialize                         | p2p component initialize Scenario           |
+| sync peer table and Leader         | Synchronization of peer table and leader    |
+| leader election                    | leader election process with RAFT algorithm |
+| general node disconnected scenario | node disconnected scenario                  |
 
-## Message Service
+## Component Initialization
+![init scenario](../doc/images/P2PComponentInitializationScenario.png)
 
-### RequestLeaderInfo(peer p2p.Node)
-request of leader info
+Above image shows how p2p component initializes
 
-### DeliverLeaderInfo(toPeer p2p.Node, leader p2p.Node)
-delivery of leader info
-
-### RequestNodeList(peer p2p.Node)
-request of node list
-
-### DeliverNodeList(toNode p2p.Node, nodeList []p2p.Node)
-delivery of node list
-
-### DelverNode(toNode p2p.NodeId, node p2p.Node)
-deliver of single node
-
-## Message Protocol and Types of Messages
-
-### LeaderInfoRequestProtocol
-request of leader info
-
-Message: `LeaderInfoRequestMessage`
-
-### LeaderInfoDeliverProtocol
-delivery of leader info
-
-Message: `LeaderInfoDelivery`
-
-### NodeListRequestProtocol
-request of node list
-
-Message: `NodeListRequestMessage`
-
-### NodeListDeliverProtocol
-send contents of node repository to specific node
-
-Message: `NodeListDelivery`
-
-### NodeDeliverProtocol
-send single node to specific node
-
-Message: `NodeDelivery`
+follows steps below
+1. create node and save it in repo
+2. set itself as leader
 
 
+## Synchronization of peer table and leader
+![Synchronization Of Peer Table And Leader](../doc/images/SynchronizationOfPeerTableAndLeader.png)
+
+Above image shows how specific node connect to other whole nodes and have genuine Leader.
+
+follows steps below
+1. save node in peer repository when `ConnectionCreatedEvent` occurs
+2. receive peer table
+3. set connected node's leader as leader if connected node has more node list
+4. check node list recursively until there are no more unconnected node and dial to unconnected node
 
 
+## Leader election when leader node is disconnected
+<p align="center"><img src="../doc/images/NodeDisconnectedScenario.png" width="450px"></p>
+
+1. Check if disconnected node is a leader when `ConnectionDisconnectedEvent` occurs
+2. elect leader
+
+**Leader Election Algorithm with RAFT**
+1. Start random timeout function 150ms ~ 300ms
+2. Send message having `RequestVoteProtocol` from timed out node to other nodes and alter state to `candidate`
+3. If node receives message by `RequestVoteProtocol` before time out, answers with message by `VoteLeaderProtocol` with it's own leader info, reset timeout function
+4. If node in the state of `candidate` receives messages with same leader by `VoteLeaderProtocol` as many as the number of nodes, update itself as leader and tell every node that leader has changed
 
 
+## General node Disconnected Scenario
+<p align="center"><img src="../doc/images/NodeDisconnectedScenario.png" width="450px"></p>
+
+1. receive `ConnectionDisconnectedEvent`
+2. save `NodeDeletedEvent`
 
 
-
----
+### AUTHOR
+[@frontalnh](https://github.com/frontalnh)
