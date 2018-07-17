@@ -50,7 +50,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 			output: &blockchain.DefaultBlock{
 				PrevSeal:  make([]byte, 0),
 				Height:    uint64(0),
-				TxList:    make([]blockchain.Transaction, 0),
+				TxList:    make([]*blockchain.DefaultTransaction, 0),
 				TxSeal:    make([][]byte, 0),
 				Timestamp: (time.Now()).Round(0),
 				Creator:   make([]byte, 0),
@@ -162,7 +162,7 @@ func TestCreateProposedBlock(t *testing.T) {
 			output: &blockchain.DefaultBlock{
 				PrevSeal: []byte("prevseal"),
 				Height:   1,
-				TxList: []blockchain.Transaction{
+				TxList: []*blockchain.DefaultTransaction{
 					&blockchain.DefaultTransaction{},
 				},
 				Timestamp: (time.Now()).Round(0),

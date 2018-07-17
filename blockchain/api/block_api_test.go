@@ -79,7 +79,7 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 		case blockchain.BlockPool:
 			aggregate.(blockchain.BlockPool).Add(&blockchain.DefaultBlock{
 				Height: blockchain.BlockHeight(12),
-				TxList: []blockchain.Transaction{},
+				TxList: []*blockchain.DefaultTransaction{},
 			})
 			break
 
