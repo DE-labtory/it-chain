@@ -1,8 +1,8 @@
 package p2p
 
 import (
-	"github.com/pkg/errors"
 	"encoding/json"
+	"errors"
 )
 
 var ErrEmptyLeaderId = errors.New("empty leader id")

@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/it-chain/it-chain-Engine/icode/domain/model"
-	"github.com/pkg/errors"
+	"errors"
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/config"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"

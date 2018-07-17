@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	cs "github.com/it-chain/it-chain-Engine/consensus/legacy/domain/model/consensus"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 type MsgPool struct {

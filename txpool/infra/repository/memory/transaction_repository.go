@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/it-chain/it-chain-Engine/txpool"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 var ErrAlreadyExist = errors.New("transaction already exist")
