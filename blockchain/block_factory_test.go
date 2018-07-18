@@ -35,6 +35,9 @@ func TestCreateGenesisBlock(t *testing.T) {
 
 	//given
 
+	const shortForm = "2006-Jan-02"
+	outputTime, _ := time.Parse(shortForm, "0000-Jan-00")
+
 	tests := map[string]struct {
 		input struct {
 			ConfigFilePath string
@@ -55,7 +58,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 				Height:    uint64(0),
 				TxList:    make([]*blockchain.DefaultTransaction, 0),
 				TxSeal:    make([][]byte, 0),
-				Timestamp: (time.Now()).Round(0),
+				Timestamp: outputTime,
 				Creator:   make([]byte, 0),
 			},
 
