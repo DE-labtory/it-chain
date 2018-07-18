@@ -1,12 +1,14 @@
 language: go
 go:
- - 1.9.4
- - release
+ - "1.9.4"
 
 # Don't email me the results of the test runs.
 notifications:
   email: false
 
+services:
+  - rabbitmq
+  
 git:
   depth: 1
 
@@ -17,5 +19,8 @@ os: linux
 
 before_install:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+
+install:
   - dep ensure
+
 go_import_path: github.com/golang/dep
