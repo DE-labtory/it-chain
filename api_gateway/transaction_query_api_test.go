@@ -126,7 +126,7 @@ func TestTransactionRepository_FindById_FindFailed(t *testing.T) {
 
 func TestTransactionRepository_FindAll(t *testing.T) {
 	// Given
-	var transactions = []*txpool.Transaction{}
+	var transactions = []txpool.Transaction{}
 
 	dbPath := "./.test"
 
@@ -155,7 +155,7 @@ func TestTransactionRepository_FindAll(t *testing.T) {
 	transactions2, err2 := tr.FindAll()
 
 	// Then
-	transactions = append(transactions, &t1)
+	transactions = append(transactions, t1)
 
 	assert.Equal(t, transactions, transactions2)
 	assert.Equal(t, nil, err2)

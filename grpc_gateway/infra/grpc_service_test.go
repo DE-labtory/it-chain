@@ -7,6 +7,8 @@ import (
 
 	"fmt"
 
+	"time"
+
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/grpc_gateway"
@@ -217,6 +219,9 @@ var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish
 
 	return hostService, func() {
 		hostService.Stop()
+
+		//need time to stop connections
+		time.Sleep(3 * time.Second)
 		os.RemoveAll(keyPath)
 	}
 }
