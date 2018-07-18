@@ -53,14 +53,14 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 		return nil, ErrCreatingEvent
 	}
 
-	//save
-	eventstore.Save(createEvent.GetID(), createEvent)
-
 	//on
 	err = GenesisBlock.On(createEvent)
 	if err != nil {
 		return nil, ErrOnEvent
 	}
+
+	//save
+	eventstore.Save(createEvent.GetID(), createEvent)
 
 	return GenesisBlock, nil
 }
@@ -133,14 +133,14 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 		return nil, ErrCreatingEvent
 	}
 
-	//save
-	eventstore.Save(createEvent.GetID(), createEvent)
-
 	//on
 	err = ProposedBlock.On(createEvent)
 	if err != nil {
 		return nil, ErrOnEvent
 	}
+
+	//save
+	eventstore.Save(createEvent.GetID(), createEvent)
 
 	return ProposedBlock, nil
 }
