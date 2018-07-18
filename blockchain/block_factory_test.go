@@ -36,7 +36,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 	//given
 
 	const shortForm = "2006-Jan-02"
-	outputTime, _ := time.Parse(shortForm, "0000-Jan-00")
+	timeStamp, _ := time.Parse(shortForm, "0000-Jan-00")
 
 	tests := map[string]struct {
 		input struct {
@@ -58,7 +58,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 				Height:    uint64(0),
 				TxList:    make([]*blockchain.DefaultTransaction, 0),
 				TxSeal:    make([][]byte, 0),
-				Timestamp: outputTime,
+				Timestamp: timeStamp,
 				Creator:   make([]byte, 0),
 			},
 
@@ -140,6 +140,8 @@ func TestCreateProposedBlock(t *testing.T) {
 
 	//given
 
+	timeStamp := time.Now().Round(0)
+
 	tests := map[string]struct {
 		input struct {
 			prevSeal []byte
@@ -161,7 +163,19 @@ func TestCreateProposedBlock(t *testing.T) {
 				prevSeal: []byte("prevseal"),
 				height:   1,
 				txList: []blockchain.Transaction{
-					&blockchain.DefaultTransaction{},
+					&blockchain.DefaultTransaction{
+						ID:        "tx01",
+						Status:    0,
+						PeerID:    "junksound",
+						Timestamp: timeStamp,
+						TxData: &blockchain.TxData{
+							Jsonrpc: "",
+							Method:  "",
+							Params:  blockchain.Params{},
+							ID:      "txData01",
+						},
+						Signature: []byte("Signature"),
+					},
 				},
 				creator: []byte("junksound"),
 			},
@@ -170,9 +184,21 @@ func TestCreateProposedBlock(t *testing.T) {
 				PrevSeal: []byte("prevseal"),
 				Height:   1,
 				TxList: []*blockchain.DefaultTransaction{
-					&blockchain.DefaultTransaction{},
+					{
+						ID:        "tx01",
+						Status:    0,
+						PeerID:    "junksound",
+						Timestamp: timeStamp,
+						TxData: &blockchain.TxData{
+							Jsonrpc: "",
+							Method:  "",
+							Params:  blockchain.Params{},
+							ID:      "txData01",
+						},
+						Signature: []byte("Signature"),
+					},
 				},
-				Timestamp: (time.Now()).Round(0),
+				Timestamp: timeStamp,
 				Creator:   []byte("junksound"),
 			},
 
@@ -209,7 +235,19 @@ func TestCreateProposedBlock(t *testing.T) {
 				prevSeal: nil,
 				height:   1,
 				txList: []blockchain.Transaction{
-					&blockchain.DefaultTransaction{},
+					&blockchain.DefaultTransaction{
+						ID:        "tx01",
+						Status:    0,
+						PeerID:    "junksound",
+						Timestamp: timeStamp,
+						TxData: &blockchain.TxData{
+							Jsonrpc: "",
+							Method:  "",
+							Params:  blockchain.Params{},
+							ID:      "txData01",
+						},
+						Signature: []byte("Signature"),
+					},
 				},
 				creator: nil,
 			},
@@ -264,11 +302,23 @@ func TestCreateProposedBlock(t *testing.T) {
 func TestCreateRetrievedBlock(t *testing.T) {
 
 	//given
-
+	timeStamp := time.Now().Round(0)
 	prevSeal := []byte("prevseal")
 	height := uint64(0)
 	txList := []blockchain.Transaction{
-		&blockchain.DefaultTransaction{},
+		&blockchain.DefaultTransaction{
+			ID:        "tx01",
+			Status:    0,
+			PeerID:    "junksound",
+			Timestamp: timeStamp,
+			TxData: &blockchain.TxData{
+				Jsonrpc: "",
+				Method:  "",
+				Params:  blockchain.Params{},
+				ID:      "txData01",
+			},
+			Signature: []byte("Signature"),
+		},
 	}
 	creator := []byte("junksound")
 
