@@ -8,7 +8,7 @@ notifications:
 
 services:
   - rabbitmq
-  
+
 git:
   depth: 1
 
