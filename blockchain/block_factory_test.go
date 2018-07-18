@@ -9,28 +9,18 @@ import (
 	"time"
 
 	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
 
-type MockRepostiory struct {
-	loadFunc func(aggregate midgard.Aggregate, aggregateID string) error
-	saveFunc func(aggregateID string, events ...midgard.Event) error
-}
-
-func (m MockRepostiory) Load(aggregate midgard.Aggregate, aggregateID string) error {
-	return m.loadFunc(aggregate, aggregateID)
-}
-
-func (m MockRepostiory) Save(aggregateID string, events ...midgard.Event) error {
-	return m.saveFunc(aggregateID, events...)
-}
-
-func (MockRepostiory) Close() {}
-
 func TestCreateGenesisBlock(t *testing.T) {
+
 	//given
+
+	const shortForm = "2006-Jan-02"
+	timeStamp, _ := time.Parse(shortForm, "0000-Jan-00")
 
 	tests := map[string]struct {
 		input struct {
@@ -52,7 +42,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 				Height:    uint64(0),
 				TxList:    make([]*blockchain.DefaultTransaction, 0),
 				TxSeal:    make([][]byte, 0),
-				Timestamp: (time.Now()).Round(0),
+				Timestamp: timeStamp,
 				Creator:   make([]byte, 0),
 			},
 
@@ -73,13 +63,15 @@ func TestCreateGenesisBlock(t *testing.T) {
 		},
 	}
 
-	repo := MockRepostiory{}
-
-	repo.saveFunc = func(aggregateID string, events ...midgard.Event) error {
+	repo := mock.EventRepository{}
+	sealByte := []byte{120, 31, 37, 220, 159, 28, 245, 136, 76, 103, 24, 88, 213, 183, 217, 168, 199, 218, 212, 149, 31, 203, 78, 75, 18, 101, 146, 25, 113, 18, 150, 146}
+	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
 		assert.Equal(t, 1, len(events))
+		assert.Equal(t, string(sealByte), aggregateID)
 		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
 		return nil
 	}
+	repo.CloseFunc = func() {}
 
 	eventstore.InitForMock(repo)
 	defer eventstore.Close()
@@ -133,6 +125,8 @@ func TestCreateProposedBlock(t *testing.T) {
 
 	//given
 
+	timeStamp := time.Now().Round(0)
+
 	tests := map[string]struct {
 		input struct {
 			prevSeal []byte
@@ -154,7 +148,19 @@ func TestCreateProposedBlock(t *testing.T) {
 				prevSeal: []byte("prevseal"),
 				height:   1,
 				txList: []blockchain.Transaction{
-					&blockchain.DefaultTransaction{},
+					&blockchain.DefaultTransaction{
+						ID:        "tx01",
+						Status:    0,
+						PeerID:    "junksound",
+						Timestamp: timeStamp,
+						TxData: &blockchain.TxData{
+							Jsonrpc: "",
+							Method:  "",
+							Params:  blockchain.Params{},
+							ID:      "txData01",
+						},
+						Signature: []byte("Signature"),
+					},
 				},
 				creator: []byte("junksound"),
 			},
@@ -163,9 +169,21 @@ func TestCreateProposedBlock(t *testing.T) {
 				PrevSeal: []byte("prevseal"),
 				Height:   1,
 				TxList: []*blockchain.DefaultTransaction{
-					&blockchain.DefaultTransaction{},
+					{
+						ID:        "tx01",
+						Status:    0,
+						PeerID:    "junksound",
+						Timestamp: timeStamp,
+						TxData: &blockchain.TxData{
+							Jsonrpc: "",
+							Method:  "",
+							Params:  blockchain.Params{},
+							ID:      "txData01",
+						},
+						Signature: []byte("Signature"),
+					},
 				},
-				Timestamp: (time.Now()).Round(0),
+				Timestamp: timeStamp,
 				Creator:   []byte("junksound"),
 			},
 
@@ -202,7 +220,19 @@ func TestCreateProposedBlock(t *testing.T) {
 				prevSeal: nil,
 				height:   1,
 				txList: []blockchain.Transaction{
-					&blockchain.DefaultTransaction{},
+					&blockchain.DefaultTransaction{
+						ID:        "tx01",
+						Status:    0,
+						PeerID:    "junksound",
+						Timestamp: timeStamp,
+						TxData: &blockchain.TxData{
+							Jsonrpc: "",
+							Method:  "",
+							Params:  blockchain.Params{},
+							ID:      "txData01",
+						},
+						Signature: []byte("Signature"),
+					},
 				},
 				creator: nil,
 			},
@@ -213,13 +243,14 @@ func TestCreateProposedBlock(t *testing.T) {
 		},
 	}
 
-	repo := MockRepostiory{}
+	repo := mock.EventRepository{}
 
-	repo.saveFunc = func(aggregateID string, events ...midgard.Event) error {
+	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
 		assert.Equal(t, 1, len(events))
 		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
 		return nil
 	}
+	repo.CloseFunc = func() {}
 
 	eventstore.InitForMock(repo)
 	defer eventstore.Close()
@@ -251,4 +282,82 @@ func TestCreateProposedBlock(t *testing.T) {
 		assert.Equal(t, test.output.GetCreator(), ProposedBlock.GetCreator())
 	}
 
+}
+
+func TestCreateRetrievedBlock(t *testing.T) {
+
+	//given
+	timeStamp := time.Now().Round(0)
+	prevSeal := []byte("prevseal")
+	height := uint64(0)
+	txList := []blockchain.Transaction{
+		&blockchain.DefaultTransaction{
+			ID:        "tx01",
+			Status:    0,
+			PeerID:    "junksound",
+			Timestamp: timeStamp,
+			TxData: &blockchain.TxData{
+				Jsonrpc: "",
+				Method:  "",
+				Params:  blockchain.Params{},
+				ID:      "txData01",
+			},
+			Signature: []byte("Signature"),
+		},
+	}
+	creator := []byte("junksound")
+
+	retrievedBlock, err := blockchain.CreateProposedBlock(prevSeal, height, txList, creator)
+	if err != nil {
+	}
+
+	tests := map[string]struct {
+		input struct {
+			retrivedBlock blockchain.Block
+		}
+		output struct {
+			createdBlock blockchain.Block
+		}
+		err error
+	}{
+		"success create retrieved block": {
+			input: struct {
+				retrivedBlock blockchain.Block
+			}{
+				retrivedBlock: retrievedBlock,
+			},
+
+			output: struct {
+				createdBlock blockchain.Block
+			}{
+				createdBlock: retrievedBlock,
+			},
+
+			err: nil,
+		},
+	}
+
+	repo := mock.EventRepository{}
+
+	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.Equal(t, 1, len(events))
+		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
+		return nil
+	}
+	repo.CloseFunc = func() {}
+
+	eventstore.InitForMock(repo)
+	defer eventstore.Close()
+
+	for testName, test := range tests {
+		t.Logf("Running test case %s", testName)
+
+		//when
+		RetrivedBlock, err := blockchain.CreateRetrievedBlock(test.input.retrivedBlock)
+
+		//then
+		assert.Equal(t, test.err, err)
+		assert.Equal(t, test.output.createdBlock, RetrivedBlock)
+
+	}
 }
