@@ -195,7 +195,7 @@
   version = "v1.2.0"
 
 [[projects]]
-  name = "github.com/pkg/errors"
+  name = "errors"
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"

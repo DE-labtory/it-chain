@@ -13,9 +13,6 @@ func init() {
 	////create rabbitmq client
 	//rabbitmqClient := rabbitmq.Connect(config.Common.Messaging.Url)
 	//// todo change node repo and leader repo after managing peerTable
-	//nodeRepository := leveldb.NewNodeRepository("path1")
-	//leaderRepository := leveldb.NewLeaderRepository("path2")
-
 	//
 	//messageDispatcher := adapter.NewMessageDispatcher(publisher)
 	//

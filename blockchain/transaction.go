@@ -166,7 +166,7 @@ func calculateHash(b []byte) []byte {
 	return hashValue.Sum(nil)
 }
 
-func deserializeTxList(txList []byte) ([]Transaction, error) {
+func deserializeTxList(txList []byte) ([]*DefaultTransaction, error) {
 	DefaultTxList := []*DefaultTransaction{}
 
 	err := common.Deserialize(txList, &DefaultTxList)
@@ -174,9 +174,7 @@ func deserializeTxList(txList []byte) ([]Transaction, error) {
 	if err != nil {
 		return nil, err
 	}
-	TxList := convertTxType(DefaultTxList)
-
-	return TxList, nil
+	return DefaultTxList, nil
 
 }
 

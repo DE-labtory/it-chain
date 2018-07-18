@@ -1,22 +1,23 @@
 package p2p
 
 import (
-	"github.com/pkg/errors"
+	"encoding/json"
+	"errors"
 )
 
 var ErrEmptyLeaderId = errors.New("empty leader id")
-var ErrEmptyPeerList = errors.New("empty peer list")
+var ErrEmptyPeerTable = errors.New("empty peer list")
 
 type PLTable struct {
 	Leader   Leader
-	PeerList []Peer
+	PeerTable map[string]Peer
 }
 
-func NewPLTable(leader Leader, peerList []Peer) *PLTable {
+func NewPLTable(leader Leader, peerTable map[string]Peer) *PLTable {
 
 	return &PLTable{
 		Leader:   leader,
-		PeerList: peerList,
+		PeerTable: peerTable,
 	}
 }
 
@@ -30,13 +31,26 @@ func (pt *PLTable) GetLeader() (Leader, error) {
 	return pt.Leader, nil
 }
 
-func (pt *PLTable) GetPeerList() ([]Peer, error) {
+func (pt *PLTable) GetPeerTable() (map[string]Peer, error) {
 
-	if len(pt.PeerList) == 0 {
+	if len(pt.PeerTable) == 0 {
 
-		return pt.PeerList, ErrEmptyPeerList
+		return pt.PeerTable, ErrEmptyPeerTable
 	}
 
-	return pt.PeerList, nil
+	return pt.PeerTable, nil
 }
 
+type PLTableService struct{}
+
+func (plts *PLTableService) GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error) {
+
+	peerTable := PLTable{}
+
+	if err := json.Unmarshal(command.Body, &peerTable); err != nil {
+		//todo error 처리
+		return PLTable{}, nil
+	}
+
+	return peerTable, nil
+}

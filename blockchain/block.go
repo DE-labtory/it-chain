@@ -23,7 +23,7 @@ type DefaultBlock struct {
 	Seal      []byte
 	PrevSeal  []byte
 	Height    uint64
-	TxList    []Transaction
+	TxList    []*DefaultTransaction
 	TxSeal    [][]byte
 	Timestamp time.Time
 	Creator   []byte
@@ -46,13 +46,17 @@ func (block *DefaultBlock) SetHeight(height uint64) {
 
 // TODO: Write test case
 func (block *DefaultBlock) PutTx(transaction Transaction) error {
-	if block.TxList == nil {
-		block.TxList = make([]Transaction, 0)
+	convTx, ok := transaction.(*DefaultTransaction)
+	if ok {
+		if block.TxList == nil {
+			block.TxList = make([]*DefaultTransaction, 0)
+		}
+		block.TxList = append(block.TxList, convTx)
+
+		return nil
 	}
 
-	block.TxList = append(block.TxList, transaction)
-
-	return nil
+	return ErrTransactionType
 }
 
 // TODO: Write test case

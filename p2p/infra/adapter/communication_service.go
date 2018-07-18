@@ -1,7 +1,6 @@
 package adapter
 
 import (
-	"github.com/it-chain/it-chain-Engine/gateway"
 	"github.com/it-chain/it-chain-Engine/p2p"
 )
 
@@ -9,23 +8,32 @@ type CommunicationService struct {
 	publish Publish
 }
 
+func NewCommunicationService(publish Publish) *CommunicationService{
+
+	return &CommunicationService{
+		publish:publish,
+	}
+}
+
 func (cs *CommunicationService) Dial(ipAddress string) error {
 
-	command := gateway.ConnectionCreateCommand{
+	command := p2p.ConnectionCreateCommand{
 		Address: ipAddress,
 	}
+
 	cs.publish("Command", "connection.create", command)
+
 	return nil
 }
 
 func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error {
 
 	if connectionId == "" {
-		return ErrEmptyPeerId
+		return ErrEmptyConnectionId
 	}
 
-	if len(peerLeaderTable.PeerList) == 0 {
-		return p2p.ErrEmptyPeerList
+	if len(peerLeaderTable.PeerTable) == 0 {
+		return p2p.ErrEmptyPeerTable
 	}
 
 	//create peer table message

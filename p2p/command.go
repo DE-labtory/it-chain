@@ -17,3 +17,9 @@ type GrpcDeliverCommand struct {
 	Body       []byte
 	Protocol   string
 }
+
+//Connection 생성 command
+type ConnectionCreateCommand struct {
+	midgard.CommandModel
+	Address string
+}

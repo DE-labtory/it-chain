@@ -1,4 +1,4 @@
-# it-chain
+# it-chain  [![Build Status](https://travis-ci.org/it-chain/it-chain-Engine.svg?branch=develop)](https://travis-ci.org/it-chain/it-chain-Engine) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
 <p align="center"><img src="./doc/images/logo.png" width="250px" height="250px"></p>

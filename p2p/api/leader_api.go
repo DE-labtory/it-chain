@@ -10,16 +10,22 @@ var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 var ErrNoMatchingPeerWithIpAddress = errors.New("no matching peer with ip address")
 
-type LeaderApi struct {
-	leaderService       p2p.ILeaderService
-	pLTableQueryService p2p.PLTableQueryService
+type ILeaderApi interface {
+
+	UpdateLeaderWithAddress(ipAddress string) error
+	UpdateLeaderWithLargePeerTable(oppositePLTable p2p.PLTable) error
 }
 
-func NewLeaderApi(leaderService p2p.ILeaderService, pLTableQueryService p2p.PLTableQueryService) LeaderApi {
+type LeaderApi struct {
+	leaderService       p2p.ILeaderService
+	peerQueryService p2p.PeerQueryService
+}
+
+func NewLeaderApi(leaderService p2p.ILeaderService, peerQueryService p2p.PeerQueryService) LeaderApi {
 
 	return LeaderApi{
 		leaderService:       leaderService,
-		pLTableQueryService: pLTableQueryService,
+		peerQueryService: peerQueryService,
 	}
 }
 
@@ -27,9 +33,9 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
 	//1. loop peer list and find specific address
 	//2. update specific peer as leader
-	pLTable, _ := la.pLTableQueryService.GetPLTable()
+	pLTable, _ := la.peerQueryService.GetPLTable()
 
-	peers := pLTable.PeerList
+	peers := pLTable.PeerTable
 
 	for _, peer := range peers {
 
@@ -45,17 +51,15 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 	return ErrNoMatchingPeerWithIpAddress
 }
 
-func (la *LeaderApi) UpdateLeaderWithLongerPeerList(oppositeLeader p2p.Leader, oppositePeerList []p2p.Peer) error {
+func (la *LeaderApi) UpdateLeaderWithLargePeerTable(oppositePLTable p2p.PLTable) error {
 
-	myPLTable, _ := la.pLTableQueryService.GetPLTable()
-
-	myPeerList, _ := myPLTable.GetPeerList()
+	myPLTable, _ := la.peerQueryService.GetPLTable()
 
 	myLeader, _ := myPLTable.GetLeader()
 
-	if len(myPeerList) < len(oppositePeerList) {
+	if len(myPLTable.PeerTable) < len(oppositePLTable.PeerTable) {
 
-		la.leaderService.Set(oppositeLeader)
+		la.leaderService.Set(oppositePLTable.Leader)
 
 	} else {
 

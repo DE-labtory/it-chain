@@ -84,6 +84,7 @@ func DeletePeer(peerId PeerId) error{
 	return eventstore.Save(peerId.Id, event)
 }
 
+
 // p2p 구조체를 json 으로 인코딩한다.
 func (n Peer) Serialize() ([]byte, error) {
 	return common.Serialize(n)
@@ -113,30 +114,4 @@ func PeerFilter(vs []Peer, f func(Peer) bool) []Peer {
 		}
 	}
 	return vsf
-}
-
-func GetMutuallyExclusivePeers(peers1 []Peer, peers2 []Peer) ([]Peer, []Peer) {
-
-	exclusivePeers1 := difference(peers1, peers2)
-
-	exclusivePeers2 := difference(peers2, peers1)
-
-	return exclusivePeers1, exclusivePeers2
-}
-
-func difference(a, b []Peer) []Peer {
-	mb := map[PeerId]bool{}
-
-	for _, x := range b {
-		mb[x.PeerId] = true
-	}
-
-	ab := []Peer{}
-	for _, x := range a {
-		if _, ok := mb[x.PeerId]; !ok {
-			ab = append(ab, x)
-		}
-	}
-
-	return ab
 }

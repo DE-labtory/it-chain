@@ -33,7 +33,7 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	}
 
 	//create
-	createEvent, err := createBlockCreatedEvent(Seal, GenesisBlock.PrevSeal, GenesisBlock.Height, GenesisBlock.TxList, GenesisBlock.TxSeal, TimeStamp, GenesisBlock.Creator)
+	createEvent, err := createBlockCreatedEvent(Seal, GenesisBlock.PrevSeal, GenesisBlock.Height, convertTxType(GenesisBlock.TxList), GenesisBlock.TxSeal, TimeStamp, GenesisBlock.Creator)
 	if err != nil {
 		return nil, ErrCreatingEvent
 	}

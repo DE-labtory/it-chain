@@ -1,0 +1,14 @@
+language: go
+go:
+ - 1.9.4
+ - release
+
+# Don't email me the results of the test runs.
+notifications:
+  email: false
+
+git:
+  depth: 1
+
+script:
+ - go test -v ./...

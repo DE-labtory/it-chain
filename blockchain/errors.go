@@ -2,6 +2,7 @@ package blockchain
 
 import "errors"
 
+var ErrTransactionType = errors.New("Wrong transaction type")
 var ErrTxListMarshal = errors.New("tx list marshal failed")
 var ErrTxListUnmarshal = errors.New("tx list unmarshal failed")
 var ErrSetConfig = errors.New("error when get Config")

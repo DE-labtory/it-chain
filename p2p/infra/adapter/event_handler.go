@@ -5,23 +5,19 @@ import (
 	"log"
 
 	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/it-chain-Engine/p2p/api"
 )
 
-var ErrEmptyAddress = errors.New("empty address proposed")
 var ErrPeerApi = errors.New("problem in peer api")
 
-type EventHandlerPeerApi interface {
-	AddPeer(peer p2p.Peer) error
-	DeletePeer(id p2p.PeerId) error
-	DeliverPLTable(connectionId string) error
-}
 type EventHandler struct {
-	peerApi EventHandlerPeerApi
+	communicationApi api.ICommunicationApi
 }
 
-func NewEventHandler(peerApi EventHandlerPeerApi) *EventHandler {
+func NewEventHandler(communicationApi api.ICommunicationApi) *EventHandler {
+
 	return &EventHandler{
-		peerApi: peerApi,
+		communicationApi: communicationApi,
 	}
 }
 
@@ -43,7 +39,7 @@ func (eh *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent)
 	}
 
 	//2. send peer table
-	eh.peerApi.DeliverPLTable(event.ID)
+	eh.communicationApi.DeliverPLTable(event.ID)
 
 	return nil
 }
@@ -55,7 +51,7 @@ func (eh *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconne
 		return ErrEmptyPeerId
 	}
 
-	err := eh.peerApi.DeletePeer(p2p.PeerId{Id: event.ID})
+	err := p2p.DeletePeer(p2p.PeerId{Id: event.ID})
 
 	if err != nil {
 		log.Println(err)
@@ -64,36 +60,3 @@ func (eh *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconne
 	return nil
 }
 
-
-type RepositoryProjector struct {}
-
-//save Leader when LeaderReceivedEvent Detected, publish updated info to network
-func (projector *RepositoryProjector) HandleLeaderUpdatedEvent(event p2p.LeaderUpdatedEvent) error {
-
-	if event.ID == "" {
-		return ErrEmptyPeerId
-	}
-
-	peer := p2p.Peer{
-		PeerId: p2p.PeerId{Id: event.ID},
-	}
-
-	p2p.UpdateLeader(peer)
-
-	return nil
-
-}
-
-func (projector *RepositoryProjector) HandlerPeerCreatedEvent(event p2p.PeerCreatedEvent) error {
-
-	if event.ID == "" {
-		return ErrEmptyPeerId
-	}
-
-	if event.IpAddress == "" {
-		return ErrEmptyAddress
-	}
-
-	return p2p.NewPeer(event.IpAddress, p2p.PeerId{Id: event.ID})
-
-}
