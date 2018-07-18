@@ -32,5 +32,5 @@ func (t *TxCommandHandler) HandleTxCreateCommand(txCreateCommand txpool.TxCreate
 		log.Println(err.Error())
 	}
 
-	log.Printf("transactions are created [%s]", tx)
+	log.Printf("transactions are created [%v]", tx)
 }

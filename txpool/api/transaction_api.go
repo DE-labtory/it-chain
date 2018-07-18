@@ -19,27 +19,27 @@ func NewTransactionApi(publisherId string) TransactionApi {
 
 func (t TransactionApi) CreateTransaction(txData txpool.TxData) (txpool.Transaction, error) {
 
-	log.Printf("create transaction: [%s]", txData)
+	log.Printf("create transaction: [%v]", txData)
 
 	tx, err := txpool.CreateTransaction(t.publisherId, txData)
 
 	if err != nil {
-		log.Printf("fail to transaction: [%s]", err)
+		log.Printf("fail to transaction: [%v]", err)
 		return tx, err
 	}
 
-	log.Printf("transaction created: [%s]", tx)
+	log.Printf("transaction created: [%v]", tx)
 	return tx, nil
 }
 
 func (t TransactionApi) DeleteTransaction(id txpool.TransactionId) error {
 
-	log.Printf("delete transaction: [%s]", id)
+	log.Printf("delete transaction: [%v]", id)
 
 	tx := &txpool.Transaction{}
 
 	if err := eventstore.Load(tx, id); err != nil {
-		log.Printf("fail to delete transaction: [%s]", id)
+		log.Printf("fail to delete transaction: [%v]", id)
 		return err
 	}
 

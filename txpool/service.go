@@ -37,7 +37,7 @@ func (b BlockProposalService) ProposeBlock() error {
 	// todo transaction size, number of tx
 	transactions, err := b.txpoolQueryService.FindUncommittedTransactions()
 
-	log.Printf("proposing transactions [%s]", transactions)
+	log.Printf("proposing transactions [%v]", transactions)
 
 	if err != nil {
 		return err
