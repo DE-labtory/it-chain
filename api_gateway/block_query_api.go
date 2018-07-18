@@ -2,8 +2,9 @@ package api_gateway
 
 import (
 	"github.com/it-chain/it-chain-Engine/blockchain"
-	"sync"
 	"github.com/it-chain/yggdrasill"
+
+	"sync"
 )
 
 type BlockQueryApi struct {
