@@ -24,26 +24,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/core/eventstore"
+	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
+	"github.com/it-chain/it-chain-Engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
-
-type MockRepostiory struct {
-	loadFunc func(aggregate midgard.Aggregate, aggregateID string) error
-	saveFunc func(aggregateID string, events ...midgard.Event) error
-}
-
-func (m MockRepostiory) Load(aggregate midgard.Aggregate, aggregateID string) error {
-	return m.loadFunc(aggregate, aggregateID)
-}
-
-func (m MockRepostiory) Save(aggregateID string, events ...midgard.Event) error {
-	return m.saveFunc(aggregateID, events...)
-}
-
-func (MockRepostiory) Close() {}
 
 func TestCreateGenesisBlock(t *testing.T) {
 
@@ -90,13 +76,14 @@ func TestCreateGenesisBlock(t *testing.T) {
 		},
 	}
 
-	repo := MockRepostiory{}
+	repo := mock.EventRepository{}
 
-	repo.saveFunc = func(aggregateID string, events ...midgard.Event) error {
+	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
 		assert.Equal(t, 1, len(events))
 		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
 		return nil
 	}
+	repo.CloseFunc = func() {}
 
 	eventstore.InitForMock(repo)
 	defer eventstore.Close()
@@ -230,13 +217,14 @@ func TestCreateProposedBlock(t *testing.T) {
 		},
 	}
 
-	repo := MockRepostiory{}
+	repo := mock.EventRepository{}
 
-	repo.saveFunc = func(aggregateID string, events ...midgard.Event) error {
+	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
 		assert.Equal(t, 1, len(events))
 		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
 		return nil
 	}
+	repo.CloseFunc = func() {}
 
 	eventstore.InitForMock(repo)
 	defer eventstore.Close()
@@ -311,13 +299,14 @@ func TestCreateRetrievedBlock(t *testing.T) {
 		},
 	}
 
-	repo := MockRepostiory{}
+	repo := mock.EventRepository{}
 
-	repo.saveFunc = func(aggregateID string, events ...midgard.Event) error {
+	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
 		assert.Equal(t, 1, len(events))
 		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
 		return nil
 	}
+	repo.CloseFunc = func() {}
 
 	eventstore.InitForMock(repo)
 	defer eventstore.Close()
