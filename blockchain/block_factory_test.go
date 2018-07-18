@@ -64,9 +64,10 @@ func TestCreateGenesisBlock(t *testing.T) {
 	}
 
 	repo := mock.EventRepository{}
-
+	sealByte := []byte{120, 31, 37, 220, 159, 28, 245, 136, 76, 103, 24, 88, 213, 183, 217, 168, 199, 218, 212, 149, 31, 203, 78, 75, 18, 101, 146, 25, 113, 18, 150, 146}
 	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
 		assert.Equal(t, 1, len(events))
+		assert.Equal(t, string(sealByte), aggregateID)
 		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
 		return nil
 	}
@@ -353,6 +354,8 @@ func TestCreateRetrievedBlock(t *testing.T) {
 
 		//when
 		RetrivedBlock, err := blockchain.CreateRetrievedBlock(test.input.retrivedBlock)
+
+		//then
 		assert.Equal(t, test.err, err)
 		assert.Equal(t, test.output.createdBlock, RetrivedBlock)
 
