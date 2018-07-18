@@ -11,3 +11,7 @@ type BlockPoolRepository interface {
 	GetStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.Block, error)
 	GetStagedBlockById(id string) (blockchain.Block, error)
 }
+
+type BlockPoolRepositoryImpl struct {
+	Blocks []blockchain.Block
+}
