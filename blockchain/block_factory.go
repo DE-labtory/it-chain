@@ -145,3 +145,33 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, C
 
 	return ProposedBlock, nil
 }
+
+func CreateRetrievedBlock(retrievedBlock Block) (Block, error) {
+
+	//declare
+	RetrievedBlock := &DefaultBlock{}
+	Seal := retrievedBlock.GetSeal()
+	PrevSeal := retrievedBlock.GetPrevSeal()
+	Height := retrievedBlock.GetHeight()
+	TxList := retrievedBlock.GetTxList()
+	TxSeal := retrievedBlock.GetTxSeal()
+	TimeStamp := retrievedBlock.GetTimestamp()
+	Creator := retrievedBlock.GetCreator()
+
+	//create
+	createEvent, err := createBlockCreatedEvent(Seal, PrevSeal, Height, TxList, TxSeal, TimeStamp, Creator)
+	if err != nil {
+		return nil, ErrCreatingEvent
+	}
+
+	//on
+	err = RetrievedBlock.On(createEvent)
+	if err != nil {
+		return nil, ErrOnEvent
+	}
+
+	//save
+	eventstore.Save(createEvent.GetID(), createEvent)
+
+	return RetrievedBlock, nil
+}
