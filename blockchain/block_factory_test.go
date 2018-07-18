@@ -46,6 +46,7 @@ func (m MockRepostiory) Save(aggregateID string, events ...midgard.Event) error 
 func (MockRepostiory) Close() {}
 
 func TestCreateGenesisBlock(t *testing.T) {
+
 	//given
 
 	tests := map[string]struct {
@@ -267,4 +268,67 @@ func TestCreateProposedBlock(t *testing.T) {
 		assert.Equal(t, test.output.GetCreator(), ProposedBlock.GetCreator())
 	}
 
+}
+
+func TestCreateRetrievedBlock(t *testing.T) {
+
+	//given
+
+	prevSeal := []byte("prevseal")
+	height := uint64(0)
+	txList := []blockchain.Transaction{
+		&blockchain.DefaultTransaction{},
+	}
+	creator := []byte("junksound")
+
+	retrievedBlock, err := blockchain.CreateProposedBlock(prevSeal, height, txList, creator)
+	if err != nil {
+	}
+
+	tests := map[string]struct {
+		input struct {
+			retrivedBlock blockchain.Block
+		}
+		output struct {
+			createdBlock blockchain.Block
+		}
+		err error
+	}{
+		"success create retrieved block": {
+			input: struct {
+				retrivedBlock blockchain.Block
+			}{
+				retrivedBlock: retrievedBlock,
+			},
+
+			output: struct {
+				createdBlock blockchain.Block
+			}{
+				createdBlock: retrievedBlock,
+			},
+
+			err: nil,
+		},
+	}
+
+	repo := MockRepostiory{}
+
+	repo.saveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.Equal(t, 1, len(events))
+		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
+		return nil
+	}
+
+	eventstore.InitForMock(repo)
+	defer eventstore.Close()
+
+	for testName, test := range tests {
+		t.Logf("Running test case %s", testName)
+
+		//when
+		RetrivedBlock, err := blockchain.CreateRetrievedBlock(test.input.retrivedBlock)
+		assert.Equal(t, test.err, err)
+		assert.Equal(t, test.output.createdBlock, RetrivedBlock)
+
+	}
 }
