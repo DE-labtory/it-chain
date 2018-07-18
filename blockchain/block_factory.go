@@ -16,7 +16,6 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	//declare
 	GenesisBlock := &DefaultBlock{}
 	validator := DefaultValidator{}
-	TimeStamp := (time.Now()).Round(0)
 
 	//set
 	err := setBlockWithConfig(genesisconfFilePath, GenesisBlock)
@@ -26,14 +25,14 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	}
 
 	//build
-	Seal, err := validator.BuildSeal(TimeStamp, GenesisBlock.PrevSeal, GenesisBlock.TxSeal, GenesisBlock.Creator)
+	Seal, err := validator.BuildSeal(GenesisBlock.Timestamp, GenesisBlock.PrevSeal, GenesisBlock.TxSeal, GenesisBlock.Creator)
 
 	if err != nil {
 		return nil, ErrBuildingSeal
 	}
 
 	//create
-	createEvent, err := createBlockCreatedEvent(Seal, GenesisBlock.PrevSeal, GenesisBlock.Height, convertTxType(GenesisBlock.TxList), GenesisBlock.TxSeal, TimeStamp, GenesisBlock.Creator)
+	createEvent, err := createBlockCreatedEvent(Seal, GenesisBlock.PrevSeal, GenesisBlock.Height, convertTxType(GenesisBlock.TxList), GenesisBlock.TxSeal, GenesisBlock.Timestamp, GenesisBlock.Creator)
 	if err != nil {
 		return nil, ErrCreatingEvent
 	}
