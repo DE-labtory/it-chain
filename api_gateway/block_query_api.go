@@ -12,7 +12,7 @@ type BlockQueryApi struct {
 
 type CommitedBlockRepository interface {
 	Save(block blockchain.Block) error
-	GetLastBlock(block blockchain.Block) (blockchain.Block, error)
+	GetLastBlock() (blockchain.Block, error)
 	GetBlockByHeight(height blockchain.BlockHeight) (blockchain.Block, error)
 }
 
