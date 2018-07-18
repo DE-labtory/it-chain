@@ -1,21 +1,9 @@
 package api_test
 
 import (
-	"os"
-	"testing"
-
-	"path/filepath"
-
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
-	"github.com/it-chain/it-chain-Engine/icode"
-	"github.com/it-chain/it-chain-Engine/icode/api"
-	api2 "github.com/it-chain/it-chain-Engine/icode/infra/api"
-	"github.com/it-chain/it-chain-Engine/icode/infra/service"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/tesseract"
-	"github.com/stretchr/testify/assert"
 )
-
+/*
 func TestICodeApi_Deploy(t *testing.T) {
 	//set data
 	baseSaveUrl := "./.tmp"
@@ -37,8 +25,8 @@ func TestICodeApi_Deploy(t *testing.T) {
 	_, err = icodeApi.Deploy("1", baseSaveUrl, icodeGitUrl, sshPath)
 	assert.NoError(t, err, "err in deploy")
 }
-
-func TestICodeApi_UnDeploy(t *testing.T) {
+*/
+/*func TestICodeApi_UnDeploy(t *testing.T) {
 	//set data
 	baseSaveUrl := "./.tmp"
 	baseSaveUrl, err := filepath.Abs(baseSaveUrl)
@@ -67,8 +55,8 @@ func TestICodeApi_UnDeploy(t *testing.T) {
 	err = icodeApi.UnDeploy(mockMeta.ICodeID)
 	assert.NoError(t, err, "err in unDeploy")
 
-}
-
+}*/
+/*
 func TestICodeApi_Invoke(t *testing.T) {
 	baseSaveUrl := "./.tmp"
 	baseSaveUrl, err := filepath.Abs(baseSaveUrl)
@@ -144,7 +132,7 @@ func TestICodeApi_Invoke(t *testing.T) {
 	// docker close
 	err = icodeApi.UnDeploy(meta.ICodeID)
 	assert.NoError(t, err)
-}
+}*/
 
 type mockEventStore struct {
 }

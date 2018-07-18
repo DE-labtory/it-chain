@@ -1,18 +1,6 @@
 package api_test
 
-import (
-	"os"
-	"testing"
-
-	"errors"
-
-	"context"
-
-	"github.com/it-chain/it-chain-Engine/icode"
-	"github.com/it-chain/it-chain-Engine/icode/infra/api"
-	"github.com/stretchr/testify/assert"
-)
-
+/*
 func TestICodeGitStoreApi_Clone(t *testing.T) {
 	baseTempPath := "./.tmp"
 	sshPath := ""
@@ -120,3 +108,4 @@ func TestICodeGitStoreApi_Push(t *testing.T) {
 	_, err = storeApi.AuthClient.Repositories.Delete(ctx, validId, meta.RepositoryName)
 	assert.NoError(t, err)
 }
+*/
