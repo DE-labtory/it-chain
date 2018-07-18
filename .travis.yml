@@ -18,4 +18,4 @@ os: linux
 before_install:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
   - dep ensure
-# go_import_path: github.com/golang/dep
+go_import_path: github.com/golang/dep
