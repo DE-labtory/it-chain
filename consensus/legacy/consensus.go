@@ -1,5 +1,0 @@
-package legacy
-
-func Init() {
-
-}
