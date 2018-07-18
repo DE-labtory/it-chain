@@ -107,11 +107,6 @@ func TestMemConnectionStore_Add(t *testing.T) {
 			output: MockConn{ID: "123"},
 			err:    nil,
 		},
-		"add same id": {
-			input:  MockConn{ID: "123"},
-			output: MockConn{ID: "123"},
-			err:    infra.ErrConnAlreadyExist,
-		},
 	}
 
 	connectionStore := infra.NewMemConnectionStore()
@@ -219,8 +214,6 @@ var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish
 
 	return hostService, func() {
 		hostService.Stop()
-
-		//need time to stop connections
 		time.Sleep(3 * time.Second)
 		os.RemoveAll(keyPath)
 	}
@@ -239,11 +232,6 @@ func TestGrpcHostService_Dial(t *testing.T) {
 			output: "127.0.0.1:7777",
 			err:    nil,
 		},
-		"dial exist connection": {
-			input:  "127.0.0.1:7777",
-			output: "",
-			err:    infra.ErrConnAlreadyExist,
-		},
 	}
 
 	var publish = func(exchange string, topic string, data interface{}) (err error) {
@@ -253,6 +241,9 @@ func TestGrpcHostService_Dial(t *testing.T) {
 
 	serverHostService, tearDown1 := setupGrpcHostService(t, "127.0.0.1:7777", "server", publish)
 	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client", publish)
+
+	//times to need to setup server
+	time.Sleep(3 * time.Second)
 
 	handler := &MockHandler{}
 	handler.OnConnectionFunc = func(connection grpc_gateway.Connection) {
@@ -268,6 +259,60 @@ func TestGrpcHostService_Dial(t *testing.T) {
 
 	serverHostService.SetHandler(handler)
 	clientHostService.SetHandler(handler)
+
+	for testName, test := range tests {
+		t.Logf("Running test case %s", testName)
+
+		conn, err := clientHostService.Dial(test.input)
+		assert.Equal(t, err, test.err)
+		assert.Equal(t, conn.Address, test.output)
+
+	}
+}
+
+func TestGrpcHostService_Dial_When_connection_exist(t *testing.T) {
+
+	//given
+	tests := map[string]struct {
+		input  string
+		output string
+		err    error
+	}{
+		"dial exist connection": {
+			input:  "127.0.0.1:7777",
+			output: "",
+			err:    infra.ErrConnAlreadyExist,
+		},
+	}
+
+	var publish = func(exchange string, topic string, data interface{}) (err error) {
+
+		return nil
+	}
+
+	serverHostService, tearDown1 := setupGrpcHostService(t, "127.0.0.1:7777", "server", publish)
+	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client", publish)
+
+	//times to need to setup server
+	time.Sleep(3 * time.Second)
+
+	handler := &MockHandler{}
+	handler.OnConnectionFunc = func(connection grpc_gateway.Connection) {
+		fmt.Println(connection)
+	}
+
+	handler.OnDisconnectionFunc = func(connection grpc_gateway.Connection) {
+		fmt.Println("connection is closing", connection)
+	}
+
+	defer tearDown1()
+	defer tearDown2()
+
+	serverHostService.SetHandler(handler)
+	clientHostService.SetHandler(handler)
+
+	_, err := clientHostService.Dial("127.0.0.1:7777")
+	assert.NoError(t, err)
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
@@ -323,6 +368,9 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 	serverHostService, tearDown1 := setupGrpcHostService(t, "127.0.0.1:7777", "server", publish)
 	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client", publish)
 
+	//times to need to setup server
+	time.Sleep(3 * time.Second)
+
 	defer tearDown1()
 	defer tearDown2()
 
@@ -377,6 +425,9 @@ func TestGrpcHostService_Close(t *testing.T) {
 
 	serverHostService, tearDown1 := setupGrpcHostService(t, "127.0.0.1:7777", "server", publish)
 	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client", publish)
+
+	//times to need to setup server
+	time.Sleep(3 * time.Second)
 
 	defer tearDown1()
 	defer tearDown2()
