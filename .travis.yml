@@ -22,5 +22,4 @@ before_install:
 
 install:
   - dep ensure
-
-go_import_path: github.com/golang/dep
+  
