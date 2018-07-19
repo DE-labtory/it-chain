@@ -35,8 +35,8 @@ func TestCreateGenesisBlock(t *testing.T) {
 
 	//given
 
-	const shortForm = "2006-Jan-02"
-	timeStamp, _ := time.Parse(shortForm, "0000-Jan-00")
+	const longForm = "Jan 1, 2006 at 0:00am (MST)"
+	timeStamp, _ := time.Parse(longForm, "Jan 1, 2018 at 0:00am (KST)")
 
 	tests := map[string]struct {
 		input struct {
@@ -59,7 +59,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 				TxList:    make([]*blockchain.DefaultTransaction, 0),
 				TxSeal:    make([][]byte, 0),
 				Timestamp: timeStamp,
-				Creator:   make([]byte, 0),
+				Creator:   []byte("junksound"),
 			},
 
 			err: nil,
@@ -80,10 +80,8 @@ func TestCreateGenesisBlock(t *testing.T) {
 	}
 
 	repo := mock.EventRepository{}
-	sealByte := []byte{120, 31, 37, 220, 159, 28, 245, 136, 76, 103, 24, 88, 213, 183, 217, 168, 199, 218, 212, 149, 31, 203, 78, 75, 18, 101, 146, 25, 113, 18, 150, 146}
 	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
 		assert.Equal(t, 1, len(events))
-		assert.Equal(t, string(sealByte), aggregateID)
 		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
 		return nil
 	}
@@ -97,13 +95,11 @@ func TestCreateGenesisBlock(t *testing.T) {
 	defer os.Remove(GenesisFilePath)
 
 	GenesisBlockConfigJson := []byte(`{
-								  "Seal":[],
-								  "PrevSeal":[],
-								  "Height":0,
-								  "TxList":[],
-								  "TxSeal":[],
-								  "TimeStamp":"0001-01-01T00:00:00-00:00",
-								  "Creator":[]
+									"Orgainaization":"Default",
+									"NetworkId":"Default",
+								  	"Height":0,
+								  	"TimeStamp":"Jan 1, 2018 at 0:00am (KST)",
+								  	"Creator":"junksound"
 								}`)
 
 	err := ioutil.WriteFile(GenesisFilePath, GenesisBlockConfigJson, 0644)
@@ -147,7 +143,7 @@ func TestCreateProposedBlock(t *testing.T) {
 		input struct {
 			prevSeal []byte
 			height   uint64
-			txList   []blockchain.Transaction
+			txList   []*blockchain.DefaultTransaction
 			creator  []byte
 		}
 		output blockchain.Block
@@ -158,13 +154,13 @@ func TestCreateProposedBlock(t *testing.T) {
 			input: struct {
 				prevSeal []byte
 				height   uint64
-				txList   []blockchain.Transaction
+				txList   []*blockchain.DefaultTransaction
 				creator  []byte
 			}{
 				prevSeal: []byte("prevseal"),
 				height:   1,
-				txList: []blockchain.Transaction{
-					&blockchain.DefaultTransaction{
+				txList: []*blockchain.DefaultTransaction{
+					{
 						ID:        "tx01",
 						Status:    0,
 						PeerID:    "junksound",
@@ -211,7 +207,7 @@ func TestCreateProposedBlock(t *testing.T) {
 			input: struct {
 				prevSeal []byte
 				height   uint64
-				txList   []blockchain.Transaction
+				txList   []*blockchain.DefaultTransaction
 				creator  []byte
 			}{
 				prevSeal: []byte("prevseal"),
@@ -230,13 +226,13 @@ func TestCreateProposedBlock(t *testing.T) {
 			input: struct {
 				prevSeal []byte
 				height   uint64
-				txList   []blockchain.Transaction
+				txList   []*blockchain.DefaultTransaction
 				creator  []byte
 			}{
 				prevSeal: nil,
 				height:   1,
-				txList: []blockchain.Transaction{
-					&blockchain.DefaultTransaction{
+				txList: []*blockchain.DefaultTransaction{
+					{
 						ID:        "tx01",
 						Status:    0,
 						PeerID:    "junksound",
@@ -293,7 +289,7 @@ func TestCreateProposedBlock(t *testing.T) {
 
 		assert.Equal(t, test.output.GetPrevSeal(), ProposedBlock.GetPrevSeal())
 		assert.Equal(t, test.output.GetHeight(), ProposedBlock.GetHeight())
-		assert.Equal(t, test.output.GetTxList()[0], ProposedBlock.GetTxList()[0])
+		assert.Equal(t, test.output.GetTxList()[0].GetID(), ProposedBlock.GetTxList()[0].GetID())
 		assert.Equal(t, test.output.GetTimestamp().String()[:19], ProposedBlock.GetTimestamp().String()[:19])
 		assert.Equal(t, test.output.GetCreator(), ProposedBlock.GetCreator())
 
@@ -307,8 +303,8 @@ func TestCreateRetrievedBlock(t *testing.T) {
 	timeStamp := time.Now().Round(0)
 	prevSeal := []byte("prevseal")
 	height := uint64(0)
-	txList := []blockchain.Transaction{
-		&blockchain.DefaultTransaction{
+	txList := []*blockchain.DefaultTransaction{
+		{
 			ID:        "tx01",
 			Status:    0,
 			PeerID:    "junksound",
