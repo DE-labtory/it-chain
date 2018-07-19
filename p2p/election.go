@@ -3,10 +3,10 @@ package p2p
 import "sync"
 
 type Election struct {
-	leftTime       int64 //left time in millisecond
-	state          string
-	voteCount      int
-	mux            sync.Mutex
+	leftTime  int64 //left time in millisecond
+	state     string
+	voteCount int
+	mux       sync.Mutex
 }
 
 func (election *Election) SetLeftTime() int64 {
@@ -54,7 +54,7 @@ func (election *Election) GetState() string {
 	return election.state
 }
 
-func (election *Election) GetLeftTime() int64{
+func (election *Election) GetLeftTime() int64 {
 
 	election.mux.Lock()
 	defer election.mux.Unlock()
@@ -91,7 +91,7 @@ type ElectionRepository struct {
 	mux      sync.Mutex
 }
 
-func (er ElectionRepository) GetElection() Election{
+func (er ElectionRepository) GetElection() Election {
 
 	er.mux.Lock()
 	defer er.mux.Unlock()

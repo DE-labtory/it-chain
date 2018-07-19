@@ -62,4 +62,3 @@ func (ps *PeerService) RequestPeerList(peerId p2p.PeerId) error {
 
 	return ps.publish("Command", "message.deliver", deliverCommand)
 }
-

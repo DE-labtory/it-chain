@@ -11,20 +11,19 @@ var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 var ErrNoMatchingPeerWithIpAddress = errors.New("no matching peer with ip address")
 
 type ILeaderApi interface {
-
 	UpdateLeaderWithAddress(ipAddress string) error
 	UpdateLeaderWithLargePeerTable(oppositePLTable p2p.PLTable) error
 }
 
 type LeaderApi struct {
-	leaderService       p2p.ILeaderService
+	leaderService    p2p.ILeaderService
 	peerQueryService p2p.PeerQueryService
 }
 
 func NewLeaderApi(leaderService p2p.ILeaderService, peerQueryService p2p.PeerQueryService) LeaderApi {
 
 	return LeaderApi{
-		leaderService:       leaderService,
+		leaderService:    leaderService,
 		peerQueryService: peerQueryService,
 	}
 }

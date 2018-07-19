@@ -3,8 +3,9 @@ package memory
 import (
 	"sync"
 
-	"github.com/it-chain/engine/txpool"
 	"errors"
+
+	"github.com/it-chain/engine/txpool"
 )
 
 var ErrAlreadyExist = errors.New("transaction already exist")

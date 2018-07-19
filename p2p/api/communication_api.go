@@ -8,13 +8,13 @@ type ICommunicationApi interface {
 }
 
 type CommunicationApi struct {
-	peerQueryService  p2p.PeerQueryService
+	peerQueryService     p2p.PeerQueryService
 	communicationService p2p.ICommunicationService
 }
 
 func NewCommunicationApi(peerQueryService p2p.PeerQueryService, communicationService p2p.ICommunicationService) *CommunicationApi {
 	return &CommunicationApi{
-		peerQueryService:  peerQueryService,
+		peerQueryService:     peerQueryService,
 		communicationService: communicationService,
 	}
 }

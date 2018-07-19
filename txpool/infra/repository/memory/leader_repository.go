@@ -24,5 +24,3 @@ func (lr *MemoryLeaderRepository) GetLeader() txpool.Leader {
 
 	return lr.currentLeader
 }
-
-

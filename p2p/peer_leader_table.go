@@ -9,14 +9,14 @@ var ErrEmptyLeaderId = errors.New("empty leader id")
 var ErrEmptyPeerTable = errors.New("empty peer list")
 
 type PLTable struct {
-	Leader   Leader
+	Leader    Leader
 	PeerTable map[string]Peer
 }
 
 func NewPLTable(leader Leader, peerTable map[string]Peer) *PLTable {
 
 	return &PLTable{
-		Leader:   leader,
+		Leader:    leader,
 		PeerTable: peerTable,
 	}
 }

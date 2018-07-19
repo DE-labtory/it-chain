@@ -9,8 +9,8 @@ import (
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/bifrost/server"
-	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/engine/grpc_gateway"
+	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/midgard"
 )
 

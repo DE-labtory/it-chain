@@ -3,12 +3,12 @@ package adapter_test
 import (
 	"testing"
 
+	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/infra/adapter"
+	"github.com/it-chain/engine/p2p/test/mock"
 	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
-	"github.com/it-chain/engine/p2p/test/mock"
-	"github.com/it-chain/engine/core/eventstore"
 )
 
 func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {

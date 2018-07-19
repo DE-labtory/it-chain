@@ -18,7 +18,6 @@ type Publish func(exchange string, topic string, data interface{}) (err error) /
 
 // message dispatcher sends messages to other nodes in p2p network
 type GrpcCommandService struct {
-
 	publish Publish // midgard.client.Publish
 }
 

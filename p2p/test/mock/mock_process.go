@@ -1,9 +1,8 @@
 package mock
 
-type MockProcess struct{
-
+type MockProcess struct {
 }
 
-func (mp *MockProcess) NewProcess(ipAddress string){
+func (mp *MockProcess) NewProcess(ipAddress string) {
 
 }

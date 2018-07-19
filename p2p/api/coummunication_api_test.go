@@ -5,8 +5,8 @@ import (
 
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/api"
-	"github.com/magiconair/properties/assert"
 	"github.com/it-chain/engine/p2p/test/mock"
+	"github.com/magiconair/properties/assert"
 )
 
 func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
@@ -18,9 +18,9 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 	}{
 		"success": {
 			input: struct{ peerTable map[string]p2p.Peer }{peerTable: map[string]p2p.Peer{
-				"1":{
-					PeerId:p2p.PeerId{
-						Id:"1",
+				"1": {
+					PeerId: p2p.PeerId{
+						Id: "1",
 					},
 				},
 			}},
@@ -28,7 +28,7 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 		},
 	}
 
-	mockPeerQueryService :=&mock.MockPeerQueryService{}
+	mockPeerQueryService := &mock.MockPeerQueryService{}
 	mockPeerQueryService.FindPeerByIdFunc = func(peerId p2p.PeerId) (p2p.Peer, error) {
 
 		peerTable := mock.MakeFakePeerTable()
@@ -53,7 +53,6 @@ func TestCommunicationApi_DialToUnConnectedNode(t *testing.T) {
 	}
 }
 
-
 func TestCommunicationApi_DeliverPLTable(t *testing.T) {
 
 	tests := map[string]struct {
@@ -69,12 +68,12 @@ func TestCommunicationApi_DeliverPLTable(t *testing.T) {
 						Id: "1",
 					},
 				},
-				PeerTable:map[string]p2p.Peer{
-					"1":p2p.Peer{
-						PeerId:p2p.PeerId{Id:"1"},
+				PeerTable: map[string]p2p.Peer{
+					"1": p2p.Peer{
+						PeerId: p2p.PeerId{Id: "1"},
 					},
-					"2":p2p.Peer{
-						PeerId:p2p.PeerId{Id:"2"},
+					"2": p2p.Peer{
+						PeerId: p2p.PeerId{Id: "2"},
 					},
 				},
 			}},
@@ -101,8 +100,8 @@ func SetupCommunicationApi() *api.CommunicationApi {
 
 		pLTable := mock.MakeFakePLTable()
 
-		if peerId.Id ==""{
-			return p2p.Peer{PeerId:p2p.PeerId{Id:""}, IpAddress:""}, p2p.ErrEmptyPeerId
+		if peerId.Id == "" {
+			return p2p.Peer{PeerId: p2p.PeerId{Id: ""}, IpAddress: ""}, p2p.ErrEmptyPeerId
 		}
 
 		for _, peer := range pLTable.PeerTable {
@@ -112,9 +111,8 @@ func SetupCommunicationApi() *api.CommunicationApi {
 			}
 		}
 
-		return p2p.Peer{PeerId:p2p.PeerId{Id:""}, IpAddress:""}, p2p.ErrNoMatchingPeerId
+		return p2p.Peer{PeerId: p2p.PeerId{Id: ""}, IpAddress: ""}, p2p.ErrNoMatchingPeerId
 	}
-
 
 	peerQueryService.GetPLTableFunc = func() (p2p.PLTable, error) {
 
