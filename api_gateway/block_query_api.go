@@ -24,8 +24,8 @@ import (
 )
 
 type BlockQueryApi struct {
-	BlockPoolRepository
-	CommitedBlockRepository
+	blockPoolRepository BlockPoolRepository
+	commitedBlockRepository CommitedBlockRepository
 }
 
 type BlockPoolRepository interface {
