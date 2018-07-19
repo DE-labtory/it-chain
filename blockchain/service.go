@@ -16,6 +16,11 @@
 
 package blockchain
 
+import (
+	"github.com/it-chain/engine/core/eventstore"
+	"github.com/it-chain/midgard"
+)
+
 type BlockQueryService interface {
 	BlockQueryInnerService
 }
@@ -25,4 +30,30 @@ type BlockQueryInnerService interface {
 	GetStagedBlockById(blockId string) (Block, error)
 	GetLastCommitedBlock() (Block, error)
 	GetCommitedBlockByHeight(height BlockHeight) (Block, error)
+}
+
+func CommitBlock(block Block) error {
+
+	event, err := createBlockCommittedEvent(block)
+
+	if err != nil {
+		return err
+	}
+
+	blockId := string(block.GetSeal())
+	eventstore.Save(blockId, event)
+
+	return nil
+}
+
+func createBlockCommittedEvent(block Block) (*BlockCommittedEvent, error) {
+
+	aggregateId := string(block.GetSeal())
+
+	return &BlockCommittedEvent{
+		EventModel: midgard.EventModel{
+			ID: aggregateId,
+		},
+		State: Committed,
+	}, nil
 }
