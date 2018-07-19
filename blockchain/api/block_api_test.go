@@ -3,8 +3,8 @@ package api_test
 import (
 	"testing"
 
-	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/it-chain/it-chain-Engine/blockchain/api"
+	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/blockchain/api"
 	"github.com/magiconair/properties/assert"
 )
 

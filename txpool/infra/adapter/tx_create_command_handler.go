@@ -3,8 +3,8 @@ package adapter
 import (
 	"log"
 
-	"github.com/it-chain/it-chain-Engine/txpool"
-	"github.com/it-chain/it-chain-Engine/txpool/api"
+	"github.com/it-chain/engine/txpool"
+	"github.com/it-chain/engine/txpool/api"
 )
 
 type TxCommandHandler struct {

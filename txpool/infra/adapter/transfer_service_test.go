@@ -3,9 +3,9 @@ package adapter_test
 import (
 	"testing"
 
-	"github.com/it-chain/it-chain-Engine/common"
-	"github.com/it-chain/it-chain-Engine/txpool"
-	"github.com/it-chain/it-chain-Engine/txpool/infra/adapter"
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/txpool"
+	"github.com/it-chain/engine/txpool/infra/adapter"
 	"github.com/magiconair/properties/assert"
 )
 

@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/it-chain-Engine/consensus"
+	"github.com/it-chain/engine/consensus"
 )
 
 type ParliamentApi struct {

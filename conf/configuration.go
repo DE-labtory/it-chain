@@ -4,8 +4,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/it-chain/it-chain-Engine/conf/model"
-	"github.com/it-chain/it-chain-Engine/conf/model/common"
+	"github.com/it-chain/engine/conf/model"
+	"github.com/it-chain/engine/conf/model/common"
 	"github.com/spf13/viper" //viper는 go 어플리케이션의 각종 설정을 담당하는 lib이다.
 	// 각종 형태의 설정파일을 찾고, 로드하는 것이 주 역할이다.
 )
@@ -44,7 +44,7 @@ func GetConfiguration() *Configuration {
 		// instance를 it-chain 설정에 관한 구조체의 포인터로 지정한다.
 
 		// Go language의 환경변수와 내부 디렉터리 구조를 통해 config 파일이 저장된 위치와 파일명을 잡아준다.
-		path := os.Getenv("GOPATH") + "/src/github.com/it-chain/it-chain-Engine/conf"
+		path := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/conf"
 		viper.SetConfigName(instance.configName)
 		viper.AddConfigPath(path)
 

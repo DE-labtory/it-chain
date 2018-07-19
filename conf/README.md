@@ -32,11 +32,11 @@ example)
 
 Linux/Unix(Mac OS)
 
-     user:~/go/src/github.com/it-chain/it-chain-Engine/conf$ sh generate_conf.sh
+     user:~/go/src/github.com/it-chain/engine/conf$ sh generate_conf.sh
 
 Windows
 
-    c:/~~~/go/src/github.com/it-chain/it-chain-Engine/conf> generate_conf.bat
+    c:/~~~/go/src/github.com/it-chain/engine/conf> generate_conf.bat
     또는
     generate_conf.bat 을 클릭하여 실행
 
@@ -48,7 +48,7 @@ GetConfiguration 함수를 호출하여 config 데이터를 불러올 수 있다
 
 sample)
 
-    import "github.com/it-chain/it-chain-Engine/conf"
+    import "github.com/it-chain/engine/conf"
 
     func foo(){
         config = conf.GetConfiguration()

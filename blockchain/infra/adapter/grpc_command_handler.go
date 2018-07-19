@@ -3,7 +3,7 @@ package adapter
 import (
 	"encoding/json"
 
-	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/engine/blockchain"
 )
 
 type SyncBlockApi interface {

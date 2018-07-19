@@ -1,7 +1,7 @@
 package api_gateway
 
 import (
-	"github.com/it-chain/it-chain-Engine/icode"
+	"github.com/it-chain/engine/icode"
 )
 
 // this is an api only for querying current state which is repository of transaction

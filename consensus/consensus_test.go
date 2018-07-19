@@ -5,8 +5,8 @@ import (
 
 	"errors"
 
-	"github.com/it-chain/it-chain-Engine/consensus/test/mock"
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/engine/consensus/test/mock"
+	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )

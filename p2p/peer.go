@@ -2,11 +2,11 @@ package p2p
 
 import (
 	"encoding/json"
-	"github.com/it-chain/it-chain-Engine/common"
+	"github.com/it-chain/engine/common"
 	"fmt"
 	"github.com/it-chain/midgard"
 	"errors"
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/engine/core/eventstore"
 )
 
 var ErrEmptyPeerId = errors.New("empty peer id requested")

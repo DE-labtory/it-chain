@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/it-chain/it-chain-Engine/p2p"
-	"github.com/it-chain/it-chain-Engine/p2p/infra/adapter"
+	"github.com/it-chain/engine/p2p"
+	"github.com/it-chain/engine/p2p/infra/adapter"
 	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
-	"github.com/it-chain/it-chain-Engine/p2p/test/mock"
+	"github.com/it-chain/engine/p2p/test/mock"
 )
 
 

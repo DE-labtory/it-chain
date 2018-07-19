@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/it-chain/it-chain-Engine/blockchain/infra/adapter"
-	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
+	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/blockchain/infra/adapter"
+	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/magiconair/properties/assert"
 )
 

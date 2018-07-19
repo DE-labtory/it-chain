@@ -3,7 +3,7 @@ package adapter
 import (
 	"errors"
 
-	"github.com/it-chain/it-chain-Engine/icode"
+	"github.com/it-chain/engine/icode"
 )
 
 type EventHandler struct {

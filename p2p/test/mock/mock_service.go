@@ -1,7 +1,7 @@
 package mock
 
 import (
-	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/engine/p2p"
 )
 
 type MockPeerService struct {

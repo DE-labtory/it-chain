@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )

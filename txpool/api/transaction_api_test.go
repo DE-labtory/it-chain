@@ -3,9 +3,9 @@ package api_test
 import (
 	"testing"
 
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
-	"github.com/it-chain/it-chain-Engine/txpool"
-	"github.com/it-chain/it-chain-Engine/txpool/api"
+	"github.com/it-chain/engine/core/eventstore"
+	"github.com/it-chain/engine/txpool"
+	"github.com/it-chain/engine/txpool/api"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )

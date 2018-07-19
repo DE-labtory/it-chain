@@ -1,6 +1,6 @@
 package mock
 
-import "github.com/it-chain/it-chain-Engine/blockchain"
+import "github.com/it-chain/engine/blockchain"
 
 type BlockApi struct {
 	AddBlockToPoolFunc            func(block blockchain.Block) error

@@ -1,6 +1,6 @@
 package mock
 
-import "github.com/it-chain/it-chain-Engine/p2p"
+import "github.com/it-chain/engine/p2p"
 
 func MakeFakePeerTable() map[string]p2p.Peer{
 

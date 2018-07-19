@@ -3,8 +3,8 @@ package api
 import (
 	"log"
 
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
-	"github.com/it-chain/it-chain-Engine/grpc_gateway"
+	"github.com/it-chain/engine/core/eventstore"
+	"github.com/it-chain/engine/grpc_gateway"
 )
 
 type ConnectionApi struct {

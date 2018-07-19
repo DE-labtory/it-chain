@@ -3,7 +3,7 @@ package adapter
 import (
 	"errors"
 
-	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )

@@ -3,7 +3,7 @@ package api
 import (
 	"errors"
 
-	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/engine/p2p"
 )
 
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")

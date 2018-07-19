@@ -8,9 +8,9 @@ import (
 
 	"flag"
 
-	"github.com/it-chain/it-chain-Engine/conf"
-	"github.com/it-chain/it-chain-Engine/conf/model"
-	"github.com/it-chain/it-chain-Engine/conf/model/common"
+	"github.com/it-chain/engine/conf"
+	"github.com/it-chain/engine/conf/model"
+	"github.com/it-chain/engine/conf/model/common"
 	"gopkg.in/yaml.v2"
 )
 

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/it-chain/it-chain-Engine/common"
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )

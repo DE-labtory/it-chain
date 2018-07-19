@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/it-chain/it-chain-Engine/grpc_gateway"
+	"github.com/it-chain/engine/grpc_gateway"
 )
 
 type MessageApi struct {

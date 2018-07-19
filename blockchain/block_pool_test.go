@@ -3,7 +3,7 @@ package blockchain_test
 import (
 	"testing"
 
-	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )

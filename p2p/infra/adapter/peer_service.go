@@ -3,8 +3,8 @@ package adapter
 import (
 	"time"
 
-	"github.com/it-chain/it-chain-Engine/grpc_gateway"
-	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/engine/grpc_gateway"
+	"github.com/it-chain/engine/p2p"
 )
 
 type PeerService struct {

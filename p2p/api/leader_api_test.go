@@ -3,9 +3,9 @@ package api_test
 import (
 	"testing"
 
-	"github.com/it-chain/it-chain-Engine/p2p"
-	"github.com/it-chain/it-chain-Engine/p2p/api"
-	"github.com/it-chain/it-chain-Engine/p2p/test/mock"
+	"github.com/it-chain/engine/p2p"
+	"github.com/it-chain/engine/p2p/api"
+	"github.com/it-chain/engine/p2p/test/mock"
 	"github.com/magiconair/properties/assert"
 )
 

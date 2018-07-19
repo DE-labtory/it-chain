@@ -6,7 +6,7 @@ import (
 
 	"time"
 
-	"github.com/it-chain/it-chain-Engine/txpool"
+	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/stretchr/testify/assert"

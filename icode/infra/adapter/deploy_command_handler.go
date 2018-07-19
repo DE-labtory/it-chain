@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/it-chain/it-chain-Engine/conf"
-	"github.com/it-chain/it-chain-Engine/icode"
-	"github.com/it-chain/it-chain-Engine/icode/api"
+	"github.com/it-chain/engine/conf"
+	"github.com/it-chain/engine/icode"
+	"github.com/it-chain/engine/icode/api"
 )
 
 type DeployCommandHandler struct {

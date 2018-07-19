@@ -1,6 +1,6 @@
 package api
 
-import "github.com/it-chain/it-chain-Engine/p2p"
+import "github.com/it-chain/engine/p2p"
 
 type ICommunicationApi interface {
 	DialToUnConnectedNode(peerTable map[string]p2p.Peer) error

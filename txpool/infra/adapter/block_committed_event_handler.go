@@ -3,8 +3,8 @@ package adapter
 import (
 	"errors"
 
-	"github.com/it-chain/it-chain-Engine/txpool"
-	"github.com/it-chain/it-chain-Engine/txpool/api"
+	"github.com/it-chain/engine/txpool"
+	"github.com/it-chain/engine/txpool/api"
 )
 
 var ErrNoEventID = errors.New("no event id ")

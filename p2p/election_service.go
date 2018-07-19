@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/it-chain/it-chain-Engine/common"
-	"github.com/it-chain/it-chain-Engine/conf"
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )

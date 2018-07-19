@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/it-chain/it-chain-Engine/icode"
-	"github.com/it-chain/it-chain-Engine/icode/api"
+	"github.com/it-chain/engine/icode"
+	"github.com/it-chain/engine/icode/api"
 )
 
 type BlockCommandHandler struct {

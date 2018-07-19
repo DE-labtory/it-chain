@@ -3,8 +3,8 @@ package adapter
 import (
 	"errors"
 
-	"github.com/it-chain/it-chain-Engine/common"
-	"github.com/it-chain/it-chain-Engine/p2p"
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )

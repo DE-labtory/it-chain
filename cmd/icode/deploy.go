@@ -3,8 +3,8 @@ package icode
 import (
 	"fmt"
 
-	"github.com/it-chain/it-chain-Engine/conf"
-	"github.com/it-chain/it-chain-Engine/icode"
+	"github.com/it-chain/engine/conf"
+	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/rs/xid"

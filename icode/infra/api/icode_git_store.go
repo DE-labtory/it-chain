@@ -13,8 +13,8 @@ import (
 	"os"
 
 	"github.com/google/go-github/github"
-	"github.com/it-chain/it-chain-Engine/conf"
-	"github.com/it-chain/it-chain-Engine/icode"
+	"github.com/it-chain/engine/conf"
+	"github.com/it-chain/engine/icode"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/config"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
