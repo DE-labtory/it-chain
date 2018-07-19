@@ -47,11 +47,3 @@ func (bApi *BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) e
 func (bApi *BlockApi) SyncIsProgressing() blockchain.ProgressState {
 	return blockchain.DONE
 }
-
-func (bApi *BlockApi) loadBlockPool() blockchain.BlockPool {
-	return nil
-}
-
-func compareHeight(height1 uint64, height2 uint64) int64 {
-	return int64(height1-height2) - 1
-}
