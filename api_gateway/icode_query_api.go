@@ -131,7 +131,7 @@ type ICodeEventHandler struct {
 	metaRepository ICodeMetaRepository
 }
 
-func NewIcodeEvnetHandler(repository ICodeMetaRepository) ICodeEventHandler {
+func NewIcodeEventHandler(repository ICodeMetaRepository) ICodeEventHandler {
 	return ICodeEventHandler{
 		metaRepository: repository,
 	}
