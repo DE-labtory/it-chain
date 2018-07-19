@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/it-chain/it-chain-Engine/blockchain"
-	"github.com/it-chain/it-chain-Engine/blockchain/test/mock"
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/blockchain/test/mock"
+	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
@@ -153,7 +153,7 @@ func TestCreateProposedBlock(t *testing.T) {
 						Status:    0,
 						PeerID:    "junksound",
 						Timestamp: timeStamp,
-						TxData: &blockchain.TxData{
+						TxData: blockchain.TxData{
 							Jsonrpc: "",
 							Method:  "",
 							Params:  blockchain.Params{},
@@ -174,7 +174,7 @@ func TestCreateProposedBlock(t *testing.T) {
 						Status:    0,
 						PeerID:    "junksound",
 						Timestamp: timeStamp,
-						TxData: &blockchain.TxData{
+						TxData: blockchain.TxData{
 							Jsonrpc: "",
 							Method:  "",
 							Params:  blockchain.Params{},
@@ -225,7 +225,7 @@ func TestCreateProposedBlock(t *testing.T) {
 						Status:    0,
 						PeerID:    "junksound",
 						Timestamp: timeStamp,
-						TxData: &blockchain.TxData{
+						TxData: blockchain.TxData{
 							Jsonrpc: "",
 							Method:  "",
 							Params:  blockchain.Params{},
@@ -296,7 +296,7 @@ func TestCreateRetrievedBlock(t *testing.T) {
 			Status:    0,
 			PeerID:    "junksound",
 			Timestamp: timeStamp,
-			TxData: &blockchain.TxData{
+			TxData: blockchain.TxData{
 				Jsonrpc: "",
 				Method:  "",
 				Params:  blockchain.Params{},
