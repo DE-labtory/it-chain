@@ -6,13 +6,11 @@ import (
 
 	"bytes"
 
-	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	ygg "github.com/it-chain/yggdrasill/common"
 
 	"errors"
 	"fmt"
-	"log"
 )
 
 type Block = ygg.Block
@@ -157,26 +155,6 @@ type BlockQueryApi interface {
 	GetLastBlock() (Block, error)
 }
 
-type Action interface {
-	DoAction(block Block) error
-}
-
-// TODO: Write test case
-func CreateSaveOrSyncAction(checkResult int64) Action {
-	if checkResult > 0 {
-		return NewSyncAction()
-	} else if checkResult == 0 {
-		return NewSaveAction()
-	} else {
-		return NewDefaultAction()
-	}
-}
-
-type SyncAction struct{}
-
-func NewSyncAction() *SyncAction {
-	return &SyncAction{}
-}
 func (block *DefaultBlock) On(event midgard.Event) error {
 
 	switch v := event.(type) {
@@ -208,48 +186,20 @@ func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock
 	return block
 }
 
-func (syncAction *SyncAction) DoAction(block Block) error {
-	// TODO: Start synchronize
+func CreateBlock(block Block) error {
+	// create BlockCreatedEvent
+	// save it to event store
 	return nil
 }
 
-type SaveAction struct {
-	blockPool BlockPool
-}
-
-func NewSaveAction() *SaveAction {
-	return &SaveAction{}
-}
-
-// TODO: Write test case
-func (saveAction *SaveAction) DoAction(block Block) error {
-	event, err := createBlockCommittedEvent(block)
-	if err != nil {
-		return err
-	}
-	blockId := string(block.GetSeal())
-	eventstore.Save(blockId, event)
+func StageBlock(block Block) error {
+	// create BlockStageEvent
+	// save it to event store
 	return nil
 }
 
-func createBlockCommittedEvent(block Block) (BlockCommittedEvent, error) {
-	seal := string(block.GetSeal())
-	return BlockCommittedEvent{
-		EventModel: midgard.EventModel{
-			ID: seal,
-		},
-		Seal: seal,
-	}, nil
-}
-
-type DefaultAction struct{}
-
-func NewDefaultAction() *DefaultAction {
-	return &DefaultAction{}
-}
-
-// TODO: Write test case
-func (defaultAction *DefaultAction) DoAction(block Block) error {
-	log.Printf("got shorter height block [%v]", block.GetHeight())
+func CommitBlock(block Block) error {
+	// create BlockCommitEvent
+	// save it to event store
 	return nil
 }
