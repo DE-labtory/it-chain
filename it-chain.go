@@ -77,17 +77,18 @@ func main() {
 func start() error {
 
 	configuration := conf.GetConfiguration()
-	ln, err := net.Listen("tcp", configuration.Common.NodeIp)
+	ip4 := configuration.GrpcGateway.Address + ":" + configuration.GrpcGateway.Port
+	ln, err := net.Listen("tcp", ip4)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Can't listen on %q: %s\n", conf.GetConfiguration().GrpcGateway.Ip, err)
+		fmt.Fprintf(os.Stderr, "Can't listen on %q: %s\n", ip4, err)
 		return err
 	}
 
 	err = ln.Close()
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Couldn't stop listening on %q: %s\n", conf.GetConfiguration().GrpcGateway.Ip, err)
+		fmt.Fprintf(os.Stderr, "Couldn't stop listening on %q: %s\n", ip4, err)
 		return err
 	}
 
@@ -117,7 +118,7 @@ func initGateway(errs chan error) error {
 	log.Println("gateway is running...")
 
 	config := conf.GetConfiguration()
-	ipAddress := config.Common.NodeIp
+	ipAddress := config.ApiGateway.Address + ":" + config.ApiGateway.Port
 
 	//set log
 	var logger kitlog.Logger
@@ -126,7 +127,7 @@ func initGateway(errs chan error) error {
 
 	//set service and repo
 	dbPath := "./.test"
-	mqClient := rabbitmq.Connect(config.Common.Messaging.Url)
+	mqClient := rabbitmq.Connect(config.Engine.Amqp)
 
 	repo := api_gateway.NewTransactionRepository(dbPath)
 
@@ -159,7 +160,7 @@ func initIcode() error {
 	log.Println("icode is running...")
 
 	config := conf.GetConfiguration()
-	mqClient := rabbitmq.Connect(config.Common.Messaging.Url)
+	mqClient := rabbitmq.Connect(config.Engine.Amqp)
 
 	// service generate
 	commandService := icodeAdapter.NewCommandService(mqClient.Publish)
@@ -196,7 +197,7 @@ func initTxPool() error {
 	log.Println("txpool is running...")
 
 	config := conf.GetConfiguration()
-	mqClient := rabbitmq.Connect(config.Common.Messaging.Url)
+	mqClient := rabbitmq.Connect(config.Engine.Amqp)
 
 	//todo get id from pubkey
 	tmpPeerID := "tmp peer 1"

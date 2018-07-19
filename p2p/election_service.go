@@ -14,11 +14,11 @@ import (
 type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
 type ElectionService struct {
-	mux                 sync.Mutex
-	electionRepository  ElectionRepository
-	peerService         IPeerService
-	peerQueryService PeerQueryService
-	publish             Publish
+	mux                sync.Mutex
+	electionRepository ElectionRepository
+	peerService        IPeerService
+	peerQueryService   PeerQueryService
+	publish            Publish
 }
 
 func (es *ElectionService) ElectLeaderWithRaft() {
@@ -179,7 +179,7 @@ func (es *ElectionService) DecideToBeLeader(command GrpcReceiveCommand) error {
 
 		peer := Peer{
 			PeerId:    PeerId{Id: ""},
-			IpAddress: conf.GetConfiguration().Common.NodeIp,
+			IpAddress: conf.GetConfiguration().GrpcGateway.Address + ":" + conf.GetConfiguration().GrpcGateway.Port,
 		}
 
 		es.BroadcastLeader(peer)

@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/it-chain/engine/conf/model"
-	"github.com/it-chain/engine/conf/model/common"
 	"github.com/spf13/viper" //viper는 go 어플리케이션의 각종 설정을 담당하는 lib이다.
 	// 각종 형태의 설정파일을 찾고, 로드하는 것이 주 역할이다.
 )
@@ -19,15 +18,15 @@ var once sync.Once
 
 // it-chain 에 필요한 각종 설정을 저장하는 구조체이다.
 type Configuration struct {
-	configName     string
-	Common         common.CommonConfiguration
-	Txpool         model.TxpoolConfiguration
-	Consensus      model.ConsensusConfiguration
-	Blockchain     model.BlockChainConfiguration
-	Peer           model.PeerConfiguration
-	Authentication model.AuthenticationConfiguration
-	Icode          model.ICodeConfiguration
-	GrpcGateway    model.GrpcGatewayConfiguration
+	configName  string
+	Engine      model.EngineConfiguration
+	Txpool      model.TxpoolConfiguration
+	Consensus   model.ConsensusConfiguration
+	Blockchain  model.BlockChainConfiguration
+	Peer        model.PeerConfiguration
+	Icode       model.ICodeConfiguration
+	GrpcGateway model.GrpcGatewayConfiguration
+	ApiGateway  model.ApiGatewayConfiguration
 }
 
 // it-chain의 각종 설정을 받아온다.

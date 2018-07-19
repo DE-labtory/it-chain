@@ -27,7 +27,7 @@ func DeployCmd() cli.Command {
 }
 func deploy(gitUrl string, sshPath string) {
 	config := conf.GetConfiguration()
-	client := rabbitmq.Connect(config.Common.Messaging.Url)
+	client := rabbitmq.Connect(config.Engine.Amqp)
 	defer client.Close()
 	command := icode.DeployCommand{
 		CommandModel: midgard.CommandModel{

@@ -1,12 +1,11 @@
-common:
-  bootnodeip: 127.0.0.1:4444
-  nodeip: 127.0.0.1:4444
-  messaging:
-    url: amqp://guest:guest@localhost:5672/
+engine:
+  keypath: .it-chain/
+  mode: solo
+  amqp: amqp://guest:guest@localhost:5672/
+  bootstrapnodeaddress: 127.0.0.1:5555
 txpool:
   timeoutms: 100
   maxtransactionbyte: 1024
-  repositorypath: empty
 consensus:
   batchtime: 3
   maxtransactions: 100
@@ -14,16 +13,16 @@ blockchain:
   repositorypath: empty
 peer:
   leaderelection: RAFT
-authentication:
-  keytype: ECDSA256
-  keypath: .it-chain/
 icode:
   repositorypath: empty
   sshpath: default
   icodesavepath: ./.tmp
-  authid: hea9549
-  authpw: gotjddl99
-  shpath: /home/hea9549/go/src/github.com/it-chain/tesseract/sh/default_setup.sh
+  authid: empty
+  authpw: empty
+  shpath: empty
 grpcgateway:
-  empty: empty
-  ip: 127.0.0.1:13579
+  address: 127.0.0.1
+  port: "13579"
+apigateway:
+  address: 127.0.0.1
+  port: "4444"

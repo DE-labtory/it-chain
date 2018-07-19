@@ -10,7 +10,6 @@ import (
 
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/conf/model"
-	"github.com/it-chain/engine/conf/model/common"
 	"gopkg.in/yaml.v2"
 )
 
@@ -37,14 +36,14 @@ func main() {
 	}
 
 	confInfo := conf.Configuration{
-		Common:         common.NewCommonConfiguration(),
-		Txpool:         model.NewTxpoolConfiguration(),
-		Consensus:      model.NewConsensusConfiguration(),
-		Blockchain:     model.NewBlockChainConfiguration(),
-		Peer:           model.NewPeerConfiguration(),
-		Authentication: model.NewAuthenticationConfiguration(),
-		Icode:          model.NewIcodeConfiguration(),
-		GrpcGateway:    model.NewGrpcGatewayConfiguration(),
+		Engine:      model.NewEngineConfiguration(),
+		Txpool:      model.NewTxpoolConfiguration(),
+		Consensus:   model.NewConsensusConfiguration(),
+		Blockchain:  model.NewBlockChainConfiguration(),
+		Peer:        model.NewPeerConfiguration(),
+		Icode:       model.NewIcodeConfiguration(),
+		GrpcGateway: model.NewGrpcGatewayConfiguration(),
+		ApiGateway:  model.NewApiGatewayConfiguration(),
 	}
 
 	output, _ := yaml.Marshal(&confInfo)
