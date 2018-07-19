@@ -2,9 +2,10 @@ package consensus
 
 import (
 	"testing"
+
 	"github.com/it-chain/engine/consensus/test/mock"
-	"github.com/it-chain/midgard"
 	"github.com/it-chain/engine/core/eventstore"
+	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,7 +13,7 @@ func TestCreateConsensus(t *testing.T) {
 	// given
 	p := NewParliament()
 	l := &Leader{LeaderId: LeaderId{"leader"}}
-	m := &Member{MemberId: MemberId{"member"},}
+	m := &Member{MemberId: MemberId{"member"}}
 	b := ProposedBlock{
 		Seal: make([]byte, 0),
 		body: make([]byte, 0),
@@ -29,8 +30,8 @@ func TestCreateConsensus(t *testing.T) {
 
 	// when
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, 1+len(p.Members), len(events[0].(ConsensusCreatedEvent).Consensus.Representatives))
-		assert.NotNil(t, events[0].(ConsensusCreatedEvent).Consensus.Block.Seal)
+		assert.Equal(t, 1+len(p.Members), len(events[0].(*ConsensusCreatedEvent).Consensus.Representatives))
+		assert.NotNil(t, events[0].(*ConsensusCreatedEvent).Consensus.Block.Seal)
 		return nil
 	}
 	eventstore.InitForMock(eventRepository)
@@ -39,7 +40,7 @@ func TestCreateConsensus(t *testing.T) {
 
 	// then
 	assert.Nil(t, err)
-	assert.Equal(t, 1+len(p.Members), len(c.Representatives))
+	assert.Equal(t, 2, len(c.Representatives))
 	assert.Equal(t, b.body, c.Block.body)
 }
 
@@ -65,8 +66,8 @@ func TestConstructConsensus(t *testing.T) {
 
 	// when
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, len(r), len(events[0].(ConsensusCreatedEvent).Consensus.Representatives))
-		assert.Equal(t, "consensusID", events[0].(ConsensusCreatedEvent).GetID())
+		assert.Equal(t, len(r), len(events[0].(*ConsensusCreatedEvent).Consensus.Representatives))
+		assert.Equal(t, "consensusID", events[0].(*ConsensusCreatedEvent).GetID())
 		return nil
 	}
 	eventstore.InitForMock(eventRepository)

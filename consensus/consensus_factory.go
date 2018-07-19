@@ -1,76 +1,44 @@
 package consensus
 
 import (
-	"github.com/rs/xid"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/engine/core/eventstore"
+	"github.com/rs/xid"
 )
 
 // leader
-func CreateConsensus(parliament Parliament, block ProposedBlock) (Consensus, error) {
-	ps := NewParliamentSerivce()
-	representatives, err := ps.Elect(parliament)
+func CreateConsensus(parliament Parliament, block ProposedBlock) (*Consensus, error) {
+	representatives, err := Elect(parliament)
 	if err != nil {
-		return Consensus{}, err
+		return &Consensus{}, err
 	}
 
 	consensusID := NewConsensusId(xid.New().String())
+	consensus := &Consensus{}
+	consensusCreatedEvent := newConsensusCreatedEvent(consensusID, representatives, block)
 
-	consensus := Consensus{
-		ConsensusID:     consensusID,
-		Representatives: representatives,
-		Block:           block,
-		CurrentState:    IDLE_STATE,
-		PrepareMsgPool:  NewPrepareMsgPool(),
-		CommitMsgPool:   NewCommitMsgPool(),
-	}
-
-	consensusCreatedEvent := ConsensusCreatedEvent{
-		EventModel: midgard.EventModel{
-			ID: consensusID.Id,
-		},
-		Consensus: struct {
-			ConsensusID     ConsensusId
-			Representatives []*Representative
-			Block           ProposedBlock
-			CurrentState    State
-			PrepareMsgPool  PrepareMsgPool
-			CommitMsgPool   CommitMsgPool
-		}{
-			ConsensusID:     consensus.ConsensusID,
-			Representatives: consensus.Representatives,
-			Block:           consensus.Block,
-			CurrentState:    consensus.CurrentState,
-			PrepareMsgPool:  consensus.PrepareMsgPool,
-			CommitMsgPool:   consensus.CommitMsgPool,
-		},
-	}
-
-	if err := consensus.On(&consensusCreatedEvent); err != nil {
-		return Consensus{}, err
-	}
-
-	if err := eventstore.Save(consensus.GetID(), consensusCreatedEvent); err != nil {
-		return Consensus{}, err
+	if err := OnAndSave(consensus, &consensusCreatedEvent); err != nil {
+		return &Consensus{}, err
 	}
 
 	return consensus, nil
 }
 
 // member
-func ConstructConsensus(msg PrePrepareMsg) (Consensus, error) {
-	consensus := Consensus{
-		ConsensusID:     msg.ConsensusId,
-		Representatives: msg.Representative,
-		Block:           msg.ProposedBlock,
-		CurrentState:    IDLE_STATE,
-		PrepareMsgPool:  NewPrepareMsgPool(),
-		CommitMsgPool:   NewCommitMsgPool(),
+func ConstructConsensus(msg PrePrepareMsg) (*Consensus, error) {
+	consensus := &Consensus{}
+	consensusCreatedEvent := newConsensusCreatedEvent(msg.ConsensusId, msg.Representative, msg.ProposedBlock)
+
+	if err := OnAndSave(consensus, &consensusCreatedEvent); err != nil {
+		return &Consensus{}, err
 	}
 
-	consensusCreatedEvent := ConsensusCreatedEvent{
+	return consensus, nil
+}
+
+func newConsensusCreatedEvent(cID ConsensusId, r []*Representative, b ProposedBlock) ConsensusCreatedEvent {
+	return ConsensusCreatedEvent{
 		EventModel: midgard.EventModel{
-			ID: consensus.GetID(),
+			ID: cID.Id,
 		},
 		Consensus: struct {
 			ConsensusID     ConsensusId
@@ -80,22 +48,12 @@ func ConstructConsensus(msg PrePrepareMsg) (Consensus, error) {
 			PrepareMsgPool  PrepareMsgPool
 			CommitMsgPool   CommitMsgPool
 		}{
-			ConsensusID:     consensus.ConsensusID,
-			Representatives: consensus.Representatives,
-			Block:           consensus.Block,
-			CurrentState:    consensus.CurrentState,
-			PrepareMsgPool:  consensus.PrepareMsgPool,
-			CommitMsgPool:   consensus.CommitMsgPool,
+			ConsensusID:     cID,
+			Representatives: r,
+			Block:           b,
+			CurrentState:    IDLE_STATE,
+			PrepareMsgPool:  NewPrepareMsgPool(),
+			CommitMsgPool:   NewCommitMsgPool(),
 		},
 	}
-
-	if err := consensus.On(&consensusCreatedEvent); err != nil {
-		return Consensus{}, err
-	}
-
-	if err := eventstore.Save(consensus.GetID(), consensusCreatedEvent); err != nil {
-		return Consensus{}, err
-	}
-
-	return consensus, nil
 }
