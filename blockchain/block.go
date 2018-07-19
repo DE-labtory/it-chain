@@ -226,9 +226,3 @@ func StageBlock(block Block) error {
 	// save it to event store
 	return nil
 }
-
-func CommitBlock(block Block) error {
-	// create BlockCommitEvent
-	// save it to event store
-	return nil
-}
