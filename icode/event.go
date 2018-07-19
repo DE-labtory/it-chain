@@ -28,6 +28,18 @@ type MetaCreatedEvent struct {
 	Version        Version
 }
 
+func (m MetaCreatedEvent) GetMeta() Meta {
+	return Meta{
+		ICodeID:        m.ID,
+		RepositoryName: m.RepositoryName,
+		GitUrl:         m.GitUrl,
+		Path:           m.Path,
+		CommitHash:     m.CommitHash,
+		Version:        m.Version,
+		Status:         READY,
+	}
+}
+
 //type : meta.deleted
 type MetaDeletedEvent struct {
 	midgard.EventModel
