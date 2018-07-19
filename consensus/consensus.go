@@ -307,11 +307,7 @@ func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) error {
 		}{ConsensusId: prepareMsg.ConsensusId, SenderId: prepareMsg.SenderId, BlockHash: prepareMsg.BlockHash},
 	}
 
-	if err := c.On(&prepareMsgAddedEvent); err != nil {
-		return err
-	}
-
-	if err := eventstore.Save(prepareMsgAddedEvent.ID, prepareMsgAddedEvent); err != nil {
+	if err := OnAndSave(c, &prepareMsgAddedEvent); err != nil {
 		return err
 	}
 
@@ -333,11 +329,7 @@ func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) error {
 		}{ConsensusId: commitMsg.ConsensusId, SenderId: commitMsg.SenderId},
 	}
 
-	if err := c.On(&commitMsgAddedEvent); err != nil {
-		return err
-	}
-
-	if err := eventstore.Save(c.GetID(), commitMsgAddedEvent); err != nil {
+	if err := OnAndSave(c, &commitMsgAddedEvent); err != nil {
 		return err
 	}
 
@@ -382,6 +374,18 @@ func (c *Consensus) On(event midgard.Event) error {
 
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
+	}
+
+	return nil
+}
+
+func OnAndSave(aggregate midgard.Aggregate, event midgard.Event) error {
+	if err := aggregate.On(event); err != nil {
+		return err
+	}
+
+	if err := eventstore.Save(event.GetID(), event); err != nil {
+		return err
 	}
 
 	return nil
