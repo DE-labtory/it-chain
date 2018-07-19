@@ -17,10 +17,11 @@
 package blockchain
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"time"
+
+	"encoding/json"
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/core/eventstore"
@@ -48,7 +49,7 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	}
 
 	//create
-	createEvent, err := createBlockCreatedEvent(Seal, GenesisBlock.PrevSeal, GenesisBlock.Height, convertTxType(GenesisBlock.TxList), GenesisBlock.TxSeal, GenesisBlock.Timestamp, GenesisBlock.Creator)
+	createEvent, err := createBlockCreatedEvent(Seal, GenesisBlock.PrevSeal, GenesisBlock.Height, GenesisBlock.TxList, GenesisBlock.TxSeal, GenesisBlock.Timestamp, GenesisBlock.Creator)
 	if err != nil {
 		return nil, ErrCreatingEvent
 	}
@@ -66,26 +67,55 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 }
 
 func setBlockWithConfig(filePath string, block Block) error {
+
+	// load
 	jsonFile, err := os.Open(filePath)
 	defer jsonFile.Close()
+
 	if err != nil {
 		return err
 	}
 
 	byteValue, err := ioutil.ReadAll(jsonFile)
+
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(byteValue, block)
+	GenesisConfig := &GenesisConfig{}
+
+	err = json.Unmarshal(byteValue, GenesisConfig)
 	if err != nil {
 		return err
 	}
+
+	// set
+	const longForm = "Jan 1, 2006 at 0:00am (MST)"
+
+	timeStamp, err := time.Parse(longForm, GenesisConfig.TimeStamp)
+
+	if err != nil {
+		return err
+	}
+
+	block.SetPrevSeal(make([]byte, 0))
+	block.SetHeight(uint64(GenesisConfig.Height))
+	block.SetTxSeal(make([][]byte, 0))
+	block.SetTimestamp(timeStamp)
+	block.SetCreator([]byte(GenesisConfig.Creator))
 
 	return nil
 }
 
-func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []Transaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*BlockCreatedEvent, error) {
+type GenesisConfig struct {
+	Organization string
+	NedworkId    string
+	Height       int
+	TimeStamp    string
+	Creator      string
+}
+
+func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []*DefaultTransaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*BlockCreatedEvent, error) {
 	txListBytes, err := common.Serialize(txList)
 
 	if err != nil {
@@ -107,15 +137,15 @@ func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList
 	}, nil
 }
 
-func CreateProposedBlock(prevSeal []byte, height uint64, txList []Transaction, Creator []byte) (Block, error) {
+func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransaction, Creator []byte) (Block, error) {
 
 	//declare
 	ProposedBlock := &DefaultBlock{}
 	validator := DefaultValidator{}
-	TimeStamp := (time.Now()).Round(0)
+	TimeStamp := time.Now().Round(0)
 
 	//build
-	txSeal, err := validator.BuildTxSeal(txList)
+	txSeal, err := validator.BuildTxSeal(convertTxType(txList))
 
 	if err != nil {
 		return nil, ErrBuildingTxSeal
@@ -149,6 +179,7 @@ func CreateRetrievedBlock(retrievedBlock Block) (Block, error) {
 
 	//declare
 	RetrievedBlock := &DefaultBlock{}
+
 	Seal := retrievedBlock.GetSeal()
 	PrevSeal := retrievedBlock.GetPrevSeal()
 	Height := retrievedBlock.GetHeight()
@@ -158,7 +189,7 @@ func CreateRetrievedBlock(retrievedBlock Block) (Block, error) {
 	Creator := retrievedBlock.GetCreator()
 
 	//create
-	createEvent, err := createBlockCreatedEvent(Seal, PrevSeal, Height, TxList, TxSeal, TimeStamp, Creator)
+	createEvent, err := createBlockCreatedEvent(Seal, PrevSeal, Height, getBackTxType(TxList), TxSeal, TimeStamp, Creator)
 	if err != nil {
 		return nil, ErrCreatingEvent
 	}

@@ -203,3 +203,13 @@ func convertTxType(txList []*DefaultTransaction) []Transaction {
 
 	return convTxList
 }
+
+func getBackTxType(txList []Transaction) []*DefaultTransaction {
+	convTxList := make([]*DefaultTransaction, 0)
+
+	for _, tx := range txList {
+		convTxList = append(convTxList, tx.(*DefaultTransaction))
+	}
+
+	return convTxList
+}
