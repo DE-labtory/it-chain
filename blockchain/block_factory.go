@@ -1,10 +1,11 @@
 package blockchain
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"time"
+
+	"encoding/json"
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/core/eventstore"
@@ -50,23 +51,52 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 }
 
 func setBlockWithConfig(filePath string, block Block) error {
+
+	// load
 	jsonFile, err := os.Open(filePath)
 	defer jsonFile.Close()
+
 	if err != nil {
 		return err
 	}
 
 	byteValue, err := ioutil.ReadAll(jsonFile)
+
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(byteValue, block)
+	GenesisConfig := &GenesisConfig{}
+
+	err = json.Unmarshal(byteValue, GenesisConfig)
 	if err != nil {
 		return err
 	}
+
+	// set
+	const longForm = "Jan 1, 2006 at 0:00am (MST)"
+
+	timeStamp, err := time.Parse(longForm, GenesisConfig.TimeStamp)
+
+	if err != nil {
+		return err
+	}
+
+	block.SetPrevSeal(make([]byte, 0))
+	block.SetHeight(uint64(GenesisConfig.Height))
+	block.SetTxSeal(make([][]byte, 0))
+	block.SetTimestamp(timeStamp)
+	block.SetCreator([]byte(GenesisConfig.Creator))
 
 	return nil
+}
+
+type GenesisConfig struct {
+	Organization string
+	NedworkId    string
+	Height       int
+	TimeStamp    string
+	Creator      string
 }
 
 func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []Transaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*BlockCreatedEvent, error) {

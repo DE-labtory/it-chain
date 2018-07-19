@@ -19,8 +19,8 @@ func TestCreateGenesisBlock(t *testing.T) {
 
 	//given
 
-	const shortForm = "2006-Jan-02"
-	timeStamp, _ := time.Parse(shortForm, "0000-Jan-00")
+	const longForm = "Jan 1, 2006 at 0:00am (MST)"
+	timeStamp, _ := time.Parse(longForm, "Jan 1, 2018 at 0:00am (KST)")
 
 	tests := map[string]struct {
 		input struct {
@@ -43,7 +43,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 				TxList:    make([]*blockchain.DefaultTransaction, 0),
 				TxSeal:    make([][]byte, 0),
 				Timestamp: timeStamp,
-				Creator:   make([]byte, 0),
+				Creator:   []byte("junksound"),
 			},
 
 			err: nil,
@@ -64,7 +64,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 	}
 
 	repo := mock.EventRepository{}
-	sealByte := []byte{120, 31, 37, 220, 159, 28, 245, 136, 76, 103, 24, 88, 213, 183, 217, 168, 199, 218, 212, 149, 31, 203, 78, 75, 18, 101, 146, 25, 113, 18, 150, 146}
+	sealByte := []byte{83, 36, 70, 186, 203, 198, 98, 239, 142, 70, 160, 199, 155, 177, 5, 65, 240, 30, 143, 15, 188, 202, 213, 81, 6, 20, 22, 8, 195, 95, 75, 66}
 	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
 		assert.Equal(t, 1, len(events))
 		assert.Equal(t, string(sealByte), aggregateID)
@@ -81,13 +81,11 @@ func TestCreateGenesisBlock(t *testing.T) {
 	defer os.Remove(GenesisFilePath)
 
 	GenesisBlockConfigJson := []byte(`{
-								  "Seal":[],
-								  "PrevSeal":[],
-								  "Height":0,
-								  "TxList":[],
-								  "TxSeal":[],
-								  "TimeStamp":"0001-01-01T00:00:00-00:00",
-								  "Creator":[]
+									"Orgainaization":"Default",
+									"NetworkId":"Default",
+								  	"Height":0,
+								  	"TimeStamp":"Jan 1, 2018 at 0:00am (KST)",
+								  	"Creator":"junksound"
 								}`)
 
 	err := ioutil.WriteFile(GenesisFilePath, GenesisBlockConfigJson, 0644)
