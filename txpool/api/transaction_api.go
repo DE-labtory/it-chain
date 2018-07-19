@@ -35,8 +35,6 @@ func NewTransactionApi(publisherId string) TransactionApi {
 
 func (t TransactionApi) CreateTransaction(txData txpool.TxData) (txpool.Transaction, error) {
 
-	log.Printf("create transaction: [%v]", txData)
-
 	tx, err := txpool.CreateTransaction(t.publisherId, txData)
 
 	if err != nil {
@@ -44,13 +42,11 @@ func (t TransactionApi) CreateTransaction(txData txpool.TxData) (txpool.Transact
 		return tx, err
 	}
 
-	log.Printf("transaction created: [%v]", tx)
+	log.Printf("transaction is created: [%v]", tx)
 	return tx, nil
 }
 
 func (t TransactionApi) DeleteTransaction(id txpool.TransactionId) error {
-
-	log.Printf("delete transaction: [%v]", id)
 
 	tx := &txpool.Transaction{}
 
@@ -58,6 +54,8 @@ func (t TransactionApi) DeleteTransaction(id txpool.TransactionId) error {
 		log.Printf("fail to delete transaction: [%v]", id)
 		return err
 	}
+
+	log.Printf("transaction is deleted: [%v]", id)
 
 	return txpool.DeleteTransaction(*tx)
 }
