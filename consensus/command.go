@@ -52,3 +52,10 @@ type SendCommitMsgCommand struct {
 		SenderId    string
 	}
 }
+
+type SendGrpcMsgCommand struct {
+	midgard.CommandModel
+	Recipients []string
+	Body       []byte
+	Protocol   string
+}

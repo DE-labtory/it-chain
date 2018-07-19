@@ -3,7 +3,9 @@ package consensus
 import "errors"
 
 type PropagateService interface {
-	BroadcastMsg() error
+	BroadcastPrePrepareMsg(msg PrePrepareMsg) error
+	BroadcastPrepareMsg(msg PrepareMsg) error
+	BroadcastCommitMsg(msg CommitMsg) error
 }
 
 type ConfirmService interface {
