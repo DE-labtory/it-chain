@@ -1,7 +1,7 @@
 package api_gateway
 
 import (
-	"github.com/it-chain/it-chain-Engine/blockchain"
+	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/yggdrasill"
 
 	"sync"
