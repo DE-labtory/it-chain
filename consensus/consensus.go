@@ -68,6 +68,14 @@ type PrePrepareMsg struct {
 	ProposedBlock  ProposedBlock
 }
 
+func NewPrePrepareMsg(c *Consensus) *PrePrepareMsg {
+	return &PrePrepareMsg{
+		ConsensusId:    c.ConsensusID,
+		Representative: c.Representatives,
+		ProposedBlock:  c.Block,
+	}
+}
+
 func (pp PrePrepareMsg) ToByte() ([]byte, error) {
 	data, err := json.Marshal(pp)
 	if err != nil {
@@ -82,6 +90,13 @@ type PrepareMsg struct {
 	BlockHash   []byte
 }
 
+func NewPrepareMsg(c *Consensus) *PrepareMsg {
+	return &PrepareMsg{
+		ConsensusId: c.ConsensusID,
+		BlockHash:   c.Block.Seal,
+	}
+}
+
 func (p PrepareMsg) ToByte() ([]byte, error) {
 	data, err := json.Marshal(p)
 	if err != nil {
@@ -93,6 +108,12 @@ func (p PrepareMsg) ToByte() ([]byte, error) {
 type CommitMsg struct {
 	ConsensusId ConsensusId
 	SenderId    string
+}
+
+func NewCommitMsg(c *Consensus) *CommitMsg {
+	return &CommitMsg{
+		ConsensusId: c.ConsensusID,
+	}
 }
 
 func (c CommitMsg) ToByte() ([]byte, error) {
