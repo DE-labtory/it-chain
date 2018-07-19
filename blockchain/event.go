@@ -36,6 +36,12 @@ type BlockCommittedEvent struct {
 	Seal string
 }
 
+// event when block is staged to event store
+type BlockStagedEvent struct {
+	midgard.EventModel
+	Seal string
+}
+
 type BlockCreatedEvent struct {
 	midgard.EventModel
 	Seal      []byte
