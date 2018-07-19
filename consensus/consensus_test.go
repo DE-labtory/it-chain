@@ -169,8 +169,8 @@ func TestConsensus_SavePrepareMsg(t *testing.T) {
 	}
 
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, "c1", events[0].(PrepareMsgAddedEvent).PrepareMsg.ConsensusId.Id)
-		assert.Equal(t, "s1", events[0].(PrepareMsgAddedEvent).PrepareMsg.SenderId)
+		assert.Equal(t, "c1", events[0].(*PrepareMsgAddedEvent).PrepareMsg.ConsensusId.Id)
+		assert.Equal(t, "s1", events[0].(*PrepareMsgAddedEvent).PrepareMsg.SenderId)
 		return nil
 	}
 	eventstore.InitForMock(eventRepository)
@@ -190,8 +190,8 @@ func TestConsensus_SavePrepareMsg(t *testing.T) {
 	}
 
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, "c2", events[0].(PrepareMsgAddedEvent).PrepareMsg.ConsensusId.Id)
-		assert.Equal(t, "s1", events[0].(PrepareMsgAddedEvent).PrepareMsg.SenderId)
+		assert.Equal(t, "c2", events[0].(*PrepareMsgAddedEvent).PrepareMsg.ConsensusId.Id)
+		assert.Equal(t, "s1", events[0].(*PrepareMsgAddedEvent).PrepareMsg.SenderId)
 		return errors.New("Consensus ID is not same")
 	}
 	eventstore.InitForMock(eventRepository)
@@ -226,8 +226,8 @@ func TestConsensus_SaveCommitMsg(t *testing.T) {
 	}
 
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, "c1", events[0].(CommitMsgAddedEvent).CommitMsg.ConsensusId.Id)
-		assert.Equal(t, "s1", events[0].(CommitMsgAddedEvent).CommitMsg.SenderId)
+		assert.Equal(t, "c1", events[0].(*CommitMsgAddedEvent).CommitMsg.ConsensusId.Id)
+		assert.Equal(t, "s1", events[0].(*CommitMsgAddedEvent).CommitMsg.SenderId)
 		return nil
 	}
 	eventstore.InitForMock(eventRepository)
@@ -246,8 +246,8 @@ func TestConsensus_SaveCommitMsg(t *testing.T) {
 	}
 
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, "c2", events[0].(CommitMsgAddedEvent).CommitMsg.ConsensusId.Id)
-		assert.Equal(t, "s1", events[0].(CommitMsgAddedEvent).CommitMsg.SenderId)
+		assert.Equal(t, "c2", events[0].(*CommitMsgAddedEvent).CommitMsg.ConsensusId.Id)
+		assert.Equal(t, "s1", events[0].(*CommitMsgAddedEvent).CommitMsg.SenderId)
 		return errors.New("Consensus ID is not same")
 	}
 	eventstore.InitForMock(eventRepository)
