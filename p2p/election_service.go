@@ -179,7 +179,7 @@ func (es *ElectionService) DecideToBeLeader(command GrpcReceiveCommand) error {
 
 		peer := Peer{
 			PeerId:    PeerId{Id: ""},
-			IpAddress: conf.GetConfiguration().Common.NodeIp,
+			IpAddress: conf.GetConfiguration().GrpcGateway.Address + ":" + conf.GetConfiguration().GrpcGateway.Port,
 		}
 
 		es.BroadcastLeader(peer)

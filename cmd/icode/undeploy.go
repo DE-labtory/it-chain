@@ -22,7 +22,7 @@ func UnDeployCmd() cli.Command {
 }
 func unDeploy(icodeId string) {
 	config := conf.GetConfiguration()
-	client := rabbitmq.Connect(config.Common.Messaging.Url)
+	client := rabbitmq.Connect(config.Engine.Amqp)
 	defer client.Close()
 	command := icode.UnDeployCommand{
 		CommandModel: midgard.CommandModel{

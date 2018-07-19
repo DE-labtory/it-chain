@@ -1,11 +1,11 @@
 package model
 
 type BlockChainConfiguration struct {
-	RepositoryPath string
+	GenesisConfPath string
 }
 
 func NewBlockChainConfiguration() BlockChainConfiguration {
 	return BlockChainConfiguration{
-		RepositoryPath: "empty",
+		GenesisConfPath: "./gensis.conf",
 	}
 }
