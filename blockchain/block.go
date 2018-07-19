@@ -33,6 +33,14 @@ type Block = ygg.Block
 
 type BlockHeight = uint64
 
+type BlockState = string
+
+const (
+	Created   BlockState = "Created"
+	Staged    BlockState = "Staged"
+	Committed BlockState = "Committed"
+)
+
 type DefaultBlock struct {
 	Seal      []byte
 	PrevSeal  []byte
@@ -41,6 +49,7 @@ type DefaultBlock struct {
 	TxSeal    [][]byte
 	Timestamp time.Time
 	Creator   []byte
+	State     BlockState
 }
 
 // TODO: Write test case

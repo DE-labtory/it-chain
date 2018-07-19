@@ -30,7 +30,7 @@ type SyncDoneEvent struct {
 	midgard.EventModel
 }
 
-// event when block is saved to event store
+// event when block is committed to event store
 type BlockCommittedEvent struct {
 	midgard.EventModel
 	Seal string
@@ -39,9 +39,10 @@ type BlockCommittedEvent struct {
 // event when block is staged to event store
 type BlockStagedEvent struct {
 	midgard.EventModel
-	Seal string
+	State string
 }
 
+//event when block is created in event store
 type BlockCreatedEvent struct {
 	midgard.EventModel
 	Seal      []byte
@@ -51,4 +52,5 @@ type BlockCreatedEvent struct {
 	TxSeal    [][]byte
 	Timestamp time.Time
 	Creator   []byte
+	State     string
 }
