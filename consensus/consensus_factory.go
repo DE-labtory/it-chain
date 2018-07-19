@@ -3,7 +3,7 @@ package consensus
 import (
 	"github.com/rs/xid"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/engine/core/eventstore"
 )
 
 // leader
