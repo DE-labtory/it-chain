@@ -277,9 +277,10 @@ func TestCreateProposedBlock(t *testing.T) {
 
 		assert.Equal(t, test.output.GetPrevSeal(), ProposedBlock.GetPrevSeal())
 		assert.Equal(t, test.output.GetHeight(), ProposedBlock.GetHeight())
-		assert.Equal(t, test.output.GetTxList(), ProposedBlock.GetTxList())
+		assert.Equal(t, test.output.GetTxList()[0], ProposedBlock.GetTxList()[0])
 		assert.Equal(t, test.output.GetTimestamp().String()[:19], ProposedBlock.GetTimestamp().String()[:19])
 		assert.Equal(t, test.output.GetCreator(), ProposedBlock.GetCreator())
+
 	}
 
 }
