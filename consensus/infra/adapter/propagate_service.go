@@ -67,7 +67,7 @@ func (ps PropagateService) BroadcastCommitMsg(msg consensus.CommitMsg) error {
 
 func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string) error {
 	if SerializedMsg == nil {
-		return errors.New("Data is empty")
+		return errors.New("Message is empty")
 	}
 
 	command, err := createSendGrpcMsgCommand(protocol, SerializedMsg)

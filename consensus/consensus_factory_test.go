@@ -16,7 +16,7 @@ func TestCreateConsensus(t *testing.T) {
 	m := &Member{MemberId: MemberId{"member"}}
 	b := ProposedBlock{
 		Seal: make([]byte, 0),
-		body: make([]byte, 0),
+		Body: make([]byte, 0),
 	}
 
 	eventRepository := mock.MockEventRepository{}
@@ -41,7 +41,7 @@ func TestCreateConsensus(t *testing.T) {
 	// then
 	assert.Nil(t, err)
 	assert.Equal(t, 2, len(c.Representatives))
-	assert.Equal(t, b.body, c.Block.body)
+	assert.Equal(t, b.Body, c.Block.Body)
 }
 
 func TestConstructConsensus(t *testing.T) {
@@ -58,7 +58,7 @@ func TestConstructConsensus(t *testing.T) {
 		Representative: r,
 		ProposedBlock: ProposedBlock{
 			Seal: make([]byte, 0),
-			body: make([]byte, 0),
+			Body: make([]byte, 0),
 		},
 	}
 
