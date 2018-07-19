@@ -48,7 +48,7 @@ func (mpltqs *MockPeerQueryService) GetPLTable() (p2p.PLTable, error) {
 	return mpltqs.GetPLTableFunc()
 }
 
-func (mpltqs *MockPeerQueryService) GetLeader() (p2p.Leader, error){
+func (mpltqs *MockPeerQueryService) GetLeader() (p2p.Leader, error) {
 
 	return mpltqs.GetLeaderFunc()
 }
@@ -63,32 +63,32 @@ func (mpltqs *MockPeerQueryService) FindPeerByAddress(ipAddress string) (p2p.Pee
 	return mpltqs.FindPeerByAddressFunc(ipAddress)
 }
 
-type MockPLTableService struct{
+type MockPLTableService struct {
 	GetPLTableFromCommandFunc func(command p2p.GrpcReceiveCommand) (p2p.PLTable, error)
 }
 
-func (mplts *MockPLTableService) GetPLTableFromCommand(command p2p.GrpcReceiveCommand) (p2p.PLTable, error){
+func (mplts *MockPLTableService) GetPLTableFromCommand(command p2p.GrpcReceiveCommand) (p2p.PLTable, error) {
 
 	return mplts.GetPLTableFromCommandFunc(command)
 }
 
 type MockElectionService struct {
-	VoteFunc func(connectionId string) error
-	BroadcastLeaderFunc func(peer p2p.Peer) error
+	VoteFunc             func(connectionId string) error
+	BroadcastLeaderFunc  func(peer p2p.Peer) error
 	DecideToBeLeaderFunc func(command p2p.GrpcReceiveCommand) error
 }
 
-func (mes *MockElectionService) Vote(connectionId string) error{
+func (mes *MockElectionService) Vote(connectionId string) error {
 
 	return mes.VoteFunc(connectionId)
 
 }
-func (mes *MockElectionService) BroadcastLeader(peer p2p.Peer) error{
+func (mes *MockElectionService) BroadcastLeader(peer p2p.Peer) error {
 
 	return mes.BroadcastLeaderFunc(peer)
 
 }
-func (mes *MockElectionService) DecideToBeLeader(command p2p.GrpcReceiveCommand) error{
+func (mes *MockElectionService) DecideToBeLeader(command p2p.GrpcReceiveCommand) error {
 
 	return mes.DecideToBeLeaderFunc(command)
 

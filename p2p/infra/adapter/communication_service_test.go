@@ -1,55 +1,56 @@
 package adapter_test
 
 import (
-	"testing"
-	"github.com/it-chain/engine/p2p"
 	"reflect"
-	"github.com/magiconair/properties/assert"
+	"testing"
+
+	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/infra/adapter"
+	"github.com/magiconair/properties/assert"
 )
 
 func TestGrpcCommandService_DeliverPLTable(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			connectionId string
-			pLTable    p2p.PLTable
+			pLTable      p2p.PLTable
 		}
 		err error
 	}{
 		"empty peer list test": {
 			input: struct {
 				connectionId string
-				pLTable    p2p.PLTable
+				pLTable      p2p.PLTable
 			}{
 				connectionId: "1",
-				pLTable:    p2p.PLTable{},
+				pLTable:      p2p.PLTable{},
 			},
 			err: p2p.ErrEmptyPeerTable,
 		},
 		"empty connection id test": {
 			input: struct {
 				connectionId string
-				pLTable    p2p.PLTable
+				pLTable      p2p.PLTable
 			}{
 				connectionId: "",
-				pLTable:    p2p.PLTable{},
+				pLTable:      p2p.PLTable{},
 			},
 			err: adapter.ErrEmptyConnectionId,
 		},
 		"success": {
 			input: struct {
 				connectionId string
-				pLTable    p2p.PLTable
+				pLTable      p2p.PLTable
 			}{
 				connectionId: "1",
 				pLTable: p2p.PLTable{
 					Leader: p2p.Leader{},
 					PeerTable: map[string]p2p.Peer{
-						"123":{
-							PeerId:p2p.PeerId{
-								Id:"123",
+						"123": {
+							PeerId: p2p.PeerId{
+								Id: "123",
 							},
-							IpAddress:"123",
+							IpAddress: "123",
 						},
 					},
 				},

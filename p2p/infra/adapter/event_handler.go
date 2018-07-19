@@ -59,4 +59,3 @@ func (eh *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconne
 
 	return nil
 }
-

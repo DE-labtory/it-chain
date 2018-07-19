@@ -6,11 +6,10 @@ import (
 
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/infra/adapter"
+	"github.com/it-chain/engine/p2p/test/mock"
 	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
-	"github.com/it-chain/engine/p2p/test/mock"
 )
-
 
 func TestGrpcCommandHandler_HandleMessageReceive(t *testing.T) {
 

@@ -70,28 +70,28 @@ func TestLeaderApi_UpdateLeaderWithLargePeerTable(t *testing.T) {
 	}{
 		"success": {
 			input: struct{ pLTable p2p.PLTable }{pLTable: p2p.PLTable{
-				Leader:p2p.Leader{
-					LeaderId:p2p.LeaderId{
-						Id:"2",
+				Leader: p2p.Leader{
+					LeaderId: p2p.LeaderId{
+						Id: "2",
 					},
 				},
-				PeerTable:map[string]p2p.Peer{
-					"1":{
+				PeerTable: map[string]p2p.Peer{
+					"1": {
 						PeerId: p2p.PeerId{
 							Id: "1",
 						},
 					},
-					"2":{
+					"2": {
 						PeerId: p2p.PeerId{
 							Id: "1",
 						},
 					},
-					"3":{
+					"3": {
 						PeerId: p2p.PeerId{
 							Id: "1",
 						},
 					},
-					"4":{
+					"4": {
 						PeerId: p2p.PeerId{
 							Id: "1",
 						},
@@ -106,20 +106,20 @@ func TestLeaderApi_UpdateLeaderWithLargePeerTable(t *testing.T) {
 		},
 		"not updated with longer peer list case": {
 			input: struct{ pLTable p2p.PLTable }{pLTable: p2p.PLTable{
-				Leader:p2p.Leader{
-					LeaderId:p2p.LeaderId{
-						Id:"1",
+				Leader: p2p.Leader{
+					LeaderId: p2p.LeaderId{
+						Id: "1",
 					},
 				},
-				PeerTable:map[string]p2p.Peer{
-					"1":p2p.Peer{
-						PeerId:p2p.PeerId{
-							Id:"1",
+				PeerTable: map[string]p2p.Peer{
+					"1": p2p.Peer{
+						PeerId: p2p.PeerId{
+							Id: "1",
 						},
 					},
-					"2":p2p.Peer{
-						PeerId:p2p.PeerId{
-							Id:"1",
+					"2": p2p.Peer{
+						PeerId: p2p.PeerId{
+							Id: "1",
 						},
 					},
 				},
@@ -164,7 +164,6 @@ func SetupLeaderApi() api.LeaderApi {
 	mockPeerQueryService := &mock.MockPeerQueryService{}
 
 	mockPeerQueryService.GetPLTableFunc = func() (p2p.PLTable, error) {
-
 
 		return mock.MakeFakePLTable(), nil
 	}

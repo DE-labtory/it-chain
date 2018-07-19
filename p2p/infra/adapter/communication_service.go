@@ -8,10 +8,10 @@ type CommunicationService struct {
 	publish Publish
 }
 
-func NewCommunicationService(publish Publish) *CommunicationService{
+func NewCommunicationService(publish Publish) *CommunicationService {
 
 	return &CommunicationService{
-		publish:publish,
+		publish: publish,
 	}
 }
 

@@ -6,17 +6,16 @@ import (
 )
 
 type ILeaderService interface {
-
 	Set(leader Leader) error
 }
 
-type LeaderService struct {}
+type LeaderService struct{}
 
-func (ls *LeaderService) Set(leader Leader) error{
+func (ls *LeaderService) Set(leader Leader) error {
 
 	event := LeaderUpdatedEvent{
-		EventModel:midgard.EventModel{
-			ID:leader.LeaderId.Id,
+		EventModel: midgard.EventModel{
+			ID: leader.LeaderId.Id,
 		},
 	}
 

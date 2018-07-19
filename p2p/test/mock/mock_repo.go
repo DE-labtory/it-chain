@@ -2,7 +2,7 @@ package mock
 
 import "github.com/it-chain/engine/p2p"
 
-func MakeFakePeerTable() map[string]p2p.Peer{
+func MakeFakePeerTable() map[string]p2p.Peer {
 
 	peerTable := make(map[string]p2p.Peer)
 
@@ -25,21 +25,20 @@ func MakeFakePeerTable() map[string]p2p.Peer{
 		IpAddress: "3",
 	}
 
-
 	return peerTable
 }
 
-func MakeFakePLTable() (p2p.PLTable){
+func MakeFakePLTable() p2p.PLTable {
 
 	peerTable := MakeFakePeerTable()
 	leader := p2p.Leader{
-		LeaderId:p2p.LeaderId{
-			Id:"1",
+		LeaderId: p2p.LeaderId{
+			Id: "1",
 		},
 	}
 
 	return p2p.PLTable{
-		Leader:leader,
-		PeerTable:peerTable,
+		Leader:    leader,
+		PeerTable: peerTable,
 	}
 }

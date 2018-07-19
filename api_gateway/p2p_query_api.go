@@ -11,7 +11,7 @@ import (
 var ErrPeerExists = errors.New("peer already exists")
 
 type PeerQueryApi struct {
-	mux               sync.Mutex
+	mux            sync.Mutex
 	peerRepository PeerRepository
 }
 
@@ -103,14 +103,14 @@ func (pltrepo *PeerRepository) Save(peer p2p.Peer) error {
 	return nil
 }
 
-func (pltrepo *PeerRepository) SetLeader(peer p2p.Peer) error{
+func (pltrepo *PeerRepository) SetLeader(peer p2p.Peer) error {
 
 	pltrepo.mux.Lock()
 	defer pltrepo.mux.Unlock()
 
 	leader := p2p.Leader{
-		LeaderId:p2p.LeaderId{
-			Id:peer.PeerId.Id,
+		LeaderId: p2p.LeaderId{
+			Id: peer.PeerId.Id,
 		},
 	}
 
@@ -119,7 +119,7 @@ func (pltrepo *PeerRepository) SetLeader(peer p2p.Peer) error{
 	return nil
 }
 
-func (pltrepo *PeerRepository) Delete(id string) error{
+func (pltrepo *PeerRepository) Delete(id string) error {
 
 	pltrepo.mux.Lock()
 	defer pltrepo.mux.Unlock()
@@ -133,13 +133,13 @@ type P2PEventHandler struct {
 	peerRepository PeerRepository
 }
 
-func (peh *P2PEventHandler) PeerCreatedEventHandler(event p2p.PeerCreatedEvent) error{
+func (peh *P2PEventHandler) PeerCreatedEventHandler(event p2p.PeerCreatedEvent) error {
 
 	peer := p2p.Peer{
-		PeerId:p2p.PeerId{
-			Id:event.ID,
+		PeerId: p2p.PeerId{
+			Id: event.ID,
 		},
-		IpAddress:event.IpAddress,
+		IpAddress: event.IpAddress,
 	}
 
 	peh.peerRepository.Save(peer)
@@ -147,7 +147,7 @@ func (peh *P2PEventHandler) PeerCreatedEventHandler(event p2p.PeerCreatedEvent) 
 	return nil
 }
 
-func (peh *P2PEventHandler) PeerDeletedEventHandler(event p2p.PeerCreatedEvent) error{
+func (peh *P2PEventHandler) PeerDeletedEventHandler(event p2p.PeerCreatedEvent) error {
 
 	peh.peerRepository.Delete(event.ID)
 
