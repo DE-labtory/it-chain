@@ -20,6 +20,10 @@ import "github.com/it-chain/midgard"
 
 type CreateBlockCommand struct {
 	midgard.CommandModel
+	Block struct {
+		Seal []byte
+		Body []byte
+	}
 }
 
 type SendPrePrepareMsgCommand struct {
