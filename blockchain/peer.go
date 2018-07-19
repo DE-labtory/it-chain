@@ -13,7 +13,8 @@ type Peer struct {
 	PeerId    PeerId
 }
 
-type PeerRepository interface {
-	Add(peer Peer) error
-	Remove(id PeerId) error
-}
+// ToDo: 삭제 제안 - junk_sound
+//type PeerRepository interface {
+//	Add(peer Peer) error
+//	Remove(id PeerId) error
+//}

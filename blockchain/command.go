@@ -5,15 +5,17 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-type SyncUpdateCommand struct {
-	midgard.EventModel
-	sync bool
-}
+// ToDo: 삭제 제안 - junk_sound
+//type SyncUpdateCommand struct {
+//	midgard.EventModel
+//	sync bool
+//}
 
-type NodeUpdateCommand struct {
-	midgard.EventModel
-	Peer
-}
+// ToDo: 삭제 제안 - junk_sound
+//type NodeUpdateCommand struct {
+//	midgard.EventModel
+//	Peer
+//}
 
 type ProposeBlockCommand struct {
 	midgard.CommandModel
@@ -27,10 +29,11 @@ type ConfirmBlockCommand struct {
 	Block Block
 }
 
-type BlockValidateCommand struct {
-	midgard.CommandModel
-	Block Block
-}
+// ToDo: 삭제 제안 - junk_sound
+//type BlockValidateCommand struct {
+//	midgard.CommandModel
+//	Block Block
+//}
 
 type GrpcDeliverCommand struct {
 	midgard.CommandModel
