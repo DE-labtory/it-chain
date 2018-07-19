@@ -13,6 +13,7 @@ git:
   depth: 1
 
 script:
+ - diff -u <(echo -n) <(goimports -l ./)
  - go test -v ./...
 
 os: linux
