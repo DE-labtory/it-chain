@@ -23,7 +23,7 @@ type TxpoolConfiguration struct {
 
 func NewTxpoolConfiguration() TxpoolConfiguration {
 	return TxpoolConfiguration{
-		TimeoutMs:          100,
+		TimeoutMs:          1000,
 		MaxTransactionByte: 1024,
 	}
 }
