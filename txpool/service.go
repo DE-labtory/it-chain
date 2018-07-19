@@ -15,18 +15,19 @@ type BlockService interface {
 }
 
 type BlockProposalService struct {
+	engineMode         string
 	txpoolQueryService TxpoolQueryService
 	blockService       BlockService
-	publisher          Publisher
 }
 
 type Publisher func(exchange string, topic string, data interface{}) (err error)
 
-func NewBlockProposalService(queryService TxpoolQueryService, blockService BlockService) *BlockProposalService {
+func NewBlockProposalService(queryService TxpoolQueryService, blockService BlockService, engineMode string) *BlockProposalService {
 
 	return &BlockProposalService{
 		txpoolQueryService: queryService,
 		blockService:       blockService,
+		engineMode:         engineMode,
 	}
 }
 
@@ -37,30 +38,28 @@ func (b BlockProposalService) ProposeBlock() error {
 	// todo transaction size, number of tx
 	transactions, err := b.txpoolQueryService.FindUncommittedTransactions()
 
-	log.Printf("proposing transactions [%v]", transactions)
-
 	if err != nil {
 		return err
 	}
-
-	// todo filter txs based on time stamp
-	//filterdTxs := filter(transactions, func(transaction Transaction) bool {
-	//
-	//	return
-	//})
 
 	if len(transactions) == 0 {
 		return nil
 	}
 
-	err = b.blockService.ProposeBlock(transactions)
+	if b.engineMode == "solo" {
+		err = b.blockService.ProposeBlock(transactions)
 
-	if err != nil {
-		return err
-	}
+		if err != nil {
+			return err
+		}
 
-	for _, tx := range transactions {
-		DeleteTransaction(tx)
+		log.Printf("transactions are proposed [%v]", transactions)
+
+		for _, tx := range transactions {
+			DeleteTransaction(tx)
+		}
+
+		return nil
 	}
 
 	return nil

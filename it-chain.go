@@ -204,14 +204,14 @@ func initTxPool() error {
 
 	//service
 	blockService := txpoolAdapter.NewBlockService(mqClient.Publish)
-	blockProposalService := txpool.NewBlockProposalService(txQueryApi, blockService)
+	blockProposalService := txpool.NewBlockProposalService(txQueryApi, blockService, config.Engine.Mode)
 
 	//infra
 	txApi := txpoolApi.NewTransactionApi(tmpPeerID)
 	txCommandHandler := txpoolAdapter.NewTxCommandHandler(txApi)
 
 	//10초마다 block propose
-	txpoolBatch.GetTimeOutBatcherInstance().Run(blockProposalService.ProposeBlock, time.Second*10)
+	txpoolBatch.GetTimeOutBatcherInstance().Run(blockProposalService.ProposeBlock, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
 
 	err := mqClient.Subscribe("Command", "transaction.create", txCommandHandler)
 
