@@ -75,7 +75,7 @@ type DefaultTransaction struct {
 	Status    Status
 	PeerID    string
 	Timestamp time.Time
-	TxData    *TxData
+	TxData    TxData
 	Signature []byte
 }
 
@@ -90,7 +90,7 @@ func (t *DefaultTransaction) GetContent() ([]byte, error) {
 		Status    Status
 		PeerID    string
 		Timestamp time.Time
-		TxData    *TxData
+		TxData    TxData
 	}{t.ID, t.Status, t.PeerID, t.Timestamp, t.TxData}
 
 	serialized, err := serialize(content)
@@ -139,7 +139,7 @@ func (t *DefaultTransaction) Deserialize(serializedBytes []byte) error {
 }
 
 // NewDefaultTransaction 함수는 새로운 DefaultTransaction를 반환한다.
-func NewDefaultTransaction(peerID string, txID string, timestamp time.Time, txData *TxData) *DefaultTransaction {
+func NewDefaultTransaction(peerID string, txID string, timestamp time.Time, txData TxData) *DefaultTransaction {
 	return &DefaultTransaction{
 		ID:        txID,
 		PeerID:    peerID,
