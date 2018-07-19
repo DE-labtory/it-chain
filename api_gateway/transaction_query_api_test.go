@@ -204,7 +204,7 @@ func TestTransactionQueryApi_FindUncommittedTransactions(t *testing.T) {
 	assert.NoError(t, err)
 
 	//wait until sync from event
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
 
 	txs, err := api.FindUncommittedTransactions()
 	assert.Equal(t, len(txs), 3)
@@ -231,7 +231,7 @@ func TestTransactionEventListener_HandleTransactionDeletedEvent(t *testing.T) {
 	assert.NoError(t, err)
 
 	//wait until sync from event
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
 	txs, err := api.FindUncommittedTransactions()
 	assert.Equal(t, len(txs), 1)
 
@@ -242,7 +242,7 @@ func TestTransactionEventListener_HandleTransactionDeletedEvent(t *testing.T) {
 	})
 
 	//wait until sync from event
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
 
 	txs, err = api.FindUncommittedTransactions()
 	assert.Equal(t, len(txs), 0)
