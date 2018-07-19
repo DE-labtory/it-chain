@@ -4,12 +4,11 @@ import (
 	"github.com/rs/xid"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
-	"github.com/it-chain/it-chain-Engine/consensus/infra/adapter"
 )
 
 // leader
 func CreateConsensus(parliament Parliament, block ProposedBlock) (Consensus, error) {
-	ps := adapter.NewParliamentService()
+	ps := NewParliamentSerivce()
 	representatives, err := ps.Elect(parliament)
 	if err != nil {
 		return Consensus{}, err
@@ -28,7 +27,7 @@ func CreateConsensus(parliament Parliament, block ProposedBlock) (Consensus, err
 
 	consensusCreatedEvent := ConsensusCreatedEvent{
 		EventModel: midgard.EventModel{
-			ID:      consensusID.Id,
+			ID: consensusID.Id,
 		},
 		Consensus: struct {
 			ConsensusID     ConsensusId
@@ -64,14 +63,14 @@ func ConstructConsensus(msg PrePrepareMsg) (Consensus, error) {
 		ConsensusID:     msg.ConsensusId,
 		Representatives: msg.Representative,
 		Block:           msg.ProposedBlock,
-		CurrentState:    PREPREPARE_STATE,
+		CurrentState:    IDLE_STATE,
 		PrepareMsgPool:  NewPrepareMsgPool(),
 		CommitMsgPool:   NewCommitMsgPool(),
 	}
 
 	consensusCreatedEvent := ConsensusCreatedEvent{
 		EventModel: midgard.EventModel{
-			ID:      consensus.GetID(),
+			ID: consensus.GetID(),
 		},
 		Consensus: struct {
 			ConsensusID     ConsensusId
