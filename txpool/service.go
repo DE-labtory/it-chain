@@ -47,6 +47,7 @@ func (b BlockProposalService) ProposeBlock() error {
 	}
 
 	if b.engineMode == "solo" {
+		//propose transaction when solo mode
 		err = b.blockService.ProposeBlock(transactions)
 
 		if err != nil {

@@ -27,9 +27,6 @@ sample/db/test/*
 .ledger
 .tx
 
-# test
-test*/*
-
 # it-chain-datasource-path
 .it-chain
 
