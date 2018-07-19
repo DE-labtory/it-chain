@@ -33,7 +33,7 @@ type SyncDoneEvent struct {
 // event when block is committed to event store
 type BlockCommittedEvent struct {
 	midgard.EventModel
-	Seal string
+	State string
 }
 
 // event when block is staged to event store

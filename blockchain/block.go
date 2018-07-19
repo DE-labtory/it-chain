@@ -198,7 +198,11 @@ func (block *DefaultBlock) On(event midgard.Event) error {
 		block.TxSeal = v.TxSeal
 		block.Timestamp = v.Timestamp
 		block.Creator = v.Creator
-
+		block.State = v.State
+	case *BlockStagedEvent:
+		block.State = v.State
+	case *BlockCommittedEvent:
+		block.State = v.State
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
 	}
