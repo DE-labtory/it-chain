@@ -110,17 +110,3 @@ func (m *Meta) On(event midgard.Event) error {
 
 	return nil
 }
-
-type MetaRepository interface {
-	Save(meta Meta) error
-	Remove(id ID) error
-	FindById(id ID) (*Meta, error)
-	FindByGitURL(url string) (*Meta, error)
-	FindAll() ([]*Meta, error)
-}
-
-type ReadOnlyMetaRepository interface {
-	FindById(id ID) (*Meta, error)
-	FindByGitURL(url string) (*Meta, error)
-	FindAll() ([]*Meta, error)
-}
