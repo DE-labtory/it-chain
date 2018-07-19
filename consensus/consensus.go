@@ -39,7 +39,7 @@ var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
 
 type ProposedBlock struct {
 	Seal []byte
-	body []byte
+	Body []byte
 }
 
 func (block *ProposedBlock) Serialize() ([]byte, error) {

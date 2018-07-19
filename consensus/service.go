@@ -2,6 +2,14 @@ package consensus
 
 import "errors"
 
+type PropagateService interface {
+	BroadcastMsg() error
+}
+
+type ConfirmService interface {
+	ConfirmBlock(block ProposedBlock) error
+}
+
 func Elect(parliament Parliament) ([]*Representative, error) {
 	representatives := make([]*Representative, 0)
 
