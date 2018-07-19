@@ -4,11 +4,13 @@ import (
 	"github.com/rs/xid"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/it-chain-Engine/core/eventstore"
+	"github.com/it-chain/it-chain-Engine/consensus/infra/adapter"
 )
 
 // leader
 func CreateConsensus(parliament Parliament, block ProposedBlock) (Consensus, error) {
-	representatives, err := Elect(parliament)
+	ps := adapter.NewParliamentService()
+	representatives, err := ps.Elect(parliament)
 	if err != nil {
 		return Consensus{}, err
 	}
