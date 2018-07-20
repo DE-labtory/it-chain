@@ -29,6 +29,7 @@ import (
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/cmd/icode"
+	"github.com/it-chain/engine/common/amqp/pubsub"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/core/eventstore"
 	icodeApi "github.com/it-chain/engine/icode/api"
@@ -39,7 +40,6 @@ import (
 	txpoolApi "github.com/it-chain/engine/txpool/api"
 	txpoolAdapter "github.com/it-chain/engine/txpool/infra/adapter"
 	txpoolBatch "github.com/it-chain/engine/txpool/infra/batch"
-	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/it-chain/tesseract"
 	"github.com/urfave/cli"
 )
@@ -143,7 +143,7 @@ func initGateway(errs chan error) error {
 
 	//set service and repo
 	dbPath := "./.test"
-	mqClient := rabbitmq.Connect(config.Engine.Amqp)
+	mqClient := pubsub.Connect(config.Engine.Amqp)
 
 	repo := api_gateway.NewTransactionRepository(dbPath)
 
@@ -176,7 +176,7 @@ func initIcode() error {
 	log.Println("icode is running...")
 
 	config := conf.GetConfiguration()
-	mqClient := rabbitmq.Connect(config.Engine.Amqp)
+	mqClient := pubsub.Connect(config.Engine.Amqp)
 
 	// service generate
 	commandService := icodeAdapter.NewCommandService(mqClient.Publish)
@@ -213,7 +213,7 @@ func initTxPool() error {
 	log.Println("txpool is running...")
 
 	config := conf.GetConfiguration()
-	mqClient := rabbitmq.Connect(config.Engine.Amqp)
+	mqClient := pubsub.Connect(config.Engine.Amqp)
 
 	//todo get id from pubkey
 	tmpPeerID := "tmp peer 1"

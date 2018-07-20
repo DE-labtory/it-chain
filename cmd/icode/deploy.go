@@ -19,10 +19,10 @@ package icode
 import (
 	"fmt"
 
+	"github.com/it-chain/engine/common/amqp/pubsub"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/rs/xid"
 	"github.com/urfave/cli"
 )
@@ -43,7 +43,7 @@ func DeployCmd() cli.Command {
 }
 func deploy(gitUrl string, sshPath string) {
 	config := conf.GetConfiguration()
-	client := rabbitmq.Connect(config.Engine.Amqp)
+	client := pubsub.Connect(config.Engine.Amqp)
 	defer client.Close()
 	command := icode.DeployCommand{
 		CommandModel: midgard.CommandModel{
