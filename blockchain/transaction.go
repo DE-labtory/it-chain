@@ -194,7 +194,7 @@ func deserializeTxList(txList []byte) ([]*DefaultTransaction, error) {
 
 }
 
-func convertTxType(txList []*DefaultTransaction) []Transaction {
+func ConvertTxType(txList []*DefaultTransaction) []Transaction {
 	convTxList := make([]Transaction, 0)
 
 	for _, tx := range txList {
@@ -204,7 +204,7 @@ func convertTxType(txList []*DefaultTransaction) []Transaction {
 	return convTxList
 }
 
-func getBackTxType(txList []Transaction) []*DefaultTransaction {
+func GetBackTxType(txList []Transaction) []*DefaultTransaction {
 	convTxList := make([]*DefaultTransaction, 0)
 
 	for _, tx := range txList {

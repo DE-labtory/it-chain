@@ -226,14 +226,3 @@ func StageBlock(block Block) error {
 	// save it to event store
 	return nil
 }
-
-func ConvertToDefaultTxList(txList []Transaction) []*DefaultTransaction {
-	defaultTxList := make([]*DefaultTransaction, 0)
-
-	for _, tx := range txList {
-		defaultTx := tx.(*DefaultTransaction)
-		defaultTxList = append(defaultTxList, defaultTx)
-	}
-
-	return defaultTxList
-}

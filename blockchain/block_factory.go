@@ -146,7 +146,7 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransa
 	TimeStamp := time.Now().Round(0)
 
 	//build
-	txSeal, err := validator.BuildTxSeal(convertTxType(txList))
+	txSeal, err := validator.BuildTxSeal(ConvertTxType(txList))
 
 	if err != nil {
 		return nil, ErrBuildingTxSeal
@@ -190,7 +190,7 @@ func CreateRetrievedBlock(retrievedBlock Block) (Block, error) {
 	Creator := retrievedBlock.GetCreator()
 
 	//create
-	createEvent, err := createBlockCreatedEvent(Seal, PrevSeal, Height, getBackTxType(TxList), TxSeal, TimeStamp, Creator)
+	createEvent, err := createBlockCreatedEvent(Seal, PrevSeal, Height, GetBackTxType(TxList), TxSeal, TimeStamp, Creator)
 	if err != nil {
 		return nil, ErrCreatingEvent
 	}
