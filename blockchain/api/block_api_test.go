@@ -21,8 +21,8 @@ import (
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/api"
-	"github.com/magiconair/properties/assert"
 	"github.com/it-chain/engine/blockchain/test/mock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBlockApi_AddBlockToPool(t *testing.T) {
@@ -41,9 +41,10 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 	}
 
 	publisherId := "zf"
-	blockQueryService := mock.BlockQueryApi{}
+	blockQueryService := mock.BlockQueryService{}
+	blockExecuteService := mock.BlockExecuteService{}
 
-	blockApi, _ := api.NewBlockApi(publisherId, blockQueryService)
+	blockApi, _ := api.NewBlockApi(publisherId, blockQueryService, blockExecuteService)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -67,9 +68,11 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 		},
 	}
 	publisherId := "zf"
+	blockQueryService := mock.BlockQueryService{}
+	blockExecuteService := mock.BlockExecuteService{}
 
 	// When
-	blockApi, _ := api.NewBlockApi(publisherId)
+	blockApi, _ := api.NewBlockApi(publisherId, blockQueryService, blockExecuteService)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -85,11 +88,16 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 func TestBlockApi_SyncIsProgressing(t *testing.T) {
 	// when
 	publisherId := "zf"
+	blockQueryService := mock.BlockQueryService{}
+	blockExecuteService := mock.BlockExecuteService{}
 
 	// when
-	blockApi, _ := api.NewBlockApi(publisherId)
+	blockApi, _ := api.NewBlockApi(publisherId, blockQueryService, blockExecuteService)
 
 	// then
 	state := blockApi.SyncIsProgressing()
 	assert.Equal(t, blockchain.DONE, state)
 }
+
+// TODO: Write real situation test code, after finishing implementing api_gatey block_query_api.go
+func TestBlockApi_CreateBlock(t *testing.T) {}

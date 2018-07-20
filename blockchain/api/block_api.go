@@ -17,22 +17,26 @@
 package api
 
 import (
-	"github.com/it-chain/engine/blockchain"
 	"errors"
+
+	"github.com/it-chain/engine/blockchain"
 )
 
 var ErrGetLastCommitedBlock = errors.New("Error in getting last commited block")
 var ErrCreateProposedBlock = errors.New("Error in creating proposed block")
+var ErrExecuteBlock = errors.New("Error in executing block")
 
 type BlockApi struct {
-	publisherId string
-	blockQueryService blockchain.BlockQueryService
+	publisherId         string
+	blockQueryService   blockchain.BlockQueryService
+	blockExecuteService blockchain.BlockExecuteService
 }
 
-func NewBlockApi(publisherId string, blockQueryService blockchain.BlockQueryService) (BlockApi, error) {
+func NewBlockApi(publisherId string, blockQueryService blockchain.BlockQueryService, blockExecuteService blockchain.BlockExecuteService) (BlockApi, error) {
 	return BlockApi{
-		publisherId: publisherId,
-		blockQueryService: blockQueryService,
+		publisherId:         publisherId,
+		blockQueryService:   blockQueryService,
+		blockExecuteService: blockExecuteService,
 	}, nil
 }
 
@@ -62,15 +66,18 @@ func (bApi *BlockApi) CreateBlock(txList []blockchain.Transaction) error {
 
 	prevSeal := lastBlock.GetSeal()
 	height := lastBlock.GetHeight() + 1
-	defaultTxList := blockchain.ConvertToDefaultTxList(txList)
+	defaultTxList := blockchain.GetBackTxType(txList)
 	creator := bApi.publisherId
 
-	_, err = blockchain.CreateProposedBlock(prevSeal, height, defaultTxList, []byte(creator))
+	block, err := blockchain.CreateProposedBlock(prevSeal, height, defaultTxList, []byte(creator))
 	if err != nil {
 		return ErrCreateProposedBlock
 	}
 
-	// TODO: send BlockExecuteCommand to icode using BlockExecuteCommandService
+	err = bApi.blockExecuteService.ExecuteBlock(block)
+	if err != nil {
+		return ErrExecuteBlock
+	}
 
 	return nil
 }
