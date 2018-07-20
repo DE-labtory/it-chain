@@ -16,7 +16,11 @@
 
 package command
 
-import "github.com/it-chain/midgard"
+import (
+	"time"
+
+	"github.com/it-chain/midgard"
+)
 
 /*
  * consensus
@@ -55,4 +59,92 @@ type SendGrpcMsgCommand struct {
 	Recipients []string
 	Body       []byte
 	Protocol   string
+}
+
+/*
+ * grpc-gateway
+ */
+
+//Connection 생성 command
+type ConnectionCreate struct {
+	midgard.CommandModel
+	Address string
+}
+
+//Connection close command
+type ConnectionClose struct {
+	midgard.CommandModel
+}
+
+//다른 Peer에게 Message전송 command
+type GrpcDeliver struct {
+	midgard.CommandModel
+	Recipients []string
+	Body       []byte
+	Protocol   string
+}
+
+//다른 Peer에게 Message수신 command
+type GrpcReceive struct {
+	midgard.CommandModel
+	Body         []byte
+	ConnectionID string
+	Protocol     string
+}
+
+/*
+ * icode
+ */
+type TransactionExecuteCommand struct {
+	midgard.CommandModel
+	ICodeID   string
+	Status    int
+	PeerID    string
+	TimeStamp time.Time
+	Jsonrpc   string
+	Method    string
+	Function  string
+	Args      []string
+	Signature []byte
+}
+
+type Deploy struct {
+	midgard.CommandModel
+	Url     string
+	SshPath string
+}
+type UnDeploy struct {
+	midgard.CommandModel
+}
+
+type BlockExecute struct {
+	midgard.CommandModel
+	Seal     []byte
+	PrevSeal []byte
+	Height   uint64
+	TxList   []struct {
+		ID        string
+		ICodeID   string
+		Status    int
+		PeerID    string
+		TimeStamp time.Time
+		Jsonrpc   string
+		Method    string
+		Function  string
+		Args      []string
+		Signature []byte
+	}
+	TxSeal    [][]byte
+	Timestamp time.Time
+	Creator   []byte
+	State     string
+}
+
+type BlockResult struct {
+	midgard.CommandModel
+	TxResults []struct {
+		TxId    string
+		Data    map[string]string
+		Success bool
+	}
 }

@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/it-chain/engine/icode"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/icode/api"
 )
 
@@ -34,8 +34,8 @@ func NewUnDeployCommandHandler(icodeApi api.ICodeApi) *UnDeployCommandHandler {
 	}
 }
 
-func (u *UnDeployCommandHandler) HandleUnDeployCommand(command icode.UnDeployCommand) {
-	err := u.icodeApi.UnDeploy(command.ID)
+func (u *UnDeployCommandHandler) HandleUnDeployCommand(undeployCommand command.UnDeploy) {
+	err := u.icodeApi.UnDeploy(undeployCommand.ID)
 	if err != nil {
 		log.Println(fmt.Sprintf("error in handle undeploy command %s", err.Error()))
 	}

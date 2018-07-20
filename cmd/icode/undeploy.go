@@ -18,8 +18,8 @@ package icode
 
 import (
 	"github.com/it-chain/engine/common/amqp/pubsub"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/midgard"
 	"github.com/urfave/cli"
 )
@@ -40,10 +40,10 @@ func unDeploy(icodeId string) {
 	config := conf.GetConfiguration()
 	client := pubsub.Connect(config.Engine.Amqp)
 	defer client.Close()
-	command := icode.UnDeployCommand{
+	undeployCommand := command.UnDeploy{
 		CommandModel: midgard.CommandModel{
 			ID: icodeId,
 		},
 	}
-	client.Publish("Command", "icode.undeploy", command)
+	client.Publish("Command", "icode.undeploy", undeployCommand)
 }

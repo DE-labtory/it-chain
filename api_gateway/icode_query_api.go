@@ -22,6 +22,7 @@ import (
 	"log"
 
 	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/leveldb-wrapper"
 )
@@ -138,8 +139,18 @@ func NewIcodeEventHandler(repository ICodeMetaRepository) ICodeEventHandler {
 	}
 }
 
-func (i ICodeEventHandler) HandleMetaCreatedEvent(event icode.MetaCreatedEvent) {
-	meta := event.GetMeta()
+func (i ICodeEventHandler) HandleMetaCreatedEvent(metaCreatedEvent event.MetaCreated) {
+
+	meta := icode.Meta{
+		ICodeID:        metaCreatedEvent.ID,
+		RepositoryName: metaCreatedEvent.RepositoryName,
+		GitUrl:         metaCreatedEvent.GitUrl,
+		Path:           metaCreatedEvent.Path,
+		CommitHash:     metaCreatedEvent.CommitHash,
+		Version:        metaCreatedEvent.Version,
+		Status:         icode.READY,
+	}
+
 	err := i.metaRepository.Save(meta)
 
 	if err != nil {
@@ -147,23 +158,29 @@ func (i ICodeEventHandler) HandleMetaCreatedEvent(event icode.MetaCreatedEvent) 
 	}
 }
 
-func (i ICodeEventHandler) HandleMetaDeletedEvent(event icode.MetaDeletedEvent) {
-	err := i.metaRepository.Remove(event.GetID())
+func (i ICodeEventHandler) HandleMetaDeletedEvent(metaDeleted event.MetaDeleted) {
+
+	err := i.metaRepository.Remove(metaDeleted.GetID())
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 }
 
-func (i ICodeEventHandler) HandleMetaStatusChangeEvent(event icode.MetaStatusChangeEvent) {
-	meta, err := i.metaRepository.FindMetaById(event.GetID())
+func (i ICodeEventHandler) HandleMetaStatusChangeEvent(metaStatusChagnedEvent event.MetaStatusChanged) {
+
+	meta, err := i.metaRepository.FindMetaById(metaStatusChagnedEvent.GetID())
+
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
 	if meta.GetID() == "" {
-		log.Fatal(fmt.Sprintf("no icode id : [%s] in handleMetaStatusChangeEvent(api_gateway/icode_query_api", event.GetID()))
+		log.Fatal(fmt.Sprintf("no icode id : [%s] in handleMetaStatusChangeEvent(api_gateway/icode_query_api", metaStatusChagnedEvent.GetID()))
 	}
-	meta.Status = event.Status
+
+	meta.Status = metaStatusChagnedEvent.Status
+
 	err = i.metaRepository.Save(meta)
 	if err != nil {
 		log.Fatal(err.Error())

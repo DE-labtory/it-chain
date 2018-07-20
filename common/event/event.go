@@ -65,7 +65,6 @@ type ConsensusFinishedEvent struct {
 }
 
 // Consume part
-
 type LeaderChangedEvent struct {
 	midgard.EventModel
 	LeaderId string
@@ -84,4 +83,40 @@ type MemberRemovedEvent struct {
 // block이 저장되었을 때
 type BlockSavedEvent struct {
 	midgard.EventModel
+}
+
+/*
+ * grpc-gateway
+ */
+
+// connection 생성
+type ConnectionCreated struct {
+	midgard.EventModel
+	Address string
+}
+
+// connection close
+type ConnectionClosed struct {
+	midgard.EventModel
+}
+
+// icode meta 생성
+type MetaCreated struct {
+	midgard.EventModel
+	RepositoryName string
+	GitUrl         string
+	Path           string
+	CommitHash     string
+	Version        struct{}
+}
+
+// icode meta deleted
+type MetaDeleted struct {
+	midgard.EventModel
+}
+
+// icode meta status changed
+type MetaStatusChanged struct {
+	midgard.EventModel
+	Status int
 }
