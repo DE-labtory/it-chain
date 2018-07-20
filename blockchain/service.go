@@ -26,7 +26,7 @@ type BlockQueryService interface {
 }
 
 type BlockQueryInnerService interface {
-	GetStagedBlockByHeight(height BlockHeight) (Block, error)
+	GetStagedBlockByHeight(height BlockHeight)(Block, error)
 	GetStagedBlockById(blockId string) (Block, error)
 	GetLastCommitedBlock() (Block, error)
 	GetCommitedBlockByHeight(height BlockHeight) (Block, error)
