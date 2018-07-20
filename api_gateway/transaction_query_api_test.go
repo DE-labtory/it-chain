@@ -22,9 +22,9 @@ import (
 
 	"time"
 
+	"github.com/it-chain/engine/common/amqp/pubsub"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -265,10 +265,10 @@ func TestTransactionEventListener_HandleTransactionDeletedEvent(t *testing.T) {
 
 }
 
-func setApiUp(t *testing.T) (TransactionQueryApi, *rabbitmq.Client, func()) {
+func setApiUp(t *testing.T) (TransactionQueryApi, *pubsub.Client, func()) {
 
 	dbPath := "./.test"
-	client := rabbitmq.Connect("")
+	client := pubsub.Connect("")
 
 	repo := NewTransactionRepository(dbPath)
 

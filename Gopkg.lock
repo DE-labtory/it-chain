@@ -28,8 +28,8 @@
 [[projects]]
   name = "github.com/Microsoft/go-winio"
   packages = ["."]
-  revision = "67921128fb397dd80339870d2193d6b1e6856fd4"
-  version = "v0.4.8"
+  revision = "a6d595ae73cf27a1b8fc32930668708f45ce1c85"
+  version = "v0.4.9"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -202,7 +202,6 @@
   packages = [
     ".",
     "bus",
-    "bus/rabbitmq",
     "store",
     "store/leveldb",
     "store/mongodb"
@@ -225,7 +224,10 @@
 [[projects]]
   branch = "develop"
   name = "github.com/it-chain/yggdrasill"
-  packages = ["common"]
+  packages = [
+    ".",
+    "common"
+  ]
   revision = "874d27d77f5f2b936733db11596022657d8b4e05"
 
 [[projects]]
@@ -463,7 +465,7 @@
     "ssh/knownhosts",
     "ssh/terminal"
   ]
-  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
+  revision = "a2144134853fc9a27a7b1e3eb4f19f1a76df13c9"
 
 [[projects]]
   branch = "master"
@@ -480,7 +482,7 @@
     "proxy",
     "trace"
   ]
-  revision = "d0887baf81f4598189d4e12a37c6da86f0bba4d0"
+  revision = "a680a1efc54dd51c040b3b5ce4939ea3cf2ea0d1"
 
 [[projects]]
   branch = "master"
@@ -516,7 +518,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "2731d4fa720b67f9fe38e9051a2a9b38e4609260"
+  revision = "fedd2861243fd1a8152376292b921b394c7bef7e"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -638,6 +640,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "208666ac20cfa3ea17a72efb3a7542934496e9b204119dd4b9098590f86895f0"
+  inputs-digest = "b0e368c80f21cdb7dc2c4de85565e4eea506f00707ce1ae4a364328c12b1e139"
   solver-name = "gps-cdcl"
   solver-version = 1

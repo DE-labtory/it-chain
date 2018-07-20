@@ -20,8 +20,8 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/it-chain/engine/common/amqp/pubsub"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/it-chain/midgard/store"
 	"github.com/it-chain/midgard/store/leveldb"
 	"github.com/it-chain/midgard/store/mongodb"
@@ -80,7 +80,7 @@ func initDefaultStore() (midgard.EventStore, store.EventSerializer) {
 //todo rabbitmq url
 func initDefaultPublisher() midgard.Publisher {
 
-	client := rabbitmq.Connect("")
+	client := pubsub.Connect("")
 
 	return client
 }

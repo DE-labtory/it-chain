@@ -1,17 +1,17 @@
 package main
 
 import (
+	"github.com/it-chain/engine/common/amqp/pubsub"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/midgard"
-	"github.com/it-chain/midgard/bus/rabbitmq"
 	"github.com/rs/xid"
 )
 
 func main() {
 
 	config := conf.GetConfiguration()
-	client := rabbitmq.Connect(config.Engine.Amqp)
+	client := pubsub.Connect(config.Engine.Amqp)
 	defer client.Close()
 
 	txCreateCommand := txpool.TxCreateCommand{
