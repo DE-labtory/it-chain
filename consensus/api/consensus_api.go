@@ -35,8 +35,8 @@ func (cApi ConsensusApi) ReceivePrePrepareMsg(msg consensus.PrePrepareMsg) {
 	return
 }
 
-func (cApi ConsensusApi) ReceivePrepareMsg(msg consensus.PrepareMsg) {
-	return
+func (cApi ConsensusApi) ReceivePrepareMsg(msg consensus.PrepareMsg) error{
+	return nil
 }
 
 func (cApi ConsensusApi) ReceiveCommitMsg(msg consensus.CommitMsg) {
