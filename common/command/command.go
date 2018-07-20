@@ -127,6 +127,19 @@ type ExecuteBlock struct {
 	State     string
 }
 
+type ExecuteBlockTx struct {
+	ID        string
+	ICodeID   string
+	Status    int
+	PeerID    string
+	TimeStamp time.Time
+	Jsonrpc   string
+	Method    string
+	Function  string
+	Args      []string
+	Signature []byte
+}
+
 type ReturnBlockResult struct {
 	midgard.CommandModel
 	TxResultList []TxResult
