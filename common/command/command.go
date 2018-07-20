@@ -157,16 +157,18 @@ type ReturnBlockResult struct {
 // Blockchain에게 block 생성 command
 type ProposeBlock struct {
 	midgard.CommandModel
-	TxList []struct {
-		ID        string
-		Status    int
-		PeerID    string
-		TimeStamp time.Time
-		Jsonrpc   string
-		Method    string
-		Type      int
-		Function  string
-		Args      []string
-		Signature []byte
-	}
+	TxList []ProposeBlockTx
+}
+
+type ProposeBlockTx struct {
+	ID        string
+	Status    int
+	PeerID    string
+	TimeStamp time.Time
+	Jsonrpc   string
+	Method    string
+	Type      int
+	Function  string
+	Args      []string
+	Signature []byte
 }
