@@ -24,6 +24,14 @@ func NewPropagateService(publish Publish, representatives []*consensus.Represent
 }
 
 func (ps PropagateService) BroadcastPrePrepareMsg(msg consensus.PrePrepareMsg) error {
+	if msg.ConsensusId.Id == "" {
+		return errors.New("Consensus ID is empty")
+	}
+
+	if msg.ProposedBlock.Body == nil {
+		return errors.New("Block is empty")
+	}
+
 	SerializedMsg, err := common.Serialize(msg)
 
 	if err != nil {
@@ -38,6 +46,14 @@ func (ps PropagateService) BroadcastPrePrepareMsg(msg consensus.PrePrepareMsg) e
 }
 
 func (ps PropagateService) BroadcastPrepareMsg(msg consensus.PrepareMsg) error {
+	if msg.ConsensusId.Id == "" {
+		return errors.New("Consensus ID is empty")
+	}
+
+	if msg.BlockHash == nil {
+		return errors.New("Block hash is empty")
+	}
+
 	SerializedMsg, err := common.Serialize(msg)
 
 	if err != nil {
@@ -52,6 +68,10 @@ func (ps PropagateService) BroadcastPrepareMsg(msg consensus.PrepareMsg) error {
 }
 
 func (ps PropagateService) BroadcastCommitMsg(msg consensus.CommitMsg) error {
+	if msg.ConsensusId.Id == "" {
+		return errors.New("Consensus ID is empty")
+	}
+
 	SerializedMsg, err := common.Serialize(msg)
 
 	if err != nil {
