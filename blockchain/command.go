@@ -17,6 +17,7 @@
 package blockchain
 
 import (
+	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/midgard"
 )
@@ -61,4 +62,14 @@ type GrpcReceiveCommand struct {
 	ConnectionID string
 	Protocol     string
 	FromPeer     Peer
+}
+
+type BlockExecuteCommand struct {
+	midgard.CommandModel
+	Block []byte
+}
+
+type BlockResultCommand struct {
+	midgard.CommandModel
+	TxResults []icode.Result
 }
