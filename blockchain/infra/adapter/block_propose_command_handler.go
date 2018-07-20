@@ -17,10 +17,10 @@
 package adapter
 
 import (
-	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/txpool"
 	"errors"
-	"log"
+
+	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/common/command"
 )
 
 var ErrCommandTransactions = errors.New("command's transactions nil or have length of zero")
@@ -30,37 +30,41 @@ type BlockCreateApi interface {
 	CreateBlock(txList []blockchain.Transaction) error
 }
 
-type BlockProposeCommandHandler struct{
-	blockApi BlockCreateApi
+type BlockProposeCommandHandler struct {
+	blockApi   BlockCreateApi
+	engineMode string
 }
 
-func NewBlockProposeCommandHandler(blockApi BlockCreateApi) *BlockProposeCommandHandler{
+func NewBlockProposeCommandHandler(blockApi BlockCreateApi, engineMode string) *BlockProposeCommandHandler {
 	return &BlockProposeCommandHandler{
-		blockApi: blockApi,
+		blockApi:   blockApi,
+		engineMode: engineMode,
 	}
 }
 
-func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command blockchain.ProposeBlockCommand) {
+func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.ProposeBlock) error {
 	if err := validateCommand(command); err != nil {
-		log.Fatal(err)
-		return
+		return err
 	}
-	txList := command.Transactions
+	txList := command.TxList
 
 	if err := validateTxList(txList); err != nil {
-		log.Fatal(err)
-		return
+		return err
 	}
 
 	defaultTxList := convertTxList(txList)
 
-	if err := h.blockApi.CreateBlock(defaultTxList); err != nil {
-		log.Fatal(err)
+	if h.engineMode == "solo" {
+		if err := h.blockApi.CreateBlock(defaultTxList); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
-func validateCommand(command blockchain.ProposeBlockCommand) error {
-	txList := command.Transactions
+func validateCommand(command command.ProposeBlock) error {
+	txList := command.TxList
 
 	if txList == nil || len(txList) == 0 {
 		return ErrCommandTransactions
@@ -68,7 +72,7 @@ func validateCommand(command blockchain.ProposeBlockCommand) error {
 	return nil
 }
 
-func validateTxList(txList []txpool.Transaction) error {
+func validateTxList(txList []command.ProposeBlockTx) error {
 	var err error
 
 	for _, tx := range txList {
@@ -78,15 +82,15 @@ func validateTxList(txList []txpool.Transaction) error {
 	return err
 }
 
-func validateTx(tx txpool.Transaction) error {
-	if tx.TxId == "" || tx.PublishPeerId == "" || tx.TimeStamp.IsZero() || tx.TxData.Jsonrpc == "" ||
-		tx.TxData.Method == "" || tx.TxData.Params.Function == "" || tx.TxData.Params.Args == nil {
+func validateTx(tx command.ProposeBlockTx) error {
+	if tx.ID == "" || tx.PeerID == "" || tx.TimeStamp.IsZero() || tx.Jsonrpc == "" ||
+		tx.Method == "" || tx.Function == "" || tx.Args == nil || tx.Signature == nil {
 		return ErrTxHasMissingProperties
 	}
 	return nil
 }
 
-func convertTxList(txList []txpool.Transaction) []blockchain.Transaction {
+func convertTxList(txList []command.ProposeBlockTx) []blockchain.Transaction {
 	defaultTxList := make([]blockchain.Transaction, 0)
 
 	for _, tx := range txList {
@@ -97,18 +101,18 @@ func convertTxList(txList []txpool.Transaction) []blockchain.Transaction {
 	return defaultTxList
 }
 
-func convertTx(tx txpool.Transaction) blockchain.Transaction {
+func convertTx(tx command.ProposeBlockTx) blockchain.Transaction {
 	return &blockchain.DefaultTransaction{
-		ID: tx.GetID(),
-		Status: blockchain.Status(tx.TxStatus),
-		PeerID: tx.PublishPeerId,
+		ID:        tx.ID,
+		Status:    blockchain.Status(tx.Status),
+		PeerID:    tx.PeerID,
 		Timestamp: tx.TimeStamp,
-		TxData: &blockchain.TxData{
-			Jsonrpc: tx.TxData.Jsonrpc,
-			Method: blockchain.TxDataType(tx.TxData.Method),
+		TxData: blockchain.TxData{
+			Jsonrpc: tx.Jsonrpc,
+			Method:  blockchain.TxDataType(tx.Method),
 			Params: blockchain.Params{
-				Function: tx.TxData.Params.Function,
-				Args: tx.TxData.Params.Args,
+				Function: tx.Function,
+				Args:     tx.Args,
 			},
 		},
 	}
