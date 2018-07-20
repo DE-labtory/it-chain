@@ -22,6 +22,7 @@ import (
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/api"
 	"github.com/magiconair/properties/assert"
+	"github.com/it-chain/engine/blockchain/test/mock"
 )
 
 func TestBlockApi_AddBlockToPool(t *testing.T) {
@@ -40,8 +41,9 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 	}
 
 	publisherId := "zf"
+	blockQueryService := mock.BlockQueryApi{}
 
-	blockApi, _ := api.NewBlockApi(publisherId)
+	blockApi, _ := api.NewBlockApi(publisherId, blockQueryService)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
