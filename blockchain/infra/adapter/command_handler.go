@@ -20,7 +20,6 @@ import (
 	"errors"
 
 	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/txpool"
 )
 
 var ErrBlockNil = errors.New("Block nil error")
@@ -59,10 +58,6 @@ func (h *CommandHandler) HandleProposeBlockCommand(command blockchain.ProposeBlo
 	//dispatcher.SendBlockValidateCommand(block)
 }
 
-// TODO: yggdrasill/impl/Transaction과 txpool/Transaction이 다름.
-func convertTxList(txList []txpool.Transaction) ([]blockchain.Transaction, error) {
-	return nil, nil
-}
 
 /// 합의된 block이 넘어오면 block pool에 저장한다.
 func (h *CommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlockCommand) error {
