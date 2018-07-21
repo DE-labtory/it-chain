@@ -20,7 +20,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/it-chain/engine/common/amqp/pubsub"
+	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/midgard"
 	"github.com/it-chain/midgard/store"
 	"github.com/it-chain/midgard/store/leveldb"
