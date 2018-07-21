@@ -172,3 +172,17 @@ type ProposeBlockTx struct {
 	Args      []string
 	Signature []byte
 }
+
+/*
+ * txpool
+ */
+
+type TxCreate struct {
+	midgard.CommandModel
+	Jsonrpc  string
+	Method   string
+	Function string
+	Args     []string
+	ID       string
+	ICodeID  string
+}

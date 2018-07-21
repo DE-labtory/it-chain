@@ -153,3 +153,26 @@ type BlockCreated struct {
 	Creator   []byte
 	State     string
 }
+
+/*
+ * txpool
+ */
+
+// transaction created event
+type TxCreated struct {
+	midgard.EventModel
+	Status    int
+	TimeStamp time.Time
+	Jsonrpc   string
+	Method    string
+	ICodeID   string
+	Function  string
+	Args      []string
+	Signature []byte
+	PeerID    string
+}
+
+// when block committed check transaction and delete
+type TxDeleted struct {
+	midgard.EventModel
+}
