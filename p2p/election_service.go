@@ -32,9 +32,18 @@ type Publish func(exchange string, topic string, data interface{}) (err error) /
 type ElectionService struct {
 	mux                sync.Mutex
 	electionRepository ElectionRepository
-	peerService        IPeerService
 	peerQueryService   PeerQueryService
 	publish            Publish
+}
+
+func NewElectionService(electionRepository ElectionRepository, peerQueryService PeerQueryService, publish Publish) ElectionService {
+
+	return ElectionService{
+		mux:                sync.Mutex{},
+		electionRepository: electionRepository,
+		peerQueryService:   peerQueryService,
+		publish:            publish,
+	}
 }
 
 func (es *ElectionService) ElectLeaderWithRaft() {
@@ -100,7 +109,7 @@ func (es *ElectionService) requestVote(connectionIds []string) error {
 	// 2. send message
 	requestVoteMessage := RequestVoteMessage{}
 
-	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("PeerTableDeliver", requestVoteMessage)
+	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("RequestVoteProtocol", requestVoteMessage)
 
 	for _, connectionId := range connectionIds {
 
@@ -130,11 +139,11 @@ func CreateGrpcDeliverCommand(protocol string, body interface{}) (GrpcDeliverCom
 	}, err
 }
 
-func genRandomInRange(min, max int64) int64 {
+func genRandomInRange(min, max int) int {
 
 	rand.Seed(time.Now().Unix())
 
-	return rand.Int63n(max-min) + min
+	return rand.Intn(max-min) + min
 }
 
 func (es *ElectionService) Vote(connectionId string) error {
