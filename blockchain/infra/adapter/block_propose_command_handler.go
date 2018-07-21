@@ -72,7 +72,7 @@ func validateCommand(command command.ProposeBlock) error {
 	return nil
 }
 
-func validateTxList(txList []command.ProposeBlockTx) error {
+func validateTxList(txList []command.Tx) error {
 	var err error
 
 	for _, tx := range txList {
@@ -82,7 +82,7 @@ func validateTxList(txList []command.ProposeBlockTx) error {
 	return err
 }
 
-func validateTx(tx command.ProposeBlockTx) error {
+func validateTx(tx command.Tx) error {
 	if tx.ID == "" || tx.PeerID == "" || tx.TimeStamp.IsZero() || tx.Jsonrpc == "" ||
 		tx.Method == "" || tx.Function == "" || tx.Args == nil || tx.Signature == nil {
 		return ErrTxHasMissingProperties
@@ -90,7 +90,7 @@ func validateTx(tx command.ProposeBlockTx) error {
 	return nil
 }
 
-func convertTxList(txList []command.ProposeBlockTx) []blockchain.Transaction {
+func convertTxList(txList []command.Tx) []blockchain.Transaction {
 	defaultTxList := make([]blockchain.Transaction, 0)
 
 	for _, tx := range txList {
@@ -101,7 +101,7 @@ func convertTxList(txList []command.ProposeBlockTx) []blockchain.Transaction {
 	return defaultTxList
 }
 
-func convertTx(tx command.ProposeBlockTx) blockchain.Transaction {
+func convertTx(tx command.Tx) blockchain.Transaction {
 	return &blockchain.DefaultTransaction{
 		ID:        tx.ID,
 		Status:    blockchain.Status(tx.Status),

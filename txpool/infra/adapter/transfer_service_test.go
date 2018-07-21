@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/engine/txpool/infra/adapter"
 	"github.com/magiconair/properties/assert"
@@ -38,7 +39,7 @@ func TestGrpcCommandService_SendLeaderTransactions(t *testing.T) {
 				transactions []txpool.Transaction
 				leader       txpool.Leader
 			}{
-				transactions: []txpool.Transaction{{TxId: txpool.TransactionId("zf")}},
+				transactions: []txpool.Transaction{{ID: txpool.TransactionId("zf")}},
 				leader:       txpool.Leader{LeaderId: txpool.LeaderId{Id: "zf2"}},
 			},
 			err: nil,
@@ -57,9 +58,9 @@ func TestGrpcCommandService_SendLeaderTransactions(t *testing.T) {
 
 	publisher := func(exchange string, topic string, data interface{}) (err error) {
 		txList := &[]*txpool.Transaction{}
-		command := data.(txpool.GrpcDeliverCommand)
+		deliverCommand := data.(command.DeliverGrpc)
 
-		common.Deserialize(command.Body, txList)
+		common.Deserialize(deliverCommand.Body, txList)
 
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.deliver")

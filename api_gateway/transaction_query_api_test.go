@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/it-chain/engine/common/amqp/pubsub"
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
@@ -35,10 +36,8 @@ func TestTransactionRepository_Save(t *testing.T) {
 	tr := NewTransactionRepository(dbPath)
 
 	transaction := txpool.Transaction{
-		TxId: "888",
-		TxData: txpool.TxData{
-			ICodeID: "889",
-		},
+		ID:      "888",
+		ICodeID: "889",
 	}
 
 	defer func() {
@@ -51,7 +50,7 @@ func TestTransactionRepository_Save(t *testing.T) {
 
 	// Then
 	t2 := &txpool.Transaction{}
-	b, _ := tr.leveldb.Get([]byte(transaction.TxId))
+	b, _ := tr.leveldb.Get([]byte(transaction.ID))
 	txpool.Deserialize(b, t2)
 	snapshot, _ := tr.leveldb.Snapshot()
 
@@ -67,10 +66,8 @@ func TestTransactionRepository_Remove(t *testing.T) {
 	tr := NewTransactionRepository(dbPath)
 
 	transaction := txpool.Transaction{
-		TxId: "888",
-		TxData: txpool.TxData{
-			ICodeID: "889",
-		},
+		ID:      "888",
+		ICodeID: "889",
 	}
 
 	defer func() {
@@ -80,11 +77,11 @@ func TestTransactionRepository_Remove(t *testing.T) {
 
 	// When
 	_ = tr.Save(transaction)
-	err := tr.Remove(transaction.TxId)
+	err := tr.Remove(transaction.ID)
 
 	// Then
 	t2 := &txpool.Transaction{}
-	b, _ := tr.leveldb.Get([]byte(transaction.TxId))
+	b, _ := tr.leveldb.Get([]byte(transaction.ID))
 	txpool.Deserialize(b, t2)
 	snapshot, _ := tr.leveldb.Snapshot()
 
@@ -101,10 +98,8 @@ func TestTransactionRepository_FindById(t *testing.T) {
 	tr := NewTransactionRepository(dbPath)
 
 	transaction := txpool.Transaction{
-		TxId: "888",
-		TxData: txpool.TxData{
-			ICodeID: "889",
-		},
+		ID:      "888",
+		ICodeID: "889",
 	}
 
 	defer func() {
@@ -162,10 +157,8 @@ func TestTransactionRepository_FindAll(t *testing.T) {
 
 	// When
 	t1 := txpool.Transaction{
-		TxId: "888",
-		TxData: txpool.TxData{
-			ICodeID: "889",
-		},
+		ID:      "888",
+		ICodeID: "889",
 	}
 	tr.Save(t1)
 	transactions2, err2 := tr.FindAll()
@@ -183,7 +176,7 @@ func TestTransactionQueryApi_FindUncommittedTransactions(t *testing.T) {
 
 	defer tearDown()
 
-	err := client.Publish("Event", "transaction.created", txpool.TxCreatedEvent{
+	err := client.Publish("Event", "transaction.created", event.TxCreated{
 		EventModel: midgard.EventModel{
 			ID:      "1123",
 			Time:    time.Now(),
@@ -191,29 +184,26 @@ func TestTransactionQueryApi_FindUncommittedTransactions(t *testing.T) {
 			Version: 3,
 		},
 		ICodeID: "2",
-		TxHash:  "123",
 		Jsonrpc: "123",
 	})
 
 	assert.NoError(t, err)
 
-	err = client.Publish("Event", "transaction.created", txpool.TxCreatedEvent{
+	err = client.Publish("Event", "transaction.created", event.TxCreated{
 		EventModel: midgard.EventModel{
 			ID: "2",
 		},
 		ICodeID: "2",
-		TxHash:  "123",
 		Jsonrpc: "123",
 	})
 
 	assert.NoError(t, err)
 
-	err = client.Publish("Event", "transaction.created", txpool.TxCreatedEvent{
+	err = client.Publish("Event", "transaction.created", event.TxCreated{
 		EventModel: midgard.EventModel{
 			ID: "3",
 		},
 		ICodeID: "2",
-		TxHash:  "123",
 		Jsonrpc: "123",
 	})
 
@@ -232,7 +222,7 @@ func TestTransactionEventListener_HandleTransactionDeletedEvent(t *testing.T) {
 
 	defer tearDown()
 
-	err := client.Publish("Event", "transaction.created", txpool.TxCreatedEvent{
+	err := client.Publish("Event", "transaction.created", event.TxCreated{
 		EventModel: midgard.EventModel{
 			ID:      "1123",
 			Time:    time.Now(),
@@ -240,7 +230,6 @@ func TestTransactionEventListener_HandleTransactionDeletedEvent(t *testing.T) {
 			Version: 3,
 		},
 		ICodeID: "2",
-		TxHash:  "123",
 		Jsonrpc: "123",
 	})
 
@@ -251,7 +240,7 @@ func TestTransactionEventListener_HandleTransactionDeletedEvent(t *testing.T) {
 	txs, err := api.FindUncommittedTransactions()
 	assert.Equal(t, len(txs), 1)
 
-	err = client.Publish("Event", "transaction.deleted", txpool.TxDeletedEvent{
+	err = client.Publish("Event", "transaction.deleted", event.TxDeleted{
 		EventModel: midgard.EventModel{
 			ID: "1123",
 		},
@@ -262,7 +251,6 @@ func TestTransactionEventListener_HandleTransactionDeletedEvent(t *testing.T) {
 
 	txs, err = api.FindUncommittedTransactions()
 	assert.Equal(t, len(txs), 0)
-
 }
 
 func setApiUp(t *testing.T) (TransactionQueryApi, *pubsub.Client, func()) {

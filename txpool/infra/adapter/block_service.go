@@ -19,6 +19,7 @@ package adapter
 import (
 	"errors"
 
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
@@ -40,11 +41,26 @@ func (m BlockService) ProposeBlock(transactions []txpool.Transaction) error {
 		return errors.New("Empty transaction list proposed")
 	}
 
-	deliverCommand := txpool.ProposeBlockCommand{
+	deliverCommand := command.ProposeBlock{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
-		Transactions: transactions,
+
+		TxList: make([]command.Tx, 0),
+	}
+
+	for _, tx := range transactions {
+		deliverCommand.TxList = append(deliverCommand.TxList, command.Tx{
+			ID:        tx.ID,
+			Status:    int(tx.Status),
+			PeerID:    tx.PeerID,
+			TimeStamp: tx.TimeStamp,
+			Jsonrpc:   tx.Jsonrpc,
+			Method:    string(tx.Method),
+			Function:  tx.Function,
+			Args:      tx.Args,
+			Signature: tx.Signature,
+		})
 	}
 
 	return m.publisher("Command", "block.propose", deliverCommand)

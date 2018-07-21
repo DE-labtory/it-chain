@@ -19,6 +19,7 @@ package adapter
 import (
 	"log"
 
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/engine/txpool/api"
 )
@@ -33,13 +34,16 @@ func NewTxCommandHandler(transactionApi api.TransactionApi) *TxCommandHandler {
 	}
 }
 
-func (t *TxCommandHandler) HandleTxCreateCommand(txCreateCommand txpool.TxCreateCommand) {
+func (t *TxCommandHandler) HandleTxCreateCommand(txCreateCommand command.CreateTransaction) {
 
 	txData := txpool.TxData{
-		ICodeID: txCreateCommand.ICodeID,
-		Jsonrpc: txCreateCommand.Jsonrpc,
-		Method:  txCreateCommand.Method,
-		Params:  txCreateCommand.Params,
+		ICodeID:   txCreateCommand.ICodeID,
+		Jsonrpc:   txCreateCommand.Jsonrpc,
+		Method:    txCreateCommand.Method,
+		Function:  txCreateCommand.Function,
+		Signature: txCreateCommand.Signature,
+		Args:      txCreateCommand.Args,
+		ID:        txCreateCommand.ID,
 	}
 
 	tx, err := t.transactionApi.CreateTransaction(txData)

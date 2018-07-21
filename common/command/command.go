@@ -34,11 +34,11 @@ type ConfirmBlock struct {
 
 type SendPrePrepareMsg struct {
 	midgard.CommandModel
-	ConsensusId     string
-	SenderId        string
-	Representatives []*string
-	Seal            []byte
-	Body            []byte
+	ConsensusId        string
+	SenderId           string
+	RepresentativeList []*string
+	Seal               []byte
+	Body               []byte
 }
 
 type SendPrepareMsg struct {
@@ -52,13 +52,6 @@ type SendCommitMsg struct {
 	midgard.CommandModel
 	ConsensusId string
 	SenderId    string
-}
-
-type SendGrpcMsg struct {
-	midgard.CommandModel
-	Recipients []string
-	Body       []byte
-	Protocol   string
 }
 
 /*
@@ -79,9 +72,9 @@ type CloseConnection struct {
 //다른 Peer에게 Message전송 command
 type DeliverGrpc struct {
 	midgard.CommandModel
-	Recipients []string
-	Body       []byte
-	Protocol   string
+	RecipientList []string
+	Body          []byte
+	Protocol      string
 }
 
 //다른 Peer에게 Message수신 command
@@ -124,21 +117,10 @@ type UnDeploy struct {
 //Icode에게 block 내 TxList 실행 command
 type ExecuteBlock struct {
 	midgard.CommandModel
-	Seal     []byte
-	PrevSeal []byte
-	Height   uint64
-	TxList   []struct {
-		ID        string
-		ICodeID   string
-		Status    int
-		PeerID    string
-		TimeStamp time.Time
-		Jsonrpc   string
-		Method    string
-		Function  string
-		Args      []string
-		Signature []byte
-	}
+	Seal      []byte
+	PrevSeal  []byte
+	Height    uint64
+	TxList    []Tx
 	TxSeal    [][]byte
 	Timestamp time.Time
 	Creator   []byte
@@ -147,27 +129,29 @@ type ExecuteBlock struct {
 
 type ReturnBlockResult struct {
 	midgard.CommandModel
-	TxResults []struct {
-		TxId    string
-		Data    map[string]string
-		Success bool
-	}
+	TxResultList []TxResult
+}
+
+type TxResult struct {
+	TxId    string
+	Data    map[string]string
+	Success bool
 }
 
 // Blockchain에게 block 생성 command
 type ProposeBlock struct {
 	midgard.CommandModel
-	TxList []ProposeBlockTx
+	TxList []Tx
 }
 
-type ProposeBlockTx struct {
+type Tx struct {
 	ID        string
+	ICodeID   string
 	Status    int
 	PeerID    string
 	TimeStamp time.Time
 	Jsonrpc   string
 	Method    string
-	Type      int
 	Function  string
 	Args      []string
 	Signature []byte
@@ -177,12 +161,12 @@ type ProposeBlockTx struct {
  * txpool
  */
 
-type TxCreate struct {
+type CreateTransaction struct {
 	midgard.CommandModel
-	Jsonrpc  string
-	Method   string
-	Function string
-	Args     []string
-	ID       string
-	ICodeID  string
+	Jsonrpc   string
+	Method    string
+	ICodeID   string
+	Function  string
+	Args      []string
+	Signature []byte
 }

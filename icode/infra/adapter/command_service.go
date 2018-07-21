@@ -39,27 +39,19 @@ func (c *CommandService) SendBlockExecuteResultCommand(results []icode.Result, b
 		CommandModel: midgard.CommandModel{
 			ID: blockId,
 		},
-		TxResults: convertTxResults(results),
+		TxResultList: convertTxResults(results),
 	})
 }
 
-func convertTxResults(icodeResults []icode.Result) []struct {
-	TxId    string
-	Data    map[string]string
-	Success bool
-} {
-	results := make([]struct {
-		TxId    string
-		Data    map[string]string
-		Success bool
-	}, 0)
+func convertTxResults(icodeResults []icode.Result) []command.TxResult {
+	results := make([]command.TxResult, 0)
 
 	for _, result := range icodeResults {
-		results = append(results, struct {
-			TxId    string
-			Data    map[string]string
-			Success bool
-		}{TxId: result.TxId, Data: result.Data, Success: result.Success})
+		results = append(results, command.TxResult{
+			TxId:    result.TxId,
+			Data:    result.Data,
+			Success: result.Success,
+		})
 	}
 
 	return results

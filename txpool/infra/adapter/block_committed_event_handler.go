@@ -19,7 +19,6 @@ package adapter
 import (
 	"errors"
 
-	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/engine/txpool/api"
 )
 
@@ -29,17 +28,10 @@ type BlockCommittedEventHandler struct {
 	transactionApi api.TransactionApi
 }
 
-func (e BlockCommittedEventHandler) HandleBlockCommittedEvent(event txpool.BlockCommittedEvent) error {
-
-	txs := event.Transactions
-
-	for _, tx := range txs {
-		err := e.transactionApi.DeleteTransaction(tx.TxId)
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
+//
+//func (e BlockCommittedEventHandler) HandleBlockCommittedEvent(blockCommittedEvent event.BlockCommitted) error {
+//
+//	err := e.transactionApi.DeleteTransactionOfBlock()
+//
+//	return nil
+//}
