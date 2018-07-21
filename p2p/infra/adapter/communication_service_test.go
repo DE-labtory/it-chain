@@ -19,7 +19,6 @@ package adapter_test
 import (
 	"reflect"
 	"testing"
-
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/infra/adapter"
 	"github.com/magiconair/properties/assert"
