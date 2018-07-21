@@ -20,6 +20,7 @@ import (
 	"errors"
 
 	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
@@ -52,25 +53,25 @@ func (ts TransferService) SendLeaderTransactions(transactions []txpool.Transacti
 		return err
 	}
 
-	deliverCommand.Recipients = append(deliverCommand.Recipients, leader.LeaderId.ToString())
+	deliverCommand.RecipientList = append(deliverCommand.RecipientList, leader.LeaderId.ToString())
 
 	return ts.publisher("Command", "message.deliver", deliverCommand)
 }
 
-func createGrpcDeliverCommand(protocol string, body interface{}) (txpool.GrpcDeliverCommand, error) {
+func createGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
 
 	data, err := common.Serialize(body)
 
 	if err != nil {
-		return txpool.GrpcDeliverCommand{}, err
+		return command.DeliverGrpc{}, err
 	}
 
-	return txpool.GrpcDeliverCommand{
+	return command.DeliverGrpc{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
-		Recipients: make([]string, 0),
-		Body:       data,
-		Protocol:   protocol,
+		RecipientList: make([]string, 0),
+		Body:          data,
+		Protocol:      protocol,
 	}, err
 }

@@ -37,7 +37,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 			}{
 				command: command.ProposeBlock{
 					CommandModel: midgard.CommandModel{ID: "111"},
-					TxList:       make([]command.ProposeBlockTx, 0),
+					TxList:       make([]command.Tx, 0),
 				},
 			},
 			err: adapter.ErrCommandTransactions,
@@ -48,8 +48,8 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 			}{
 				command: command.ProposeBlock{
 					CommandModel: midgard.CommandModel{ID: "111"},
-					TxList: []command.ProposeBlockTx{
-						command.ProposeBlockTx{ID: "", PeerID: ""},
+					TxList: []command.Tx{
+						command.Tx{ID: "", PeerID: ""},
 					},
 				},
 			},
@@ -61,8 +61,8 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 			}{
 				command: command.ProposeBlock{
 					CommandModel: midgard.CommandModel{ID: "111"},
-					TxList: []command.ProposeBlockTx{
-						command.ProposeBlockTx{
+					TxList: []command.Tx{
+						command.Tx{
 							ID:        "1",
 							Status:    1,
 							PeerID:    "2",

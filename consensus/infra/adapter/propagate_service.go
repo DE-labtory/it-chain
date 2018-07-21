@@ -91,32 +91,32 @@ func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string) e
 		return errors.New("Message is empty")
 	}
 
-	command, err := createSendGrpcMsgCommand(protocol, SerializedMsg)
+	command, err := createDeliverGrpcCommand(protocol, SerializedMsg)
 
 	if err != nil {
 		return err
 	}
 
 	for _, r := range ps.representatives {
-		command.Recipients = append(command.Recipients, r.GetID())
+		command.RecipientList = append(command.RecipientList, r.GetID())
 	}
 
 	return ps.publish("Command", "message.broadcast", command)
 }
 
-func createSendGrpcMsgCommand(protocol string, body interface{}) (command.SendGrpcMsg, error) {
+func createDeliverGrpcCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
 	data, err := common.Serialize(body)
 
 	if err != nil {
-		return command.SendGrpcMsg{}, err
+		return command.DeliverGrpc{}, err
 	}
 
-	return command.SendGrpcMsg{
+	return command.DeliverGrpc{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
-		Recipients: make([]string, 0),
-		Body:       data,
-		Protocol:   protocol,
+		RecipientList: make([]string, 0),
+		Body:          data,
+		Protocol:      protocol,
 	}, nil
 }

@@ -21,6 +21,7 @@ import (
 	"errors"
 	"log"
 
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/leveldb-wrapper"
 )
@@ -62,9 +63,20 @@ func NewTransactionEventListener(transactionRepository TransactionPoolRepository
 }
 
 // this function listens to TxCreatedEvent and update repository
-func (t TransactionEventListener) HandleTransactionCreatedEvent(event txpool.TxCreatedEvent) {
+func (t TransactionEventListener) HandleTransactionCreatedEvent(txCreatedEvent event.TxCreated) {
 
-	tx := event.GetTransaction()
+	tx := txpool.Transaction{
+		Args:      txCreatedEvent.Args,
+		Signature: txCreatedEvent.Signature,
+		Function:  txCreatedEvent.Function,
+		Method:    txpool.TxDataType(txCreatedEvent.Function),
+		Jsonrpc:   txCreatedEvent.Jsonrpc,
+		TimeStamp: txCreatedEvent.TimeStamp,
+		PeerID:    txCreatedEvent.PeerID,
+		Status:    txpool.TransactionStatus(txCreatedEvent.Status),
+		ID:        txCreatedEvent.ID,
+		ICodeID:   txCreatedEvent.ICodeID,
+	}
 	err := t.transactionRepository.Save(tx)
 
 	if err != nil {
@@ -72,9 +84,9 @@ func (t TransactionEventListener) HandleTransactionCreatedEvent(event txpool.TxC
 	}
 }
 
-func (t TransactionEventListener) HandleTransactionDeletedEvent(event txpool.TxDeletedEvent) {
+func (t TransactionEventListener) HandleTransactionDeletedEvent(txDeletedEvent event.TxDeleted) {
 
-	err := t.transactionRepository.Remove(event.GetID())
+	err := t.transactionRepository.Remove(txDeletedEvent.GetID())
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -96,7 +108,7 @@ func NewTransactionRepository(path string) *LeveldbTransactionPoolRepository {
 
 func (t LeveldbTransactionPoolRepository) Save(transaction txpool.Transaction) error {
 
-	if transaction.TxId == "" {
+	if transaction.ID == "" {
 		return errors.New("transaction ID is empty")
 	}
 
@@ -106,7 +118,7 @@ func (t LeveldbTransactionPoolRepository) Save(transaction txpool.Transaction) e
 		return err
 	}
 
-	if err = t.leveldb.Put([]byte(transaction.TxId), b, true); err != nil {
+	if err = t.leveldb.Put([]byte(transaction.ID), b, true); err != nil {
 		return err
 	}
 

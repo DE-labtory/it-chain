@@ -78,6 +78,7 @@ func main() {
 	app.Commands = []cli.Command{}
 	app.Commands = append(app.Commands, icode.IcodeCmd())
 	app.Action = func(c *cli.Context) error {
+		PrintLogo()
 		configName := c.String("config")
 		conf.SetConfigName(configName)
 		eventstore.InitDefault()
