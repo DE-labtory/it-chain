@@ -26,13 +26,13 @@ import (
  * consensus
  */
 
-type CreateBlockCommand struct {
+type CreateBlock struct {
 	midgard.CommandModel
 	Seal []byte
 	Body []byte
 }
 
-type SendPrePrepareMsgCommand struct {
+type SendPrePrepareMsg struct {
 	midgard.CommandModel
 	ConsensusId     string
 	SenderId        string
@@ -41,20 +41,20 @@ type SendPrePrepareMsgCommand struct {
 	Body            []byte
 }
 
-type SendPrepareMsgCommand struct {
+type SendPrepareMsg struct {
 	midgard.CommandModel
 	ConsensusId string
 	SenderId    string
 	BlockHash   []byte
 }
 
-type SendCommitMsgCommand struct {
+type SendCommitMsg struct {
 	midgard.CommandModel
 	ConsensusId string
 	SenderId    string
 }
 
-type SendGrpcMsgCommand struct {
+type SendGrpcMsg struct {
 	midgard.CommandModel
 	Recipients []string
 	Body       []byte
