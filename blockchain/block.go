@@ -27,6 +27,7 @@ import (
 
 	"errors"
 	"fmt"
+	"reflect"
 )
 
 type Block = ygg.Block
@@ -170,6 +171,10 @@ func (block *DefaultBlock) IsPrev(serializedPrevBlock []byte) bool {
 	prevBlock.Deserialize(serializedPrevBlock)
 
 	return bytes.Compare(prevBlock.GetSeal(), block.GetPrevSeal()) == 0
+}
+
+func (block *DefaultBlock) IsEmpty() bool {
+	return reflect.DeepEqual(*block, DefaultBlock{})
 }
 
 // interface of api gateway query api
