@@ -24,18 +24,18 @@ import "github.com/it-chain/midgard"
 
 // Publish part
 
-type PrepareMsgAddedEvent struct {
+type PrepareMsgAdded struct {
 	midgard.EventModel
 	SenderId  string
 	BlockHash []byte
 }
 
-type CommitMsgAddedEvent struct {
+type CommitMsgAdded struct {
 	midgard.EventModel
 	SenderId string
 }
 
-type ConsensusCreatedEvent struct {
+type ConsensusCreated struct {
 	midgard.EventModel
 	ConsensusId     string
 	Representatives []*string
@@ -45,43 +45,43 @@ type ConsensusCreatedEvent struct {
 }
 
 // Preprepare msg를 보냈을 때
-type ConsensusPrePreparedEvent struct {
+type ConsensusPrePrepared struct {
 	midgard.EventModel
 }
 
 // Prepare msg를 보냈을 때
-type ConsensusPreparedEvent struct {
+type ConsensusPrepared struct {
 	midgard.EventModel
 }
 
 // Commit msg를 보냈을 때
-type ConsensusCommittedEvent struct {
+type ConsensusCommitted struct {
 	midgard.EventModel
 }
 
 // block 저장이 끝나 state가 idle이 될 때
-type ConsensusFinishedEvent struct {
+type ConsensusFinished struct {
 	midgard.EventModel
 }
 
 // Consume part
-type LeaderChangedEvent struct {
+type LeaderChanged struct {
 	midgard.EventModel
 	LeaderId string
 }
 
-type MemberJoinedEvent struct {
+type MemberJoined struct {
 	midgard.EventModel
 	MemberId string
 }
 
-type MemberRemovedEvent struct {
+type MemberRemoved struct {
 	midgard.EventModel
 	MemberId string
 }
 
 // block이 저장되었을 때
-type BlockSavedEvent struct {
+type BlockSaved struct {
 	midgard.EventModel
 }
 
