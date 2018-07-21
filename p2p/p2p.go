@@ -18,35 +18,36 @@ package p2p
 
 //todo implement it!
 func init() {
-	//publisher := rabbitmq.Connect("")
-	//eventRepository := midgard.NewRepo(store, publisher)
-	//publisher :=
-	//grpcCommandService := adapter.NewGrpcCommandService(publisher)
-	//peerApi := api.NewPeerApi(eventRepository, grpcCommandService)
-	////myIp := conf.GetConfiguration().Common.NodeIp
+	//peerRepository := api_gateway.NewPeerRepository(PLTable{})
 	//
-	//config := conf.GetConfiguration()
-	////create rabbitmq client
-	//rabbitmqClient := rabbitmq.Connect(config.Common.Messaging.Url)
-	//// todo change node repo and leader repo after managing peerTable
+	//client := rabbitmq.Connect("")
 	//
-	//messageDispatcher := adapter.NewMessageDispatcher(publisher)
+	//peerQueryService := api_gateway.NewPeerQueryApi(peerRepository)
 	//
+	//communicationService := adapter.NewCommunicationService(client.Publish)
 	//
-	////create amqp Handler
-	//eventHandler := adapter.NewNodeEventHandler(nodeRepository, leaderRepository)
-	//grpcMessageHandler := adapter.NewGrpcMessageHandler(leaderApi, nodeApi, messageDispatcher)
+	//communicationApi := api.NewCommunicationApi(peerQueryService, communicationService)
 	//
-	//// Subscribe amqp server
-	//err1 := rabbitmqClient.Subscribe("Command", "connection.*", eventHandler)
+	//eventHandler := adapter.NewEventHandler(&communicationApi)
 	//
-	//if err1 != nil {
-	//	panic(err1)
-	//}
+	//leaderService := NewLeaderService()
 	//
-	//err2 := rabbitmqClient.Subscribe("Command", "message.*", grpcMessageHandler)
+	//leaderApi := api.NewLeaderApi(leaderService, peerQueryService)
 	//
-	//if err2 != nil {
-	//	panic(err2)
-	//}
+	//election := NewElection(0, "candidate", 0)
+	//
+	//electionRepository := NewElectionRepository(election)
+	//
+	//electionService := NewElectionService(electionRepository, peerQueryService, client.Publish)
+	//
+	//pLTableService := NewPLTableService()
+	//
+	//grpcCommandHandler := adapter.NewGrpcCommandHandler(&leaderApi, electionService, &communicationApi, &pLTableService)
+	//
+	////subscribe event
+	//client.Subscribe("Event", "connection.*", eventHandler)
+	//
+	//client.Subscribe("Event", "peer.*", eventHandler)
+	//
+	//client.Subscribe("Command", "peer.*", grpcCommandHandler)
 }
