@@ -17,14 +17,15 @@
 package api_gateway
 
 import (
-	"testing"
 	"os"
-	"github.com/it-chain/engine/icode"
-	"github.com/stretchr/testify/assert"
+	"testing"
+	"time"
+
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/amqp/pubsub"
+	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/midgard"
-	"time"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLevelDbMetaRepository_Save(t *testing.T) {
@@ -247,8 +248,8 @@ func TestICodeEventHandler_HandleMetaCreatedEvent(t *testing.T) {
 
 		//check
 		metas, err := api.metaRepository.FindAllMeta()
-		assert.NoError(t,err,"err in check")
-		assert.Equal(t,test.ExpectDataNum,len(metas),"not equal in check dataNum")
+		assert.NoError(t, err, "err in check")
+		assert.Equal(t, test.ExpectDataNum, len(metas), "not equal in check dataNum")
 
 	}
 }
@@ -268,8 +269,8 @@ func setICodeQueryApi(t *testing.T) (ICodeQueryApi, *pubsub.Client, func()) {
 
 	repo := NewLevelDbMetaRepository(dbPath)
 
-	metaQueryApi := ICodeQueryApi{metaRepository: repo}
-	metaEventListener := &ICodeEventHandler{metaRepository: repo}
+	metaQueryApi := ICodeQueryApi{metaRepository: &repo}
+	metaEventListener := &ICodeEventHandler{metaRepository: &repo}
 
 	err := client.Subscribe("Event", "meta.*", metaEventListener)
 	assert.NoError(t, err)
