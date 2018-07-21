@@ -1,4 +1,4 @@
-package infra
+package rpc
 
 import (
 	"net/rpc"
