@@ -26,7 +26,7 @@ import (
  * consensus
  */
 
-type CreateBlock struct {
+type ConfirmBlock struct {
 	midgard.CommandModel
 	Seal []byte
 	Body []byte

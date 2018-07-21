@@ -1,6 +1,7 @@
 package consensus
 
 import (
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
@@ -35,25 +36,22 @@ func ConstructConsensus(msg PrePrepareMsg) (*Consensus, error) {
 	return consensus, nil
 }
 
-func newConsensusCreatedEvent(cID ConsensusId, r []*Representative, b ProposedBlock) ConsensusCreatedEvent {
-	return ConsensusCreatedEvent{
+func newConsensusCreatedEvent(cID ConsensusId, r []*Representative, b ProposedBlock) event.ConsensusCreated {
+	representativeStr := make([]*string, 0)
+
+	for _, representative := range r {
+		str := representative.GetID()
+		representativeStr = append(representativeStr, &str)
+	}
+
+	return event.ConsensusCreated{
 		EventModel: midgard.EventModel{
 			ID: cID.Id,
 		},
-		Consensus: struct {
-			ConsensusID     ConsensusId
-			Representatives []*Representative
-			Block           ProposedBlock
-			CurrentState    State
-			PrepareMsgPool  PrepareMsgPool
-			CommitMsgPool   CommitMsgPool
-		}{
-			ConsensusID:     cID,
-			Representatives: r,
-			Block:           b,
-			CurrentState:    IDLE_STATE,
-			PrepareMsgPool:  NewPrepareMsgPool(),
-			CommitMsgPool:   NewCommitMsgPool(),
-		},
+		ConsensusId:     cID.Id,
+		Representatives: representativeStr,
+		Seal:            b.Seal,
+		Body:            b.Body,
+		CurrentState:    string(IDLE_STATE),
 	}
 }

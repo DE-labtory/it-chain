@@ -3,6 +3,7 @@ package consensus
 import (
 	"testing"
 
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/consensus/test/mock"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
@@ -30,8 +31,8 @@ func TestCreateConsensus(t *testing.T) {
 
 	// when
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, 1+len(p.Members), len(events[0].(*ConsensusCreatedEvent).Consensus.Representatives))
-		assert.NotNil(t, events[0].(*ConsensusCreatedEvent).Consensus.Block.Seal)
+		assert.Equal(t, 1+len(p.Members), len(events[0].(*event.ConsensusCreated).Representatives))
+		assert.NotNil(t, events[0].(*event.ConsensusCreated).Seal)
 		return nil
 	}
 	eventstore.InitForMock(eventRepository)
@@ -66,8 +67,8 @@ func TestConstructConsensus(t *testing.T) {
 
 	// when
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, len(r), len(events[0].(*ConsensusCreatedEvent).Consensus.Representatives))
-		assert.Equal(t, "consensusID", events[0].(*ConsensusCreatedEvent).GetID())
+		assert.Equal(t, len(r), len(events[0].(*event.ConsensusCreated).Representatives))
+		assert.Equal(t, "consensusID", events[0].(*event.ConsensusCreated).GetID())
 		return nil
 	}
 	eventstore.InitForMock(eventRepository)
@@ -77,6 +78,6 @@ func TestConstructConsensus(t *testing.T) {
 	// then
 	assert.Nil(t, err)
 	assert.Equal(t, "consensusID", c.ConsensusID.Id)
-	assert.Equal(t, PREPREPARE_STATE, c.CurrentState)
+	assert.Equal(t, IDLE_STATE, c.CurrentState)
 	assert.Equal(t, 2, len(c.Representatives))
 }

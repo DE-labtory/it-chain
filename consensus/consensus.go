@@ -22,6 +22,7 @@ import (
 
 	"encoding/json"
 
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
@@ -296,15 +297,12 @@ func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) error {
 		return errors.New("Consensus ID is not same")
 	}
 
-	prepareMsgAddedEvent := PrepareMsgAddedEvent{
+	prepareMsgAddedEvent := event.PrepareMsgAdded{
 		EventModel: midgard.EventModel{
 			ID: c.ConsensusID.Id,
 		},
-		PrepareMsg: struct {
-			ConsensusId ConsensusId
-			SenderId    string
-			BlockHash   []byte
-		}{ConsensusId: prepareMsg.ConsensusId, SenderId: prepareMsg.SenderId, BlockHash: prepareMsg.BlockHash},
+		SenderId:  prepareMsg.SenderId,
+		BlockHash: prepareMsg.BlockHash,
 	}
 
 	if err := OnAndSave(c, &prepareMsgAddedEvent); err != nil {
@@ -319,14 +317,11 @@ func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) error {
 		return errors.New("Consensus ID is not same")
 	}
 
-	commitMsgAddedEvent := CommitMsgAddedEvent{
+	commitMsgAddedEvent := event.CommitMsgAdded{
 		EventModel: midgard.EventModel{
 			ID: c.ConsensusID.Id,
 		},
-		CommitMsg: struct {
-			ConsensusId ConsensusId
-			SenderId    string
-		}{ConsensusId: commitMsg.ConsensusId, SenderId: commitMsg.SenderId},
+		SenderId: commitMsg.SenderId,
 	}
 
 	if err := OnAndSave(c, &commitMsgAddedEvent); err != nil {
@@ -336,40 +331,45 @@ func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) error {
 	return nil
 }
 
-func (c *Consensus) On(event midgard.Event) error {
-	switch v := event.(type) {
+func (c *Consensus) On(consensusEvent midgard.Event) error {
+	switch v := consensusEvent.(type) {
 
-	case *PrepareMsgAddedEvent:
+	case *event.PrepareMsgAdded:
 		c.PrepareMsgPool.Save(&PrepareMsg{
-			ConsensusId: v.PrepareMsg.ConsensusId,
-			SenderId:    v.PrepareMsg.SenderId,
-			BlockHash:   v.PrepareMsg.BlockHash,
+			ConsensusId: ConsensusId{v.GetID()},
+			SenderId:    v.SenderId,
+			BlockHash:   v.BlockHash,
 		})
 
-	case *CommitMsgAddedEvent:
+	case *event.CommitMsgAdded:
 		c.CommitMsgPool.Save(&CommitMsg{
-			ConsensusId: v.CommitMsg.ConsensusId,
-			SenderId:    v.CommitMsg.SenderId,
+			ConsensusId: ConsensusId{v.GetID()},
+			SenderId:    v.SenderId,
 		})
 
-	case *ConsensusCreatedEvent:
-		c.ConsensusID = v.Consensus.ConsensusID
-		c.Representatives = v.Consensus.Representatives
-		c.Block = v.Consensus.Block
-		c.Start()
-		c.PrepareMsgPool = v.Consensus.PrepareMsgPool
-		c.CommitMsgPool = v.Consensus.CommitMsgPool
+	case *event.ConsensusCreated:
+		c.ConsensusID = ConsensusId{v.ConsensusId}
+		for _, rStr := range v.Representatives {
+			c.Representatives = append(c.Representatives, &Representative{
+				Id: RepresentativeId(*rStr),
+			})
+		}
+		c.Block.Body = v.Body
+		c.Block.Seal = v.Seal
+		c.CurrentState = State(v.CurrentState)
+		c.PrepareMsgPool = NewPrepareMsgPool()
+		c.CommitMsgPool = NewCommitMsgPool()
 
-	case *ConsensusPrePreparedEvent:
+	case *event.ConsensusPrePrepared:
 		c.Start()
 
-	case *ConsensusPreparedEvent:
+	case *event.ConsensusPrepared:
 		c.ToPrepareState()
 
-	case *ConsensusCommittedEvent:
+	case *event.ConsensusCommitted:
 		c.ToCommitState()
 
-	case *ConsensusFinishedEvent:
+	case *event.ConsensusFinished:
 		c.ToIdleState()
 
 	default:

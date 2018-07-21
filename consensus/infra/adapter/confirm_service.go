@@ -3,9 +3,9 @@ package adapter
 import (
 	"errors"
 
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/consensus"
 	"github.com/it-chain/midgard"
-	"github.com/rs/xid"
 )
 
 type ConfirmService struct {
@@ -27,15 +27,11 @@ func (cs *ConfirmService) ConfirmBlock(block consensus.ProposedBlock) error {
 		return errors.New("There is no block")
 	}
 
-	command := consensus.CreateBlockCommand{
-		CommandModel: midgard.CommandModel{
-			ID: xid.New().String(),
-		},
-		Block: struct {
-			Seal []byte
-			Body []byte
-		}{Seal: block.Seal, Body: block.Body},
+	cmd := command.ConfirmBlock{
+		CommandModel: midgard.CommandModel{},
+		Seal:         nil,
+		Body:         nil,
 	}
 
-	return cs.publish("Command", "block.create", command)
+	return cs.publish("Command", "block.create", cmd)
 }
