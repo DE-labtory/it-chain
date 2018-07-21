@@ -16,7 +16,11 @@
 
 package command
 
-import "github.com/it-chain/midgard"
+import (
+	"time"
+
+	"github.com/it-chain/midgard"
+)
 
 /*
  * consensus
@@ -86,4 +90,61 @@ type GrpcReceive struct {
 	Body         []byte
 	ConnectionID string
 	Protocol     string
+}
+
+/*
+ * icode
+ */
+type TransactionExecuteCommand struct {
+	midgard.CommandModel
+	ICodeID   string
+	Status    int
+	PeerID    string
+	TimeStamp time.Time
+	Jsonrpc   string
+	Method    string
+	Function  string
+	Args      []string
+	Signature []byte
+}
+
+type Deploy struct {
+	midgard.CommandModel
+	Url     string
+	SshPath string
+}
+type UnDeploy struct {
+	midgard.CommandModel
+}
+
+type BlockExecute struct {
+	midgard.CommandModel
+	Seal     []byte
+	PrevSeal []byte
+	Height   uint64
+	TxList   []struct {
+		ID        string
+		ICodeID   string
+		Status    int
+		PeerID    string
+		TimeStamp time.Time
+		Jsonrpc   string
+		Method    string
+		Function  string
+		Args      []string
+		Signature []byte
+	}
+	TxSeal    [][]byte
+	Timestamp time.Time
+	Creator   []byte
+	State     string
+}
+
+type BlockResult struct {
+	midgard.CommandModel
+	TxResults []struct {
+		TxId    string
+		Data    map[string]string
+		Success bool
+	}
 }

@@ -17,6 +17,7 @@
 package adapter
 
 import (
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/midgard"
 )
@@ -34,10 +35,32 @@ func NewCommandService(publisher Publisher) *CommandService {
 }
 
 func (c *CommandService) SendBlockExecuteResultCommand(results []icode.Result, blockId string) error {
-	return c.publisher("Command", "blockResult", icode.BlockResultCommand{
+	return c.publisher("Command", "blockResult", command.BlockResult{
 		CommandModel: midgard.CommandModel{
 			ID: blockId,
 		},
-		TxResults: results,
+		TxResults: convertTxResults(results),
 	})
+}
+
+func convertTxResults(icodeResults []icode.Result) []struct {
+	TxId    string
+	Data    map[string]string
+	Success bool
+} {
+	results := make([]struct {
+		TxId    string
+		Data    map[string]string
+		Success bool
+	}, 0)
+
+	for _, result := range icodeResults {
+		results = append(results, struct {
+			TxId    string
+			Data    map[string]string
+			Success bool
+		}{TxId: result.TxId, Data: result.Data, Success: result.Success})
+	}
+
+	return results
 }

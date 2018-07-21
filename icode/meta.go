@@ -22,6 +22,7 @@ import (
 
 	"time"
 
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
@@ -50,7 +51,7 @@ type Meta struct {
 }
 
 func NewMeta(id string, repositoryName string, gitUrl string, path string, commitHash string) *Meta {
-	createEvent := MetaCreatedEvent{
+	createEvent := event.MetaCreated{
 		EventModel: midgard.EventModel{
 			ID:   id,
 			Type: "meta.created",
@@ -67,7 +68,7 @@ func NewMeta(id string, repositoryName string, gitUrl string, path string, commi
 }
 
 func DeleteMeta(metaId ID) error {
-	return eventstore.Save(metaId, MetaDeletedEvent{
+	return eventstore.Save(metaId, event.MetaDeleted{
 		EventModel: midgard.EventModel{
 			ID:   metaId,
 			Type: "meta.deleted",
@@ -76,7 +77,7 @@ func DeleteMeta(metaId ID) error {
 }
 
 func ChangeMetaStatus(metaId ID, status MetaStatus) error {
-	return eventstore.Save(metaId, MetaStatusChangeEvent{
+	return eventstore.Save(metaId, event.MetaStatusChanged{
 		EventModel: midgard.EventModel{
 			ID:   metaId,
 			Type: "meta.statusChange",
@@ -90,9 +91,9 @@ func (m Meta) GetID() string {
 	return m.ICodeID
 }
 
-func (m *Meta) On(event midgard.Event) error {
-	switch v := event.(type) {
-	case *MetaCreatedEvent:
+func (m *Meta) On(metaEvent midgard.Event) error {
+	switch v := metaEvent.(type) {
+	case *event.MetaCreated:
 		m.CommitHash = v.CommitHash
 		m.Version = v.Version
 		m.Path = v.Path
@@ -100,9 +101,9 @@ func (m *Meta) On(event midgard.Event) error {
 		m.ICodeID = v.ID
 		m.RepositoryName = v.RepositoryName
 		m.Status = READY
-	case *MetaDeletedEvent:
+	case *event.MetaDeleted:
 		m.Status = UNDEPLOYED
-	case *MetaStatusChangeEvent:
+	case *event.MetaStatusChanged:
 		m.Status = v.Status
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))

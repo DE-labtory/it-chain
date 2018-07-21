@@ -17,10 +17,10 @@
 package adapter
 
 import (
-	"encoding/json"
 	"fmt"
 	"sync"
 
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/engine/icode/api"
 )
@@ -39,25 +39,36 @@ func NewBlockCommandHandler(icodeApi api.ICodeApi, service icode.CommandService)
 	}
 }
 
-func (b *BlockCommandHandler) HandleBlockExecuteCommand(command icode.BlockExecuteCommand) {
-	var block icode.Block
-	err := json.Unmarshal(command.Block, &block)
-	if err != nil {
-		fmt.Println("error in handle block excute command. unmashal err")
-		return
-	}
+func (b *BlockCommandHandler) HandleBlockExecuteCommand(blockExecuteCommand command.BlockExecute) {
+
 	b.mutex.Lock()
+	defer b.mutex.Unlock()
+
 	results := make([]icode.Result, 0)
-	for _, tx := range block.TxList {
-		switch tx.TxData.Method {
+	for _, tx := range blockExecuteCommand.TxList {
+		switch tx.Method {
 		case icode.Query:
-			results = append(results, *b.icodeApi.Query(tx))
+			results = append(results, *b.icodeApi.Query(icode.Transaction{
+				TxId:     tx.ID,
+				ICodeID:  tx.ICodeID,
+				Function: tx.Function,
+				Method:   tx.Method,
+				Jsonrpc:  tx.Jsonrpc,
+				Args:     tx.Args,
+			}))
 		case icode.Invoke:
-			results = append(results, *b.icodeApi.Invoke(tx))
+			results = append(results, *b.icodeApi.Invoke(icode.Transaction{
+				TxId:     tx.ID,
+				ICodeID:  tx.ICodeID,
+				Function: tx.Function,
+				Method:   tx.Method,
+				Jsonrpc:  tx.Jsonrpc,
+				Args:     tx.Args,
+			}))
 		default:
-			fmt.Println(fmt.Sprintf("unknown tx method [%s]", tx.TxData.Method))
+			fmt.Println(fmt.Sprintf("unknown tx method [%s]", tx.Method))
 		}
 	}
-	b.commandService.SendBlockExecuteResultCommand(results, command.GetID())
-	b.mutex.Unlock()
+
+	b.commandService.SendBlockExecuteResultCommand(results, blockExecuteCommand.GetID())
 }
