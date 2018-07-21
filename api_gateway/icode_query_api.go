@@ -17,12 +17,13 @@
 package api_gateway
 
 import (
+	"errors"
+	"fmt"
+	"log"
+
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/leveldb-wrapper"
-	"github.com/it-chain/engine/common"
-	"errors"
-	"log"
-	"fmt"
 )
 
 type ICodeQueryApi struct {
@@ -98,7 +99,7 @@ func (l *LevelDbMetaRepository) FindMetaById(id icode.ID) (icode.Meta, error) {
 
 	meta := &icode.Meta{}
 
-	err = common.Deserialize(metaByte,meta)
+	err = common.Deserialize(metaByte, meta)
 
 	if err != nil {
 		return icode.Meta{}, err
@@ -159,8 +160,8 @@ func (i ICodeEventHandler) HandleMetaStatusChangeEvent(event icode.MetaStatusCha
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	if meta.GetID() ==""{
-		log.Fatal(fmt.Sprintf("no icode id : [%s] in handleMetaStatusChangeEvent(api_gateway/icode_query_api",event.GetID()))
+	if meta.GetID() == "" {
+		log.Fatal(fmt.Sprintf("no icode id : [%s] in handleMetaStatusChangeEvent(api_gateway/icode_query_api", event.GetID()))
 	}
 	meta.Status = event.Status
 	err = i.metaRepository.Save(meta)
