@@ -177,6 +177,14 @@ func (block *DefaultBlock) IsEmpty() bool {
 	return reflect.DeepEqual(*block, DefaultBlock{})
 }
 
+func (block *DefaultBlock) GetBlockState() BlockState {
+	return block.State
+}
+
+func (block *DefaultBlock) SetBlockState(state BlockState) {
+	block.State = state
+}
+
 // interface of api gateway query api
 type BlockQueryApi interface {
 	GetBlockByHeight(blockHeight uint64) (Block, error)

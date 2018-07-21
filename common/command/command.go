@@ -183,3 +183,4 @@ type CreateTransaction struct {
 	Args      []string
 	Signature []byte
 }
+

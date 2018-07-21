@@ -24,17 +24,22 @@ import (
 	"log"
 	"sync"
 
+	"time"
+
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/leveldb-wrapper"
 )
 
 var ErrGetCommitedBlock = errors.New("Error in getting commited block")
 var ErrAddCommitingBlock = errors.New("Error in add block which is going to be commited")
 var ErrNewBlockStorage = errors.New("Error in construct block storage")
+var ErrNoCreatedBlock = errors.New("Error can not find created block")
 var ErrNoStagedBlock = errors.New("Error can not find staged block")
 var ErrInvalidStateBlock = errors.New("Error invalid state block")
-var ErrFailUpdateBlock = errors.New("Error failed updating block")
 var ErrFailRemoveBlock = errors.New("Error failed removing block")
 var ErrFailBlockTypeCasting = errors.New("Error failed type casting block")
+var ErrSealEmpty = errors.New("Error that seal is empty string")
 
 type BlockQueryApi struct {
 	blockPoolRepository     BlockPoolRepository
@@ -50,7 +55,8 @@ func NewBlockQueryApi(blockPoolRepo BlockPoolRepository, commitedBlockRepo Commi
 
 // TODO:
 func (q *BlockQueryApi) GetStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.Block, error) {
-	return nil, nil
+	defaultBlock, err := q.blockPoolRepository.FindStagedBlockByHeight(height)
+	return &defaultBlock, err
 }
 
 // TODO:
@@ -67,10 +73,12 @@ func (q *BlockQueryApi) GetCommitedBlockByHeight(height blockchain.BlockHeight) 
 }
 
 type BlockPoolRepository interface {
-	AddCreatedBlock(block blockchain.DefaultBlock) error
-	GetStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
-	GetStagedBlockById(id string) (blockchain.DefaultBlock, error)
-	GetFirstStagedBlock() (blockchain.DefaultBlock, error)
+	SaveCreatedBlock(block blockchain.DefaultBlock) error
+	SaveStagedBlock(block blockchain.DefaultBlock) error
+	FindCreatedBlockById(id string) (blockchain.DefaultBlock, error)
+	FindStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
+	FindStagedBlockById(id string) (blockchain.DefaultBlock, error)
+	FindFirstStagedBlock() (blockchain.DefaultBlock, error)
 	RemoveById(id string) error
 }
 
@@ -84,19 +92,51 @@ func NewBlockPoolRepository() *BlockPoolRepositoryImpl {
 	}
 }
 
-func (r *BlockPoolRepositoryImpl) AddCreatedBlock(block blockchain.DefaultBlock) error {
-	if validStateBlock(block) {
+func (r *BlockPoolRepositoryImpl) SaveCreatedBlock(block blockchain.DefaultBlock) error {
+	if block.State == blockchain.Created {
+		for i, b := range r.Blocks {
+			if isBlockIdEqualWith(b, string(block.GetSeal())) {
+				r.Blocks[i] = &block
+				return nil
+			}
+		}
 		r.Blocks = append(r.Blocks, &block)
 		return nil
 	}
 	return ErrInvalidStateBlock
 }
 
-func validStateBlock(block blockchain.DefaultBlock) bool {
-	return block.State == blockchain.Staged || block.State == blockchain.Created
+func (r *BlockPoolRepositoryImpl) SaveStagedBlock(block blockchain.DefaultBlock) error {
+	if block.State == blockchain.Staged {
+		for i, b := range r.Blocks {
+			if isBlockIdEqualWith(b, string(block.GetSeal())) {
+				r.Blocks[i] = &block
+				return nil
+			}
+		}
+		r.Blocks = append(r.Blocks, &block)
+		return nil
+	}
+	return ErrInvalidStateBlock
 }
 
-func (r *BlockPoolRepositoryImpl) GetStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
+func (r *BlockPoolRepositoryImpl) FindCreatedBlockById(id string) (blockchain.DefaultBlock, error) {
+	for _, block := range r.Blocks {
+		if isBlockIdEqualWith(block, id) {
+			defaultBlock, ok := block.(*blockchain.DefaultBlock)
+			if !ok {
+				return blockchain.DefaultBlock{}, ErrFailBlockTypeCasting
+			}
+
+			if defaultBlock.State == blockchain.Created {
+				return *defaultBlock, nil
+			}
+		}
+	}
+	return blockchain.DefaultBlock{}, ErrNoCreatedBlock
+}
+
+func (r *BlockPoolRepositoryImpl) FindStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
 	for _, block := range r.Blocks {
 		if block.GetHeight() == height {
 			target, ok := block.(*blockchain.DefaultBlock)
@@ -110,21 +150,23 @@ func (r *BlockPoolRepositoryImpl) GetStagedBlockByHeight(height blockchain.Block
 	return blockchain.DefaultBlock{}, ErrNoStagedBlock
 }
 
-func (r *BlockPoolRepositoryImpl) GetStagedBlockById(id string) (blockchain.DefaultBlock, error) {
+func (r *BlockPoolRepositoryImpl) FindStagedBlockById(id string) (blockchain.DefaultBlock, error) {
 	for _, block := range r.Blocks {
-		if string(block.GetSeal()) == id {
+		if isBlockIdEqualWith(block, id) {
 			defaultBlock, ok := block.(*blockchain.DefaultBlock)
 			if !ok {
 				return blockchain.DefaultBlock{}, ErrFailBlockTypeCasting
 			}
 
-			return *defaultBlock, nil
+			if defaultBlock.State == blockchain.Staged {
+				return *defaultBlock, nil
+			}
 		}
 	}
 	return blockchain.DefaultBlock{}, ErrNoStagedBlock
 }
 
-func (r *BlockPoolRepositoryImpl) GetFirstStagedBlock() (blockchain.DefaultBlock, error) {
+func (r *BlockPoolRepositoryImpl) FindFirstStagedBlock() (blockchain.DefaultBlock, error) {
 	if len(r.Blocks) == 0 {
 		return blockchain.DefaultBlock{}, ErrNoStagedBlock
 	}
@@ -155,12 +197,16 @@ func stagedBlockWithSmallerHeight(base blockchain.DefaultBlock, comparator block
 
 func (r *BlockPoolRepositoryImpl) RemoveById(id string) error {
 	for i, b := range r.Blocks {
-		if string(b.GetSeal()) == id {
+		if isBlockIdEqualWith(b, id) {
 			r.Blocks = append(r.Blocks[:i], r.Blocks[i+1:]...)
 			return nil
 		}
 	}
 	return ErrFailRemoveBlock
+}
+
+func isBlockIdEqualWith(block blockchain.Block, id string) bool {
+	return string(block.GetSeal()) == id
 }
 
 type CommitedBlockRepository interface {
@@ -227,4 +273,134 @@ func (cbr *CommitedBlockRepositoryImpl) GetBlockByHeight(height uint64) (blockch
 	}
 
 	return *block, nil
+}
+
+type BlockEventListener struct {
+	blockPoolRepository     BlockPoolRepository
+	commitedBlockRepository CommitedBlockRepository
+}
+
+func NewBlockEventListener(blockPoolRepo BlockPoolRepository, commitedBlockRepo CommitedBlockRepository) *BlockEventListener {
+	return &BlockEventListener{
+		blockPoolRepository:     blockPoolRepo,
+		commitedBlockRepository: commitedBlockRepo,
+	}
+}
+
+func (l *BlockEventListener) HandleBlockCreatedEvent(event event.BlockCreated) error {
+	block, err := createDefaultBlock(event.Seal, event.PrevSeal, event.Height, event.TxList, event.Timestamp, event.Creator, event.State)
+	if err != nil {
+		return err
+	}
+
+	l.blockPoolRepository.SaveCreatedBlock(block)
+	return nil
+}
+
+func createDefaultBlock(Seal []byte, PrevSeal []byte, Height uint64, TxList []event.Tx, Timestamp time.Time, Creator []byte, State string) (blockchain.DefaultBlock, error) {
+	txList, err := convertToDefaultTransactionList(TxList)
+	if err != nil {
+		return blockchain.DefaultBlock{}, err
+	}
+	return blockchain.DefaultBlock{
+		Seal:      Seal,
+		PrevSeal:  PrevSeal,
+		Height:    Height,
+		TxList:    txList,
+		Timestamp: Timestamp,
+		Creator:   Creator,
+		State:     State,
+	}, nil
+}
+
+func deserializeTxList(txList []byte) ([]*blockchain.DefaultTransaction, error) {
+	DefaultTxList := []*blockchain.DefaultTransaction{}
+
+	err := common.Deserialize(txList, &DefaultTxList)
+
+	if err != nil {
+		return nil, err
+	}
+	return DefaultTxList, nil
+}
+
+func convertToDefaultTransactionList(txlist []event.Tx) ([]*blockchain.DefaultTransaction, error) {
+	defaultTxList := make([]*blockchain.DefaultTransaction, 0)
+
+	for _, tx := range txlist {
+		defaultTx, err := convertToDefaultTransaction(tx)
+		if err != nil {
+			return defaultTxList, err
+		}
+		defaultTxList = append(defaultTxList, defaultTx)
+	}
+
+	return defaultTxList, nil
+}
+
+func convertToDefaultTransaction(tx event.Tx) (*blockchain.DefaultTransaction, error) {
+	return &blockchain.DefaultTransaction{
+		ID:        tx.ID,
+		Status:    blockchain.Status(tx.Status),
+		PeerID:    tx.PeerID,
+		ICodeID:   tx.ICodeID,
+		Timestamp: tx.TimeStamp,
+		TxData: blockchain.TxData{
+			Jsonrpc: tx.Jsonrpc,
+			Method:  blockchain.TxDataType(tx.Method),
+			Params: blockchain.Params{
+				Function: tx.Function,
+				Args:     tx.Args,
+			},
+			ID: tx.ID,
+		},
+		Signature: tx.Signature,
+	}, nil
+}
+
+func (l *BlockEventListener) HandleBlockStagedEvent(event event.BlockStaged) error {
+	seal := event.ID
+	if seal == "" {
+		return ErrSealEmpty
+	}
+
+	block, err := l.blockPoolRepository.FindCreatedBlockById(seal)
+	if err != nil {
+		return err
+	}
+
+	block.State = event.State
+
+	err = l.blockPoolRepository.SaveStagedBlock(block)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (l *BlockEventListener) HandleBlockCommitedEvent(event event.BlockCommitted) error {
+	seal := event.ID
+	if seal == "" {
+		return ErrSealEmpty
+	}
+
+	block, err := l.blockPoolRepository.FindStagedBlockById(seal)
+	if err != nil {
+		return err
+	}
+
+	block.State = event.State
+
+	err = l.commitedBlockRepository.Save(block)
+	if err != nil {
+		return err
+	}
+
+	err = l.blockPoolRepository.RemoveById(seal)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

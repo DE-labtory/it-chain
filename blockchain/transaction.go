@@ -192,7 +192,6 @@ func deserializeTxList(txList []byte) ([]*DefaultTransaction, error) {
 		return nil, err
 	}
 	return DefaultTxList, nil
-
 }
 
 func ConvertTxType(txList []*DefaultTransaction) []Transaction {
