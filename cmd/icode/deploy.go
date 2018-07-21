@@ -20,8 +20,8 @@ import (
 	"fmt"
 
 	"github.com/it-chain/engine/common/amqp/pubsub"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 	"github.com/urfave/cli"
@@ -45,13 +45,13 @@ func deploy(gitUrl string, sshPath string) {
 	config := conf.GetConfiguration()
 	client := pubsub.Connect(config.Engine.Amqp)
 	defer client.Close()
-	command := icode.DeployCommand{
+	deployCommand := command.Deploy{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
 		Url:     gitUrl,
 		SshPath: sshPath,
 	}
-	fmt.Println(fmt.Sprintf("deploying ID : %s", command.GetID()))
-	client.Publish("Command", "icode.deploy", command)
+	fmt.Println(fmt.Sprintf("deploying ID : %s", deployCommand.GetID()))
+	client.Publish("Command", "icode.deploy", deployCommand)
 }

@@ -36,18 +36,9 @@ type TxDataType = string
 type Transaction struct {
 	TxId      TransactionId
 	TimeStamp time.Time
-	TxData    TxData
-}
-
-type TxData struct {
-	Jsonrpc string
-	Method  TxDataType
-	Params  Param
-	ID      string
-	ICodeID string
-}
-
-type Param struct {
-	Function string
-	Args     []string
+	Jsonrpc   string
+	Method    TxDataType
+	ICodeID   string
+	Function  string
+	Args      []string
 }

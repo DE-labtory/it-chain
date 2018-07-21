@@ -99,3 +99,24 @@ type ConnectionCreated struct {
 type ConnectionClosed struct {
 	midgard.EventModel
 }
+
+// icode meta 생성
+type MetaCreated struct {
+	midgard.EventModel
+	RepositoryName string
+	GitUrl         string
+	Path           string
+	CommitHash     string
+	Version        struct{}
+}
+
+// icode meta deleted
+type MetaDeleted struct {
+	midgard.EventModel
+}
+
+// icode meta status changed
+type MetaStatusChanged struct {
+	midgard.EventModel
+	Status int
+}

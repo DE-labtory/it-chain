@@ -22,6 +22,7 @@ import (
 
 	"encoding/json"
 
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/midgard"
@@ -58,18 +59,18 @@ func (cs TesseractContainerService) StartContainer(meta icode.Meta) error {
 }
 
 func (cs TesseractContainerService) ExecuteTransaction(tx icode.Transaction) (*icode.Result, error) {
-	containerId, found := cs.containerIdMap[tx.TxData.ICodeID]
+	containerId, found := cs.containerIdMap[tx.ICodeID]
 
 	if !found {
-		return nil, errors.New(fmt.Sprintf("no container for iCode : %s", tx.TxData.ICodeID))
+		return nil, errors.New(fmt.Sprintf("no container for iCode : %s", tx.ICodeID))
 	}
 
 	tesseractTxInfo := cell.TxInfo{
-		Method: tx.TxData.Method,
-		ID:     tx.TxData.ID,
+		Method: tx.Method,
+		ID:     tx.ICodeID,
 		Params: cell.Params{
-			Function: tx.TxData.Params.Function,
-			Args:     tx.TxData.Params.Args,
+			Function: tx.Function,
+			Args:     tx.Args,
 		},
 	}
 
@@ -114,7 +115,7 @@ func (cs TesseractContainerService) StopContainer(id icode.ID) error {
 		return err
 	}
 	delete(cs.containerIdMap, id)
-	deletedEvent := icode.MetaDeletedEvent{
+	deletedEvent := event.MetaDeleted{
 		EventModel: midgard.EventModel{
 			ID:   id,
 			Type: "meta.deleted",
