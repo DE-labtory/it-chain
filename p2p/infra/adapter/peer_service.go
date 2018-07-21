@@ -29,7 +29,7 @@ type PeerService struct {
 
 func (ps *PeerService) Dial(ipAddress string) error {
 
-	connectionCreateCommand := command.ConnectionCreate{
+	connectionCreateCommand := command.CreateConnection{
 		Address: ipAddress,
 	}
 	ps.publish("Command", "connection.create", connectionCreateCommand)

@@ -35,7 +35,7 @@ func NewCommandService(publisher Publisher) *CommandService {
 }
 
 func (c *CommandService) SendBlockExecuteResultCommand(results []icode.Result, blockId string) error {
-	return c.publisher("Command", "blockResult", command.BlockResult{
+	return c.publisher("Command", "blockResult", command.ReturnBlockResult{
 		CommandModel: midgard.CommandModel{
 			ID: blockId,
 		},
