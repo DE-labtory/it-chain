@@ -19,6 +19,7 @@ package consensus
 import (
 	"testing"
 
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/consensus/test/mock"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
@@ -73,7 +74,7 @@ func TestParliament_ChangeLeader(t *testing.T) {
 
 	// when
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, "leader", events[0].(LeaderChangedEvent).LeaderId)
+		assert.Equal(t, "leader", events[0].(event.LeaderChanged).LeaderId)
 		return nil
 	}
 	eventstore.InitForMock(eventRepository)
@@ -93,7 +94,7 @@ func TestParliament_AddMember(t *testing.T) {
 
 	// when
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, "member", events[0].(MemberJoinedEvent).MemberId)
+		assert.Equal(t, "member", events[0].(event.MemberJoined).MemberId)
 		return nil
 	}
 	eventstore.InitForMock(eventRepository)
@@ -118,7 +119,7 @@ func TestParliament_RemoveMember(t *testing.T) {
 
 	// case 1
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.NotEqual(t, m.MemberId.Id, events[0].(MemberRemovedEvent).MemberId)
+		assert.NotEqual(t, m.MemberId.Id, events[0].(event.MemberRemoved).MemberId)
 		return nil
 	}
 	eventstore.InitForMock(eventRepository)
@@ -131,7 +132,7 @@ func TestParliament_RemoveMember(t *testing.T) {
 
 	// case2
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, m.MemberId.Id, events[0].(MemberRemovedEvent).MemberId)
+		assert.Equal(t, m.MemberId.Id, events[0].(event.MemberRemoved).MemberId)
 		return nil
 	}
 	eventstore.InitForMock(eventRepository)

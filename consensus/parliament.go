@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
@@ -117,7 +118,7 @@ func (p *Parliament) ChangeLeader(leader *Leader) error {
 		return errors.New("Leader is nil")
 	}
 
-	leaderChangedEvent := LeaderChangedEvent{
+	leaderChangedEvent := event.LeaderChanged{
 		EventModel: midgard.EventModel{
 			ID: p.GetID(),
 		},
@@ -150,7 +151,7 @@ func (p *Parliament) AddMember(member *Member) error {
 		return errors.New(fmt.Sprintf("Already exist member [%s]", member.GetID()))
 	}
 
-	memberJoinedEvent := MemberJoinedEvent{
+	memberJoinedEvent := event.MemberJoined{
 		EventModel: midgard.EventModel{
 			ID: p.GetID(),
 		},
@@ -175,7 +176,7 @@ func (p *Parliament) RemoveMember(memberID MemberId) error {
 		return nil
 	}
 
-	memberRemovedEvent := MemberRemovedEvent{
+	memberRemovedEvent := event.MemberRemoved{
 		EventModel: midgard.EventModel{
 			ID: p.GetID(),
 		},
@@ -225,20 +226,20 @@ func (p *Parliament) FindByPeerID(memberID string) *Member {
 	return p.Members[index]
 }
 
-func (p *Parliament) On(event midgard.Event) error {
-	switch v := event.(type) {
+func (p *Parliament) On(parliamentEvent midgard.Event) error {
+	switch v := parliamentEvent.(type) {
 
-	case *LeaderChangedEvent:
+	case *event.LeaderChanged:
 		p.Leader = &Leader{
 			LeaderId: LeaderId{v.LeaderId},
 		}
 
-	case *MemberJoinedEvent:
+	case *event.MemberJoined:
 		p.Members = append(p.Members, &Member{
 			MemberId: MemberId{v.MemberId},
 		})
 
-	case *MemberRemovedEvent:
+	case *event.MemberRemoved:
 		index := p.findIndexOfMember(v.MemberId)
 
 		if index != -1 {

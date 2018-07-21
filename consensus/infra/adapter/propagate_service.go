@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/consensus"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
@@ -103,14 +104,14 @@ func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string) e
 	return ps.publish("Command", "message.broadcast", command)
 }
 
-func createSendGrpcMsgCommand(protocol string, body interface{}) (consensus.SendGrpcMsgCommand, error) {
+func createSendGrpcMsgCommand(protocol string, body interface{}) (command.SendGrpcMsg, error) {
 	data, err := common.Serialize(body)
 
 	if err != nil {
-		return consensus.SendGrpcMsgCommand{}, err
+		return command.SendGrpcMsg{}, err
 	}
 
-	return consensus.SendGrpcMsgCommand{
+	return command.SendGrpcMsg{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
