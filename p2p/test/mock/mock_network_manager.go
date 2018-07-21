@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
-package p2p
 
-type PeerQueryService interface {
-	GetPLTable() (PLTable, error)
-	GetPeerList() ([]Peer, error)
-	GetLeader() (Leader, error)
-	FindPeerById(peerId PeerId) (Peer, error)
-	FindPeerByAddress(ipAddress string) (Peer, error)
+package mock
+
+type MockNetworkManager struct {
+	mockProcessTable map[string]MockProcess
+}
+
+func (mnm *MockNetworkManager) AddMockProcess(mockProcess MockProcess) {
+
+	mnm.mockProcessTable[mockProcess.GetId()] = mockProcess
+}
+
+func (mnm *MockNetworkManager) FindMockProcess(id string) MockProcess {
+
+	return mnm.mockProcessTable[id]
+}
+
+
+func (mnm *MockNetworkManager) AddMockP2PProcess(mockProcess MockProcess) {
+
+	mnm.mockProcessTable[mockProcess.GetId()] = mockProcess
 }
