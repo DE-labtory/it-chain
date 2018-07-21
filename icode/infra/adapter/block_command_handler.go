@@ -39,7 +39,7 @@ func NewBlockCommandHandler(icodeApi api.ICodeApi, service icode.CommandService)
 	}
 }
 
-func (b *BlockCommandHandler) HandleBlockExecuteCommand(blockExecuteCommand command.BlockExecute) {
+func (b *BlockCommandHandler) HandleBlockExecuteCommand(blockExecuteCommand command.ExecuteBlock) {
 
 	b.mutex.Lock()
 	defer b.mutex.Unlock()

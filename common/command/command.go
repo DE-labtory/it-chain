@@ -66,18 +66,18 @@ type SendGrpcMsg struct {
  */
 
 //Connection 생성 command
-type ConnectionCreate struct {
+type CreateConnection struct {
 	midgard.CommandModel
 	Address string
 }
 
 //Connection close command
-type ConnectionClose struct {
+type CloseConnection struct {
 	midgard.CommandModel
 }
 
 //다른 Peer에게 Message전송 command
-type GrpcDeliver struct {
+type DeliverGrpc struct {
 	midgard.CommandModel
 	Recipients []string
 	Body       []byte
@@ -85,7 +85,7 @@ type GrpcDeliver struct {
 }
 
 //다른 Peer에게 Message수신 command
-type GrpcReceive struct {
+type ReceiveGrpc struct {
 	midgard.CommandModel
 	Body         []byte
 	ConnectionID string
@@ -95,7 +95,7 @@ type GrpcReceive struct {
 /*
  * icode
  */
-type TransactionExecuteCommand struct {
+type ExecuteTransaction struct {
 	midgard.CommandModel
 	ICodeID   string
 	Status    int
@@ -117,7 +117,12 @@ type UnDeploy struct {
 	midgard.CommandModel
 }
 
-type BlockExecute struct {
+/*
+ * blockchain
+ */
+
+//Icode에게 block 내 TxList 실행 command
+type ExecuteBlock struct {
 	midgard.CommandModel
 	Seal     []byte
 	PrevSeal []byte
@@ -140,11 +145,28 @@ type BlockExecute struct {
 	State     string
 }
 
-type BlockResult struct {
+type ReturnBlockResult struct {
 	midgard.CommandModel
 	TxResults []struct {
 		TxId    string
 		Data    map[string]string
 		Success bool
+	}
+}
+
+// Blockchain에게 block 생성 command
+type ProposeBlock struct {
+	midgard.CommandModel
+	TxList []struct {
+		ID        string
+		Status    int
+		PeerID    string
+		TimeStamp time.Time
+		Jsonrpc   string
+		Method    string
+		Type      int
+		Function  string
+		Args      []string
+		Signature []byte
 	}
 }

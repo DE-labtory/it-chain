@@ -16,7 +16,11 @@
 
 package event
 
-import "github.com/it-chain/midgard"
+import (
+	"time"
+
+	"github.com/it-chain/midgard"
+)
 
 /*
  * consensus
@@ -119,4 +123,33 @@ type MetaDeleted struct {
 type MetaStatusChanged struct {
 	midgard.EventModel
 	Status int
+}
+
+/*
+ * blockChain
+ */
+
+// event when block is committed to event store
+type BlockCommitted struct {
+	midgard.EventModel
+	State string
+}
+
+// event when block is staged to event store
+type BlockStaged struct {
+	midgard.EventModel
+	State string
+}
+
+//event when block is created in event store
+type BlockCreated struct {
+	midgard.EventModel
+	Seal      []byte
+	PrevSeal  []byte
+	Height    uint64
+	TxList    []byte
+	TxSeal    [][]byte
+	Timestamp time.Time
+	Creator   []byte
+	State     string
 }
