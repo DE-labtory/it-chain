@@ -42,7 +42,7 @@ func (s *BlockExecuteService) ExecuteBlock(block blockchain.Block) error {
 		return err
 	}
 
-	return s.publisher("Command", "block.execute", command)
+	return s.publisher("block.execute", command)
 }
 
 func createBlockExecuteCommand(block blockchain.Block) (command.ExecuteBlock, error) {

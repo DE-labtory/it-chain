@@ -43,7 +43,7 @@ func DeployCmd() cli.Command {
 }
 func deploy(gitUrl string, sshPath string) {
 	config := conf.GetConfiguration()
-	client := pubsub.Connect(config.Engine.Amqp)
+	client := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
 	defer client.Close()
 	deployCommand := command.Deploy{
 		CommandModel: midgard.CommandModel{
@@ -53,5 +53,5 @@ func deploy(gitUrl string, sshPath string) {
 		SshPath: sshPath,
 	}
 	fmt.Println(fmt.Sprintf("deploying ID : %s", deployCommand.GetID()))
-	client.Publish("Command", "icode.deploy", deployCommand)
+	client.Publish("icode.deploy", deployCommand)
 }

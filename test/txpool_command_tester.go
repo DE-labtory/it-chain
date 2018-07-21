@@ -11,7 +11,7 @@ import (
 func main() {
 
 	config := conf.GetConfiguration()
-	client := pubsub.Connect(config.Engine.Amqp)
+	client := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
 	defer client.Close()
 
 	txCreateCommand := command.CreateTransaction{
@@ -25,7 +25,7 @@ func main() {
 		Function: "initA",
 	}
 
-	err := client.Publish("Command", "transaction.create", txCreateCommand)
+	err := client.Publish("transaction.create", txCreateCommand)
 
 	if err != nil {
 		panic(err)

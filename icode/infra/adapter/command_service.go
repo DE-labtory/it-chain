@@ -22,7 +22,7 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-type Publisher func(exchange string, topic string, data interface{}) (err error)
+type Publisher func(topic string, data interface{}) (err error)
 
 type CommandService struct {
 	publisher Publisher
@@ -35,7 +35,7 @@ func NewCommandService(publisher Publisher) *CommandService {
 }
 
 func (c *CommandService) SendBlockExecuteResultCommand(results []icode.Result, blockId string) error {
-	return c.publisher("Command", "blockResult", command.ReturnBlockResult{
+	return c.publisher("blockResult", command.ReturnBlockResult{
 		CommandModel: midgard.CommandModel{
 			ID: blockId,
 		},

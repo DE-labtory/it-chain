@@ -63,5 +63,5 @@ func (m BlockService) ProposeBlock(transactions []txpool.Transaction) error {
 		})
 	}
 
-	return m.publisher("Command", "block.propose", deliverCommand)
+	return m.publisher("block.propose", deliverCommand)
 }

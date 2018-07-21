@@ -144,7 +144,7 @@ func initGateway(errs chan error) error {
 
 	//set service and repo
 	dbPath := "./.test"
-	mqClient := pubsub.Connect(config.Engine.Amqp)
+	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Command")
 
 	repo := api_gateway.NewTransactionRepository(dbPath)
 
@@ -155,7 +155,7 @@ func initGateway(errs chan error) error {
 	mux := http.NewServeMux()
 	httpLogger := kitlog.With(logger, "component", "http")
 
-	err := mqClient.Subscribe("Event", "transaction.*", &txEventListener)
+	err := subscriber.SubscribeTopic("transaction.*", &txEventListener)
 
 	if err != nil {
 		panic(err)
@@ -177,10 +177,11 @@ func initIcode() error {
 	log.Println("icode is running...")
 
 	config := conf.GetConfiguration()
-	mqClient := pubsub.Connect(config.Engine.Amqp)
+	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Command")
+	publisher := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
 
 	// service generate
-	commandService := icodeAdapter.NewCommandService(mqClient.Publish)
+	commandService := icodeAdapter.NewCommandService(publisher.Publish)
 
 	// api generate
 	storeApi, err := icodeInfra.NewICodeGitStoreApi(config.Icode.AuthId, config.Icode.AuthPw)
@@ -197,9 +198,9 @@ func initIcode() error {
 	unDeployHandler := icodeAdapter.NewUnDeployCommandHandler(*api)
 	blockCommandHandler := icodeAdapter.NewBlockCommandHandler(*api, commandService)
 
-	mqClient.Subscribe("Command", "icode.deploy", deployHandler)
-	mqClient.Subscribe("Command", "icode.undeploy", unDeployHandler)
-	mqClient.Subscribe("Command", "block.excute", blockCommandHandler)
+	subscriber.SubscribeTopic("icode.deploy", deployHandler)
+	subscriber.SubscribeTopic("icode.undeploy", unDeployHandler)
+	subscriber.SubscribeTopic("block.excute", blockCommandHandler)
 
 	return nil
 
@@ -214,13 +215,14 @@ func initTxPool() error {
 	log.Println("txpool is running...")
 
 	config := conf.GetConfiguration()
-	mqClient := pubsub.Connect(config.Engine.Amqp)
+	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Command")
+	publisher := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
 
 	//todo get id from pubkey
 	tmpPeerID := "tmp peer 1"
 
 	//service
-	blockService := txpoolAdapter.NewBlockService(mqClient.Publish)
+	blockService := txpoolAdapter.NewBlockService(publisher.Publish)
 	blockProposalService := txpool.NewBlockProposalService(txQueryApi, blockService, config.Engine.Mode)
 
 	//infra
@@ -230,7 +232,7 @@ func initTxPool() error {
 	//10초마다 block propose
 	txpoolBatch.GetTimeOutBatcherInstance().Run(blockProposalService.ProposeBlock, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
 
-	err := mqClient.Subscribe("Command", "transaction.create", txCommandHandler)
+	err := subscriber.SubscribeTopic("transaction.create", txCommandHandler)
 
 	if err != nil {
 		panic(err)
@@ -238,6 +240,7 @@ func initTxPool() error {
 
 	return nil
 }
+
 func initConsensus() error {
 	return nil
 }

@@ -63,10 +63,9 @@ func TestBlockExecuteService_ExecuteBlock(t *testing.T) {
 		},
 	}
 
-	publisher := func(exchange string, topic string, data interface{}) error {
+	publisher := func(topic string, data interface{}) error {
 		command := data.(command.ExecuteBlock)
 
-		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "block.execute")
 		assert.Equal(t, []byte{0x1}, command.Seal)
 		assert.Equal(t, []byte{0x2}, command.PrevSeal)

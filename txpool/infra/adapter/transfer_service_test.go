@@ -56,13 +56,12 @@ func TestGrpcCommandService_SendLeaderTransactions(t *testing.T) {
 		},
 	}
 
-	publisher := func(exchange string, topic string, data interface{}) (err error) {
+	publisher := func(topic string, data interface{}) (err error) {
 		txList := &[]*txpool.Transaction{}
 		deliverCommand := data.(command.DeliverGrpc)
 
 		common.Deserialize(deliverCommand.Body, txList)
 
-		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.deliver")
 		assert.Equal(t, 1, len(*txList))
 

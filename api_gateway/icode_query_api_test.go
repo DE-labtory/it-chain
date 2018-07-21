@@ -262,20 +262,21 @@ func TestICodeEventHandler_HandleMetaDeletedEvent(t *testing.T) {
 	//todo impl like TestICodeEventHandler_HandleMetaCreatedEvent
 }
 
-func setICodeQueryApi(t *testing.T) (ICodeQueryApi, *pubsub.Client, func()) {
+func setICodeQueryApi(t *testing.T) (ICodeQueryApi, *pubsub.TopicPublisher, func()) {
 
 	dbPath := "./.test"
-	client := pubsub.Connect("")
+	client := pubsub.NewTopicSubscriber("", "Event")
+	publisher := pubsub.NewTopicPublisher("", "Event")
 
 	repo := NewLevelDbMetaRepository(dbPath)
 
 	metaQueryApi := ICodeQueryApi{metaRepository: &repo}
 	metaEventListener := &ICodeEventHandler{metaRepository: &repo}
 
-	err := client.Subscribe("Event", "meta.*", metaEventListener)
+	err := client.SubscribeTopic("meta.*", metaEventListener)
 	assert.NoError(t, err)
 
-	return metaQueryApi, client, func() {
+	return metaQueryApi, &publisher, func() {
 		os.RemoveAll(dbPath)
 		client.Close()
 	}

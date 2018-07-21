@@ -176,7 +176,7 @@ func TestTransactionQueryApi_FindUncommittedTransactions(t *testing.T) {
 
 	defer tearDown()
 
-	err := client.Publish("Event", "transaction.created", event.TxCreated{
+	err := client.Publish("transaction.created", event.TxCreated{
 		EventModel: midgard.EventModel{
 			ID:      "1123",
 			Time:    time.Now(),
@@ -189,7 +189,7 @@ func TestTransactionQueryApi_FindUncommittedTransactions(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	err = client.Publish("Event", "transaction.created", event.TxCreated{
+	err = client.Publish("transaction.created", event.TxCreated{
 		EventModel: midgard.EventModel{
 			ID: "2",
 		},
@@ -199,7 +199,7 @@ func TestTransactionQueryApi_FindUncommittedTransactions(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	err = client.Publish("Event", "transaction.created", event.TxCreated{
+	err = client.Publish("transaction.created", event.TxCreated{
 		EventModel: midgard.EventModel{
 			ID: "3",
 		},
@@ -222,7 +222,7 @@ func TestTransactionEventListener_HandleTransactionDeletedEvent(t *testing.T) {
 
 	defer tearDown()
 
-	err := client.Publish("Event", "transaction.created", event.TxCreated{
+	err := client.Publish("transaction.created", event.TxCreated{
 		EventModel: midgard.EventModel{
 			ID:      "1123",
 			Time:    time.Now(),
@@ -240,7 +240,7 @@ func TestTransactionEventListener_HandleTransactionDeletedEvent(t *testing.T) {
 	txs, err := api.FindUncommittedTransactions()
 	assert.Equal(t, len(txs), 1)
 
-	err = client.Publish("Event", "transaction.deleted", event.TxDeleted{
+	err = client.Publish("transaction.deleted", event.TxDeleted{
 		EventModel: midgard.EventModel{
 			ID: "1123",
 		},
@@ -253,20 +253,21 @@ func TestTransactionEventListener_HandleTransactionDeletedEvent(t *testing.T) {
 	assert.Equal(t, len(txs), 0)
 }
 
-func setApiUp(t *testing.T) (TransactionQueryApi, *pubsub.Client, func()) {
+func setApiUp(t *testing.T) (TransactionQueryApi, *pubsub.TopicPublisher, func()) {
 
 	dbPath := "./.test"
-	client := pubsub.Connect("")
+	client := pubsub.NewTopicSubscriber("", "Event")
+	publisher := pubsub.NewTopicPublisher("", "Event")
 
 	repo := NewTransactionRepository(dbPath)
 
 	txQueryApi := TransactionQueryApi{transactionRepository: repo}
 	txEventListener := &TransactionEventListener{transactionRepository: repo}
 
-	err := client.Subscribe("Event", "transaction.*", txEventListener)
+	err := client.SubscribeTopic("transaction.*", txEventListener)
 	assert.NoError(t, err)
 
-	return txQueryApi, client, func() {
+	return txQueryApi, &publisher, func() {
 		os.RemoveAll(dbPath)
 		client.Close()
 	}

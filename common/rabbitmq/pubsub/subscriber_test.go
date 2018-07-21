@@ -36,6 +36,7 @@ func TestTopicSubscriber_SubscribeTopic(t *testing.T) {
 	wg.Add(2)
 
 	subscriber := pubsub.NewTopicSubscriber("", "Event")
+	defer subscriber.Close()
 
 	handler := &MockHandler{}
 	handler.HandleNameUpdateCommandFunc = func(event UserNameUpdateEvent) {
@@ -44,7 +45,7 @@ func TestTopicSubscriber_SubscribeTopic(t *testing.T) {
 	}
 
 	handler.HandleFunc = func(command UserAddCommand) {
-		assert.Equal(t, command.Age, "123")
+		assert.Equal(t, command.Age, 123)
 		wg.Done()
 	}
 

@@ -21,9 +21,13 @@ import (
 	"log"
 
 	"github.com/it-chain/engine/common/rabbitmq"
-	"github.com/it-chain/midgard/bus"
 	"github.com/streadway/amqp"
 )
+
+type Message struct {
+	MatchingValue string
+	Data          []byte
+}
 
 type TopicSubscriber struct {
 	rabbitmq.Client
@@ -63,7 +67,7 @@ func NewTopicSubscriber(rabbitmqUrl string, exchange string) TopicSubscriber {
 		panic(err.Error())
 	}
 
-	p, _ := bus.NewParamBasedRouter()
+	p, _ := NewParamBasedRouter()
 
 	return TopicSubscriber{
 		Client: rabbitmq.Client{
@@ -137,4 +141,14 @@ func (t TopicSubscriber) SubscribeTopic(topic string, source interface{}) error 
 	}()
 
 	return nil
+}
+
+func (t *TopicSubscriber) Close() {
+
+	if t.Conn != nil {
+		t.Conn.Close()
+	}
+	if t.Ch != nil {
+		t.Ch.Close()
+	}
 }

@@ -26,7 +26,7 @@ import (
 
 var ErrEmptyBlock = errors.New("block is nil")
 
-type Publisher func(exchange string, topic string, data interface{}) (err error) //해당 publish함수는 midgard 에서 의존성 주입을 받기 위해 interface로 작성한다.
+type Publisher func(topic string, data interface{}) (err error) //해당 publish함수는 midgard 에서 의존성 주입을 받기 위해 interface로 작성한다.
 //모든 의존성 주입은 컴포넌트.go 에서 이루어짐
 
 type CommandService struct {
@@ -51,5 +51,5 @@ func (c *CommandService) SendBlockValidateCommand(block blockchain.Block) error 
 		Block: block,
 	}
 
-	return c.publisher("Event", "Block", command)
+	return c.publisher("Block", command)
 }
