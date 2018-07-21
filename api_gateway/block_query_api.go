@@ -30,6 +30,11 @@ import (
 var ErrGetCommitedBlock = errors.New("Error in getting commited block")
 var ErrAddCommitingBlock = errors.New("Error in add block which is going to be commited")
 var ErrNewBlockStorage = errors.New("Error in construct block storage")
+var ErrNoStagedBlock = errors.New("Error can not find staged block")
+var ErrInvalidStateBlock = errors.New("Error invalid state block")
+var ErrFailUpdateBlock = errors.New("Error failed updating block")
+var ErrFailRemoveBlock = errors.New("Error failed removing block")
+var ErrFailBlockTypeCasting = errors.New("Error failed type casting block")
 
 type BlockQueryApi struct {
 	blockPoolRepository     BlockPoolRepository
@@ -62,14 +67,100 @@ func (q *BlockQueryApi) GetCommitedBlockByHeight(height blockchain.BlockHeight) 
 }
 
 type BlockPoolRepository interface {
-	AddCreatedBlock(block blockchain.DefaultBlock)
+	AddCreatedBlock(block blockchain.DefaultBlock) error
 	GetStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
 	GetStagedBlockById(id string) (blockchain.DefaultBlock, error)
 	GetFirstStagedBlock() (blockchain.DefaultBlock, error)
+	RemoveById(id string) error
 }
 
 type BlockPoolRepositoryImpl struct {
 	Blocks []blockchain.Block
+}
+
+func NewBlockPoolRepository() *BlockPoolRepositoryImpl {
+	return &BlockPoolRepositoryImpl{
+		Blocks: make([]blockchain.Block, 0),
+	}
+}
+
+func (r *BlockPoolRepositoryImpl) AddCreatedBlock(block blockchain.DefaultBlock) error {
+	if validStateBlock(block) {
+		r.Blocks = append(r.Blocks, &block)
+		return nil
+	}
+	return ErrInvalidStateBlock
+}
+
+func validStateBlock(block blockchain.DefaultBlock) bool {
+	return block.State == blockchain.Staged || block.State == blockchain.Created
+}
+
+func (r *BlockPoolRepositoryImpl) GetStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
+	for _, block := range r.Blocks {
+		if block.GetHeight() == height {
+			target, ok := block.(*blockchain.DefaultBlock)
+			if !ok {
+				return blockchain.DefaultBlock{}, ErrFailBlockTypeCasting
+			}
+
+			return *target, nil
+		}
+	}
+	return blockchain.DefaultBlock{}, ErrNoStagedBlock
+}
+
+func (r *BlockPoolRepositoryImpl) GetStagedBlockById(id string) (blockchain.DefaultBlock, error) {
+	for _, block := range r.Blocks {
+		if string(block.GetSeal()) == id {
+			defaultBlock, ok := block.(*blockchain.DefaultBlock)
+			if !ok {
+				return blockchain.DefaultBlock{}, ErrFailBlockTypeCasting
+			}
+
+			return *defaultBlock, nil
+		}
+	}
+	return blockchain.DefaultBlock{}, ErrNoStagedBlock
+}
+
+func (r *BlockPoolRepositoryImpl) GetFirstStagedBlock() (blockchain.DefaultBlock, error) {
+	if len(r.Blocks) == 0 {
+		return blockchain.DefaultBlock{}, ErrNoStagedBlock
+	}
+
+	target := blockchain.DefaultBlock{}
+
+	for _, block := range r.Blocks {
+		defaultBlock, ok := block.(*blockchain.DefaultBlock)
+		if !ok {
+			return blockchain.DefaultBlock{}, ErrFailBlockTypeCasting
+		}
+
+		if stagedBlockWithSmallerHeight(target, *defaultBlock) {
+			target = *defaultBlock
+		}
+	}
+
+	if target.IsEmpty() {
+		return target, ErrNoStagedBlock
+	}
+
+	return target, nil
+}
+
+func stagedBlockWithSmallerHeight(base blockchain.DefaultBlock, comparator blockchain.DefaultBlock) bool {
+	return comparator.State == blockchain.Staged && (base.Height > comparator.Height || base.IsEmpty())
+}
+
+func (r *BlockPoolRepositoryImpl) RemoveById(id string) error {
+	for i, b := range r.Blocks {
+		if string(b.GetSeal()) == id {
+			r.Blocks = append(r.Blocks[:i], r.Blocks[i+1:]...)
+			return nil
+		}
+	}
+	return ErrFailRemoveBlock
 }
 
 type CommitedBlockRepository interface {
