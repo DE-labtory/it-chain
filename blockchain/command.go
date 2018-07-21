@@ -57,11 +57,6 @@ type GrpcReceiveCommand struct {
 	FromPeer     Peer
 }
 
-type BlockExecuteCommand struct {
-	midgard.CommandModel
-	Block []byte
-}
-
 type BlockResultCommand struct {
 	midgard.CommandModel
 	TxResults []icode.Result

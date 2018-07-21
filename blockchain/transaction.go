@@ -74,6 +74,7 @@ type DefaultTransaction struct {
 	ID        string
 	Status    Status
 	PeerID    string
+	ICodeID   string
 	Timestamp time.Time
 	TxData    TxData
 	Signature []byte
