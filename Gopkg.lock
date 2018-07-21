@@ -201,13 +201,12 @@
   name = "github.com/it-chain/midgard"
   packages = [
     ".",
-    "bus",
     "store",
     "store/leveldb",
     "store/mongodb"
   ]
-  revision = "b7fe3c7479773f3aece558f3fb5c426c775dfd4c"
-  version = "v0.0.2"
+  revision = "cfaf91f623b0f65430dbef4b00804ab72088f6f3"
+  version = "v0.0.4"
 
 [[projects]]
   name = "github.com/it-chain/tesseract"
@@ -640,6 +639,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ed415a657c5dd5d3259b67f8755f942182812ea44f5f4849cdc48e77a96a5e07"
+  inputs-digest = "95b650741093e5be6a4e9326913126b45cbfef625707e107de29aaf92af3e2e1"
   solver-name = "gps-cdcl"
   solver-version = 1
