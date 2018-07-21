@@ -56,3 +56,34 @@ type SendGrpcMsgCommand struct {
 	Body       []byte
 	Protocol   string
 }
+
+/*
+ * grpc-gateway
+ */
+
+//Connection 생성 command
+type ConnectionCreate struct {
+	midgard.CommandModel
+	Address string
+}
+
+//Connection close command
+type ConnectionClose struct {
+	midgard.CommandModel
+}
+
+//다른 Peer에게 Message전송 command
+type GrpcDeliver struct {
+	midgard.CommandModel
+	Recipients []string
+	Body       []byte
+	Protocol   string
+}
+
+//다른 Peer에게 Message수신 command
+type GrpcReceive struct {
+	midgard.CommandModel
+	Body         []byte
+	ConnectionID string
+	Protocol     string
+}

@@ -24,14 +24,12 @@ import (
 )
 
 type ConnectionApi struct {
-	eventRepository grpc_gateway.EventRepository
-	grpcService     grpc_gateway.GrpcService
+	grpcService grpc_gateway.GrpcService
 }
 
-func NewConnectionApi(eventRepository grpc_gateway.EventRepository, grpcService grpc_gateway.GrpcService) *ConnectionApi {
+func NewConnectionApi(grpcService grpc_gateway.GrpcService) *ConnectionApi {
 	return &ConnectionApi{
-		eventRepository: eventRepository,
-		grpcService:     grpcService,
+		grpcService: grpcService,
 	}
 }
 
