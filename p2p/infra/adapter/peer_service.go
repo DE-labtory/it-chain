@@ -19,7 +19,7 @@ package adapter
 import (
 	"time"
 
-	"github.com/it-chain/engine/grpc_gateway"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/p2p"
 )
 
@@ -28,10 +28,11 @@ type PeerService struct {
 }
 
 func (ps *PeerService) Dial(ipAddress string) error {
-	command := grpc_gateway.ConnectionCreateCommand{
+
+	connectionCreateCommand := command.ConnectionCreate{
 		Address: ipAddress,
 	}
-	ps.publish("Command", "connection.create", command)
+	ps.publish("Command", "connection.create", connectionCreateCommand)
 	return nil
 }
 
