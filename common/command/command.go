@@ -119,8 +119,8 @@ type UnDeploy struct {
 
 type Query struct {
 	midgard.CommandModel
-	function string
-	args     []string
+	Function string
+	Args     []string
 }
 
 /*
