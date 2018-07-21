@@ -31,6 +31,13 @@ type PeerQueryApi struct {
 	peerRepository PeerRepository
 }
 
+func NewPeerQueryApi(peerRepository PeerRepository) *PeerQueryApi {
+
+	return &PeerQueryApi{
+		peerRepository: peerRepository,
+	}
+}
+
 func (pqa *PeerQueryApi) GetPLTable() (p2p.PLTable, error) {
 
 	return pqa.peerRepository.GetPLTable()
@@ -54,6 +61,14 @@ func (pqa *PeerQueryApi) FindPeerByAddress(ipAddress string) (p2p.Peer, error) {
 type PeerRepository struct {
 	mux     sync.Mutex
 	pLTable p2p.PLTable
+}
+
+func NewPeerRepository(pLTable p2p.PLTable) PeerRepository {
+
+	return PeerRepository{
+		mux:     sync.Mutex{},
+		pLTable: pLTable,
+	}
 }
 
 func (pltrepo *PeerRepository) GetPLTable() (p2p.PLTable, error) {
