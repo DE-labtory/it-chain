@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
@@ -29,14 +30,14 @@ type Connection struct {
 	Address string
 }
 
-func (c *Connection) On(event midgard.Event) error {
-	switch v := event.(type) {
+func (c *Connection) On(connectionEvent midgard.Event) error {
+	switch v := connectionEvent.(type) {
 
-	case *ConnectionCreatedEvent:
+	case *event.ConnectionCreated:
 		c.ID = v.ID
 		c.Address = v.Address
 
-	case *ConnectionClosedEvent:
+	case *event.ConnectionClosed:
 		c.ID = ""
 		c.Address = ""
 
@@ -51,7 +52,7 @@ func NewConnection(connectionID string, address string) (Connection, error) {
 
 	c := Connection{}
 
-	event := &ConnectionCreatedEvent{
+	connectionCreatedEvent := &event.ConnectionCreated{
 		EventModel: midgard.EventModel{
 			ID:   connectionID,
 			Type: "connection.created",
@@ -59,14 +60,14 @@ func NewConnection(connectionID string, address string) (Connection, error) {
 		Address: address,
 	}
 
-	c.On(event)
+	c.On(connectionCreatedEvent)
 
-	return c, eventstore.Save(connectionID, event)
+	return c, eventstore.Save(connectionID, connectionCreatedEvent)
 }
 
 func CloseConnection(connectionID string) error {
 
-	return eventstore.Save(connectionID, ConnectionClosedEvent{
+	return eventstore.Save(connectionID, event.ConnectionClosed{
 		EventModel: midgard.EventModel{
 			ID:   connectionID,
 			Type: "connection.closed",

@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/grpc_gateway"
 	"github.com/it-chain/engine/grpc_gateway/infra"
 	"github.com/it-chain/heimdall/key"
@@ -70,7 +71,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 	//given
 	tests := map[string]struct {
 		input  bifrost.Message
-		output grpc_gateway.GrpcReceiveCommand
+		output command.GrpcReceive
 		err    error
 	}{
 		"success": {
@@ -80,7 +81,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 					ID: "123",
 				},
 			},
-			output: grpc_gateway.GrpcReceiveCommand{
+			output: command.GrpcReceive{
 				Body:         []byte("hello world"),
 				ConnectionID: "123",
 			},
@@ -93,7 +94,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 		//then
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.receive")
-		assert.Equal(t, data, grpc_gateway.GrpcReceiveCommand{
+		assert.Equal(t, data, command.GrpcReceive{
 			Body:         []byte("hello world"),
 			ConnectionID: "123",
 		})
@@ -374,7 +375,7 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.receive")
-		assert.Equal(t, data, grpc_gateway.GrpcReceiveCommand{
+		assert.Equal(t, data, command.GrpcReceive{
 			Body:         publishedData,
 			ConnectionID: connID,
 		})
