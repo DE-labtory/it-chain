@@ -147,11 +147,24 @@ type BlockCreated struct {
 	Seal      []byte
 	PrevSeal  []byte
 	Height    uint64
-	TxList    []byte
+	TxList    []Tx
 	TxSeal    [][]byte
 	Timestamp time.Time
 	Creator   []byte
 	State     string
+}
+
+type Tx struct {
+	ID        string
+	ICodeID   string
+	Status    int
+	PeerID    string
+	TimeStamp time.Time
+	Jsonrpc   string
+	Method    string
+	Function  string
+	Args      []string
+	Signature []byte
 }
 
 /*

@@ -54,3 +54,6 @@ my.pid
 
 # draw.io images
 images/*.xml
+
+# vim stack dump
+vim.exe.stackdump
