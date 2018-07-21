@@ -80,9 +80,9 @@ func initDefaultStore() (midgard.EventStore, store.EventSerializer) {
 //todo rabbitmq url
 func initDefaultPublisher() midgard.Publisher {
 
-	client := pubsub.Connect("")
+	client := pubsub.NewTopicPublisher("", "Event")
 
-	return client
+	return &client
 }
 
 //this function is for testing

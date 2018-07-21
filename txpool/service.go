@@ -36,8 +36,6 @@ type BlockProposalService struct {
 	blockService       BlockService
 }
 
-type Publisher func(exchange string, topic string, data interface{}) (err error)
-
 func NewBlockProposalService(queryService TxpoolQueryService, blockService BlockService, engineMode string) *BlockProposalService {
 
 	return &BlockProposalService{

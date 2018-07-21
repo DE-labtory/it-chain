@@ -38,12 +38,12 @@ func UnDeployCmd() cli.Command {
 }
 func unDeploy(icodeId string) {
 	config := conf.GetConfiguration()
-	client := pubsub.Connect(config.Engine.Amqp)
+	client := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
 	defer client.Close()
 	undeployCommand := command.UnDeploy{
 		CommandModel: midgard.CommandModel{
 			ID: icodeId,
 		},
 	}
-	client.Publish("Command", "icode.undeploy", undeployCommand)
+	client.Publish("icode.undeploy", undeployCommand)
 }
