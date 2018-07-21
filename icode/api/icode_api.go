@@ -19,6 +19,8 @@ package api
 import (
 	"fmt"
 
+	"time"
+
 	"github.com/it-chain/engine/icode"
 )
 
@@ -88,7 +90,18 @@ func (iApi ICodeApi) Invoke(tx icode.Transaction) *icode.Result {
 	return result
 }
 
-func (iApi ICodeApi) Query(tx icode.Transaction) *icode.Result {
+//todo change not using tx
+func (iApi ICodeApi) Query(id icode.ID, function string, args []string) *icode.Result {
+
+	tx := icode.Transaction{
+		TxId:      "",
+		TimeStamp: time.Now(),
+		Jsonrpc:   "2.0",
+		Method:    "query",
+		ICodeID:   id,
+		Function:  function,
+		Args:      args,
+	}
 	result, err := iApi.ContainerService.ExecuteTransaction(tx)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("error in invoke tx, err : %s", err.Error()))
