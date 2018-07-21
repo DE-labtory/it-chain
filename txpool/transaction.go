@@ -48,26 +48,18 @@ const (
 
 type TxDataType string
 
-type TxData struct {
-	Jsonrpc string
-	Method  TxDataType
-	Params  Param
-	ICodeID string
-}
-
-type Param struct {
-	Function string
-	Args     []string
-}
-
 //Aggregate root must implement aggregate interface
 type Transaction struct {
-	TxId          TransactionId
-	PublishPeerId string
-	TxStatus      TransactionStatus
-	TxHash        string
-	TimeStamp     time.Time
-	TxData        TxData
+	TxId      TransactionId
+	Status    TransactionStatus
+	TimeStamp time.Time
+	Jsonrpc   string
+	Method    TxDataType
+	ICodeID   string
+	Function  string
+	Args      []string
+	Signature []byte
+	PeerID    string
 }
 
 // must implement id method
@@ -83,7 +75,7 @@ func (t *Transaction) On(event midgard.Event) error {
 	case *TxCreatedEvent:
 
 		t.TxId = TransactionId(v.ID)
-		t.PublishPeerId = v.PublishPeerId
+		t.PeerID = v
 		t.TxStatus = TransactionStatus(v.TxStatus)
 		t.TxHash = v.TxHash
 		t.TimeStamp = v.TimeStamp
