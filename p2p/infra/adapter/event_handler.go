@@ -30,9 +30,9 @@ type EventHandler struct {
 	communicationApi api.ICommunicationApi
 }
 
-func NewEventHandler(communicationApi api.ICommunicationApi) *EventHandler {
+func NewEventHandler(communicationApi api.ICommunicationApi) EventHandler {
 
-	return &EventHandler{
+	return EventHandler{
 		communicationApi: communicationApi,
 	}
 }
