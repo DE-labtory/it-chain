@@ -36,6 +36,22 @@ func (pqa *PeerQueryApi) GetPLTable() (p2p.PLTable, error) {
 	return pqa.peerRepository.GetPLTable()
 }
 
+func (pqa *PeerQueryApi) GetPeerList() ([]p2p.Peer, error) {
+	pTable, err := pqa.peerRepository.GetPLTable()
+
+	if err != nil {
+		return nil, err
+	}
+
+	peerList := make([]p2p.Peer, 0)
+
+	for _, peer := range pTable.PeerTable {
+		peerList = append(peerList, peer)
+	}
+
+	return peerList, nil
+}
+
 func (pqa *PeerQueryApi) GetLeader() (p2p.Leader, error) {
 
 	return pqa.peerRepository.GetLeader()
