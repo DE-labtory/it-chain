@@ -33,11 +33,11 @@ func init() {
 	//messageDispatcher := adapter.NewMessageDispatcher(publisher)
 	//
 	//
-	////create amqp Handler
+	////create rabbitmq Handler
 	//eventHandler := adapter.NewNodeEventHandler(nodeRepository, leaderRepository)
 	//grpcMessageHandler := adapter.NewGrpcMessageHandler(leaderApi, nodeApi, messageDispatcher)
 	//
-	//// Subscribe amqp server
+	//// Subscribe rabbitmq server
 	//err1 := rabbitmqClient.Subscribe("Command", "connection.*", eventHandler)
 	//
 	//if err1 != nil {

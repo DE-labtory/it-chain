@@ -40,7 +40,7 @@ type Client struct {
 func Connect(rabbitmqUrl string) *Client {
 
 	if rabbitmqUrl == "" {
-		rabbitmqUrl = "amqp://guest:guest@localhost:5672/"
+		rabbitmqUrl = "rabbitmq://guest:guest@localhost:5672/"
 	}
 
 	conn, err := amqp.Dial(rabbitmqUrl)
@@ -89,7 +89,7 @@ func (c *Client) Publish(exchange string, topic string, data interface{}) (err e
 		exchange, // name
 		"topic",  // type
 		true,     // durable
-		false,    // auto-deleted
+		true,     // auto-deleted
 		false,    // internal
 		false,    // no-wait
 		nil,      // arguments
@@ -153,7 +153,7 @@ func (c *Client) consume(exchange string, topic string) (<-chan amqp.Delivery, e
 		exchange, // name
 		"topic",  // type
 		true,     // durable
-		false,    // auto-deleted
+		true,     // auto-deleted
 		false,    // internal
 		false,    // no-wait
 		nil,      // arguments

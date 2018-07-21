@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/it-chain/engine/common/amqp/pubsub"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"

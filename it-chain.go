@@ -29,7 +29,7 @@ import (
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/cmd/icode"
-	"github.com/it-chain/engine/common/amqp/pubsub"
+	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/core/eventstore"
 	icodeApi "github.com/it-chain/engine/icode/api"

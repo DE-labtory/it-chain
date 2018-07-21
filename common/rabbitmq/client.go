@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package model
+package rabbitmq
 
-// it-chain의 공통적이고 중요한 설정을 담는 구조체이다.
-type EngineConfiguration struct {
-	KeyPath              string
-	Mode                 string
-	Amqp                 string
-	BootstrapNodeAddress string
-}
+import "github.com/streadway/amqp"
 
-func NewEngineConfiguration() EngineConfiguration {
-	return EngineConfiguration{
-		KeyPath:              ".it-chain/",
-		Mode:                 "solo",
-		BootstrapNodeAddress: "127.0.0.1:5555",
-		Amqp:                 "rabbitmq://guest:guest@localhost:5672/",
-	}
+type Client struct {
+	Conn *amqp.Connection
+	Ch   *amqp.Channel
 }
