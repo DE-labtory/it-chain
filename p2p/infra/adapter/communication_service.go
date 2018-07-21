@@ -58,7 +58,7 @@ func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTa
 		PLTable: peerLeaderTable,
 	}
 
-	grpcDeliverCommand, err := CreateGrpcDeliverCommand("PeerTableDeliver", peerLeaderTableMessage)
+	grpcDeliverCommand, err := CreateGrpcDeliverCommand("PLTableDeliverProtocol", peerLeaderTableMessage)
 
 	if err != nil {
 		return err

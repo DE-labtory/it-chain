@@ -28,6 +28,11 @@ type ILeaderService interface {
 
 type LeaderService struct{}
 
+func NewLeaderService() LeaderService {
+
+	return LeaderService{}
+}
+
 func (ls *LeaderService) Set(leader Leader) error {
 
 	e := event.LeaderUpdated{
