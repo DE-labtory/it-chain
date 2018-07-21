@@ -21,11 +21,8 @@ import (
 )
 
 type MockPeerService struct {
-	SaveFunc          func(peer p2p.Peer) error
-	RemoveFunc        func(peerId p2p.PeerId) error
-	FindByIdFunc      func(peerId p2p.PeerId) (p2p.Peer, error)
-	FindByAddressFunc func(ipAddress string) (p2p.Peer, error)
-	FindAllFunc       func() ([]p2p.Peer, error)
+	SaveFunc   func(peer p2p.Peer) error
+	RemoveFunc func(peerId p2p.PeerId) error
 }
 
 type MockLeaderService struct {
