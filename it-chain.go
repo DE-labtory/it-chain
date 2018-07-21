@@ -28,6 +28,7 @@ import (
 
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/it-chain/engine/api_gateway"
+	"github.com/it-chain/engine/cmd/blockchain"
 	"github.com/it-chain/engine/cmd/icode"
 	"github.com/it-chain/engine/common/amqp/pubsub"
 	"github.com/it-chain/engine/conf"
@@ -77,6 +78,7 @@ func main() {
 	}
 	app.Commands = []cli.Command{}
 	app.Commands = append(app.Commands, icode.IcodeCmd())
+	app.Commands = append(app.Commands, blockchain.BlockchainCmd())
 	app.Action = func(c *cli.Context) error {
 		PrintLogo()
 		configName := c.String("config")
@@ -115,6 +117,7 @@ func start() error {
 	initTxPool()
 	initIcode()
 	initPeer()
+	initBlockchain()
 
 	go func() {
 		c := make(chan os.Signal, 1)
@@ -239,5 +242,12 @@ func initTxPool() error {
 	return nil
 }
 func initConsensus() error {
+	return nil
+}
+
+func initBlockchain() error {
+
+	log.Println("blockchain is running...")
+
 	return nil
 }
