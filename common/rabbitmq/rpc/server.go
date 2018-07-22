@@ -14,11 +14,4 @@
  * limitations under the License.
  */
 
-package rabbitmq
-
-import "github.com/streadway/amqp"
-
-type Client struct {
-	Conn *amqp.Connection
-	Ch   *amqp.Channel
-}
+package rpc
