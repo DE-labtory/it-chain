@@ -211,6 +211,7 @@ type CommitedBlockRepository interface {
 	Save(block blockchain.DefaultBlock) error
 	GetLastBlock() (blockchain.DefaultBlock, error)
 	GetBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
+	IsEmpty() bool
 }
 
 type CommitedBlockRepositoryImpl struct {
@@ -401,4 +402,20 @@ func (l *BlockEventListener) HandleBlockCommitedEvent(event event.BlockCommitted
 	}
 
 	return nil
+}
+
+func (cbr *CommitedBlockRepositoryImpl) IsEmpty() bool {
+
+	lastBlock := &blockchain.DefaultBlock{}
+	err := cbr.BlockStorageManager.GetLastBlock(lastBlock)
+
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	if lastBlock.IsEmpty() {
+		return true
+	}
+
+	return false
 }
