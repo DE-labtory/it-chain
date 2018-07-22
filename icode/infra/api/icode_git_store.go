@@ -37,16 +37,16 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
-type ICodeGitStoreApi struct {
+type ICodeGitStoreApi struct {/*
 	AuthClient  *github.Client
 	AuthGitUser *github.User
 	authUserID  string
 	authUserPW  string
-	name        string
+	name        string*/
 }
 
-func NewICodeGitStoreApi(authUserID string, authUserPW string) (*ICodeGitStoreApi, error) {
-	tp := github.BasicAuthTransport{
+func NewICodeGitStoreApi() (*ICodeGitStoreApi, error) {
+	/*tp := github.BasicAuthTransport{
 		Username: strings.TrimSpace(authUserID),
 		Password: strings.TrimSpace(authUserPW),
 	}
@@ -57,23 +57,13 @@ func NewICodeGitStoreApi(authUserID string, authUserPW string) (*ICodeGitStoreAp
 	if err != nil {
 		return nil, err
 	}
-
-	confSshPath := conf.GetConfiguration().Icode.SshPath
-	if confSshPath == "default" {
-		currentUser, err := user.Current()
-		if err != nil {
-			return nil, err
-		}
-		confSshPath = currentUser.HomeDir + "/.ssh/id_rsa"
-
-	}
-
-	return &ICodeGitStoreApi{
+*/
+	return &ICodeGitStoreApi{/*
 		AuthClient:  client,
 		AuthGitUser: gitUser,
 		authUserID:  authUserID,
 		authUserPW:  authUserPW,
-		name:        gitUser.GetLogin(),
+		name:        gitUser.GetLogin(),*/
 	}, nil
 }
 
@@ -127,7 +117,7 @@ func (gApi *ICodeGitStoreApi) Clone(id string, baseSavePath string, repositoryUr
 
 //todo async push
 func (gApi *ICodeGitStoreApi) Push(meta icode.Meta) error {
-	iCodePath := meta.Path
+	/*iCodePath := meta.Path
 
 	if _, err := os.Stat(iCodePath); os.IsNotExist(err) {
 		return errors.New(fmt.Sprintf("Invalid iCodeMeta Path [%s]", iCodePath))
@@ -160,19 +150,19 @@ func (gApi *ICodeGitStoreApi) Push(meta icode.Meta) error {
 
 	if err != nil {
 		return err
-	}
+	}*/
 
-	return nil
+	return errors.New("don't use Push func")
 
 }
 
 func (gApi *ICodeGitStoreApi) createRepository(name string) error {
-	ctx := context.Background()
+	/*ctx := context.Background()
 	_, _, err := gApi.AuthClient.Repositories.Create(ctx, "", &github.Repository{
 		Name:    &name,
 		Private: &[]bool{false}[0],
-	})
-	return err
+	})*/
+	return errors.New("don't use Push func")
 }
 
 func getNameFromGitUrl(gitUrl string) string {

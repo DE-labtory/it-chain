@@ -184,12 +184,13 @@ func initIcode() error {
 	commandService := icodeAdapter.NewCommandService(publisher.Publish)
 
 	// api generate
-	storeApi, err := icodeInfra.NewICodeGitStoreApi(config.Icode.AuthId, config.Icode.AuthPw)
+	storeApi, err := icodeInfra.NewICodeGitStoreApi()
 	if err != nil {
 		return err
 	}
+	defaultScriptPath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/icode/default_setup.sh"
 	containerService := icodeService.NewTesseractContainerService(tesseract.Config{
-		ShPath: config.Icode.ShPath,
+		ShPath: defaultScriptPath,
 	})
 	api := icodeApi.NewIcodeApi(containerService, storeApi)
 
