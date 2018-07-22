@@ -115,7 +115,7 @@ func (c Client) Call(queue string, params interface{}, callback interface{}) err
 				return err
 			}
 
-			c.Ch.QueueDelete(replyQ.Name, true, true, true)
+			c.Ch.QueueDelete(replyQ.Name, false, false, true)
 			break
 		}
 	}

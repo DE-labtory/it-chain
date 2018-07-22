@@ -17,59 +17,23 @@
 package rpc_test
 
 import (
-	"fmt"
 	"testing"
 
-	"sync"
-
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
 
-type Sample struct {
-	midgard.EventModel
-	ID     string
-	TxData TxData
-}
-
-type TxData struct {
-	ID string
-}
-
-func TestClient_Call(t *testing.T) {
-
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+func TestNewServer(t *testing.T) {
 
 	server := rpc.NewServer("")
-	defer server.Close()
-	server.Register("transaction.create", func(sample Sample) Sample {
+
+	err := server.Register("transaction.create", func(sample Sample) Sample {
+
 		assert.Equal(t, sample.ID, "123")
 		assert.Equal(t, sample.TxData.ID, "1234")
 
 		return Sample{ID: "1234"}
 	})
 
-	client := rpc.NewClient("")
-	defer client.Close()
-	err := client.Call("transaction.create", Sample{ID: "123", TxData: TxData{ID: "1234"}}, func(sample Sample) {
-
-		assert.Equal(t, sample.ID, "1234")
-		wg.Done()
-	})
-
 	assert.NoError(t, err)
-	wg.Wait()
-}
-
-func TestClient_Call_When_No_consumer(t *testing.T) {
-
-	client := rpc.NewClient("")
-	defer client.Close()
-	err := client.Call("transaction.create", Sample{}, func(sample Sample) {
-		fmt.Println("callbacked!")
-	})
-
-	assert.Error(t, err)
 }
