@@ -38,7 +38,7 @@ func TestICodeApi_Deploy(t *testing.T) {
 	containerService := service.NewTesseractContainerService(tesseractConfig)
 	storeApi, err := api2.NewICodeGitStoreApi(backupGitId, backupGitPw)
 	assert.NoError(t, err, "err in newIcodeGitStoreApi")
-	icodeApi := api.NewIcodeApi(containerService, storeApi)
+	icodeApi := git.NewIcodeApi(containerService, storeApi)
 	_, err = icodeApi.Deploy("1", baseSaveUrl, icodeGitUrl, sshPath)
 	assert.NoError(t, err, "err in deploy")
 }
@@ -65,7 +65,7 @@ func TestICodeApi_Deploy(t *testing.T) {
 	containerService := service.NewTesseractContainerService(tesseractConfig)
 	storeApi, err := api2.NewICodeGitStoreApi(backupGitId, backupGitPw)
 	assert.NoError(t, err, "err in newIcodeGitStoreApi")
-	icodeApi := api.NewIcodeApi(containerService, storeApi)
+	icodeApi := git.NewIcodeApi(containerService, storeApi)
 	meta, err := icodeApi.Deploy("1", baseSaveUrl, icodeGitUrl, sshPath)
 	assert.NoError(t, err, "err in deploy")
 	mockMeta = meta
@@ -121,7 +121,7 @@ func TestICodeApi_Invoke(t *testing.T) {
 	assert.NoError(t, err, "err in newIcodeGitStoreApi")
 
 	//icodeApi 설정
-	icodeApi := api.NewIcodeApi(containerService, storeApi)
+	icodeApi := git.NewIcodeApi(containerService, storeApi)
 
 	// deploy 시도
 	meta, err := icodeApi.Deploy("1", baseSaveUrl, icodeGitUrl, sshPath)

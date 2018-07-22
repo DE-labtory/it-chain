@@ -34,7 +34,7 @@ import (
 	"github.com/it-chain/engine/core/eventstore"
 	icodeApi "github.com/it-chain/engine/icode/api"
 	icodeAdapter "github.com/it-chain/engine/icode/infra/adapter"
-	icodeInfra "github.com/it-chain/engine/icode/infra/api"
+	icodeInfra "github.com/it-chain/engine/icode/infra/git"
 	icodeService "github.com/it-chain/engine/icode/infra/service"
 	"github.com/it-chain/engine/txpool"
 	txpoolApi "github.com/it-chain/engine/txpool/api"
@@ -183,11 +183,8 @@ func initIcode() error {
 	// service generate
 	commandService := icodeAdapter.NewCommandService(publisher.Publish)
 
-	// api generate
-	storeApi, err := icodeInfra.NewICodeGitStoreApi()
-	if err != nil {
-		return err
-	}
+	// git generate
+	storeApi := icodeInfra.NewICodeGitStoreApi()
 	defaultScriptPath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/icode/default_setup.sh"
 	containerService := icodeService.NewTesseractContainerService(tesseract.Config{
 		ShPath: defaultScriptPath,

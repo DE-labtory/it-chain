@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package api_test
+package git_test
 
 /*
 func TestICodeGitStoreApi_Clone(t *testing.T) {
@@ -41,7 +41,7 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 		},
 	}
 
-	icodeApi, err := api.NewICodeGitStoreApi("testid", "testpw")
+	icodeApi, err := git.NewICodeGitStoreApi("testid", "testpw")
 	assert.NoError(t, err)
 
 	for testName, test := range tests {
@@ -94,7 +94,7 @@ func TestNewICodeGitStoreApi(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("Running %s test, case: %s", t.Name(), testName)
 		//when
-		_, err := api.NewICodeGitStoreApi(test.Input.Id, test.Input.Pw)
+		_, err := git.NewICodeGitStoreApi(test.Input.Id, test.Input.Pw)
 
 		if err != nil {
 			assert.Equal(t, err.Error(), test.Output)
@@ -113,7 +113,7 @@ func TestICodeGitStoreApi_Push(t *testing.T) {
 	os.RemoveAll(baseTempPath)
 	defer os.RemoveAll(baseTempPath)
 
-	storeApi, err := api.NewICodeGitStoreApi(validId, validPw)
+	storeApi, err := git.NewICodeGitStoreApi(validId, validPw)
 
 	assert.NoError(t, err)
 	meta, err := storeApi.Clone("1", baseTempPath, "git@github.com:it-chain/heimdall.git", sshPath)
