@@ -79,6 +79,14 @@ type PeerRepository struct {
 	pLTable p2p.PLTable
 }
 
+func NewPeerRepository(pLTable p2p.PLTable) PeerRepository {
+
+	return PeerRepository{
+		mux:     sync.Mutex{},
+		pLTable: pLTable,
+	}
+}
+
 func (pltrepo *PeerRepository) GetPLTable() (p2p.PLTable, error) {
 
 	pltrepo.mux.Lock()
