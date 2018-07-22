@@ -108,7 +108,7 @@ func TestCommunicationApi_DeliverPLTable(t *testing.T) {
 
 }
 
-func SetupCommunicationApi() *api.CommunicationApi {
+func SetupCommunicationApi() api.CommunicationApi {
 
 	peerQueryService := &mock.MockPeerQueryService{}
 
