@@ -21,7 +21,6 @@ import (
 	"log"
 
 	"github.com/it-chain/engine/common/rabbitmq"
-	"github.com/streadway/amqp"
 )
 
 type Message struct {
@@ -30,30 +29,16 @@ type Message struct {
 }
 
 type TopicSubscriber struct {
-	rabbitmq.Client
+	rabbitmq.Session
 	exchange string
 	router   Router
 }
 
 func NewTopicSubscriber(rabbitmqUrl string, exchange string) TopicSubscriber {
 
-	if rabbitmqUrl == "" {
-		rabbitmqUrl = "amqp://guest:guest@localhost:5672/"
-	}
+	session := rabbitmq.CreateSession(rabbitmqUrl)
 
-	conn, err := amqp.Dial(rabbitmqUrl)
-
-	if err != nil {
-		panic("Failed to connect to RabbitMQ" + err.Error())
-	}
-
-	ch, err := conn.Channel()
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	err = ch.ExchangeDeclare(
+	err := session.Ch.ExchangeDeclare(
 		exchange, // name
 		"topic",  // type
 		true,     // durable
@@ -70,10 +55,7 @@ func NewTopicSubscriber(rabbitmqUrl string, exchange string) TopicSubscriber {
 	p, _ := NewParamBasedRouter()
 
 	return TopicSubscriber{
-		Client: rabbitmq.Client{
-			Conn: conn,
-			Ch:   ch,
-		},
+		Session:  session,
 		exchange: exchange,
 		router:   p,
 	}
@@ -144,11 +126,5 @@ func (t TopicSubscriber) SubscribeTopic(topic string, source interface{}) error 
 }
 
 func (t *TopicSubscriber) Close() {
-
-	if t.Conn != nil {
-		t.Conn.Close()
-	}
-	if t.Ch != nil {
-		t.Ch.Close()
-	}
+	t.Session.Close()
 }

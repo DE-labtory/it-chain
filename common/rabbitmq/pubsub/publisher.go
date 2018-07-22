@@ -26,29 +26,15 @@ import (
 )
 
 type TopicPublisher struct {
-	rabbitmq.Client
+	rabbitmq.Session
 	exchange string
 }
 
 func NewTopicPublisher(rabbitmqUrl string, exchange string) TopicPublisher {
 
-	if rabbitmqUrl == "" {
-		rabbitmqUrl = "amqp://guest:guest@localhost:5672/"
-	}
+	session := rabbitmq.CreateSession(rabbitmqUrl)
 
-	conn, err := amqp.Dial(rabbitmqUrl)
-
-	if err != nil {
-		panic("Failed to connect to RabbitMQ" + err.Error())
-	}
-
-	ch, err := conn.Channel()
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	err = ch.ExchangeDeclare(
+	err := session.Ch.ExchangeDeclare(
 		exchange, // name
 		"topic",  // type
 		true,     // durable
@@ -63,10 +49,7 @@ func NewTopicPublisher(rabbitmqUrl string, exchange string) TopicPublisher {
 	}
 
 	return TopicPublisher{
-		Client: rabbitmq.Client{
-			Ch:   ch,
-			Conn: conn,
-		},
+		Session:  session,
 		exchange: exchange,
 	}
 }
@@ -144,11 +127,5 @@ func (t *TopicPublisher) Publish(topic string, data interface{}) (err error) {
 }
 
 func (t *TopicPublisher) Close() {
-
-	if t.Conn != nil {
-		t.Conn.Close()
-	}
-	if t.Ch != nil {
-		t.Ch.Close()
-	}
+	t.Session.Close()
 }
