@@ -28,14 +28,14 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
-type ICodeGitStoreApi struct {
+type RepositoryService struct {
 }
 
-func NewICodeGitStoreApi() *ICodeGitStoreApi {
-	return &ICodeGitStoreApi{}
+func NewRepositoryService() *RepositoryService {
+	return &RepositoryService{}
 }
 
-func (gApi *ICodeGitStoreApi) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (*icode.Meta, error) {
+func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (*icode.Meta, error) {
 	name := getNameFromGitUrl(repositoryUrl)
 
 	if name == "" {

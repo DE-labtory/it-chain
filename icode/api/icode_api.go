@@ -24,10 +24,10 @@ import (
 
 type ICodeApi struct {
 	ContainerService icode.ContainerService
-	StoreApi         ICodeStoreApi
+	StoreApi         icode.RepositoryService
 }
 
-func NewIcodeApi(containerService icode.ContainerService, storeApi ICodeStoreApi) *ICodeApi {
+func NewIcodeApi(containerService icode.ContainerService, storeApi icode.RepositoryService) *ICodeApi {
 	return &ICodeApi{
 		ContainerService: containerService,
 		StoreApi:         storeApi,
