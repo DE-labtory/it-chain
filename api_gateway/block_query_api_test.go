@@ -540,16 +540,22 @@ func TestCommitedBlockRepositoryImpl(t *testing.T) {
 	// then
 	assert.NoError(t, err)
 
-	// when
-	block3, err2 := cbr.GetLastBlock()
-	// then
-	assert.NoError(t, err2)
-	assert.Equal(t, blockchain.BlockHeight(1), block3.GetHeight())
+	blockQueryApi := api_gateway.NewBlockQueryApi(nil, cbr)
 
 	// when
-	block4, err3 := cbr.GetBlockByHeight(blockchain.BlockHeight(1))
-	assert.NoError(t, err3)
-	assert.Equal(t, 4, len(block4.GetTxList()))
+	block3, err := blockQueryApi.GetLastCommitedBlock()
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, block2.GetSeal(), block3.GetSeal())
+	assert.Equal(t, block2.GetHeight(), block3.GetHeight())
+	assert.Equal(t, block2.GetPrevSeal(), block3.GetPrevSeal())
+
+	// when
+	EveryBlock, err4 := cbr.GetEveryBlock()
+
+	// then
+	assert.NoError(t, err4)
+	assert.Equal(t, 2, len(EveryBlock))
 
 }
 

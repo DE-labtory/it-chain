@@ -133,7 +133,7 @@ func start() error {
 
 //todo other way to inject each query Api to component
 var txQueryApi api_gateway.TransactionQueryApi
-var BlockQueryApi api_gateway.BlockQueryApi
+var blockQueryApi api_gateway.BlockQueryApi
 
 func initGateway(errs chan error) error {
 
@@ -168,21 +168,23 @@ func initGateway(errs chan error) error {
 		panic(err)
 	}
 
-	BlockQueryApi = api_gateway.NewBlockQueryApi(BlockPoolRepo, CommittedBlockRepo)
-	BlockEventListener := api_gateway.NewBlockEventListener(BlockPoolRepo, CommittedBlockRepo)
+	blockQueryApi = api_gateway.NewBlockQueryApi(BlockPoolRepo, CommittedBlockRepo)
+
+	blockEventListener := api_gateway.NewBlockEventListener(BlockPoolRepo, CommittedBlockRepo)
 
 	//set mux
 	mux := http.NewServeMux()
 	httpLogger := kitlog.With(logger, "component", "http")
 
 	err = subscriber.SubscribeTopic("transaction.*", &txEventListener)
-	err = subscriber.SubscribeTopic("block.*", &BlockEventListener)
+	err = subscriber.SubscribeTopic("block.*", &blockEventListener)
 
 	if err != nil {
 		panic(err)
 	}
 
-	mux.Handle("/", api_gateway.MakeHandler(txQueryApi, httpLogger))
+	mux.Handle("/transactions", api_gateway.TxPoolApiHandler(txQueryApi, httpLogger))
+	mux.Handle("/blocks", api_gateway.BlockchainApiHandler(blockQueryApi, httpLogger))
 	http.Handle("/", mux)
 
 	go func() {
@@ -279,7 +281,7 @@ func initBlockchain() error {
 	blockExecuteService := blockchainAdapter.NewBlockExecuteService(client)
 
 	//infra
-	blockApi, err := blockchainApi.NewBlockApi(tempPeerID, BlockQueryApi, blockExecuteService)
+	blockApi, err := blockchainApi.NewBlockApi(tempPeerID, blockQueryApi, blockExecuteService)
 
 	if err != nil {
 		panic(err)

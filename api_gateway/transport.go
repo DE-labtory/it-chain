@@ -26,7 +26,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func MakeHandler(bs TransactionQueryApi, logger kitlog.Logger) http.Handler {
+func TxPoolApiHandler(bs TransactionQueryApi, logger kitlog.Logger) http.Handler {
 
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorLogger(logger),
@@ -46,9 +46,33 @@ func MakeHandler(bs TransactionQueryApi, logger kitlog.Logger) http.Handler {
 	return r
 }
 
+//ToDo: MakeHandler와 통합 필요 : service interface 통합 (gitId: junk-sound)
+func BlockchainApiHandler(bqa BlockQueryApi, logger kitlog.Logger) http.Handler {
+
+	opts := []kithttp.ServerOption{
+		kithttp.ServerErrorLogger(logger),
+	}
+
+	findAllCommittedBlocksHandler := kithttp.NewServer(
+		makeFindCommittedBlocksEndpoint(bqa),
+		decodeFindAllCommittedBlocksRequest,
+		encodeResponse,
+		opts...,
+	)
+
+	r := mux.NewRouter()
+
+	r.Handle("/blocks", findAllCommittedBlocksHandler).Methods("GET")
+
+	return r
+}
+
 // this return nil because this request body is empty
 func decodeFindAllUncommittedTransactionsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	return nil, nil
+}
 
+func decodeFindAllCommittedBlocksRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	return nil, nil
 }
 
