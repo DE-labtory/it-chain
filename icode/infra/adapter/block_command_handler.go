@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"sync"
 
+	"log"
+
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/engine/icode/api"
@@ -48,14 +50,7 @@ func (b *BlockCommandHandler) HandleBlockExecuteCommand(blockExecuteCommand comm
 	for _, tx := range blockExecuteCommand.TxList {
 		switch tx.Method {
 		case icode.Query:
-			results = append(results, *b.icodeApi.Query(icode.Transaction{
-				TxId:     tx.ID,
-				ICodeID:  tx.ICodeID,
-				Function: tx.Function,
-				Method:   tx.Method,
-				Jsonrpc:  tx.Jsonrpc,
-				Args:     tx.Args,
-			}))
+			log.Print(fmt.Sprintf("dont excute query using blockExecuteCommand , txID : [%s]", tx.ID))
 		case icode.Invoke:
 			results = append(results, *b.icodeApi.Invoke(icode.Transaction{
 				TxId:     tx.ID,

@@ -110,6 +110,12 @@ type UnDeploy struct {
 	midgard.CommandModel
 }
 
+type Query struct {
+	midgard.CommandModel
+	Function string
+	Args     []string
+}
+
 /*
  * blockchain
  */

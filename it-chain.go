@@ -30,17 +30,19 @@ import (
 	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/cmd/icode"
 	"github.com/it-chain/engine/common/amqp/pubsub"
+	"github.com/it-chain/engine/common/amqp/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/core/eventstore"
 	icodeApi "github.com/it-chain/engine/icode/api"
 	icodeAdapter "github.com/it-chain/engine/icode/infra/adapter"
-	icodeInfra "github.com/it-chain/engine/icode/infra/api"
+	icodeInfraApi "github.com/it-chain/engine/icode/infra/api"
 	icodeService "github.com/it-chain/engine/icode/infra/service"
 	"github.com/it-chain/engine/txpool"
 	txpoolApi "github.com/it-chain/engine/txpool/api"
 	txpoolAdapter "github.com/it-chain/engine/txpool/infra/adapter"
 	txpoolBatch "github.com/it-chain/engine/txpool/infra/batch"
 	"github.com/it-chain/tesseract"
+	"github.com/streadway/amqp"
 	"github.com/urfave/cli"
 )
 
@@ -178,12 +180,22 @@ func initIcode() error {
 
 	config := conf.GetConfiguration()
 	mqClient := pubsub.Connect(config.Engine.Amqp)
+	conn, err := amqp.Dial(config.Engine.Amqp)
+	if err != nil {
+		return err
+	}
+
+	// rpc server init
+	rpcServer, err := rpc.NewRpcServer(*conn, "icode")
+	if err != nil {
+		return err
+	}
 
 	// service generate
 	commandService := icodeAdapter.NewCommandService(mqClient.Publish)
 
 	// api generate
-	storeApi, err := icodeInfra.NewICodeGitStoreApi(config.Icode.AuthId, config.Icode.AuthPw)
+	storeApi, err := icodeInfraApi.NewICodeGitStoreApi(config.Icode.AuthId, config.Icode.AuthPw)
 	if err != nil {
 		return err
 	}
@@ -196,10 +208,18 @@ func initIcode() error {
 	deployHandler := icodeAdapter.NewDeployCommandHandler(*api)
 	unDeployHandler := icodeAdapter.NewUnDeployCommandHandler(*api)
 	blockCommandHandler := icodeAdapter.NewBlockCommandHandler(*api, commandService)
+	queryCommandHandler := icodeAdapter.NewQueryCommandHandler(*rpcServer)
 
 	mqClient.Subscribe("Command", "icode.deploy", deployHandler)
 	mqClient.Subscribe("Command", "icode.undeploy", unDeployHandler)
 	mqClient.Subscribe("Command", "block.excute", blockCommandHandler)
+	queryCommandHandler.SetHandleQueryCommand(*api)
+
+	//start rpc server
+	rpcServer.Serve()
+	if err != nil {
+		return err
+	}
 
 	return nil
 
