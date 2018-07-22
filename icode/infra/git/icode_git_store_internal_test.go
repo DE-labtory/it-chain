@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package api
+package git
 
 /*
 func TestCreateRepository(t *testing.T) {
@@ -22,7 +22,7 @@ func TestCreateRepository(t *testing.T) {
 	validId := "validId"
 	validPw := "validPw"
 	storeApi, err := NewICodeGitStoreApi(validId, validPw)
-	assert.NoError(t, err, "icode store api 생성 실패")
+	assert.NoError(t, err, "icode store git 생성 실패")
 	tests := map[string]struct {
 		Input  string
 		Output error

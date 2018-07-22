@@ -211,7 +211,7 @@ func TestLevelDbMetaRepository_FindMetaByUrl(t *testing.T) {
 // todo test fail 함
 //func TestICodeEventHandler_HandleMetaCreatedEvent(t *testing.T) {
 //
-//	api, client, tearDown := setICodeQueryApi(t)
+//	git, client, tearDown := setICodeQueryApi(t)
 //
 //	defer tearDown()
 //
@@ -247,7 +247,7 @@ func TestLevelDbMetaRepository_FindMetaByUrl(t *testing.T) {
 //		assert.Equal(t, test.OutputError, err, "err in compare err")
 //
 //		//check
-//		metas, err := api.metaRepository.FindAllMeta()
+//		metas, err := git.metaRepository.FindAllMeta()
 //		assert.NoError(t, err, "err in check")
 //		assert.Equal(t, test.ExpectDataNum, len(metas), "not equal in check dataNum")
 //
