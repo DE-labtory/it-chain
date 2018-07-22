@@ -31,6 +31,13 @@ type PeerQueryApi struct {
 	peerRepository PeerRepository
 }
 
+func NewPeerQueryApi(repository PeerRepository) PeerQueryApi {
+	return PeerQueryApi{
+		mux:            sync.Mutex{},
+		peerRepository: repository,
+	}
+}
+
 func (pqa *PeerQueryApi) GetPLTable() (p2p.PLTable, error) {
 
 	return pqa.peerRepository.GetPLTable()
