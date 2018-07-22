@@ -10,16 +10,12 @@ consensus:
   batchtime: 3
   maxtransactions: 100
 blockchain:
-  repositorypath: empty
+  genesisconfpath: ./gensis.conf
 peer:
   leaderelection: RAFT
 icode:
   repositorypath: empty
-  sshpath: default
   icodesavepath: ./.tmp
-  authid: empty
-  authpw: empty
-  shpath: empty
 grpcgateway:
   address: 127.0.0.1
   port: "13579"
