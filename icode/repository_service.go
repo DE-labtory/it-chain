@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package api
+package icode
 
-import (
-	"github.com/it-chain/engine/icode"
-)
-
-type ICodeStoreApi interface {
+type RepositoryService interface {
 	//clone code from deploy info
-	Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (*icode.Meta, error)
+	Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (*Meta, error)
 }
