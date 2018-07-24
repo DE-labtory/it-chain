@@ -30,6 +30,74 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestBlockQueryApi_GetStagedBlockByHeight(t *testing.T) {
+	pool := api_gateway.NewBlockPoolRepository()
+
+	block1 := &blockchain.DefaultBlock{
+		Seal:   []byte{0x1},
+		Height: blockchain.BlockHeight(1),
+		State:  blockchain.Created,
+	}
+	block2 := &blockchain.DefaultBlock{
+		Seal:   []byte{0x2},
+		Height: blockchain.BlockHeight(2),
+		State:  blockchain.Staged,
+	}
+
+	pool.Blocks = append(pool.Blocks, block1)
+	pool.Blocks = append(pool.Blocks, block2)
+
+	// when
+	qa := api_gateway.NewBlockQueryApi(pool, nil)
+	// when
+	b1, err1 := qa.GetStagedBlockByHeight(1)
+	// then
+	assert.Equal(t, api_gateway.ErrNoStagedBlock, err1)
+	assert.Equal(t, blockchain.DefaultBlock{}, *b1.(*blockchain.DefaultBlock))
+
+	// when
+	b2, err2 := qa.GetStagedBlockByHeight(2)
+	// then
+	assert.Equal(t, nil, err2)
+	assert.Equal(t, []byte{0x2}, b2.GetSeal())
+	assert.Equal(t, blockchain.Staged, (*b2.(*blockchain.DefaultBlock)).State)
+	assert.Equal(t, blockchain.BlockHeight(2), (*b2.(*blockchain.DefaultBlock)).Height)
+}
+
+func TestBlockQueryApi_GetStagedBlockById(t *testing.T) {
+	pool := api_gateway.NewBlockPoolRepository()
+
+	block1 := &blockchain.DefaultBlock{
+		Seal:   []byte{0x1},
+		Height: blockchain.BlockHeight(1),
+		State:  blockchain.Created,
+	}
+	block2 := &blockchain.DefaultBlock{
+		Seal:   []byte{0x2},
+		Height: blockchain.BlockHeight(2),
+		State:  blockchain.Staged,
+	}
+
+	pool.Blocks = append(pool.Blocks, block1)
+	pool.Blocks = append(pool.Blocks, block2)
+
+	// when
+	qa := api_gateway.NewBlockQueryApi(pool, nil)
+	// when
+	b1, err1 := qa.GetStagedBlockById(string([]byte{0x1}))
+	// then
+	assert.Equal(t, api_gateway.ErrNoStagedBlock, err1)
+	assert.Equal(t, blockchain.DefaultBlock{}, *b1.(*blockchain.DefaultBlock))
+
+	// when
+	b2, err2 := qa.GetStagedBlockById(string([]byte{0x2}))
+	// then
+	assert.Equal(t, nil, err2)
+	assert.Equal(t, []byte{0x2}, b2.GetSeal())
+	assert.Equal(t, blockchain.Staged, (*b2.(*blockchain.DefaultBlock)).State)
+	assert.Equal(t, blockchain.BlockHeight(2), (*b2.(*blockchain.DefaultBlock)).Height)
+}
+
 func TestBlockPoolRepositoryImpl_SaveCreatedBlock(t *testing.T) {
 	bpr := api_gateway.NewBlockPoolRepository()
 
@@ -59,10 +127,10 @@ func TestBlockPoolRepositoryImpl_SaveCreatedBlock(t *testing.T) {
 
 	// when
 	block3 := &blockchain.DefaultBlock{
-		Seal: []byte{0x1},
+		Seal:     []byte{0x1},
 		PrevSeal: []byte{0x5},
-		Height: blockchain.BlockHeight(3),
-		State: blockchain.Created,
+		Height:   blockchain.BlockHeight(3),
+		State:    blockchain.Created,
 	}
 	// when
 	err3 := bpr.SaveCreatedBlock(*block3)
@@ -107,10 +175,10 @@ func TestBlockPoolRepositoryImpl_SaveStagedBlock(t *testing.T) {
 
 	// when
 	block3 := &blockchain.DefaultBlock{
-		Seal: []byte{0x1},
+		Seal:     []byte{0x1},
 		PrevSeal: []byte{0x5},
-		Height: blockchain.BlockHeight(3),
-		State: blockchain.Staged,
+		Height:   blockchain.BlockHeight(3),
+		State:    blockchain.Staged,
 	}
 	// when
 	err3 := bpr.SaveStagedBlock(*block3)
@@ -125,7 +193,6 @@ func TestBlockPoolRepositoryImpl_SaveStagedBlock(t *testing.T) {
 	assert.Equal(t, []byte{0x5}, block.GetPrevSeal())
 
 }
-
 
 func TestBlockPoolRepositoryImpl_FindCreatedBlockById(t *testing.T) {
 	bpr := api_gateway.NewBlockPoolRepository()
@@ -194,6 +261,7 @@ func TestBlockPoolRepositoryImpl_FindStagedBlockByHeight(t *testing.T) {
 		Seal:     []byte{0x1},
 		PrevSeal: []byte{0x1},
 		Height:   uint64(1),
+		State:    blockchain.Staged,
 	})
 
 	// when
