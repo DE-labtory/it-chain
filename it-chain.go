@@ -28,6 +28,8 @@ import (
 
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/it-chain/engine/api_gateway"
+	blockchainApi "github.com/it-chain/engine/blockchain/api"
+	blockchainAdapter "github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/cmd/icode"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
@@ -116,6 +118,7 @@ func start() error {
 	initTxPool()
 	initIcode()
 	initPeer()
+	initBlockchain()
 
 	go func() {
 		c := make(chan os.Signal, 1)
@@ -130,6 +133,7 @@ func start() error {
 
 //todo other way to inject each query Api to component
 var txQueryApi api_gateway.TransactionQueryApi
+var BlockQueryApi api_gateway.BlockQueryApi
 
 func initGateway(errs chan error) error {
 
@@ -143,20 +147,36 @@ func initGateway(errs chan error) error {
 	logger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
 	logger = kitlog.With(logger, "ts", kitlog.DefaultTimestampUTC)
 
-	//set service and repo
-	dbPath := "./.test"
+	//set txpool service and repo
+	txpoolDB := "./.test/txpool"
 	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Event")
 
-	repo := api_gateway.NewTransactionRepository(dbPath)
+	transactionRepo := api_gateway.NewTransactionRepository(txpoolDB)
 
-	txQueryApi = api_gateway.NewTransactionQueryApi(repo)
-	txEventListener := api_gateway.NewTransactionEventListener(repo)
+	txQueryApi = api_gateway.NewTransactionQueryApi(transactionRepo)
+	txEventListener := api_gateway.NewTransactionEventListener(transactionRepo)
+
+	//set blockchain service and repo
+
+	blockchainDB := "./.test/blockchain"
+
+	BlockPoolRepo := api_gateway.NewBlockPoolRepository()
+
+	CommittedBlockRepo, err := api_gateway.NewCommitedBlockRepositoryImpl(blockchainDB)
+
+	if err != nil {
+		panic(err)
+	}
+
+	BlockQueryApi = api_gateway.NewBlockQueryApi(BlockPoolRepo, CommittedBlockRepo)
+	BlockEventListener := api_gateway.NewBlockEventListener(BlockPoolRepo, CommittedBlockRepo)
 
 	//set mux
 	mux := http.NewServeMux()
 	httpLogger := kitlog.With(logger, "component", "http")
 
-	err := subscriber.SubscribeTopic("transaction.*", &txEventListener)
+	err = subscriber.SubscribeTopic("transaction.*", &txEventListener)
+	err = subscriber.SubscribeTopic("block.*", &BlockEventListener)
 
 	if err != nil {
 		panic(err)
@@ -241,5 +261,44 @@ func initTxPool() error {
 }
 
 func initConsensus() error {
+	return nil
+}
+
+func initBlockchain() error {
+
+	log.Println("blockchain is running...")
+
+	config := conf.GetConfiguration()
+	client := rpc.NewClient(config.Engine.Amqp)
+	server := rpc.NewServer(config.Engine.Amqp)
+
+	//todo get id from pubkey
+	tempPeerID := "tmp peer 1"
+
+	//servie
+	blockExecuteService := blockchainAdapter.NewBlockExecuteService(client)
+
+	//infra
+	blockApi, err := blockchainApi.NewBlockApi(tempPeerID, BlockQueryApi, blockExecuteService)
+
+	if err != nil {
+		panic(err)
+	}
+
+	blockCommandHandler := blockchainAdapter.NewCommandHandler(blockApi)
+
+	//crete GenesisBlock
+	GenesisConfPath := config.Blockchain.GenesisConfPath
+
+	blockApi.CreateGenesisBlock(GenesisConfPath)
+
+	err = server.Register("block.propose", blockCommandHandler.HandleProposeBlockCommand)
+
+	if err != nil {
+		panic(err)
+	}
+
+	err = server.Register("block.confirm", blockCommandHandler.HandleConfirmBlockCommand)
+
 	return nil
 }

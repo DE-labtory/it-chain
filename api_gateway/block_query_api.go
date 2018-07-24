@@ -296,7 +296,7 @@ func (l *BlockEventListener) HandleBlockCreatedEvent(event event.BlockCreated) e
 }
 
 func createDefaultBlock(Seal []byte, PrevSeal []byte, Height uint64, TxList []event.Tx, Timestamp time.Time, Creator []byte, State string) (blockchain.DefaultBlock, error) {
-	txList, err := convertToDefaultTransactionList(TxList)
+	txList, err := getBackTxType(TxList)
 	if err != nil {
 		return blockchain.DefaultBlock{}, err
 	}
@@ -322,7 +322,7 @@ func deserializeTxList(txList []byte) ([]*blockchain.DefaultTransaction, error) 
 	return DefaultTxList, nil
 }
 
-func convertToDefaultTransactionList(txlist []event.Tx) ([]*blockchain.DefaultTransaction, error) {
+func getBackTxType(txlist []event.Tx) ([]*blockchain.DefaultTransaction, error) {
 	defaultTxList := make([]*blockchain.DefaultTransaction, 0)
 
 	for _, tx := range txlist {
