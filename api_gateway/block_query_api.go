@@ -53,15 +53,13 @@ func NewBlockQueryApi(blockPoolRepo BlockPoolRepository, commitedBlockRepo Commi
 	}
 }
 
-// TODO:
 func (q *BlockQueryApi) GetStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.Block, error) {
 	defaultBlock, err := q.blockPoolRepository.FindStagedBlockByHeight(height)
 	return &defaultBlock, err
 }
-
-// TODO:
 func (q *BlockQueryApi) GetStagedBlockById(blockId string) (blockchain.Block, error) {
-	return nil, nil
+	defaultBlock, err := q.blockPoolRepository.FindStagedBlockById(blockId)
+	return &defaultBlock, err
 }
 func (q *BlockQueryApi) GetLastCommitedBlock() (blockchain.Block, error) {
 	defaultBlock, err := q.commitedBlockRepository.GetLastBlock()
@@ -139,12 +137,14 @@ func (r *BlockPoolRepositoryImpl) FindCreatedBlockById(id string) (blockchain.De
 func (r *BlockPoolRepositoryImpl) FindStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
 	for _, block := range r.Blocks {
 		if block.GetHeight() == height {
-			target, ok := block.(*blockchain.DefaultBlock)
+			defaultBlock, ok := block.(*blockchain.DefaultBlock)
 			if !ok {
 				return blockchain.DefaultBlock{}, ErrFailBlockTypeCasting
 			}
 
-			return *target, nil
+			if defaultBlock.State == blockchain.Staged {
+				return *defaultBlock, nil
+			}
 		}
 	}
 	return blockchain.DefaultBlock{}, ErrNoStagedBlock
