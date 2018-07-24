@@ -46,8 +46,8 @@ type BlockQueryApi struct {
 	commitedBlockRepository CommitedBlockRepository
 }
 
-func NewBlockQueryApi(blockPoolRepo BlockPoolRepository, commitedBlockRepo CommitedBlockRepository) *BlockQueryApi {
-	return &BlockQueryApi{
+func NewBlockQueryApi(blockPoolRepo BlockPoolRepository, commitedBlockRepo CommitedBlockRepository) BlockQueryApi {
+	return BlockQueryApi{
 		blockPoolRepository:     blockPoolRepo,
 		commitedBlockRepository: commitedBlockRepo,
 	}
