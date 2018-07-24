@@ -17,9 +17,8 @@
 package adapter
 
 import (
-	"log"
-
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/engine/txpool/api"
 )
@@ -34,7 +33,7 @@ func NewTxCommandHandler(transactionApi api.TransactionApi) *TxCommandHandler {
 	}
 }
 
-func (t *TxCommandHandler) HandleTxCreateCommand(txCreateCommand command.CreateTransaction) {
+func (t *TxCommandHandler) HandleTxCreateCommand(txCreateCommand command.CreateTransaction) (txpool.Transaction, rpc.Error) {
 
 	txData := txpool.TxData{
 		ICodeID:   txCreateCommand.ICodeID,
@@ -49,8 +48,8 @@ func (t *TxCommandHandler) HandleTxCreateCommand(txCreateCommand command.CreateT
 	tx, err := t.transactionApi.CreateTransaction(txData)
 
 	if err != nil {
-		log.Println(err.Error())
+		return txpool.Transaction{}, rpc.Error{Message: err.Error()}
 	}
 
-	log.Printf("transactions are created [%v]", tx)
+	return tx, rpc.Error{}
 }

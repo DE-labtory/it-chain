@@ -44,22 +44,29 @@ func TestClient_Call(t *testing.T) {
 
 	server := rpc.NewServer("")
 	defer server.Close()
-	server.Register("transaction.create", func(sample Sample) Sample {
+
+	server.Register("transaction.create", func(sample Sample) (Sample, rpc.Error) {
 		assert.Equal(t, sample.ID, "123")
 		assert.Equal(t, sample.TxData.ID, "1234")
 
-		return Sample{ID: "1234"}
+		return Sample{ID: "1234"}, rpc.Error{}
 	})
 
 	client := rpc.NewClient("")
 	defer client.Close()
-	err := client.Call("transaction.create", Sample{ID: "123", TxData: TxData{ID: "1234"}}, func(sample Sample) {
+
+	err := client.Call("transaction.create", Sample{ID: "123", TxData: TxData{ID: "1234"}}, func(sample Sample, err rpc.Error) {
+
+		assert.True(t, err.IsNil())
 
 		assert.Equal(t, sample.ID, "1234")
 		wg.Done()
 	})
 
-	assert.NoError(t, err)
+	if err != nil {
+		panic(err)
+	}
+
 	wg.Wait()
 }
 

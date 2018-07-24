@@ -20,22 +20,23 @@ import (
 	"errors"
 
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
 
 type BlockService struct {
-	publisher Publisher // midgard.client
+	client rpc.Client // midgard.client
 }
 
-func NewBlockService(publisher Publisher) *BlockService {
+func NewBlockService(client rpc.Client) *BlockService {
 	return &BlockService{
-		publisher: publisher,
+		client: client,
 	}
 }
 
-func (m BlockService) ProposeBlock(transactions []txpool.Transaction) error {
+func (b BlockService) ProposeBlock(transactions []txpool.Transaction) error {
 
 	if len(transactions) == 0 {
 		return errors.New("Empty transaction list proposed")
@@ -63,5 +64,9 @@ func (m BlockService) ProposeBlock(transactions []txpool.Transaction) error {
 		})
 	}
 
-	return m.publisher("block.propose", deliverCommand)
+	err := b.client.Call("block.propose", deliverCommand, func() {
+
+	})
+
+	return err
 }

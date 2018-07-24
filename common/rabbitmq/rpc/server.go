@@ -17,12 +17,12 @@
 package rpc
 
 import (
-	"errors"
-
 	"encoding/json"
 	"reflect"
 
 	"log"
+
+	"errors"
 
 	"github.com/it-chain/engine/common/rabbitmq"
 	"github.com/streadway/amqp"
@@ -39,6 +39,7 @@ func NewServer(rabbitmqUrl string) Server {
 	}
 }
 
+//todo need handler params and return value check logic
 func (s Server) Register(queue string, handler interface{}) error {
 
 	q, err := s.Ch.QueueDeclare(
@@ -80,10 +81,10 @@ func (s Server) Register(queue string, handler interface{}) error {
 			sourceValue := reflect.ValueOf(handler)
 			sourceType := reflect.TypeOf(handler)
 
-			len := sourceType.NumIn()
+			numOfParam := sourceType.NumIn()
 
-			if len != 1 {
-				log.Println(errors.New("callback function parameter should have only one struct"))
+			if numOfParam != 1 {
+				log.Println(err.Error())
 			}
 
 			callbackParam := sourceType.In(0)
@@ -100,11 +101,7 @@ func (s Server) Register(queue string, handler interface{}) error {
 			paramValue := reflect.ValueOf(paramInterface).Elem().Interface()
 			values := sourceValue.Call([]reflect.Value{reflect.ValueOf(paramValue)})
 
-			response, err := json.Marshal(values[0].Interface())
-
-			if err != nil {
-				log.Println(err.Error())
-			}
+			r, err := buildResult(values)
 
 			err = s.Ch.Publish(
 				"",        // exchange
@@ -114,16 +111,49 @@ func (s Server) Register(queue string, handler interface{}) error {
 				amqp.Publishing{
 					ContentType:   "text/plain",
 					CorrelationId: d.CorrelationId,
-					Body:          response,
+					Body:          r,
 				})
 
 			if err != nil {
 				log.Println(err.Error())
 			}
 
-			d.Ack(false)
+			err = d.Ack(false)
+
+			if err != nil {
+				log.Println(err.Error())
+			}
 		}
 	}()
 
 	return nil
+}
+
+type Result struct {
+	Data []byte
+	Err  Error
+}
+
+func buildResult(values []reflect.Value) ([]byte, error) {
+
+	if len(values) != 2 {
+		return []byte{}, errors.New("return should 2")
+	}
+
+	d, err := json.Marshal(values[0].Interface())
+
+	if err != nil {
+		return []byte{}, err
+	}
+
+	e, ok := values[1].Interface().(Error)
+
+	if !ok {
+		return []byte{}, err
+	}
+
+	return json.Marshal(Result{
+		Data: d,
+		Err:  e,
+	})
 }
