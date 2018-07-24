@@ -1,9 +1,12 @@
 package main
 
 import (
+	"log"
+
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
+	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
@@ -11,7 +14,7 @@ import (
 func main() {
 
 	config := conf.GetConfiguration()
-	client := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
+	client := rpc.NewClient(config.Engine.Amqp)
 	defer client.Close()
 
 	txCreateCommand := command.CreateTransaction{
@@ -25,9 +28,11 @@ func main() {
 		Function: "initA",
 	}
 
-	err := client.Publish("transaction.create", txCreateCommand)
+	err := client.Call("transaction.create", txCreateCommand, func(transaction txpool.Transaction, err rpc.Error) {
+		log.Printf("created transaction id [%s]", transaction.ID)
+	})
 
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 }

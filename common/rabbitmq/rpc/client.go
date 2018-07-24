@@ -47,7 +47,7 @@ func (c Client) Call(queue string, params interface{}, callback interface{}) err
 	data, err := json.Marshal(params)
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	replyQ, err := c.Ch.QueueDeclare(
@@ -130,25 +130,44 @@ func handleResponse(data []byte, callback interface{}) error {
 
 	len := sourceType.NumIn()
 
-	if len != 1 {
+	if len != 2 {
 		return errors.New("callback function parameter should have only one struct")
 	}
 
 	callbackParam := sourceType.In(0)
-	v := reflect.New(callbackParam)
-	initializeStruct(callbackParam, v.Elem())
-	paramInterface := v.Interface()
-
-	err := json.Unmarshal(data, paramInterface)
+	v, err := toValues(data, callbackParam)
 
 	if err != nil {
 		return err
 	}
 
-	paramValue := reflect.ValueOf(paramInterface).Elem().Interface()
-	sourceValue.Call([]reflect.Value{reflect.ValueOf(paramValue)})
+	sourceValue.Call(v)
 
 	return nil
+}
+
+func toValues(data []byte, paramType reflect.Type) ([]reflect.Value, error) {
+
+	v := reflect.New(paramType)
+	initializeStruct(paramType, v.Elem())
+	paramInterface := v.Interface()
+
+	r := Result{}
+	err := json.Unmarshal(data, &r)
+
+	if err != nil {
+		return []reflect.Value{}, err
+	}
+
+	err = json.Unmarshal(r.Data, paramInterface)
+
+	if err != nil {
+		return []reflect.Value{}, err
+	}
+
+	paramValue := reflect.ValueOf(paramInterface).Elem().Interface()
+
+	return []reflect.Value{reflect.ValueOf(paramValue), reflect.ValueOf(r.Err)}, nil
 }
 
 func hasConsumer(channel *amqp.Channel, queueName string) bool {

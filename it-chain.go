@@ -30,6 +30,7 @@ import (
 	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/cmd/icode"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/core/eventstore"
 	icodeApi "github.com/it-chain/engine/icode/api"
@@ -144,7 +145,7 @@ func initGateway(errs chan error) error {
 
 	//set service and repo
 	dbPath := "./.test"
-	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Command")
+	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Event")
 
 	repo := api_gateway.NewTransactionRepository(dbPath)
 
@@ -213,14 +214,14 @@ func initTxPool() error {
 	log.Println("txpool is running...")
 
 	config := conf.GetConfiguration()
-	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Command")
-	publisher := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
+	client := rpc.NewClient(config.Engine.Amqp)
+	server := rpc.NewServer(config.Engine.Amqp)
 
 	//todo get id from pubkey
 	tmpPeerID := "tmp peer 1"
 
 	//service
-	blockService := txpoolAdapter.NewBlockService(publisher.Publish)
+	blockService := txpoolAdapter.NewBlockService(client)
 	blockProposalService := txpool.NewBlockProposalService(txQueryApi, blockService, config.Engine.Mode)
 
 	//infra
@@ -230,7 +231,7 @@ func initTxPool() error {
 	//10초마다 block propose
 	txpoolBatch.GetTimeOutBatcherInstance().Run(blockProposalService.ProposeBlock, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
 
-	err := subscriber.SubscribeTopic("transaction.create", txCommandHandler)
+	err := server.Register("transaction.create", txCommandHandler.HandleTxCreateCommand)
 
 	if err != nil {
 		panic(err)
