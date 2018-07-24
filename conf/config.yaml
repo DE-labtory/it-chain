@@ -10,7 +10,7 @@ consensus:
   batchtime: 3
   maxtransactions: 100
 blockchain:
-  genesisconfpath: ./gensis.conf
+  genesisconfpath: ./Genesis.conf
 peer:
   leaderelection: RAFT
 icode:

@@ -29,6 +29,6 @@ func NewEngineConfiguration() EngineConfiguration {
 		KeyPath:              ".it-chain/",
 		Mode:                 "solo",
 		BootstrapNodeAddress: "127.0.0.1:5555",
-		Amqp:                 "rabbitmq://guest:guest@localhost:5672/",
+		Amqp:                 "amqp://guest:guest@localhost:5672/",
 	}
 }

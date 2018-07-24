@@ -22,6 +22,6 @@ type BlockChainConfiguration struct {
 
 func NewBlockChainConfiguration() BlockChainConfiguration {
 	return BlockChainConfiguration{
-		GenesisConfPath: "./gensis.conf",
+		GenesisConfPath: "./Genesis.conf",
 	}
 }
