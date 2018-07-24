@@ -81,3 +81,20 @@ func (bApi BlockApi) CreateBlock(txList []blockchain.Transaction) error {
 
 	return nil
 }
+
+func (bApi BlockApi) CreateGenesisBlock(GenesisConfPath string) error {
+
+	GenesisBlock, err := blockchain.CreateGenesisBlock(GenesisConfPath)
+
+	if err != nil {
+		return ErrCreateGenesisBlock
+	}
+
+	err = blockchain.CommitBlock(GenesisBlock)
+
+	if err != nil {
+		return ErrCommitBlock
+	}
+
+	return nil
+}
