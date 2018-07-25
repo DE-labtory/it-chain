@@ -21,6 +21,7 @@ import (
 
 	"errors"
 
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/p2p"
 )
 
@@ -177,7 +178,7 @@ type P2PEventHandler struct {
 	peerRepository PeerRepository
 }
 
-func (peh *P2PEventHandler) PeerCreatedEventHandler(event p2p.PeerCreatedEvent) error {
+func (peh *P2PEventHandler) PeerCreatedEventHandler(event event.PeerCreated) error {
 
 	peer := p2p.Peer{
 		PeerId: p2p.PeerId{
@@ -191,14 +192,14 @@ func (peh *P2PEventHandler) PeerCreatedEventHandler(event p2p.PeerCreatedEvent) 
 	return nil
 }
 
-func (peh *P2PEventHandler) PeerDeletedEventHandler(event p2p.PeerCreatedEvent) error {
+func (peh *P2PEventHandler) PeerDeletedEventHandler(event event.PeerCreated) error {
 
 	peh.peerRepository.Delete(event.ID)
 
 	return nil
 }
 
-func (peh *P2PEventHandler) HandleLeaderUpdatedEvent(event p2p.LeaderUpdatedEvent) error {
+func (peh *P2PEventHandler) HandleLeaderUpdatedEvent(event event.PeerCreated) error {
 
 	peer := p2p.Peer{
 		PeerId: p2p.PeerId{Id: event.ID},

@@ -19,6 +19,7 @@ package adapter_test
 import (
 	"testing"
 
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/infra/adapter"
@@ -62,7 +63,7 @@ func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := eventHandler.HandleConnCreatedEvent(p2p.ConnectionCreatedEvent{EventModel: midgard.EventModel{ID: test.input.nodeId}, Address: test.input.address})
+		err := eventHandler.HandleConnCreatedEvent(event.ConnectionCreated{EventModel: midgard.EventModel{ID: test.input.nodeId}, Address: test.input.address})
 		assert.Equal(t, err, test.err)
 	}
 
@@ -98,13 +99,13 @@ func TestEventHandler_HandleConnDisconnectedEvent(t *testing.T) {
 
 		t.Logf("running test case %s", testName)
 
-		event := p2p.ConnectionDisconnectedEvent{
+		e := event.ConnectionClosed{
 			EventModel: midgard.EventModel{
 				ID: test.input.id,
 			},
 		}
 
-		err := eventHandler.HandleConnDisconnectedEvent(event)
+		err := eventHandler.HandleConnDisconnectedEvent(e)
 
 		assert.Equal(t, err, test.err)
 

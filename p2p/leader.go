@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
@@ -40,11 +41,11 @@ func (l Leader) GetID() string {
 	return l.LeaderId.ToString()
 }
 
-func (l *Leader) On(event midgard.Event) error {
+func (l *Leader) On(e midgard.Event) error {
 
-	switch v := event.(type) {
+	switch v := e.(type) {
 
-	case LeaderChangedEvent:
+	case event.LeaderUpdated:
 		l.LeaderId = LeaderId{v.GetID()}
 
 	default:
@@ -66,7 +67,7 @@ func UpdateLeader(peer Peer) error {
 
 	events := make([]midgard.Event, 0)
 
-	leaderUpdatedEvent := LeaderUpdatedEvent{
+	leaderUpdatedEvent := event.LeaderUpdated{
 		EventModel: midgard.EventModel{
 			ID:   leader.LeaderId.ToString(),
 			Type: "leader.update",

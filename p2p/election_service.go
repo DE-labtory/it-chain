@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
@@ -104,7 +105,7 @@ func (es *ElectionService) requestVote(connectionIds []string) error {
 
 	for _, connectionId := range connectionIds {
 
-		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
+		grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
 	}
 
 	es.publish("Command", "message.send", grpcDeliverCommand)
@@ -112,21 +113,21 @@ func (es *ElectionService) requestVote(connectionIds []string) error {
 	return nil
 }
 
-func CreateGrpcDeliverCommand(protocol string, body interface{}) (GrpcDeliverCommand, error) {
+func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
 
 	data, err := common.Serialize(body)
 
 	if err != nil {
-		return GrpcDeliverCommand{}, err
+		return command.DeliverGrpc{}, err
 	}
 
-	return GrpcDeliverCommand{
+	return command.DeliverGrpc{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
-		Recipients: make([]string, 0),
-		Body:       data,
-		Protocol:   protocol,
+		RecipientList: make([]string, 0),
+		Body:          data,
+		Protocol:      protocol,
 	}, err
 }
 
@@ -151,7 +152,7 @@ func (es *ElectionService) Vote(connectionId string) error {
 	voteLeaderMessage := VoteMessage{}
 
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("VoteLeaderProtocol", voteLeaderMessage)
-	grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
+	grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
 
 	es.publish("Command", "message.deliver", grpcDeliverCommand)
 
@@ -167,7 +168,7 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 	pLTable, _ := es.peerQueryService.GetPLTable()
 
 	for _, peer := range pLTable.PeerTable {
-		grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, peer.PeerId.Id)
+		grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, peer.PeerId.Id)
 	}
 
 	es.publish("Command", "message.deliver", grpcDeliverCommand)
@@ -176,7 +177,7 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 }
 
 //broad case leader when voted fully
-func (es *ElectionService) DecideToBeLeader(command GrpcReceiveCommand) error {
+func (es *ElectionService) DecideToBeLeader(command command.ReceiveGrpc) error {
 	election := es.electionRepository.GetElection()
 
 	//	1. if candidate, reset left time
