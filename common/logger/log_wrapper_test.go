@@ -1,6 +1,14 @@
 package logger
 
-import "testing"
+import (
+	"testing"
+
+	"path/filepath"
+
+	"os"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestDebug(t *testing.T) {
 	EnableFileLogger(false, "")
@@ -10,4 +18,14 @@ func TestDebug(t *testing.T) {
 func TestError(t *testing.T) {
 	EnableFileLogger(false, "")
 	Errorf(&Fields{"filedTest": "good"}, "%s good?", "testing is")
+}
+
+func TestEnableFileLogger(t *testing.T) {
+	os.RemoveAll("./.tmp")
+	absPath, _ := filepath.Abs("./.tmp/tmp.log")
+	defer os.RemoveAll("./.tmp")
+	err := EnableFileLogger(true, absPath)
+	assert.NoError(t, err)
+	Error(nil, "hahaha")
+
 }

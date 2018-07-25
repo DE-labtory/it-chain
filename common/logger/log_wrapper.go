@@ -7,6 +7,8 @@ import (
 
 	"runtime"
 
+	"path/filepath"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -36,7 +38,11 @@ func EnableStd(enable bool) {
 func EnableFileLogger(enable bool, savePath string) error {
 	if enable {
 		fileLogger = logrus.New()
-		return initFileLogger(fileLogger, savePath)
+		err := initFileLogger(fileLogger, savePath)
+		if err != nil {
+			fileLogger = nil
+		}
+		return err
 	} else {
 		fileLogger = nil
 		return nil
@@ -60,6 +66,9 @@ func Info(fields *Fields, message string) {
 	}
 }
 func Warn(fields *Fields, message string) {
+	if fields == nil {
+		fields = &Fields{}
+	}
 	if stdLogger != nil {
 		fields = addLineInfo(fields)
 		stdLogger.WithFields(*fields).Warn(message)
@@ -70,6 +79,9 @@ func Warn(fields *Fields, message string) {
 	}
 }
 func Fatal(fields *Fields, message string) {
+	if fields == nil {
+		fields = &Fields{}
+	}
 	if stdLogger != nil {
 		fields = addLineInfo(fields)
 		stdLogger.WithFields(*fields).Fatal(message)
@@ -80,6 +92,9 @@ func Fatal(fields *Fields, message string) {
 	}
 }
 func Error(fields *Fields, message string) {
+	if fields == nil {
+		fields = &Fields{}
+	}
 	if stdLogger != nil {
 		fields = addLineInfo(fields)
 		stdLogger.WithFields(*fields).Error(message)
@@ -91,6 +106,9 @@ func Error(fields *Fields, message string) {
 }
 
 func Panic(fields *Fields, message string) {
+	if fields == nil {
+		fields = &Fields{}
+	}
 	if stdLogger != nil {
 		fields = addLineInfo(fields)
 		stdLogger.WithFields(*fields).Panic(message)
@@ -134,12 +152,25 @@ func initStdLogger(logger *logrus.Logger) {
 
 func initFileLogger(logger *logrus.Logger, savePath string) error {
 
-	file, err := os.OpenFile(savePath, os.O_CREATE|os.O_WRONLY, 0666)
+	if _, err := os.Stat(savePath); err != nil {
+		err = os.MkdirAll(filepath.Dir(savePath), 0666)
+		if err != nil {
+			return err
+		}
+		_, err = os.Create(savePath)
+		if err != nil {
+			return err
+		}
+	}
+
+	file, err := os.OpenFile(savePath, os.O_APPEND|os.O_WRONLY, 0666)
 	if err == nil {
+		logger.Formatter = &logrus.JSONFormatter{}
 		logger.Out = file
 	} else {
 		return err
 	}
+
 	return nil
 }
 
