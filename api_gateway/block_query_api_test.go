@@ -695,7 +695,7 @@ func TestBlockEventListener_HandleBlockCommitedEvent(t *testing.T) {
 	assert.NoError(t, err1)
 
 	// when - Test whether save target block to yggdrasill
-	block3, err2 := cbr.GetBlockByHeight(1)
+	block3, err2 := cbr.FindByHeight(1)
 	// then
 	assert.NoError(t, err2)
 	assert.Equal(t, block3.Seal, block2.GetSeal())

@@ -46,7 +46,6 @@ func TxPoolApiHandler(bs TransactionQueryApi, logger kitlog.Logger) http.Handler
 	return r
 }
 
-//ToDo: MakeHandler와 통합 필요 : service interface 통합 (gitId: junk-sound)
 func BlockchainApiHandler(bqa BlockQueryApi, logger kitlog.Logger) http.Handler {
 
 	opts := []kithttp.ServerOption{
