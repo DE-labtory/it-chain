@@ -147,9 +147,11 @@ func initGateway(errs chan error) error {
 	logger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
 	logger = kitlog.With(logger, "ts", kitlog.DefaultTimestampUTC)
 
+	//set subscriber
+	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Event")
+
 	//set txpool service and repo
 	txpoolDB := "./.test/txpool"
-	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Event")
 
 	transactionRepo := api_gateway.NewTransactionRepository(txpoolDB)
 

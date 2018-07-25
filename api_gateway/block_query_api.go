@@ -41,6 +41,7 @@ var ErrFailRemoveBlock = errors.New("Error failed removing block")
 var ErrFailBlockTypeCasting = errors.New("Error failed type casting block")
 var ErrSealEmpty = errors.New("Error that seal is empty string")
 var ErrEmptyBlock = errors.New("Error empty block when getting block")
+var ErrCheckEmpty = errors.New("Error when checking repo empty")
 
 type BlockQueryApi struct {
 	blockPoolRepository     BlockPoolRepository
@@ -214,7 +215,6 @@ type CommitedBlockRepository interface {
 	FindLast() (blockchain.DefaultBlock, error)
 	FindByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
 	FindAll() ([]blockchain.DefaultBlock, error)
-	IsEmpty() bool
 }
 
 type CommitedBlockRepositoryImpl struct {
@@ -275,6 +275,49 @@ func (cbr *CommitedBlockRepositoryImpl) FindByHeight(height uint64) (blockchain.
 	}
 
 	return *block, nil
+}
+
+func (cbr *CommitedBlockRepositoryImpl) FindAll() ([]blockchain.DefaultBlock, error) {
+	cbr.mux.Lock()
+	defer cbr.mux.Unlock()
+
+	blocks := []blockchain.DefaultBlock{}
+
+	// set
+	lastBlock := &blockchain.DefaultBlock{}
+
+	err := cbr.BlockStorageManager.GetLastBlock(lastBlock)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// check empty
+	if lastBlock.IsEmpty() {
+		return blocks, nil
+	}
+
+	lastHeight := lastBlock.GetHeight()
+
+	// get blocks
+	for i := uint64(0); i <= lastHeight; i++ {
+
+		block := &blockchain.DefaultBlock{}
+
+		err := cbr.BlockStorageManager.GetBlockByHeight(block, i)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if block.IsEmpty() {
+			return nil, ErrEmptyBlock
+		}
+
+		blocks = append(blocks, *block)
+	}
+
+	return blocks, nil
 }
 
 type BlockEventListener struct {
@@ -404,63 +447,4 @@ func (l *BlockEventListener) HandleBlockCommitedEvent(event event.BlockCommitted
 	}
 
 	return nil
-}
-
-func (cbr *CommitedBlockRepositoryImpl) IsEmpty() bool {
-
-	lastBlock := &blockchain.DefaultBlock{}
-	err := cbr.BlockStorageManager.GetLastBlock(lastBlock)
-
-	if err != nil {
-		log.Println(err.Error())
-	}
-
-	if lastBlock.IsEmpty() {
-		return true
-	}
-
-	return false
-}
-
-func (cbr *CommitedBlockRepositoryImpl) FindAll() ([]blockchain.DefaultBlock, error) {
-	cbr.mux.Lock()
-	defer cbr.mux.Unlock()
-
-	blocks := []blockchain.DefaultBlock{}
-
-	// check empty
-	if cbr.IsEmpty() {
-		return blocks, nil
-	}
-
-	// set
-	lastBlock := &blockchain.DefaultBlock{}
-
-	err := cbr.BlockStorageManager.GetLastBlock(lastBlock)
-
-	if err != nil {
-		return nil, err
-	}
-
-	lastHeight := lastBlock.GetHeight()
-
-	// get blocks
-	for i := uint64(0); i <= lastHeight; i++ {
-
-		block := &blockchain.DefaultBlock{}
-
-		err := cbr.BlockStorageManager.GetBlockByHeight(block, i)
-
-		if err != nil {
-			return nil, err
-		}
-
-		if block.IsEmpty() {
-			return nil, ErrEmptyBlock
-		}
-
-		blocks = append(blocks, *block)
-	}
-
-	return blocks, nil
 }
