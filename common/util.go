@@ -30,8 +30,6 @@ import (
 	"strings"
 )
 
-var logger = GetLogger("util.go")
-
 func CreateDirIfMissing(dirPath string) error {
 
 	if !strings.HasSuffix(dirPath, "/") {
@@ -42,7 +40,6 @@ func CreateDirIfMissing(dirPath string) error {
 
 	err := os.MkdirAll(path.Dir(dirPath), 0755)
 	if err != nil {
-		logger.Debugf("Error while creating dir [%s]", dirPath)
 		return err
 	}
 
@@ -53,7 +50,6 @@ func CreateDirIfMissing(dirPath string) error {
 func DirEmpty(dirPath string) (bool, error) {
 	f, err := os.Open(dirPath)
 	if err != nil {
-		logger.Debugf("Error while opening dir [%s]: %s", dirPath, err)
 		return false, err
 	}
 	defer f.Close()
