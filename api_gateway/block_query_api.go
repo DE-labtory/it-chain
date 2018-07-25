@@ -53,16 +53,16 @@ func NewBlockQueryApi(blockPoolRepo BlockPoolRepository, commitedBlockRepo Commi
 	}
 }
 
-func (q *BlockQueryApi) GetStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
+func (q BlockQueryApi) GetStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
 	return q.blockPoolRepository.FindStagedBlockByHeight(height)
 }
-func (q *BlockQueryApi) GetStagedBlockById(blockId string) (blockchain.DefaultBlock, error) {
+func (q BlockQueryApi) GetStagedBlockById(blockId string) (blockchain.DefaultBlock, error) {
 	return q.blockPoolRepository.FindStagedBlockById(blockId)
 }
-func (q *BlockQueryApi) GetLastCommitedBlock() (blockchain.DefaultBlock, error) {
+func (q BlockQueryApi) GetLastCommitedBlock() (blockchain.DefaultBlock, error) {
 	return q.commitedBlockRepository.GetLastBlock()
 }
-func (q *BlockQueryApi) GetCommitedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
+func (q BlockQueryApi) GetCommitedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
 	return q.commitedBlockRepository.GetBlockByHeight(height)
 }
 
