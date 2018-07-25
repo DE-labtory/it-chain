@@ -20,7 +20,7 @@ import (
 	"errors"
 
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/p2p"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
@@ -45,21 +45,21 @@ func NewGrpcCommandService(publish Publish) *GrpcCommandService {
 	}
 }
 
-func CreateGrpcDeliverCommand(protocol string, body interface{}) (p2p.GrpcDeliverCommand, error) {
+func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
 
 	data, err := common.Serialize(body)
 
 	if err != nil {
-		return p2p.GrpcDeliverCommand{}, err
+		return command.DeliverGrpc{}, err
 	}
 
-	return p2p.GrpcDeliverCommand{
+	return command.DeliverGrpc{
 
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
-		Recipients: make([]string, 0),
-		Body:       data,
-		Protocol:   protocol,
+		RecipientList: make([]string, 0),
+		Body:          data,
+		Protocol:      protocol,
 	}, err
 }

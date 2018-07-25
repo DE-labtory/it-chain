@@ -16,6 +16,8 @@
 
 package p2p
 
+import "github.com/it-chain/engine/common/command"
+
 type ICommunicationService interface {
 	Dial(ipAddress string) error
 	DeliverPLTable(connectionId string, peerLeaderTable PLTable) error
@@ -27,5 +29,5 @@ type IPeerService interface {
 }
 
 type IPLTableService interface {
-	GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error)
+	GetPLTableFromCommand(command command.ReceiveGrpc) (PLTable, error)
 }

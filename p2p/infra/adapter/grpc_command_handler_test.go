@@ -25,6 +25,7 @@ import (
 	"github.com/it-chain/engine/p2p/test/mock"
 	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
+	"github.com/it-chain/engine/common/command"
 )
 
 func TestGrpcCommandHandler_HandleMessageReceive(t *testing.T) {
@@ -70,7 +71,7 @@ func TestGrpcCommandHandler_HandleMessageReceive(t *testing.T) {
 	messageHandler := adapter.NewGrpcCommandHandler(leaderApi, electionService, communicationApi, pLTableService)
 
 	for testName, test := range tests {
-		grpcReceiveCommand := p2p.GrpcReceiveCommand{
+		grpcReceiveCommand := command.ReceiveGrpc{
 			CommandModel: midgard.CommandModel{
 				ID: test.input.id,
 			},
