@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
@@ -68,16 +69,16 @@ func (bss *BlockSyncState) SetProgress(state ProgressState) {
 	bss.On(event)
 }
 
-func createSyncStartEvent() *SyncStartEvent {
-	return &SyncStartEvent{
+func createSyncStartEvent() *event.SyncStart {
+	return &event.SyncStart{
 		EventModel: midgard.EventModel{
 			ID: BC_SYNC_STATE_AID,
 		},
 	}
 }
 
-func createSyncDoneEvent() *SyncDoneEvent {
-	return &SyncDoneEvent{
+func createSyncDoneEvent() *event.SyncDone {
+	return &event.SyncDone{
 		EventModel: midgard.EventModel{
 			ID: BC_SYNC_STATE_AID,
 		},
@@ -88,13 +89,13 @@ func (bss *BlockSyncState) IsProgressing() ProgressState {
 	return bss.isProgress
 }
 
-func (bss *BlockSyncState) On(event midgard.Event) error {
-	switch v := event.(type) {
+func (bss *BlockSyncState) On(e midgard.Event) error {
+	switch v := e.(type) {
 
-	case *SyncStartEvent:
+	case *(event.SyncStart):
 		bss.isProgress = PROGRESSING
 
-	case *SyncDoneEvent:
+	case *(event.SyncDone):
 		bss.isProgress = DONE
 
 	default:

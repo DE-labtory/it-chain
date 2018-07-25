@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
@@ -32,7 +33,7 @@ func TestBlockSyncState(t *testing.T) {
 	assert.Equal(t, blockchain.BC_SYNC_STATE_AID, syncState.GetID())
 
 	// When
-	event1 := &blockchain.SyncStartEvent{
+	event1 := &event.SyncStart{
 		EventModel: midgard.EventModel{
 			ID: blockchain.BC_SYNC_STATE_AID,
 		},
@@ -43,7 +44,7 @@ func TestBlockSyncState(t *testing.T) {
 	assert.Equal(t, blockchain.PROGRESSING, syncState.IsProgressing())
 
 	// When
-	event2 := &blockchain.SyncDoneEvent{
+	event2 := &event.SyncDone{
 		EventModel: midgard.EventModel{
 			ID: blockchain.BC_SYNC_STATE_AID,
 		},

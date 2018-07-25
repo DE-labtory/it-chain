@@ -23,7 +23,7 @@ import (
 
 	"encoding/json"
 
-	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
@@ -115,14 +115,8 @@ type GenesisConfig struct {
 	Creator      string
 }
 
-func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []*DefaultTransaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*BlockCreatedEvent, error) {
-	txListBytes, err := common.Serialize(txList)
-
-	if err != nil {
-		return &BlockCreatedEvent{}, err
-	}
-
-	return &BlockCreatedEvent{
+func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []*DefaultTransaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*event.BlockCreated, error) {
+	return &event.BlockCreated{
 		EventModel: midgard.EventModel{
 			ID:   string(seal),
 			Type: "block.created",
@@ -130,7 +124,7 @@ func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList
 		Seal:      seal,
 		PrevSeal:  prevSeal,
 		Height:    height,
-		TxList:    txListBytes,
+		TxList:    ConvBackFromTransactionList(txList),
 		TxSeal:    txSeal,
 		Timestamp: timeStamp,
 		Creator:   creator,

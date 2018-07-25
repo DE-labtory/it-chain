@@ -24,6 +24,7 @@ import (
 	"errors"
 
 	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/event"
 	ygg "github.com/it-chain/yggdrasill/common"
 )
 
@@ -192,6 +193,62 @@ func deserializeTxList(txList []byte) ([]*DefaultTransaction, error) {
 		return nil, err
 	}
 	return DefaultTxList, nil
+}
+
+func ConvertToTransactionList(txList []event.Tx) []*DefaultTransaction {
+	defaultTxList := make([]*DefaultTransaction, 0)
+
+	for _, tx := range txList {
+		defaultTx := ConvertToTransaction(tx)
+		defaultTxList = append(defaultTxList, defaultTx)
+	}
+
+	return defaultTxList
+}
+
+func ConvertToTransaction(tx event.Tx) *DefaultTransaction {
+	return &DefaultTransaction{
+		ID:        tx.ID,
+		Status:    Status(tx.Status),
+		PeerID:    tx.PeerID,
+		ICodeID:   tx.ICodeID,
+		Timestamp: tx.TimeStamp,
+		TxData: TxData{
+			Jsonrpc: tx.Jsonrpc,
+			Method:  TxDataType(tx.Method),
+			Params: Params{
+				Function: tx.Function,
+				Args:     tx.Args,
+			},
+			ID: tx.ID,
+		},
+		Signature: tx.Signature,
+	}
+}
+
+func ConvBackFromTransactionList(defaultTxList []*DefaultTransaction) []event.Tx {
+	txList := make([]event.Tx, 0)
+
+	for _, defaultTx := range defaultTxList {
+		tx := ConvBackFromTransaction(defaultTx)
+		txList = append(txList, tx)
+	}
+
+	return txList
+}
+
+func ConvBackFromTransaction(defaultTx *DefaultTransaction) event.Tx {
+	return event.Tx{
+		ID:        defaultTx.ID,
+		ICodeID:   defaultTx.ICodeID,
+		Status:    int(defaultTx.Status),
+		TimeStamp: defaultTx.Timestamp,
+		Jsonrpc:   defaultTx.TxData.Jsonrpc,
+		Method:    string(defaultTx.TxData.Method),
+		Function:  defaultTx.TxData.Params.Function,
+		Args:      defaultTx.TxData.Params.Args,
+		Signature: defaultTx.Signature,
+	}
 }
 
 func ConvertTxType(txList []*DefaultTransaction) []Transaction {

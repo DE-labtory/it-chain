@@ -167,6 +167,14 @@ type Tx struct {
 	Signature []byte
 }
 
+type SyncStart struct {
+	midgard.EventModel
+}
+
+type SyncDone struct {
+	midgard.EventModel
+}
+
 /*
  * txpool
  */
