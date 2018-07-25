@@ -31,6 +31,7 @@ import (
 	blockchainApi "github.com/it-chain/engine/blockchain/api"
 	blockchainAdapter "github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/cmd/icode"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
@@ -97,6 +98,8 @@ func main() {
 func start() error {
 
 	configuration := conf.GetConfiguration()
+	logger.EnableFileLogger(true, configuration.Engine.LogPath)
+
 	ip4 := configuration.GrpcGateway.Address + ":" + configuration.GrpcGateway.Port
 	ln, err := net.Listen("tcp", ip4)
 
