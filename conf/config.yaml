@@ -1,7 +1,8 @@
 engine:
+  logpath: log/it-chain.log
   keypath: .it-chain/
   mode: solo
-  amqp: amqp://guest:guest@localhost:5672/
+  amqp: rabbitmq://guest:guest@localhost:5672/
   bootstrapnodeaddress: 127.0.0.1:5555
 txpool:
   timeoutms: 1000

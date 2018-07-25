@@ -18,6 +18,7 @@ package model
 
 // it-chain의 공통적이고 중요한 설정을 담는 구조체이다.
 type EngineConfiguration struct {
+	LogPath              string
 	KeyPath              string
 	Mode                 string
 	Amqp                 string
@@ -26,6 +27,7 @@ type EngineConfiguration struct {
 
 func NewEngineConfiguration() EngineConfiguration {
 	return EngineConfiguration{
+		LogPath:              "log/it-chain.log",
 		KeyPath:              ".it-chain/",
 		Mode:                 "solo",
 		BootstrapNodeAddress: "127.0.0.1:5555",
