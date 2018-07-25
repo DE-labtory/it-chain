@@ -19,6 +19,8 @@ package p2p
 import (
 	"encoding/json"
 	"errors"
+
+	"github.com/it-chain/engine/common/command"
 )
 
 var ErrEmptyLeaderId = errors.New("empty leader id")
@@ -59,7 +61,7 @@ func (pt *PLTable) GetPeerTable() (map[string]Peer, error) {
 
 type PLTableService struct{}
 
-func (plts *PLTableService) GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error) {
+func (plts *PLTableService) GetPLTableFromCommand(command command.ReceiveGrpc) (PLTable, error) {
 
 	peerTable := PLTable{}
 
