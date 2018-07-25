@@ -21,3 +21,8 @@ type ContainerService interface {
 	StopContainer(id ID) error
 	ExecuteTransaction(tx Transaction) (*Result, error)
 }
+
+type GitService interface {
+	//clone code from deploy info
+	Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (*Meta, error)
+}

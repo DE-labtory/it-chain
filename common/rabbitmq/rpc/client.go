@@ -22,6 +22,8 @@ import (
 	"math/rand"
 	"reflect"
 
+	"log"
+
 	"github.com/it-chain/engine/common/rabbitmq"
 	"github.com/streadway/amqp"
 )
@@ -112,6 +114,7 @@ func (c Client) Call(queue string, params interface{}, callback interface{}) err
 			err := handleResponse(d.Body, callback)
 
 			if err != nil {
+				log.Fatal(err)
 				return err
 			}
 
