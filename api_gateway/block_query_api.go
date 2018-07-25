@@ -40,6 +40,7 @@ var ErrInvalidStateBlock = errors.New("Error invalid state block")
 var ErrFailRemoveBlock = errors.New("Error failed removing block")
 var ErrFailBlockTypeCasting = errors.New("Error failed type casting block")
 var ErrSealEmpty = errors.New("Error that seal is empty string")
+var ErrEmptyBlock = errors.New("Error empty block when getting block")
 
 type BlockQueryApi struct {
 	blockPoolRepository     BlockPoolRepository
@@ -59,11 +60,12 @@ func (q BlockQueryApi) GetStagedBlockByHeight(height blockchain.BlockHeight) (bl
 func (q BlockQueryApi) GetStagedBlockById(blockId string) (blockchain.DefaultBlock, error) {
 	return q.blockPoolRepository.FindStagedBlockById(blockId)
 }
+
 func (q BlockQueryApi) GetLastCommitedBlock() (blockchain.DefaultBlock, error) {
-	return q.commitedBlockRepository.GetLastBlock()
+	return q.commitedBlockRepository.FindLast()
 }
 func (q BlockQueryApi) GetCommitedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
-	return q.commitedBlockRepository.GetBlockByHeight(height)
+	return q.commitedBlockRepository.FindByHeight(height)
 }
 
 type BlockPoolRepository interface {
@@ -209,8 +211,9 @@ func isBlockIdEqualWith(block blockchain.Block, id string) bool {
 
 type CommitedBlockRepository interface {
 	Save(block blockchain.DefaultBlock) error
-	GetLastBlock() (blockchain.DefaultBlock, error)
-	GetBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
+	FindLast() (blockchain.DefaultBlock, error)
+	FindByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
+	FindAll() ([]blockchain.DefaultBlock, error)
 	IsEmpty() bool
 }
 
@@ -247,7 +250,7 @@ func (cbr *CommitedBlockRepositoryImpl) Save(block blockchain.DefaultBlock) erro
 	return nil
 }
 
-func (cbr *CommitedBlockRepositoryImpl) GetLastBlock() (blockchain.DefaultBlock, error) {
+func (cbr *CommitedBlockRepositoryImpl) FindLast() (blockchain.DefaultBlock, error) {
 	cbr.mux.Lock()
 	defer cbr.mux.Unlock()
 
@@ -260,7 +263,7 @@ func (cbr *CommitedBlockRepositoryImpl) GetLastBlock() (blockchain.DefaultBlock,
 
 	return *block, nil
 }
-func (cbr *CommitedBlockRepositoryImpl) GetBlockByHeight(height uint64) (blockchain.DefaultBlock, error) {
+func (cbr *CommitedBlockRepositoryImpl) FindByHeight(height uint64) (blockchain.DefaultBlock, error) {
 	cbr.mux.Lock()
 	defer cbr.mux.Unlock()
 
@@ -314,9 +317,8 @@ func createDefaultBlock(Seal []byte, PrevSeal []byte, Height uint64, TxList []ev
 
 func deserializeTxList(txList []byte) ([]*blockchain.DefaultTransaction, error) {
 	DefaultTxList := []*blockchain.DefaultTransaction{}
-
 	err := common.Deserialize(txList, &DefaultTxList)
-
+	// get blocks
 	if err != nil {
 		return nil, err
 	}
@@ -418,4 +420,47 @@ func (cbr *CommitedBlockRepositoryImpl) IsEmpty() bool {
 	}
 
 	return false
+}
+
+func (cbr *CommitedBlockRepositoryImpl) FindAll() ([]blockchain.DefaultBlock, error) {
+	cbr.mux.Lock()
+	defer cbr.mux.Unlock()
+
+	blocks := []blockchain.DefaultBlock{}
+
+	// check empty
+	if cbr.IsEmpty() {
+		return blocks, nil
+	}
+
+	// set
+	lastBlock := &blockchain.DefaultBlock{}
+
+	err := cbr.BlockStorageManager.GetLastBlock(lastBlock)
+
+	if err != nil {
+		return nil, err
+	}
+
+	lastHeight := lastBlock.GetHeight()
+
+	// get blocks
+	for i := uint64(0); i <= lastHeight; i++ {
+
+		block := &blockchain.DefaultBlock{}
+
+		err := cbr.BlockStorageManager.GetBlockByHeight(block, i)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if block.IsEmpty() {
+			return nil, ErrEmptyBlock
+		}
+
+		blocks = append(blocks, *block)
+	}
+
+	return blocks, nil
 }
