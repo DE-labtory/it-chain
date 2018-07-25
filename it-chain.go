@@ -292,12 +292,6 @@ func initBlockchain() error {
 
 	blockApi.CreateGenesisBlock(GenesisConfPath)
 
-	err = server.Register("block.propose", blockCommandHandler.HandleProposeBlockCommand)
-
-	if err != nil {
-		panic(err)
-	}
-
 	err = server.Register("block.confirm", blockCommandHandler.HandleConfirmBlockCommand)
 
 	return nil

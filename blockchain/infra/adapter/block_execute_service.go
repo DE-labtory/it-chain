@@ -19,6 +19,7 @@ package adapter
 import (
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/midgard"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
@@ -30,22 +31,24 @@ type Publisher func(topic string, data interface{}) (err error) //해당 publish
 //모든 의존성 주입은 컴포넌트.go 에서 이루어짐
 
 type BlockExecuteService struct {
-	publisher Publisher
+	client rpc.Client
 }
 
-func NewBlockExecuteService(publisher Publisher) *BlockExecuteService {
+func NewBlockExecuteService(client rpc.Client) *BlockExecuteService {
 	return &BlockExecuteService{
-		publisher: publisher,
+		client: client,
 	}
 }
 
 func (s *BlockExecuteService) ExecuteBlock(block blockchain.Block) error {
-	command, err := createBlockExecuteCommand(block)
+	deliverCommand, err := createBlockExecuteCommand(block)
 	if err != nil {
 		return err
 	}
 
-	return s.publisher("block.execute", command)
+	err = s.client.Call("block.execute", deliverCommand, func() {})
+
+	return err
 }
 
 func createBlockExecuteCommand(block blockchain.Block) (command.ExecuteBlock, error) {
