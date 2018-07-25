@@ -18,12 +18,10 @@ package model
 
 type ICodeConfiguration struct {
 	RepositoryPath string
-	ICodeSavePath  string
 }
 
 func NewIcodeConfiguration() ICodeConfiguration {
 	return ICodeConfiguration{
 		RepositoryPath: "empty",
-		ICodeSavePath:  "./.tmp",
 	}
 }

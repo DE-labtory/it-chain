@@ -17,10 +17,8 @@
 package adapter
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/icode/api"
 )
 
@@ -34,9 +32,13 @@ func NewUnDeployCommandHandler(icodeApi api.ICodeApi) *UnDeployCommandHandler {
 	}
 }
 
-func (u *UnDeployCommandHandler) HandleUnDeployCommand(undeployCommand command.UnDeploy) {
+func (u *UnDeployCommandHandler) HandleUnDeployCommand(undeployCommand command.UnDeploy) (struct{}, rpc.Error) {
+
 	err := u.icodeApi.UnDeploy(undeployCommand.ID)
+
 	if err != nil {
-		log.Println(fmt.Sprintf("error in handle undeploy command %s", err.Error()))
+		return struct{}{}, rpc.Error{Message: err.Error()}
 	}
+
+	return struct{}{}, rpc.Error{}
 }

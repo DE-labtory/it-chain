@@ -15,7 +15,6 @@ peer:
   leaderelection: RAFT
 icode:
   repositorypath: empty
-  icodesavepath: ./.tmp
 grpcgateway:
   address: 127.0.0.1
   port: "13579"

@@ -21,30 +21,30 @@ import (
 	"sync"
 
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/engine/icode/api"
 )
 
-type BlockCommandHandler struct {
-	icodeApi       api.ICodeApi
-	commandService icode.CommandService
-	mutex          *sync.Mutex
+type BlockExecuteCommandHandler struct {
+	icodeApi api.ICodeApi
+	mutex    *sync.Mutex
 }
 
-func NewBlockCommandHandler(icodeApi api.ICodeApi, service icode.CommandService) *BlockCommandHandler {
-	return &BlockCommandHandler{
-		icodeApi:       icodeApi,
-		commandService: service,
-		mutex:          &sync.Mutex{},
+func NewBlockCommandHandler(icodeApi api.ICodeApi) *BlockExecuteCommandHandler {
+	return &BlockExecuteCommandHandler{
+		icodeApi: icodeApi,
+		mutex:    &sync.Mutex{},
 	}
 }
 
-func (b *BlockCommandHandler) HandleBlockExecuteCommand(blockExecuteCommand command.ExecuteBlock) {
+func (b *BlockExecuteCommandHandler) HandleBlockExecuteCommand(blockExecuteCommand command.ExecuteBlock) ([]command.TxResult, rpc.Error) {
 
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
 
 	results := make([]icode.Result, 0)
+
 	for _, tx := range blockExecuteCommand.TxList {
 		switch tx.Method {
 		case icode.Query:
@@ -70,5 +70,20 @@ func (b *BlockCommandHandler) HandleBlockExecuteCommand(blockExecuteCommand comm
 		}
 	}
 
-	b.commandService.SendBlockExecuteResultCommand(results, blockExecuteCommand.GetID())
+	return convertTxResults(results), rpc.Error{}
+}
+
+func convertTxResults(icodeResults []icode.Result) []command.TxResult {
+
+	results := make([]command.TxResult, 0)
+
+	for _, result := range icodeResults {
+		results = append(results, command.TxResult{
+			TxId:    result.TxId,
+			Data:    result.Data,
+			Success: result.Success,
+		})
+	}
+
+	return results
 }

@@ -178,11 +178,11 @@ func initIcode() error {
 	log.Println("icode is running...")
 
 	config := conf.GetConfiguration()
-	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Command")
-	publisher := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
+	server := rpc.NewServer(config.Engine.Amqp)
+	//publisher := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
 
 	// service generate
-	commandService := icodeAdapter.NewCommandService(publisher.Publish)
+	//commandService := icodeAdapter.NewCommandService(publisher.Publish)
 
 	// git generate
 	storeApi := icodeInfra.NewRepositoryService()
@@ -195,11 +195,11 @@ func initIcode() error {
 	// handler generate
 	deployHandler := icodeAdapter.NewDeployCommandHandler(*api)
 	unDeployHandler := icodeAdapter.NewUnDeployCommandHandler(*api)
-	blockCommandHandler := icodeAdapter.NewBlockCommandHandler(*api, commandService)
+	blockCommandHandler := icodeAdapter.NewBlockCommandHandler(*api)
 
-	subscriber.SubscribeTopic("icode.deploy", deployHandler)
-	subscriber.SubscribeTopic("icode.undeploy", unDeployHandler)
-	subscriber.SubscribeTopic("block.excute", blockCommandHandler)
+	server.Register("icode.deploy", deployHandler.HandleDeployCommand)
+	server.Register("icode.undeploy", unDeployHandler.HandleUnDeployCommand)
+	server.Register("block.execute", blockCommandHandler.HandleBlockExecuteCommand)
 
 	return nil
 

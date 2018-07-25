@@ -44,21 +44,26 @@ func NewTesseractContainerService(config tesseract.Config) *TesseractContainerSe
 }
 
 func (cs TesseractContainerService) StartContainer(meta icode.Meta) error {
+
 	tesseractIcodeInfo := tesseract.ICodeInfo{
 		Name:      meta.RepositoryName,
 		Directory: meta.Path,
 	}
 	containerId, err := cs.tesseract.SetupContainer(tesseractIcodeInfo)
+
 	if err != nil {
 		icode.ChangeMetaStatus(meta.GetID(), icode.DEPLOY_FAIL)
 		return err
 	}
+
 	cs.containerIdMap[meta.ICodeID] = containerId
 	icode.ChangeMetaStatus(meta.GetID(), icode.DEPLOYED)
+
 	return nil
 }
 
 func (cs TesseractContainerService) ExecuteTransaction(tx icode.Transaction) (*icode.Result, error) {
+
 	containerId, found := cs.containerIdMap[tx.ICodeID]
 
 	if !found {

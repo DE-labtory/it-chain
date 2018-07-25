@@ -17,36 +17,27 @@
 package api
 
 import (
-	"fmt"
-
 	"github.com/it-chain/engine/icode"
 )
 
 type ICodeApi struct {
 	ContainerService icode.ContainerService
-	StoreApi         icode.RepositoryService
+	GitService       icode.GitService
 }
 
-func NewIcodeApi(containerService icode.ContainerService, storeApi icode.RepositoryService) *ICodeApi {
+func NewIcodeApi(containerService icode.ContainerService, gitService icode.GitService) *ICodeApi {
+
 	return &ICodeApi{
 		ContainerService: containerService,
-		StoreApi:         storeApi,
+		GitService:       gitService,
 	}
 }
 
 func (iApi ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath string) (*icode.Meta, error) {
-	// check for already in repository
-	/*meta, err := iApi.MetaRepository.FindByGitURL(gitUrl)
-	if meta.ICodeID != "" {
-		return nil, errors.New("already deployed")
-	}
-	if err != nil {
-		return nil, err
-	}
-	*/
 
 	// clone meta. in clone function, metaCreatedEvent will publish
-	meta, err := iApi.StoreApi.Clone(id, baseSaveUrl, gitUrl, sshPath)
+	meta, err := iApi.GitService.Clone(id, baseSaveUrl, gitUrl, sshPath)
+
 	if err != nil {
 		return nil, err
 	}
@@ -76,22 +67,26 @@ func (iApi ICodeApi) UnDeploy(id icode.ID) error {
 
 //todo need asnyc process
 func (iApi ICodeApi) Invoke(tx icode.Transaction) *icode.Result {
+
 	result, err := iApi.ContainerService.ExecuteTransaction(tx)
+
 	if err != nil {
-		fmt.Println(fmt.Sprintf("error in invoke tx, err : %s", err.Error()))
 		result = &icode.Result{
 			TxId:    tx.TxId,
 			Data:    nil,
 			Success: false,
 		}
 	}
+
 	return result
 }
 
 func (iApi ICodeApi) Query(tx icode.Transaction) *icode.Result {
+
 	result, err := iApi.ContainerService.ExecuteTransaction(tx)
+
 	if err != nil {
-		fmt.Println(fmt.Sprintf("error in invoke tx, err : %s", err.Error()))
+
 		result = &icode.Result{
 			TxId:    tx.TxId,
 			Data:    nil,

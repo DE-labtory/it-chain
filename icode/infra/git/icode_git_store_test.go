@@ -70,7 +70,6 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 		assert.Equal(t, test.OutputMeta, meta)
 		assert.Equal(t, test.OutputErr, err)
 	}
-
 }
 
 func generatePriKey(path string) (error, func() error) {

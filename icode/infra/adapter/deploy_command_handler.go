@@ -17,11 +17,11 @@
 package adapter
 
 import (
-	"fmt"
-	"log"
+	"os"
 
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/conf"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
+	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/engine/icode/api"
 )
 
@@ -35,11 +35,15 @@ func NewDeployCommandHandler(icodeApi api.ICodeApi) *DeployCommandHandler {
 	}
 }
 
-func (d *DeployCommandHandler) HandleDeployCommand(deployCommand command.Deploy) {
+func (d *DeployCommandHandler) HandleDeployCommand(deployCommand command.Deploy) (icode.Meta, rpc.Error) {
 
-	_, err := d.icodeApi.Deploy(deployCommand.GetID(), conf.GetConfiguration().Icode.ICodeSavePath, deployCommand.Url, deployCommand.SshPath)
+	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine"
+
+	meta, err := d.icodeApi.Deploy(deployCommand.GetID(), savePath, deployCommand.Url, deployCommand.SshPath)
 
 	if err != nil {
-		log.Println(fmt.Sprintf("error in handle deploy command %s", err.Error()))
+		return icode.Meta{}, rpc.Error{Message: err.Error()}
 	}
+
+	return *meta, rpc.Error{}
 }

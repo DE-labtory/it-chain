@@ -17,8 +17,10 @@
 package icode
 
 import (
+	"log"
+
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/midgard"
 	"github.com/urfave/cli"
@@ -37,13 +39,29 @@ func UnDeployCmd() cli.Command {
 	}
 }
 func unDeploy(icodeId string) {
+
 	config := conf.GetConfiguration()
-	client := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
+	client := rpc.NewClient(config.Engine.Amqp)
+
 	defer client.Close()
+
 	undeployCommand := command.UnDeploy{
 		CommandModel: midgard.CommandModel{
 			ID: icodeId,
 		},
 	}
-	client.Publish("icode.undeploy", undeployCommand)
+
+	err := client.Call("icode.undeploy", undeployCommand, func(empty struct{}, err rpc.Error) {
+
+		if !err.IsNil() {
+			log.Printf("fail to undeploy icode err: [%s]", err.Message)
+			return
+		}
+
+		log.Printf("[%s] icode has undeployed", icodeId)
+	})
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }

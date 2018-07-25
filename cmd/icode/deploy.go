@@ -17,11 +17,12 @@
 package icode
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
+	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 	"github.com/urfave/cli"
@@ -41,10 +42,14 @@ func DeployCmd() cli.Command {
 		},
 	}
 }
+
 func deploy(gitUrl string, sshPath string) {
+
 	config := conf.GetConfiguration()
-	client := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
+	client := rpc.NewClient(config.Engine.Amqp)
+
 	defer client.Close()
+
 	deployCommand := command.Deploy{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
@@ -52,6 +57,21 @@ func deploy(gitUrl string, sshPath string) {
 		Url:     gitUrl,
 		SshPath: sshPath,
 	}
-	fmt.Println(fmt.Sprintf("deploying ID : %s", deployCommand.GetID()))
-	client.Publish("icode.deploy", deployCommand)
+
+	log.Printf("deploying icode...")
+	log.Printf("This may take a few minutes")
+
+	err := client.Call("icode.deploy", deployCommand, func(meta icode.Meta, err rpc.Error) {
+
+		if !err.IsNil() {
+			log.Printf("fail to deploy icode err: [%s]", err.Message)
+			return
+		}
+
+		log.Printf("[%s] icode has deployed", meta.ICodeID)
+	})
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
