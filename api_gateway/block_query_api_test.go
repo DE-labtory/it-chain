@@ -551,11 +551,11 @@ func TestCommitedBlockRepositoryImpl(t *testing.T) {
 	assert.Equal(t, block2.GetPrevSeal(), block3.GetPrevSeal())
 
 	// when
-	EveryBlock, err4 := cbr.GetEveryBlock()
+	AllBlock, err4 := cbr.FindAll()
 
 	// then
 	assert.NoError(t, err4)
-	assert.Equal(t, 2, len(EveryBlock))
+	assert.Equal(t, 2, len(AllBlock))
 
 }
 
