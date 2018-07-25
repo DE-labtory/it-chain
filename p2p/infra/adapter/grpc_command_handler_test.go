@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/infra/adapter"
 	"github.com/it-chain/engine/p2p/test/mock"
@@ -70,7 +71,7 @@ func TestGrpcCommandHandler_HandleMessageReceive(t *testing.T) {
 	messageHandler := adapter.NewGrpcCommandHandler(leaderApi, electionService, communicationApi, pLTableService)
 
 	for testName, test := range tests {
-		grpcReceiveCommand := p2p.GrpcReceiveCommand{
+		grpcReceiveCommand := command.ReceiveGrpc{
 			CommandModel: midgard.CommandModel{
 				ID: test.input.id,
 			},

@@ -17,6 +17,7 @@
 package mock
 
 import (
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/p2p"
 )
 
@@ -80,10 +81,10 @@ func (mpltqs *MockPeerQueryService) FindPeerByAddress(ipAddress string) (p2p.Pee
 }
 
 type MockPLTableService struct {
-	GetPLTableFromCommandFunc func(command p2p.GrpcReceiveCommand) (p2p.PLTable, error)
+	GetPLTableFromCommandFunc func(command command.ReceiveGrpc) (p2p.PLTable, error)
 }
 
-func (mplts *MockPLTableService) GetPLTableFromCommand(command p2p.GrpcReceiveCommand) (p2p.PLTable, error) {
+func (mplts *MockPLTableService) GetPLTableFromCommand(command command.ReceiveGrpc) (p2p.PLTable, error) {
 
 	return mplts.GetPLTableFromCommandFunc(command)
 }
@@ -91,7 +92,7 @@ func (mplts *MockPLTableService) GetPLTableFromCommand(command p2p.GrpcReceiveCo
 type MockElectionService struct {
 	VoteFunc             func(connectionId string) error
 	BroadcastLeaderFunc  func(peer p2p.Peer) error
-	DecideToBeLeaderFunc func(command p2p.GrpcReceiveCommand) error
+	DecideToBeLeaderFunc func(command command.ReceiveGrpc) error
 }
 
 func (mes *MockElectionService) Vote(connectionId string) error {
@@ -104,7 +105,7 @@ func (mes *MockElectionService) BroadcastLeader(peer p2p.Peer) error {
 	return mes.BroadcastLeaderFunc(peer)
 
 }
-func (mes *MockElectionService) DecideToBeLeader(command p2p.GrpcReceiveCommand) error {
+func (mes *MockElectionService) DecideToBeLeader(command command.ReceiveGrpc) error {
 
 	return mes.DecideToBeLeaderFunc(command)
 

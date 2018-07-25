@@ -20,6 +20,7 @@ import (
 	"errors"
 	"log"
 
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/api"
 )
@@ -38,7 +39,7 @@ func NewEventHandler(communicationApi api.ICommunicationApi) *EventHandler {
 }
 
 //handler connection created event
-func (eh *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent) error {
+func (eh *EventHandler) HandleConnCreatedEvent(event event.ConnectionCreated) error {
 
 	//1. addPeer
 	peer := p2p.Peer{
@@ -61,7 +62,7 @@ func (eh *EventHandler) HandleConnCreatedEvent(event p2p.ConnectionCreatedEvent)
 }
 
 //todo deleted peer if disconnected peer is leader
-func (eh *EventHandler) HandleConnDisconnectedEvent(event p2p.ConnectionDisconnectedEvent) error {
+func (eh *EventHandler) HandleConnDisconnectedEvent(event event.ConnectionClosed) error {
 
 	if event.ID == "" {
 		return ErrEmptyPeerId

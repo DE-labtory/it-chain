@@ -77,17 +77,6 @@ type BlockSaved struct {
  * grpc-gateway
  */
 
-// connection 생성
-type ConnectionCreated struct {
-	midgard.EventModel
-	Address string
-}
-
-// connection close
-type ConnectionClosed struct {
-	midgard.EventModel
-}
-
 // icode meta 생성
 type MetaCreated struct {
 	midgard.EventModel
@@ -179,5 +168,44 @@ type TxCreated struct {
 
 // when block committed check transaction and delete
 type TxDeleted struct {
+	midgard.EventModel
+}
+
+/*
+ * p2p
+ */
+
+type PeerCreated struct {
+	midgard.EventModel
+	IpAddress string
+}
+
+type PeerDeleted struct {
+	midgard.EventModel
+}
+
+// handle leader received event
+type LeaderUpdated struct {
+	midgard.EventModel
+}
+
+type LeaderDelivered struct {
+	midgard.EventModel
+}
+
+type LeaderDeleted struct {
+	midgard.EventModel
+}
+
+//Connection
+
+// connection 생성
+type ConnectionCreated struct {
+	midgard.EventModel
+	Address string
+}
+
+// connection close
+type ConnectionClosed struct {
 	midgard.EventModel
 }

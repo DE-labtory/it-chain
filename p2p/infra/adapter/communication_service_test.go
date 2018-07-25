@@ -78,7 +78,7 @@ func TestGrpcCommandService_DeliverPLTable(t *testing.T) {
 		{
 			assert.Equal(t, exchange, "Command")
 			assert.Equal(t, topic, "message.deliver")
-			assert.Equal(t, reflect.TypeOf(data).String(), "p2p.GrpcDeliverCommand")
+			assert.Equal(t, reflect.TypeOf(data).String(), "command.DeliverGrpc")
 
 			return nil
 		}
