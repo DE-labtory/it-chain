@@ -54,7 +54,6 @@ func (election *Election) ResetLeftTime() {
 //count down left time by tick millisecond  until 0
 func (election *Election) CountDownLeftTimeBy(tick int) {
 
-
 	if election.leftTime == 0 {
 		return
 	}

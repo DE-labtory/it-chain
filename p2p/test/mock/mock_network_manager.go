@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package mock
 
 type MockNetworkManager struct {
@@ -30,7 +29,6 @@ func (mnm *MockNetworkManager) FindMockProcess(id string) MockProcess {
 
 	return mnm.mockProcessTable[id]
 }
-
 
 func (mnm *MockNetworkManager) AddMockP2PProcess(mockProcess MockProcess) {
 

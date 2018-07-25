@@ -16,7 +16,6 @@
 
 package mock
 
-
 type MockProcess interface {
 	Init(id string, ipAddress string)
 
@@ -32,4 +31,3 @@ type MockProcess interface {
 
 	TriggerEvent(data interface{}, process MockProcess)
 }
-
