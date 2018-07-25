@@ -17,6 +17,7 @@
 package blockchain
 
 import (
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
@@ -46,11 +47,11 @@ func CommitBlock(block Block) error {
 	return nil
 }
 
-func createBlockCommittedEvent(block Block) (*BlockCommittedEvent, error) {
+func createBlockCommittedEvent(block Block) (*event.BlockCommitted, error) {
 
 	aggregateId := string(block.GetSeal())
 
-	return &BlockCommittedEvent{
+	return &event.BlockCommitted{
 		EventModel: midgard.EventModel{
 			ID: aggregateId,
 		},

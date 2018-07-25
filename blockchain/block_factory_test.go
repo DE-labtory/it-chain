@@ -26,6 +26,7 @@ import (
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/test/mock"
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
@@ -82,7 +83,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 	repo := mock.EventRepository{}
 	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
 		assert.Equal(t, 1, len(events))
-		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
+		assert.IsType(t, &event.BlockCreated{}, events[0])
 		return nil
 	}
 	repo.CloseFunc = func() {}
@@ -259,7 +260,7 @@ func TestCreateProposedBlock(t *testing.T) {
 
 	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
 		assert.Equal(t, 1, len(events))
-		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
+		assert.IsType(t, &event.BlockCreated{}, events[0])
 		return nil
 	}
 	repo.CloseFunc = func() {}
@@ -354,7 +355,7 @@ func TestCreateRetrievedBlock(t *testing.T) {
 
 	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
 		assert.Equal(t, 1, len(events))
-		assert.IsType(t, &blockchain.BlockCreatedEvent{}, events[0])
+		assert.IsType(t, &event.BlockCreated{}, events[0])
 		return nil
 	}
 	repo.CloseFunc = func() {}

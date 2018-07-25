@@ -22,6 +22,7 @@ import (
 
 	"bytes"
 
+	e "github.com/it-chain/engine/common/event"
 	"github.com/it-chain/midgard"
 	ygg "github.com/it-chain/yggdrasill/common"
 
@@ -197,12 +198,8 @@ func (block *DefaultBlock) On(event midgard.Event) error {
 
 	switch v := event.(type) {
 
-	case *BlockCreatedEvent:
-		TxList, err := deserializeTxList(v.TxList)
-
-		if err != nil {
-			return ErrDeserializingTxList
-		}
+	case *(e.BlockCreated):
+		TxList := ConvertToTransactionList(v.TxList)
 
 		block.Seal = v.Seal
 		block.PrevSeal = v.PrevSeal
@@ -212,10 +209,11 @@ func (block *DefaultBlock) On(event midgard.Event) error {
 		block.Timestamp = v.Timestamp
 		block.Creator = v.Creator
 		block.State = v.State
-	case *BlockStagedEvent:
+		break
+	case *(e.BlockStaged):
+	case *(e.BlockCommitted):
 		block.State = v.State
-	case *BlockCommittedEvent:
-		block.State = v.State
+		break
 	default:
 		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
 	}
