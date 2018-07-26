@@ -87,31 +87,33 @@ func NewBlockPoolRepository() *BlockPoolRepositoryImpl {
 }
 
 func (r *BlockPoolRepositoryImpl) SaveCreatedBlock(block blockchain.DefaultBlock) error {
-	if block.State == blockchain.Created {
-		for i, b := range r.Blocks {
-			if isBlockIdEqualWith(b, string(block.GetSeal())) {
-				r.Blocks[i] = &block
-				return nil
-			}
-		}
-		r.Blocks = append(r.Blocks, &block)
-		return nil
+	if block.State != blockchain.Created {
+		return ErrInvalidStateBlock
 	}
-	return ErrInvalidStateBlock
+
+	for i, b := range r.Blocks {
+		if isBlockIdEqualWith(b, string(block.GetSeal())) {
+			r.Blocks[i] = &block
+			return nil
+		}
+	}
+	r.Blocks = append(r.Blocks, &block)
+	return nil
 }
 
 func (r *BlockPoolRepositoryImpl) SaveStagedBlock(block blockchain.DefaultBlock) error {
-	if block.State == blockchain.Staged {
-		for i, b := range r.Blocks {
-			if isBlockIdEqualWith(b, string(block.GetSeal())) {
-				r.Blocks[i] = &block
-				return nil
-			}
-		}
-		r.Blocks = append(r.Blocks, &block)
-		return nil
+	if block.State != blockchain.Staged {
+		return ErrInvalidStateBlock
 	}
-	return ErrInvalidStateBlock
+
+	for i, b := range r.Blocks {
+		if isBlockIdEqualWith(b, string(block.GetSeal())) {
+			r.Blocks[i] = &block
+			return nil
+		}
+	}
+	r.Blocks = append(r.Blocks, &block)
+	return nil
 }
 
 func (r *BlockPoolRepositoryImpl) FindCreatedBlockById(id string) (blockchain.DefaultBlock, error) {
