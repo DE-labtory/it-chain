@@ -65,7 +65,7 @@ func TestBlockResultCommandHandler_HandleBlockResultCommand(t *testing.T) {
 	}
 
 	blockQueryService := mock.BlockQueryService{}
-	blockQueryService.GetStagedBlockByIdFunc = func(blockId string) (blockchain.Block, error) {
+	blockQueryService.GetStagedBlockByIdFunc = func(blockId string) (blockchain.DefaultBlock, error) {
 		assert.Equal(t, blockId, "block_id1")
 		return mock.GetStagedBlockWithId(blockId), nil
 	}
