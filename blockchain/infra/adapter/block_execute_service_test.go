@@ -23,6 +23,7 @@ import (
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/magiconair/properties/assert"
 )
 
@@ -42,10 +43,11 @@ func TestBlockExecuteService_ExecuteBlock(t *testing.T) {
 					PrevSeal: []byte{0x2},
 					Height:   blockchain.BlockHeight(1),
 					TxList: []*blockchain.DefaultTransaction{{
-						PeerID:    "p01",
 						ID:        "tx01",
 						Status:    0,
-						Timestamp: time.Now(),
+						PeerID:    "p01",
+						ICodeID:   "icode01",
+						Timestamp: time.Now().Round(0),
 						TxData: blockchain.TxData{
 							Jsonrpc: "jsonRPC01",
 							Method:  "invoke",
@@ -56,6 +58,7 @@ func TestBlockExecuteService_ExecuteBlock(t *testing.T) {
 							},
 							ID: "txdata01",
 						},
+						Signature: nil,
 					}},
 				},
 			},
@@ -63,22 +66,20 @@ func TestBlockExecuteService_ExecuteBlock(t *testing.T) {
 		},
 	}
 
-	publisher := func(topic string, data interface{}) error {
-		command := data.(command.ExecuteBlock)
+	server := rpc.NewServer("")
+	defer server.Close()
 
-		assert.Equal(t, topic, "block.execute")
-		assert.Equal(t, []byte{0x1}, command.Seal)
-		assert.Equal(t, []byte{0x2}, command.PrevSeal)
-		assert.Equal(t, blockchain.BlockHeight(1), command.Height)
+	server.Register("block.execute", func(command command.ExecuteBlock) (command.ExecuteBlock, rpc.Error) {
+		return command, rpc.Error{}
+	})
 
-		return nil
-	}
+	client := rpc.NewClient("")
+	defer client.Close()
 
-	blockExecuteService := adapter.NewBlockExecuteService(publisher)
+	blockExecuteService := adapter.NewBlockExecuteService(client)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-
 		err := blockExecuteService.ExecuteBlock(test.input.block)
 
 		assert.Equal(t, err, test.err)
