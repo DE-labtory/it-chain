@@ -54,6 +54,7 @@ func (mcs *MockCommunicationService) DeliverPLTable(connectionId string, pLTable
 
 type MockPeerQueryService struct {
 	GetPLTableFunc        func() (p2p.PLTable, error)
+	GetPeerListFunc       func() ([]p2p.Peer, error)
 	GetLeaderFunc         func() (p2p.Leader, error)
 	FindPeerByIdFunc      func(peerId p2p.PeerId) (p2p.Peer, error)
 	FindPeerByAddressFunc func(ipAddress string) (p2p.Peer, error)
@@ -62,6 +63,11 @@ type MockPeerQueryService struct {
 func (mpltqs *MockPeerQueryService) GetPLTable() (p2p.PLTable, error) {
 
 	return mpltqs.GetPLTableFunc()
+}
+
+func (mpltqs *MockPeerQueryService) GetPeerList() ([]p2p.Peer, error) {
+
+	return mpltqs.GetPeerListFunc()
 }
 
 func (mpltqs *MockPeerQueryService) GetLeader() (p2p.Leader, error) {

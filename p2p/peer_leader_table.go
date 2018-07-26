@@ -59,6 +59,11 @@ func (pt *PLTable) GetPeerTable() (map[string]Peer, error) {
 
 type PLTableService struct{}
 
+func NewPLTableService() PLTableService {
+
+	return PLTableService{}
+}
+
 func (plts *PLTableService) GetPLTableFromCommand(command GrpcReceiveCommand) (PLTable, error) {
 
 	peerTable := PLTable{}
