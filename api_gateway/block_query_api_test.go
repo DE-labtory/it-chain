@@ -53,15 +53,15 @@ func TestBlockQueryApi_GetStagedBlockByHeight(t *testing.T) {
 	b1, err1 := qa.GetStagedBlockByHeight(1)
 	// then
 	assert.Equal(t, api_gateway.ErrNoStagedBlock, err1)
-	assert.Equal(t, blockchain.DefaultBlock{}, *b1.(*blockchain.DefaultBlock))
+	assert.Equal(t, blockchain.DefaultBlock{}, b1)
 
 	// when
 	b2, err2 := qa.GetStagedBlockByHeight(2)
 	// then
 	assert.Equal(t, nil, err2)
 	assert.Equal(t, []byte{0x2}, b2.GetSeal())
-	assert.Equal(t, blockchain.Staged, (*b2.(*blockchain.DefaultBlock)).State)
-	assert.Equal(t, blockchain.BlockHeight(2), (*b2.(*blockchain.DefaultBlock)).Height)
+	assert.Equal(t, blockchain.Staged, b2.State)
+	assert.Equal(t, blockchain.BlockHeight(2), b2.Height)
 }
 
 func TestBlockQueryApi_GetStagedBlockById(t *testing.T) {
@@ -87,15 +87,15 @@ func TestBlockQueryApi_GetStagedBlockById(t *testing.T) {
 	b1, err1 := qa.GetStagedBlockById(string([]byte{0x1}))
 	// then
 	assert.Equal(t, api_gateway.ErrNoStagedBlock, err1)
-	assert.Equal(t, blockchain.DefaultBlock{}, *b1.(*blockchain.DefaultBlock))
+	assert.Equal(t, blockchain.DefaultBlock{}, b1)
 
 	// when
 	b2, err2 := qa.GetStagedBlockById(string([]byte{0x2}))
 	// then
 	assert.Equal(t, nil, err2)
 	assert.Equal(t, []byte{0x2}, b2.GetSeal())
-	assert.Equal(t, blockchain.Staged, (*b2.(*blockchain.DefaultBlock)).State)
-	assert.Equal(t, blockchain.BlockHeight(2), (*b2.(*blockchain.DefaultBlock)).Height)
+	assert.Equal(t, blockchain.Staged, b2.State)
+	assert.Equal(t, blockchain.BlockHeight(2), b2.Height)
 }
 
 func TestBlockPoolRepositoryImpl_SaveCreatedBlock(t *testing.T) {
