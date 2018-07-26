@@ -49,9 +49,9 @@ func GetFailedTxResults() []command.TxResult {
 	}
 }
 
-func GetStagedBlockWithId(blockId string) blockchain.Block {
+func GetStagedBlockWithId(blockId string) blockchain.DefaultBlock {
 	testingTime := time.Now()
-	return &blockchain.DefaultBlock{
+	return blockchain.DefaultBlock{
 		Seal:      []byte(blockId),
 		PrevSeal:  []byte{0x2},
 		Height:    blockchain.BlockHeight(1),

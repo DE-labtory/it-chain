@@ -18,22 +18,22 @@ package mock
 import "github.com/it-chain/engine/blockchain"
 
 type BlockQueryService struct {
-	GetStagedBlockByHeightFunc   func(height blockchain.BlockHeight) (blockchain.Block, error)
-	GetStagedBlockByIdFunc       func(blockId string) (blockchain.Block, error)
-	GetLastCommitedBlockFunc     func() (blockchain.Block, error)
-	GetCommitedBlockByHeightFunc func(height blockchain.BlockHeight) (blockchain.Block, error)
+	GetStagedBlockByHeightFunc   func(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
+	GetStagedBlockByIdFunc       func(blockId string) (blockchain.DefaultBlock, error)
+	GetLastCommitedBlockFunc     func() (blockchain.DefaultBlock, error)
+	GetCommitedBlockByHeightFunc func(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
 }
 
-func (s BlockQueryService) GetStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.Block, error) {
+func (s BlockQueryService) GetStagedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
 	return s.GetStagedBlockByHeightFunc(height)
 }
-func (s BlockQueryService) GetStagedBlockById(blockId string) (blockchain.Block, error) {
+func (s BlockQueryService) GetStagedBlockById(blockId string) (blockchain.DefaultBlock, error) {
 	return s.GetStagedBlockByIdFunc(blockId)
 }
-func (s BlockQueryService) GetLastCommitedBlock() (blockchain.Block, error) {
+func (s BlockQueryService) GetLastCommitedBlock() (blockchain.DefaultBlock, error) {
 	return s.GetLastCommitedBlockFunc()
 }
-func (s BlockQueryService) GetCommitedBlockByHeight(height blockchain.BlockHeight) (blockchain.Block, error) {
+func (s BlockQueryService) GetCommitedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
 	return s.GetCommitedBlockByHeightFunc(height)
 }
 

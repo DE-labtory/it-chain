@@ -186,14 +186,6 @@ func (block *DefaultBlock) SetBlockState(state BlockState) {
 	block.State = state
 }
 
-// interface of api gateway query api
-type BlockQueryApi interface {
-	GetBlockByHeight(blockHeight uint64) (Block, error)
-	GetBlockBySeal(seal []byte) (Block, error)
-	GetBlockByTxID(txid string) (Block, error)
-	GetLastBlock() (Block, error)
-}
-
 func (block *DefaultBlock) On(event midgard.Event) error {
 
 	switch v := event.(type) {

@@ -76,7 +76,7 @@ func (h *BlockResultCommandHandler) commitBlock(blockId string) error {
 		return err
 	}
 
-	err = blockchain.CommitBlock(block)
+	err = blockchain.CommitBlock(&block)
 	if err != nil {
 		return err
 	}

@@ -27,10 +27,10 @@ type BlockQueryService interface {
 }
 
 type BlockQueryInnerService interface {
-	GetStagedBlockByHeight(height BlockHeight) (Block, error)
-	GetStagedBlockById(blockId string) (Block, error)
-	GetLastCommitedBlock() (Block, error)
-	GetCommitedBlockByHeight(height BlockHeight) (Block, error)
+	GetStagedBlockByHeight(height BlockHeight) (DefaultBlock, error)
+	GetStagedBlockById(blockId string) (DefaultBlock, error)
+	GetLastCommitedBlock() (DefaultBlock, error)
+	GetCommitedBlockByHeight(height BlockHeight) (DefaultBlock, error)
 }
 
 func CommitBlock(block Block) error {
