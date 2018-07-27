@@ -89,7 +89,7 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 	}
 
 	representatives := make([]*consensus.Representative, 0)
-	propagateService := NewPropagateService(publish, representatives)
+	propagateService := NewGrpcCommandService(publish, representatives)
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
@@ -153,7 +153,7 @@ func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 	}
 
 	representatives := make([]*consensus.Representative, 0)
-	propagateService := NewPropagateService(publish, representatives)
+	propagateService := NewGrpcCommandService(publish, representatives)
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
@@ -203,7 +203,7 @@ func TestPropagateService_BroadcastCommitMsg(t *testing.T) {
 	}
 
 	representatives := make([]*consensus.Representative, 0)
-	propagateService := NewPropagateService(publish, representatives)
+	propagateService := NewGrpcCommandService(publish, representatives)
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
