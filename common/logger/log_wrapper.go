@@ -184,7 +184,7 @@ func initStdLogger(logger *logrus.Logger) {
 func initFileLogger(logger *logrus.Logger, savePath string) error {
 
 	if _, err := os.Stat(savePath); err != nil {
-		err = os.MkdirAll(filepath.Dir(savePath), 0666)
+		err = os.MkdirAll(filepath.Dir(savePath), 0777)
 		if err != nil {
 			return err
 		}
@@ -194,7 +194,7 @@ func initFileLogger(logger *logrus.Logger, savePath string) error {
 		}
 	}
 
-	file, err := os.OpenFile(savePath, os.O_APPEND|os.O_WRONLY, 0666)
+	file, err := os.OpenFile(savePath, os.O_APPEND|os.O_WRONLY, 0777)
 	if err == nil {
 		logger.Formatter = &logrus.JSONFormatter{}
 		logger.Out = file

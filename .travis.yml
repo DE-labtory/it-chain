@@ -24,5 +24,3 @@ before_install:
 
 install:
   - dep ensure
-
-sudo: required
