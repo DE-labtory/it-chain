@@ -19,11 +19,15 @@ package api
 import (
 	"github.com/it-chain/engine/consensus/infra/adapter"
 	"github.com/it-chain/engine/consensus"
+
 )
 
 type ConsensusApi struct {
 	parliamentService adapter.ParliamentService
 	consensusService consensus.Consensus
+	//grpcMsgService adapter.GrpcMessageService
+	propagateService adapter.PropagateService
+	confirmService adapter.ConfirmService
 }
 
 // todo : Event Sourcing 첨가
@@ -32,20 +36,22 @@ func (cApi ConsensusApi) StartConsensus(userId consensus.MemberId, block consens
 
 	// 합의 시작!! 리더에 의해 시작 만약 블록이 생성되면 Consensus가 필요한지 따져야함
 	// consensus를 시작한 멤버 아이디와, 제안된 블록으로 consensus를 만든다.
-	// 합의 필요
-
 	peerList, _ := cApi.parliamentService.RequestPeerList()
 	if  cApi.parliamentService.IsNeedConsensus(){
 		createdConsensus, err := consensus.CreateConsensus(peerList, block)
-
 		if err != nil{
-			print("error 발생")
-			return nil
+			return consensus.CreateConsensusError
 		}
 		createdConsensus.Start()
-		//TODO 다른 피어에게 메시지 전송
+		createdPrePrepareMsg := consensus.NewPrePrepareMsg(createdConsensus)
+		cApi.propagateService.BroadcastPrePrepareMsg(*createdPrePrepareMsg)
 
+		return nil
+
+	}else{
+		cApi.confirmService.ConfirmBlock(block)
 	}
+
 	return nil
 }
 
@@ -57,21 +63,59 @@ func (cApi ConsensusApi) ReceivePrePrepareMsg(msg consensus.PrePrepareMsg) error
 	if lid.ToString() == msg.SenderId{
 		// 검증 후 consensus Construct
 		createdConsensus, err := consensus.ConstructConsensus(msg)
+
 		if err != nil{
-			print("construct consensus Err")
+			return consensus.CreateConsensusError
 		}
+		createdConsensus.ToPrepareState()
 		prepareMsg := consensus.NewPrepareMsg(createdConsensus)
-		// TODO 모든피어에게 prepareMsg 보내야 함
+		cApi.propagateService.BroadcastPrepareMsg(*prepareMsg)
 
 		return nil
 	}
-	return nil
+
+	return consensus.InvalidLeaderIdError
 }
 
-func (cApi ConsensusApi) ReceivePrepareMsg(msg consensus.PrepareMsg) error{
+func (cApi ConsensusApi) ReceivePrepareMsg(msg consensus.PrepareMsg) error {
+
+	// Prepare Msg 받으면 개수가 2f개 이상인지
+	err := cApi.consensusService.SavePrepareMsg(&msg)
+
+	if err != nil{
+		return consensus.SavePrepareMsgError
+	}
+	// 2f 조건 체크
+	if cApi.parliamentService.CheckPrepareCondition(cApi.consensusService.PrepareMsgPool){
+		//조건 만족
+		/*(tempConsensus := &consensus.Consensus{}
+
+		newConsensus := eventstore.Load(tempConsensus, msg.ConsensusId.Id)
+
+		newCommitMsg := consensus.NewCommitMsg(newConsensus)
+		// Commit state로 전환 후 Broadcast
+		cApi.consensusService.ToCommitState()
+		cApi.propagateService.BroadcastCommitMsg(*newCommitMsg)*/
+	}else{
+		return nil
+	}
+
 	return nil
 }
 
 func (cApi ConsensusApi) ReceiveCommitMsg(msg consensus.CommitMsg) error{
+	// 커밋 메시지 저
+	err := cApi.consensusService.SaveCommitMsg(&msg)
+	if err != nil{
+		return consensus.SaveCommitMsgError
+	}
+
+	if cApi.parliamentService.CheckCommitCondition(cApi.consensusService.CommitMsgPool) {
+		// 조건 만족
+		// TODO Client 한테 Response
+
+	} else {
+		return nil
+	}
 	return nil
 }
