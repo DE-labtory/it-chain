@@ -17,6 +17,8 @@
 package blockchain
 
 import (
+	"encoding/hex"
+
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
@@ -35,25 +37,25 @@ type BlockQueryInnerService interface {
 
 func CommitBlock(block Block) error {
 
-	event, err := createBlockCommittedEvent(block)
+	committedEvent, err := createBlockCommittedEvent(block)
 
 	if err != nil {
 		return err
 	}
 
 	blockId := string(block.GetSeal())
-	eventstore.Save(blockId, event)
 
-	return nil
+	return eventstore.Save(blockId, committedEvent)
 }
 
 func createBlockCommittedEvent(block Block) (*event.BlockCommitted, error) {
 
-	aggregateId := string(block.GetSeal())
+	AggregateID := hex.EncodeToString(block.GetSeal())
 
 	return &event.BlockCommitted{
 		EventModel: midgard.EventModel{
-			ID: aggregateId,
+			ID:   AggregateID,
+			Type: "block.committed",
 		},
 		State: Committed,
 	}, nil

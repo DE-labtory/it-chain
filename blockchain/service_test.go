@@ -3,6 +3,8 @@ package blockchain_test
 import (
 	"testing"
 
+	"encoding/hex"
+
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/core/eventstore"
@@ -32,8 +34,8 @@ func TestCommitBlock(t *testing.T) {
 		repo := mock.EventRepository{}
 
 		repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-
-			assert.Equal(t, string(test.input.GetSeal()), events[0].GetID())
+			blockID := hex.EncodeToString([]byte("Seal"))
+			assert.Equal(t, blockID, events[0].GetID())
 			assert.Equal(t, 1, len(events))
 
 			//when

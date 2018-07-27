@@ -3,10 +3,13 @@ package adapter_test
 import (
 	"testing"
 
+	"encoding/hex"
+
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
 )
@@ -63,6 +66,17 @@ func TestBlockResultCommandHandler_HandleBlockResultCommand(t *testing.T) {
 			err: nil,
 		},
 	}
+
+	repo := mock.EventRepository{}
+	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
+		assert.Equal(t, events[0].GetID(), hex.EncodeToString([]byte("block_id1")))
+		return nil
+	}
+
+	repo.CloseFunc = func() {}
+
+	eventstore.InitForMock(repo)
+	defer eventstore.Close()
 
 	blockQueryService := mock.BlockQueryService{}
 	blockQueryService.GetStagedBlockByIdFunc = func(blockId string) (blockchain.DefaultBlock, error) {
