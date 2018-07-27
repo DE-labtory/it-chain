@@ -21,13 +21,14 @@ import (
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 )
 
 var ErrCommandTransactions = errors.New("command's transactions nil or have length of zero")
 var ErrTxHasMissingProperties = errors.New("Tx has missing properties")
 
 type BlockCreateApi interface {
-	CreateBlock(txList []blockchain.Transaction) error
+	CreateBlock(txList []blockchain.Transaction) (blockchain.DefaultBlock, error)
 }
 
 type BlockProposeCommandHandler struct {
@@ -42,25 +43,28 @@ func NewBlockProposeCommandHandler(blockApi BlockCreateApi, engineMode string) *
 	}
 }
 
-func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.ProposeBlock) error {
+func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.ProposeBlock) (blockchain.DefaultBlock, rpc.Error) {
 	if err := validateCommand(command); err != nil {
-		return err
+		return blockchain.DefaultBlock{}, rpc.Error{Message: err.Error()}
 	}
 	txList := command.TxList
 
 	if err := validateTxList(txList); err != nil {
-		return err
+		return blockchain.DefaultBlock{}, rpc.Error{Message: err.Error()}
 	}
 
 	defaultTxList := convertTxList(txList)
 
 	if h.engineMode == "solo" {
-		if err := h.blockApi.CreateBlock(defaultTxList); err != nil {
-			return err
+		block, err := h.blockApi.CreateBlock(defaultTxList)
+		if err != nil {
+			return blockchain.DefaultBlock{}, rpc.Error{Message: err.Error()}
 		}
+
+		return block, rpc.Error{}
 	}
 
-	return nil
+	return blockchain.DefaultBlock{}, rpc.Error{}
 }
 
 func validateCommand(command command.ProposeBlock) error {

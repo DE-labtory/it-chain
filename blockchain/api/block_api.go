@@ -25,6 +25,7 @@ import (
 var ErrGetLastCommitedBlock = errors.New("Error in getting last commited block")
 var ErrCreateProposedBlock = errors.New("Error in creating proposed block")
 var ErrExecuteBlock = errors.New("Error in executing block")
+var ErrFailBlockTypeCasting = errors.New("Error failed type casting block")
 
 type BlockApi struct {
 	publisherId         string
@@ -58,10 +59,10 @@ func (bApi BlockApi) SyncIsProgressing() blockchain.ProgressState {
 	return blockchain.DONE
 }
 
-func (bApi BlockApi) CreateBlock(txList []blockchain.Transaction) error {
+func (bApi BlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.DefaultBlock, error) {
 	lastBlock, err := bApi.blockQueryService.GetLastCommitedBlock()
 	if err != nil {
-		return ErrGetLastCommitedBlock
+		return blockchain.DefaultBlock{}, ErrGetLastCommitedBlock
 	}
 
 	prevSeal := lastBlock.GetSeal()
@@ -71,15 +72,20 @@ func (bApi BlockApi) CreateBlock(txList []blockchain.Transaction) error {
 
 	block, err := blockchain.CreateProposedBlock(prevSeal, height, defaultTxList, []byte(creator))
 	if err != nil {
-		return ErrCreateProposedBlock
+		return blockchain.DefaultBlock{}, ErrCreateProposedBlock
 	}
 
 	err = bApi.blockExecuteService.ExecuteBlock(block)
 	if err != nil {
-		return ErrExecuteBlock
+		return blockchain.DefaultBlock{}, ErrExecuteBlock
 	}
 
-	return nil
+	defaultBlock, ok := block.(*blockchain.DefaultBlock)
+	if !ok {
+		return blockchain.DefaultBlock{}, ErrFailBlockTypeCasting
+	}
+
+	return *defaultBlock, nil
 }
 
 func (bApi BlockApi) CreateGenesisBlock(GenesisConfPath string) error {

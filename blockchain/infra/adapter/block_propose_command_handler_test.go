@@ -9,6 +9,7 @@ import (
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
 )
@@ -17,34 +18,40 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			command command.ProposeBlock
+			result  blockchain.DefaultBlock
 		}
-		err error
+		err rpc.Error
 	}{
 		"command with emtpy transactions test": {
 			input: struct {
 				command command.ProposeBlock
+				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
 					CommandModel: midgard.CommandModel{ID: "111"},
 					TxList:       nil,
 				},
+				result: blockchain.DefaultBlock{},
 			},
-			err: adapter.ErrCommandTransactions,
+			err: rpc.Error{Message: adapter.ErrCommandTransactions.Error()},
 		},
 		"transactions which have length of 0 test": {
 			input: struct {
 				command command.ProposeBlock
+				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
 					CommandModel: midgard.CommandModel{ID: "111"},
 					TxList:       make([]command.Tx, 0),
 				},
+				result: blockchain.DefaultBlock{},
 			},
-			err: adapter.ErrCommandTransactions,
+			err: rpc.Error{Message: adapter.ErrCommandTransactions.Error()},
 		},
 		"transactions which have missing properties test": {
 			input: struct {
 				command command.ProposeBlock
+				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
 					CommandModel: midgard.CommandModel{ID: "111"},
@@ -52,12 +59,14 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 						command.Tx{ID: "", PeerID: ""},
 					},
 				},
+				result: blockchain.DefaultBlock{},
 			},
-			err: adapter.ErrTxHasMissingProperties,
+			err: rpc.Error{Message: adapter.ErrTxHasMissingProperties.Error()},
 		},
 		"successfully pass txlist to block api": {
 			input: struct {
 				command command.ProposeBlock
+				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
 					CommandModel: midgard.CommandModel{ID: "111"},
@@ -75,13 +84,17 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 						},
 					},
 				},
+				result: blockchain.DefaultBlock{
+					Seal:     []byte{0x1},
+					PrevSeal: []byte{0x2},
+				},
 			},
-			err: nil,
+			err: rpc.Error{},
 		},
 	}
 
 	blockApi := mock.BlockApi{}
-	blockApi.CreateBlockFunc = func(txList []blockchain.Transaction) error {
+	blockApi.CreateBlockFunc = func(txList []blockchain.Transaction) (blockchain.DefaultBlock, error) {
 		tx := txList[0]
 		txContentBytes, _ := tx.GetContent()
 		content := struct {
@@ -102,7 +115,10 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 		assert.Equal(t, "function1", content.TxData.Params.Function)
 		assert.Equal(t, []string{"arg1", "arg2"}, content.TxData.Params.Args)
 
-		return nil
+		return blockchain.DefaultBlock{
+			Seal:     []byte{0x1},
+			PrevSeal: []byte{0x2},
+		}, nil
 	}
 
 	commandHandler := adapter.NewBlockProposeCommandHandler(blockApi, "solo")
@@ -110,8 +126,10 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		err := commandHandler.HandleProposeBlockCommand(test.input.command)
+		block, err := commandHandler.HandleProposeBlockCommand(test.input.command)
 
 		assert.Equal(t, err, test.err)
+		assert.Equal(t, block.Seal, test.input.result.Seal)
+		assert.Equal(t, block.PrevSeal, test.input.result.PrevSeal)
 	}
 }
