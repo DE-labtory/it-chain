@@ -28,10 +28,10 @@ var ErrPeerExists = errors.New("peer already exists")
 
 type PeerQueryApi struct {
 	mux            sync.Mutex
-	peerRepository PeerRepository
+	peerRepository *PeerRepository
 }
 
-func NewPeerQueryApi(repository PeerRepository) PeerQueryApi {
+func NewPeerQueryApi(repository *PeerRepository) PeerQueryApi {
 	return PeerQueryApi{
 		mux:            sync.Mutex{},
 		peerRepository: repository,
@@ -75,8 +75,15 @@ func (pqa *PeerQueryApi) FindPeerByAddress(ipAddress string) (p2p.Peer, error) {
 }
 
 type PeerRepository struct {
-	mux     sync.Mutex
+	mux     sync.RWMutex
 	pLTable p2p.PLTable
+}
+
+func NewPeerReopository() PeerRepository {
+	return PeerRepository{
+		mux:     sync.RWMutex{},
+		pLTable: *p2p.NewPLTable(p2p.Leader{p2p.LeaderId{""}}, make(map[string]p2p.Peer)),
+	}
 }
 
 func (pltrepo *PeerRepository) GetPLTable() (p2p.PLTable, error) {
@@ -129,15 +136,13 @@ func (pltrepo *PeerRepository) Save(peer p2p.Peer) error {
 	pltrepo.mux.Lock()
 	defer pltrepo.mux.Unlock()
 
-	pLTable, _ := pltrepo.GetPLTable()
-
-	_, exist := pLTable.PeerTable[peer.PeerId.Id]
+	_, exist := pltrepo.pLTable.PeerTable[peer.PeerId.Id]
 
 	if exist {
 		return ErrPeerExists
 	}
 
-	pLTable.PeerTable[peer.PeerId.Id] = peer
+	pltrepo.pLTable.PeerTable[peer.PeerId.Id] = peer
 
 	return nil
 }

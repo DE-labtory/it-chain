@@ -24,7 +24,7 @@ type ParliamentService struct {
 	pQuery api_gateway.PeerQueryApi
 }
 
-func NewParliamentService(peerRepository api_gateway.PeerRepository) *ParliamentService {
+func NewParliamentService(peerRepository *api_gateway.PeerRepository) *ParliamentService {
 	return &ParliamentService{
 		pQuery: api_gateway.NewPeerQueryApi(peerRepository),
 	}
