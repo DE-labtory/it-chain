@@ -101,7 +101,7 @@ func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string) e
 		command.RecipientList = append(command.RecipientList, r.GetID())
 	}
 
-	return ps.publish("Command", "message.broadcast", command)
+	return ps.publish("Command", "message.deliver", command)
 }
 
 func createDeliverGrpcCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
