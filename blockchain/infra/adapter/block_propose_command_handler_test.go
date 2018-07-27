@@ -15,6 +15,7 @@ import (
 )
 
 func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
+
 	tests := map[string]struct {
 		input struct {
 			command command.ProposeBlock
