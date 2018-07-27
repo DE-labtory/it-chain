@@ -20,6 +20,7 @@ import (
 	"errors"
 
 	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 )
 
 var ErrBlockNil = errors.New("Block nil error")
@@ -39,13 +40,13 @@ func NewCommandHandler(blockApi BlockApi) *BlockConfirmCommandHandler {
 	}
 }
 
-func (h *BlockConfirmCommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlockCommand) error {
+func (h *BlockConfirmCommandHandler) HandleConfirmBlockCommand(command blockchain.ConfirmBlockCommand) (struct{}, rpc.Error) {
 	block := command.Block
 	if block == nil {
-		return ErrBlockNil
+		return struct{}{}, rpc.Error{Message: ErrBlockNil.Error()}
 	}
 
 	h.blockApi.AddBlockToPool(block)
 
-	return nil
+	return struct{}{}, rpc.Error{}
 }

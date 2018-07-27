@@ -19,9 +19,12 @@ package adapter_test
 import (
 	"testing"
 
+	"reflect"
+
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/test/mock"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,7 +34,7 @@ func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 		input struct {
 			command blockchain.ConfirmBlockCommand
 		}
-		err error
+		err rpc.Error
 	}{
 		"success": {
 			input: struct {
@@ -44,7 +47,7 @@ func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 					},
 				},
 			},
-			err: nil,
+			err: rpc.Error{},
 		},
 		"block nil error test": {
 			input: struct {
@@ -55,7 +58,7 @@ func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 					Block:        nil,
 				},
 			},
-			err: adapter.ErrBlockNil,
+			err: rpc.Error{Message: adapter.ErrBlockNil.Error()},
 		},
 	}
 
@@ -69,9 +72,10 @@ func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		err := commandHandler.HandleConfirmBlockCommand(test.input.command)
+		value, err := commandHandler.HandleConfirmBlockCommand(test.input.command)
 
 		assert.Equal(t, err, test.err)
+		assert.True(t, reflect.DeepEqual(value, struct{}{}))
 	}
 
 }
