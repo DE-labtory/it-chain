@@ -207,7 +207,7 @@ func initFileLogger(logger *logrus.Logger, savePath string) error {
 
 func addLineInfo(fields *Fields) *Fields {
 	pc, _, _, _ := runtime.Caller(2)
-	dataField := Fields{"err_component": runtime.FuncForPC(pc).Name()}
+	dataField := Fields{"cause": runtime.FuncForPC(pc).Name()}
 	data := make(Fields, len(dataField)+len(*fields))
 	for k, v := range dataField {
 		data[k] = v
