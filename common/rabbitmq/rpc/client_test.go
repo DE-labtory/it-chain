@@ -70,6 +70,30 @@ func TestClient_Call(t *testing.T) {
 	wg.Wait()
 }
 
+func TestClient_Call_Err_When_Callback_Params_Over_Two(t *testing.T) {
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	server := rpc.NewServer("")
+	defer server.Close()
+
+	server.Register("aggregate.action", func(sample Sample) (Sample, rpc.Error) {
+		assert.Equal(t, "123", sample.ID)
+		return Sample{ID: "666"}, rpc.Error{}
+	})
+
+	client := rpc.NewClient("")
+	defer client.Close()
+
+	err := client.Call("aggregate.action", Sample{ID: "123", TxData: TxData{ID: "456"}}, func(sample Sample, sample2 Sample, err rpc.Error) {
+		assert.True(t, err.IsNil())
+		assert.Equal(t, "666", sample.ID)
+		wg.Done()
+	})
+
+	assert.Error(t, err)
+}
+
 func TestClient_Call_When_No_consumer(t *testing.T) {
 
 	client := rpc.NewClient("")
