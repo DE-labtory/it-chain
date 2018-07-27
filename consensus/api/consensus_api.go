@@ -17,12 +17,12 @@
 package api
 
 import (
+	"github.com/it-chain/engine/consensus/infra/adapter"
 	"github.com/it-chain/engine/consensus"
-
 )
 
 type ConsensusApi struct {
-	parliamentService consensus.Parliament
+	parliamentService adapter.ParliamentService
 	consensusService consensus.Consensus
 }
 
@@ -32,11 +32,11 @@ func (cApi ConsensusApi) StartConsensus(userId consensus.MemberId, block consens
 
 	// 합의 시작!! 리더에 의해 시작 만약 블록이 생성되면 Consensus가 필요한지 따져야함
 	// consensus를 시작한 멤버 아이디와, 제안된 블록으로 consensus를 만든다.
-
-	parliament := cApi.parliamentService
 	// 합의 필요
-	if parliament.IsNeedConsensus() {
-		createdConsensus, err := consensus.CreateConsensus(parliament, block)
+
+	peerList, _ := cApi.parliamentService.RequestPeerList()
+	if  cApi.parliamentService.IsNeedConsensus(){
+		createdConsensus, err := consensus.CreateConsensus(peerList, block)
 
 		if err != nil{
 			print("error 발생")
@@ -44,6 +44,7 @@ func (cApi ConsensusApi) StartConsensus(userId consensus.MemberId, block consens
 		}
 		createdConsensus.Start()
 		//TODO 다른 피어에게 메시지 전송
+
 	}
 	return nil
 }
@@ -51,9 +52,16 @@ func (cApi ConsensusApi) StartConsensus(userId consensus.MemberId, block consens
 func (cApi ConsensusApi) ReceivePrePrepareMsg(msg consensus.PrePrepareMsg) error {
 	// 검증하는 함수 if -> 검증.false == 수용 x
 	// msg가 leader에게 온 것인지 검증
-	// TODO message Service에 옮김
-	if cApi.parliamentService.Leader.GetID() == msg.SenderId{
-		// 리더에게 온 preprepareMsg
+	// TODO message Service에 옮김 추가 검증 필요?
+	lid, _ := cApi.parliamentService.RequestLeader()
+	if lid.ToString() == msg.SenderId{
+		// 검증 후 consensus Construct
+		createdConsensus, err := consensus.ConstructConsensus(msg)
+		if err != nil{
+			print("construct consensus Err")
+		}
+		prepareMsg := consensus.NewPrepareMsg(createdConsensus)
+		// TODO 모든피어에게 prepareMsg 보내야 함
 
 		return nil
 	}
