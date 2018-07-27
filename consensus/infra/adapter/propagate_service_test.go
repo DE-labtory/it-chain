@@ -67,7 +67,7 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 
 	publish := func(exchange string, topic string, data interface{}) (e error) {
 		assert.Equal(t, "Command", exchange)
-		assert.Equal(t, "message.broadcast", topic)
+		assert.Equal(t, "message.deliver", topic)
 
 		return nil
 	}
@@ -131,7 +131,7 @@ func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 
 	publish := func(exchange string, topic string, data interface{}) (e error) {
 		assert.Equal(t, "Command", exchange)
-		assert.Equal(t, "message.broadcast", topic)
+		assert.Equal(t, "message.deliver", topic)
 
 		return nil
 	}
@@ -181,7 +181,7 @@ func TestPropagateService_BroadcastCommitMsg(t *testing.T) {
 
 	publish := func(exchange string, topic string, data interface{}) (e error) {
 		assert.Equal(t, "Command", exchange)
-		assert.Equal(t, "message.broadcast", topic)
+		assert.Equal(t, "message.deliver", topic)
 
 		return nil
 	}
