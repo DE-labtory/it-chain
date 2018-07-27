@@ -81,8 +81,14 @@ func (iApi ICodeApi) Invoke(tx icode.Transaction) *icode.Result {
 	return result
 }
 
-func (iApi ICodeApi) Query(tx icode.Transaction) *icode.Result {
+func (iApi ICodeApi) Query(icodeId icode.ID, functionName string, args []string) *icode.Result {
 
+	tx := icode.Transaction{
+		Method:   "query",
+		ICodeID:  icodeId,
+		Function: functionName,
+		Args:     args,
+	}
 	result, err := iApi.ContainerService.ExecuteTransaction(tx)
 
 	if err != nil {
