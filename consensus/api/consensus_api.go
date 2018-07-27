@@ -18,21 +18,46 @@ package api
 
 import (
 	"github.com/it-chain/engine/consensus"
-	"github.com/it-chain/midgard"
+
 )
 
 type ConsensusApi struct {
-	eventRepository *midgard.Repository
+	parliamentService consensus.Parliament
+	consensusService consensus.Consensus
 }
 
 // todo : Event Sourcing 첨가
 
 func (cApi ConsensusApi) StartConsensus(userId consensus.MemberId, block consensus.ProposedBlock) error {
+
+	// 합의 시작!! 리더에 의해 시작 만약 블록이 생성되면 Consensus가 필요한지 따져야함
+	// consensus를 시작한 멤버 아이디와, 제안된 블록으로 consensus를 만든다.
+
+	parliament := cApi.parliamentService
+	// 합의 필요
+	if parliament.IsNeedConsensus() {
+		createdConsensus, err := consensus.CreateConsensus(parliament, block)
+
+		if err != nil{
+			print("error 발생")
+			return nil
+		}
+		createdConsensus.Start()
+		//TODO 다른 피어에게 메시지 전송
+	}
 	return nil
 }
 
-func (cApi ConsensusApi) ReceivePrePrepareMsg(msg consensus.PrePrepareMsg) {
-	return
+func (cApi ConsensusApi) ReceivePrePrepareMsg(msg consensus.PrePrepareMsg) error {
+	// 검증하는 함수 if -> 검증.false == 수용 x
+	// msg가 leader에게 온 것인지 검증
+	// TODO message Service에 옮김
+	if cApi.parliamentService.Leader.GetID() == msg.SenderId{
+		// 리더에게 온 preprepareMsg
+
+		return nil
+	}
+	return nil
 }
 
 func (cApi ConsensusApi) ReceivePrepareMsg(msg consensus.PrepareMsg) error{

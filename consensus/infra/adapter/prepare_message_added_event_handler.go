@@ -1,19 +1,23 @@
 package adapter
 
 import (
-	"github.com/it-chain/engine/consensus"
 	"github.com/it-chain/engine/consensus/api"
+	"github.com/it-chain/engine/common/event"
 )
 
-type PrepareMsgAddedEventHandler struct {
+type PrepareMessageAddedEventHandler struct {
 	consensusApi api.ConsensusApi
 }
 
-func (handler PrepareMsgAddedEventHandler) HandlePrepareMsgAddedEvent(event consensus.PrepareMsgAddedEvent) error {
-	err := handler.consensusApi.ReceivePrepareMsg(event.PrepareMsg)
+func NewPrepareMessageEventHandler(consensusApi api.ConsensusApi) *PrepareMessageAddedEventHandler{
 
-	if err != nil {
-		return err
+	return &PrepareMessageAddedEventHandler{
+		consensusApi: consensusApi,
 	}
-	return nil
+}
+
+func (handler PrepareMessageAddedEventHandler) HandlePrepareMessage(e event.PrepareMsgAdded){
+
+	// prepare message 가 들어왔을때 처리?
+	handler.consensusApi.ReceivePrepareMsg()
 }
