@@ -41,11 +41,11 @@ package adapter_test
 //	return m.RemoveFunc(id)
 //}
 //
-//func (m MockTransactionRepository) FindById(id txpool.TransactionId) (txpool.Transaction, error) {
+//func (m MockTransactionRepository) FindBlockById(id txpool.TransactionId) (txpool.Transaction, error) {
 //	return m.FindByIdFunc(id)
 //}
 //
-//func (m MockTransactionRepository) FindAll() ([]txpool.Transaction, error) {
+//func (m MockTransactionRepository) FindAllBlock() ([]txpool.Transaction, error) {
 //	return m.FindAllFunc()
 //}
 //

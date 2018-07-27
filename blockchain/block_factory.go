@@ -23,6 +23,8 @@ import (
 
 	"encoding/json"
 
+	"encoding/hex"
+
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
@@ -61,7 +63,11 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	}
 
 	//save
-	eventstore.Save(createEvent.GetID(), createEvent)
+	err = eventstore.Save(createEvent.GetID(), createEvent)
+
+	if err != nil {
+		return nil, ErrSavingEvent
+	}
 
 	return GenesisBlock, nil
 }
@@ -116,9 +122,12 @@ type GenesisConfig struct {
 }
 
 func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []*DefaultTransaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*event.BlockCreated, error) {
+
+	AggregateID := hex.EncodeToString(seal)
+
 	return &event.BlockCreated{
 		EventModel: midgard.EventModel{
-			ID:   string(seal),
+			ID:   AggregateID,
 			Type: "block.created",
 		},
 		Seal:      seal,

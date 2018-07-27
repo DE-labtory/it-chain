@@ -43,7 +43,7 @@ func makeFindUncommittedTransactionsEndpoint(t TransactionQueryApi) endpoint.End
 func makeFindCommittedBlocksEndpoint(b BlockQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 
-		blocks, err := b.commitedBlockRepository.FindAll()
+		blocks, err := b.commitedBlockRepository.FindAllBlock()
 
 		if err != nil {
 			return nil, err

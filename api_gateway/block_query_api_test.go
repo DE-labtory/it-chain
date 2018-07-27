@@ -22,6 +22,8 @@ import (
 
 	"time"
 
+	"encoding/hex"
+
 	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/api_gateway/test/mock"
 	"github.com/it-chain/engine/blockchain"
@@ -84,13 +86,15 @@ func TestBlockQueryApi_GetStagedBlockById(t *testing.T) {
 	// when
 	qa := api_gateway.NewBlockQueryApi(pool, nil)
 	// when
-	b1, err1 := qa.GetStagedBlockById(string([]byte{0x1}))
+	bId1 := hex.EncodeToString([]byte{0x1})
+	b1, err1 := qa.GetStagedBlockById(bId1)
 	// then
 	assert.Equal(t, api_gateway.ErrNoStagedBlock, err1)
 	assert.Equal(t, blockchain.DefaultBlock{}, b1)
 
 	// when
-	b2, err2 := qa.GetStagedBlockById(string([]byte{0x2}))
+	bId2 := hex.EncodeToString([]byte{0x2})
+	b2, err2 := qa.GetStagedBlockById(bId2)
 	// then
 	assert.Equal(t, nil, err2)
 	assert.Equal(t, []byte{0x2}, b2.GetSeal())
@@ -214,7 +218,8 @@ func TestBlockPoolRepositoryImpl_FindCreatedBlockById(t *testing.T) {
 	})
 
 	// when
-	block, err := bpr.FindCreatedBlockById(string([]byte{0x1}))
+	blockID := hex.EncodeToString([]byte{0x1})
+	block, err := bpr.FindCreatedBlockById(blockID)
 
 	// then
 	assert.Equal(t, err, nil)
@@ -300,7 +305,8 @@ func TestBlockPoolRepositoryImpl_FindStagedBlockById(t *testing.T) {
 	})
 
 	// when
-	block, err := bpr.FindStagedBlockById(string([]byte{0x1}))
+	blockID := hex.EncodeToString([]byte{0x1})
+	block, err := bpr.FindStagedBlockById(blockID)
 
 	// then
 	assert.Equal(t, err, nil)
@@ -309,12 +315,14 @@ func TestBlockPoolRepositoryImpl_FindStagedBlockById(t *testing.T) {
 	assert.Equal(t, []byte{0x1}, block.GetPrevSeal())
 
 	// when
-	_, err2 := bpr.FindStagedBlockById(string([]byte{0x2}))
+	blockID2 := hex.EncodeToString([]byte{0x2})
+	_, err2 := bpr.FindStagedBlockById(blockID2)
 	// then
 	assert.Equal(t, err2, api_gateway.ErrNoStagedBlock)
 
 	// when
-	_, err3 := bpr.FindStagedBlockById(string([]byte{0x3}))
+	blockID3 := hex.EncodeToString([]byte{0x3})
+	_, err3 := bpr.FindStagedBlockById(blockID3)
 
 	// then
 	assert.Equal(t, err3, api_gateway.ErrNoStagedBlock)
@@ -401,7 +409,8 @@ func TestBlockPoolRepositoryImpl_RemoveById(t *testing.T) {
 	})
 
 	// when
-	err := bpr.RemoveById(string(0x1))
+	bId1 := hex.EncodeToString([]byte{0x1})
+	err := bpr.RemoveBlockById(bId1)
 
 	// then
 	assert.Equal(t, nil, err)
@@ -409,7 +418,8 @@ func TestBlockPoolRepositoryImpl_RemoveById(t *testing.T) {
 	assert.Equal(t, []byte{0x2}, bpr.Blocks[0].GetSeal())
 
 	// when
-	err2 := bpr.RemoveById(string(0x3))
+	bId2 := hex.EncodeToString([]byte{0x3})
+	err2 := bpr.RemoveBlockById(bId2)
 
 	// then
 	assert.Equal(t, 1, len(bpr.Blocks))
@@ -435,7 +445,8 @@ func TestBlockPoolRepositoryImpl_RemoveById_FailRemoving(t *testing.T) {
 	})
 
 	// when
-	err := bpr.RemoveById(string(0x3))
+	bId := hex.EncodeToString([]byte{0x3})
+	err := bpr.RemoveBlockById(bId)
 
 	// then
 	assert.Equal(t, 2, len(bpr.Blocks))
@@ -551,7 +562,7 @@ func TestCommitedBlockRepositoryImpl(t *testing.T) {
 	assert.Equal(t, block2.GetPrevSeal(), block3.GetPrevSeal())
 
 	// when
-	AllBlock, err4 := cbr.FindAll()
+	AllBlock, err4 := cbr.FindAllBlock()
 
 	// then
 	assert.NoError(t, err4)
@@ -614,9 +625,10 @@ func TestBlockEventListener_HandleBlockStagedEvent(t *testing.T) {
 	blockpoolRepo.SaveCreatedBlock(*block2)
 
 	// when
+	block1ID := hex.EncodeToString([]byte{0x1})
 	event1 := event.BlockStaged{
 		EventModel: midgard.EventModel{
-			ID: string([]byte{0x1}),
+			ID: block1ID,
 		},
 		State: blockchain.Staged,
 	}
@@ -625,16 +637,17 @@ func TestBlockEventListener_HandleBlockStagedEvent(t *testing.T) {
 	assert.NoError(t, err1)
 
 	// when
-	defaultBlock, err2 := blockpoolRepo.FindStagedBlockById(string([]byte{0x1}))
+	defaultBlock, err2 := blockpoolRepo.FindStagedBlockById(block1ID)
 	// then
 	assert.NoError(t, err2)
 	assert.Equal(t, []byte{0x1}, defaultBlock.Seal)
 	assert.Equal(t, uint64(1), defaultBlock.Height)
 
 	// when
+	block2ID := hex.EncodeToString([]byte{0x2})
 	event2 := event.BlockStaged{
 		EventModel: midgard.EventModel{
-			ID: string([]byte{0x2}),
+			ID: block2ID,
 		},
 		State: blockchain.Staged,
 	}
@@ -643,9 +656,10 @@ func TestBlockEventListener_HandleBlockStagedEvent(t *testing.T) {
 	assert.Equal(t, api_gateway.ErrNoCreatedBlock, err3)
 
 	// when
+	block3ID := hex.EncodeToString([]byte{0x3})
 	event3 := event.BlockStaged{
 		EventModel: midgard.EventModel{
-			ID: string([]byte{0x3}),
+			ID: block3ID,
 		},
 		State: blockchain.Staged,
 	}
@@ -683,9 +697,10 @@ func TestBlockEventListener_HandleBlockCommitedEvent(t *testing.T) {
 	// when
 	poolRepo.Blocks = append(poolRepo.Blocks, block2)
 	// when
+	block2ID := hex.EncodeToString(block2.GetSeal())
 	event1 := event.BlockCommitted{
 		EventModel: midgard.EventModel{
-			ID: string(block2.GetSeal()),
+			ID: block2ID,
 		},
 		State: blockchain.Committed,
 	}
@@ -695,14 +710,14 @@ func TestBlockEventListener_HandleBlockCommitedEvent(t *testing.T) {
 	assert.NoError(t, err1)
 
 	// when - Test whether save target block to yggdrasill
-	block3, err2 := cbr.FindByHeight(1)
+	block3, err2 := cbr.FindBlockByHeight(1)
 	// then
 	assert.NoError(t, err2)
 	assert.Equal(t, block3.Seal, block2.GetSeal())
 	assert.Equal(t, blockchain.Committed, block3.State)
 
 	// when - Test whether target block is removed from block pool
-	block4, err3 := poolRepo.FindStagedBlockById(string(block2.GetSeal()))
+	block4, err3 := poolRepo.FindStagedBlockById(block2ID)
 	// then
 	assert.Equal(t, api_gateway.ErrNoStagedBlock, err3)
 	assert.Equal(t, true, block4.IsEmpty())
