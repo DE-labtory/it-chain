@@ -21,7 +21,7 @@ import "github.com/it-chain/engine/blockchain"
 type BlockApi struct {
 	AddBlockToPoolFunc            func(block blockchain.Block) error
 	CheckAndSaveBlockFromPoolFunc func(height blockchain.BlockHeight) error
-	CreateBlockFunc               func(txList []blockchain.Transaction) error
+	CreateBlockFunc               func(txList []blockchain.Transaction) (blockchain.DefaultBlock, error)
 }
 
 func (api BlockApi) AddBlockToPool(block blockchain.Block) error {
@@ -32,7 +32,7 @@ func (api BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) err
 	return api.CheckAndSaveBlockFromPoolFunc(height)
 }
 
-func (api BlockApi) CreateBlock(txList []blockchain.Transaction) error {
+func (api BlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.DefaultBlock, error) {
 	return api.CreateBlockFunc(txList)
 }
 
