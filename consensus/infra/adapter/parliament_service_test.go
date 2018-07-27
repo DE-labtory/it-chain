@@ -80,3 +80,55 @@ func TestParliamentService_RequestPeerList(t *testing.T) {
 	assert.Equal(t, 2, len(peerList))
 	assert.Nil(t, err)
 }
+
+func TestParliamentService_IsNeedConsensus(t *testing.T) {
+	// given (case 1 : no member)
+	peerRepository := api_gateway.NewPeerReopository()
+	ps := NewParliamentService(&peerRepository)
+
+	// when
+	flag := ps.IsNeedConsensus()
+
+	// then
+	assert.Equal(t, false, flag)
+
+	// given (case 2 : less than 4 members)
+	p1 := p2p.Peer{
+		IpAddress: "1.1.1.1",
+		PeerId:    p2p.PeerId{"p1"},
+	}
+
+	p2 := p2p.Peer{
+		IpAddress: "2.2.2.2",
+		PeerId:    p2p.PeerId{"p2"},
+	}
+
+	p3 := p2p.Peer{
+		IpAddress: "3.3.3.3",
+		PeerId:    p2p.PeerId{"p3"},
+	}
+
+	peerRepository.Save(p1)
+	peerRepository.Save(p2)
+	peerRepository.Save(p3)
+
+	// when
+	flag = ps.IsNeedConsensus()
+
+	// then
+	assert.Equal(t, false, flag)
+
+	// given (case 3 : equal or moro than 4 members)
+	p4 := p2p.Peer{
+		IpAddress: "4.4.4.4",
+		PeerId:    p2p.PeerId{"p4"},
+	}
+
+	peerRepository.Save(p4)
+
+	// when
+	flag = ps.IsNeedConsensus()
+
+	// then
+	assert.Equal(t, true, flag)
+}

@@ -56,3 +56,20 @@ func (ps *ParliamentService) RequestPeerList() ([]consensus.MemberId, error) {
 
 	return peerList, nil
 }
+
+func (p *ParliamentService) IsNeedConsensus() bool {
+	peerList, err := p.RequestPeerList()
+
+	if err != nil {
+		return false
+	}
+
+	numOfMember := 0
+	numOfMember = numOfMember + len(peerList)
+
+	if numOfMember >= 4 {
+		return true
+	}
+
+	return false
+}
