@@ -18,6 +18,7 @@ package adapter
 
 import (
 	"github.com/it-chain/engine/api_gateway"
+	"github.com/it-chain/engine/consensus"
 )
 
 type ParliamentService struct {
@@ -30,28 +31,28 @@ func NewParliamentService(peerRepository *api_gateway.PeerRepository) *Parliamen
 	}
 }
 
-func (ps *ParliamentService) RequestLeader() (string, error) {
+func (ps *ParliamentService) RequestLeader() (consensus.MemberId, error) {
 	l, err := ps.pQuery.GetLeader()
 
 	if err != nil {
 		return "", err
 	}
 
-	return l.GetID(), nil
+	return consensus.MemberId(l.GetID()), nil
 }
 
-func (ps *ParliamentService) RequestPeerList() ([]string, error) {
+func (ps *ParliamentService) RequestPeerList() ([]consensus.MemberId, error) {
 	pl, err := ps.pQuery.GetPeerList()
 
 	if err != nil {
 		return nil, err
 	}
 
-	strPL := make([]string, 0)
+	peerList := make([]consensus.MemberId, 0)
 
 	for _, p := range pl {
-		strPL = append(strPL, p.GetID())
+		peerList = append(peerList, consensus.MemberId(p.GetID()))
 	}
 
-	return strPL, nil
+	return peerList, nil
 }

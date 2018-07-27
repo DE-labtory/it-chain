@@ -38,7 +38,7 @@ func TestParliamentService_RequestLeader(t *testing.T) {
 	l, _ := ps.RequestLeader()
 
 	// then
-	assert.Equal(t, "", l)
+	assert.Equal(t, "", l.ToString())
 
 	// given (case 2 : good case)
 	peerRepository.SetLeader(p2p.Peer{
@@ -50,7 +50,7 @@ func TestParliamentService_RequestLeader(t *testing.T) {
 	l, err := ps.RequestLeader()
 
 	// then
-	assert.Equal(t, "leader", l)
+	assert.Equal(t, "leader", l.ToString())
 	assert.Nil(t, err)
 }
 

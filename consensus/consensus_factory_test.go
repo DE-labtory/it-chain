@@ -12,9 +12,9 @@ import (
 
 func TestCreateConsensus(t *testing.T) {
 	// given
-	p := NewParliament()
-	l := &Leader{LeaderId: LeaderId{"leader"}}
-	m := &Member{MemberId: MemberId{"member"}}
+	p := make([]MemberId, 0)
+	l := MemberId("leader")
+	m := MemberId("member")
 	b := ProposedBlock{
 		Seal: make([]byte, 0),
 		Body: make([]byte, 0),
@@ -26,12 +26,12 @@ func TestCreateConsensus(t *testing.T) {
 	}
 	eventstore.InitForMock(eventRepository)
 
-	p.ChangeLeader(l)
-	p.AddMember(m)
+	p = append(p, l)
+	p = append(p, m)
 
 	// when
 	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, 1+len(p.Members), len(events[0].(*event.ConsensusCreated).Representatives))
+		assert.Equal(t, len(p), len(events[0].(*event.ConsensusCreated).Representatives))
 		assert.NotNil(t, events[0].(*event.ConsensusCreated).Seal)
 		return nil
 	}

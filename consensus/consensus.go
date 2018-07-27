@@ -64,6 +64,12 @@ func (block *ProposedBlock) Deserialize(serializedBlock []byte) error {
 	return nil
 }
 
+type MemberId string
+
+func (m MemberId) ToString() string {
+	return string(m)
+}
+
 type RepresentativeId string
 
 type Representative struct {
