@@ -17,6 +17,7 @@
 package adapter
 
 import (
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/p2p"
 )
 
@@ -33,11 +34,11 @@ func NewCommunicationService(publish Publish) *CommunicationService {
 
 func (cs *CommunicationService) Dial(ipAddress string) error {
 
-	command := p2p.ConnectionCreateCommand{
+	c := command.CreateConnection{
 		Address: ipAddress,
 	}
 
-	cs.publish("Command", "connection.create", command)
+	cs.publish("Command", "connection.create", c)
 
 	return nil
 }
@@ -63,7 +64,7 @@ func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTa
 		return err
 	}
 
-	grpcDeliverCommand.Recipients = append(grpcDeliverCommand.Recipients, connectionId)
+	grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
 
 	return cs.publish("Command", "message.deliver", grpcDeliverCommand)
 }

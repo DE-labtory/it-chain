@@ -22,6 +22,7 @@ import (
 	"fmt"
 
 	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
 )
@@ -41,14 +42,14 @@ type PeerId struct {
 	Id string
 }
 
-func (p *Peer) On(event midgard.Event) error {
+func (p *Peer) On(e midgard.Event) error {
 
-	switch v := event.(type) {
-	case *PeerCreatedEvent:
+	switch v := e.(type) {
+	case *event.PeerCreated:
 		p.PeerId.Id = v.ID
 		p.IpAddress = v.IpAddress
 
-	case *PeerDeletedEvent:
+	case *event.PeerDeleted:
 		p.PeerId.Id = ""
 		p.IpAddress = ""
 
@@ -76,7 +77,7 @@ func NewPeer(ipAddress string, id PeerId) error {
 
 	peer := Peer{}
 
-	event := PeerCreatedEvent{
+	e := event.PeerCreated{
 		EventModel: midgard.EventModel{
 			ID:   id.Id,
 			Type: "peer.created",
@@ -84,14 +85,14 @@ func NewPeer(ipAddress string, id PeerId) error {
 		IpAddress: ipAddress,
 	}
 
-	peer.On(event)
+	peer.On(e)
 
-	return eventstore.Save(id.Id, event)
+	return eventstore.Save(id.Id, e)
 }
 
 func DeletePeer(peerId PeerId) error {
 
-	event := PeerDeletedEvent{
+	event := event.PeerDeleted{
 		EventModel: midgard.EventModel{
 			ID:   peerId.Id,
 			Type: "peer.deleted",

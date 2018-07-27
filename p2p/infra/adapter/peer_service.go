@@ -54,7 +54,7 @@ func (ps *PeerService) RequestLeaderInfo(connectionId string) error {
 		return err
 	}
 
-	deliverCommand.Recipients = append(deliverCommand.Recipients, connectionId)
+	deliverCommand.RecipientList = append(deliverCommand.RecipientList, connectionId)
 
 	return ps.publish("Command", "message.deliver", deliverCommand)
 }
@@ -75,7 +75,7 @@ func (ps *PeerService) RequestPeerList(peerId p2p.PeerId) error {
 		return err
 	}
 
-	deliverCommand.Recipients = append(deliverCommand.Recipients, peerId.ToString())
+	deliverCommand.RecipientList = append(deliverCommand.RecipientList, peerId.ToString())
 
 	return ps.publish("Command", "message.deliver", deliverCommand)
 }
