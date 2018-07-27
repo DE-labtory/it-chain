@@ -19,6 +19,7 @@ package adapter
 import (
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/pkg/errors"
 )
 
@@ -36,28 +37,28 @@ func NewBlockResultCommandHandler(blockQueryService blockchain.BlockQueryService
 	}
 }
 
-func (h *BlockResultCommandHandler) HandleBlockResultCommand(command command.ReturnBlockResult) error {
+func (h *BlockResultCommandHandler) HandleBlockResultCommand(command command.ReturnBlockResult) (struct{}, rpc.Error) {
 	blockId := command.CommandModel.ID
 	txResultList := command.TxResultList
 
 	if blockId == "" {
-		return ErrBlockIdNil
+		return struct{}{}, rpc.Error{Message: ErrBlockIdNil.Error()}
 	}
 
 	if len(txResultList) == 0 {
-		return ErrTxResultsLengthOfZero
+		return struct{}{}, rpc.Error{Message: ErrTxResultsLengthOfZero.Error()}
 	}
 
 	if !txResultsSuccess(txResultList) {
-		return ErrTxResultsFail
+		return struct{}{}, rpc.Error{Message: ErrTxResultsFail.Error()}
 	}
 
 	err := h.commitBlock(blockId)
 	if err != nil {
-		return err
+		return struct{}{}, rpc.Error{Message: err.Error()}
 	}
 
-	return nil
+	return struct{}{}, rpc.Error{}
 }
 
 func txResultsSuccess(txResultList []command.TxResult) bool {

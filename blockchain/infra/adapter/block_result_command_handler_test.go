@@ -5,13 +5,16 @@ import (
 
 	"encoding/hex"
 
+	"reflect"
+
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/midgard"
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBlockResultCommandHandler_HandleBlockResultCommand(t *testing.T) {
@@ -19,7 +22,7 @@ func TestBlockResultCommandHandler_HandleBlockResultCommand(t *testing.T) {
 		input struct {
 			command command.ReturnBlockResult
 		}
-		err error
+		err rpc.Error
 	}{
 		"test when block id nil": {
 			input: struct {
@@ -30,7 +33,7 @@ func TestBlockResultCommandHandler_HandleBlockResultCommand(t *testing.T) {
 				},
 				TxResultList: mock.GetTxResults(),
 			}},
-			err: adapter.ErrBlockIdNil,
+			err: rpc.Error{Message: adapter.ErrBlockIdNil.Error()},
 		},
 		"test when length of tx results 0": {
 			input: struct {
@@ -41,7 +44,7 @@ func TestBlockResultCommandHandler_HandleBlockResultCommand(t *testing.T) {
 				},
 				TxResultList: mock.GetZeroLengthTxResults(),
 			}},
-			err: adapter.ErrTxResultsLengthOfZero,
+			err: rpc.Error{Message: adapter.ErrTxResultsLengthOfZero.Error()},
 		},
 		"test when one of tx results failed": {
 			input: struct {
@@ -52,7 +55,7 @@ func TestBlockResultCommandHandler_HandleBlockResultCommand(t *testing.T) {
 				},
 				TxResultList: mock.GetFailedTxResults(),
 			}},
-			err: adapter.ErrTxResultsFail,
+			err: rpc.Error{Message: adapter.ErrTxResultsFail.Error()},
 		},
 		"successfully commit block": {
 			input: struct {
@@ -63,7 +66,7 @@ func TestBlockResultCommandHandler_HandleBlockResultCommand(t *testing.T) {
 				},
 				TxResultList: mock.GetTxResults(),
 			}},
-			err: nil,
+			err: rpc.Error{},
 		},
 	}
 
@@ -89,8 +92,9 @@ func TestBlockResultCommandHandler_HandleBlockResultCommand(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		err := handler.HandleBlockResultCommand(test.input.command)
+		value, err := handler.HandleBlockResultCommand(test.input.command)
 
 		assert.Equal(t, err, test.err)
+		assert.True(t, reflect.DeepEqual(value, struct{}{}))
 	}
 }
