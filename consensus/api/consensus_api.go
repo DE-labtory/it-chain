@@ -25,7 +25,6 @@ import (
 type ConsensusApi struct {
 	parliamentService adapter.ParliamentService
 	consensusService consensus.Consensus
-	//grpcMsgService adapter.GrpcMessageService
 	propagateService adapter.PropagateService
 	confirmService adapter.ConfirmService
 }
@@ -88,7 +87,7 @@ func (cApi ConsensusApi) ReceivePrepareMsg(msg consensus.PrepareMsg) error {
 	// 2f 조건 체크
 	if cApi.parliamentService.CheckPrepareCondition(cApi.consensusService.PrepareMsgPool){
 		//조건 만족
-		/*(tempConsensus := &consensus.Consensus{}
+		/*tempConsensus := &consensus.Consensus{}
 
 		newConsensus := eventstore.Load(tempConsensus, msg.ConsensusId.Id)
 
