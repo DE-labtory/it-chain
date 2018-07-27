@@ -68,22 +68,6 @@ type ConsensusFinished struct {
 	midgard.EventModel
 }
 
-// Consume part
-type LeaderChanged struct {
-	midgard.EventModel
-	LeaderId string
-}
-
-type MemberJoined struct {
-	midgard.EventModel
-	MemberId string
-}
-
-type MemberRemoved struct {
-	midgard.EventModel
-	MemberId string
-}
-
 // block이 저장되었을 때
 type BlockSaved struct {
 	midgard.EventModel
