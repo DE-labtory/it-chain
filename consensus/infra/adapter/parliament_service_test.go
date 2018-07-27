@@ -32,7 +32,7 @@ func TestParliamentService_RequestLeader(t *testing.T) {
 		PeerId:    p2p.PeerId{"p1"},
 	})
 
-	ps := NewParliamentService(&peerRepository)
+	ps := NewParliamentService(api_gateway.NewPeerQueryApi(&peerRepository))
 
 	// when
 	l, _ := ps.RequestLeader()
@@ -71,7 +71,7 @@ func TestParliamentService_RequestPeerList(t *testing.T) {
 	peerRepository.Save(p1)
 	peerRepository.Save(p2)
 
-	ps := NewParliamentService(&peerRepository)
+	ps := NewParliamentService(api_gateway.NewPeerQueryApi(&peerRepository))
 
 	// when
 	peerList, err := ps.RequestPeerList()
@@ -84,7 +84,7 @@ func TestParliamentService_RequestPeerList(t *testing.T) {
 func TestParliamentService_IsNeedConsensus(t *testing.T) {
 	// given (case 1 : no member)
 	peerRepository := api_gateway.NewPeerReopository()
-	ps := NewParliamentService(&peerRepository)
+	ps := NewParliamentService(api_gateway.NewPeerQueryApi(&peerRepository))
 
 	// when
 	flag := ps.IsNeedConsensus()
