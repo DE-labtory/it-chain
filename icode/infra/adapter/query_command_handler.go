@@ -16,15 +16,24 @@
 
 package adapter
 
-import "github.com/it-chain/engine/icode/api"
+import (
+	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
+	"github.com/it-chain/engine/icode"
+	"github.com/it-chain/engine/icode/api"
+)
 
-type CommandHandler struct {
+type QueryCommandHandler struct {
 	iCodeApi api.ICodeApi
 }
 
-func NewCommandHandler(icodeApi api.ICodeApi) *CommandHandler {
-
-	return &CommandHandler{
+func NewQueryCommandHandler(icodeApi api.ICodeApi) *QueryCommandHandler {
+	return &QueryCommandHandler{
 		iCodeApi: icodeApi,
 	}
+}
+
+func (q *QueryCommandHandler) HandleQueryCommandHandler(command command.Query) (icode.Result, rpc.Error) {
+	result := q.iCodeApi.Query(command.GetID(), command.Function, command.Args)
+	return *result, rpc.Error{}
 }

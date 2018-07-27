@@ -88,17 +88,10 @@ type ReceiveGrpc struct {
 /*
  * icode
  */
-type ExecuteTransaction struct {
+type Query struct {
 	midgard.CommandModel
-	ICodeID   string
-	Status    int
-	PeerID    string
-	TimeStamp time.Time
-	Jsonrpc   string
-	Method    string
-	Function  string
-	Args      []string
-	Signature []byte
+	Function string
+	Args     []string
 }
 
 type Deploy struct {
