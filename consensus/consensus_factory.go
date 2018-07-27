@@ -7,7 +7,7 @@ import (
 )
 
 // leader
-func CreateConsensus(parliament Parliament, block ProposedBlock) (*Consensus, error) {
+func CreateConsensus(parliament []MemberId, block ProposedBlock) (*Consensus, error) {
 	representatives, err := Elect(parliament)
 	if err != nil {
 		return &Consensus{}, err
