@@ -137,6 +137,7 @@ func start() error {
 //todo other way to inject each query Api to component
 var txQueryApi api_gateway.TransactionQueryApi
 var blockQueryApi api_gateway.BlockQueryApi
+var metaQueryApi api_gateway.ICodeQueryApi
 
 func initGateway(errs chan error) error {
 
@@ -146,9 +147,9 @@ func initGateway(errs chan error) error {
 	ipAddress := config.ApiGateway.Address + ":" + config.ApiGateway.Port
 
 	//set log
-	var logger kitlog.Logger
-	logger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
-	logger = kitlog.With(logger, "ts", kitlog.DefaultTimestampUTC)
+	var kitLogger kitlog.Logger
+	kitLogger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
+	kitLogger = kitlog.With(kitLogger, "ts", kitlog.DefaultTimestampUTC)
 
 	//set subscriber
 	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Event")
@@ -164,25 +165,30 @@ func initGateway(errs chan error) error {
 	//set blockchain service and repo
 
 	blockchainDB := "./.test/blockchain"
-
 	BlockPoolRepo := api_gateway.NewBlockPoolRepository()
-
 	CommittedBlockRepo, err := api_gateway.NewCommitedBlockRepositoryImpl(blockchainDB)
+	blockQueryApi = api_gateway.NewBlockQueryApi(BlockPoolRepo, CommittedBlockRepo)
+	blockEventListener := api_gateway.NewBlockEventListener(BlockPoolRepo, CommittedBlockRepo)
+
+	//set icode service and repo
+
+	icodeDb := "./.test/icode"
+	icodeRepo := api_gateway.NewLevelDbMetaRepository(icodeDb)
+	metaQueryApi := api_gateway.NewICodeQueryApi(&icodeRepo)
+	metaEventListener := api_gateway.NewIcodeEventHandler(&icodeRepo)
 
 	if err != nil {
+		logger.Panic(&logger.Fields{"err_msg": err.Error()}, "error while init gateway")
 		panic(err)
 	}
 
-	blockQueryApi = api_gateway.NewBlockQueryApi(BlockPoolRepo, CommittedBlockRepo)
-
-	blockEventListener := api_gateway.NewBlockEventListener(BlockPoolRepo, CommittedBlockRepo)
-
 	//set mux
 	mux := http.NewServeMux()
-	httpLogger := kitlog.With(logger, "component", "http")
+	httpLogger := kitlog.With(kitLogger, "component", "http")
 
 	err = subscriber.SubscribeTopic("transaction.*", &txEventListener)
 	err = subscriber.SubscribeTopic("block.*", &blockEventListener)
+	err = subscriber.SubscribeTopic("meta.*", &metaEventListener)
 
 	if err != nil {
 		panic(err)
@@ -190,6 +196,7 @@ func initGateway(errs chan error) error {
 
 	mux.Handle("/transactions", api_gateway.TxPoolApiHandler(txQueryApi, httpLogger))
 	mux.Handle("/blocks", api_gateway.BlockchainApiHandler(blockQueryApi, httpLogger))
+	mux.Handle("/metas", api_gateway.ICodeApiHandler(metaQueryApi, httpLogger))
 	http.Handle("/", mux)
 
 	go func() {

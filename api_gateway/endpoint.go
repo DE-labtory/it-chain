@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"github.com/go-kit/kit/endpoint"
+	"github.com/it-chain/engine/common/logger"
 )
 
 //This file is based on the following sample.
@@ -49,5 +50,17 @@ func makeFindCommittedBlocksEndpoint(b BlockQueryApi) endpoint.Endpoint {
 		}
 
 		return blocks, nil
+	}
+}
+
+//icode
+func makeFindAllMetaEndpoint(i ICodeQueryApi) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		metas, err := i.metaRepository.FindAllMeta()
+		if err != nil {
+			logger.Error(&logger.Fields{"err_message": err.Error()}, "error while find all meta endpoint")
+			return nil, err
+		}
+		return metas, nil
 	}
 }

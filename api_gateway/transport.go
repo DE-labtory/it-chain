@@ -66,12 +66,34 @@ func BlockchainApiHandler(bqa BlockQueryApi, logger kitlog.Logger) http.Handler 
 	return r
 }
 
+func ICodeApiHandler(api ICodeQueryApi, logger kitlog.Logger) http.Handler {
+	opts := []kithttp.ServerOption{
+		kithttp.ServerErrorLogger(logger),
+	}
+
+	findAllMetasHandler := kithttp.NewServer(
+		makeFindAllMetaEndpoint(api),
+		decodeFindAllMetaRequest,
+		encodeResponse,
+		opts...,
+	)
+	r := mux.NewRouter()
+
+	r.Handle("/metas", findAllMetasHandler).Methods("GET")
+
+	return r
+}
+
 // this return nil because this request body is empty
 func decodeFindAllUncommittedTransactionsRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	return nil, nil
 }
 
 func decodeFindAllCommittedBlocksRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	return nil, nil
+}
+
+func decodeFindAllMetaRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	return nil, nil
 }
 
