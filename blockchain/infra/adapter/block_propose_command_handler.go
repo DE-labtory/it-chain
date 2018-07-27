@@ -43,28 +43,31 @@ func NewBlockProposeCommandHandler(blockApi BlockCreateApi, engineMode string) *
 	}
 }
 
-func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.ProposeBlock) (blockchain.DefaultBlock, rpc.Error) {
+func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.ProposeBlock) (struct{}, rpc.Error) {
+
 	if err := validateCommand(command); err != nil {
-		return blockchain.DefaultBlock{}, rpc.Error{Message: err.Error()}
+		return struct{}{}, rpc.Error{Message: err.Error()}
 	}
+
 	txList := command.TxList
 
 	if err := validateTxList(txList); err != nil {
-		return blockchain.DefaultBlock{}, rpc.Error{Message: err.Error()}
+		return struct{}{}, rpc.Error{Message: err.Error()}
 	}
 
 	defaultTxList := convertTxList(txList)
 
 	if h.engineMode == "solo" {
-		block, err := h.blockApi.CreateBlock(defaultTxList)
+		_, err := h.blockApi.CreateBlock(defaultTxList)
+
 		if err != nil {
-			return blockchain.DefaultBlock{}, rpc.Error{Message: err.Error()}
+			return struct{}{}, rpc.Error{}
 		}
 
-		return block, rpc.Error{}
+		return struct{}{}, rpc.Error{}
 	}
 
-	return blockchain.DefaultBlock{}, rpc.Error{}
+	return struct{}{}, rpc.Error{}
 }
 
 func validateCommand(command command.ProposeBlock) error {

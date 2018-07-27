@@ -42,7 +42,7 @@ func (b BlockService) ProposeBlock(transactions []txpool.Transaction) error {
 		return errors.New("Empty transaction list proposed")
 	}
 
-	deliverCommand := command.ProposeBlock{
+	proposeCommand := command.ProposeBlock{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
@@ -51,7 +51,7 @@ func (b BlockService) ProposeBlock(transactions []txpool.Transaction) error {
 	}
 
 	for _, tx := range transactions {
-		deliverCommand.TxList = append(deliverCommand.TxList, command.Tx{
+		proposeCommand.TxList = append(proposeCommand.TxList, command.Tx{
 			ID:        tx.ID,
 			Status:    int(tx.Status),
 			PeerID:    tx.PeerID,
@@ -64,7 +64,7 @@ func (b BlockService) ProposeBlock(transactions []txpool.Transaction) error {
 		})
 	}
 
-	err := b.client.Call("block.propose", deliverCommand, func() {
+	err := b.client.Call("block.propose", proposeCommand, func() {
 
 	})
 
