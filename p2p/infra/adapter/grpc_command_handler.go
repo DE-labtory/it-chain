@@ -20,6 +20,7 @@ import (
 	"errors"
 
 	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/api"
 )
@@ -52,7 +53,7 @@ func NewGrpcCommandHandler(
 	}
 }
 
-func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveCommand) error {
+func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc) error {
 
 	switch command.Protocol {
 
@@ -70,7 +71,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command p2p.GrpcReceiveComma
 		break
 
 	case "RequestVoteProtocol":
-		gch.electionService.Vote(command.ConnectionID)
+		gch.electionService.Vote(command.CommandModel.ID)
 
 	case "VoteLeaderProtocol":
 		//	1. if candidate, reset left time
