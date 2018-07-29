@@ -1,20 +1,17 @@
 package adapter
 
 import (
-	"github.com/it-chain/engine/consensus/api"
 	"github.com/it-chain/engine/common/event"
 )
 
 type ConsensusCreatedEventHandler struct {
-	consensusApi api.ConsensusApi
+	//consensusApi api.ConsensusApi
 }
 
-func NewConsensusCreatedEventHandler(consensusApi api.ConsensusApi) *ConsensusCreatedEventHandler{
-	return &ConsensusCreatedEventHandler{
-		consensusApi:consensusApi,
-	}
+func NewConsensusCreatedEventHandler() *ConsensusCreatedEventHandler {
+	return &ConsensusCreatedEventHandler{}
 }
 
-func (handler ConsensusCreatedEventHandler) HandleConsensusCreatedEvent(e event.ConsensusCreated){
+func (handler ConsensusCreatedEventHandler) HandleConsensusCreatedEvent(e event.ConsensusCreated) {
 
 }
