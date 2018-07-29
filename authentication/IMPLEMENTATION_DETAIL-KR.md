@@ -1,7 +1,7 @@
 Crypto <a name="Crypto"></a>
 ----------------------------
 
-![crypto-implementation-module](../images/crypto-implementation-module.png)
+![crypto-implementation-module](../doc/images/crypto-implementation-module.png)
 
 Crypto는 블록체인 플랫폼 내부의 데이터에 대한 서명/검증 관련 기능과 서명/검증에 사용되는 키를 관리하는 기능을 제공한다. *it-chain*은 `RSA`, `ECDSA`의 두 가지 서명 알고리즘을 지원한다.
 
@@ -33,7 +33,7 @@ Crypto는 블록체인 플랫폼 내부의 데이터에 대한 서명/검증 관
 
 ### 서명 순서도
 
-![crypto-implementation-seq](../images/crypto-implementation-seq.png) ​
+![crypto-implementation-seq](../doc/images/crypto-implementation-seq.png) ​
 
 ### Author
 
