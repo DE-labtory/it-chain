@@ -21,6 +21,7 @@ import (
 	"github.com/it-chain/engine/consensus/infra/adapter"
 )
 
+//TODO Api 는 interface 선언 infra에서 구현
 type ConsensusApi struct {
 	parliamentService adapter.ParliamentService
 	consensus         consensus.Consensus
