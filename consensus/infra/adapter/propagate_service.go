@@ -33,8 +33,8 @@ type PropagateService struct {
 	representatives []*consensus.Representative
 }
 
-func NewPropagateService(publish Publish, representatives []*consensus.Representative) *PropagateService {
-	return &PropagateService{
+func NewPropagateService(publish Publish, representatives []*consensus.Representative) PropagateService {
+	return PropagateService{
 		publish:         publish,
 		representatives: representatives,
 	}
