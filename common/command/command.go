@@ -88,16 +88,11 @@ type ReceiveGrpc struct {
 /*
  * icode
  */
-type Query struct {
+type ExecuteICode struct {
 	midgard.CommandModel
 	Function string
 	Args     []string
-}
-
-type Invoke struct {
-	midgard.CommandModel
-	Function string
-	Args     []string
+	Method   string
 }
 
 type Deploy struct {

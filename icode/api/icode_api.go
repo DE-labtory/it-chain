@@ -33,26 +33,26 @@ func NewIcodeApi(containerService icode.ContainerService, gitService icode.GitSe
 	}
 }
 
-func (iApi ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath string) (*icode.Meta, error) {
+func (i ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath string) (*icode.Meta, error) {
 
 	// clone meta. in clone function, metaCreatedEvent will publish
-	meta, err := iApi.GitService.Clone(id, baseSaveUrl, gitUrl, sshPath)
+	meta, err := i.GitService.Clone(id, baseSaveUrl, gitUrl, sshPath)
 
 	if err != nil {
 		return nil, err
 	}
 
 	//start ICode with container
-	if err = iApi.ContainerService.StartContainer(*meta); err != nil {
+	if err = i.ContainerService.StartContainer(*meta); err != nil {
 		return nil, err
 	}
 
 	return meta, nil
 }
 
-func (iApi ICodeApi) UnDeploy(id icode.ID) error {
+func (i ICodeApi) UnDeploy(id icode.ID) error {
 	// stop iCode container
-	err := iApi.ContainerService.StopContainer(id)
+	err := i.ContainerService.StopContainer(id)
 	if err != nil {
 		return err
 	}
@@ -66,40 +66,29 @@ func (iApi ICodeApi) UnDeploy(id icode.ID) error {
 	return nil
 }
 
-//todo need asnyc process
-func (iApi ICodeApi) Invoke(tx icode.Transaction) *icode.Result {
+func (i ICodeApi) ExecuteTransactionList(transactionList []icode.Transaction) []icode.Result {
 
-	result, err := iApi.ContainerService.ExecuteTransaction(tx)
+	resultList := make([]icode.Result, 0)
 
-	if err != nil {
-		result = &icode.Result{
-			TxId:    tx.TxId,
-			Data:    nil,
-			Success: false,
-		}
+	for _, transaction := range transactionList {
+		result := i.ExecuteTransaction(transaction)
+		resultList = append(resultList, result)
 	}
 
-	return result
+	return resultList
 }
 
-func (iApi ICodeApi) Query(icodeId icode.ID, functionName string, args []string) *icode.Result {
+func (i ICodeApi) ExecuteTransaction(tx icode.Transaction) icode.Result {
 
-	tx := icode.Transaction{
-		Method:   "query",
-		ICodeID:  icodeId,
-		Function: functionName,
-		Args:     args,
-	}
-
-	result, err := iApi.ContainerService.ExecuteTransaction(tx)
+	result, err := i.ContainerService.ExecuteTransaction(tx)
 
 	if err != nil {
-
 		result = &icode.Result{
 			TxId:    tx.TxId,
 			Data:    nil,
 			Success: false,
 		}
 	}
-	return result
+
+	return *result
 }

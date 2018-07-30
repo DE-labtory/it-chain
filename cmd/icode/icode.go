@@ -28,6 +28,7 @@ var icodeCmd = cli.Command{
 func IcodeCmd() cli.Command {
 	icodeCmd.Subcommands = append(icodeCmd.Subcommands, DeployCmd())
 	icodeCmd.Subcommands = append(icodeCmd.Subcommands, UnDeployCmd())
+	icodeCmd.Subcommands = append(icodeCmd.Subcommands, InvokeCmd())
 	icodeCmd.Subcommands = append(icodeCmd.Subcommands, QueryCmd())
 	return icodeCmd
 }
