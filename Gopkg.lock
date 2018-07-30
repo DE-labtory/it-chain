@@ -251,24 +251,6 @@
   version = "v1.8.0"
 
 [[projects]]
-  name = "github.com/mattn/go-colorable"
-  packages = ["."]
-  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
-  version = "v0.0.9"
-
-[[projects]]
-  name = "github.com/mattn/go-isatty"
-  packages = ["."]
-  revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
-  version = "v0.0.3"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/mgutz/ansi"
-  packages = ["."]
-  revision = "9520e82c474b0a04dd04f8a40959027271bab992"
-
-[[projects]]
   branch = "master"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
@@ -417,12 +399,6 @@
   packages = ["."]
   revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
   version = "v1.20.0"
-
-[[projects]]
-  name = "github.com/x-cray/logrus-prefixed-formatter"
-  packages = ["."]
-  revision = "bb2702d423886830dee131692131d35648c382e2"
-  version = "v0.5.2"
 
 [[projects]]
   name = "github.com/xanzy/ssh-agent"
@@ -627,6 +603,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4d1fd7152f718d2d7c62f0c30144dc6cebadd91dc018f0d73dc241d21a2be074"
+  inputs-digest = "e02a976eed913319b1960ab4bed21efea6aabf310212903c33136725189f1770"
   solver-name = "gps-cdcl"
   solver-version = 1
