@@ -28,19 +28,19 @@ import (
 
 type Publish func(exchange string, topic string, data interface{}) (err error)
 
-type PropagateService struct {
+type GrpcCommandService struct {
 	publish         Publish
 	representatives []*consensus.Representative
 }
 
-func NewPropagateService(publish Publish, representatives []*consensus.Representative) *PropagateService {
-	return &PropagateService{
+func NewGrpcCommandService(publish Publish, representatives []*consensus.Representative) *GrpcCommandService {
+	return &GrpcCommandService{
 		publish:         publish,
 		representatives: representatives,
 	}
 }
 
-func (ps PropagateService) BroadcastPrePrepareMsg(msg consensus.PrePrepareMsg) error {
+func (ps GrpcCommandService) BroadcastPrePrepareMsg(msg consensus.PrePrepareMsg) error {
 	if msg.ConsensusId.Id == "" {
 		return errors.New("Consensus ID is empty")
 	}
@@ -62,7 +62,7 @@ func (ps PropagateService) BroadcastPrePrepareMsg(msg consensus.PrePrepareMsg) e
 	return nil
 }
 
-func (ps PropagateService) BroadcastPrepareMsg(msg consensus.PrepareMsg) error {
+func (ps GrpcCommandService) BroadcastPrepareMsg(msg consensus.PrepareMsg) error {
 	if msg.ConsensusId.Id == "" {
 		return errors.New("Consensus ID is empty")
 	}
@@ -84,7 +84,7 @@ func (ps PropagateService) BroadcastPrepareMsg(msg consensus.PrepareMsg) error {
 	return nil
 }
 
-func (ps PropagateService) BroadcastCommitMsg(msg consensus.CommitMsg) error {
+func (ps GrpcCommandService) BroadcastCommitMsg(msg consensus.CommitMsg) error {
 	if msg.ConsensusId.Id == "" {
 		return errors.New("Consensus ID is empty")
 	}
@@ -102,7 +102,7 @@ func (ps PropagateService) BroadcastCommitMsg(msg consensus.CommitMsg) error {
 	return nil
 }
 
-func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string) error {
+func (ps GrpcCommandService) broadcastMsg(SerializedMsg []byte, protocol string) error {
 	if SerializedMsg == nil {
 		return errors.New("Message is empty")
 	}
