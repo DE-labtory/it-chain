@@ -46,6 +46,7 @@ func (iApi ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPat
 	if err = iApi.ContainerService.StartContainer(*meta); err != nil {
 		return nil, err
 	}
+
 	return meta, nil
 }
 
@@ -89,6 +90,7 @@ func (iApi ICodeApi) Query(icodeId icode.ID, functionName string, args []string)
 		Function: functionName,
 		Args:     args,
 	}
+
 	result, err := iApi.ContainerService.ExecuteTransaction(tx)
 
 	if err != nil {
