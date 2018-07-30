@@ -28,14 +28,14 @@ import (
 func TestBlockApi_AddBlockToPool(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			block blockchain.Block
+			seal []byte
 		}
 	}{
 		"success": {
 			input: struct {
-				block blockchain.Block
-			}{block: &blockchain.DefaultBlock{
-				Height: uint64(11),
+				seal []byte
+			}{seal: []byte{
+				0x1,
 			}},
 		},
 	}
@@ -49,7 +49,7 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
-		blockApi.AddBlockToPool(test.input.block)
+		blockApi.AddBlockToPool(test.input.seal)
 	}
 }
 

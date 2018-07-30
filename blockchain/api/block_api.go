@@ -47,7 +47,7 @@ func (bApi BlockApi) SyncedCheck(block blockchain.Block) error {
 }
 
 // 받은 block을 block pool에 추가한다.
-func (bApi BlockApi) AddBlockToPool(block blockchain.Block) error {
+func (bApi BlockApi) AddBlockToPool(seal []byte) error {
 	return nil
 }
 

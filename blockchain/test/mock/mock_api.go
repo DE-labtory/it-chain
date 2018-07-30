@@ -19,13 +19,13 @@ package mock
 import "github.com/it-chain/engine/blockchain"
 
 type BlockApi struct {
-	AddBlockToPoolFunc            func(block blockchain.Block) error
+	AddBlockToPoolFunc            func(seal []byte) error
 	CheckAndSaveBlockFromPoolFunc func(height blockchain.BlockHeight) error
 	CreateBlockFunc               func(txList []blockchain.Transaction) (blockchain.DefaultBlock, error)
 }
 
-func (api BlockApi) AddBlockToPool(block blockchain.Block) error {
-	return api.AddBlockToPoolFunc(block)
+func (api BlockApi) AddBlockToPool(seal []byte) error {
+	return api.AddBlockToPoolFunc(seal)
 }
 
 func (api BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {

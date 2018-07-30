@@ -163,6 +163,12 @@ type Tx struct {
 	Signature []byte
 }
 
+// command to update whether sync is progressing now or not
+type UpdateSyncState struct {
+	midgard.EventModel
+	syncing bool
+}
+
 /*
  * txpool
  */
