@@ -94,6 +94,12 @@ type Query struct {
 	Args     []string
 }
 
+type Invoke struct {
+	midgard.CommandModel
+	Function string
+	Args     []string
+}
+
 type Deploy struct {
 	midgard.CommandModel
 	Url     string
