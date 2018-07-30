@@ -23,17 +23,26 @@ import (
 	"github.com/it-chain/engine/icode/api"
 )
 
-type InvokeCommandHandler struct {
+type IcodeExecuteCommandHandler struct {
 	iCodeApi api.ICodeApi
 }
 
-func NewInvokeCommandHandler(icodeApi api.ICodeApi) *QueryCommandHandler {
-	return &QueryCommandHandler{
+func NewIcodeExecuteCommandHandler(icodeApi api.ICodeApi) IcodeExecuteCommandHandler {
+	return IcodeExecuteCommandHandler{
 		iCodeApi: icodeApi,
 	}
 }
 
-func (q *QueryCommandHandler) HandleInvokeCommandHandler(command command.Invoke) (icode.Result, rpc.Error) {
-	result := q.iCodeApi.Invoke(command.GetID(), command.Function, command.Args)
-	return *result, rpc.Error{}
+func (i *IcodeExecuteCommandHandler) HandleTransactionExecuteCommandHandler(command command.ExecuteICode) (icode.Result, rpc.Error) {
+
+	transaction := icode.Transaction{
+		Args:     command.Args,
+		Function: command.Function,
+		ICodeID:  command.ID,
+		Method:   command.Method,
+	}
+
+	result := i.iCodeApi.ExecuteTransaction(transaction)
+
+	return result, rpc.Error{}
 }

@@ -230,9 +230,9 @@ func initIcode() error {
 	deployHandler := icodeAdapter.NewDeployCommandHandler(*api)
 	unDeployHandler := icodeAdapter.NewUnDeployCommandHandler(*api)
 	blockCommandHandler := icodeAdapter.NewBlockCommandHandler(*api)
-	queryCommandHandler := icodeAdapter.NewQueryCommandHandler(*api)
+	icodeExecuteHandler := icodeAdapter.NewIcodeExecuteCommandHandler(*api)
 
-	server.Register("icode.query", queryCommandHandler.HandleQueryCommandHandler)
+	server.Register("icode.execute", icodeExecuteHandler.HandleTransactionExecuteCommandHandler)
 	server.Register("icode.deploy", deployHandler.HandleDeployCommand)
 	server.Register("icode.undeploy", unDeployHandler.HandleUnDeployCommand)
 	server.Register("block.execute", blockCommandHandler.HandleBlockExecuteCommand)

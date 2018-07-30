@@ -51,7 +51,7 @@ func (b *BlockExecuteCommandHandler) HandleBlockExecuteCommand(blockExecuteComma
 		case icode.Query:
 			logger.Warn(&logger.Fields{"txID": tx.ID}, "block include unwanted query transaction")
 		case icode.Invoke:
-			results = append(results, *b.icodeApi.Invoke(icode.Transaction{
+			results = append(results, b.icodeApi.ExecuteTransaction(icode.Transaction{
 				TxId:     tx.ID,
 				ICodeID:  tx.ICodeID,
 				Function: tx.Function,

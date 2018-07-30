@@ -85,6 +85,7 @@ func (cs TesseractContainerService) ExecuteTransaction(tx icode.Transaction) (*i
 	if err != nil {
 		return nil, err
 	}
+
 	var data = make(map[string]string)
 	var isSuccess bool
 
