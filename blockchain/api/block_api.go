@@ -60,6 +60,7 @@ func (bApi BlockApi) SyncIsProgressing() blockchain.ProgressState {
 }
 
 func (bApi BlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.DefaultBlock, error) {
+
 	lastBlock, err := bApi.blockQueryService.GetLastCommitedBlock()
 	if err != nil {
 		return blockchain.DefaultBlock{}, ErrGetLastCommitedBlock
@@ -71,11 +72,13 @@ func (bApi BlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.De
 	creator := bApi.publisherId
 
 	block, err := blockchain.CreateProposedBlock(prevSeal, height, defaultTxList, []byte(creator))
+
 	if err != nil {
 		return blockchain.DefaultBlock{}, ErrCreateProposedBlock
 	}
 
 	err = bApi.blockExecuteService.ExecuteBlock(block)
+
 	if err != nil {
 		return blockchain.DefaultBlock{}, ErrExecuteBlock
 	}

@@ -302,13 +302,22 @@ func initBlockchain() error {
 	}
 
 	blockCommandHandler := blockchainAdapter.NewCommandHandler(blockApi)
+	blockProposeHandler := blockchainAdapter.NewBlockProposeCommandHandler(blockApi, config.Engine.Mode)
 
 	//crete GenesisBlock
 	GenesisConfPath := config.Blockchain.GenesisConfPath
 
-	blockApi.CreateGenesisBlock(GenesisConfPath)
+	if err := blockApi.CreateGenesisBlock(GenesisConfPath); err != nil {
+		panic(err)
+	}
 
-	err = server.Register("block.confirm", blockCommandHandler.HandleConfirmBlockCommand)
+	if err := server.Register("block.confirm", blockCommandHandler.HandleConfirmBlockCommand); err != nil {
+		panic(err)
+	}
+
+	if err := server.Register("block.propose", blockProposeHandler.HandleProposeBlockCommand); err != nil {
+		panic(err)
+	}
 
 	return nil
 }

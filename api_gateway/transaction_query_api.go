@@ -69,7 +69,7 @@ func (t TransactionEventListener) HandleTransactionCreatedEvent(txCreatedEvent e
 		Args:      txCreatedEvent.Args,
 		Signature: txCreatedEvent.Signature,
 		Function:  txCreatedEvent.Function,
-		Method:    txpool.TxDataType(txCreatedEvent.Function),
+		Method:    txpool.TxDataType(txCreatedEvent.Method),
 		Jsonrpc:   txCreatedEvent.Jsonrpc,
 		TimeStamp: txCreatedEvent.TimeStamp,
 		PeerID:    txCreatedEvent.PeerID,

@@ -61,7 +61,7 @@ func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.P
 		_, err := h.blockApi.CreateBlock(defaultTxList)
 
 		if err != nil {
-			return struct{}{}, rpc.Error{}
+			return struct{}{}, rpc.Error{Message: err.Error()}
 		}
 
 		return struct{}{}, rpc.Error{}
@@ -91,7 +91,7 @@ func validateTxList(txList []command.Tx) error {
 
 func validateTx(tx command.Tx) error {
 	if tx.ID == "" || tx.PeerID == "" || tx.TimeStamp.IsZero() || tx.Jsonrpc == "" ||
-		tx.Method == "" || tx.Function == "" || tx.Args == nil || tx.Signature == nil {
+		tx.Method == "" || tx.Function == "" || tx.Args == nil {
 		return ErrTxHasMissingProperties
 	}
 	return nil
@@ -114,6 +114,8 @@ func convertTx(tx command.Tx) blockchain.Transaction {
 		Status:    blockchain.Status(tx.Status),
 		PeerID:    tx.PeerID,
 		Timestamp: tx.TimeStamp,
+		ICodeID:   tx.ICodeID,
+		Signature: tx.Signature,
 		TxData: blockchain.TxData{
 			Jsonrpc: tx.Jsonrpc,
 			Method:  blockchain.TxDataType(tx.Method),

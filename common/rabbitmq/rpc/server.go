@@ -68,7 +68,7 @@ func (s Server) Register(queue string, handler interface{}) error {
 	msgs, err := s.Ch.Consume(
 		q.Name, // queue
 		"",     // consumer
-		false,  // auto-ack
+		true,   // auto-ack
 		false,  // exclusive
 		false,  // no-local
 		false,  // no-wait
@@ -113,12 +113,6 @@ func (s Server) Register(queue string, handler interface{}) error {
 					CorrelationId: d.CorrelationId,
 					Body:          r,
 				})
-
-			if err != nil {
-				log.Println(err.Error())
-			}
-
-			err = d.Ack(false)
 
 			if err != nil {
 				log.Println(err.Error())

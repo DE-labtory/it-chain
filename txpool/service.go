@@ -16,7 +16,10 @@
 
 package txpool
 
-import "log"
+import (
+	"log"
+	"sync"
+)
 
 type TxpoolQueryService interface {
 	FindUncommittedTransactions() ([]Transaction, error)
@@ -34,6 +37,7 @@ type BlockProposalService struct {
 	engineMode         string
 	txpoolQueryService TxpoolQueryService
 	blockService       BlockService
+	sync.RWMutex
 }
 
 func NewBlockProposalService(queryService TxpoolQueryService, blockService BlockService, engineMode string) *BlockProposalService {
@@ -42,12 +46,16 @@ func NewBlockProposalService(queryService TxpoolQueryService, blockService Block
 		txpoolQueryService: queryService,
 		blockService:       blockService,
 		engineMode:         engineMode,
+		RWMutex:            sync.RWMutex{},
 	}
 }
 
 // todo do not delete transaction immediately
 // todo transaction will be deleted when block are committed
 func (b BlockProposalService) ProposeBlock() error {
+
+	b.Lock()
+	defer b.Unlock()
 
 	// todo transaction size, number of tx
 	transactions, err := b.txpoolQueryService.FindUncommittedTransactions()

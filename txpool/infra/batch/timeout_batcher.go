@@ -91,12 +91,12 @@ func (t *TimeoutBatcher) Run(taskFunc TaskFunc, duration time.Duration) chan str
 	var err error
 
 	go func() {
-		defer log.Println("timer is closing")
+		//defer log.Println("timer is closing")
 		err = timer.Start()
 
 		if err != nil {
-			log.Println(err)
-			return
+			log.Println(err.Error())
+			//	return
 		}
 	}()
 

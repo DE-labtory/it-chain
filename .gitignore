@@ -33,7 +33,7 @@ sample/db/test/*
 # tmp
 .tmp
 
-#vendor
+# vendor
 vendor
 
 # leveldb output
@@ -49,11 +49,11 @@ conf/config_bak[0-9]*.yaml
 # add conf generator main
 !conf/main
 
-#pid
-my.pid
-
 # draw.io images
 images/*.xml
 
 # vim stack dump
 vim.exe.stackdump
+
+# pri
+id_rsa

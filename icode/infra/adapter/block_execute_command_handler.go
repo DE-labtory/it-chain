@@ -39,7 +39,7 @@ func NewBlockCommandHandler(icodeApi api.ICodeApi) *BlockExecuteCommandHandler {
 	}
 }
 
-func (b *BlockExecuteCommandHandler) HandleBlockExecuteCommand(blockExecuteCommand command.ExecuteBlock) ([]command.TxResult, rpc.Error) {
+func (b *BlockExecuteCommandHandler) HandleBlockExecuteCommand(blockExecuteCommand command.ExecuteBlock) (command.ReturnBlockResult, rpc.Error) {
 
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
@@ -64,7 +64,7 @@ func (b *BlockExecuteCommandHandler) HandleBlockExecuteCommand(blockExecuteComma
 		}
 	}
 
-	return convertTxResults(results), rpc.Error{}
+	return command.ReturnBlockResult{TxResultList: convertTxResults(results)}, rpc.Error{}
 }
 
 func convertTxResults(icodeResults []icode.Result) []command.TxResult {
