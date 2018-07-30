@@ -120,7 +120,7 @@ type ExecuteBlock struct {
 	State     string
 }
 
-type ExecuteBlockTx struct {
+type ExecuteTransaction struct {
 	ID        string
 	ICodeID   string
 	Status    int

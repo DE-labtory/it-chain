@@ -20,6 +20,7 @@ import (
 	"errors"
 
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/midgard"
@@ -55,6 +56,7 @@ func (b BlockService) ProposeBlock(transactions []txpool.Transaction) error {
 			ID:        tx.ID,
 			Status:    int(tx.Status),
 			PeerID:    tx.PeerID,
+			ICodeID:   tx.ICodeID,
 			TimeStamp: tx.TimeStamp,
 			Jsonrpc:   tx.Jsonrpc,
 			Method:    string(tx.Method),
@@ -64,8 +66,14 @@ func (b BlockService) ProposeBlock(transactions []txpool.Transaction) error {
 		})
 	}
 
-	err := b.client.Call("block.propose", proposeCommand, func() {
+	err := b.client.Call("block.propose", proposeCommand, func(_ struct{}, err rpc.Error) {
 
+		if !err.IsNil() {
+			logger.Fatal(nil, err.Message)
+			return
+		}
+
+		logger.Info(nil, "a block has proposed")
 	})
 
 	return err

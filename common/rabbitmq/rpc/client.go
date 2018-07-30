@@ -55,7 +55,7 @@ func (c Client) Call(queue string, params interface{}, callback interface{}) err
 	replyQ, err := c.Ch.QueueDeclare(
 		"",    // name
 		false, // durable
-		false, // delete when usused
+		true,  // delete when usused
 		false, // exclusive
 		false, // no-wait
 		nil,   // arguments
@@ -78,7 +78,7 @@ func (c Client) Call(queue string, params interface{}, callback interface{}) err
 	msgs, err := c.Ch.Consume(
 		replyQ.Name, // queue
 		"",          // consumer
-		false,       // auto-ack
+		true,        // auto-ack
 		false,       // exclusive
 		false,       // no-local
 		false,       // no-wait

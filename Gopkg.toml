@@ -47,11 +47,11 @@
 
 [[constraint]]
   name = "github.com/it-chain/midgard"
-  version = "0.0.2"
+  version = "0.0.4"
 
 [[constraint]]
   name = "github.com/it-chain/tesseract"
-  version = "0.1.0"
+  version = "0.1.2"
 
 [[constraint]]
   branch = "develop"
@@ -62,12 +62,16 @@
   version = "1.8.0"
 
 [[constraint]]
+  name = "github.com/pkg/errors"
+  version = "0.8.0"
+
+[[constraint]]
   name = "github.com/rs/xid"
   version = "1.2.0"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
-  version = "1.0.5"
+  version = "1.0.6"
 
 [[constraint]]
   name = "github.com/spf13/viper"
@@ -84,10 +88,6 @@
 [[constraint]]
   name = "github.com/urfave/cli"
   version = "1.20.0"
-
-[[constraint]]
-  name = "github.com/x-cray/logrus-prefixed-formatter"
-  version = "0.5.2"
 
 [[constraint]]
   name = "gopkg.in/src-d/go-git.v4"

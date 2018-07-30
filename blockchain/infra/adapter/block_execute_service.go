@@ -17,8 +17,11 @@
 package adapter
 
 import (
+	"fmt"
+
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/midgard"
 	"github.com/pkg/errors"
@@ -41,12 +44,21 @@ func NewBlockExecuteService(client rpc.Client) *BlockExecuteService {
 }
 
 func (s *BlockExecuteService) ExecuteBlock(block blockchain.Block) error {
+
 	deliverCommand, err := createBlockExecuteCommand(block)
+
 	if err != nil {
 		return err
 	}
 
-	err = s.client.Call("block.execute", deliverCommand, func() {})
+	err = s.client.Call("block.execute", deliverCommand, func(result command.ReturnBlockResult, err rpc.Error) {
+
+		if !err.IsNil() {
+			logger.Fatal(nil, err.Message)
+			return
+		}
+		logger.Info(&logger.Fields{"": "BLOCKCHAIN"}, fmt.Sprintf("block executed %v", result))
+	})
 
 	return err
 }

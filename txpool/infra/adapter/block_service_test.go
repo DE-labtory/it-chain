@@ -30,8 +30,9 @@ func TestBlockService_ProposeBlock(t *testing.T) {
 	client := rpc.NewClient("")
 	server := rpc.NewServer("")
 
-	server.Register("block.propose", func(block command.ProposeBlock) {
+	server.Register("block.propose", func(command command.ProposeBlock) (struct{}, rpc.Error) {
 
+		return struct{}{}, rpc.Error{}
 	})
 
 	blockService := adapter.NewBlockService(client)

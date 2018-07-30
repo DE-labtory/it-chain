@@ -21,7 +21,7 @@ func main() {
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
-		ICodeID:  "1",
+		ICodeID:  "bdeshe0e2r74d1hr8pv0",
 		Jsonrpc:  "2.0",
 		Method:   "invoke",
 		Args:     []string{},

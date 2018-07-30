@@ -49,6 +49,7 @@ func (cs TesseractContainerService) StartContainer(meta icode.Meta) error {
 		Name:      meta.RepositoryName,
 		Directory: meta.Path,
 	}
+
 	containerId, err := cs.tesseract.SetupContainer(tesseractIcodeInfo)
 
 	if err != nil {
