@@ -50,6 +50,7 @@ func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.Delive
 	data, err := common.Serialize(body)
 
 	if err != nil {
+
 		return command.DeliverGrpc{}, err
 	}
 

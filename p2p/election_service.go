@@ -28,13 +28,11 @@ import (
 	"github.com/rs/xid"
 )
 
-type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
-
 type ElectionService struct {
 	mux                sync.Mutex
 	electionRepository ElectionRepository
 	peerQueryService   PeerQueryService
-	publish            Publish
+	publish            Publish // dependency injection
 }
 
 func NewElectionService(electionRepository ElectionRepository, peerQueryService PeerQueryService, publish Publish) ElectionService {
@@ -45,106 +43,6 @@ func NewElectionService(electionRepository ElectionRepository, peerQueryService 
 		peerQueryService:   peerQueryService,
 		publish:            publish,
 	}
-}
-
-func (es *ElectionService) ElectLeaderWithRaft() {
-	//1. Start random timeout
-	//2. timed out! alter state to 'candidate'
-	//3. while ticking, count down leader repo left time
-	//4. Send message having 'RequestVoteProtocol' to other node
-	go StartRandomTimeOut(es)
-}
-
-func StartRandomTimeOut(es *ElectionService) {
-
-	timeoutNum := genRandomInRange(150, 300)
-	timeout := time.After(time.Duration(timeoutNum) * time.Microsecond)
-	tick := time.Tick(1 * time.Millisecond)
-	election := es.electionRepository.GetElection()
-
-	for {
-		select {
-
-		case <-timeout:
-			// when timed out
-			// 1. if state is ticking, be candidate and request vote
-			// 2. if state is candidate, reset state and left time
-			if election.GetState() == "Ticking" {
-
-				election.SetState("Candidate")
-				es.electionRepository.SetElection(election)
-
-				pLTable, _ := es.peerQueryService.GetPLTable()
-
-				peerList := pLTable.PeerTable
-
-				connectionIds := make([]string, 0)
-
-				for _, peer := range peerList {
-					connectionIds = append(connectionIds, peer.PeerId.Id)
-				}
-
-				es.requestVote(connectionIds)
-
-			} else if election.GetState() == "Candidate" {
-				//reset time and state chane candidate -> ticking when timed in candidate state
-				election.ResetLeftTime()
-				election.SetState("Ticking")
-			}
-
-			es.electionRepository.SetElection(election)
-
-		case <-tick:
-			// count down left time while ticking
-			election.CountDownLeftTimeBy(1)
-
-			es.electionRepository.SetElection(election)
-
-		}
-	}
-}
-
-func (es *ElectionService) requestVote(connectionIds []string) error {
-
-	// 1. create request vote message
-	// 2. send message
-	requestVoteMessage := RequestVoteMessage{}
-
-	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("RequestVoteProtocol", requestVoteMessage)
-
-	for _, connectionId := range connectionIds {
-
-		grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
-	}
-
-	es.publish("Command", "message.send", grpcDeliverCommand)
-
-	return nil
-}
-
-func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
-
-	data, err := common.Serialize(body)
-
-	if err != nil {
-		return command.DeliverGrpc{}, err
-	}
-
-	return command.DeliverGrpc{
-		CommandModel: midgard.CommandModel{
-			ID: xid.New().String(),
-		},
-		RecipientList: make([]string, 0),
-		Body:          data,
-		Protocol:      protocol,
-	}, err
-}
-
-func genRandomInRange(min, max int) int {
-
-	rand.Seed(time.Now().Unix())
-
-	return rand.Intn(max-min) + min
 }
 
 func (es *ElectionService) Vote(connectionId string) error {
@@ -168,6 +66,7 @@ func (es *ElectionService) Vote(connectionId string) error {
 	return nil
 }
 
+// broadcast leader to other peers
 func (es *ElectionService) BroadcastLeader(peer Peer) error {
 
 	updateLeaderMessage := UpdateLeaderMessage{}
@@ -212,4 +111,103 @@ func (es *ElectionService) DecideToBeLeader(command command.ReceiveGrpc) error {
 	}
 
 	return nil
+}
+
+func (es *ElectionService) ElectLeaderWithRaft() {
+
+	//1. Start random timeout
+	//2. timed out! alter state to 'candidate'
+	//3. while ticking, count down leader repo left time
+	//4. Send message having 'RequestVoteProtocol' to other node
+	go func() {
+
+		timeoutNum := genRandomInRange(150, 300)
+		timeout := time.After(time.Duration(timeoutNum) * time.Microsecond)
+		tick := time.Tick(1 * time.Millisecond)
+		election := es.electionRepository.GetElection()
+
+		for {
+			select {
+
+			case <-timeout:
+				// when timed out
+				// 1. if state is ticking, be candidate and request vote
+				// 2. if state is candidate, reset state and left time
+				if election.GetState() == "Ticking" {
+
+					election.SetState("Candidate")
+					es.electionRepository.SetElection(election)
+
+					pLTable, _ := es.peerQueryService.GetPLTable()
+
+					peerList := pLTable.PeerTable
+
+					connectionIds := make([]string, 0)
+
+					for _, peer := range peerList {
+						connectionIds = append(connectionIds, peer.PeerId.Id)
+					}
+
+					es.requestVote(connectionIds)
+
+				} else if election.GetState() == "Candidate" {
+					//reset time and state chane candidate -> ticking when timed in candidate state
+					election.ResetLeftTime()
+					election.SetState("Ticking")
+				}
+
+				es.electionRepository.SetElection(election)
+
+			case <-tick:
+				// count down left time while ticking
+				election.CountDownLeftTimeBy(1)
+
+				es.electionRepository.SetElection(election)
+
+			}
+		}
+	}()
+}
+
+func (es *ElectionService) requestVote(connectionIds []string) error {
+
+	// 1. create request vote message
+	// 2. send message
+	requestVoteMessage := RequestVoteMessage{}
+
+	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("RequestVoteProtocol", requestVoteMessage)
+
+	for _, connectionId := range connectionIds {
+
+		grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
+	}
+
+	es.publish("Command", "message.send", grpcDeliverCommand)
+
+	return nil
+}
+
+func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
+
+	data, err := common.Serialize(body)
+
+	if err != nil {
+		return command.DeliverGrpc{}, err
+	}
+
+	return command.DeliverGrpc{
+		CommandModel: midgard.CommandModel{
+			ID: xid.New().String(),
+		},
+		RecipientList: make([]string, 0),
+		Body:          data,
+		Protocol:      protocol,
+	}, err
+}
+
+func genRandomInRange(min, max int) int {
+
+	rand.Seed(time.Now().Unix())
+
+	return rand.Intn(max-min) + min
 }
