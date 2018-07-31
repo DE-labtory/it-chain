@@ -76,6 +76,7 @@ func (mpp *MockP2PProcess) Init(id string, ipAddress string) {
 }
 
 func (mpp *MockP2PProcess) GetId() string {
+
 	return mpp.id
 }
 

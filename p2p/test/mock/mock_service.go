@@ -99,6 +99,7 @@ type MockElectionService struct {
 	VoteFunc             func(connectionId string) error
 	BroadcastLeaderFunc  func(peer p2p.Peer) error
 	DecideToBeLeaderFunc func(command command.ReceiveGrpc) error
+	ElectLeaderWithRaft  func() error
 }
 
 func (mes *MockElectionService) Vote(connectionId string) error {
@@ -106,13 +107,20 @@ func (mes *MockElectionService) Vote(connectionId string) error {
 	return mes.VoteFunc(connectionId)
 
 }
+
 func (mes *MockElectionService) BroadcastLeader(peer p2p.Peer) error {
 
 	return mes.BroadcastLeaderFunc(peer)
 
 }
+
 func (mes *MockElectionService) DecideToBeLeader(command command.ReceiveGrpc) error {
 
 	return mes.DecideToBeLeaderFunc(command)
 
+}
+
+func (mes *MockElectionService) ElectLEaderWithRaft() error {
+
+	return mes.ElectLeaderWithRaft()
 }

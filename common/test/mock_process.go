@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package p2p
+package test
 
-type PeerService struct {
-	publishService PublishService
-}
+type MockProcess interface {
+	Init(id string, ipAddress string)
 
-func (ps *PeerService) Save(peer Peer) {
+	GetId() string
 
-	ps.publishService.PeerCreated(peer)
+	Publish(exchange string, topic string, data interface{}) error
+
+	HandleEvent()
+
+	HandleCommand()
+
+	TriggerCommand(data interface{}, process MockProcess)
+
+	TriggerEvent(data interface{}, process MockProcess)
 }

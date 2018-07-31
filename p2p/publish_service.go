@@ -16,11 +16,17 @@
 
 package p2p
 
-type PeerService struct {
-	publishService PublishService
+type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
+
+type PublishService struct {
+	publish Publish
 }
 
-func (ps *PeerService) Save(peer Peer) {
+func (ps *PublishService) PeerCreated(peer Peer) {
 
-	ps.publishService.PeerCreated(peer)
+	ps.publish("Event", "peer.created", peer)
+}
+
+func (ps *PublishService) PeerDeleted(peerId PeerId) {
+	ps.publish("Event", "peer.created", peerId)
 }

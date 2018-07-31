@@ -69,6 +69,7 @@ func (q BlockQueryApi) GetStagedBlockById(blockId string) (blockchain.DefaultBlo
 func (q BlockQueryApi) GetLastCommitedBlock() (blockchain.DefaultBlock, error) {
 	return q.commitedBlockRepository.FindLastBlock()
 }
+
 func (q BlockQueryApi) GetCommitedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
 	return q.commitedBlockRepository.FindBlockByHeight(height)
 }
