@@ -42,8 +42,3 @@ func NewGrpcCommandHandler(blockApi SyncBlockApi, blockQueryService blockchain.B
 		grpcCommandService: grpcCommandService,
 	}
 }
-
-func (g *GrpcCommandHandler) HandleGrpcCommand(command blockchain.GrpcReceiveCommand) error {
-
-	return nil
-}

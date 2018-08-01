@@ -62,7 +62,7 @@ func TestGrpcCommandService_RequestBlock(t *testing.T) {
 	publish := func(exchange string, topic string, data interface{}) error {
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.deliver")
-		assert.Equal(t, reflect.TypeOf(data).String(), "blockchain.GrpcDeliverCommand")
+		assert.Equal(t, reflect.TypeOf(data).String(), "command.DeliverGrpc")
 		return nil
 	}
 
@@ -129,7 +129,7 @@ func TestGrpcCommandService_ResponseBlock(t *testing.T) {
 	publish := func(exchange string, topic string, data interface{}) error {
 		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.deliver")
-		assert.Equal(t, reflect.TypeOf(data).String(), "blockchain.GrpcDeliverCommand")
+		assert.Equal(t, reflect.TypeOf(data).String(), "command.DeliverGrpc")
 
 		return nil
 	}

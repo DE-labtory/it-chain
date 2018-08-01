@@ -19,6 +19,7 @@ package adapter
 import (
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
@@ -48,7 +49,7 @@ func (gcs *GrpcCommandService) RequestBlock(peerId blockchain.PeerId, height uin
 		return err
 	}
 
-	deliverCommand.Recipients = append(deliverCommand.Recipients, peerId.ToString())
+	deliverCommand.RecipientList = append(deliverCommand.RecipientList, peerId.ToString())
 
 	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
@@ -69,7 +70,7 @@ func (gcs *GrpcCommandService) ResponseBlock(peerId blockchain.PeerId, block blo
 		return err
 	}
 
-	deliverCommand.Recipients = append(deliverCommand.Recipients, peerId.ToString())
+	deliverCommand.RecipientList = append(deliverCommand.RecipientList, peerId.ToString())
 
 	return gcs.publish("Command", "message.deliver", deliverCommand)
 }
@@ -79,19 +80,19 @@ func (gcs *GrpcCommandService) SyncCheckResponse(block blockchain.Block) error {
 	return nil
 }
 
-func createGrpcDeliverCommand(protocol string, body interface{}) (blockchain.GrpcDeliverCommand, error) {
+func createGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
 
 	data, err := common.Serialize(body)
 	if err != nil {
-		return blockchain.GrpcDeliverCommand{}, err
+		return command.DeliverGrpc{}, err
 	}
 
-	return blockchain.GrpcDeliverCommand{
+	return command.DeliverGrpc{
 		CommandModel: midgard.CommandModel{
 			ID: xid.New().String(),
 		},
-		Recipients: make([]string, 0),
-		Body:       data,
-		Protocol:   protocol,
+		RecipientList: make([]string, 0),
+		Body:          data,
+		Protocol:      protocol,
 	}, err
 }

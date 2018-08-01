@@ -21,9 +21,9 @@ import (
 
 	"reflect"
 
-	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/test/mock"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
@@ -32,18 +32,18 @@ import (
 func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			command blockchain.ConfirmBlockCommand
+			command command.ConfirmBlock
 		}
 		err rpc.Error
 	}{
 		"success": {
 			input: struct {
-				command blockchain.ConfirmBlockCommand
+				command command.ConfirmBlock
 			}{
-				command: blockchain.ConfirmBlockCommand{
+				command: command.ConfirmBlock{
 					CommandModel: midgard.CommandModel{ID: "zf"},
-					Block: &blockchain.DefaultBlock{
-						Height: 99887,
+					Seal: []byte{
+						0x1,
 					},
 				},
 			},
@@ -51,11 +51,11 @@ func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 		},
 		"block nil error test": {
 			input: struct {
-				command blockchain.ConfirmBlockCommand
+				command command.ConfirmBlock
 			}{
-				command: blockchain.ConfirmBlockCommand{
+				command: command.ConfirmBlock{
 					CommandModel: midgard.CommandModel{ID: "zf"},
-					Block:        nil,
+					Seal:         nil,
 				},
 			},
 			err: rpc.Error{Message: adapter.ErrBlockNil.Error()},
@@ -63,8 +63,8 @@ func TestCommandHandler_HandleConfirmBlockCommand(t *testing.T) {
 	}
 
 	blockApi := mock.BlockApi{}
-	blockApi.AddBlockToPoolFunc = func(block blockchain.Block) error {
-		assert.Equal(t, block.GetHeight(), uint64(99887))
+	blockApi.AddBlockToPoolFunc = func(seal []byte) error {
+		assert.Equal(t, seal, []byte{0x1})
 		return nil
 	}
 
