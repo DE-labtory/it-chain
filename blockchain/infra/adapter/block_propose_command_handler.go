@@ -106,18 +106,12 @@ func convertTxList(txList []command.Tx) []blockchain.Transaction {
 func convertTx(tx command.Tx) blockchain.Transaction {
 	return &blockchain.DefaultTransaction{
 		ID:        tx.ID,
-		Status:    blockchain.Status(tx.Status),
+		ICodeID: tx.ICodeID,
 		PeerID:    tx.PeerID,
 		Timestamp: tx.TimeStamp,
-		ICodeID:   tx.ICodeID,
+		Jsonrpc: tx.Jsonrpc,
+		Function: tx.Function,
+		Args: tx.Args,
 		Signature: tx.Signature,
-		TxData: blockchain.TxData{
-			Jsonrpc: tx.Jsonrpc,
-			Method:  blockchain.TxDataType(tx.Method),
-			Params: blockchain.Params{
-				Function: tx.Function,
-				Args:     tx.Args,
-			},
-		},
 	}
 }
