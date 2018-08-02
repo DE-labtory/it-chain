@@ -54,12 +54,10 @@ func (b BlockService) ProposeBlock(transactions []txpool.Transaction) error {
 	for _, tx := range transactions {
 		proposeCommand.TxList = append(proposeCommand.TxList, command.Tx{
 			ID:        tx.ID,
-			Status:    int(tx.Status),
 			PeerID:    tx.PeerID,
 			ICodeID:   tx.ICodeID,
 			TimeStamp: tx.TimeStamp,
 			Jsonrpc:   tx.Jsonrpc,
-			Method:    string(tx.Method),
 			Function:  tx.Function,
 			Args:      tx.Args,
 			Signature: tx.Signature,

@@ -22,40 +22,40 @@ import (
 	"github.com/it-chain/engine/txpool"
 )
 
-type TransactionApi struct {
-	publisherId string
+type TransactionRepository interface {
+	FindAll() ([]txpool.Transaction, error)
+	Save(transaction txpool.Transaction) error
+	Remove(id txpool.TransactionId)
+	FindById(id txpool.TransactionId) (txpool.Transaction, error)
 }
 
-func NewTransactionApi(publisherId string) TransactionApi {
+type TransactionApi struct {
+	publisherId           string
+	transactionRepository TransactionRepository
+}
+
+func NewTransactionApi(publisherId string, transactionRepository TransactionRepository) TransactionApi {
 	return TransactionApi{
-		publisherId: publisherId,
+		publisherId:           publisherId,
+		transactionRepository: transactionRepository,
 	}
 }
 
 func (t TransactionApi) CreateTransaction(txData txpool.TxData) (txpool.Transaction, error) {
 
-	tx, err := txpool.CreateTransaction(t.publisherId, txData)
+	transaction, err := txpool.CreateTransaction(t.publisherId, txData)
 
 	if err != nil {
 		log.Printf("fail to transaction: [%v]", err)
-		return tx, err
+		return txpool.Transaction{}, err
 	}
 
-	log.Printf("transaction is created: [%v]", tx)
-	return tx, nil
+	err = t.transactionRepository.Save(transaction)
+
+	return transaction, err
 }
 
-//todo DeleteTransaction
-//func (t TransactionApi) DeleteTransaction(id txpool.TransactionId) error {
-//
-//	tx := &txpool.Transaction{}
-//
-//	if err := eventstore.Load(tx, id); err != nil {
-//		log.Printf("fail to delete transaction: [%v]", id)
-//		return err
-//	}
-//
-//	log.Printf("transaction is deleted: [%v]", id)
-//
-//	return txpool.DeleteTransaction(*tx)
-//}
+func (t TransactionApi) DeleteTransaction(id txpool.TransactionId) {
+
+	t.transactionRepository.Remove(id)
+}
