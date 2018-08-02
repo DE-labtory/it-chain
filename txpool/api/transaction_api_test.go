@@ -19,28 +19,11 @@ package api_test
 import (
 	"testing"
 
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/engine/txpool/api"
-	"github.com/it-chain/midgard"
+	"github.com/it-chain/engine/txpool/infra/mem"
 	"github.com/stretchr/testify/assert"
 )
-
-type MockEventRepository struct {
-	SaveFunc func(aggregateID string, events ...midgard.Event) error
-	LoadFunc func(aggregate midgard.Aggregate, aggregateID string) error
-}
-
-func (rp MockEventRepository) Load(aggregate midgard.Aggregate, aggregateID string) error {
-	return rp.LoadFunc(aggregate, aggregateID)
-}
-
-func (rp MockEventRepository) Save(aggregateID string, events ...midgard.Event) error {
-	return rp.SaveFunc(aggregateID, events...)
-}
-
-func (rp MockEventRepository) Close() {}
 
 func TestTransactionApi_CreateTransaction(t *testing.T) {
 
@@ -53,65 +36,57 @@ func TestTransactionApi_CreateTransaction(t *testing.T) {
 		"success": {
 			input: struct {
 				txData txpool.TxData
-			}{txData: txpool.TxData{ICodeID: "gg"}},
+			}{
+				txData: txpool.TxData{
+					ICodeID:   "gg",
+					Function:  "1",
+					Signature: []byte("123"),
+					Args:      []string{"1", "2"},
+					Jsonrpc:   "2.0",
+				},
+			},
 			err: nil,
 		},
 	}
 
-	eventRepository := MockEventRepository{}
-	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, "gg", events[0].(*event.TxCreated).ICodeID)
-		return nil
-	}
+	transactionRepository := mem.NewTransactionRepository()
+	transactionApi := api.NewTransactionApi("zf", transactionRepository)
 
-	eventstore.InitForMock(eventRepository)
-
-	transactionApi := api.NewTransactionApi("zf")
-
-	for testName, test := range tests {
-		t.Logf("running test case %s", testName)
-
-		_, err := transactionApi.CreateTransaction(test.input.txData)
+	for _, test := range tests {
+		tx, err := transactionApi.CreateTransaction(test.input.txData)
 
 		assert.Equal(t, test.err, err)
+		assert.Equal(t, tx.ICodeID, test.input.txData.ICodeID)
+		assert.Equal(t, tx.Args, test.input.txData.Args)
+		assert.Equal(t, tx.Signature, test.input.txData.Signature)
+		assert.Equal(t, tx.Jsonrpc, test.input.txData.Jsonrpc)
+		assert.Equal(t, tx.Function, test.input.txData.Function)
 	}
 }
 
-//todo impl
-//func TestTransactionApi_DeleteTransaction(t *testing.T) {
-//
-//	tests := map[string]struct {
-//		input string
-//		err   error
-//	}{
-//		"success": {
-//			input: "transactionID",
-//			err:   nil,
-//		},
-//	}
-//
-//	eventRepository := MockEventRepository{}
-//	eventRepository.LoadFunc = func(aggregate midgard.Aggregate, aggregateID string) error {
-//
-//		aggregate.(*txpool.Transaction).TxId = "transactionID"
-//		return nil
-//	}
-//
-//	eventRepository.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-//
-//		assert.Equal(t, "transactionID", events[0].(*txpool.TxDeletedEvent).GetID())
-//		return nil
-//	}
-//
-//	eventstore.InitForMock(eventRepository)
-//
-//	transactionApi := api.NewTransactionApi("zf")
-//
-//	for testName, test := range tests {
-//		t.Logf("running test case %s", testName)
-//
-//		err := transactionApi.DeleteTransaction(test.input)
-//
-//		assert.Equal(t, test.err, err)
-//	}
-//}
+func TestTransactionApi_DeleteTransaction(t *testing.T) {
+
+	tests := map[string]struct {
+		input string
+		err   error
+	}{
+		"success": {
+			input: "transactionID",
+			err:   mem.ErrTransactionDoesNotExist,
+		},
+	}
+
+	transactionRepository := mem.NewTransactionRepository()
+	transactionApi := api.NewTransactionApi("zf", transactionRepository)
+
+	transactionRepository.Save(txpool.Transaction{
+		ID: "transactionID",
+	})
+
+	for _, test := range tests {
+		transactionApi.DeleteTransaction(test.input)
+
+		_, err := transactionRepository.FindById(test.input)
+		assert.Equal(t, err, test.err)
+	}
+}

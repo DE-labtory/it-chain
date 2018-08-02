@@ -38,11 +38,9 @@ func (t *TxCommandHandler) HandleTxCreateCommand(txCreateCommand command.CreateT
 	txData := txpool.TxData{
 		ICodeID:   txCreateCommand.ICodeID,
 		Jsonrpc:   txCreateCommand.Jsonrpc,
-		Method:    txCreateCommand.Method,
 		Function:  txCreateCommand.Function,
 		Signature: txCreateCommand.Signature,
 		Args:      txCreateCommand.Args,
-		ID:        txCreateCommand.ID,
 	}
 
 	tx, err := t.transactionApi.CreateTransaction(txData)

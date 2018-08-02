@@ -17,7 +17,6 @@
 package txpool
 
 import (
-	"log"
 	"sync"
 )
 
@@ -74,12 +73,6 @@ func (b BlockProposalService) ProposeBlock() error {
 
 		if err != nil {
 			return err
-		}
-
-		log.Printf("transactions are proposed [%v]", transactions)
-
-		for _, tx := range transactions {
-			DeleteTransaction(tx)
 		}
 
 		return nil
