@@ -163,15 +163,12 @@ func TestCreateProposedBlock(t *testing.T) {
 				txList: []*blockchain.DefaultTransaction{
 					{
 						ID:        "tx01",
-						Status:    0,
+						ICodeID:   "ICodeID",
 						PeerID:    "junksound",
 						Timestamp: timeStamp,
-						TxData: blockchain.TxData{
-							Jsonrpc: "",
-							Method:  "",
-							Params:  blockchain.Params{},
-							ID:      "txData01",
-						},
+						Jsonrpc:   "",
+						Function:  "",
+						Args:      make([]string, 0),
 						Signature: []byte("Signature"),
 					},
 				},
@@ -184,15 +181,12 @@ func TestCreateProposedBlock(t *testing.T) {
 				TxList: []*blockchain.DefaultTransaction{
 					{
 						ID:        "tx01",
-						Status:    0,
+						ICodeID:   "ICodeID",
 						PeerID:    "junksound",
 						Timestamp: timeStamp,
-						TxData: blockchain.TxData{
-							Jsonrpc: "",
-							Method:  "",
-							Params:  blockchain.Params{},
-							ID:      "txData01",
-						},
+						Jsonrpc:   "",
+						Function:  "",
+						Args:      make([]string, 0),
 						Signature: []byte("Signature"),
 					},
 				},
@@ -235,15 +229,12 @@ func TestCreateProposedBlock(t *testing.T) {
 				txList: []*blockchain.DefaultTransaction{
 					{
 						ID:        "tx01",
-						Status:    0,
+						ICodeID:   "ICodeID",
 						PeerID:    "junksound",
 						Timestamp: timeStamp,
-						TxData: blockchain.TxData{
-							Jsonrpc: "",
-							Method:  "",
-							Params:  blockchain.Params{},
-							ID:      "txData01",
-						},
+						Jsonrpc:   "",
+						Function:  "",
+						Args:      make([]string, 0),
 						Signature: []byte("Signature"),
 					},
 				},
@@ -307,15 +298,12 @@ func TestCreateRetrievedBlock(t *testing.T) {
 	txList := []*blockchain.DefaultTransaction{
 		{
 			ID:        "tx01",
-			Status:    0,
+			ICodeID:   "ICodeID",
 			PeerID:    "junksound",
 			Timestamp: timeStamp,
-			TxData: blockchain.TxData{
-				Jsonrpc: "",
-				Method:  "",
-				Params:  blockchain.Params{},
-				ID:      "txData01",
-			},
+			Jsonrpc:   "",
+			Function:  "",
+			Args:      make([]string, 0),
 			Signature: []byte("Signature"),
 		},
 	}
