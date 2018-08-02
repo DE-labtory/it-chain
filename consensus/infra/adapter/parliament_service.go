@@ -73,3 +73,34 @@ func (p *ParliamentService) IsNeedConsensus() bool {
 
 	return false
 }
+func (p *ParliamentService) CheckPrepareCondition(pool consensus.PrepareMsgPool) bool{
+	pl, err := p.pQuery.GetPeerList()
+	if err != nil{
+		return false
+	}
+	plNum := len(pl)
+
+	fNum := plNum / 3 + 1
+
+	if len(pool.Get()) > 2 * fNum {
+		return true
+	}
+
+	return false
+}
+func (p *ParliamentService) CheckCommitCondition(pool consensus.CommitMsgPool) bool{
+	pl, err := p.pQuery.GetPeerList()
+	if err != nil{
+		return false
+	}
+	plNum := len(pl)
+
+	fNum := plNum / 3 + 1
+
+	if len(pool.Get()) > 2 * fNum {
+		return true
+	}
+
+	return false
+}
+
