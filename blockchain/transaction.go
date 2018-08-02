@@ -21,14 +21,10 @@ import (
 	"encoding/json"
 	"time"
 
-	"errors"
-
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
 	ygg "github.com/it-chain/yggdrasill/common"
 )
-
-var ErrDeserializingTxList = errors.New("err when deserailizing TxList")
 
 // Status 변수는 Transaction의 상태를 Unconfirmed, Confirmed, Unknown 중 하나로 표현함.
 type Status int

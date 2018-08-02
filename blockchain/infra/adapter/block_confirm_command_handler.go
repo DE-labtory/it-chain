@@ -17,13 +17,9 @@
 package adapter
 
 import (
-	"errors"
-
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 )
-
-var ErrBlockNil = errors.New("Block nil error")
 
 type BlockApi interface {
 	AddBlockToPool(block blockchain.Block) error
