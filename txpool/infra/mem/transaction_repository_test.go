@@ -19,7 +19,7 @@ package mem_test
 import (
 	"testing"
 
-	"fmt"
+	"strconv"
 
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/engine/txpool/infra/mem"
@@ -64,7 +64,7 @@ func TestTransactionRepository_FindAll(t *testing.T) {
 
 	for i := 0; i < 3; i++ {
 		repo.Save(txpool.Transaction{
-			ID: fmt.Sprintf("%s", i),
+			ID: strconv.Itoa(i),
 		})
 	}
 
@@ -75,7 +75,7 @@ func TestTransactionRepository_FindAll(t *testing.T) {
 
 	i := 0
 	for _, tx := range transactionList {
-		assert.Equal(t, tx.ID, fmt.Sprintf("%s", i))
+		assert.Equal(t, tx.ID, strconv.Itoa(i))
 		i++
 	}
 }

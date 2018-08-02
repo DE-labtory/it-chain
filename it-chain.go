@@ -44,6 +44,7 @@ import (
 	txpoolApi "github.com/it-chain/engine/txpool/api"
 	txpoolAdapter "github.com/it-chain/engine/txpool/infra/adapter"
 	txpoolBatch "github.com/it-chain/engine/txpool/infra/batch"
+	"github.com/it-chain/engine/txpool/infra/mem"
 	"github.com/it-chain/tesseract"
 	"github.com/urfave/cli"
 )
@@ -135,7 +136,6 @@ func start() error {
 }
 
 //todo other way to inject each query Api to component
-var txQueryApi api_gateway.TransactionQueryApi
 var blockQueryApi api_gateway.BlockQueryApi
 var metaQueryApi api_gateway.ICodeQueryApi
 
@@ -153,14 +153,6 @@ func initGateway(errs chan error) error {
 
 	//set subscriber
 	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Event")
-
-	//set txpool service and repo
-	txpoolDB := "./.test/txpool"
-
-	transactionRepo := api_gateway.NewTransactionRepository(txpoolDB)
-
-	txQueryApi = api_gateway.NewTransactionQueryApi(transactionRepo)
-	txEventListener := api_gateway.NewTransactionEventListener(transactionRepo)
 
 	//set blockchain service and repo
 
@@ -186,7 +178,6 @@ func initGateway(errs chan error) error {
 	mux := http.NewServeMux()
 	httpLogger := kitlog.With(kitLogger, "component", "http")
 
-	err = subscriber.SubscribeTopic("transaction.*", &txEventListener)
 	err = subscriber.SubscribeTopic("block.*", &blockEventListener)
 	err = subscriber.SubscribeTopic("meta.*", &metaEventListener)
 
@@ -194,7 +185,6 @@ func initGateway(errs chan error) error {
 		panic(err)
 	}
 
-	mux.Handle("/transactions", api_gateway.TxPoolApiHandler(txQueryApi, httpLogger))
 	mux.Handle("/blocks", api_gateway.BlockchainApiHandler(blockQueryApi, httpLogger))
 	mux.Handle("/metas", api_gateway.ICodeApiHandler(metaQueryApi, httpLogger))
 	http.Handle("/", mux)
@@ -256,12 +246,14 @@ func initTxPool() error {
 	//todo get id from pubkey
 	tmpPeerID := "tmp peer 1"
 
+	transactionRepo := mem.NewTransactionRepository()
+
 	//service
 	blockService := txpoolAdapter.NewBlockService(client)
-	blockProposalService := txpool.NewBlockProposalService(txQueryApi, blockService, config.Engine.Mode)
+	blockProposalService := txpool.NewBlockProposalService(transactionRepo, blockService, config.Engine.Mode)
 
 	//infra
-	txApi := txpoolApi.NewTransactionApi(tmpPeerID)
+	txApi := txpoolApi.NewTransactionApi(tmpPeerID, transactionRepo)
 	txCommandHandler := txpoolAdapter.NewTxCommandHandler(txApi)
 
 	//10초마다 block propose

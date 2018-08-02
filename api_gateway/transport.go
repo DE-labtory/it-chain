@@ -26,26 +26,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func TxPoolApiHandler(bs TransactionQueryApi, logger kitlog.Logger) http.Handler {
-
-	opts := []kithttp.ServerOption{
-		kithttp.ServerErrorLogger(logger),
-	}
-
-	findAllUncommittedTransactionsHandler := kithttp.NewServer(
-		makeFindUncommittedTransactionsEndpoint(bs),
-		decodeFindAllUncommittedTransactionsRequest,
-		encodeResponse,
-		opts...,
-	)
-
-	r := mux.NewRouter()
-
-	r.Handle("/transactions", findAllUncommittedTransactionsHandler).Methods("GET")
-
-	return r
-}
-
 func BlockchainApiHandler(bqa BlockQueryApi, logger kitlog.Logger) http.Handler {
 
 	opts := []kithttp.ServerOption{
