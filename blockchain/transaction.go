@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
 	ygg "github.com/it-chain/yggdrasill/common"
 )
@@ -34,12 +33,12 @@ type Transaction = ygg.Transaction
 // DefaultTransaction 구조체는 Transaction 인터페이스의 기본 구현체이다.
 type DefaultTransaction struct {
 	ID        string
+	ICodeID   string
+	PeerID    string
+	Timestamp time.Time
+	Jsonrpc   string
 	Function  string
 	Args      []string
-	PeerID    string
-	Jsonrpc   string
-	ICodeID   string
-	Timestamp time.Time
 	Signature []byte
 }
 
@@ -49,13 +48,7 @@ func (t *DefaultTransaction) GetID() string {
 }
 
 func (t *DefaultTransaction) GetContent() ([]byte, error) {
-	content := struct {
-		ID        string
-		PeerID    string
-		Timestamp time.Time
-	}{t.ID,t.PeerID, t.Timestamp}
-
-	serialized, err := serialize(content)
+	serialized, err := serialize(t)
 	if err != nil {
 		return nil, err
 	}
@@ -77,6 +70,12 @@ func (t *DefaultTransaction) CalculateSeal() ([]byte, error) {
 	return calculateHash(serializedTx), nil
 }
 
+func calculateHash(b []byte) []byte {
+	hashValue := sha256.New()
+	hashValue.Write(b)
+	return hashValue.Sum(nil)
+}
+
 func (t *DefaultTransaction) SetSignature(signature []byte) {
 	t.Signature = signature
 }
@@ -84,6 +83,14 @@ func (t *DefaultTransaction) SetSignature(signature []byte) {
 // Serialize 함수는 Transaction을 []byte 형태로 변환한다.
 func (t *DefaultTransaction) Serialize() ([]byte, error) {
 	return serialize(t)
+}
+
+func serialize(data interface{}) ([]byte, error) {
+	serialized, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return serialized, nil
 }
 
 func (t *DefaultTransaction) Deserialize(serializedBytes []byte) error {
@@ -98,40 +105,6 @@ func (t *DefaultTransaction) Deserialize(serializedBytes []byte) error {
 	}
 
 	return nil
-}
-
-// NewDefaultTransaction 함수는 새로운 DefaultTransaction를 반환한다.
-func NewDefaultTransaction(peerID string, txID string, timestamp time.Time) *DefaultTransaction {
-	return &DefaultTransaction{
-		ID:        txID,
-		PeerID:    peerID,
-		Timestamp: timestamp,
-	}
-}
-
-func serialize(data interface{}) ([]byte, error) {
-	serialized, err := json.Marshal(data)
-	if err != nil {
-		return nil, err
-	}
-	return serialized, nil
-}
-
-func calculateHash(b []byte) []byte {
-	hashValue := sha256.New()
-	hashValue.Write(b)
-	return hashValue.Sum(nil)
-}
-
-func deserializeTxList(txList []byte) ([]*DefaultTransaction, error) {
-	DefaultTxList := []*DefaultTransaction{}
-
-	err := common.Deserialize(txList, &DefaultTxList)
-
-	if err != nil {
-		return nil, err
-	}
-	return DefaultTxList, nil
 }
 
 func ConvertToTransactionList(txList []event.Tx) []*DefaultTransaction {

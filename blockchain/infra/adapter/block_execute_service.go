@@ -96,13 +96,11 @@ func convertToExecuteBlockTx(tx *blockchain.DefaultTransaction) command.Tx {
 	return command.Tx{
 		ID:        tx.ID,
 		ICodeID:   tx.ICodeID,
-		Status:    int(tx.Status),
 		PeerID:    tx.PeerID,
 		TimeStamp: tx.Timestamp,
-		Jsonrpc:   tx.TxData.Jsonrpc,
-		Method:    string(tx.TxData.Method),
-		Args:      tx.TxData.Params.Args,
-		Function:  tx.TxData.Params.Function,
+		Jsonrpc:   tx.Jsonrpc,
+		Args:      tx.Args,
+		Function:  tx.Function,
 		Signature: tx.Signature,
 	}
 }
