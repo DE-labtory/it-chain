@@ -29,51 +29,17 @@ import (
 // Status 변수는 Transaction의 상태를 Unconfirmed, Confirmed, Unknown 중 하나로 표현함.
 type Status int
 
-// TxDataType 변수는 Transaction의 함수가 invoke인지 query인지 표현한다.
-type TxDataType string
-
-// FunctionType 은 ...
-// TODO: FunctionType 타입에 대한 상수값들이 없음
-type FunctionType string
-
-// Transaction의 Status를 정의하는 상수들
-// TODO: 필요한 것인지 논의가 필요함.
-const (
-	StatusTransactionInvalid Status = 0
-	StatusTransactionValid   Status = 1
-)
-
-// TxData의 Type을 정의하는 상수들
-const (
-	Invoke TxDataType = "invoke"
-	Query  TxDataType = "query"
-)
-
 type Transaction = ygg.Transaction
-
-// Params 구조체는 Jsonrpc에서 invoke하는 함수의 패러미터를 정의한다.
-type Params struct {
-	Type     int
-	Function string
-	Args     []string
-}
-
-// TxData 구조체는 Jsonrpc에서 invoke하는 함수를 정의한다.
-type TxData struct {
-	Jsonrpc string
-	Method  TxDataType
-	Params  Params
-	ID      string
-}
 
 // DefaultTransaction 구조체는 Transaction 인터페이스의 기본 구현체이다.
 type DefaultTransaction struct {
 	ID        string
-	Status    Status
+	Function  string
+	Args      []string
 	PeerID    string
+	Jsonrpc   string
 	ICodeID   string
 	Timestamp time.Time
-	TxData    TxData
 	Signature []byte
 }
 
@@ -85,11 +51,9 @@ func (t *DefaultTransaction) GetID() string {
 func (t *DefaultTransaction) GetContent() ([]byte, error) {
 	content := struct {
 		ID        string
-		Status    Status
 		PeerID    string
 		Timestamp time.Time
-		TxData    TxData
-	}{t.ID, t.Status, t.PeerID, t.Timestamp, t.TxData}
+	}{t.ID,t.PeerID, t.Timestamp}
 
 	serialized, err := serialize(content)
 	if err != nil {
@@ -137,32 +101,11 @@ func (t *DefaultTransaction) Deserialize(serializedBytes []byte) error {
 }
 
 // NewDefaultTransaction 함수는 새로운 DefaultTransaction를 반환한다.
-func NewDefaultTransaction(peerID string, txID string, timestamp time.Time, txData TxData) *DefaultTransaction {
+func NewDefaultTransaction(peerID string, txID string, timestamp time.Time) *DefaultTransaction {
 	return &DefaultTransaction{
 		ID:        txID,
 		PeerID:    peerID,
 		Timestamp: timestamp,
-		TxData:    txData,
-		Status:    StatusTransactionInvalid,
-	}
-}
-
-// NewTxData 함수는 새로운 TxData 객체를 반환한다.
-func NewTxData(jsonrpc string, method TxDataType, params Params, contractID string) *TxData {
-	return &TxData{
-		Jsonrpc: jsonrpc,
-		Method:  method,
-		Params:  params,
-		ID:      contractID,
-	}
-}
-
-// NewParams 함수는 새로운 Params 객체를 반환한다. (포인터가 아니라 객체 자체를 반환한다.)
-func NewParams(paramsType int, function string, args []string) Params {
-	return Params{
-		Type:     paramsType,
-		Function: function,
-		Args:     args,
 	}
 }
 
@@ -205,19 +148,9 @@ func ConvertToTransactionList(txList []event.Tx) []*DefaultTransaction {
 func ConvertToTransaction(tx event.Tx) *DefaultTransaction {
 	return &DefaultTransaction{
 		ID:        tx.ID,
-		Status:    Status(tx.Status),
 		PeerID:    tx.PeerID,
 		ICodeID:   tx.ICodeID,
 		Timestamp: tx.TimeStamp,
-		TxData: TxData{
-			Jsonrpc: tx.Jsonrpc,
-			Method:  TxDataType(tx.Method),
-			Params: Params{
-				Function: tx.Function,
-				Args:     tx.Args,
-			},
-			ID: tx.ID,
-		},
 		Signature: tx.Signature,
 	}
 }
@@ -237,12 +170,10 @@ func ConvBackFromTransaction(defaultTx *DefaultTransaction) event.Tx {
 	return event.Tx{
 		ID:        defaultTx.ID,
 		ICodeID:   defaultTx.ICodeID,
-		Status:    int(defaultTx.Status),
 		TimeStamp: defaultTx.Timestamp,
-		Jsonrpc:   defaultTx.TxData.Jsonrpc,
-		Method:    string(defaultTx.TxData.Method),
-		Function:  defaultTx.TxData.Params.Function,
-		Args:      defaultTx.TxData.Params.Args,
+		Jsonrpc:   defaultTx.Jsonrpc,
+		Function:  defaultTx.Function,
+		Args:      defaultTx.Args,
 		Signature: defaultTx.Signature,
 	}
 }
