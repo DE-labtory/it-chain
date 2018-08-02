@@ -100,21 +100,20 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 		txContentBytes, _ := tx.GetContent()
 		content := struct {
 			ID        string
-			Status    blockchain.Status
 			PeerID    string
 			Timestamp time.Time
-			TxData    *blockchain.TxData
+			Jsonrpc   string
+			Function  string
+			Args      []string
 		}{}
 		json.Unmarshal(txContentBytes, &content)
 
 		// then
 		assert.Equal(t, "1", tx.GetID())
 		assert.Equal(t, "2", content.PeerID)
-		assert.Equal(t, blockchain.Status(1), content.Status)
-		assert.Equal(t, "123", content.TxData.Jsonrpc)
-		assert.Equal(t, blockchain.Invoke, content.TxData.Method)
-		assert.Equal(t, "function1", content.TxData.Params.Function)
-		assert.Equal(t, []string{"arg1", "arg2"}, content.TxData.Params.Args)
+		assert.Equal(t, "123", content.Jsonrpc)
+		assert.Equal(t, "function1", content.Function)
+		assert.Equal(t, []string{"arg1", "arg2"}, content.Args)
 
 		return blockchain.DefaultBlock{
 			Seal:     []byte{0x1},
