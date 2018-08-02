@@ -33,19 +33,19 @@ type BlockService interface {
 }
 
 type BlockProposalService struct {
-	engineMode         string
-	txpoolQueryService TxpoolQueryService
-	blockService       BlockService
+	engineMode       string
+	txpoolRepository TransactionRepository
+	blockService     BlockService
 	sync.RWMutex
 }
 
-func NewBlockProposalService(queryService TxpoolQueryService, blockService BlockService, engineMode string) *BlockProposalService {
+func NewBlockProposalService(txpoolRepository TransactionRepository, blockService BlockService, engineMode string) *BlockProposalService {
 
 	return &BlockProposalService{
-		txpoolQueryService: queryService,
-		blockService:       blockService,
-		engineMode:         engineMode,
-		RWMutex:            sync.RWMutex{},
+		blockService:     blockService,
+		engineMode:       engineMode,
+		RWMutex:          sync.RWMutex{},
+		txpoolRepository: txpoolRepository,
 	}
 }
 
@@ -57,7 +57,7 @@ func (b BlockProposalService) ProposeBlock() error {
 	defer b.Unlock()
 
 	// todo transaction size, number of tx
-	transactions, err := b.txpoolQueryService.FindUncommittedTransactions()
+	transactions, err := b.txpoolRepository.FindAll()
 
 	if err != nil {
 		return err

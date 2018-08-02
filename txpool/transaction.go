@@ -62,3 +62,10 @@ func CreateTransaction(publisherId string, txData TxData) (Transaction, error) {
 
 	return transaction, nil
 }
+
+type TransactionRepository interface {
+	FindAll() ([]Transaction, error)
+	Save(transaction Transaction) error
+	Remove(id TransactionId)
+	FindById(id TransactionId) (Transaction, error)
+}

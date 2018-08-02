@@ -22,19 +22,12 @@ import (
 	"github.com/it-chain/engine/txpool"
 )
 
-type TransactionRepository interface {
-	FindAll() ([]txpool.Transaction, error)
-	Save(transaction txpool.Transaction) error
-	Remove(id txpool.TransactionId)
-	FindById(id txpool.TransactionId) (txpool.Transaction, error)
-}
-
 type TransactionApi struct {
 	publisherId           string
-	transactionRepository TransactionRepository
+	transactionRepository txpool.TransactionRepository
 }
 
-func NewTransactionApi(publisherId string, transactionRepository TransactionRepository) TransactionApi {
+func NewTransactionApi(publisherId string, transactionRepository txpool.TransactionRepository) TransactionApi {
 	return TransactionApi{
 		publisherId:           publisherId,
 		transactionRepository: transactionRepository,
