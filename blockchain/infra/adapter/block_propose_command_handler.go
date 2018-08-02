@@ -17,15 +17,10 @@
 package adapter
 
 import (
-	"errors"
-
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 )
-
-var ErrCommandTransactions = errors.New("command's transactions nil or have length of zero")
-var ErrTxHasMissingProperties = errors.New("Tx has missing properties")
 
 type BlockCreateApi interface {
 	CreateBlock(txList []blockchain.Transaction) (blockchain.DefaultBlock, error)

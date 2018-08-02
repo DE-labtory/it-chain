@@ -24,11 +24,8 @@ import (
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/midgard"
-	"github.com/pkg/errors"
 	"github.com/rs/xid"
 )
-
-var ErrBlockTypeCasting = errors.New("Error in type casting block")
 
 type Publisher func(topic string, data interface{}) (err error) //해당 publish함수는 midgard 에서 의존성 주입을 받기 위해 interface로 작성한다.
 //모든 의존성 주입은 컴포넌트.go 에서 이루어짐

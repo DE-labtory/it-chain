@@ -19,12 +19,7 @@ package adapter
 import (
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/command"
-	"github.com/pkg/errors"
 )
-
-var ErrBlockIdNil = errors.New("Error command model ID is nil")
-var ErrTxResultsLengthOfZero = errors.New("Error length of tx results is zero")
-var ErrTxResultsFail = errors.New("Error not all tx results success")
 
 type BlockResultCommandHandler struct {
 	blockQueryService blockchain.BlockQueryService

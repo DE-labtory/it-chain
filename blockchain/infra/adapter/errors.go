@@ -18,11 +18,10 @@ package adapter
 
 import "errors"
 
-var ErrBlockInfoDeliver = errors.New("block info deliver failed")
-var ErrGetBlock = errors.New("error when Getting block")
-var ErrResponseBlock = errors.New("error when response block")
-var ErrGetLastBlock = errors.New("error when get last block")
-var ErrSyncCheckResponse = errors.New("error when sync check response")
-var ErrEmptyNodeId = errors.New("empty nodeid proposed")
-var ErrEmptyBlockSeal = errors.New("empty block seal")
-var ErrBlockMissingProperties = errors.New("error when block miss some properties")
+var ErrBlockNil = errors.New("Block nil error")
+var ErrBlockTypeCasting = errors.New("Error in type casting block")
+var ErrCommandTransactions = errors.New("command's transactions nil or have length of zero")
+var ErrTxHasMissingProperties = errors.New("Tx has missing properties")
+var ErrBlockIdNil = errors.New("Error command model ID is nil")
+var ErrTxResultsLengthOfZero = errors.New("Error length of tx results is zero")
+var ErrTxResultsFail = errors.New("Error not all tx results success")
