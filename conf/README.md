@@ -28,8 +28,6 @@ config 모델을 생성/변경 후 **Config.yaml** 파일을 생성/변경 하�
 
 config 모델을 생성/변경 후 개발 환경에 맞는 스크립트 파일을 실행해주면 된다
 
-example)
-
 Linux/Unix(Mac OS)
 
      user:~/go/src/github.com/it-chain/engine/conf$ sh generate_conf.sh
@@ -46,8 +44,6 @@ Windows
 
 GetConfiguration 함수를 호출하여 config 데이터를 불러올 수 있다.
 
-sample)
-
     import "github.com/it-chain/engine/conf"
 
     func foo(){
@@ -60,7 +56,7 @@ sample)
 ## How to add/change config data
 - 변경 방법
 
-./conf/model 에 있는 값들을 변경하고 generator를 빌드/실행하면 된다.
+  - ./conf/model 에 있는 값들을 변경하고 generator를 빌드/실행하면 된다.
 
 - 추가 방법
   - ./conf/model 에 존재하는 모델에 추가할경우
