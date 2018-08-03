@@ -14,3 +14,7 @@
 
 * `master` : 릴리즈 수준의 코드만 merge.
 * `develop` : 개발중인 테스트 완료된 코드만 merge.
+
+### CLA
+
+To get started, <a href="https://www.clahub.com/agreements/it-chain/engine">sign the Contributor License Agreement</a>.
