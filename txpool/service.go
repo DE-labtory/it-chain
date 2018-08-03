@@ -16,10 +16,6 @@
 
 package txpool
 
-import (
-	"sync"
-)
-
 type TxpoolQueryService interface {
 	FindUncommittedTransactions() ([]Transaction, error)
 }
@@ -28,57 +24,8 @@ type TransferService interface {
 	SendTransactionsToLeader(transactions []Transaction, leader Leader) error
 }
 
-type BlockService interface {
-	ProposeBlock(transactions []Transaction) error
-}
-
-type BlockProposalService struct {
-	engineMode       string
-	txpoolRepository TransactionRepository
-	blockService     BlockService
-	sync.RWMutex
-}
-
-func NewBlockProposalService(txpoolRepository TransactionRepository, blockService BlockService, engineMode string) *BlockProposalService {
-
-	return &BlockProposalService{
-		blockService:     blockService,
-		engineMode:       engineMode,
-		RWMutex:          sync.RWMutex{},
-		txpoolRepository: txpoolRepository,
-	}
-}
-
-// todo do not delete transaction immediately
-// todo transaction will be deleted when block are committed
-func (b BlockProposalService) ProposeBlock() error {
-
-	b.Lock()
-	defer b.Unlock()
-
-	// todo transaction size, number of tx
-	transactions, err := b.txpoolRepository.FindAll()
-
-	if err != nil {
-		return err
-	}
-
-	if len(transactions) == 0 {
-		return nil
-	}
-
-	if b.engineMode == "solo" {
-		//propose transaction when solo mode
-		err = b.blockService.ProposeBlock(transactions)
-
-		if err != nil {
-			return err
-		}
-
-		return nil
-	}
-
-	return nil
+type BlockProposalService interface {
+	ProposeBlock() error
 }
 
 func filter(vs []Transaction, f func(Transaction) bool) []Transaction {

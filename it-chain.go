@@ -40,7 +40,6 @@ import (
 	icodeAdapter "github.com/it-chain/engine/icode/infra/adapter"
 	icodeInfra "github.com/it-chain/engine/icode/infra/git"
 	icodeService "github.com/it-chain/engine/icode/infra/service"
-	"github.com/it-chain/engine/txpool"
 	txpoolApi "github.com/it-chain/engine/txpool/api"
 	txpoolAdapter "github.com/it-chain/engine/txpool/infra/adapter"
 	txpoolBatch "github.com/it-chain/engine/txpool/infra/batch"
@@ -247,8 +246,7 @@ func initTxPool() error {
 	transactionRepo := mem.NewTransactionRepository()
 
 	//service
-	blockService := txpoolAdapter.NewBlockService(client)
-	blockProposalService := txpool.NewBlockProposalService(transactionRepo, blockService, config.Engine.Mode)
+	blockProposalService := txpoolAdapter.NewBlockProposalService(client, transactionRepo, config.Engine.Mode)
 
 	//infra
 	txApi := txpoolApi.NewTransactionApi(tmpPeerID, transactionRepo)
