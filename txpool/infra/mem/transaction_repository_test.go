@@ -62,10 +62,16 @@ func TestTransactionRepository_FindAll(t *testing.T) {
 	//given
 	repo := mem.NewTransactionRepository()
 
+	testTransactions := make([]txpool.Transaction, 0)
+
 	for i := 0; i < 3; i++ {
-		repo.Save(txpool.Transaction{
+		testTransactions = append(testTransactions, txpool.Transaction{
 			ID: strconv.Itoa(i),
 		})
+	}
+
+	for _, tx := range testTransactions {
+		repo.Save(tx)
 	}
 
 	//then
@@ -73,10 +79,8 @@ func TestTransactionRepository_FindAll(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	i := 0
-	for _, tx := range transactionList {
-		assert.Equal(t, tx.ID, strconv.Itoa(i))
-		i++
+	for _, tx := range testTransactions {
+		assert.Contains(t, transactionList, tx)
 	}
 }
 
