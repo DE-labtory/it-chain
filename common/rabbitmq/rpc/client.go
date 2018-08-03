@@ -114,7 +114,7 @@ func (c Client) Call(queue string, params interface{}, callback interface{}) err
 			err := handleResponse(d.Body, callback)
 
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 				return err
 			}
 
