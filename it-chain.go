@@ -277,17 +277,13 @@ func initBlockchain() error {
 	log.Println("blockchain is running...")
 
 	config := conf.GetConfiguration()
-	client := rpc.NewClient(config.Engine.Amqp)
 	server := rpc.NewServer(config.Engine.Amqp)
 
 	//todo get id from pubkey
 	tempPeerID := "tmp peer 1"
 
-	//servie
-	blockExecuteService := blockchainAdapter.NewBlockExecuteService(client)
-
 	//infra
-	blockApi, err := blockchainApi.NewBlockApi(tempPeerID, blockQueryApi, blockExecuteService)
+	blockApi, err := blockchainApi.NewBlockApi(tempPeerID, blockQueryApi)
 
 	if err != nil {
 		panic(err)

@@ -42,9 +42,8 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 
 	publisherId := "zf"
 	blockQueryService := mock.BlockQueryService{}
-	blockExecuteService := mock.BlockExecuteService{}
 
-	blockApi, _ := api.NewBlockApi(publisherId, blockQueryService, blockExecuteService)
+	blockApi, _ := api.NewBlockApi(publisherId, blockQueryService)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -69,10 +68,9 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 	}
 	publisherId := "zf"
 	blockQueryService := mock.BlockQueryService{}
-	blockExecuteService := mock.BlockExecuteService{}
 
 	// When
-	blockApi, _ := api.NewBlockApi(publisherId, blockQueryService, blockExecuteService)
+	blockApi, _ := api.NewBlockApi(publisherId, blockQueryService)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -89,10 +87,9 @@ func TestBlockApi_SyncIsProgressing(t *testing.T) {
 	// when
 	publisherId := "zf"
 	blockQueryService := mock.BlockQueryService{}
-	blockExecuteService := mock.BlockExecuteService{}
 
 	// when
-	blockApi, _ := api.NewBlockApi(publisherId, blockQueryService, blockExecuteService)
+	blockApi, _ := api.NewBlockApi(publisherId, blockQueryService)
 
 	// then
 	state := blockApi.SyncIsProgressing()
