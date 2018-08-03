@@ -19,9 +19,8 @@ package git
 import (
 	"errors"
 	"fmt"
-	"strings"
-
 	"os"
+	"strings"
 
 	"github.com/it-chain/engine/icode"
 	"gopkg.in/src-d/go-git.v4"

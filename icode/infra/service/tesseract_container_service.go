@@ -63,20 +63,19 @@ func (cs TesseractContainerService) StartContainer(meta icode.Meta) error {
 	return nil
 }
 
-func (cs TesseractContainerService) ExecuteTransaction(tx icode.Transaction) (*icode.Result, error) {
+func (cs TesseractContainerService) ExecuteRequest(request icode.Request) (*icode.Result, error) {
 
-	containerId, found := cs.containerIdMap[tx.ICodeID]
+	containerId, found := cs.containerIdMap[request.ICodeID]
 
 	if !found {
-		return nil, errors.New(fmt.Sprintf("no container for iCode : %s", tx.ICodeID))
+		return nil, errors.New(fmt.Sprintf("no container for iCode : %s", request.ICodeID))
 	}
 
 	tesseractTxInfo := cell.TxInfo{
-		Method: tx.Method,
-		ID:     tx.ICodeID,
+		ID: request.ICodeID,
 		Params: cell.Params{
-			Function: tx.Function,
-			Args:     tx.Args,
+			Function: request.Function,
+			Args:     request.Args,
 		},
 	}
 
@@ -106,9 +105,9 @@ func (cs TesseractContainerService) ExecuteTransaction(tx icode.Transaction) (*i
 
 	result := &icode.Result{
 		Data:    data,
-		TxId:    tx.TxId,
 		Success: isSuccess,
 	}
+
 	return result, nil
 }
 

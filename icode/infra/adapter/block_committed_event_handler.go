@@ -19,8 +19,6 @@ package adapter
 import (
 	"sync"
 
-	"fmt"
-
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/icode"
@@ -40,25 +38,25 @@ func NewBlockCommittedEventHandler(icodeApi api.ICodeApi) *BlockCommittedEventHa
 }
 
 func (b *BlockCommittedEventHandler) HandleBlockCommittedEventHandler(blockCreatedEvent event.BlockCreated) {
+	logger.Info(nil, "updating state...")
 
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
 
-	for _, tx := range blockCreatedEvent.TxList {
-		switch tx.Method {
-		case icode.Query:
-			logger.Warn(&logger.Fields{"txID": tx.ID}, "block include unwanted query transaction")
-		case icode.Invoke:
-			results = append(results, b.icodeApi.ExecuteTransaction(icode.Transaction{
-				TxId:     tx.ID,
-				ICodeID:  tx.ICodeID,
-				Function: tx.Function,
-				Method:   tx.Method,
-				Jsonrpc:  tx.Jsonrpc,
-				Args:     tx.Args,
-			}))
-		default:
-			fmt.Println(fmt.Sprintf("unknown tx method [%s]", tx.Method))
-		}
+	b.icodeApi.ExecuteTransactionList(toInvokeList(blockCreatedEvent.TxList))
+}
+
+func toInvokeList(transactionList []event.Tx) []icode.Request {
+
+	requestList := make([]icode.Request, 0)
+
+	for _, transaction := range transactionList {
+		requestList = append(requestList, icode.Request{
+			Function: transaction.Function,
+			Args:     transaction.Args,
+			ICodeID:  transaction.ICodeID,
+		})
 	}
+
+	return requestList
 }

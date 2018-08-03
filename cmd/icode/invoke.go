@@ -65,7 +65,6 @@ func invoke(id string, functionName string, args []string) {
 		},
 		Function: functionName,
 		Args:     args,
-		Method:   icode.Invoke,
 	}
 
 	logger.Info(nil, "invoke icode ...")

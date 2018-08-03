@@ -62,7 +62,6 @@ func query(id string, functionName string, args []string) {
 		},
 		Function: functionName,
 		Args:     args,
-		Method:   icode.Query,
 	}
 
 	logger.Info(nil, "query icode ...")
@@ -75,10 +74,13 @@ func query(id string, functionName string, args []string) {
 
 		logger.Infof(nil, "%15s : [%s]", "icodeId", id)
 		logger.Infof(nil, "%15s : [%s]", "function Name", functionName)
+
 		for i, arg := range args {
 			logger.Infof(nil, "%15s : [%s]", "arg"+string(i), arg)
 		}
+
 		logger.Infof(nil, "%15s : %t", "success", result.Success)
+
 		for key, val := range result.Data {
 			logger.Infof(nil, "%s : %s", "[result]"+key, val)
 		}

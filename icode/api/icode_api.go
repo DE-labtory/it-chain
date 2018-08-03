@@ -66,27 +66,27 @@ func (i ICodeApi) UnDeploy(id icode.ID) error {
 	return nil
 }
 
-func (i ICodeApi) ExecuteTransactionList(transactionList []icode.Transaction) []icode.Result {
+func (i ICodeApi) ExecuteTransactionList(RequestList []icode.Request) []icode.Result {
 
 	resultList := make([]icode.Result, 0)
 
-	for _, transaction := range transactionList {
-		result := i.ExecuteTransaction(transaction)
+	for _, transaction := range RequestList {
+		result := i.ExecuteRequest(transaction)
 		resultList = append(resultList, result)
 	}
 
 	return resultList
 }
 
-func (i ICodeApi) ExecuteTransaction(tx icode.Transaction) icode.Result {
+func (i ICodeApi) ExecuteRequest(request icode.Request) icode.Result {
 
-	result, err := i.ContainerService.ExecuteTransaction(tx)
+	result, err := i.ContainerService.ExecuteRequest(request)
 
 	if err != nil {
 		result = &icode.Result{
-			TxId:    tx.TxId,
 			Data:    nil,
 			Success: false,
+			Err:     err.Error(),
 		}
 	}
 
