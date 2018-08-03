@@ -23,6 +23,7 @@ import (
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/engine/txpool/infra/adapter"
+	"github.com/it-chain/engine/txpool/infra/mem"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,14 +36,13 @@ func TestBlockService_ProposeBlock(t *testing.T) {
 		return struct{}{}, rpc.Error{}
 	})
 
-	blockService := adapter.NewBlockService(client)
+	txpoolRepository := mem.NewTransactionRepository()
+	txpoolRepository.Save(txpool.Transaction{})
+	txpoolRepository.Save(txpool.Transaction{})
 
-	txList := []txpool.Transaction{
-		txpool.Transaction{},
-		txpool.Transaction{},
-	}
+	blockService := adapter.NewBlockProposalService(client, txpoolRepository, "solo")
 
-	err := blockService.ProposeBlock(txList)
+	err := blockService.ProposeBlock()
 
 	assert.NoError(t, err)
 }

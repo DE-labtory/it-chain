@@ -19,6 +19,8 @@ package adapter
 import (
 	"errors"
 
+	"sync"
+
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
@@ -27,17 +29,55 @@ import (
 	"github.com/rs/xid"
 )
 
-type BlockService struct {
-	client rpc.Client // midgard.client
+type BlockProposalService struct {
+	client           rpc.Client // midgard.client
+	engineMode       string
+	txpoolRepository txpool.TransactionRepository
+	sync.RWMutex
 }
 
-func NewBlockService(client rpc.Client) *BlockService {
-	return &BlockService{
-		client: client,
+func NewBlockProposalService(client rpc.Client, txpoolRepository txpool.TransactionRepository, engineMode string) *BlockProposalService {
+	return &BlockProposalService{
+		client:           client,
+		engineMode:       engineMode,
+		RWMutex:          sync.RWMutex{},
+		txpoolRepository: txpoolRepository,
 	}
 }
 
-func (b BlockService) ProposeBlock(transactions []txpool.Transaction) error {
+// todo do not delete transaction immediately
+// todo transaction will be deleted when block are committed
+func (b BlockProposalService) ProposeBlock() error {
+
+	b.Lock()
+	defer b.Unlock()
+
+	// todo transaction size, number of tx
+	transactions, err := b.txpoolRepository.FindAll()
+
+	if err != nil {
+		return err
+	}
+
+	if len(transactions) == 0 {
+		return nil
+	}
+
+	if b.engineMode == "solo" {
+		//propose transaction when solo mode
+		err = b.sendBlockProposal(transactions)
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	return nil
+}
+
+func (b BlockProposalService) sendBlockProposal(transactions []txpool.Transaction) error {
 
 	if len(transactions) == 0 {
 		return errors.New("Empty transaction list proposed")
