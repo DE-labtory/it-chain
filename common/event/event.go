@@ -130,11 +130,9 @@ type BlockCreated struct {
 type Tx struct {
 	ID        string
 	ICodeID   string
-	Status    int
 	PeerID    string
 	TimeStamp time.Time
 	Jsonrpc   string
-	Method    string
 	Function  string
 	Args      []string
 	Signature []byte
@@ -155,15 +153,13 @@ type SyncDone struct {
 // transaction created event
 type TxCreated struct {
 	midgard.EventModel
-	Status    int
+	ICodeID   string
+	PeerID    string
 	TimeStamp time.Time
 	Jsonrpc   string
-	Method    string
-	ICodeID   string
 	Function  string
 	Args      []string
 	Signature []byte
-	PeerID    string
 }
 
 // when block committed check transaction and delete

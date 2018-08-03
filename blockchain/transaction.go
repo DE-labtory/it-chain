@@ -121,9 +121,12 @@ func ConvertToTransactionList(txList []event.Tx) []*DefaultTransaction {
 func ConvertToTransaction(tx event.Tx) *DefaultTransaction {
 	return &DefaultTransaction{
 		ID:        tx.ID,
-		PeerID:    tx.PeerID,
 		ICodeID:   tx.ICodeID,
+		PeerID:    tx.PeerID,
 		Timestamp: tx.TimeStamp,
+		Jsonrpc:   tx.Jsonrpc,
+		Function:  tx.Function,
+		Args:      tx.Args,
 		Signature: tx.Signature,
 	}
 }
@@ -143,6 +146,7 @@ func ConvBackFromTransaction(defaultTx *DefaultTransaction) event.Tx {
 	return event.Tx{
 		ID:        defaultTx.ID,
 		ICodeID:   defaultTx.ICodeID,
+		PeerID:    defaultTx.PeerID,
 		TimeStamp: defaultTx.Timestamp,
 		Jsonrpc:   defaultTx.Jsonrpc,
 		Function:  defaultTx.Function,

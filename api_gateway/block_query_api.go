@@ -452,19 +452,12 @@ func deserializeTxListType(txlist []event.Tx) ([]*blockchain.DefaultTransaction,
 func deserializeTxType(tx event.Tx) (*blockchain.DefaultTransaction, error) {
 	return &blockchain.DefaultTransaction{
 		ID:        tx.ID,
-		Status:    blockchain.Status(tx.Status),
-		PeerID:    tx.PeerID,
 		ICodeID:   tx.ICodeID,
+		PeerID:    tx.PeerID,
 		Timestamp: tx.TimeStamp,
-		TxData: blockchain.TxData{
-			Jsonrpc: tx.Jsonrpc,
-			Method:  blockchain.TxDataType(tx.Method),
-			Params: blockchain.Params{
-				Function: tx.Function,
-				Args:     tx.Args,
-			},
-			ID: tx.ID,
-		},
+		Jsonrpc:   tx.Jsonrpc,
+		Function:  tx.Function,
+		Args:      tx.Args,
 		Signature: tx.Signature,
 	}, nil
 }
