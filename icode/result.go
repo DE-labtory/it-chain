@@ -17,9 +17,9 @@
 package icode
 
 type Result struct {
-	TxId    TransactionId
 	Data    map[key]value
 	Success bool
+	Err     string
 }
 
 type key = string

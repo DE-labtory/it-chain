@@ -35,14 +35,13 @@ func NewIcodeExecuteCommandHandler(icodeApi api.ICodeApi) IcodeExecuteCommandHan
 
 func (i *IcodeExecuteCommandHandler) HandleTransactionExecuteCommandHandler(command command.ExecuteICode) (icode.Result, rpc.Error) {
 
-	transaction := icode.Transaction{
+	request := icode.Request{
 		Args:     command.Args,
 		Function: command.Function,
 		ICodeID:  command.ID,
-		Method:   command.Method,
 	}
 
-	result := i.iCodeApi.ExecuteTransaction(transaction)
+	result := i.iCodeApi.ExecuteRequest(request)
 
 	return result, rpc.Error{}
 }
