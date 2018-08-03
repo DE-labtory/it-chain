@@ -33,68 +33,41 @@ func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
 func GetTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 	return []*blockchain.DefaultTransaction{
 		{
-			PeerID:    "p01",
 			ID:        "tx01",
-			Status:    0,
+			ICodeID:   "ICode01",
+			PeerID:    "p01",
 			Timestamp: testingTime,
-			TxData: blockchain.TxData{
-				Jsonrpc: "jsonRPC01",
-				Method:  "invoke",
-				Params: blockchain.Params{
-					Type:     0,
-					Function: "function01",
-					Args:     []string{"arg1", "arg2"},
-				},
-				ID: "txdata01",
-			},
+			Jsonrpc:   "jsonRPC01",
+			Function:  "function01",
+			Args:      []string{"arg1", "arg2"},
 		},
 		{
-			PeerID:    "p02",
+
 			ID:        "tx02",
-			Status:    0,
+			ICodeID:   "ICode02",
+			PeerID:    "p02",
 			Timestamp: testingTime,
-			TxData: blockchain.TxData{
-				Jsonrpc: "jsonRPC02",
-				Method:  "invoke",
-				Params: blockchain.Params{
-					Type:     0,
-					Function: "function02",
-					Args:     []string{"arg1", "arg2"},
-				},
-				ID: "txdata02",
-			},
+			Jsonrpc:   "jsonRPC02",
+			Function:  "function02",
+			Args:      []string{"arg1", "arg2"},
 		},
 		{
-			PeerID:    "p03",
 			ID:        "tx03",
-			Status:    0,
+			ICodeID:   "ICode03",
+			PeerID:    "p03",
 			Timestamp: testingTime,
-			TxData: blockchain.TxData{
-				Jsonrpc: "jsonRPC03",
-				Method:  "invoke",
-				Params: blockchain.Params{
-					Type:     0,
-					Function: "function03",
-					Args:     []string{"arg1", "arg2"},
-				},
-				ID: "txdata03",
-			},
+			Jsonrpc:   "jsonRPC03",
+			Function:  "function03",
+			Args:      []string{"arg1", "arg2"},
 		},
 		{
-			PeerID:    "p04",
 			ID:        "tx04",
-			Status:    0,
+			ICodeID:   "ICode04",
+			PeerID:    "p04",
 			Timestamp: testingTime,
-			TxData: blockchain.TxData{
-				Jsonrpc: "jsonRPC04",
-				Method:  "invoke",
-				Params: blockchain.Params{
-					Type:     0,
-					Function: "function04",
-					Args:     []string{"arg1", "arg2"},
-				},
-				ID: "txdata04",
-			},
+			Jsonrpc:   "jsonRPC04",
+			Function:  "function04",
+			Args:      []string{"arg1", "arg2"},
 		},
 	}
 }
@@ -114,11 +87,9 @@ func GetEventTxList() []event.Tx {
 	tx := event.Tx{
 		ID:        "1",
 		ICodeID:   "icode1",
-		Status:    1,
 		PeerID:    "peer1",
 		TimeStamp: time.Now(),
 		Jsonrpc:   "jsonrpc1",
-		Method:    "mtd1",
 		Function:  "fn1",
 		Args:      []string{"arg1", "arg2"},
 		Signature: []byte{0x4},
