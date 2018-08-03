@@ -65,10 +65,12 @@ func (b BlockProposalService) ProposeBlock() error {
 
 	if b.engineMode == "solo" {
 		//propose transaction when solo mode
-		err = b.sendBlockProposal(transactions)
-
-		if err != nil {
+		if err := b.sendBlockProposal(transactions); err != nil {
 			return err
+		}
+
+		for _, tx := range transactions {
+			b.txpoolRepository.Remove(tx.ID)
 		}
 
 		return nil

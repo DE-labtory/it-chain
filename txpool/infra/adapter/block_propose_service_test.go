@@ -31,18 +31,24 @@ func TestBlockService_ProposeBlock(t *testing.T) {
 	client := rpc.NewClient("")
 	server := rpc.NewServer("")
 
-	server.Register("block.propose", func(command command.ProposeBlock) (struct{}, rpc.Error) {
+	err := server.Register("block.propose", func(command command.ProposeBlock) (struct{}, rpc.Error) {
 
 		return struct{}{}, rpc.Error{}
 	})
 
+	assert.NoError(t, err)
+
 	txpoolRepository := mem.NewTransactionRepository()
-	txpoolRepository.Save(txpool.Transaction{})
-	txpoolRepository.Save(txpool.Transaction{})
+	txpoolRepository.Save(txpool.Transaction{ID: "tx1"})
+	txpoolRepository.Save(txpool.Transaction{ID: "tx2"})
+
+	transactions, _ := txpoolRepository.FindAll()
+	assert.Equal(t, 2, len(transactions))
 
 	blockService := adapter.NewBlockProposalService(client, txpoolRepository, "solo")
-
-	err := blockService.ProposeBlock()
-
+	err = blockService.ProposeBlock()
 	assert.NoError(t, err)
+
+	transactions, _ = txpoolRepository.FindAll()
+	assert.Equal(t, 0, len(transactions))
 }
