@@ -3,6 +3,10 @@
 
 <p align="center"><img src="./doc/images/logo.png" width="250px" height="250px"></p>
 
+## An Ongoing Event
+- 2018 Contributon: https://www.kosshackathon.kr/
+  - it-chain: https://www.kosshackathon.kr/project
+
 ## Overview
 
 Lightweight Customizable Chain For All
