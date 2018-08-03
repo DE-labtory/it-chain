@@ -36,11 +36,3 @@ func (s BlockQueryService) GetLastCommitedBlock() (blockchain.DefaultBlock, erro
 func (s BlockQueryService) GetCommitedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
 	return s.GetCommitedBlockByHeightFunc(height)
 }
-
-type BlockExecuteService struct {
-	ExecuteBlockFunc func(block blockchain.Block) error
-}
-
-func (s BlockExecuteService) ExecuteBlock(block blockchain.Block) error {
-	return s.ExecuteBlockFunc(block)
-}

@@ -24,20 +24,17 @@ import (
 
 var ErrGetLastCommitedBlock = errors.New("Error in getting last commited block")
 var ErrCreateProposedBlock = errors.New("Error in creating proposed block")
-var ErrExecuteBlock = errors.New("Error in executing block")
 var ErrFailBlockTypeCasting = errors.New("Error failed type casting block")
 
 type BlockApi struct {
-	publisherId         string
-	blockQueryService   blockchain.BlockQueryService
-	blockExecuteService blockchain.BlockExecuteService
+	publisherId       string
+	blockQueryService blockchain.BlockQueryService
 }
 
-func NewBlockApi(publisherId string, blockQueryService blockchain.BlockQueryService, blockExecuteService blockchain.BlockExecuteService) (BlockApi, error) {
+func NewBlockApi(publisherId string, blockQueryService blockchain.BlockQueryService) (BlockApi, error) {
 	return BlockApi{
-		publisherId:         publisherId,
-		blockQueryService:   blockQueryService,
-		blockExecuteService: blockExecuteService,
+		publisherId:       publisherId,
+		blockQueryService: blockQueryService,
 	}, nil
 }
 
@@ -75,12 +72,6 @@ func (bApi BlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.De
 
 	if err != nil {
 		return blockchain.DefaultBlock{}, ErrCreateProposedBlock
-	}
-
-	err = bApi.blockExecuteService.ExecuteBlock(block)
-
-	if err != nil {
-		return blockchain.DefaultBlock{}, ErrExecuteBlock
 	}
 
 	defaultBlock, ok := block.(*blockchain.DefaultBlock)

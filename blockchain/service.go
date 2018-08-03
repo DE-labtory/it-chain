@@ -60,7 +60,3 @@ func createBlockCommittedEvent(block Block) (*event.BlockCommitted, error) {
 		State: Committed,
 	}, nil
 }
-
-type BlockExecuteService interface {
-	ExecuteBlock(block Block) error
-}
