@@ -16,29 +16,16 @@
 
 package icode
 
-import "time"
+type Request struct {
+	ICodeID  string
+	Function string
+	Args     []string
+}
 
-const (
-	Ready = iota
-	ExcuteSuccess
-	ExcuteFail
-)
+type Invoke struct {
+	Request
+}
 
-const (
-	Invoke TxDataType = "invoke"
-	Query  TxDataType = "query"
-)
-
-type TransactionId = string
-type TxStatus = int
-type TxDataType = string
-
-type Transaction struct {
-	TxId      TransactionId
-	TimeStamp time.Time
-	Jsonrpc   string
-	Method    TxDataType
-	ICodeID   string
-	Function  string
-	Args      []string
+type Query struct {
+	Request
 }
