@@ -105,13 +105,21 @@ type MetaStatusChanged struct {
 // event when block is committed to event store
 type BlockCommitted struct {
 	midgard.EventModel
-	State string
+	Seal		[]byte
+	PrevSeal  []byte
+	Height    uint64
+	TxList    []Tx
+	TxSeal    [][]byte
+	Timestamp time.Time
+	Creator   []byte
+	State     string
 }
 
 // event when block is staged to event store
 type BlockStaged struct {
 	midgard.EventModel
 	State string
+
 }
 
 //event when block is created in event store

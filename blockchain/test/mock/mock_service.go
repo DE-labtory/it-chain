@@ -66,9 +66,9 @@ func (r BlockRepository) FindAll() ([]blockchain.DefaultBlock, error) {
 }
 
 type EventService struct {
-	CommitBlockFunc func(block blockchain.DefaultBlock) error
+	PublishFunc func(topic string, event interface{}) error
 }
 
-func (s EventService) CommitBlock(block blockchain.DefaultBlock) error {
-	return s.CommitBlockFunc(block)
+func (s EventService) Publish(topic string, event interface{}) error {
+	return s.PublishFunc(topic, event)
 }
