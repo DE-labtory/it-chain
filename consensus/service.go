@@ -28,6 +28,12 @@ type ConfirmService interface {
 	ConfirmBlock(block ProposedBlock) error
 }
 
+type ParliamentService interface {
+	RequestLeader() (MemberId, error)
+	RequestPeerList() ([]MemberId, error)
+	IsNeedConsensus() bool
+}
+
 // 연결된 peer 중에서 consensus 에 참여할 representative 들을 선출
 func Elect(parliament []MemberId) ([]*Representative, error) {
 	representatives := make([]*Representative, 0)
