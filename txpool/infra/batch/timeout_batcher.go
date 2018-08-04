@@ -21,7 +21,7 @@ import (
 
 	"sync"
 
-	"log"
+	"github.com/it-chain/engine/common/logger"
 )
 
 var instance *TimeoutBatcher
@@ -58,7 +58,7 @@ func (t *Task) Start() error {
 		select {
 		case <-t.T.C:
 			if err := t.taskFunc(); err != nil {
-				t.quit <- struct{}{}
+				logger.Error(nil, "error: "+err.Error())
 			}
 		case <-t.quit:
 			t.Stop()
@@ -95,7 +95,7 @@ func (t *TimeoutBatcher) Run(taskFunc TaskFunc, duration time.Duration) chan str
 		err = timer.Start()
 
 		if err != nil {
-			log.Println(err.Error())
+			logger.Error(nil, "error: "+err.Error())
 			//	return
 		}
 	}()
