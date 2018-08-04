@@ -43,7 +43,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 		input struct {
 			ConfigFilePath string
 		}
-		output blockchain.Block
+		output blockchain.DefaultBlock
 		err    error
 	}{
 		"success create genesisBlock": {
@@ -54,7 +54,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 				ConfigFilePath: "./GenesisBlockConfig.json",
 			},
 
-			output: &blockchain.DefaultBlock{
+			output: blockchain.DefaultBlock{
 				PrevSeal:  make([]byte, 0),
 				Height:    uint64(0),
 				TxList:    make([]*blockchain.DefaultTransaction, 0),
@@ -74,7 +74,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 				ConfigFilePath: "./WrongBlockConfig.json",
 			},
 
-			output: nil,
+			output: blockchain.DefaultBlock{},
 
 			err: blockchain.ErrSetConfig,
 		},
@@ -147,7 +147,7 @@ func TestCreateProposedBlock(t *testing.T) {
 			txList   []*blockchain.DefaultTransaction
 			creator  []byte
 		}
-		output blockchain.Block
+		output blockchain.DefaultBlock
 		err    error
 	}{
 		"success create proposed block": {
@@ -175,7 +175,7 @@ func TestCreateProposedBlock(t *testing.T) {
 				creator: []byte("junksound"),
 			},
 
-			output: &blockchain.DefaultBlock{
+			output: blockchain.DefaultBlock{
 				PrevSeal: []byte("prevseal"),
 				Height:   1,
 				TxList: []*blockchain.DefaultTransaction{
@@ -211,7 +211,7 @@ func TestCreateProposedBlock(t *testing.T) {
 				creator:  []byte("junksound"),
 			},
 
-			output: nil,
+			output: blockchain.DefaultBlock{},
 
 			err: blockchain.ErrBuildingTxSeal,
 		},
@@ -241,7 +241,7 @@ func TestCreateProposedBlock(t *testing.T) {
 				creator: nil,
 			},
 
-			output: nil,
+			output: blockchain.DefaultBlock{},
 
 			err: blockchain.ErrBuildingSeal,
 		},
@@ -315,22 +315,22 @@ func TestCreateRetrievedBlock(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			retrivedBlock blockchain.Block
+			retrivedBlock blockchain.DefaultBlock
 		}
 		output struct {
-			createdBlock blockchain.Block
+			createdBlock blockchain.DefaultBlock
 		}
 		err error
 	}{
 		"success create retrieved block": {
 			input: struct {
-				retrivedBlock blockchain.Block
+				retrivedBlock blockchain.DefaultBlock
 			}{
 				retrivedBlock: retrievedBlock,
 			},
 
 			output: struct {
-				createdBlock blockchain.Block
+				createdBlock blockchain.DefaultBlock
 			}{
 				createdBlock: retrievedBlock,
 			},

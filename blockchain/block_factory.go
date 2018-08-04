@@ -30,7 +30,7 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
+func CreateGenesisBlock(genesisconfFilePath string) (DefaultBlock, error) {
 
 	//declare
 	GenesisBlock := &DefaultBlock{}
@@ -40,39 +40,39 @@ func CreateGenesisBlock(genesisconfFilePath string) (Block, error) {
 	err := setBlockWithConfig(genesisconfFilePath, GenesisBlock)
 
 	if err != nil {
-		return nil, ErrSetConfig
+		return DefaultBlock{}, ErrSetConfig
 	}
 
 	//build
 	Seal, err := validator.BuildSeal(GenesisBlock.Timestamp, GenesisBlock.PrevSeal, GenesisBlock.TxSeal, GenesisBlock.Creator)
 
 	if err != nil {
-		return nil, ErrBuildingSeal
+		return DefaultBlock{}, ErrBuildingSeal
 	}
 
 	//create
 	createEvent, err := createBlockCreatedEvent(Seal, GenesisBlock.PrevSeal, GenesisBlock.Height, GenesisBlock.TxList, GenesisBlock.TxSeal, GenesisBlock.Timestamp, GenesisBlock.Creator)
 	if err != nil {
-		return nil, ErrCreatingEvent
+		return DefaultBlock{}, ErrCreatingEvent
 	}
 
 	//on
 	err = GenesisBlock.On(createEvent)
 	if err != nil {
-		return nil, ErrOnEvent
+		return DefaultBlock{}, ErrOnEvent
 	}
 
 	//save
 	err = eventstore.Save(createEvent.GetID(), createEvent)
 
 	if err != nil {
-		return nil, ErrSavingEvent
+		return DefaultBlock{}, ErrSavingEvent
 	}
 
-	return GenesisBlock, nil
+	return *GenesisBlock, nil
 }
 
-func setBlockWithConfig(filePath string, block Block) error {
+func setBlockWithConfig(filePath string, block *DefaultBlock) error {
 
 	// load
 	jsonFile, err := os.Open(filePath)
@@ -141,7 +141,7 @@ func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList
 	}, nil
 }
 
-func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransaction, Creator []byte) (Block, error) {
+func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransaction, Creator []byte) (DefaultBlock, error) {
 
 	//declare
 	ProposedBlock := &DefaultBlock{}
@@ -152,34 +152,34 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransa
 	txSeal, err := validator.BuildTxSeal(ConvertTxType(txList))
 
 	if err != nil {
-		return nil, ErrBuildingTxSeal
+		return DefaultBlock{}, ErrBuildingTxSeal
 	}
 
 	Seal, err := validator.BuildSeal(TimeStamp, prevSeal, txSeal, Creator)
 
 	if err != nil {
-		return nil, ErrBuildingSeal
+		return DefaultBlock{}, ErrBuildingSeal
 	}
 
 	//create
 	createEvent, err := createBlockCreatedEvent(Seal, prevSeal, height, txList, txSeal, TimeStamp, Creator)
 	if err != nil {
-		return nil, ErrCreatingEvent
+		return DefaultBlock{}, ErrCreatingEvent
 	}
 
 	//on
 	err = ProposedBlock.On(createEvent)
 	if err != nil {
-		return nil, ErrOnEvent
+		return DefaultBlock{}, ErrOnEvent
 	}
 
 	//save
 	eventstore.Save(createEvent.GetID(), createEvent)
 
-	return ProposedBlock, nil
+	return *ProposedBlock, nil
 }
 
-func CreateRetrievedBlock(retrievedBlock Block) (Block, error) {
+func CreateRetrievedBlock(retrievedBlock DefaultBlock) (DefaultBlock, error) {
 
 	//declare
 	RetrievedBlock := &DefaultBlock{}
@@ -195,17 +195,17 @@ func CreateRetrievedBlock(retrievedBlock Block) (Block, error) {
 	//create
 	createEvent, err := createBlockCreatedEvent(Seal, PrevSeal, Height, GetBackTxType(TxList), TxSeal, TimeStamp, Creator)
 	if err != nil {
-		return nil, ErrCreatingEvent
+		return DefaultBlock{}, ErrCreatingEvent
 	}
 
 	//on
 	err = RetrievedBlock.On(createEvent)
 	if err != nil {
-		return nil, ErrOnEvent
+		return DefaultBlock{}, ErrOnEvent
 	}
 
 	//save
 	eventstore.Save(createEvent.GetID(), createEvent)
 
-	return RetrievedBlock, nil
+	return *RetrievedBlock, nil
 }
