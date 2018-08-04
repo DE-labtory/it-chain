@@ -28,14 +28,17 @@ var ErrFailBlockTypeCasting = errors.New("Error failed type casting block")
 
 type BlockApi struct {
 	publisherId       string
-	blockQueryService blockchain.BlockQueryService
 	blockRepository   blockchain.BlockRepository
+	eventService blockchain.EventService
 }
 
-func NewBlockApi(publisherId string, blockQueryService blockchain.BlockQueryService) (BlockApi, error) {
+func NewBlockApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService ) (BlockApi, error) {
 	return BlockApi{
+
 		publisherId:       publisherId,
-		blockQueryService: blockQueryService,
+		blockRepository: blockRepository,
+		eventService:	eventService,
+
 	}, nil
 }
 
@@ -57,46 +60,67 @@ func (bApi BlockApi) SyncIsProgressing() blockchain.ProgressState {
 	return blockchain.DONE
 }
 
-func (bApi BlockApi) CreateProposedBlock(txList []blockchain.Transaction) (blockchain.DefaultBlock, error) {
 
+func (bApi BlockApi) CommitProposedBlock(txList []*blockchain.DefaultTransaction) error {
+
+	// create
 	lastBlock, err := bApi.blockRepository.FindLast()
 
 	if err != nil {
-		return blockchain.DefaultBlock{}, ErrGetLastBlock
+		return ErrGetLastBlock
 	}
 
 	prevSeal := lastBlock.GetSeal()
 	height := lastBlock.GetHeight() + 1
-	defaultTxList := blockchain.GetBackTxType(txList)
+
 	creator := bApi.publisherId
 
-	block, err := blockchain.CreateProposedBlock(prevSeal, height, defaultTxList, []byte(creator))
+	proposedBlock, err := blockchain.CreateProposedBlock(prevSeal, height, txList, []byte(creator))
 
 	if err != nil {
-		return blockchain.DefaultBlock{}, ErrCreateProposedBlock
+		return ErrCreateProposedBlock
 	}
 
-	defaultBlock, ok := block.(*blockchain.DefaultBlock)
-	if !ok {
-		return blockchain.DefaultBlock{}, ErrFailBlockTypeCasting
+	// save
+
+	err = bApi.blockRepository.Save(proposedBlock)
+
+	if err != nil {
+		return err
 	}
 
-	return *defaultBlock, nil
+	// publish
+	commitEvent, err := blockchain.CreateBlockCommittedEvent(proposedBlock)
+
+	if err != nil {
+		return err
+	}
+
+	return bApi.eventService.Publish("block.committed", commitEvent)
 }
 
-func (bApi BlockApi) CreateGenesisBlock(GenesisConfPath string) error {
+func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
 
+	// create
 	GenesisBlock, err := blockchain.CreateGenesisBlock(GenesisConfPath)
 
 	if err != nil {
 		return ErrCreateGenesisBlock
 	}
 
-	err = blockchain.CommitBlock(GenesisBlock)
+	// save
+	err = bApi.blockRepository.Save(GenesisBlock)
 
 	if err != nil {
-		return ErrCommitBlock
+		return err
 	}
 
-	return nil
+	// publish
+	commitEvent, err := blockchain.CreateBlockCommittedEvent(GenesisBlock)
+
+	if err != nil {
+		return err
+	}
+
+	return bApi.eventService.Publish("block.committed", commitEvent)
 }
