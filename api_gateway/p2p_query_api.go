@@ -21,8 +21,10 @@ import (
 
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/p2p"
-	"github.com/it-chain/engine/p2p/infra/mem"
+	"github.com/pkg/errors"
 )
+
+var ErrPeerExists = errors.New("peer already exists")
 
 type PeerQueryApi struct {
 	mux            sync.Mutex
@@ -137,7 +139,7 @@ func (pltrepo *PeerRepository) Save(peer p2p.Peer) error {
 	_, exist := pltrepo.pLTable.PeerTable[peer.PeerId.Id]
 
 	if exist {
-		return mem.ErrPeerExists
+		return ErrPeerExists
 	}
 
 	pltrepo.pLTable.PeerTable[peer.PeerId.Id] = peer
@@ -179,7 +181,7 @@ func (peh *P2PEventHandler) PeerCreatedEventHandler(event event.PeerCreated) err
 
 	peer := p2p.Peer{
 		PeerId: p2p.PeerId{
-			Id: event.ID,
+			Id: event.PeerId,
 		},
 		IpAddress: event.IpAddress,
 	}
@@ -191,7 +193,7 @@ func (peh *P2PEventHandler) PeerCreatedEventHandler(event event.PeerCreated) err
 
 func (peh *P2PEventHandler) PeerDeletedEventHandler(event event.PeerCreated) error {
 
-	peh.peerRepository.Delete(event.ID)
+	peh.peerRepository.Delete(event.PeerId)
 
 	return nil
 }
@@ -199,7 +201,9 @@ func (peh *P2PEventHandler) PeerDeletedEventHandler(event event.PeerCreated) err
 func (peh *P2PEventHandler) HandleLeaderUpdatedEvent(event event.PeerCreated) error {
 
 	peer := p2p.Peer{
-		PeerId: p2p.PeerId{Id: event.ID},
+		PeerId: p2p.PeerId{
+			Id: event.PeerId,
+		},
 	}
 
 	peh.peerRepository.SetLeader(peer)

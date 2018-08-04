@@ -19,7 +19,6 @@ package api
 import (
 	"log"
 
-	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/engine/grpc_gateway"
 )
 
@@ -44,30 +43,12 @@ func (c ConnectionApi) CreateConnection(address string) (grpc_gateway.Connection
 		return grpc_gateway.Connection{}, err
 	}
 
-	return grpc_gateway.NewConnection(connection.ID, connection.Address)
+	return connection, err
 }
 
 func (c ConnectionApi) CloseConnection(connectionID string) error {
 
-	connection := &grpc_gateway.Connection{}
-
-	err := eventstore.Load(connection, connectionID)
-
-	if err != nil {
-		return err
-	}
-
 	c.grpcService.CloseConnection(connectionID)
 
-	return grpc_gateway.CloseConnection(connection.ID)
-}
-
-func (c ConnectionApi) OnConnection(connection grpc_gateway.Connection) (grpc_gateway.Connection, error) {
-
-	return grpc_gateway.NewConnection(connection.ID, connection.Address)
-}
-
-func (c ConnectionApi) OnDisconnection(connection grpc_gateway.Connection) error {
-
-	return grpc_gateway.CloseConnection(connection.ID)
+	return nil
 }

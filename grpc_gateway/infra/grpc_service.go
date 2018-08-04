@@ -28,7 +28,6 @@ import (
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/grpc_gateway"
 	"github.com/it-chain/heimdall/key"
-	"github.com/it-chain/midgard"
 )
 
 var ErrConnAlreadyExist = errors.New("connection is already exist")
@@ -93,10 +92,8 @@ func (g *GrpcHostService) Dial(address string) (grpc_gateway.Connection, error) 
 
 func toGatewayConnectionModel(connection bifrost.Connection) grpc_gateway.Connection {
 	return grpc_gateway.Connection{
-		AggregateModel: midgard.AggregateModel{
-			ID: connection.GetID(),
-		},
-		Address: connection.GetIP(),
+		ConnectionId: connection.GetID(),
+		Address:      connection.GetIP(),
 	}
 }
 

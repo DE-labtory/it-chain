@@ -19,12 +19,8 @@ package p2p
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/core/eventstore"
-	"github.com/it-chain/midgard"
 )
 
 var ErrEmptyPeerId = errors.New("empty peer id requested")
@@ -42,64 +38,8 @@ type PeerId struct {
 	Id string
 }
 
-func (p *Peer) On(e midgard.Event) error {
-
-	switch v := e.(type) {
-	case *event.PeerCreated:
-		p.PeerId.Id = v.ID
-		p.IpAddress = v.IpAddress
-
-	case *event.PeerDeleted:
-		p.PeerId.Id = ""
-		p.IpAddress = ""
-
-	default:
-		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
-	}
-
-	return nil
-}
-
 func (n Peer) GetID() string {
 	return n.PeerId.ToString()
-}
-
-// 해당 노드의 ip와 Id로 새로운 피어를 생성한다.
-func NewPeer(ipAddress string, id PeerId) error {
-
-	if id.Id == "" {
-		return ErrEmptyPeerId
-	}
-
-	if ipAddress == "" {
-		return ErrEmptyAddress
-	}
-
-	peer := Peer{}
-
-	e := event.PeerCreated{
-		EventModel: midgard.EventModel{
-			ID:   id.Id,
-			Type: "peer.created",
-		},
-		IpAddress: ipAddress,
-	}
-
-	peer.On(e)
-
-	return eventstore.Save(id.Id, e)
-}
-
-func DeletePeer(peerId PeerId) error {
-
-	event := event.PeerDeleted{
-		EventModel: midgard.EventModel{
-			ID:   peerId.Id,
-			Type: "peer.deleted",
-		},
-	}
-
-	return eventstore.Save(peerId.Id, event)
 }
 
 // p2p 구조체를 json 으로 인코딩한다.
@@ -131,4 +71,14 @@ func PeerFilter(vs []Peer, f func(Peer) bool) []Peer {
 		}
 	}
 	return vsf
+}
+
+type PeerRepository interface {
+	GetPLTable() (PLTable, error)
+	GetLeader() (Leader, error)
+	FindPeerById(peerId PeerId) (Peer, error)
+	FindPeerByAddress(ipAddress string) (Peer, error)
+	Save(peer Peer) error
+	SetLeader(peer Peer) error
+	Delete(id string) error
 }

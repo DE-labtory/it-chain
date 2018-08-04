@@ -19,12 +19,12 @@ package adapter_test
 import (
 	"testing"
 
+	"fmt"
+
 	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/core/eventstore"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/infra/adapter"
 	"github.com/it-chain/engine/p2p/test/mock"
-	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
 )
 
@@ -41,29 +41,43 @@ func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
 			input: struct {
 				nodeId  string
 				address string
-			}{nodeId: string("123"), address: string("123")},
-			err: eventstore.ErrNilStore,
+			}{nodeId: "123", address: "123"},
+			err: nil,
 		},
 		"empty address test": {
 			input: struct {
 				nodeId  string
 				address string
-			}{nodeId: string("123"), address: string("")},
+			}{nodeId: "123", address: ""},
 			err: p2p.ErrEmptyAddress,
 		},
 	}
 
-	communicationApi := &mock.MockCommunicationApi{}
+	communicationApi := mock.MockCommunicationApi{}
 
 	communicationApi.DeliverPLTableFunc = func(connectionId string) error {
 		return nil
 	}
 
-	eventHandler := adapter.NewEventHandler(communicationApi)
+	peerService := &mock.MockPeerService{}
+
+	peerService.SaveFunc = func(peer p2p.Peer) error {
+		if peer.IpAddress == "" {
+			return p2p.ErrEmptyAddress
+		}
+		return nil
+	}
+
+	eventHandler := adapter.NewEventHandler(&communicationApi, peerService)
+	fmt.Println(communicationApi)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
-		err := eventHandler.HandleConnCreatedEvent(event.ConnectionCreated{EventModel: midgard.EventModel{ID: test.input.nodeId}, Address: test.input.address})
+		err := eventHandler.HandleConnCreatedEvent(event.ConnectionCreated{
+			ConnectionID: test.input.nodeId,
+			Address:      test.input.address,
+		})
+		fmt.Println(err)
 		assert.Equal(t, err, test.err)
 	}
 
@@ -93,16 +107,19 @@ func TestEventHandler_HandleConnDisconnectedEvent(t *testing.T) {
 
 	communicationApi := &mock.MockCommunicationApi{}
 
-	eventHandler := adapter.NewEventHandler(communicationApi)
+	peerService := &mock.MockPeerService{}
+
+	peerService.RemoveFunc = func(peerId p2p.PeerId) error {
+		return nil
+	}
+	eventHandler := adapter.NewEventHandler(communicationApi, peerService)
 
 	for testName, test := range tests {
 
 		t.Logf("running test case %s", testName)
 
 		e := event.ConnectionClosed{
-			EventModel: midgard.EventModel{
-				ID: test.input.id,
-			},
+			ConnectionId: test.input.id,
 		}
 
 		err := eventHandler.HandleConnDisconnectedEvent(e)

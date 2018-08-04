@@ -22,6 +22,7 @@ import (
 	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/api"
 	"github.com/it-chain/engine/p2p/infra/adapter"
@@ -56,7 +57,10 @@ func (mpp *MockP2PProcess) Init(id string, ipAddress string) {
 
 	communicationApi := api.NewCommunicationApi(&peerQueryService, communicationService)
 
-	mpp.eventHandler = adapter.NewEventHandler(&communicationApi)
+	//todo should be replaced with real struct
+	peerService := &MockPeerService{}
+
+	mpp.eventHandler = adapter.NewEventHandler(&communicationApi, peerService)
 
 	leaderService := p2p.NewLeaderService()
 
@@ -66,7 +70,10 @@ func (mpp *MockP2PProcess) Init(id string, ipAddress string) {
 
 	electionRepository := p2p.NewElectionRepository(election)
 
-	electionService := p2p.NewElectionService(electionRepository, &peerQueryService, mpp.Publish)
+	//todo should be replaced with mock client
+	client := rpc.NewClient("")
+
+	electionService := p2p.NewElectionService(electionRepository, &peerQueryService, client)
 
 	pLTableService := p2p.PLTableService{}
 
@@ -146,11 +153,9 @@ func (mpp *MockP2PProcess) HandleCommand(mpt map[string]MockP2PProcess) {
 
 		case reflect.TypeOf(event.ConnectionCreated{}):
 			connectionCreatedEvent := event.ConnectionCreated{
-				EventModel: midgard.EventModel{
-					ID: c.(event.ConnectionCreated).ID,
-				},
+				ConnectionID: c.(event.ConnectionCreated).ConnectionID,
 			}
-			mpp.TriggerOutboundEvent(connectionCreatedEvent, mpt[connectionCreatedEvent.ID])
+			mpp.TriggerOutboundEvent(connectionCreatedEvent, mpt[connectionCreatedEvent.ConnectionID])
 
 		case reflect.TypeOf(command.DeliverGrpc{}):
 			switch c.(command.DeliverGrpc).Protocol {
