@@ -19,4 +19,5 @@ package api
 import "errors"
 
 var ErrCreateGenesisBlock = errors.New("Error in creating Genesis block")
+var ErrSaveBlock = errors.New("Error in saving block")
 var ErrCommitBlock = errors.New("Error in committing block")
