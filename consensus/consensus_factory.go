@@ -17,8 +17,6 @@
 package consensus
 
 import (
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
 
@@ -29,45 +27,28 @@ func CreateConsensus(parliament []MemberId, block ProposedBlock) (*Consensus, er
 		return &Consensus{}, err
 	}
 
-	consensusID := NewConsensusId(xid.New().String())
-	consensus := &Consensus{}
-	consensusCreatedEvent := newConsensusCreatedEvent(consensusID, representatives, block)
-
-	if err := OnAndSave(consensus, &consensusCreatedEvent); err != nil {
-		return &Consensus{}, err
+	newConsensus := Consensus{
+		ConsensusID:     NewConsensusId(xid.New().String()),
+		Representatives: representatives,
+		Block:           block,
+		CurrentState:    IDLE_STATE,
+		PrepareMsgPool:  NewPrepareMsgPool(),
+		CommitMsgPool:   NewCommitMsgPool(),
 	}
 
-	return consensus, nil
+	return &newConsensus, nil
 }
 
 // member
 func ConstructConsensus(msg PrePrepareMsg) (*Consensus, error) {
-	consensus := &Consensus{}
-	consensusCreatedEvent := newConsensusCreatedEvent(msg.ConsensusId, msg.Representative, msg.ProposedBlock)
-
-	if err := OnAndSave(consensus, &consensusCreatedEvent); err != nil {
-		return &Consensus{}, err
+	newConsensus := &Consensus{
+		ConsensusID:     msg.ConsensusId,
+		Representatives: msg.Representative,
+		Block:           msg.ProposedBlock,
+		CurrentState:    IDLE_STATE,
+		PrepareMsgPool:  NewPrepareMsgPool(),
+		CommitMsgPool:   NewCommitMsgPool(),
 	}
 
-	return consensus, nil
-}
-
-func newConsensusCreatedEvent(cID ConsensusId, r []*Representative, b ProposedBlock) event.ConsensusCreated {
-	representativeStr := make([]*string, 0)
-
-	for _, representative := range r {
-		str := representative.GetID()
-		representativeStr = append(representativeStr, &str)
-	}
-
-	return event.ConsensusCreated{
-		EventModel: midgard.EventModel{
-			ID: cID.Id,
-		},
-		ConsensusId:     cID.Id,
-		Representatives: representativeStr,
-		Seal:            b.Seal,
-		Body:            b.Body,
-		CurrentState:    string(IDLE_STATE),
-	}
+	return newConsensus, nil
 }
