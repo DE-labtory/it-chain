@@ -18,15 +18,12 @@ package p2p
 
 import (
 	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/core/eventstore"
-	"github.com/it-chain/midgard"
 )
 
-type ILeaderService interface {
-	Set(leader Leader) error
+type LeaderService struct {
+	peerRepository PeerRepository
+	publishService PublishService
 }
-
-type LeaderService struct{}
 
 func NewLeaderService() LeaderService {
 
@@ -36,10 +33,8 @@ func NewLeaderService() LeaderService {
 func (ls *LeaderService) Set(leader Leader) error {
 
 	e := event.LeaderUpdated{
-		EventModel: midgard.EventModel{
-			ID: leader.LeaderId.Id,
-		},
+		LeaderId: leader.LeaderId.Id,
 	}
 
-	return eventstore.Save(leader.LeaderId.Id, e)
+	return ls.publishService.publish("leader.updated", e)
 }

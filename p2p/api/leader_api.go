@@ -56,7 +56,11 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
 		if peer.IpAddress == ipAddress {
 
-			p2p.UpdateLeader(peer)
+			la.leaderService.Set(p2p.Leader{
+				LeaderId: p2p.LeaderId{
+					Id: peer.PeerId.Id,
+				},
+			})
 
 			return nil
 		}
@@ -81,5 +85,6 @@ func (la *LeaderApi) UpdateLeaderWithLargePeerTable(oppositePLTable p2p.PLTable)
 		la.leaderService.Set(myLeader)
 
 	}
+
 	return nil
 }

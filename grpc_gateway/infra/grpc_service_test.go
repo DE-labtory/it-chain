@@ -393,7 +393,7 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 
 	handler := &MockHandler{}
 	handler.OnConnectionFunc = func(connection grpc_gateway.Connection) {
-		connID = connection.ID
+		connID = connection.ConnectionId
 	}
 
 	handler.OnDisconnectionFunc = func(connection grpc_gateway.Connection) {
@@ -411,7 +411,7 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 
 		publishedData = test.input.Message
 
-		clientHostService.SendMessages(test.input.Message, test.input.Protocol, conn.ID)
+		clientHostService.SendMessages(test.input.Message, test.input.Protocol, conn.ConnectionId)
 	}
 }
 
@@ -454,12 +454,12 @@ func TestGrpcHostService_Close(t *testing.T) {
 	handler := &MockHandler{}
 	handler.OnConnectionFunc = func(connection grpc_gateway.Connection) {
 		fmt.Println(connection)
-		connID = connection.ID
+		connID = connection.ConnectionId
 	}
 
 	handler.OnDisconnectionFunc = func(connection grpc_gateway.Connection) {
 		fmt.Println("connection is closing", connection)
-		assert.Equal(t, connID, connection.ID)
+		assert.Equal(t, connID, connection.ConnectionId)
 	}
 
 	serverHostService.SetHandler(handler)
@@ -470,6 +470,6 @@ func TestGrpcHostService_Close(t *testing.T) {
 
 		conn, err := clientHostService.Dial(test.input)
 		assert.NoError(t, err)
-		clientHostService.CloseConnection(conn.ID)
+		clientHostService.CloseConnection(conn.ConnectionId)
 	}
 }

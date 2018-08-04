@@ -23,6 +23,7 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
@@ -32,16 +33,16 @@ type ElectionService struct {
 	mux                sync.Mutex
 	electionRepository ElectionRepository
 	peerQueryService   PeerQueryService
-	publish            Publish // dependency injection
+	client             rpc.Client
 }
 
-func NewElectionService(electionRepository ElectionRepository, peerQueryService PeerQueryService, publish Publish) ElectionService {
+func NewElectionService(electionRepository ElectionRepository, peerQueryService PeerQueryService, client rpc.Client) ElectionService {
 
 	return ElectionService{
 		mux:                sync.Mutex{},
 		electionRepository: electionRepository,
 		peerQueryService:   peerQueryService,
-		publish:            publish,
+		client:             client,
 	}
 }
 
@@ -61,7 +62,7 @@ func (es *ElectionService) Vote(connectionId string) error {
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("VoteLeaderProtocol", voteLeaderMessage)
 	grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
 
-	es.publish("Command", "message.deliver", grpcDeliverCommand)
+	es.client.Call("message.deliver", grpcDeliverCommand, func() {})
 
 	return nil
 }
@@ -79,7 +80,7 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 		grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, peer.PeerId.Id)
 	}
 
-	es.publish("Command", "message.deliver", grpcDeliverCommand)
+	es.client.Call("message.deliver", grpcDeliverCommand, func() {})
 
 	return nil
 }
@@ -182,7 +183,7 @@ func (es *ElectionService) requestVote(connectionIds []string) error {
 		grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
 	}
 
-	es.publish("Command", "message.send", grpcDeliverCommand)
+	es.client.Call("message.deliver", grpcDeliverCommand, func() {})
 
 	return nil
 }
