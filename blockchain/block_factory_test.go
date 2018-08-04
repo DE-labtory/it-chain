@@ -61,6 +61,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 				TxSeal:    make([][]byte, 0),
 				Timestamp: timeStamp,
 				Creator:   []byte("junksound"),
+				State:blockchain.Created,
 			},
 
 			err: nil,
@@ -79,17 +80,6 @@ func TestCreateGenesisBlock(t *testing.T) {
 			err: blockchain.ErrSetConfig,
 		},
 	}
-
-	repo := mock.EventRepository{}
-	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, 1, len(events))
-		assert.IsType(t, &event.BlockCreated{}, events[0])
-		return nil
-	}
-	repo.CloseFunc = func() {}
-
-	eventstore.InitForMock(repo)
-	defer eventstore.Close()
 
 	GenesisFilePath := "./GenesisBlockConfig.json"
 
@@ -129,7 +119,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 		assert.Equal(t, test.output.GetTxSeal(), GenesisBlock.GetTxSeal())
 		assert.Equal(t, test.output.GetTimestamp().String()[:19], GenesisBlock.GetTimestamp().String()[:19])
 		assert.Equal(t, test.output.GetCreator(), GenesisBlock.GetCreator())
-
+		assert.Equal(t, test.output.GetState(), GenesisBlock.GetState())
 	}
 
 }
@@ -192,6 +182,7 @@ func TestCreateProposedBlock(t *testing.T) {
 				},
 				Timestamp: timeStamp,
 				Creator:   []byte("junksound"),
+				State:blockchain.Created,
 			},
 
 			err: nil,
@@ -247,18 +238,6 @@ func TestCreateProposedBlock(t *testing.T) {
 		},
 	}
 
-	repo := mock.EventRepository{}
-
-	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, 1, len(events))
-		assert.IsType(t, &event.BlockCreated{}, events[0])
-		return nil
-	}
-	repo.CloseFunc = func() {}
-
-	eventstore.InitForMock(repo)
-	defer eventstore.Close()
-
 	for testName, test := range tests {
 
 		t.Logf("Running test case %s", testName)
@@ -284,6 +263,7 @@ func TestCreateProposedBlock(t *testing.T) {
 		assert.Equal(t, test.output.GetTxList()[0].GetID(), ProposedBlock.GetTxList()[0].GetID())
 		assert.Equal(t, test.output.GetTimestamp().String()[:19], ProposedBlock.GetTimestamp().String()[:19])
 		assert.Equal(t, test.output.GetCreator(), ProposedBlock.GetCreator())
+		assert.Equal(t, test.output.GetState(), ProposedBlock.GetState())
 
 	}
 

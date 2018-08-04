@@ -36,7 +36,7 @@ func CreateGenesisBlock(genesisconfFilePath string) (DefaultBlock, error) {
 	GenesisBlock := &DefaultBlock{}
 	validator := DefaultValidator{}
 
-	//set
+	//set basic
 	err := setBlockWithConfig(genesisconfFilePath, GenesisBlock)
 
 	if err != nil {
@@ -50,24 +50,9 @@ func CreateGenesisBlock(genesisconfFilePath string) (DefaultBlock, error) {
 		return DefaultBlock{}, ErrBuildingSeal
 	}
 
-	//create
-	createEvent, err := createBlockCreatedEvent(Seal, GenesisBlock.PrevSeal, GenesisBlock.Height, GenesisBlock.TxList, GenesisBlock.TxSeal, GenesisBlock.Timestamp, GenesisBlock.Creator)
-	if err != nil {
-		return DefaultBlock{}, ErrCreatingEvent
-	}
+	//set seal
+	GenesisBlock.SetSeal(Seal)
 
-	//on
-	err = GenesisBlock.On(createEvent)
-	if err != nil {
-		return DefaultBlock{}, ErrOnEvent
-	}
-
-	//save
-	err = eventstore.Save(createEvent.GetID(), createEvent)
-
-	if err != nil {
-		return DefaultBlock{}, ErrSavingEvent
-	}
 
 	return *GenesisBlock, nil
 }
@@ -109,6 +94,7 @@ func setBlockWithConfig(filePath string, block *DefaultBlock) error {
 	block.SetTxSeal(make([][]byte, 0))
 	block.SetTimestamp(timeStamp)
 	block.SetCreator([]byte(GenesisConfig.Creator))
+	block.SetState(Created)
 
 	return nil
 }
@@ -149,6 +135,10 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransa
 	TimeStamp := time.Now().Round(0)
 
 	//build
+	for _, tx := range txList {
+		ProposedBlock.PutTx(tx)
+	}
+
 	txSeal, err := validator.BuildTxSeal(ConvertTxType(txList))
 
 	if err != nil {
@@ -161,20 +151,14 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransa
 		return DefaultBlock{}, ErrBuildingSeal
 	}
 
-	//create
-	createEvent, err := createBlockCreatedEvent(Seal, prevSeal, height, txList, txSeal, TimeStamp, Creator)
-	if err != nil {
-		return DefaultBlock{}, ErrCreatingEvent
-	}
-
-	//on
-	err = ProposedBlock.On(createEvent)
-	if err != nil {
-		return DefaultBlock{}, ErrOnEvent
-	}
-
-	//save
-	eventstore.Save(createEvent.GetID(), createEvent)
+	//set
+	ProposedBlock.SetSeal(Seal)
+	ProposedBlock.SetPrevSeal(prevSeal)
+	ProposedBlock.SetHeight(height)
+	ProposedBlock.SetTxSeal(txSeal)
+	ProposedBlock.SetTimestamp(TimeStamp)
+	ProposedBlock.SetCreator(Creator)
+	ProposedBlock.SetState(Created)
 
 	return *ProposedBlock, nil
 }

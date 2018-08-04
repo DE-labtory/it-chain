@@ -99,6 +99,10 @@ func (block *DefaultBlock) SetTimestamp(currentTime time.Time) {
 	block.Timestamp = currentTime
 }
 
+func (block *DefaultBlock) SetState(state BlockState) {
+	block.State = state
+}
+
 // TODO: Write test case
 func (block *DefaultBlock) GetSeal() []byte {
 	return block.Seal
@@ -136,6 +140,10 @@ func (block *DefaultBlock) GetCreator() []byte {
 // TODO: Write test case
 func (block *DefaultBlock) GetTimestamp() time.Time {
 	return block.Timestamp
+}
+
+func (block *DefaultBlock) GetState() BlockState {
+	return block.State
 }
 
 // TODO: Write test case
