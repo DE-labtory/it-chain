@@ -95,7 +95,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 	}
 
 	blockApi := mock.BlockApi{}
-	blockApi.CreateBlockFunc = func(txList []blockchain.Transaction) (blockchain.DefaultBlock, error) {
+	blockApi.CreateProposedBlockFunc = func(txList []blockchain.Transaction) (blockchain.DefaultBlock, error) {
 		tx := txList[0]
 		txContentBytes, _ := tx.GetContent()
 		content := struct {
@@ -121,7 +121,18 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 		}, nil
 	}
 
-	commandHandler := adapter.NewBlockProposeCommandHandler(blockApi, "solo")
+	blockRepo := mock.BlockRepository{}
+
+	blockRepo.SaveFunc = func(block blockchain.DefaultBlock) error {
+		return nil
+	}
+
+	eventService := mock.EventService{}
+	eventService.CommitBlockFunc = func(block blockchain.DefaultBlock) error {
+		return nil
+	}
+
+	commandHandler := adapter.NewBlockProposeCommandHandler(blockApi, blockRepo, eventService, "solo")
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)

@@ -36,3 +36,39 @@ func (s BlockQueryService) GetLastCommitedBlock() (blockchain.DefaultBlock, erro
 func (s BlockQueryService) GetCommitedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
 	return s.GetCommitedBlockByHeightFunc(height)
 }
+
+type BlockRepository struct {
+	SaveFunc         func(block blockchain.DefaultBlock) error
+	FindLastFunc     func() (blockchain.DefaultBlock, error)
+	FindByHeightFunc func(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
+	FindBySealFunc   func(seal string) (blockchain.DefaultBlock, error)
+	FindAllFunc      func() ([]blockchain.DefaultBlock, error)
+}
+
+func (r BlockRepository) Save(block blockchain.DefaultBlock) error {
+	return r.SaveFunc(block)
+}
+
+func (r BlockRepository) FindLast() (blockchain.DefaultBlock, error) {
+	return r.FindLastFunc()
+}
+
+func (r BlockRepository) FindByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
+	return r.FindByHeightFunc(height)
+}
+
+func (r BlockRepository) FindBySeal(seal string) (blockchain.DefaultBlock, error) {
+	return r.FindBySealFunc(seal)
+}
+
+func (r BlockRepository) FindAll() ([]blockchain.DefaultBlock, error) {
+	return r.FindAllFunc()
+}
+
+type EventService struct {
+	CommitBlockFunc func(block blockchain.DefaultBlock) error
+}
+
+func (s EventService) CommitBlock(block blockchain.DefaultBlock) error {
+	return s.CommitBlockFunc(block)
+}
