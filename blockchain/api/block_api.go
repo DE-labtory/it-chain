@@ -29,7 +29,7 @@ var ErrFailBlockTypeCasting = errors.New("Error failed type casting block")
 type BlockApi struct {
 	publisherId       string
 	blockQueryService blockchain.BlockQueryService
-	blockRepository blockchain.BlockRepository
+	blockRepository   blockchain.BlockRepository
 }
 
 func NewBlockApi(publisherId string, blockQueryService blockchain.BlockQueryService) (BlockApi, error) {

@@ -26,17 +26,27 @@ type BlockCreateApi interface {
 	CreateProposedBlock(txList []blockchain.Transaction) (blockchain.DefaultBlock, error)
 }
 
-type BlockProposeCommandHandler struct {
-	blockApi   BlockCreateApi
-	blockRepository blockchain.BlockRepository
-	eventService blockchain.EventService
-	engineMode string
+type BlockSaveRepository interface {
+	Save(block blockchain.DefaultBlock) error
 }
 
-func NewBlockProposeCommandHandler(blockApi BlockCreateApi, engineMode string) *BlockProposeCommandHandler {
+type BlockCommitService interface {
+	CommitBlock(block blockchain.DefaultBlock) error
+}
+
+type BlockProposeCommandHandler struct {
+	blockApi        BlockCreateApi
+	blockRepository BlockSaveRepository
+	eventService    BlockCommitService
+	engineMode      string
+}
+
+func NewBlockProposeCommandHandler(blockApi BlockCreateApi, blockRepository BlockSaveRepository, eventService BlockCommitService, engineMode string) *BlockProposeCommandHandler {
 	return &BlockProposeCommandHandler{
-		blockApi:   blockApi,
-		engineMode: engineMode,
+		blockApi:        blockApi,
+		blockRepository: blockRepository,
+		eventService:    eventService,
+		engineMode:      engineMode,
 	}
 }
 
