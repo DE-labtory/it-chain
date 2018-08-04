@@ -34,6 +34,7 @@ func NewConfirmService(publish Publish) *ConfirmService {
 	}
 }
 
+// todo : command가 아닌 event를 날려야함
 func (cs *ConfirmService) ConfirmBlock(block consensus.ProposedBlock) error {
 	if block.Seal == nil {
 		return errors.New("Block hash is nil")

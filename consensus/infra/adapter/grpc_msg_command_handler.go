@@ -22,15 +22,15 @@ import (
 	"github.com/it-chain/engine/consensus/api"
 )
 
-type SendMsgCommandHandler struct {
+type GrpcMsgCommandHandler struct {
 	cApi api.ConsensusApi
 }
 
-func NewSendMsgCommandHandler(cApi api.ConsensusApi) SendMsgCommandHandler {
-	return SendMsgCommandHandler{}
+func NewGrpcMsgCommandHandler(cApi api.ConsensusApi) GrpcMsgCommandHandler {
+	return GrpcMsgCommandHandler{}
 }
 
-func (s *SendMsgCommandHandler) HandleSendPrePrepareMsg(command command.SendPrePrepareMsg) {
+func (s *GrpcMsgCommandHandler) HandleSendPrePrepareMsg(command command.SendPrePrepareMsg) {
 	representatives := make([]*consensus.Representative, 0)
 	representativeList := command.RepresentativeList
 	for _, r := range representativeList {
@@ -50,7 +50,7 @@ func (s *SendMsgCommandHandler) HandleSendPrePrepareMsg(command command.SendPreP
 	s.cApi.ReceivePrePrepareMsg(msg)
 }
 
-func (s *SendMsgCommandHandler) HandleSendPrepareMsg(command command.SendPrepareMsg) {
+func (s *GrpcMsgCommandHandler) HandleSendPrepareMsg(command command.SendPrepareMsg) {
 	msg := consensus.PrepareMsg{
 		ConsensusId: consensus.NewConsensusId(command.ConsensusId),
 		SenderId:    command.SenderId,
@@ -59,7 +59,7 @@ func (s *SendMsgCommandHandler) HandleSendPrepareMsg(command command.SendPrepare
 	s.cApi.ReceivePrepareMsg(msg)
 }
 
-func (s *SendMsgCommandHandler) HandleSendCommitMsg(command command.SendCommitMsg) {
+func (s *GrpcMsgCommandHandler) HandleSendCommitMsg(command command.SendCommitMsg) {
 	msg := consensus.CommitMsg{
 		ConsensusId: consensus.NewConsensusId(command.ConsensusId),
 		SenderId:    command.SenderId,
