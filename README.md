@@ -1,4 +1,4 @@
-# it-chain  [![Build Status](https://travis-ci.org/it-chain/engine.svg?branch=develop)](https://travis-ci.org/it-chain/engine) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Language](https://img.shields.io/badge/language-go-orange.svg)](https://golang.org)
+# it-chain  [![Build Status](https://travis-ci.org/it-chain/engine.svg?branch=develop)](https://travis-ci.org/it-chain/engine) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Language](https://img.shields.io/badge/language-go-orange.svg)](https://golang.org) [![Coverage Status](https://coveralls.io/repos/github/it-chain/engine/badge.svg?branch=develop)](https://coveralls.io/github/it-chain/engine?branch=develop)
 
 
 <p align="center"><img src="./doc/images/logo.png" width="250px" height="250px"></p>
