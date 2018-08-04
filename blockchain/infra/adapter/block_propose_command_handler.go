@@ -23,11 +23,12 @@ import (
 )
 
 type BlockCreateApi interface {
-	CreateBlock(txList []blockchain.Transaction) (blockchain.DefaultBlock, error)
+	CreateProposedBlock(txList []blockchain.Transaction) (blockchain.DefaultBlock, error)
 }
 
 type BlockProposeCommandHandler struct {
 	blockApi   BlockCreateApi
+	blockRepository blockchain.BlockRepository
 	engineMode string
 }
 
@@ -53,12 +54,21 @@ func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.P
 	defaultTxList := convertTxList(txList)
 
 	if h.engineMode == "solo" {
-		_, err := h.blockApi.CreateBlock(defaultTxList)
+
+		//create
+		ProposedBlock, err := h.blockApi.CreateProposedBlock(defaultTxList)
 
 		if err != nil {
 			return struct{}{}, rpc.Error{Message: err.Error()}
 		}
 
+		// save
+		err = h.blockRepository.Save(ProposedBlock)
+		if err != nil {
+			return struct{}{}, rpc.Error{Message: err.Error()}
+		}
+
+		// event
 		return struct{}{}, rpc.Error{}
 	}
 

@@ -22,13 +22,14 @@ import (
 	"github.com/it-chain/engine/blockchain"
 )
 
-var ErrGetLastCommitedBlock = errors.New("Error in getting last commited block")
+var ErrGetLastBlock = errors.New("Error in getting last block")
 var ErrCreateProposedBlock = errors.New("Error in creating proposed block")
 var ErrFailBlockTypeCasting = errors.New("Error failed type casting block")
 
 type BlockApi struct {
 	publisherId       string
 	blockQueryService blockchain.BlockQueryService
+	blockRepository blockchain.BlockRepository
 }
 
 func NewBlockApi(publisherId string, blockQueryService blockchain.BlockQueryService) (BlockApi, error) {
@@ -56,11 +57,12 @@ func (bApi BlockApi) SyncIsProgressing() blockchain.ProgressState {
 	return blockchain.DONE
 }
 
-func (bApi BlockApi) CreateBlock(txList []blockchain.Transaction) (blockchain.DefaultBlock, error) {
+func (bApi BlockApi) CreateProposedBlock(txList []blockchain.Transaction) (blockchain.DefaultBlock, error) {
 
-	lastBlock, err := bApi.blockQueryService.GetLastCommitedBlock()
+	lastBlock, err := bApi.blockRepository.FindLast()
+
 	if err != nil {
-		return blockchain.DefaultBlock{}, ErrGetLastCommitedBlock
+		return blockchain.DefaultBlock{}, ErrGetLastBlock
 	}
 
 	prevSeal := lastBlock.GetSeal()
