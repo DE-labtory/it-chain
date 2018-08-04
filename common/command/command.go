@@ -26,34 +26,6 @@ import (
  * consensus
  */
 
-type ConfirmBlock struct {
-	midgard.CommandModel
-	Seal []byte
-	Body []byte
-}
-
-type SendPrePrepareMsg struct {
-	midgard.CommandModel
-	ConsensusId        string
-	SenderId           string
-	RepresentativeList []*string
-	Seal               []byte
-	Body               []byte
-}
-
-type SendPrepareMsg struct {
-	midgard.CommandModel
-	ConsensusId string
-	SenderId    string
-	BlockHash   []byte
-}
-
-type SendCommitMsg struct {
-	midgard.CommandModel
-	ConsensusId string
-	SenderId    string
-}
-
 /*
  * grpc-gateway
  */
