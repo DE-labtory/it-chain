@@ -28,6 +28,10 @@ type BlockQueryService interface {
 	BlockQueryInnerService
 }
 
+type EventService interface {
+	CommitBlock(block DefaultBlock) error
+}
+
 type BlockQueryInnerService interface {
 	GetStagedBlockByHeight(height BlockHeight) (DefaultBlock, error)
 	GetStagedBlockById(blockId string) (DefaultBlock, error)

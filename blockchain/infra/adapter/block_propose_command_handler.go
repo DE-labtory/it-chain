@@ -29,6 +29,7 @@ type BlockCreateApi interface {
 type BlockProposeCommandHandler struct {
 	blockApi   BlockCreateApi
 	blockRepository blockchain.BlockRepository
+	eventService blockchain.EventService
 	engineMode string
 }
 
@@ -69,6 +70,11 @@ func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.P
 		}
 
 		// event
+		err = h.eventService.CommitBlock(ProposedBlock)
+
+		if err != nil {
+			return struct{}{}, rpc.Error{Message: err.Error()}
+		}
 		return struct{}{}, rpc.Error{}
 	}
 
