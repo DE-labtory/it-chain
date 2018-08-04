@@ -14,40 +14,47 @@
  * limitations under the License.
  */
 
-package pubsub_test
+package common_test
 
 import (
 	"sync"
 	"testing"
 
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTopicPublisher_Publish(t *testing.T) {
+type SampleEvent struct {
+	Attr string
+}
 
+type MockHandler struct {
+	HandleFunc func(event SampleEvent)
+}
+
+func (d *MockHandler) Handle(event SampleEvent) {
+	d.HandleFunc(event)
+}
+
+func TestEventServiceImpl_Publish(t *testing.T) {
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(1)
 
 	subscriber := pubsub.NewTopicSubscriber("", "Event")
-	publisher := pubsub.NewTopicPublisher("", "Event")
-
 	defer subscriber.Close()
 
 	handler := &MockHandler{}
-	handler.HandleNameUpdateCommandFunc = func(event UserNameUpdateEvent) {
-		assert.Equal(t, event.Name, "Jun")
-		wg.Done()
-	}
-
-	handler.HandleFunc = func(command UserAddCommand) {
-		assert.Equal(t, command.Age, 123)
+	handler.HandleFunc = func(event SampleEvent) {
+		assert.Equal(t, "test", event.Attr)
 		wg.Done()
 	}
 
 	subscriber.SubscribeTopic("test.*", handler)
 
-	publisher.Publish("test.created", UserNameUpdateEvent{Name: "Jun"})
-	publisher.Publish("test.created", UserAddCommand{Age: 123})
+	eventService := common.NewEventService("", "Event")
+
+	err := eventService.Publish("test.sample", SampleEvent{Attr: "test"})
+	assert.NoError(t, err)
 	wg.Wait()
 }
