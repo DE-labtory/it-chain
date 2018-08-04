@@ -313,3 +313,23 @@ func (s *State) SaveCommitMsg(commitMsg *CommitMsg) error {
 
 	return s.CommitMsgPool.Save(commitMsg)
 }
+func (s *State) CheckPrepareCondition() bool {
+	representativeNum := len(s.Representatives)
+	commitMsgNum := len(s.PrepareMsgPool.Get())
+	satisfyNum := representativeNum / 3
+
+	if commitMsgNum > (satisfyNum + 1) {
+		return true
+	}
+	return false
+}
+func (s *State) CheckCommitCondition() bool {
+	representativeNum := len(s.Representatives)
+	commitMsgNum := len(s.CommitMsgPool.Get())
+	satisfyNum := representativeNum / 3
+
+	if commitMsgNum > (satisfyNum + 1) {
+		return true
+	}
+	return false
+}
