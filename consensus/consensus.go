@@ -21,10 +21,6 @@ import (
 	"fmt"
 
 	"encoding/json"
-
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/core/eventstore"
-	"github.com/it-chain/midgard"
 )
 
 type State string
@@ -303,19 +299,7 @@ func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) error {
 		return errors.New("Consensus ID is not same")
 	}
 
-	prepareMsgAddedEvent := event.PrepareMsgAdded{
-		EventModel: midgard.EventModel{
-			ID: c.ConsensusID.Id,
-		},
-		SenderId:  prepareMsg.SenderId,
-		BlockHash: prepareMsg.BlockHash,
-	}
-
-	if err := OnAndSave(c, &prepareMsgAddedEvent); err != nil {
-		return err
-	}
-
-	return nil
+	return c.PrepareMsgPool.Save(prepareMsg)
 }
 
 func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) error {
@@ -323,76 +307,5 @@ func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) error {
 		return errors.New("Consensus ID is not same")
 	}
 
-	commitMsgAddedEvent := event.CommitMsgAdded{
-		EventModel: midgard.EventModel{
-			ID: c.ConsensusID.Id,
-		},
-		SenderId: commitMsg.SenderId,
-	}
-
-	if err := OnAndSave(c, &commitMsgAddedEvent); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Consensus) On(consensusEvent midgard.Event) error {
-	switch v := consensusEvent.(type) {
-
-	case *event.PrepareMsgAdded:
-		c.PrepareMsgPool.Save(&PrepareMsg{
-			ConsensusId: ConsensusId{v.GetID()},
-			SenderId:    v.SenderId,
-			BlockHash:   v.BlockHash,
-		})
-
-	case *event.CommitMsgAdded:
-		c.CommitMsgPool.Save(&CommitMsg{
-			ConsensusId: ConsensusId{v.GetID()},
-			SenderId:    v.SenderId,
-		})
-
-	case *event.ConsensusCreated:
-		c.ConsensusID = ConsensusId{v.ConsensusId}
-		for _, rStr := range v.Representatives {
-			c.Representatives = append(c.Representatives, &Representative{
-				Id: RepresentativeId(*rStr),
-			})
-		}
-		c.Block.Body = v.Body
-		c.Block.Seal = v.Seal
-		c.CurrentState = State(v.CurrentState)
-		c.PrepareMsgPool = NewPrepareMsgPool()
-		c.CommitMsgPool = NewCommitMsgPool()
-
-	case *event.ConsensusPrePrepared:
-		c.Start()
-
-	case *event.ConsensusPrepared:
-		c.ToPrepareState()
-
-	case *event.ConsensusCommitted:
-		c.ToCommitState()
-
-	case *event.ConsensusFinished:
-		c.ToIdleState()
-
-	default:
-		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
-	}
-
-	return nil
-}
-
-func OnAndSave(aggregate midgard.Aggregate, event midgard.Event) error {
-	if err := aggregate.On(event); err != nil {
-		return err
-	}
-
-	if err := eventstore.Save(event.GetID(), event); err != nil {
-		return err
-	}
-
-	return nil
+	return c.CommitMsgPool.Save(commitMsg)
 }
