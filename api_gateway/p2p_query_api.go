@@ -19,13 +19,10 @@ package api_gateway
 import (
 	"sync"
 
-	"errors"
-
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/p2p"
+	"github.com/it-chain/engine/p2p/infra/mem"
 )
-
-var ErrPeerExists = errors.New("peer already exists")
 
 type PeerQueryApi struct {
 	mux            sync.Mutex
@@ -140,7 +137,7 @@ func (pltrepo *PeerRepository) Save(peer p2p.Peer) error {
 	_, exist := pltrepo.pLTable.PeerTable[peer.PeerId.Id]
 
 	if exist {
-		return ErrPeerExists
+		return mem.ErrPeerExists
 	}
 
 	pltrepo.pLTable.PeerTable[peer.PeerId.Id] = peer
