@@ -12,6 +12,7 @@ script:
 - go test -v ./...
 - go test -v -covermode=count -coverprofile=coverage.out
 - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+
 os: linux
 before_install:
 - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
