@@ -29,7 +29,7 @@ type BlockQueryService interface {
 }
 
 type EventService interface {
-	CommitBlock(block DefaultBlock) error
+	Publish(topic string, event interface{}) error
 }
 
 type BlockQueryInnerService interface {
@@ -64,3 +64,21 @@ func createBlockCommittedEvent(block Block) (*event.BlockCommitted, error) {
 		State: Committed,
 	}, nil
 }
+
+
+func CreateBlockCommittedEvent(block DefaultBlock) (*event.BlockCommitted, error) {
+
+	txList := ConvBackFromTransactionList(block.TxList);
+
+	return &event.BlockCommitted{
+		Seal: block.GetSeal(),
+		PrevSeal: block.GetPrevSeal(),
+		Height: block.GetHeight(),
+		TxList: txList,
+		TxSeal: block.GetTxSeal(),
+		Timestamp: block.GetTimestamp(),
+		Creator: block.GetCreator(),
+		State: Committed,
+	}, nil
+}
+
