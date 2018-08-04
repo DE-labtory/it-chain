@@ -17,10 +17,35 @@
 package p2p
 
 type PeerService struct {
+	peerRepository PeerRepository
 	publishService PublishService
 }
 
-func (ps *PeerService) Save(peer Peer) {
+func NewPeerService(peerRepository PeerRepository, publishService PublishService) PeerService {
+	return PeerService{
+		peerRepository: peerRepository,
+		publishService: publishService,
+	}
+}
+
+func (ps *PeerService) Save(peer Peer) error {
+
+	if peer.IpAddress == "" {
+		return ErrEmptyAddress
+	}
+
+	ps.peerRepository.Save(peer)
 
 	ps.publishService.PeerCreated(peer)
+
+	return nil
+}
+
+func (ps *PeerService) Remove(peerId PeerId) error {
+
+	ps.peerRepository.Delete(peerId.Id)
+
+	ps.publishService.PeerDeleted(peerId)
+
+	return nil
 }

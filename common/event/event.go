@@ -179,36 +179,36 @@ type TxDeleted struct {
  */
 
 type PeerCreated struct {
-	midgard.EventModel
+	PeerId    string
 	IpAddress string
 }
 
 type PeerDeleted struct {
-	midgard.EventModel
+	PeerId string
 }
 
 // handle leader received event
 type LeaderUpdated struct {
-	midgard.EventModel
+	LeaderId string
 }
 
 type LeaderDelivered struct {
-	midgard.EventModel
+	LeaderId string
 }
 
 type LeaderDeleted struct {
-	midgard.EventModel
+	LeaderId string
 }
 
 //Connection
 
 // connection 생성
 type ConnectionCreated struct {
-	midgard.EventModel
-	Address string
+	ConnectionID string
+	Address      string
 }
 
 // connection close
 type ConnectionClosed struct {
-	midgard.EventModel
+	ConnectionId string
 }

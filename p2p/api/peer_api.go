@@ -14,20 +14,28 @@
  * limitations under the License.
  */
 
-package p2p
+package api
 
-type Leader struct {
-	LeaderId LeaderId
+import (
+	"github.com/it-chain/engine/p2p"
+	"github.com/it-chain/engine/p2p/infra/mem"
+)
+
+type PeerApi struct {
+	peerRepository mem.PeerRepository
+	publishService p2p.PublishService
 }
 
-type LeaderId struct {
-	Id string
+func (ps *PeerApi) Save(peer p2p.Peer) {
+
+	ps.peerRepository.Save(peer)
+
+	ps.publishService.PeerCreated(peer)
 }
 
-func (lid LeaderId) ToString() string {
-	return string(lid.Id)
-}
+func (ps *PeerApi) Remove(peerId p2p.PeerId) {
 
-func (l Leader) GetID() string {
-	return l.LeaderId.ToString()
+	ps.peerRepository.Delete(peerId.Id)
+
+	ps.publishService.PeerDeleted(peerId)
 }
