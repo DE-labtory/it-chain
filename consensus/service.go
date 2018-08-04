@@ -16,6 +16,8 @@
 
 package consensus
 
+import "errors"
+
 type PropagateService interface {
 	BroadcastPrePrepareMsg(msg PrePrepareMsg) error
 	BroadcastPrepareMsg(msg PrepareMsg) error
@@ -29,6 +31,10 @@ type ConfirmService interface {
 // 연결된 peer 중에서 consensus 에 참여할 representative 들을 선출
 func Elect(parliament []MemberId) ([]*Representative, error) {
 	representatives := make([]*Representative, 0)
+
+	if len(parliament) == 0 {
+		return []*Representative{}, errors.New("No parliament member.")
+	}
 
 	for _, peerId := range parliament {
 		representatives = append(representatives, NewRepresentative(peerId.ToString()))
