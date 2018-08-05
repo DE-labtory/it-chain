@@ -105,7 +105,7 @@ type MetaStatusChanged struct {
 // event when block is committed to event store
 type BlockCommitted struct {
 	midgard.EventModel
-	Seal		[]byte
+	Seal      []byte
 	PrevSeal  []byte
 	Height    uint64
 	TxList    []Tx
@@ -119,7 +119,6 @@ type BlockCommitted struct {
 type BlockStaged struct {
 	midgard.EventModel
 	State string
-
 }
 
 //event when block is created in event store

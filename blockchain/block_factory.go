@@ -53,7 +53,6 @@ func CreateGenesisBlock(genesisconfFilePath string) (DefaultBlock, error) {
 	//set seal
 	GenesisBlock.SetSeal(Seal)
 
-
 	return *GenesisBlock, nil
 }
 
