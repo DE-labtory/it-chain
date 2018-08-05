@@ -31,3 +31,7 @@ type IPeerService interface {
 type IPLTableService interface {
 	GetPLTableFromCommand(command command.ReceiveGrpc) (PLTable, error)
 }
+
+type ILeaderService interface {
+	Set(leader Leader) error
+}

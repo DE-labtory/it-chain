@@ -16,17 +16,29 @@
 
 package p2p
 
-type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
+import "github.com/it-chain/engine/common/event"
+
+type Publish func(topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
 type PublishService struct {
 	publish Publish
 }
 
-func (ps *PublishService) PeerCreated(peer Peer) {
+func (ps *PublishService) PeerCreated(peer Peer) error {
 
-	ps.publish("Event", "peer.created", peer)
+	event := event.PeerCreated{
+		PeerId:    peer.PeerId.Id,
+		IpAddress: peer.IpAddress,
+	}
+
+	return ps.publish("peer.created", event)
 }
 
-func (ps *PublishService) PeerDeleted(peerId PeerId) {
-	ps.publish("Event", "peer.created", peerId)
+func (ps *PublishService) PeerDeleted(peerId PeerId) error {
+
+	event := event.PeerDeleted{
+		PeerId: peerId.Id,
+	}
+
+	return ps.publish("peer.deleted", event)
 }

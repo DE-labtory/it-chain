@@ -20,6 +20,8 @@ import (
 	"errors"
 	"log"
 
+	"fmt"
+
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/api"
@@ -29,12 +31,14 @@ var ErrPeerApi = errors.New("problem in peer api")
 
 type EventHandler struct {
 	communicationApi api.ICommunicationApi
+	peerService      p2p.IPeerService
 }
 
-func NewEventHandler(communicationApi api.ICommunicationApi) EventHandler {
+func NewEventHandler(communicationApi api.ICommunicationApi, peerService p2p.IPeerService) EventHandler {
 
 	return EventHandler{
 		communicationApi: communicationApi,
+		peerService:      peerService,
 	}
 }
 
@@ -44,19 +48,24 @@ func (eh *EventHandler) HandleConnCreatedEvent(event event.ConnectionCreated) er
 	//1. addPeer
 	peer := p2p.Peer{
 		PeerId: p2p.PeerId{
-			Id: event.ID,
+			Id: event.ConnectionID,
 		},
 		IpAddress: event.Address,
 	}
+	fmt.Print("hey!")
+	fmt.Println(event)
 
-	err := p2p.NewPeer(peer.IpAddress, peer.PeerId)
+	err := eh.peerService.Save(peer)
+
+	fmt.Print("hey2!")
+	fmt.Println(err)
 
 	if err != nil {
 		return err
 	}
 
 	//2. send peer table
-	eh.communicationApi.DeliverPLTable(event.ID)
+	eh.communicationApi.DeliverPLTable(event.ConnectionID)
 
 	return nil
 }
@@ -64,11 +73,11 @@ func (eh *EventHandler) HandleConnCreatedEvent(event event.ConnectionCreated) er
 //todo deleted peer if disconnected peer is leader
 func (eh *EventHandler) HandleConnDisconnectedEvent(event event.ConnectionClosed) error {
 
-	if event.ID == "" {
+	if event.ConnectionId == "" {
 		return ErrEmptyPeerId
 	}
 
-	err := p2p.DeletePeer(p2p.PeerId{Id: event.ID})
+	err := eh.peerService.Remove(p2p.PeerId{Id: event.ConnectionId})
 
 	if err != nil {
 		log.Println(err)
