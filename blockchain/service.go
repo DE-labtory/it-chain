@@ -66,11 +66,11 @@ func createBlockCommittedEvent(block Block) (*event.BlockCommitted, error) {
 }
 
 
-func CreateBlockCommittedEvent(block DefaultBlock) (*event.BlockCommitted, error) {
+func CreateBlockCommittedEvent(block DefaultBlock) (event.BlockCommitted, error) {
 
 	txList := ConvBackFromTransactionList(block.TxList);
 
-	return &event.BlockCommitted{
+	return event.BlockCommitted{
 		Seal: block.GetSeal(),
 		PrevSeal: block.GetPrevSeal(),
 		Height: block.GetHeight(),
@@ -78,7 +78,7 @@ func CreateBlockCommittedEvent(block DefaultBlock) (*event.BlockCommitted, error
 		TxSeal: block.GetTxSeal(),
 		Timestamp: block.GetTimestamp(),
 		Creator: block.GetCreator(),
-		State: Committed,
+		State: block.State,
 	}, nil
 }
 

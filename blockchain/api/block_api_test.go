@@ -26,6 +26,11 @@ import (
 	"time"
 	"os"
 	"io/ioutil"
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/event"
+	"sync"
+	"github.com/it-chain/engine/common/rabbitmq/pubsub"
+	"encoding/hex"
 )
 
 func TestBlockApi_AddBlockToPool(t *testing.T) {
@@ -103,14 +108,36 @@ func TestBlockApi_SyncIsProgressing(t *testing.T) {
 	assert.Equal(t, blockchain.DONE, state)
 }
 
+
+
 // TODO: Write real situation test code, after finishing implementing api_gatey block_query_api.go
 func TestBlockApi_CommitProposedBlock(t *testing.T) {
 
-	publisherID := "junksound"
+	lastBlock := blockchain.DefaultBlock{
+		Seal:      []byte("seal"),
+		PrevSeal:  []byte("prevSeal"),
+		Height:    uint64(11),
+		TxList:    []*blockchain.DefaultTransaction{
+			{
+				ID:        "tx01",
+				ICodeID:   "ICodeID",
+				PeerID:    "junksound",
+				Timestamp: time.Now().Round(0),
+				Jsonrpc:   "",
+				Function:  "",
+				Args:      make([]string, 0),
+				Signature: []byte("Signature"),
+			},
+		},
+		TxSeal:    nil,
+		Timestamp: time.Time{},
+		Creator:   nil,
+		State:     "",
+	}
 
 	txList := []*blockchain.DefaultTransaction{
 		{
-			ID:        "tx01",
+			ID:        "tx02",
 			ICodeID:   "ICodeID",
 			PeerID:    "junksound",
 			Timestamp: time.Now().Round(0),
@@ -121,40 +148,51 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 		},
 	}
 
-	lastBlock := blockchain.DefaultBlock{
-		Seal:      []byte("seal"),
-		PrevSeal:  []byte("prevSeal"),
-		Height:    uint64(11),
-		TxList:    txList,
-		TxSeal:    nil,
-		Timestamp: time.Time{},
-		Creator:   nil,
-		State:     "",
+	//set subscriber
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	subscriber := pubsub.NewTopicSubscriber("", "Event")
+	defer subscriber.Close()
+
+	handler := &mock.CommitEventHandler{}
+
+	handler.HandleFunc = func(event event.BlockCommitted) {
+		assert.Equal(t, "tx02", event.TxList[0].ID)
+		assert.Equal(t, blockchain.Committed, event.State)
+		wg.Done()
 	}
 
+	subscriber.SubscribeTopic("block.*", handler)
+
+	//set api param
+
+	publisherID := "junksound"
+
 	blockRepo := mock.BlockRepository{}
+
 	blockRepo.FindLastFunc = func() (blockchain.DefaultBlock, error) {
 		return lastBlock, nil
 	}
 
 	blockRepo.SaveFunc = func(block blockchain.DefaultBlock) error {
 
-		assert.Equal(t,[]byte("seal"),block.PrevSeal)
+		assert.Equal(t,"tx02", block.GetTxList()[0].GetID())
 
 		return nil
 	}
 
-	eventService := mock.EventService{}
-	eventService.PublishFunc = func(topic string, event interface{}) error {
-		return nil
-	}
+	eventService := common.NewEventService("", "Event")
 
 
 	bApi, err := api.NewBlockApi(publisherID,blockRepo,eventService)
+
 	assert.NoError(t, err)
 
 	// when
 	err = bApi.CommitProposedBlock(txList)
+
+	// then
 	assert.NoError(t, err)
 }
 
@@ -173,20 +211,40 @@ func TestBlockApi_CommitGenesisBlock(t *testing.T) {
 	err := ioutil.WriteFile(GenesisFilePath, GenesisBlockConfigJson, 0644)
 	assert.NoError(t, err)
 
-	blockRepo := mock.BlockRepository{}
-	blockRepo.SaveFunc = func(block blockchain.DefaultBlock) error {
-		return nil
+	//set subscriber
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	subscriber := pubsub.NewTopicSubscriber("", "Event")
+	defer subscriber.Close()
+
+	handler := &mock.CommitEventHandler{}
+
+	handler.HandleFunc = func(event event.BlockCommitted) {
+		assert.Equal(t, hex.EncodeToString([]byte("junksound")), hex.EncodeToString(event.Creator))
+		assert.Equal(t, blockchain.Committed, event.State)
+		wg.Done()
 	}
 
-	eventService := mock.EventService{}
-	eventService.PublishFunc = func(topic string, event interface{}) error {
-		return nil
-	}
+	subscriber.SubscribeTopic("block.*", handler)
 
 	publisherID := "junksound"
+
+	blockRepo := mock.BlockRepository{}
+
+	blockRepo.SaveFunc = func(block blockchain.DefaultBlock) error {
+		assert.Equal(t, hex.EncodeToString([]byte("junksound")), hex.EncodeToString(block.GetCreator()))
+		return nil
+	}
+
+	eventService := common.NewEventService("", "Event")
+
+
 	bApi, err := api.NewBlockApi(publisherID,blockRepo,eventService)
 	assert.NoError(t, err)
+
 	// when
 	err = bApi.CommitGenesisBlock(GenesisFilePath)
+	// then
 	assert.NoError(t, err)
 }

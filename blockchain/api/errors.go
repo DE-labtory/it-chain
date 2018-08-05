@@ -20,4 +20,6 @@ import "errors"
 
 var ErrCreateGenesisBlock = errors.New("Error in creating Genesis block")
 var ErrSaveBlock = errors.New("Error in saving block")
-var ErrCommitBlock = errors.New("Error in committing block")
+var ErrCreateEvent = errors.New("Error in creating event")
+var ErrGetLastBlock = errors.New("Error in getting last block")
+var ErrCreateProposedBlock = errors.New("Error in creating proposed block")

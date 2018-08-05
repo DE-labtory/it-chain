@@ -16,12 +16,15 @@
 
 package mock
 
-import "github.com/it-chain/engine/blockchain"
+import (
+	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/common/event"
+)
 
 type BlockApi struct {
 	AddBlockToPoolFunc            func(block blockchain.Block) error
 	CheckAndSaveBlockFromPoolFunc func(height blockchain.BlockHeight) error
-	CreateProposedBlockFunc       func(txList []blockchain.Transaction) (blockchain.DefaultBlock, error)
+	CommitProposedBlockFunc       func(txList []*blockchain.DefaultTransaction) error
 }
 
 func (api BlockApi) AddBlockToPool(block blockchain.Block) error {
@@ -32,8 +35,8 @@ func (api BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) err
 	return api.CheckAndSaveBlockFromPoolFunc(height)
 }
 
-func (api BlockApi) CreateProposedBlock(txList []blockchain.Transaction) (blockchain.DefaultBlock, error) {
-	return api.CreateProposedBlockFunc(txList)
+func (api BlockApi) CommitProposedBlock(txList []*blockchain.DefaultTransaction) error {
+	return api.CommitProposedBlockFunc(txList)
 }
 
 type MockSyncBlockApi struct {
@@ -42,4 +45,8 @@ type MockSyncBlockApi struct {
 
 func (ba MockSyncBlockApi) SyncedCheck(block blockchain.Block) error {
 	return ba.SyncedCheckFunc(block)
+}
+
+type CommitEventHandler struct {
+	HandleFunc func(event event.BlockCommitted)
 }
