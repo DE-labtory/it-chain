@@ -21,6 +21,7 @@ import (
 
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/api"
+	"github.com/it-chain/engine/p2p/infra/mem"
 	"github.com/it-chain/engine/p2p/test/mock"
 	"github.com/magiconair/properties/assert"
 )
@@ -60,7 +61,33 @@ func TestLeaderApi_UpdateLeaderWithAddress(t *testing.T) {
 		},
 	}
 
-	leaderApi := SetupLeaderApi()
+	leaderApi := SetupLeaderApi(p2p.PLTable{
+		Leader: p2p.Leader{
+			LeaderId: p2p.LeaderId{
+				Id: "1",
+			},
+		},
+		PeerTable: map[string]p2p.Peer{
+			"1": {
+				PeerId: p2p.PeerId{
+					Id: "1",
+				},
+				IpAddress: "1",
+			},
+			"2": {
+				PeerId: p2p.PeerId{
+					Id: "2",
+				},
+				IpAddress: "2",
+			},
+			"3": {
+				PeerId: p2p.PeerId{
+					Id: "3",
+				},
+				IpAddress: "3",
+			},
+		},
+	})
 
 	for testName, test := range tests {
 
@@ -78,14 +105,31 @@ func TestLeaderApi_UpdateLeaderWithLargePeerTable(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			pLTable p2p.PLTable
+			myPLTable       p2p.PLTable
+			oppositePLTable p2p.PLTable
 		}
 		output struct {
 			leader p2p.Leader
 		}
 	}{
 		"success": {
-			input: struct{ pLTable p2p.PLTable }{pLTable: p2p.PLTable{
+			input: struct {
+				myPLTable       p2p.PLTable
+				oppositePLTable p2p.PLTable
+			}{myPLTable: p2p.PLTable{
+				Leader: p2p.Leader{
+					LeaderId: p2p.LeaderId{
+						Id: "1",
+					},
+				},
+				PeerTable: map[string]p2p.Peer{
+					"1": {
+						PeerId: p2p.PeerId{
+							Id: "1",
+						},
+					},
+				},
+			}, oppositePLTable: p2p.PLTable{
 				Leader: p2p.Leader{
 					LeaderId: p2p.LeaderId{
 						Id: "2",
@@ -121,19 +165,45 @@ func TestLeaderApi_UpdateLeaderWithLargePeerTable(t *testing.T) {
 			}},
 		},
 		"not updated with longer peer list case": {
-			input: struct{ pLTable p2p.PLTable }{pLTable: p2p.PLTable{
+			input: struct {
+				myPLTable       p2p.PLTable
+				oppositePLTable p2p.PLTable
+			}{myPLTable: p2p.PLTable{
 				Leader: p2p.Leader{
 					LeaderId: p2p.LeaderId{
 						Id: "1",
 					},
 				},
 				PeerTable: map[string]p2p.Peer{
-					"1": p2p.Peer{
+					"1": {
 						PeerId: p2p.PeerId{
 							Id: "1",
 						},
 					},
-					"2": p2p.Peer{
+					"2": {
+						PeerId: p2p.PeerId{
+							Id: "2",
+						},
+					},
+					"3": {
+						PeerId: p2p.PeerId{
+							Id: "3",
+						},
+					},
+				},
+			}, oppositePLTable: p2p.PLTable{
+				Leader: p2p.Leader{
+					LeaderId: p2p.LeaderId{
+						Id: "2",
+					},
+				},
+				PeerTable: map[string]p2p.Peer{
+					"1": {
+						PeerId: p2p.PeerId{
+							Id: "1",
+						},
+					},
+					"2": {
 						PeerId: p2p.PeerId{
 							Id: "1",
 						},
@@ -152,39 +222,38 @@ func TestLeaderApi_UpdateLeaderWithLargePeerTable(t *testing.T) {
 		},
 	}
 
-	leaderApi := SetupLeaderApi()
-
 	for testName, test := range tests {
 		t.Logf("running test case %s ", testName)
 
-		leaderApi.UpdateLeaderWithLargePeerTable(test.input.pLTable)
+		leaderApi := SetupLeaderApi(test.input.myPLTable)
 
-		t.Logf("%s", MockPLTable.Leader.LeaderId.Id)
+		leaderApi.UpdateLeaderWithLargePeerTable(test.input.oppositePLTable)
 
-		assert.Equal(t, MockPLTable.Leader, test.output.leader)
+		leader, _ := leaderApi.PeerRepository.GetLeader()
+
+		assert.Equal(t, leader, test.output.leader)
 	}
 
 }
 
-func SetupLeaderApi() api.LeaderApi {
+func SetupLeaderApi(myPLTable p2p.PLTable) api.LeaderApi {
 
-	leaderService := &mock.MockLeaderService{}
+	peerRepository := mem.NewPeerReopository()
 
-	leaderService.SetFunc = func(leader p2p.Leader) error {
+	peerRepository.SetLeader(myPLTable.Leader)
 
-		MockPLTable.Leader = leader
+	for _, v := range myPLTable.PeerTable {
 
+		peerRepository.Save(v)
+	}
+
+	mockPublishService := mock.MockPublishService{}
+
+	mockPublishService.LeaderUpdatedFunc = func(leader p2p.Leader) error {
 		return nil
 	}
 
-	mockPeerQueryService := &mock.MockPeerQueryService{}
-
-	mockPeerQueryService.GetPLTableFunc = func() (p2p.PLTable, error) {
-
-		return mock.MakeFakePLTable(), nil
-	}
-
-	leaderApi := api.NewLeaderApi(leaderService, mockPeerQueryService)
+	leaderApi := api.NewLeaderApi(&peerRepository, &mockPublishService)
 
 	return leaderApi
 }

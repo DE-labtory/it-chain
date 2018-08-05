@@ -20,11 +20,17 @@ import "github.com/it-chain/engine/common/event"
 
 type Publish func(topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
 
-type PublishService struct {
+type PublishService interface {
+	PeerCreated(peer Peer) error
+	PeerDeleted(peerId PeerId) error
+	LeaderUpdated(leader Leader) error
+}
+
+type PublishServiceImpl struct {
 	publish Publish
 }
 
-func (ps *PublishService) PeerCreated(peer Peer) error {
+func (ps *PublishServiceImpl) PeerCreated(peer Peer) error {
 
 	event := event.PeerCreated{
 		PeerId:    peer.PeerId.Id,
@@ -34,11 +40,20 @@ func (ps *PublishService) PeerCreated(peer Peer) error {
 	return ps.publish("peer.created", event)
 }
 
-func (ps *PublishService) PeerDeleted(peerId PeerId) error {
+func (ps *PublishServiceImpl) PeerDeleted(peerId PeerId) error {
 
 	event := event.PeerDeleted{
 		PeerId: peerId.Id,
 	}
 
 	return ps.publish("peer.deleted", event)
+}
+
+func (ps *PublishServiceImpl) LeaderUpdated(leader Leader) error {
+
+	event := event.LeaderUpdated{
+		LeaderId: leader.LeaderId.Id,
+	}
+
+	return ps.publish("leader.updated", event)
 }

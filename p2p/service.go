@@ -28,7 +28,7 @@ type IPeerService interface {
 	Remove(peerId PeerId) error
 }
 
-type IPLTableService interface {
+type PLTableService interface {
 	GetPLTableFromCommand(command command.ReceiveGrpc) (PLTable, error)
 }
 

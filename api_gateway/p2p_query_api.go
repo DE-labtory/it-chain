@@ -164,7 +164,7 @@ func (pltrepo *PeerRepository) SetLeader(peer p2p.Peer) error {
 	return nil
 }
 
-func (pltrepo *PeerRepository) Delete(id string) error {
+func (pltrepo *PeerRepository) Remove(id string) error {
 
 	pltrepo.mux.Lock()
 	defer pltrepo.mux.Unlock()
@@ -194,7 +194,7 @@ func (peh *P2PEventHandler) PeerCreatedEventHandler(event event.PeerCreated) err
 
 func (peh *P2PEventHandler) PeerDeletedEventHandler(event event.PeerCreated) error {
 
-	peh.peerRepository.Delete(event.PeerId)
+	peh.peerRepository.Remove(event.PeerId)
 
 	return nil
 }
