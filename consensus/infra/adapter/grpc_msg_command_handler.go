@@ -17,7 +17,9 @@
 package adapter
 
 import (
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus"
 	"github.com/it-chain/engine/consensus/api"
 )
@@ -30,39 +32,39 @@ func NewGrpcMsgCommandHandler(cApi api.ConsensusApi) GrpcMsgCommandHandler {
 	return GrpcMsgCommandHandler{}
 }
 
-func (s *GrpcMsgCommandHandler) HandleSendPrePrepareMsg(command command.SendPrePrepareMsg) {
-	representatives := make([]*consensus.Representative, 0)
-	representativeList := command.RepresentativeList
-	for _, r := range representativeList {
-		representatives = append(representatives, &consensus.Representative{
-			Id: consensus.RepresentativeId(*r),
-		})
+func (s *GrpcMsgCommandHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) {
+	protocol := command.Protocol
+	body := command.Body
+
+	switch protocol {
+	case "PrePrepareMsgProtocol":
+		s.HandleSendPrePrepareMsg(body)
+	case "PrepareMsgProtocol":
+		s.HandleSendPrepareMsg(body)
+	case "CommitMsgProtocol":
+		s.HandleSendCommitMsg(body)
+	default:
+		logger.Error(nil, "GRPC protocol is not defined.")
 	}
-	msg := consensus.PrePrepareMsg{
-		ConsensusId:    consensus.NewConsensusId(command.ConsensusId),
-		SenderId:       command.SenderId,
-		Representative: representatives,
-		ProposedBlock: consensus.ProposedBlock{
-			Seal: command.Seal,
-			Body: command.Body,
-		},
-	}
+}
+
+func (s *GrpcMsgCommandHandler) HandleSendPrePrepareMsg(body []byte) {
+	var msg consensus.PrePrepareMsg
+	common.Deserialize(body, msg)
+
 	s.cApi.ReceivePrePrepareMsg(msg)
 }
 
-func (s *GrpcMsgCommandHandler) HandleSendPrepareMsg(command command.SendPrepareMsg) {
-	msg := consensus.PrepareMsg{
-		ConsensusId: consensus.NewConsensusId(command.ConsensusId),
-		SenderId:    command.SenderId,
-		BlockHash:   command.BlockHash,
-	}
+func (s *GrpcMsgCommandHandler) HandleSendPrepareMsg(body []byte) {
+	var msg consensus.PrepareMsg
+	common.Deserialize(body, msg)
+
 	s.cApi.ReceivePrepareMsg(msg)
 }
 
-func (s *GrpcMsgCommandHandler) HandleSendCommitMsg(command command.SendCommitMsg) {
-	msg := consensus.CommitMsg{
-		ConsensusId: consensus.NewConsensusId(command.ConsensusId),
-		SenderId:    command.SenderId,
-	}
+func (s *GrpcMsgCommandHandler) HandleSendCommitMsg(body []byte) {
+	var msg consensus.CommitMsg
+	common.Deserialize(body, msg)
+
 	s.cApi.ReceiveCommitMsg(msg)
 }

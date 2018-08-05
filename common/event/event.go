@@ -26,51 +26,10 @@ import (
  * consensus
  */
 
-// Publish part
-
-type PrepareMsgAdded struct {
-	midgard.EventModel
-	SenderId  string
-	BlockHash []byte
-}
-
-type CommitMsgAdded struct {
-	midgard.EventModel
-	SenderId string
-}
-
-type ConsensusCreated struct {
-	midgard.EventModel
-	ConsensusId     string
-	Representatives []*string
-	Seal            []byte
-	Body            []byte
-	CurrentState    string
-}
-
-// Preprepare msg를 보냈을 때
-type ConsensusPrePrepared struct {
-	midgard.EventModel
-}
-
-// Prepare msg를 보냈을 때
-type ConsensusPrepared struct {
-	midgard.EventModel
-}
-
-// Commit msg를 보냈을 때
-type ConsensusCommitted struct {
-	midgard.EventModel
-}
-
-// block 저장이 끝나 state가 idle이 될 때
+// consensus가 끝났다는 event
+// true면 블록 저장, false면 블록 저장안함
 type ConsensusFinished struct {
-	midgard.EventModel
-}
-
-// block이 저장되었을 때
-type BlockSaved struct {
-	midgard.EventModel
+	IsConfirmed bool
 }
 
 /*

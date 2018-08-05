@@ -31,6 +31,7 @@ func NewRequestedConsensusSCommandHandler(c *consensus.Consensus, service Parlia
 	}
 }
 
+// todo : requested consensus command 가 아직 정의 되지 않음
 func (r RequestedConsensusCommandHandler) HandleConsensusRequestCommand() error {
 	parliament, err := r.parliamentService.RequestPeerList()
 

@@ -66,9 +66,8 @@ func TestConfirmService_ConfirmBlock(t *testing.T) {
 		},
 	}
 
-	publish := func(exchange string, topic string, data interface{}) (e error) {
-		assert.Equal(t, "Command", exchange)
-		assert.Equal(t, "block.create", topic)
+	publish := func(topic string, data interface{}) (e error) {
+		assert.Equal(t, "block.confirm", topic)
 
 		return nil
 	}
