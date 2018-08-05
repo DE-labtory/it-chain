@@ -32,15 +32,15 @@ type ILeaderApi interface {
 }
 
 type LeaderApi struct {
-	leaderService    p2p.ILeaderService
-	peerQueryService p2p.PeerQueryService
+	PeerRepository p2p.PeerRepository
+	publishService p2p.PublishService
 }
 
-func NewLeaderApi(leaderService p2p.ILeaderService, peerQueryService p2p.PeerQueryService) LeaderApi {
+func NewLeaderApi(peerRepository p2p.PeerRepository, publishService p2p.PublishService) LeaderApi {
 
 	return LeaderApi{
-		leaderService:    leaderService,
-		peerQueryService: peerQueryService,
+		PeerRepository: peerRepository,
+		publishService: publishService,
 	}
 }
 
@@ -48,7 +48,7 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
 	//1. loop peer list and find specific address
 	//2. update specific peer as leader
-	pLTable, _ := la.peerQueryService.GetPLTable()
+	pLTable, _ := la.PeerRepository.GetPLTable()
 
 	peers := pLTable.PeerTable
 
@@ -56,11 +56,25 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
 		if peer.IpAddress == ipAddress {
 
-			la.leaderService.Set(p2p.Leader{
+			err := la.PeerRepository.SetLeader(p2p.Leader{
 				LeaderId: p2p.LeaderId{
 					Id: peer.PeerId.Id,
 				},
 			})
+
+			if err != nil {
+				return err
+			}
+
+			err2 := la.publishService.LeaderUpdated(p2p.Leader{
+				LeaderId: p2p.LeaderId{
+					Id: peer.PeerId.Id,
+				},
+			})
+
+			if err2 != nil {
+				return err2
+			}
 
 			return nil
 		}
@@ -72,17 +86,41 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 
 func (la *LeaderApi) UpdateLeaderWithLargePeerTable(oppositePLTable p2p.PLTable) error {
 
-	myPLTable, _ := la.peerQueryService.GetPLTable()
+	myPLTable, _ := la.PeerRepository.GetPLTable()
 
 	myLeader, _ := myPLTable.GetLeader()
 
 	if len(myPLTable.PeerTable) < len(oppositePLTable.PeerTable) {
 
-		la.leaderService.Set(oppositePLTable.Leader)
+		err := la.PeerRepository.SetLeader(oppositePLTable.Leader)
+
+		if err != nil {
+			return err
+		}
+
+		err2 := la.publishService.LeaderUpdated(oppositePLTable.Leader)
+
+		if err2 != nil {
+			return err2
+		}
+
+		return nil
 
 	} else {
 
-		la.leaderService.Set(myLeader)
+		err := la.PeerRepository.SetLeader(myLeader)
+
+		if err != nil {
+			return err
+		}
+
+		err2 := la.publishService.LeaderUpdated(myLeader)
+
+		if err2 != nil {
+			return err2
+		}
+
+		return nil
 
 	}
 

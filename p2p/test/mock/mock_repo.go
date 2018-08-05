@@ -58,3 +58,36 @@ func MakeFakePLTable() p2p.PLTable {
 		PeerTable: peerTable,
 	}
 }
+
+type MockPeerRepository struct {
+	GetPLTableFunc        func() (p2p.PLTable, error)
+	GetLeaderFunc         func() (p2p.Leader, error)
+	FindPeerByIdFunc      func(peerId p2p.PeerId) (p2p.Peer, error)
+	FindPeerByAddressFunc func(ipAddress string) (p2p.Peer, error)
+	SaveFunc              func(peer p2p.Peer) error
+	SetLeaderFunc         func(leader p2p.Leader) error
+	DeleteFunc            func(id string) error
+}
+
+func (mpr *MockPeerRepository) GetPLTable() (p2p.PLTable, error) {
+
+	return mpr.GetPLTableFunc()
+}
+func (mpr *MockPeerRepository) GetLeader() (p2p.Leader, error) {
+	return mpr.GetLeaderFunc()
+}
+func (mpr *MockPeerRepository) FindPeerById(peerId p2p.PeerId) (p2p.Peer, error) {
+	return mpr.FindPeerByIdFunc(peerId)
+}
+func (mpr *MockPeerRepository) FindPeerByAddress(ipAddress string) (p2p.Peer, error) {
+	return mpr.FindPeerByAddressFunc(ipAddress)
+}
+func (mpr *MockPeerRepository) Save(peer p2p.Peer) error {
+	return mpr.SaveFunc(peer)
+}
+func (mpr *MockPeerRepository) SetLeader(leader p2p.Leader) error {
+	return mpr.SetLeaderFunc(leader)
+}
+func (mpr *MockPeerRepository) Delete(id string) error {
+	return mpr.DeleteFunc(id)
+}

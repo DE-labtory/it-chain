@@ -79,6 +79,6 @@ type PeerRepository interface {
 	FindPeerById(peerId PeerId) (Peer, error)
 	FindPeerByAddress(ipAddress string) (Peer, error)
 	Save(peer Peer) error
-	SetLeader(peer Peer) error
-	Delete(id string) error
+	SetLeader(leader Leader) error
+	Remove(id string) error
 }

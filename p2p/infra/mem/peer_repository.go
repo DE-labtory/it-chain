@@ -25,19 +25,19 @@ import (
 
 var ErrPeerExists = errors.New("peer already exists")
 
-type PeerRepository struct {
+type PeerRepositoryImpl struct {
 	mux     sync.RWMutex
 	pLTable p2p.PLTable
 }
 
-func NewPeerReopository() PeerRepository {
-	return PeerRepository{
+func NewPeerReopository() PeerRepositoryImpl {
+	return PeerRepositoryImpl{
 		mux:     sync.RWMutex{},
 		pLTable: *p2p.NewPLTable(p2p.Leader{p2p.LeaderId{""}}, make(map[string]p2p.Peer)),
 	}
 }
 
-func (pr *PeerRepository) GetPLTable() (p2p.PLTable, error) {
+func (pr *PeerRepositoryImpl) GetPLTable() (p2p.PLTable, error) {
 
 	pr.mux.Lock()
 	defer pr.mux.Unlock()
@@ -45,12 +45,12 @@ func (pr *PeerRepository) GetPLTable() (p2p.PLTable, error) {
 	return pr.pLTable, nil
 }
 
-func (pr *PeerRepository) GetLeader() (p2p.Leader, error) {
+func (pr *PeerRepositoryImpl) GetLeader() (p2p.Leader, error) {
 
 	return pr.pLTable.Leader, nil
 }
 
-func (pr *PeerRepository) FindPeerById(peerId p2p.PeerId) (p2p.Peer, error) {
+func (pr *PeerRepositoryImpl) FindPeerById(peerId p2p.PeerId) (p2p.Peer, error) {
 
 	pr.mux.Lock()
 	defer pr.mux.Unlock()
@@ -67,7 +67,7 @@ func (pr *PeerRepository) FindPeerById(peerId p2p.PeerId) (p2p.Peer, error) {
 	return v, nil
 }
 
-func (pr *PeerRepository) FindPeerByAddress(ipAddress string) (p2p.Peer, error) {
+func (pr *PeerRepositoryImpl) FindPeerByAddress(ipAddress string) (p2p.Peer, error) {
 
 	pr.mux.Lock()
 	defer pr.mux.Unlock()
@@ -82,7 +82,7 @@ func (pr *PeerRepository) FindPeerByAddress(ipAddress string) (p2p.Peer, error) 
 	return p2p.Peer{}, nil
 }
 
-func (pr *PeerRepository) Save(peer p2p.Peer) error {
+func (pr *PeerRepositoryImpl) Save(peer p2p.Peer) error {
 
 	pr.mux.Lock()
 	defer pr.mux.Unlock()
@@ -98,23 +98,17 @@ func (pr *PeerRepository) Save(peer p2p.Peer) error {
 	return nil
 }
 
-func (pr *PeerRepository) SetLeader(peer p2p.Peer) error {
+func (pr *PeerRepositoryImpl) SetLeader(leader p2p.Leader) error {
 
 	pr.mux.Lock()
 	defer pr.mux.Unlock()
-
-	leader := p2p.Leader{
-		LeaderId: p2p.LeaderId{
-			Id: peer.PeerId.Id,
-		},
-	}
 
 	pr.pLTable.Leader = leader
 
 	return nil
 }
 
-func (pr *PeerRepository) Delete(id string) error {
+func (pr *PeerRepositoryImpl) Remove(id string) error {
 
 	pr.mux.Lock()
 	defer pr.mux.Unlock()

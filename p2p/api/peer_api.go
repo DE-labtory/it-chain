@@ -45,7 +45,7 @@ func (ps *PeerApiImpl) Save(peer p2p.Peer) error {
 
 func (ps *PeerApiImpl) Remove(peerId p2p.PeerId) error {
 
-	err := ps.peerRepository.Delete(peerId.Id)
+	err := ps.peerRepository.Remove(peerId.Id)
 
 	if err != nil {
 		return err

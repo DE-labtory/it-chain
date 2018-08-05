@@ -34,13 +34,13 @@ type GrpcCommandHandler struct {
 	leaderApi        api.ILeaderApi
 	electionService  p2p.ElectionService
 	communicationApi api.ICommunicationApi
-	pLTableService   p2p.IPLTableService
+	pLTableService   p2p.PLTableService
 }
 
 func NewGrpcCommandHandler(
 	leaderApi api.ILeaderApi,
 	electionService p2p.ElectionService, communicationApi api.ICommunicationApi,
-	pLTableService p2p.IPLTableService) GrpcCommandHandler {
+	pLTableService p2p.PLTableService) GrpcCommandHandler {
 	return GrpcCommandHandler{
 		leaderApi:        leaderApi,
 		electionService:  electionService,

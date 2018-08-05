@@ -26,6 +26,7 @@ import (
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/api"
 	"github.com/it-chain/engine/p2p/infra/adapter"
+	"github.com/it-chain/engine/p2p/infra/mem"
 	"github.com/it-chain/midgard"
 )
 
@@ -49,9 +50,12 @@ func NewMockP2PProcess(mockProcessTable map[string]MockP2PProcess) MockP2PProces
 
 func (mpp *MockP2PProcess) Init(id string, ipAddress string) {
 
-	peerRepository := api_gateway.NewPeerReopository()
+	peerRepository := mem.NewPeerReopository()
 
-	peerQueryService := api_gateway.NewPeerQueryApi(&peerRepository)
+	//todo replace with component repo
+	queryPeerRepository := api_gateway.PeerRepository{}
+
+	peerQueryService := api_gateway.NewPeerQueryApi(&queryPeerRepository)
 
 	communicationService := p2p.NewCommunicationService(mpp.Publish)
 
@@ -60,11 +64,12 @@ func (mpp *MockP2PProcess) Init(id string, ipAddress string) {
 	//todo should be replaced with real struct
 	peerApi := &MockPeerApi{}
 
+	//todo should be replaced with real struct
+	publishService := p2p.PublishServiceImpl{}
+
 	mpp.eventHandler = adapter.NewEventHandler(&communicationApi, peerApi)
 
-	leaderService := p2p.NewLeaderService()
-
-	leaderApi := api.NewLeaderApi(&leaderService, &peerQueryService)
+	leaderApi := api.NewLeaderApi(&peerRepository, &publishService)
 
 	election := p2p.NewElection(0, "candidate", 0)
 
@@ -75,7 +80,7 @@ func (mpp *MockP2PProcess) Init(id string, ipAddress string) {
 
 	electionService := p2p.NewElectionService(electionRepository, &peerQueryService, client)
 
-	pLTableService := p2p.PLTableService{}
+	pLTableService := p2p.PLTableServiceImpl{}
 
 	mpp.grpcCommandHandler = adapter.NewGrpcCommandHandler(&leaderApi, electionService, &communicationApi, &pLTableService)
 

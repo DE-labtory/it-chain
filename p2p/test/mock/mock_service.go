@@ -129,3 +129,21 @@ func (mes *MockElectionService) ElectLEaderWithRaft() error {
 
 	return mes.ElectLeaderWithRaft()
 }
+
+type MockPublishService struct {
+	PeerCreatedFunc   func(peer p2p.Peer) error
+	PeerDeletedFunc   func(peerId p2p.PeerId) error
+	LeaderUpdatedFunc func(leader p2p.Leader) error
+}
+
+func (mp *MockPublishService) PeerCreated(peer p2p.Peer) error {
+	return mp.PeerCreatedFunc(peer)
+}
+
+func (mp *MockPublishService) PeerDeleted(peerId p2p.PeerId) error {
+	return mp.PeerDeletedFunc(peerId)
+}
+
+func (mp *MockPublishService) LeaderUpdated(leader p2p.Leader) error {
+	return mp.LeaderUpdatedFunc(leader)
+}
