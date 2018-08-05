@@ -18,24 +18,40 @@ package api
 
 import (
 	"github.com/it-chain/engine/p2p"
-	"github.com/it-chain/engine/p2p/infra/mem"
 )
 
-type PeerApi struct {
-	peerRepository mem.PeerRepository
+type PeerApi interface {
+	Save(peer p2p.Peer) error
+	Remove(peerId p2p.PeerId) error
+}
+
+type PeerApiImpl struct {
+	peerRepository p2p.PeerRepository
 	publishService p2p.PublishService
 }
 
-func (ps *PeerApi) Save(peer p2p.Peer) {
+func (ps *PeerApiImpl) Save(peer p2p.Peer) error {
 
-	ps.peerRepository.Save(peer)
+	err := ps.peerRepository.Save(peer)
+
+	if err != nil {
+		return err
+	}
 
 	ps.publishService.PeerCreated(peer)
+
+	return nil
 }
 
-func (ps *PeerApi) Remove(peerId p2p.PeerId) {
+func (ps *PeerApiImpl) Remove(peerId p2p.PeerId) error {
 
-	ps.peerRepository.Delete(peerId.Id)
+	err := ps.peerRepository.Delete(peerId.Id)
+
+	if err != nil {
+		return err
+	}
 
 	ps.publishService.PeerDeleted(peerId)
+
+	return nil
 }

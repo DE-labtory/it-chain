@@ -29,14 +29,14 @@ var ErrPeerApi = errors.New("problem in peer api")
 
 type EventHandler struct {
 	communicationApi api.ICommunicationApi
-	peerService      p2p.IPeerService
+	peerApi          api.PeerApi
 }
 
-func NewEventHandler(communicationApi api.ICommunicationApi, peerService p2p.IPeerService) EventHandler {
+func NewEventHandler(communicationApi api.ICommunicationApi, peerApi api.PeerApi) EventHandler {
 
 	return EventHandler{
 		communicationApi: communicationApi,
-		peerService:      peerService,
+		peerApi:          peerApi,
 	}
 }
 
@@ -51,7 +51,7 @@ func (eh *EventHandler) HandleConnCreatedEvent(event event.ConnectionCreated) er
 		IpAddress: event.Address,
 	}
 
-	err := eh.peerService.Save(peer)
+	err := eh.peerApi.Save(peer)
 
 	if err != nil {
 		return err
@@ -70,7 +70,7 @@ func (eh *EventHandler) HandleConnDisconnectedEvent(event event.ConnectionClosed
 		return ErrEmptyPeerId
 	}
 
-	err := eh.peerService.Remove(p2p.PeerId{Id: event.ConnectionId})
+	err := eh.peerApi.Remove(p2p.PeerId{Id: event.ConnectionId})
 
 	if err != nil {
 		log.Println(err)
