@@ -25,10 +25,6 @@ import (
 	"time"
 
 	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/blockchain/test/mock"
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/core/eventstore"
-	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -267,79 +263,4 @@ func TestCreateProposedBlock(t *testing.T) {
 
 	}
 
-}
-
-func TestCreateRetrievedBlock(t *testing.T) {
-
-	//given
-	timeStamp := time.Now().Round(0)
-	prevSeal := []byte("prevseal")
-	height := uint64(0)
-	txList := []*blockchain.DefaultTransaction{
-		{
-			ID:        "tx01",
-			ICodeID:   "ICodeID",
-			PeerID:    "junksound",
-			Timestamp: timeStamp,
-			Jsonrpc:   "",
-			Function:  "",
-			Args:      make([]string, 0),
-			Signature: []byte("Signature"),
-		},
-	}
-	creator := []byte("junksound")
-
-	retrievedBlock, err := blockchain.CreateProposedBlock(prevSeal, height, txList, creator)
-	if err != nil {
-	}
-
-	tests := map[string]struct {
-		input struct {
-			retrivedBlock blockchain.DefaultBlock
-		}
-		output struct {
-			createdBlock blockchain.DefaultBlock
-		}
-		err error
-	}{
-		"success create retrieved block": {
-			input: struct {
-				retrivedBlock blockchain.DefaultBlock
-			}{
-				retrivedBlock: retrievedBlock,
-			},
-
-			output: struct {
-				createdBlock blockchain.DefaultBlock
-			}{
-				createdBlock: retrievedBlock,
-			},
-
-			err: nil,
-		},
-	}
-
-	repo := mock.EventRepository{}
-
-	repo.SaveFunc = func(aggregateID string, events ...midgard.Event) error {
-		assert.Equal(t, 1, len(events))
-		assert.IsType(t, &event.BlockCreated{}, events[0])
-		return nil
-	}
-	repo.CloseFunc = func() {}
-
-	eventstore.InitForMock(repo)
-	defer eventstore.Close()
-
-	for testName, test := range tests {
-		t.Logf("Running test case %s", testName)
-
-		//when
-		RetrivedBlock, err := blockchain.CreateRetrievedBlock(test.input.retrivedBlock)
-
-		//then
-		assert.Equal(t, test.err, err)
-		assert.Equal(t, test.output.createdBlock, RetrivedBlock)
-
-	}
 }

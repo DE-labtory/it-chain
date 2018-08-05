@@ -111,14 +111,14 @@ func ConvertToTransactionList(txList []event.Tx) []*DefaultTransaction {
 	defaultTxList := make([]*DefaultTransaction, 0)
 
 	for _, tx := range txList {
-		defaultTx := ConvertToTransaction(tx)
+		defaultTx := convertToTransaction(tx)
 		defaultTxList = append(defaultTxList, defaultTx)
 	}
 
 	return defaultTxList
 }
 
-func ConvertToTransaction(tx event.Tx) *DefaultTransaction {
+func convertToTransaction(tx event.Tx) *DefaultTransaction {
 	return &DefaultTransaction{
 		ID:        tx.ID,
 		ICodeID:   tx.ICodeID,
@@ -135,14 +135,14 @@ func ConvBackFromTransactionList(defaultTxList []*DefaultTransaction) []event.Tx
 	txList := make([]event.Tx, 0)
 
 	for _, defaultTx := range defaultTxList {
-		tx := ConvBackFromTransaction(defaultTx)
+		tx := convBackFromTransaction(defaultTx)
 		txList = append(txList, tx)
 	}
 
 	return txList
 }
 
-func ConvBackFromTransaction(defaultTx *DefaultTransaction) event.Tx {
+func convBackFromTransaction(defaultTx *DefaultTransaction) event.Tx {
 	return event.Tx{
 		ID:        defaultTx.ID,
 		ICodeID:   defaultTx.ICodeID,
