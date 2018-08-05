@@ -22,12 +22,8 @@ import (
 
 	"bytes"
 
-	e "github.com/it-chain/engine/common/event"
-	"github.com/it-chain/midgard"
 	ygg "github.com/it-chain/yggdrasill/common"
 
-	"errors"
-	"fmt"
 	"reflect"
 )
 
@@ -192,50 +188,6 @@ func (block *DefaultBlock) GetBlockState() BlockState {
 
 func (block *DefaultBlock) SetBlockState(state BlockState) {
 	block.State = state
-}
-
-func (block *DefaultBlock) On(event midgard.Event) error {
-
-	switch v := event.(type) {
-
-	case *(e.BlockCreated):
-		TxList := ConvertToTransactionList(v.TxList)
-
-		block.Seal = v.Seal
-		block.PrevSeal = v.PrevSeal
-		block.Height = v.Height
-		block.TxList = TxList
-		block.TxSeal = v.TxSeal
-		block.Timestamp = v.Timestamp
-		block.Creator = v.Creator
-		block.State = v.State
-		break
-	case *(e.BlockStaged):
-	case *(e.BlockCommitted):
-		block.State = v.State
-		break
-	default:
-		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
-	}
-
-	return nil
-}
-
-func NewEmptyBlock(prevSeal []byte, height uint64, creator []byte) *DefaultBlock {
-	block := &DefaultBlock{}
-	return block
-}
-
-func CreateBlock(block Block) error {
-	// create BlockCreatedEvent
-	// save it to event store
-	return nil
-}
-
-func StageBlock(block Block) error {
-	// create BlockStageEvent
-	// save it to event store
-	return nil
 }
 
 type BlockRepository interface {

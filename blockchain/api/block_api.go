@@ -18,6 +18,7 @@ package api
 
 import (
 	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/common/event"
 )
 
 type BlockApi struct {
@@ -72,7 +73,7 @@ func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
 	}
 
 	// publish
-	commitEvent, err := blockchain.CreateBlockCommittedEvent(GenesisBlock)
+	commitEvent, err := createBlockCommittedEvent(GenesisBlock)
 
 	if err != nil {
 		return ErrCreateEvent
@@ -111,11 +112,27 @@ func (bApi BlockApi) CommitProposedBlock(txList []*blockchain.DefaultTransaction
 	}
 
 	// publish
-	commitEvent, err := blockchain.CreateBlockCommittedEvent(ProposedBlock)
+	commitEvent, err := createBlockCommittedEvent(ProposedBlock)
 
 	if err != nil {
 		return ErrCreateEvent
 	}
 
 	return bApi.eventService.Publish("block.committed", commitEvent)
+}
+
+func createBlockCommittedEvent(block blockchain.DefaultBlock) (event.BlockCommitted, error) {
+
+	txList := blockchain.ConvBackFromTransactionList(block.TxList)
+
+	return event.BlockCommitted{
+		Seal:      block.GetSeal(),
+		PrevSeal:  block.GetPrevSeal(),
+		Height:    block.GetHeight(),
+		TxList:    txList,
+		TxSeal:    block.GetTxSeal(),
+		Timestamp: block.GetTimestamp(),
+		Creator:   block.GetCreator(),
+		State:     block.GetState(),
+	}, nil
 }

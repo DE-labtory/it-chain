@@ -22,12 +22,6 @@ import (
 	"time"
 
 	"encoding/json"
-
-	"encoding/hex"
-
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/core/eventstore"
-	"github.com/it-chain/midgard"
 )
 
 func CreateGenesisBlock(genesisconfFilePath string) (DefaultBlock, error) {
@@ -106,26 +100,6 @@ type GenesisConfig struct {
 	Creator      string
 }
 
-func createBlockCreatedEvent(seal []byte, prevSeal []byte, height uint64, txList []*DefaultTransaction, txSeal [][]byte, timeStamp time.Time, creator []byte) (*event.BlockCreated, error) {
-
-	AggregateID := hex.EncodeToString(seal)
-
-	return &event.BlockCreated{
-		EventModel: midgard.EventModel{
-			ID:   AggregateID,
-			Type: "block.created",
-		},
-		Seal:      seal,
-		PrevSeal:  prevSeal,
-		Height:    height,
-		TxList:    ConvBackFromTransactionList(txList),
-		TxSeal:    txSeal,
-		Timestamp: timeStamp,
-		Creator:   creator,
-		State:     Created,
-	}, nil
-}
-
 func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransaction, Creator []byte) (DefaultBlock, error) {
 
 	//declare
@@ -160,35 +134,4 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransa
 	ProposedBlock.SetState(Created)
 
 	return *ProposedBlock, nil
-}
-
-func CreateRetrievedBlock(retrievedBlock DefaultBlock) (DefaultBlock, error) {
-
-	//declare
-	RetrievedBlock := &DefaultBlock{}
-
-	Seal := retrievedBlock.GetSeal()
-	PrevSeal := retrievedBlock.GetPrevSeal()
-	Height := retrievedBlock.GetHeight()
-	TxList := retrievedBlock.GetTxList()
-	TxSeal := retrievedBlock.GetTxSeal()
-	TimeStamp := retrievedBlock.GetTimestamp()
-	Creator := retrievedBlock.GetCreator()
-
-	//create
-	createEvent, err := createBlockCreatedEvent(Seal, PrevSeal, Height, GetBackTxType(TxList), TxSeal, TimeStamp, Creator)
-	if err != nil {
-		return DefaultBlock{}, ErrCreatingEvent
-	}
-
-	//on
-	err = RetrievedBlock.On(createEvent)
-	if err != nil {
-		return DefaultBlock{}, ErrOnEvent
-	}
-
-	//save
-	eventstore.Save(createEvent.GetID(), createEvent)
-
-	return *RetrievedBlock, nil
 }
