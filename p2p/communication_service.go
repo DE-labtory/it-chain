@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package adapter
+package p2p
 
 import (
+	"errors"
+
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/p2p"
 )
+
+var ErrEmptyConnectionId = errors.New("empty connection ")
 
 type CommunicationService struct {
 	publish Publish
@@ -32,29 +35,30 @@ func NewCommunicationService(publish Publish) *CommunicationService {
 	}
 }
 
+//todo use rpc instead of publish
 func (cs *CommunicationService) Dial(ipAddress string) error {
 
 	c := command.CreateConnection{
 		Address: ipAddress,
 	}
 
-	cs.publish("Command", "connection.create", c)
+	cs.publish("connection.create", c)
 
 	return nil
 }
 
-func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error {
+func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTable PLTable) error {
 
 	if connectionId == "" {
 		return ErrEmptyConnectionId
 	}
 
 	if len(peerLeaderTable.PeerTable) == 0 {
-		return p2p.ErrEmptyPeerTable
+		return ErrEmptyPeerTable
 	}
 
 	//create peer table message
-	peerLeaderTableMessage := p2p.PLTableMessage{
+	peerLeaderTableMessage := PLTableMessage{
 		PLTable: peerLeaderTable,
 	}
 
@@ -66,5 +70,5 @@ func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTa
 
 	grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
 
-	return cs.publish("Command", "message.deliver", grpcDeliverCommand)
+	return cs.publish("message.deliver", grpcDeliverCommand)
 }

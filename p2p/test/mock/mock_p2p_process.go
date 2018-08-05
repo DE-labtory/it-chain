@@ -53,7 +53,7 @@ func (mpp *MockP2PProcess) Init(id string, ipAddress string) {
 
 	peerQueryService := api_gateway.NewPeerQueryApi(&peerRepository)
 
-	communicationService := adapter.NewCommunicationService(mpp.Publish)
+	communicationService := p2p.NewCommunicationService(mpp.Publish)
 
 	communicationApi := api.NewCommunicationApi(&peerQueryService, communicationService)
 
@@ -87,16 +87,9 @@ func (mpp *MockP2PProcess) GetId() string {
 	return mpp.id
 }
 
-//publish event or command => consumed by commandHandler and eventHandler through channel
-func (mpp *MockP2PProcess) Publish(exchange string, topic string, data interface{}) error {
-	switch exchange {
-	case "Command":
-		mpp.commandReceiver <- data
-
-	case "Event":
-		mpp.eventReceiver <- data
-
-	}
+//publish event => consumed by commandHandler and eventHandler through channel
+func (mpp *MockP2PProcess) Publish(topic string, data interface{}) error {
+	mpp.eventReceiver <- data
 
 	return nil
 }
@@ -139,7 +132,7 @@ func (mpp *MockP2PProcess) TriggerOutboundEvent(data interface{}, process MockP2
 //deal with command
 //
 //if command is
-func (mpp *MockP2PProcess) HandleCommand(mpt map[string]MockP2PProcess) {
+func (mpp *MockP2PProcess) RpcListen(mpt map[string]MockP2PProcess) {
 	var done = true
 	for done {
 
@@ -178,6 +171,11 @@ func (mpp *MockP2PProcess) HandleCommand(mpt map[string]MockP2PProcess) {
 		}
 
 	}
+}
+
+func (mpp *MockP2PProcess) RpcCall(data interface{}, process MockProcess) {
+
+	mpp.commandReceiver <- data
 }
 
 func (mpp *MockP2PProcess) FindMockP2PProcess(id string) MockP2PProcess {

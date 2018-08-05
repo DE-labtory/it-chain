@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package adapter_test
+package p2p_test
 
 import (
 	"reflect"
 	"testing"
 
 	"github.com/it-chain/engine/p2p"
-	"github.com/it-chain/engine/p2p/infra/adapter"
 	"github.com/magiconair/properties/assert"
 )
 
@@ -51,7 +50,7 @@ func TestGrpcCommandService_DeliverPLTable(t *testing.T) {
 				connectionId: "",
 				pLTable:      p2p.PLTable{},
 			},
-			err: adapter.ErrEmptyConnectionId,
+			err: p2p.ErrEmptyConnectionId,
 		},
 		"success": {
 			input: struct {
@@ -74,9 +73,8 @@ func TestGrpcCommandService_DeliverPLTable(t *testing.T) {
 			err: nil,
 		},
 	}
-	publish := func(exchange string, topic string, data interface{}) error {
+	publish := func(topic string, data interface{}) error {
 		{
-			assert.Equal(t, exchange, "Command")
 			assert.Equal(t, topic, "message.deliver")
 			assert.Equal(t, reflect.TypeOf(data).String(), "command.DeliverGrpc")
 
@@ -84,7 +82,7 @@ func TestGrpcCommandService_DeliverPLTable(t *testing.T) {
 		}
 	}
 
-	communicationService := adapter.NewCommunicationService(publish)
+	communicationService := p2p.NewCommunicationService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
