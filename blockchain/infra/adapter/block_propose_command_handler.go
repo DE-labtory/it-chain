@@ -22,30 +22,20 @@ import (
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 )
 
-type BlockCreateApi interface {
-	CreateProposedBlock(txList []blockchain.Transaction) (blockchain.DefaultBlock, error)
+type BlockCommitApi interface {
+	CommitProposedBlock(txList []*blockchain.DefaultTransaction) error
 }
 
-type BlockSaveRepository interface {
-	Save(block blockchain.DefaultBlock) error
-}
 
-type BlockCommitService interface {
-	CommitBlock(block blockchain.DefaultBlock) error
-}
 
 type BlockProposeCommandHandler struct {
-	blockApi        BlockCreateApi
-	blockRepository BlockSaveRepository
-	eventService    BlockCommitService
-	engineMode      string
+	blockApi   BlockCommitApi
+	engineMode string
 }
 
-func NewBlockProposeCommandHandler(blockApi BlockCreateApi, blockRepository BlockSaveRepository, eventService BlockCommitService, engineMode string) *BlockProposeCommandHandler {
+func NewBlockProposeCommandHandler(blockApi BlockCommitApi, engineMode string) *BlockProposeCommandHandler {
 	return &BlockProposeCommandHandler{
 		blockApi:        blockApi,
-		blockRepository: blockRepository,
-		eventService:    eventService,
 		engineMode:      engineMode,
 	}
 }
@@ -62,29 +52,17 @@ func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.P
 		return struct{}{}, rpc.Error{Message: err.Error()}
 	}
 
-	defaultTxList := convertTxList(txList)
+	defaultTxList := getBackTxList(txList)
 
 	if h.engineMode == "solo" {
 
-		//create
-		ProposedBlock, err := h.blockApi.CreateProposedBlock(defaultTxList)
+		//commit
+		err := h.blockApi.CommitProposedBlock(defaultTxList)
 
 		if err != nil {
 			return struct{}{}, rpc.Error{Message: err.Error()}
 		}
 
-		// save
-		err = h.blockRepository.Save(ProposedBlock)
-		if err != nil {
-			return struct{}{}, rpc.Error{Message: err.Error()}
-		}
-
-		// event
-		err = h.eventService.CommitBlock(ProposedBlock)
-
-		if err != nil {
-			return struct{}{}, rpc.Error{Message: err.Error()}
-		}
 		return struct{}{}, rpc.Error{}
 	}
 
@@ -118,26 +96,25 @@ func validateTx(tx command.Tx) error {
 	return nil
 }
 
-func convertTxList(txList []command.Tx) []blockchain.Transaction {
-	defaultTxList := make([]blockchain.Transaction, 0)
+func getBackTxList(txList []command.Tx) []*blockchain.DefaultTransaction  {
+	defaultTxList := make([]*blockchain.DefaultTransaction, 0)
 
 	for _, tx := range txList {
-		defaultTx := convertTx(tx)
+		defaultTx := getBackTx(tx)
 		defaultTxList = append(defaultTxList, defaultTx)
 	}
-
 	return defaultTxList
 }
 
-func convertTx(tx command.Tx) blockchain.Transaction {
+func getBackTx(tx command.Tx) *blockchain.DefaultTransaction {
 	return &blockchain.DefaultTransaction{
-		ID:        tx.ID,
-		ICodeID:   tx.ICodeID,
-		PeerID:    tx.PeerID,
+		ID: tx.ID,
+		ICodeID: tx.ICodeID,
+		PeerID: tx.PeerID,
 		Timestamp: tx.TimeStamp,
-		Jsonrpc:   tx.Jsonrpc,
-		Function:  tx.Function,
-		Args:      tx.Args,
-		Signature: tx.Signature,
+		Jsonrpc:tx.Jsonrpc,
+		Function:tx.Function,
+		Args:tx.Args,
+		Signature:tx.Signature,
 	}
 }

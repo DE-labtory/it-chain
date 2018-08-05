@@ -1,7 +1,6 @@
 package adapter_test
 
 import (
-	"encoding/json"
 	"testing"
 	"time"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/midgard"
 	"github.com/magiconair/properties/assert"
 )
 
@@ -29,7 +27,6 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
-					CommandModel: midgard.CommandModel{ID: "111"},
 					TxList:       nil,
 				},
 				result: blockchain.DefaultBlock{},
@@ -42,7 +39,6 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
-					CommandModel: midgard.CommandModel{ID: "111"},
 					TxList:       make([]command.Tx, 0),
 				},
 				result: blockchain.DefaultBlock{},
@@ -55,9 +51,8 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
-					CommandModel: midgard.CommandModel{ID: "111"},
 					TxList: []command.Tx{
-						command.Tx{ID: "", PeerID: ""},
+						{ID: "", PeerID: ""},
 					},
 				},
 				result: blockchain.DefaultBlock{},
@@ -70,9 +65,8 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
-					CommandModel: midgard.CommandModel{ID: "111"},
 					TxList: []command.Tx{
-						command.Tx{
+						{
 							ID:        "1",
 							Status:    1,
 							PeerID:    "2",
@@ -95,44 +89,20 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 	}
 
 	blockApi := mock.BlockApi{}
-	blockApi.CreateProposedBlockFunc = func(txList []blockchain.Transaction) (blockchain.DefaultBlock, error) {
+	blockApi.CommitProposedBlockFunc = func(txList []*blockchain.DefaultTransaction) error {
 		tx := txList[0]
-		txContentBytes, _ := tx.GetContent()
-		content := struct {
-			ID        string
-			PeerID    string
-			Timestamp time.Time
-			Jsonrpc   string
-			Function  string
-			Args      []string
-		}{}
-		json.Unmarshal(txContentBytes, &content)
 
 		// then
 		assert.Equal(t, "1", tx.GetID())
-		assert.Equal(t, "2", content.PeerID)
-		assert.Equal(t, "123", content.Jsonrpc)
-		assert.Equal(t, "function1", content.Function)
-		assert.Equal(t, []string{"arg1", "arg2"}, content.Args)
+		assert.Equal(t, "2", tx.PeerID)
+		assert.Equal(t, "123", tx.Jsonrpc)
+		assert.Equal(t, "function1", tx.Function)
+		assert.Equal(t, []string{"arg1", "arg2"}, tx.Args)
 
-		return blockchain.DefaultBlock{
-			Seal:     []byte{0x1},
-			PrevSeal: []byte{0x2},
-		}, nil
-	}
-
-	blockRepo := mock.BlockRepository{}
-
-	blockRepo.SaveFunc = func(block blockchain.DefaultBlock) error {
 		return nil
 	}
 
-	eventService := mock.EventService{}
-	eventService.CommitBlockFunc = func(block blockchain.DefaultBlock) error {
-		return nil
-	}
-
-	commandHandler := adapter.NewBlockProposeCommandHandler(blockApi, blockRepo, eventService, "solo")
+	commandHandler := adapter.NewBlockProposeCommandHandler(blockApi, "solo")
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
