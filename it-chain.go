@@ -28,8 +28,6 @@ import (
 
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/it-chain/engine/api_gateway"
-	blockchainApi "github.com/it-chain/engine/blockchain/api"
-	blockchainAdapter "github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/cmd/icode"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
@@ -271,32 +269,6 @@ func initConsensus() error {
 func initBlockchain() error {
 
 	log.Println("blockchain is running...")
-
-	config := conf.GetConfiguration()
-	server := rpc.NewServer(config.Engine.Amqp)
-
-	//todo get id from pubkey
-	tempPeerID := "tmp peer 1"
-
-	//infra
-	blockApi, err := blockchainApi.NewBlockApi(tempPeerID, blockQueryApi)
-
-	if err != nil {
-		panic(err)
-	}
-
-	blockCommandHandler := blockchainAdapter.NewCommandHandler(blockApi)
-
-	//crete GenesisBlock
-	GenesisConfPath := config.Blockchain.GenesisConfPath
-
-	if err := blockApi.CreateGenesisBlock(GenesisConfPath); err != nil {
-		panic(err)
-	}
-
-	if err := server.Register("block.confirm", blockCommandHandler.HandleConfirmBlockCommand); err != nil {
-		panic(err)
-	}
 
 	return nil
 }

@@ -27,7 +27,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
-					TxList:       nil,
+					TxList: nil,
 				},
 				result: blockchain.DefaultBlock{},
 			},
@@ -39,7 +39,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
-					TxList:       make([]command.Tx, 0),
+					TxList: make([]command.Tx, 0),
 				},
 				result: blockchain.DefaultBlock{},
 			},

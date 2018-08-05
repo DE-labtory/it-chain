@@ -20,20 +20,18 @@ import (
 	"github.com/it-chain/engine/blockchain"
 )
 
-
 type BlockApi struct {
-	publisherId       string
-	blockRepository   blockchain.BlockRepository
-	eventService blockchain.EventService
+	publisherId     string
+	blockRepository blockchain.BlockRepository
+	eventService    blockchain.EventService
 }
 
-func NewBlockApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService ) (BlockApi, error) {
+func NewBlockApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService) (BlockApi, error) {
 	return BlockApi{
 
-		publisherId:       publisherId,
+		publisherId:     publisherId,
 		blockRepository: blockRepository,
-		eventService:	eventService,
-
+		eventService:    eventService,
 	}, nil
 }
 
@@ -103,7 +101,6 @@ func (bApi BlockApi) CommitProposedBlock(txList []*blockchain.DefaultTransaction
 		return ErrCreateProposedBlock
 	}
 
-
 	// save(commit)
 	ProposedBlock.SetState(blockchain.Committed)
 
@@ -122,5 +119,3 @@ func (bApi BlockApi) CommitProposedBlock(txList []*blockchain.DefaultTransaction
 
 	return bApi.eventService.Publish("block.committed", commitEvent)
 }
-
-

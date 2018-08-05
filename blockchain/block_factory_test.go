@@ -61,7 +61,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 				TxSeal:    make([][]byte, 0),
 				Timestamp: timeStamp,
 				Creator:   []byte("junksound"),
-				State:blockchain.Created,
+				State:     blockchain.Created,
 			},
 
 			err: nil,
@@ -182,7 +182,7 @@ func TestCreateProposedBlock(t *testing.T) {
 				},
 				Timestamp: timeStamp,
 				Creator:   []byte("junksound"),
-				State:blockchain.Created,
+				State:     blockchain.Created,
 			},
 
 			err: nil,

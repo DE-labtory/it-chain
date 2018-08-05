@@ -26,8 +26,6 @@ type BlockCommitApi interface {
 	CommitProposedBlock(txList []*blockchain.DefaultTransaction) error
 }
 
-
-
 type BlockProposeCommandHandler struct {
 	blockApi   BlockCommitApi
 	engineMode string
@@ -35,8 +33,8 @@ type BlockProposeCommandHandler struct {
 
 func NewBlockProposeCommandHandler(blockApi BlockCommitApi, engineMode string) *BlockProposeCommandHandler {
 	return &BlockProposeCommandHandler{
-		blockApi:        blockApi,
-		engineMode:      engineMode,
+		blockApi:   blockApi,
+		engineMode: engineMode,
 	}
 }
 
@@ -96,7 +94,7 @@ func validateTx(tx command.Tx) error {
 	return nil
 }
 
-func getBackTxList(txList []command.Tx) []*blockchain.DefaultTransaction  {
+func getBackTxList(txList []command.Tx) []*blockchain.DefaultTransaction {
 	defaultTxList := make([]*blockchain.DefaultTransaction, 0)
 
 	for _, tx := range txList {
@@ -108,13 +106,13 @@ func getBackTxList(txList []command.Tx) []*blockchain.DefaultTransaction  {
 
 func getBackTx(tx command.Tx) *blockchain.DefaultTransaction {
 	return &blockchain.DefaultTransaction{
-		ID: tx.ID,
-		ICodeID: tx.ICodeID,
-		PeerID: tx.PeerID,
+		ID:        tx.ID,
+		ICodeID:   tx.ICodeID,
+		PeerID:    tx.PeerID,
 		Timestamp: tx.TimeStamp,
-		Jsonrpc:tx.Jsonrpc,
-		Function:tx.Function,
-		Args:tx.Args,
-		Signature:tx.Signature,
+		Jsonrpc:   tx.Jsonrpc,
+		Function:  tx.Function,
+		Args:      tx.Args,
+		Signature: tx.Signature,
 	}
 }

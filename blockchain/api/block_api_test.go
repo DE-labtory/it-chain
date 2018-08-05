@@ -19,18 +19,19 @@ package api_test
 import (
 	"testing"
 
+	"encoding/hex"
+	"io/ioutil"
+	"os"
+	"sync"
+	"time"
+
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/api"
 	"github.com/it-chain/engine/blockchain/test/mock"
-	"github.com/stretchr/testify/assert"
-	"time"
-	"os"
-	"io/ioutil"
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
-	"sync"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"encoding/hex"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBlockApi_AddBlockToPool(t *testing.T) {
@@ -79,7 +80,6 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 	blockRepo := mock.BlockRepository{}
 	eventService := mock.EventService{}
 
-
 	// When
 	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService)
 
@@ -108,16 +108,14 @@ func TestBlockApi_SyncIsProgressing(t *testing.T) {
 	assert.Equal(t, blockchain.DONE, state)
 }
 
-
-
 // TODO: Write real situation test code, after finishing implementing api_gatey block_query_api.go
 func TestBlockApi_CommitProposedBlock(t *testing.T) {
 
 	lastBlock := blockchain.DefaultBlock{
-		Seal:      []byte("seal"),
-		PrevSeal:  []byte("prevSeal"),
-		Height:    uint64(11),
-		TxList:    []*blockchain.DefaultTransaction{
+		Seal:     []byte("seal"),
+		PrevSeal: []byte("prevSeal"),
+		Height:   uint64(11),
+		TxList: []*blockchain.DefaultTransaction{
 			{
 				ID:        "tx01",
 				ICodeID:   "ICodeID",
@@ -177,15 +175,14 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 
 	blockRepo.SaveFunc = func(block blockchain.DefaultBlock) error {
 
-		assert.Equal(t,"tx02", block.GetTxList()[0].GetID())
+		assert.Equal(t, "tx02", block.GetTxList()[0].GetID())
 
 		return nil
 	}
 
 	eventService := common.NewEventService("", "Event")
 
-
-	bApi, err := api.NewBlockApi(publisherID,blockRepo,eventService)
+	bApi, err := api.NewBlockApi(publisherID, blockRepo, eventService)
 
 	assert.NoError(t, err)
 
@@ -239,8 +236,7 @@ func TestBlockApi_CommitGenesisBlock(t *testing.T) {
 
 	eventService := common.NewEventService("", "Event")
 
-
-	bApi, err := api.NewBlockApi(publisherID,blockRepo,eventService)
+	bApi, err := api.NewBlockApi(publisherID, blockRepo, eventService)
 	assert.NoError(t, err)
 
 	// when
