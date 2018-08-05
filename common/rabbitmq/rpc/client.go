@@ -39,7 +39,7 @@ func NewClient(rabbitmqUrl string) Client {
 	}
 }
 
-//need to implement timeout
+//todo need to implement timeout
 func (c Client) Call(queue string, params interface{}, callback interface{}) error {
 
 	if !hasConsumer(c.Ch, queue) {

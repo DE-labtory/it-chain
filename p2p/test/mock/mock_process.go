@@ -25,9 +25,9 @@ type MockProcess interface {
 
 	HandleEvent()
 
-	HandleCommand()
+	RpcListen()
 
-	TriggerCommand(data interface{}, process MockProcess)
+	RpcCall(data interface{}, process MockProcess)
 
 	TriggerEvent(data interface{}, process MockProcess)
 }
