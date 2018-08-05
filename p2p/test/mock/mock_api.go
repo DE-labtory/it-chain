@@ -27,6 +27,19 @@ func (mplta *MockPLTableApi) GetPLTable() p2p.PLTable {
 	return mplta.getPLTableFunc()
 }
 
+type MockPeerApi struct {
+	SaveFunc   func(peer p2p.Peer) error
+	RemoveFunc func(peerId p2p.PeerId) error
+}
+
+func (mpa *MockPeerApi) Save(peer p2p.Peer) error {
+	return mpa.SaveFunc(peer)
+}
+
+func (mpa *MockPeerApi) Remove(peerId p2p.PeerId) error {
+	return mpa.RemoveFunc(peerId)
+}
+
 type MockLeaderApi struct {
 }
 

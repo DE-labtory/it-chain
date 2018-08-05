@@ -58,9 +58,9 @@ func (mpp *MockP2PProcess) Init(id string, ipAddress string) {
 	communicationApi := api.NewCommunicationApi(&peerQueryService, communicationService)
 
 	//todo should be replaced with real struct
-	peerService := &MockPeerService{}
+	peerApi := &MockPeerApi{}
 
-	mpp.eventHandler = adapter.NewEventHandler(&communicationApi, peerService)
+	mpp.eventHandler = adapter.NewEventHandler(&communicationApi, peerApi)
 
 	leaderService := p2p.NewLeaderService()
 
