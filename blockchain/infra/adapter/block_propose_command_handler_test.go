@@ -40,100 +40,6 @@ import (
 
 func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 
-	tests := map[string]struct {
-		input struct {
-			command command.ProposeBlock
-		}
-		err rpc.Error
-	}{
-		"command with emtpy transactions test": {
-			input: struct {
-				command command.ProposeBlock
-			}{
-				command: command.ProposeBlock{
-					TxList: nil,
-				},
-			},
-			err: rpc.Error{Message: adapter.ErrCommandTransactions.Error()},
-		},
-		"transactions which have length of 0 test": {
-			input: struct {
-				command command.ProposeBlock
-			}{
-				command: command.ProposeBlock{
-					TxList: make([]command.Tx, 0),
-				},
-			},
-			err: rpc.Error{Message: adapter.ErrCommandTransactions.Error()},
-		},
-		"transactions which have missing properties test": {
-			input: struct {
-				command command.ProposeBlock
-			}{
-				command: command.ProposeBlock{
-					TxList: []command.Tx{
-						{ID: "", PeerID: ""},
-					},
-				},
-			},
-			err: rpc.Error{Message: adapter.ErrTxHasMissingProperties.Error()},
-		},
-		"successfully pass txlist(odd tx) to block api": {
-			input: struct {
-				command command.ProposeBlock
-			}{
-				command: command.ProposeBlock{
-					TxList: []command.Tx{
-						{
-							ID:        "tx01",
-							ICodeID:   "ICodeID",
-							PeerID:    "2",
-							TimeStamp: time.Now().Round(0),
-							Jsonrpc:   "123",
-							Function:  "function1",
-							Args:      []string{"arg1", "arg2"},
-							Signature: []byte{0x1},
-						},
-					},
-				},
-			},
-			err: rpc.Error{},
-		},
-
-		"successfully pass txlist(even tx) to block api": {
-			input: struct {
-				command command.ProposeBlock
-			}{
-				command: command.ProposeBlock{
-					TxList: []command.Tx{
-						{
-							ID:        "tx01",
-							ICodeID:   "ICodeID",
-							PeerID:    "2",
-							TimeStamp: time.Now().Round(0),
-							Jsonrpc:   "123",
-							Function:  "function1",
-							Args:      []string{"arg1", "arg2"},
-							Signature: []byte{0x1},
-						},
-
-						{
-							ID:        "tx02",
-							ICodeID:   "ICodeID",
-							PeerID:    "2",
-							TimeStamp: time.Now().Round(0),
-							Jsonrpc:   "123",
-							Function:  "function1",
-							Args:      []string{"arg1", "arg2"},
-							Signature: []byte{0x1},
-						},
-					},
-				},
-			},
-			err: rpc.Error{},
-		},
-	}
-
 	//set subscriber
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -176,14 +82,72 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 
 	commandHandler := adapter.NewBlockProposeCommandHandler(bApi, "solo")
 
-	for testName, test := range tests {
-		t.Logf("running test case %s", testName)
+	//when
+	_, errRPC := commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: nil})
 
-		//when
-		_, err := commandHandler.HandleProposeBlockCommand(test.input.command)
+	//then
+	assert.Equal(t, errRPC, rpc.Error{Message: adapter.ErrCommandTransactions.Error()})
 
-		//then
-		assert.Equal(t, err, test.err)
-	}
+	//when
+	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: make([]command.Tx, 0)})
+
+	//then
+	assert.Equal(t, errRPC, rpc.Error{Message: adapter.ErrCommandTransactions.Error()})
+
+	//when
+	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: []command.Tx{{ID: "", PeerID: ""}}})
+
+	//then
+	assert.Equal(t, errRPC, rpc.Error{Message: adapter.ErrTxHasMissingProperties.Error()})
+
+	//when
+	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
+		TxList: []command.Tx{
+			{
+				ID:        "tx01",
+				ICodeID:   "ICodeID",
+				PeerID:    "2",
+				TimeStamp: time.Now().Round(0),
+				Jsonrpc:   "123",
+				Function:  "function1",
+				Args:      []string{"arg1", "arg2"},
+				Signature: []byte{0x1},
+			},
+		},
+	})
+
+	//then
+	assert.Equal(t, errRPC, rpc.Error{})
+
+	//when
+	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
+		TxList: []command.Tx{
+			{
+				ID:        "tx01",
+				ICodeID:   "ICodeID",
+				PeerID:    "2",
+				TimeStamp: time.Now().Round(0),
+				Jsonrpc:   "123",
+				Function:  "function1",
+				Args:      []string{"arg1", "arg2"},
+				Signature: []byte{0x1},
+			},
+
+			{
+				ID:        "tx02",
+				ICodeID:   "ICodeID",
+				PeerID:    "2",
+				TimeStamp: time.Now().Round(0),
+				Jsonrpc:   "123",
+				Function:  "function1",
+				Args:      []string{"arg1", "arg2"},
+				Signature: []byte{0x1},
+			},
+		},
+	})
+
+	//then
+	assert.Equal(t, errRPC, rpc.Error{})
+
 	wg.Wait()
 }
