@@ -29,7 +29,6 @@ type BlockApi struct {
 
 func NewBlockApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService) (BlockApi, error) {
 	return BlockApi{
-
 		publisherId:     publisherId,
 		blockRepository: blockRepository,
 		eventService:    eventService,
