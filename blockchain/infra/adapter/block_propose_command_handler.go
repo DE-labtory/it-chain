@@ -88,7 +88,7 @@ func validateTxList(txList []command.Tx) error {
 
 func validateTx(tx command.Tx) error {
 	if tx.ID == "" || tx.PeerID == "" || tx.TimeStamp.IsZero() || tx.Jsonrpc == "" ||
-		tx.Method == "" || tx.Function == "" || tx.Args == nil {
+		tx.Function == "" || tx.Args == nil {
 		return ErrTxHasMissingProperties
 	}
 	return nil

@@ -92,6 +92,7 @@ func (bApi BlockApi) CommitProposedBlock(txList []*blockchain.DefaultTransaction
 	}
 
 	prevSeal := lastBlock.GetSeal()
+
 	height := lastBlock.GetHeight() + 1
 
 	creator := bApi.publisherId

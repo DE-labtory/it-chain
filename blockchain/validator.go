@@ -46,9 +46,13 @@ func (t *DefaultValidator) ValidateSeal(seal []byte, comparisonBlock Block) (boo
 	return bytes.Compare(seal, comparisonSeal) == 0, nil
 }
 
+//ToDo: txlist에 tx가 1개일 때 검증이 이상하다.
 // ValidateTxSeal 함수는 주어진 Transaction 리스트에 따라 주어진 transaction Seal을 검증함.
 func (t *DefaultValidator) ValidateTxSeal(txSeal [][]byte, txList []Transaction) (bool, error) {
 	leafNodeIndex := 0
+	if len(txList)%2 != 0 {
+		txList = append(txList, txList[len(txList)-1])
+	}
 	for i, n := range txSeal {
 		leftIndex, rightIndex := (i+1)*2-1, (i+1)*2
 		if rightIndex >= len(txSeal) {
@@ -149,7 +153,6 @@ func (t *DefaultValidator) BuildSeal(timeStamp time.Time, prevSeal []byte, txSea
 
 // BuildTxSeal 함수는 Transaction 배열을 받아서 TxSeal을 생성하여 반환한다.
 func (t *DefaultValidator) BuildTxSeal(txList []Transaction) ([][]byte, error) {
-
 	if len(txList) == 0 {
 		return nil, ErrEmptyTxList
 	}

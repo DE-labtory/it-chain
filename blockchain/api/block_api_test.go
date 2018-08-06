@@ -191,6 +191,7 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
+	wg.Wait()
 }
 
 func TestBlockApi_CommitGenesisBlock(t *testing.T) {
@@ -243,4 +244,5 @@ func TestBlockApi_CommitGenesisBlock(t *testing.T) {
 	err = bApi.CommitGenesisBlock(GenesisFilePath)
 	// then
 	assert.NoError(t, err)
+	wg.Wait()
 }
