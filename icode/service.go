@@ -19,7 +19,7 @@ package icode
 type ContainerService interface {
 	StartContainer(meta Meta) error
 	StopContainer(id ID) error
-	ExecuteRequest(request Request) (*Result, error)
+	ExecuteRequest(request Request) (Result, error)
 }
 
 type GitService interface {

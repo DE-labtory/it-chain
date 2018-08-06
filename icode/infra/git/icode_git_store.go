@@ -34,11 +34,11 @@ func NewRepositoryService() *RepositoryService {
 	return &RepositoryService{}
 }
 
-func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (*icode.Meta, error) {
+func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (icode.Meta, error) {
 	name := getNameFromGitUrl(repositoryUrl)
 
 	if name == "" {
-		return nil, errors.New(fmt.Sprintf("Invalid url name [%s]", repositoryUrl))
+		return icode.Meta{}, errors.New(fmt.Sprintf("Invalid url name [%s]", repositoryUrl))
 	}
 
 	//check file already exist
@@ -46,13 +46,13 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 		// if iCode already exist, remove that
 		err = os.RemoveAll(baseSavePath + "/" + name)
 		if err != nil {
-			return nil, err
+			return icode.Meta{}, err
 		}
 	}
 
 	sshAuth, err := ssh.NewPublicKeysFromFile("git", sshPath, "")
 	if err != nil {
-		return nil, err
+		return icode.Meta{}, err
 	}
 
 	r, err := git.PlainClone(baseSavePath+"/"+name, false, &git.CloneOptions{
@@ -62,20 +62,20 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 	})
 
 	if err != nil {
-		return nil, err
+		return icode.Meta{}, err
 	}
 
 	head, err := r.Head()
 
 	if err != nil {
-		return nil, err
+		return icode.Meta{}, err
 	}
 
 	lastHeadCommit, err := r.CommitObject(head.Hash())
 	commitHash := lastHeadCommit.Hash.String()
 
 	if err != nil {
-		return nil, err
+		return icode.Meta{}, err
 	}
 
 	metaData := icode.NewMeta(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash)
