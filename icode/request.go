@@ -14,12 +14,27 @@
  * limitations under the License.
  */
 
-package service_test
+package icode
 
-import (
-	"testing"
-)
-
-func TestTesseractContainerService_StartContainer(t *testing.T) {
-
+type Request struct {
+	ICodeID  string
+	Function string
+	Args     []string
+	Type     string
 }
+
+type Invoke struct {
+	Request
+}
+
+type Query struct {
+	Request
+}
+
+type Result struct {
+	Data map[key]value
+	Err  string
+}
+
+type key = string
+type value = string
