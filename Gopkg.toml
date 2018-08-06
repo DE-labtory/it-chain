@@ -24,6 +24,7 @@
 #   go-tests = true
 #   unused-packages = true
 
+ignored = ["github.com/mock/handler"]
 
 [[constraint]]
   name = "github.com/go-kit/kit"
@@ -50,20 +51,24 @@
   version = "0.0.4"
 
 [[constraint]]
-  name = "github.com/it-chain/tesseract"
-  version = "0.1.2"
+  name = "github.com/it-chain/sdk"
+  version = "0.1.0"
 
 [[constraint]]
-  branch = "develop"
+  name = "github.com/it-chain/tesseract"
+  version = "0.2.2"
+
+[[constraint]]
   name = "github.com/it-chain/yggdrasill"
+  version = "0.1.0"
+
+[[constraint]]
+  name = "github.com/jessevdk/go-flags"
+  version = "1.4.0"
 
 [[constraint]]
   name = "github.com/magiconair/properties"
   version = "1.8.0"
-
-[[constraint]]
-  name = "github.com/pkg/errors"
-  version = "0.8.0"
 
 [[constraint]]
   name = "github.com/rs/xid"
