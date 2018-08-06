@@ -28,7 +28,11 @@ import (
 
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/it-chain/engine/api_gateway"
+	blockchainApi "github.com/it-chain/engine/blockchain/api"
+	blockchainAdapter "github.com/it-chain/engine/blockchain/infra/adapter"
+	blockchainMem "github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/cmd/icode"
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
@@ -41,7 +45,7 @@ import (
 	txpoolApi "github.com/it-chain/engine/txpool/api"
 	txpoolAdapter "github.com/it-chain/engine/txpool/infra/adapter"
 	txpoolBatch "github.com/it-chain/engine/txpool/infra/batch"
-	"github.com/it-chain/engine/txpool/infra/mem"
+	txpoolMem "github.com/it-chain/engine/txpool/infra/mem"
 	"github.com/it-chain/tesseract"
 	"github.com/urfave/cli"
 )
@@ -241,7 +245,7 @@ func initTxPool() error {
 	//todo get id from pubkey
 	tmpPeerID := "tmp peer 1"
 
-	transactionRepo := mem.NewTransactionRepository()
+	transactionRepo := txpoolMem.NewTransactionRepository()
 
 	//service
 	blockProposalService := txpoolAdapter.NewBlockProposalService(client, transactionRepo, config.Engine.Mode)
@@ -269,6 +273,30 @@ func initConsensus() error {
 func initBlockchain() error {
 
 	log.Println("blockchain is running...")
+
+	publisherId := "publisher.1"
+
+	config := conf.GetConfiguration()
+	server := rpc.NewServer(config.Engine.Amqp)
+
+	blockRepo, err := blockchainMem.NewBlockRepository("./blockchain/db")
+	if err != nil {
+		panic(err)
+	}
+
+	// service
+	eventService := common.NewEventService(config.Engine.Amqp, "Event")
+
+	// api
+	blockApi, err := blockchainApi.NewBlockApi(publisherId, blockRepo, eventService)
+	if err != nil {
+		panic(err)
+	}
+
+	// infra
+	blockProposeHandler := blockchainAdapter.NewBlockProposeCommandHandler(blockApi, config.Engine.Mode)
+
+	server.Register("block.propose", blockProposeHandler.HandleProposeBlockCommand)
 
 	return nil
 }
