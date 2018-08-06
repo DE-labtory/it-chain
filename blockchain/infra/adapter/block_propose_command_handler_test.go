@@ -1,15 +1,41 @@
+/*
+ * Copyright 2018 It-chain
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package adapter_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
-	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/magiconair/properties/assert"
+
+	"os"
+	"sync"
+
+	"time"
+
+	"github.com/it-chain/engine/blockchain/api"
+	"github.com/it-chain/engine/blockchain/infra/mem"
+	"github.com/it-chain/engine/blockchain/test/mock"
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/common/rabbitmq/pubsub"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
@@ -17,100 +43,147 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			command command.ProposeBlock
-			result  blockchain.DefaultBlock
 		}
 		err rpc.Error
 	}{
 		"command with emtpy transactions test": {
 			input: struct {
 				command command.ProposeBlock
-				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
 					TxList: nil,
 				},
-				result: blockchain.DefaultBlock{},
 			},
 			err: rpc.Error{Message: adapter.ErrCommandTransactions.Error()},
 		},
 		"transactions which have length of 0 test": {
 			input: struct {
 				command command.ProposeBlock
-				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
 					TxList: make([]command.Tx, 0),
 				},
-				result: blockchain.DefaultBlock{},
 			},
 			err: rpc.Error{Message: adapter.ErrCommandTransactions.Error()},
 		},
 		"transactions which have missing properties test": {
 			input: struct {
 				command command.ProposeBlock
-				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
 					TxList: []command.Tx{
 						{ID: "", PeerID: ""},
 					},
 				},
-				result: blockchain.DefaultBlock{},
 			},
 			err: rpc.Error{Message: adapter.ErrTxHasMissingProperties.Error()},
 		},
-		"successfully pass txlist to block api": {
+		"successfully pass txlist(odd tx) to block api": {
 			input: struct {
 				command command.ProposeBlock
-				result  blockchain.DefaultBlock
 			}{
 				command: command.ProposeBlock{
 					TxList: []command.Tx{
 						{
-							ID:        "1",
-							Status:    1,
+							ID:        "tx01",
+							ICodeID:   "ICodeID",
 							PeerID:    "2",
-							TimeStamp: time.Now(),
+							TimeStamp: time.Now().Round(0),
 							Jsonrpc:   "123",
-							Method:    "invoke",
 							Function:  "function1",
 							Args:      []string{"arg1", "arg2"},
 							Signature: []byte{0x1},
 						},
 					},
 				},
-				result: blockchain.DefaultBlock{
-					Seal:     []byte{0x1},
-					PrevSeal: []byte{0x2},
+			},
+			err: rpc.Error{},
+		},
+
+		"successfully pass txlist(even tx) to block api": {
+			input: struct {
+				command command.ProposeBlock
+			}{
+				command: command.ProposeBlock{
+					TxList: []command.Tx{
+						{
+							ID:        "tx01",
+							ICodeID:   "ICodeID",
+							PeerID:    "2",
+							TimeStamp: time.Now().Round(0),
+							Jsonrpc:   "123",
+							Function:  "function1",
+							Args:      []string{"arg1", "arg2"},
+							Signature: []byte{0x1},
+						},
+
+						{
+							ID:        "tx02",
+							ICodeID:   "ICodeID",
+							PeerID:    "2",
+							TimeStamp: time.Now().Round(0),
+							Jsonrpc:   "123",
+							Function:  "function1",
+							Args:      []string{"arg1", "arg2"},
+							Signature: []byte{0x1},
+						},
+					},
 				},
 			},
 			err: rpc.Error{},
 		},
 	}
 
-	blockApi := mock.BlockApi{}
-	blockApi.CommitProposedBlockFunc = func(txList []*blockchain.DefaultTransaction) error {
-		tx := txList[0]
+	//set subscriber
+	var wg sync.WaitGroup
+	wg.Add(2)
 
-		// then
-		assert.Equal(t, "1", tx.GetID())
-		assert.Equal(t, "2", tx.PeerID)
-		assert.Equal(t, "123", tx.Jsonrpc)
-		assert.Equal(t, "function1", tx.Function)
-		assert.Equal(t, []string{"arg1", "arg2"}, tx.Args)
+	subscriber := pubsub.NewTopicSubscriber("", "Event")
+	defer subscriber.Close()
 
-		return nil
+	handler := &mock.CommitEventHandler{}
+
+	handler.HandleFunc = func(event event.BlockCommitted) {
+		assert.Equal(t, "tx01", event.TxList[0].ID)
+		assert.Equal(t, blockchain.Committed, event.State)
+		wg.Done()
 	}
 
-	commandHandler := adapter.NewBlockProposeCommandHandler(blockApi, "solo")
+	subscriber.SubscribeTopic("block.*", handler)
+
+	//set bApi
+	publisherID := "junksound"
+	dbPath := "./.db"
+
+	br, err := mem.NewBlockRepository(dbPath)
+
+	assert.Equal(t, nil, err)
+	defer func() {
+		br.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	prevBlock := mock.GetNewBlock([]byte("genesis"), 0)
+
+	err = br.AddBlock(prevBlock)
+	assert.NoError(t, err)
+
+	eventService := common.NewEventService("", "Event")
+
+	bApi, err := api.NewBlockApi(publisherID, br, eventService)
+
+	assert.NoError(t, err)
+
+	commandHandler := adapter.NewBlockProposeCommandHandler(bApi, "solo")
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 
+		//when
 		_, err := commandHandler.HandleProposeBlockCommand(test.input.command)
 
+		//then
 		assert.Equal(t, err, test.err)
-		//assert.Equal(t, block.Seal, test.input.result.Seal)
-		//assert.Equal(t, block.PrevSeal, test.input.result.PrevSeal)
 	}
+	wg.Wait()
 }

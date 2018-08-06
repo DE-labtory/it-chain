@@ -194,6 +194,6 @@ type BlockRepository interface {
 	Save(block DefaultBlock) error
 	FindLast() (DefaultBlock, error)
 	FindByHeight(height BlockHeight) (DefaultBlock, error)
-	FindBySeal(seal string) (DefaultBlock, error)
+	FindBySeal(seal []byte) (DefaultBlock, error)
 	FindAll() ([]DefaultBlock, error)
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 It-chain
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package mock
 
 import (
@@ -5,6 +21,7 @@ import (
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/yggdrasill/common"
 )
 
 func GetTxResults() []command.TxResult {
@@ -63,6 +80,28 @@ func GetStagedBlockWithId(blockId string) blockchain.DefaultBlock {
 	}
 }
 
+func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
+	validator := &blockchain.DefaultValidator{}
+	testingTime := time.Now()
+	blockCreator := []byte("testUser")
+	txList := getTxList(testingTime)
+	block := &blockchain.DefaultBlock{}
+	block.SetPrevSeal(prevSeal)
+	block.SetHeight(height)
+	block.SetCreator(blockCreator)
+	block.SetTimestamp(testingTime)
+	for _, tx := range txList {
+		block.PutTx(tx)
+	}
+	txSeal, _ := validator.BuildTxSeal(ConvertTxListType(txList))
+	block.SetTxSeal(txSeal)
+
+	seal, _ := validator.BuildSeal(block.GetTimestamp(), block.GetPrevSeal(), block.GetTxSeal(), block.GetCreator())
+	block.SetSeal(seal)
+
+	return block
+}
+
 func getTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 	return []*blockchain.DefaultTransaction{
 		{
@@ -103,4 +142,13 @@ func getTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 			Args:      []string{"arg1", "arg2"},
 		},
 	}
+}
+
+func ConvertTxListType(txList []*blockchain.DefaultTransaction) []blockchain.Transaction {
+	convTxList := make([]common.Transaction, 0)
+	for _, tx := range txList {
+		convTxList = append(convTxList, tx)
+	}
+
+	return convTxList
 }
