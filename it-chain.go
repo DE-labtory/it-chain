@@ -41,7 +41,7 @@ import (
 	icodeApi "github.com/it-chain/engine/icode/api"
 	icodeAdapter "github.com/it-chain/engine/icode/infra/adapter"
 	icodeInfra "github.com/it-chain/engine/icode/infra/git"
-	icodeService "github.com/it-chain/engine/icode/infra/service"
+	icodeService "github.com/it-chain/engine/icode/infra/tesseract"
 	txpoolApi "github.com/it-chain/engine/txpool/api"
 	txpoolAdapter "github.com/it-chain/engine/txpool/infra/adapter"
 	txpoolBatch "github.com/it-chain/engine/txpool/infra/batch"
@@ -155,7 +155,7 @@ func initGateway(errs chan error) error {
 	//set subscriber
 	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Event")
 
-	//set blockchain service and repo
+	//set blockchain tesseract and repo
 
 	blockchainDB := "./.test/blockchain"
 	BlockPoolRepo := api_gateway.NewBlockPoolRepository()
@@ -163,7 +163,7 @@ func initGateway(errs chan error) error {
 	blockQueryApi = api_gateway.NewBlockQueryApi(BlockPoolRepo, CommittedBlockRepo)
 	blockEventListener := api_gateway.NewBlockEventListener(BlockPoolRepo, CommittedBlockRepo)
 
-	//set icode service and repo
+	//set icode tesseract and repo
 
 	icodeDb := "./.test/icode"
 	icodeRepo := api_gateway.NewLevelDbMetaRepository(icodeDb)
@@ -206,7 +206,7 @@ func initIcode() error {
 	server := rpc.NewServer(config.Engine.Amqp)
 	//publisher := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
 
-	// service generate
+	// tesseract generate
 	//commandService := icodeAdapter.NewCommandService(publisher.Publish)
 
 	// git generate
@@ -247,7 +247,7 @@ func initTxPool() error {
 
 	transactionRepo := txpoolMem.NewTransactionRepository()
 
-	//service
+	//tesseract
 	blockProposalService := txpoolAdapter.NewBlockProposalService(client, transactionRepo, config.Engine.Mode)
 
 	//infra
@@ -284,7 +284,7 @@ func initBlockchain() error {
 		panic(err)
 	}
 
-	// service
+	// tesseract
 	eventService := common.NewEventService(config.Engine.Amqp, "Event")
 
 	// api

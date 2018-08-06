@@ -79,7 +79,7 @@ type BlockSaved struct {
 
 // icode meta 생성
 type MetaCreated struct {
-	midgard.EventModel
+	ICodeID        string
 	RepositoryName string
 	GitUrl         string
 	Path           string
@@ -89,7 +89,7 @@ type MetaCreated struct {
 
 // icode meta deleted
 type MetaDeleted struct {
-	midgard.EventModel
+	ICodeID string
 }
 
 // icode meta status changed

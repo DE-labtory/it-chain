@@ -35,7 +35,7 @@ func TestICodeApi_Deploy(t *testing.T) {
 	//set mock repo
 
 	tesseractConfig := tesseract.Config{ShPath: shPath}
-	containerService := service.NewTesseractContainerService(tesseractConfig)
+	containerService := tesseract.NewTesseractContainerService(tesseractConfig)
 	storeApi, err := api2.NewICodeGitStoreApi(backupGitId, backupGitPw)
 	assert.NoError(t, err, "err in newIcodeGitStoreApi")
 	icodeApi := git.NewIcodeApi(containerService, storeApi)
@@ -79,7 +79,7 @@ func TestICodeApi_Deploy(t *testing.T) {
 //
 //	//teseeract 설정
 //	tesseractConfig := tesseract.Config{ShPath: shPath}
-//	containerService := service.NewTesseractContainerService(tesseractConfig)
+//	containerService := tesseract.NewTesseractContainerService(tesseractConfig)
 //
 //	//storeApi 설정
 //	storeApi := git.NewRepositoryService()
