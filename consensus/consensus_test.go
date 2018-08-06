@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package consensus
+package consensus_test
 
 import (
 	"testing"
 
+	"github.com/it-chain/engine/consensus"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPrepareMsgPool_Save(t *testing.T) {
 	// given
-	pPool := NewPrepareMsgPool()
+	pPool := consensus.NewPrepareMsgPool()
 
 	// case 1 : save
-	pMsg := PrepareMsg{
-		ConsensusId: ConsensusId{"c1"},
+	pMsg := consensus.PrepareMsg{
+		ConsensusId: consensus.ConsensusId{"c1"},
 		SenderId:    "s1",
 		BlockHash:   make([]byte, 0),
 	}
@@ -37,11 +38,11 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 	pPool.Save(&pMsg)
 
 	// then
-	assert.Equal(t, 1, len(pPool.messages))
+	assert.Equal(t, 1, len(pPool.Get()))
 
 	// case 2 : save
-	pMsg = PrepareMsg{
-		ConsensusId: ConsensusId{"c1"},
+	pMsg = consensus.PrepareMsg{
+		ConsensusId: consensus.ConsensusId{"c1"},
 		SenderId:    "s2",
 		BlockHash:   make([]byte, 0),
 	}
@@ -50,11 +51,11 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 	pPool.Save(&pMsg)
 
 	// then
-	assert.Equal(t, 2, len(pPool.messages))
+	assert.Equal(t, 2, len(pPool.Get()))
 
 	// case 3 : same sender
-	pMsg = PrepareMsg{
-		ConsensusId: ConsensusId{"c1"},
+	pMsg = consensus.PrepareMsg{
+		ConsensusId: consensus.ConsensusId{"c1"},
 		SenderId:    "s2",
 		BlockHash:   make([]byte, 0),
 	}
@@ -63,11 +64,11 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 	pPool.Save(&pMsg)
 
 	// then
-	assert.Equal(t, 2, len(pPool.messages))
+	assert.Equal(t, 2, len(pPool.Get()))
 
 	// case 4 : block hash is is nil
-	pMsg = PrepareMsg{
-		ConsensusId: ConsensusId{"c1"},
+	pMsg = consensus.PrepareMsg{
+		ConsensusId: consensus.ConsensusId{"c1"},
 		SenderId:    "s3",
 		BlockHash:   nil,
 	}
@@ -76,15 +77,15 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 	pPool.Save(&pMsg)
 
 	// then
-	assert.Equal(t, 2, len(pPool.messages))
+	assert.Equal(t, 2, len(pPool.Get()))
 }
 
 func TestPrepareMsgPool_RemoveAllMsgs(t *testing.T) {
 	// given
-	pPool := NewPrepareMsgPool()
+	pPool := consensus.NewPrepareMsgPool()
 
-	pMsg := PrepareMsg{
-		ConsensusId: ConsensusId{"c1"},
+	pMsg := consensus.PrepareMsg{
+		ConsensusId: consensus.ConsensusId{"c1"},
 		SenderId:    "s1",
 		BlockHash:   make([]byte, 0),
 	}
@@ -95,16 +96,16 @@ func TestPrepareMsgPool_RemoveAllMsgs(t *testing.T) {
 	pPool.RemoveAllMsgs()
 
 	// then
-	assert.Equal(t, 0, len(pPool.messages))
+	assert.Equal(t, 0, len(pPool.Get()))
 }
 
 func TestCommitMsgPool_Save(t *testing.T) {
 	// given
-	cPool := NewCommitMsgPool()
+	cPool := consensus.NewCommitMsgPool()
 
 	// case 1 : save
-	cMsg := CommitMsg{
-		ConsensusId: ConsensusId{"c1"},
+	cMsg := consensus.CommitMsg{
+		ConsensusId: consensus.ConsensusId{"c1"},
 		SenderId:    "s1",
 	}
 
@@ -112,11 +113,11 @@ func TestCommitMsgPool_Save(t *testing.T) {
 	cPool.Save(&cMsg)
 
 	// then
-	assert.Equal(t, 1, len(cPool.messages))
+	assert.Equal(t, 1, len(cPool.Get()))
 
 	// case 2 : save
-	cMsg = CommitMsg{
-		ConsensusId: ConsensusId{"c1"},
+	cMsg = consensus.CommitMsg{
+		ConsensusId: consensus.ConsensusId{"c1"},
 		SenderId:    "s2",
 	}
 
@@ -124,11 +125,11 @@ func TestCommitMsgPool_Save(t *testing.T) {
 	cPool.Save(&cMsg)
 
 	// then
-	assert.Equal(t, 2, len(cPool.messages))
+	assert.Equal(t, 2, len(cPool.Get()))
 
 	// case 3 : same sender
-	cMsg = CommitMsg{
-		ConsensusId: ConsensusId{"c1"},
+	cMsg = consensus.CommitMsg{
+		ConsensusId: consensus.ConsensusId{"c1"},
 		SenderId:    "s2",
 	}
 
@@ -136,15 +137,15 @@ func TestCommitMsgPool_Save(t *testing.T) {
 	cPool.Save(&cMsg)
 
 	// then
-	assert.Equal(t, 2, len(cPool.messages))
+	assert.Equal(t, 2, len(cPool.Get()))
 }
 
 func TestCommitMsgPool_RemoveAllMsgs(t *testing.T) {
 	// given
-	cPool := NewCommitMsgPool()
+	cPool := consensus.NewCommitMsgPool()
 
-	cMsg := CommitMsg{
-		ConsensusId: ConsensusId{"c1"},
+	cMsg := consensus.CommitMsg{
+		ConsensusId: consensus.ConsensusId{"c1"},
 		SenderId:    "s1",
 	}
 
@@ -154,25 +155,25 @@ func TestCommitMsgPool_RemoveAllMsgs(t *testing.T) {
 	cPool.RemoveAllMsgs()
 
 	// then
-	assert.Equal(t, 0, len(cPool.messages))
+	assert.Equal(t, 0, len(cPool.Get()))
 }
 
 func TestConsensus_SavePrepareMsg(t *testing.T) {
 	// given
-	c := Consensus{
-		ConsensusID:     NewConsensusId("c1"),
+	c := consensus.Consensus{
+		ConsensusID:     consensus.NewConsensusId("c1"),
 		Representatives: nil,
-		Block: ProposedBlock{
+		Block: consensus.ProposedBlock{
 			Seal: make([]byte, 0),
 		},
-		CurrentState:   IDLE_STATE,
-		PrepareMsgPool: NewPrepareMsgPool(),
-		CommitMsgPool:  NewCommitMsgPool(),
+		CurrentState:   consensus.IDLE_STATE,
+		PrepareMsgPool: consensus.NewPrepareMsgPool(),
+		CommitMsgPool:  consensus.NewCommitMsgPool(),
 	}
 
 	// case 1 : save
-	pMsg := &PrepareMsg{
-		ConsensusId: NewConsensusId("c1"),
+	pMsg := &consensus.PrepareMsg{
+		ConsensusId: consensus.NewConsensusId("c1"),
 		SenderId:    "s1",
 		BlockHash:   make([]byte, 0),
 	}
@@ -186,8 +187,8 @@ func TestConsensus_SavePrepareMsg(t *testing.T) {
 	assert.Equal(t, *pMsg, c.PrepareMsgPool.Get()[0])
 
 	// case 2 : incorrect consensus ID
-	pMsg = &PrepareMsg{
-		ConsensusId: NewConsensusId("c2"),
+	pMsg = &consensus.PrepareMsg{
+		ConsensusId: consensus.NewConsensusId("c2"),
 		SenderId:    "s1",
 		BlockHash:   make([]byte, 0),
 	}
@@ -197,25 +198,25 @@ func TestConsensus_SavePrepareMsg(t *testing.T) {
 
 	//then
 	assert.Error(t, err)
-	assert.Equal(t, 1, len(c.PrepareMsgPool.messages))
+	assert.Equal(t, 1, len(c.PrepareMsgPool.Get()))
 }
 
 func TestConsensus_SaveCommitMsg(t *testing.T) {
 	// given
-	c := Consensus{
-		ConsensusID:     NewConsensusId("c1"),
+	c := consensus.Consensus{
+		ConsensusID:     consensus.NewConsensusId("c1"),
 		Representatives: nil,
-		Block: ProposedBlock{
+		Block: consensus.ProposedBlock{
 			Seal: make([]byte, 0),
 		},
-		CurrentState:   IDLE_STATE,
-		PrepareMsgPool: NewPrepareMsgPool(),
-		CommitMsgPool:  NewCommitMsgPool(),
+		CurrentState:   consensus.IDLE_STATE,
+		PrepareMsgPool: consensus.NewPrepareMsgPool(),
+		CommitMsgPool:  consensus.NewCommitMsgPool(),
 	}
 
 	// case 1 : save
-	cMsg := &CommitMsg{
-		ConsensusId: NewConsensusId("c1"),
+	cMsg := &consensus.CommitMsg{
+		ConsensusId: consensus.NewConsensusId("c1"),
 		SenderId:    "s1",
 	}
 
@@ -228,8 +229,8 @@ func TestConsensus_SaveCommitMsg(t *testing.T) {
 	assert.Equal(t, *cMsg, c.CommitMsgPool.Get()[0])
 
 	// case 2 : incorrect consensus ID
-	cMsg = &CommitMsg{
-		ConsensusId: NewConsensusId("c2"),
+	cMsg = &consensus.CommitMsg{
+		ConsensusId: consensus.NewConsensusId("c2"),
 		SenderId:    "s1",
 	}
 
@@ -238,5 +239,5 @@ func TestConsensus_SaveCommitMsg(t *testing.T) {
 
 	//then
 	assert.Error(t, err)
-	assert.Equal(t, 1, len(c.CommitMsgPool.messages))
+	assert.Equal(t, 1, len(c.CommitMsgPool.Get()))
 }
