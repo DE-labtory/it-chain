@@ -18,7 +18,6 @@ package api_gateway
 
 import (
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/it-chain/engine/common"
@@ -110,18 +109,21 @@ func (l *LevelDbMetaRepository) FindMetaById(id icode.ID) (icode.Meta, error) {
 }
 
 func (l *LevelDbMetaRepository) Save(meta icode.Meta) error {
-	if meta.GetID() == "" {
+
+	if meta.ICodeID == "" {
 		return errors.New("meta is empty")
 	}
+
 	b, err := common.Serialize(meta)
 	if err != nil {
 		return err
 	}
 
-	err = l.leveldb.Put([]byte(meta.GetID()), b, true)
+	err = l.leveldb.Put([]byte(meta.ICodeID), b, true)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -142,13 +144,12 @@ func NewIcodeEventHandler(repository ICodeMetaRepository) ICodeEventHandler {
 func (i ICodeEventHandler) HandleMetaCreatedEvent(metaCreatedEvent event.MetaCreated) {
 
 	meta := icode.Meta{
-		ICodeID:        metaCreatedEvent.ID,
+		ICodeID:        metaCreatedEvent.ICodeID,
 		RepositoryName: metaCreatedEvent.RepositoryName,
 		GitUrl:         metaCreatedEvent.GitUrl,
 		Path:           metaCreatedEvent.Path,
 		CommitHash:     metaCreatedEvent.CommitHash,
 		Version:        metaCreatedEvent.Version,
-		Status:         icode.READY,
 	}
 
 	err := i.metaRepository.Save(meta)
@@ -160,28 +161,8 @@ func (i ICodeEventHandler) HandleMetaCreatedEvent(metaCreatedEvent event.MetaCre
 
 func (i ICodeEventHandler) HandleMetaDeletedEvent(metaDeleted event.MetaDeleted) {
 
-	err := i.metaRepository.Remove(metaDeleted.GetID())
+	err := i.metaRepository.Remove(metaDeleted.ICodeID)
 
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-}
-
-func (i ICodeEventHandler) HandleMetaStatusChangeEvent(metaStatusChagnedEvent event.MetaStatusChanged) {
-
-	meta, err := i.metaRepository.FindMetaById(metaStatusChagnedEvent.GetID())
-
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	if meta.GetID() == "" {
-		log.Fatal(fmt.Sprintf("no icode id : [%s] in handleMetaStatusChangeEvent(api_gateway/icode_query_api", metaStatusChagnedEvent.GetID()))
-	}
-
-	meta.Status = metaStatusChagnedEvent.Status
-
-	err = i.metaRepository.Save(meta)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

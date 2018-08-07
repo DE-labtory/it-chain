@@ -83,8 +83,6 @@ func invoke(id string, functionName string, args []string) {
 			logger.Infof(nil, "%15s : [%s]", "arg"+string(i), arg)
 		}
 
-		logger.Infof(nil, "%15s : %t", "success", result.Success)
-
 		for key, val := range result.Data {
 			logger.Infof(nil, "%s : %s", "[result]"+key, val)
 		}
