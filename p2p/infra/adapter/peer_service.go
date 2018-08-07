@@ -24,7 +24,7 @@ import (
 )
 
 type PeerService struct {
-	publish Publish
+	client p2p.Client
 }
 
 func (ps *PeerService) Dial(ipAddress string) error {
@@ -32,7 +32,7 @@ func (ps *PeerService) Dial(ipAddress string) error {
 	connectionCreateCommand := command.CreateConnection{
 		Address: ipAddress,
 	}
-	ps.publish("Command", "connection.create", connectionCreateCommand)
+	ps.client.Call("connection.create", connectionCreateCommand, func() {})
 	return nil
 }
 
@@ -56,7 +56,7 @@ func (ps *PeerService) RequestLeaderInfo(connectionId string) error {
 
 	deliverCommand.RecipientList = append(deliverCommand.RecipientList, connectionId)
 
-	return ps.publish("Command", "message.deliver", deliverCommand)
+	return ps.client.Call("message.deliver", deliverCommand, func() {})
 }
 
 // command message which requests node list of specific node
@@ -77,5 +77,5 @@ func (ps *PeerService) RequestPeerList(peerId p2p.PeerId) error {
 
 	deliverCommand.RecipientList = append(deliverCommand.RecipientList, peerId.ToString())
 
-	return ps.publish("Command", "message.deliver", deliverCommand)
+	return ps.client.Call("message.deliver", deliverCommand, func() {})
 }

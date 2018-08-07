@@ -53,13 +53,13 @@ type KeyValueDBIterator interface {
 	Value() []byte
 }
 
-type KeyValueDB interface{
+type KeyValueDB interface {
 	Open()
 	Close()
- 	Get(key []byte) ([]byte, error)
- 	Put(key []byte, value []byte, sync bool) error
- 	Delete(key []byte, sync bool) error
- 	WriteBatch(KVs map[string][]byte, sync bool) error
+	Get(key []byte) ([]byte, error)
+	Put(key []byte, value []byte, sync bool) error
+	Delete(key []byte, sync bool) error
+	WriteBatch(KVs map[string][]byte, sync bool) error
 	GetIteratorWithPrefix(prefix []byte) KeyValueDBIterator
 	GetIterator(startKey []byte, endKey []byte) KeyValueDBIterator
 	Snapshot() (map[string][]byte, error)
