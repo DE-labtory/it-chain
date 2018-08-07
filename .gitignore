@@ -34,7 +34,7 @@ sample/db/test/*
 .tmp
 
 # vendor
-vendor
+/vendor
 
 # leveldb output
 *.log
