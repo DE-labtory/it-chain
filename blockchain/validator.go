@@ -46,7 +46,6 @@ func (t *DefaultValidator) ValidateSeal(seal []byte, comparisonBlock Block) (boo
 	return bytes.Compare(seal, comparisonSeal) == 0, nil
 }
 
-//ToDo: txlist에 tx가 1개일 때 검증이 이상하다.
 // ValidateTxSeal 함수는 주어진 Transaction 리스트에 따라 주어진 transaction Seal을 검증함.
 func (t *DefaultValidator) ValidateTxSeal(txSeal [][]byte, txList []Transaction) (bool, error) {
 	leafNodeIndex := 0
