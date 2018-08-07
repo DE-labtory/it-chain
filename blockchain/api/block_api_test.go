@@ -135,7 +135,7 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 
 	txList := []*blockchain.DefaultTransaction{
 		{
-			ID:        "tx01",
+			ID:        "tx02",
 			ICodeID:   "ICodeID",
 			PeerID:    "junksound",
 			Timestamp: time.Now().Round(0),
@@ -156,7 +156,7 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 	handler := &mock.CommitEventHandler{}
 
 	handler.HandleFunc = func(event event.BlockCommitted) {
-		assert.Equal(t, "tx01", event.TxList[0].ID)
+		assert.Equal(t, "tx02", event.TxList[0].ID)
 		assert.Equal(t, blockchain.Committed, event.State)
 		wg.Done()
 	}
@@ -175,7 +175,7 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 
 	blockRepo.SaveFunc = func(block blockchain.DefaultBlock) error {
 
-		assert.Equal(t, "tx01", block.GetTxList()[0].GetID())
+		assert.Equal(t, "tx02", block.GetTxList()[0].GetID())
 
 		return nil
 	}
