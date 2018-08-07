@@ -43,7 +43,7 @@ func NewContainerService() *ContainerService {
 }
 
 func (cs ContainerService) StartContainer(meta icode.Meta) error {
-	logger.Info(nil, fmt.Sprintf("[ICode] staring icode, id:%s", meta.ICodeID))
+	logger.Info(nil, fmt.Sprintf("[ICode] deploying icode, id:%s", meta.ICodeID))
 
 	conf := tesseract.ContainerConfig{
 		Name:      meta.RepositoryName,

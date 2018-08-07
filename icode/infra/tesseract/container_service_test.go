@@ -1,5 +1,3 @@
-// +build ignore
-
 /*
  * Copyright 2018 It-chain
  *
@@ -74,6 +72,18 @@ func TestTesseractContainerService_ExecuteRequest(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, result.Err, "")
 
+	// success case
+	result, err = cs.ExecuteRequest(icode.Request{
+		ICodeID:  "1",
+		Function: "getA",
+		Type:     "query",
+		Args:     []string{},
+	})
+
+	assert.NoError(t, err)
+	assert.Equal(t, result.Data["A"], "0")
+	assert.Equal(t, result.Err, "")
+
 	// no corresponding icode id
 	result, err = cs.ExecuteRequest(icode.Request{
 		ICodeID:  "2",
@@ -100,6 +110,5 @@ func TestTesseractContainerService_ExecuteRequest(t *testing.T) {
 		Type:     "invoke",
 		Args:     []string{},
 	})
-
 	assert.NotEqual(t, result.Err, "")
 }

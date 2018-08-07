@@ -55,6 +55,7 @@ func createRequestList(transactionList []event.Tx) []icode.Request {
 			Function: transaction.Function,
 			Args:     transaction.Args,
 			ICodeID:  transaction.ICodeID,
+			Type:     "invoke",
 		})
 	}
 
