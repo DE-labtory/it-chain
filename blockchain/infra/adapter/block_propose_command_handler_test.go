@@ -95,12 +95,6 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 	assert.Equal(t, errRPC, rpc.Error{Message: adapter.ErrCommandTransactions.Error()})
 
 	//when
-	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: []command.Tx{{ID: "", PeerID: ""}}})
-
-	//then
-	assert.Equal(t, errRPC, rpc.Error{Message: adapter.ErrTxHasMissingProperties.Error()})
-
-	//when
 	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
 		TxList: []command.Tx{
 			{

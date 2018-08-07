@@ -46,10 +46,6 @@ func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.P
 
 	txList := command.TxList
 
-	if err := validateTxList(txList); err != nil {
-		return struct{}{}, rpc.Error{Message: err.Error()}
-	}
-
 	defaultTxList := getBackTxList(txList)
 
 	if h.engineMode == "solo" {
@@ -72,24 +68,6 @@ func validateCommand(command command.ProposeBlock) error {
 
 	if txList == nil || len(txList) == 0 {
 		return ErrCommandTransactions
-	}
-	return nil
-}
-
-func validateTxList(txList []command.Tx) error {
-	var err error
-
-	for _, tx := range txList {
-		err = validateTx(tx)
-	}
-
-	return err
-}
-
-func validateTx(tx command.Tx) error {
-	if tx.ID == "" || tx.PeerID == "" || tx.TimeStamp.IsZero() || tx.Jsonrpc == "" ||
-		tx.Function == "" || tx.Args == nil {
-		return ErrTxHasMissingProperties
 	}
 	return nil
 }
