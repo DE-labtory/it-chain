@@ -28,6 +28,13 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
+var ErrUnsupportedUrl = errors.New("unsupported url [format: github.com/xxx/yyyy], currently only github url is supported")
+
+const (
+	github = "github.com"
+	gitlab = "gitlab.com"
+)
+
 type RepositoryService struct {
 }
 
@@ -36,8 +43,14 @@ func NewRepositoryService() *RepositoryService {
 }
 
 func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (icode.Meta, error) {
-	logger.Info(nil, fmt.Sprintf("[ICode] cloning icode, url:%s", repositoryUrl))
-	name := getNameFromGitUrl(repositoryUrl)
+	logger.Info(nil, fmt.Sprintf("[ICode] cloning [%s]", repositoryUrl))
+
+	giturl, err := toSshUrl(repositoryUrl)
+	if err != nil {
+		return icode.Meta{}, err
+	}
+
+	name := getNameFromGitUrl(giturl)
 
 	if name == "" {
 		return icode.Meta{}, errors.New(fmt.Sprintf("Invalid url name [%s]", repositoryUrl))
@@ -58,7 +71,7 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 	}
 
 	r, err := git.PlainClone(baseSavePath+"/"+name, false, &git.CloneOptions{
-		URL:               repositoryUrl,
+		URL:               giturl,
 		Auth:              sshAuth,
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 	})
@@ -81,9 +94,34 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 	}
 
 	metaData := icode.NewMeta(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash)
-	logger.Info(nil, fmt.Sprintf("[ICode] successfully cloned icode, url:%s", repositoryUrl))
+	logger.Info(nil, fmt.Sprintf("[ICode] [%s] has successfully cloned ", repositoryUrl))
 
 	return metaData, nil
+}
+
+// transfer github.com/it-chain/engine to // git@github.com:it-chain/engine.git
+func toSshUrl(repositoryUrl string) (string, error) {
+	prefix := "git@"
+	postfix := ".git"
+
+	if strings.HasPrefix(repositoryUrl, github) {
+		return prefix + github + ":" + after(repositoryUrl, github+"/") + postfix, nil
+	}
+
+	return "", ErrUnsupportedUrl
+}
+
+func after(value string, a string) string {
+	// Get substring after a string.
+	pos := strings.LastIndex(value, a)
+	if pos == -1 {
+		return ""
+	}
+	adjustedPos := pos + len(a)
+	if adjustedPos >= len(value) {
+		return ""
+	}
+	return value[adjustedPos:len(value)]
 }
 
 func getNameFromGitUrl(gitUrl string) string {

@@ -41,10 +41,6 @@ func NewDeployCommandHandler(icodeApi api.ICodeApi) *DeployCommandHandler {
 func (d *DeployCommandHandler) HandleDeployCommand(deployCommand command.Deploy) (icode.Meta, rpc.Error) {
 
 	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/.tmp/"
-	logger.Info(nil, fmt.Sprintf("[Icode] icode deploying, url %s", deployCommand.Url))
-	logger.Info(nil, fmt.Sprintf("[Icode] icode deploying, id %s", deployCommand.ID))
-	logger.Info(nil, fmt.Sprintf("[Icode] icode saving path: %s", savePath))
-
 	meta, err := d.icodeApi.Deploy(deployCommand.GetID(), savePath, deployCommand.Url, deployCommand.SshPath)
 
 	if err != nil {

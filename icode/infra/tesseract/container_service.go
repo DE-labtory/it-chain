@@ -17,10 +17,9 @@
 package tesseract
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-
-	"encoding/json"
 
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/icode"
@@ -49,6 +48,7 @@ func (cs ContainerService) StartContainer(meta icode.Meta) error {
 	conf := tesseract.ContainerConfig{
 		Name:      meta.RepositoryName,
 		Directory: meta.Path,
+		Url:       meta.GitUrl,
 	}
 
 	container, err := container.Create(conf)

@@ -1,3 +1,5 @@
+// +build ignore
+
 /*
  * Copyright 2018 It-chain
  *
@@ -15,6 +17,9 @@
  *
  */
 
+// should not modify this file
+// this file will be used as just test
+
 package main
 
 import (
@@ -22,10 +27,10 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/it-chain/engine/icode/mock/handler"
 	"github.com/it-chain/sdk"
 	"github.com/it-chain/sdk/logger"
 	"github.com/jessevdk/go-flags"
+	"github.com/mock/handler"
 )
 
 var opts struct {
