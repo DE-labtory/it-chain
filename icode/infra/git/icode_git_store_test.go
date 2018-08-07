@@ -62,12 +62,13 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 		t.Logf("Running %s test, case: %s", t.Name(), testName)
 		//when
 		meta, err := icodeApi.Clone(testName, baseTempPath, test.InputGitURL, sshPath)
-		assert.NoError(t, err)
 
-		// icode ID 는 랜덤이기때문에 실데이터에서 주입
-		// commit hash 는 repo 상황에따라 바뀌기 때문에 주입
-		test.OutputMeta.ICodeID = meta.ICodeID
-		test.OutputMeta.CommitHash = meta.CommitHash
+		if err == nil {
+			// icode ID 는 랜덤이기때문에 실데이터에서 주입
+			// commit hash 는 repo 상황에따라 바뀌기 때문에 주입
+			test.OutputMeta.ICodeID = meta.ICodeID
+			test.OutputMeta.CommitHash = meta.CommitHash
+		}
 
 		//then
 		assert.Equal(t, test.OutputMeta, meta)

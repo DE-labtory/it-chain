@@ -37,7 +37,6 @@ import (
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/core/eventstore"
 	icodeApi "github.com/it-chain/engine/icode/api"
 	icodeAdapter "github.com/it-chain/engine/icode/infra/adapter"
 	icodeInfra "github.com/it-chain/engine/icode/infra/git"
@@ -86,7 +85,6 @@ func main() {
 		PrintLogo()
 		configName := c.String("config")
 		conf.SetConfigName(configName)
-		eventstore.InitDefault()
 		return start()
 	}
 
