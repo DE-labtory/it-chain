@@ -33,13 +33,13 @@ var ErrUnmarshal = errors.New("error during unmarshal")
 type GrpcCommandHandler struct {
 	leaderApi        api.ILeaderApi
 	electionService  p2p.ElectionService
-	communicationApi api.ICommunicationApi
+	communicationApi CommunicationApi // api.CommunicationApi
 	pLTableService   p2p.PLTableService
 }
 
 func NewGrpcCommandHandler(
 	leaderApi api.ILeaderApi,
-	electionService p2p.ElectionService, communicationApi api.ICommunicationApi,
+	electionService p2p.ElectionService, communicationApi CommunicationApi,
 	pLTableService p2p.PLTableService) GrpcCommandHandler {
 	return GrpcCommandHandler{
 		leaderApi:        leaderApi,
