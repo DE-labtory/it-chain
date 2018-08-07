@@ -18,9 +18,11 @@ package tesseract
 
 import (
 	"errors"
+	"fmt"
 
 	"encoding/json"
 
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/tesseract"
 	"github.com/it-chain/tesseract/container"
@@ -42,6 +44,7 @@ func NewContainerService() *ContainerService {
 }
 
 func (cs ContainerService) StartContainer(meta icode.Meta) error {
+	logger.Info(nil, fmt.Sprintf("[ICode] staring icode, id:%s", meta.ICodeID))
 
 	conf := tesseract.ContainerConfig{
 		Name:      meta.RepositoryName,
@@ -60,6 +63,7 @@ func (cs ContainerService) StartContainer(meta icode.Meta) error {
 }
 
 func (cs ContainerService) ExecuteRequest(request icode.Request) (icode.Result, error) {
+	logger.Info(nil, fmt.Sprintf("[ICode] executing icode, id:%s", request.ICodeID))
 
 	container, ok := cs.containerMap[request.ICodeID]
 
@@ -73,9 +77,7 @@ func (cs ContainerService) ExecuteRequest(request icode.Request) (icode.Result, 
 	var callback = func(response *pb.Response, err error) {
 
 		if err != nil {
-			resultCh <- icode.Result{
-				Err: err.Error(),
-			}
+			errCh <- err
 		}
 
 		data := make(map[string]string)
@@ -106,6 +108,7 @@ func (cs ContainerService) ExecuteRequest(request icode.Request) (icode.Result, 
 
 	select {
 	case err := <-errCh:
+		logger.Error(nil, fmt.Sprintf("[ICode] fail executing icode, id:%s", request.ICodeID))
 		return icode.Result{}, err
 	case result := <-resultCh:
 		return result, nil
@@ -128,4 +131,15 @@ func (cs ContainerService) StopContainer(id icode.ID) error {
 
 	delete(cs.containerMap, id)
 	return nil
+}
+
+func (cs ContainerService) GetRunningICodeIDList() []icode.ID {
+
+	icodeIDList := make([]icode.ID, 0)
+
+	for id, _ := range cs.containerMap {
+		icodeIDList = append(icodeIDList, id)
+	}
+
+	return icodeIDList
 }

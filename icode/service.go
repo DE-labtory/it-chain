@@ -20,9 +20,14 @@ type ContainerService interface {
 	StartContainer(meta Meta) error
 	StopContainer(id ID) error
 	ExecuteRequest(request Request) (Result, error)
+	GetRunningICodeIDList() []ID
 }
 
 type GitService interface {
 	//clone code from deploy info
-	Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (*Meta, error)
+	Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (Meta, error)
+}
+
+type EventService interface {
+	Publish(topic string, event interface{}) error
 }

@@ -41,12 +41,11 @@ import (
 	icodeApi "github.com/it-chain/engine/icode/api"
 	icodeAdapter "github.com/it-chain/engine/icode/infra/adapter"
 	icodeInfra "github.com/it-chain/engine/icode/infra/git"
-	icodeService "github.com/it-chain/engine/icode/infra/tesseract"
+	"github.com/it-chain/engine/icode/infra/tesseract"
 	txpoolApi "github.com/it-chain/engine/txpool/api"
 	txpoolAdapter "github.com/it-chain/engine/txpool/infra/adapter"
 	txpoolBatch "github.com/it-chain/engine/txpool/infra/batch"
 	txpoolMem "github.com/it-chain/engine/txpool/infra/mem"
-	"github.com/it-chain/tesseract"
 	"github.com/urfave/cli"
 )
 
@@ -211,11 +210,9 @@ func initIcode() error {
 
 	// git generate
 	storeApi := icodeInfra.NewRepositoryService()
-	defaultScriptPath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/icode/default_setup.sh"
-	containerService := icodeService.NewTesseractContainerService(tesseract.Config{
-		ShPath: defaultScriptPath,
-	})
-	api := icodeApi.NewIcodeApi(containerService, storeApi)
+	containerService := tesseract.NewContainerService()
+	eventService := common.NewEventService(config.Engine.Amqp, "Event")
+	api := icodeApi.NewICodeApi(containerService, storeApi, eventService)
 
 	// handler generate
 	deployHandler := icodeAdapter.NewDeployCommandHandler(*api)
@@ -284,7 +281,6 @@ func initBlockchain() error {
 		panic(err)
 	}
 
-	// tesseract
 	eventService := common.NewEventService(config.Engine.Amqp, "Event")
 
 	// api

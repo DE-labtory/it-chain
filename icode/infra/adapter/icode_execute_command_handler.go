@@ -41,7 +41,11 @@ func (i *IcodeExecuteCommandHandler) HandleTransactionExecuteCommandHandler(comm
 		ICodeID:  command.ID,
 	}
 
-	result := i.iCodeApi.ExecuteRequest(request)
+	result, err := i.iCodeApi.ExecuteRequest(request)
+
+	if err != nil {
+		return icode.Result{}, rpc.Error{Message: err.Error()}
+	}
 
 	return result, rpc.Error{}
 }

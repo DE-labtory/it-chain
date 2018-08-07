@@ -22,6 +22,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/icode"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
@@ -35,6 +36,7 @@ func NewRepositoryService() *RepositoryService {
 }
 
 func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (icode.Meta, error) {
+	logger.Info(nil, fmt.Sprintf("[ICode] cloning icode, url:%s", repositoryUrl))
 	name := getNameFromGitUrl(repositoryUrl)
 
 	if name == "" {
@@ -79,6 +81,8 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 	}
 
 	metaData := icode.NewMeta(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash)
+	logger.Info(nil, fmt.Sprintf("[ICode] successfully cloned icode, url:%s", repositoryUrl))
+
 	return metaData, nil
 }
 

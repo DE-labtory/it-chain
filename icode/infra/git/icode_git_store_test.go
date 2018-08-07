@@ -41,17 +41,17 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 	//given
 	tests := map[string]struct {
 		InputGitURL string
-		OutputMeta  *icode.Meta
+		OutputMeta  icode.Meta
 		OutputErr   error
 	}{
 		"success": {
 			InputGitURL: "git@github.com:junbeomlee/test_icode.git",
-			OutputMeta:  &icode.Meta{RepositoryName: "test_icode", GitUrl: "git@github.com:junbeomlee/test_icode.git", Path: baseTempPath + "/" + "test_icode"},
+			OutputMeta:  icode.Meta{RepositoryName: "test_icode", GitUrl: "git@github.com:junbeomlee/test_icode.git", Path: baseTempPath + "/" + "test_icode"},
 			OutputErr:   nil,
 		},
 		"fail": {
 			InputGitURL: "git@github.com:nonono",
-			OutputMeta:  nil,
+			OutputMeta:  icode.Meta{},
 			OutputErr:   errors.New("repository not found"),
 		},
 	}
@@ -62,12 +62,12 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 		t.Logf("Running %s test, case: %s", t.Name(), testName)
 		//when
 		meta, err := icodeApi.Clone(testName, baseTempPath, test.InputGitURL, sshPath)
-		if meta != nil {
-			// icode ID 는 랜덤이기때문에 실데이터에서 주입
-			// commit hash 는 repo 상황에따라 바뀌기 때문에 주입
-			test.OutputMeta.ICodeID = meta.ICodeID
-			test.OutputMeta.CommitHash = meta.CommitHash
-		}
+		assert.NoError(t, err)
+
+		// icode ID 는 랜덤이기때문에 실데이터에서 주입
+		// commit hash 는 repo 상황에따라 바뀌기 때문에 주입
+		test.OutputMeta.ICodeID = meta.ICodeID
+		test.OutputMeta.CommitHash = meta.CommitHash
 
 		//then
 		assert.Equal(t, test.OutputMeta, meta)
