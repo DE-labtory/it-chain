@@ -213,9 +213,9 @@ func initIcode() error {
 	api := icodeApi.NewICodeApi(containerService, storeApi, eventService)
 
 	// handler generate
-	deployHandler := icodeAdapter.NewDeployCommandHandler(*api)
-	unDeployHandler := icodeAdapter.NewUnDeployCommandHandler(*api)
-	icodeExecuteHandler := icodeAdapter.NewIcodeExecuteCommandHandler(*api)
+	deployHandler := icodeAdapter.NewDeployCommandHandler(api)
+	unDeployHandler := icodeAdapter.NewUnDeployCommandHandler(api)
+	icodeExecuteHandler := icodeAdapter.NewIcodeExecuteCommandHandler(api)
 
 	server.Register("icode.execute", icodeExecuteHandler.HandleTransactionExecuteCommandHandler)
 	server.Register("icode.deploy", deployHandler.HandleDeployCommand)
@@ -275,6 +275,7 @@ func initBlockchain() error {
 	server := rpc.NewServer(config.Engine.Amqp)
 
 	blockRepo, err := blockchainMem.NewBlockRepository("./blockchain/db")
+
 	if err != nil {
 		panic(err)
 	}

@@ -30,9 +30,9 @@ type ICodeApi struct {
 	EventService     icode.EventService
 }
 
-func NewICodeApi(containerService icode.ContainerService, gitService icode.GitService, eventService icode.EventService) *ICodeApi {
+func NewICodeApi(containerService icode.ContainerService, gitService icode.GitService, eventService icode.EventService) ICodeApi {
 
-	return &ICodeApi{
+	return ICodeApi{
 		ContainerService: containerService,
 		GitService:       gitService,
 		EventService:     eventService,
@@ -83,8 +83,6 @@ func (i ICodeApi) UnDeploy(id icode.ID) error {
 }
 
 func (i ICodeApi) ExecuteRequestList(RequestList []icode.Request) []icode.Result {
-
-	logger.Info(nil, "[ICode] handle blockCreatedEvent")
 
 	resultList := make([]icode.Result, 0)
 

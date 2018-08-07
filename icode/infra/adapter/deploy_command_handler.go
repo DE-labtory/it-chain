@@ -17,9 +17,8 @@
 package adapter
 
 import (
-	"os"
-
 	"fmt"
+	"os"
 
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
