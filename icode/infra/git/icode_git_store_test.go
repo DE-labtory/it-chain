@@ -40,17 +40,20 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 
 	//given
 	tests := map[string]struct {
+		ID          string
 		InputGitURL string
 		OutputMeta  icode.Meta
 		OutputErr   error
 	}{
 		"success": {
-			InputGitURL: "git@github.com:junbeomlee/test_icode.git",
-			OutputMeta:  icode.Meta{RepositoryName: "test_icode", GitUrl: "git@github.com:junbeomlee/test_icode.git", Path: baseTempPath + "/" + "test_icode"},
+			ID:          "1",
+			InputGitURL: "github.com/junbeomlee/test_icode",
+			OutputMeta:  icode.Meta{RepositoryName: "test_icode", GitUrl: "github.com/junbeomlee/test_icode", Path: baseTempPath + "/" + "test_icode"},
 			OutputErr:   nil,
 		},
 		"fail": {
-			InputGitURL: "git@github.com:nonono",
+			ID:          "2",
+			InputGitURL: "github.com/nonono",
 			OutputMeta:  icode.Meta{},
 			OutputErr:   errors.New("repository not found"),
 		},
@@ -58,10 +61,9 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 
 	icodeApi := git.NewRepositoryService()
 
-	for testName, test := range tests {
-		t.Logf("Running %s test, case: %s", t.Name(), testName)
+	for _, test := range tests {
 		//when
-		meta, err := icodeApi.Clone(testName, baseTempPath, test.InputGitURL, sshPath)
+		meta, err := icodeApi.Clone(test.ID, baseTempPath, test.InputGitURL, sshPath)
 
 		if err == nil {
 			// icode ID 는 랜덤이기때문에 실데이터에서 주입

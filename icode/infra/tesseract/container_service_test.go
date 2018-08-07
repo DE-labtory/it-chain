@@ -1,3 +1,5 @@
+// +build ignore
+
 /*
  * Copyright 2018 It-chain
  *
@@ -18,9 +20,8 @@ package tesseract_test
 
 import (
 	"errors"
-	"testing"
-
 	"os"
+	"testing"
 
 	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/engine/icode/infra/tesseract"
@@ -42,6 +43,7 @@ func setContainer(t *testing.T) (*tesseract.ContainerService, func()) {
 		ICodeID:        "1",
 		RepositoryName: "test icode",
 		Path:           GOPATH + "/src/github.com/it-chain/engine/icode/mock/",
+		GitUrl:         "github.com/mock",
 	}
 
 	err := containerService.StartContainer(meta)
