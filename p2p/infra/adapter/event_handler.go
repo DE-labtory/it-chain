@@ -27,12 +27,17 @@ import (
 
 var ErrPeerApi = errors.New("problem in peer api")
 
+type CommunicationApi interface {
+	DialToUnConnectedNode(peerTable map[string]p2p.Peer) error
+	DeliverPLTable(connectionId string) error
+}
+
 type EventHandler struct {
-	communicationApi api.ICommunicationApi
+	communicationApi CommunicationApi // api.CommunicationApi
 	peerApi          api.PeerApi
 }
 
-func NewEventHandler(communicationApi api.ICommunicationApi, peerApi api.PeerApi) EventHandler {
+func NewEventHandler(communicationApi CommunicationApi, peerApi api.PeerApi) EventHandler {
 
 	return EventHandler{
 		communicationApi: communicationApi,

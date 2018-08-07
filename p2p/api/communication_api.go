@@ -18,17 +18,17 @@ package api
 
 import "github.com/it-chain/engine/p2p"
 
-type ICommunicationApi interface {
-	DialToUnConnectedNode(peerTable map[string]p2p.Peer) error
-	DeliverPLTable(connectionId string) error
+type CommunicationService interface {
+	Dial(ipAddress string) error
+	DeliverPLTable(connectionId string, peerLeaderTable p2p.PLTable) error
 }
 
 type CommunicationApi struct {
 	peerQueryService     p2p.PeerQueryService
-	communicationService p2p.ICommunicationService
+	communicationService CommunicationService // CommunicationService
 }
 
-func NewCommunicationApi(peerQueryService p2p.PeerQueryService, communicationService p2p.ICommunicationService) CommunicationApi {
+func NewCommunicationApi(peerQueryService p2p.PeerQueryService, communicationService CommunicationService) CommunicationApi {
 	return CommunicationApi{
 		peerQueryService:     peerQueryService,
 		communicationService: communicationService,
