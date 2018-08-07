@@ -21,6 +21,7 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
@@ -29,18 +30,16 @@ import (
 var ErrEmptyPeerId = errors.New("empty nodeid proposed")
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 
-type Publish func(exchange string, topic string, data interface{}) (err error) // 나중에 의존성 주입을 해준다.
-
 // message dispatcher sends messages to other nodes in p2p network
 type GrpcCommandService struct {
-	publish Publish // midgard.client.Publish
+	client p2p.Client // rpc.client
 }
 
-func NewGrpcCommandService(publish Publish) *GrpcCommandService {
+func NewGrpcCommandService(client p2p.Client) *GrpcCommandService {
 
 	return &GrpcCommandService{
 
-		publish: publish,
+		client: client,
 	}
 }
 

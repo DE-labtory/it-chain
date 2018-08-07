@@ -21,3 +21,7 @@ import "github.com/it-chain/engine/common/command"
 type PLTableService interface {
 	GetPLTableFromCommand(command command.ReceiveGrpc) (PLTable, error)
 }
+
+type Client interface {
+	Call(queue string, params interface{}, callback interface{}) error
+}

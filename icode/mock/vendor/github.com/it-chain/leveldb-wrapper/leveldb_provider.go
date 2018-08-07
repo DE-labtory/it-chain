@@ -2,19 +2,20 @@ package leveldbwrapper
 
 import (
 	"sync"
-	"github.com/syndtr/goleveldb/leveldb"
+
 	"github.com/it-chain/leveldb-wrapper/key_value_db"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 type DBHandle struct {
-	dbName	string
-	db		*DB
+	dbName string
+	db     *DB
 }
 
 type DBProvider struct {
-	db			*DB
-	mux			sync.Mutex
-	dbHandles	map[string]*DBHandle
+	db        *DB
+	mux       sync.Mutex
+	dbHandles map[string]*DBHandle
 }
 
 func CreateNewDBProvider(levelDbPath string) *DBProvider {
