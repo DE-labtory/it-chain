@@ -37,13 +37,13 @@ func NewBlockCommittedEventHandler(icodeApi api.ICodeApi) *BlockCommittedEventHa
 	}
 }
 
-func (b *BlockCommittedEventHandler) HandleBlockCommittedEventHandler(blockCreatedEvent event.BlockCreated) {
-	logger.Info(nil, "[Icode] handle blockCreatedEvent")
+func (b *BlockCommittedEventHandler) HandleBlockCommittedEventHandler(blockCommittedEvent event.BlockCommitted) {
+	logger.Info(nil, "[Icode] handle blockCommitedEvent")
 
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
 
-	b.icodeApi.ExecuteRequestList(createRequestList(blockCreatedEvent.TxList))
+	b.icodeApi.ExecuteRequestList(createRequestList(blockCommittedEvent.TxList))
 }
 
 func createRequestList(transactionList []event.Tx) []icode.Request {

@@ -19,6 +19,8 @@ package icode
 import (
 	"errors"
 
+	"fmt"
+
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
@@ -65,12 +67,13 @@ func invoke(id string, functionName string, args []string) {
 		},
 		Function: functionName,
 		Args:     args,
+		Method:   "invoke",
 	}
 
 	logger.Info(nil, "invoke icode ...")
 
 	err := client.Call("icode.execute", invokeCommand, func(result icode.Result, err rpc.Error) {
-
+		fmt.Println(result)
 		if !err.IsNil() {
 			logger.Errorf(nil, "fail to invoke icode err: [%s]", err.Message)
 			return

@@ -19,7 +19,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -85,7 +84,7 @@ func main() {
 		PrintLogo()
 		configName := c.String("config")
 		conf.SetConfigName(configName)
-		return start()
+		return run()
 	}
 
 	err := app.Run(os.Args)
@@ -94,33 +93,19 @@ func main() {
 	}
 }
 
-func start() error {
-
-	configuration := conf.GetConfiguration()
-	logger.EnableFileLogger(true, configuration.Engine.LogPath)
-
-	ip4 := configuration.GrpcGateway.Address + ":" + configuration.GrpcGateway.Port
-	ln, err := net.Listen("tcp", ip4)
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Can't listen on %q: %s\n", ip4, err)
-		return err
-	}
-
-	err = ln.Close()
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Couldn't stop listening on %q: %s\n", ip4, err)
-		return err
-	}
+func run() error {
 
 	errs := make(chan error, 2)
 
-	initGateway(errs)
-	initTxPool()
-	initIcode()
-	initPeer()
-	initBlockchain()
+	rpcServer, rpcClient, configuration, tearDown := initCommon()
+	defer tearDown()
+
+	logger.EnableFileLogger(true, configuration.Engine.LogPath)
+
+	defer initApiGateway(configuration, errs)()
+	defer initTxPool(configuration, rpcServer, rpcClient)()
+	defer initICode(configuration, rpcServer)()
+	defer initBlockchain(configuration, rpcServer)()
 
 	go func() {
 		c := make(chan os.Signal, 1)
@@ -133,15 +118,18 @@ func start() error {
 	return nil
 }
 
-//todo other way to inject each query Api to component
-var blockQueryApi api_gateway.BlockQueryApi
-var metaQueryApi api_gateway.ICodeQueryApi
-
-func initGateway(errs chan error) error {
-
-	log.Println("gateway is running...")
-
+func initCommon() (rpc.Server, rpc.Client, *conf.Configuration, func()) {
 	config := conf.GetConfiguration()
+	server := rpc.NewServer(config.Engine.Amqp)
+	client := rpc.NewClient(config.Engine.Amqp)
+	return server, client, config, func() {
+		server.Close()
+		client.Close()
+	}
+}
+
+func initApiGateway(config *conf.Configuration, errs chan error) func() {
+
 	ipAddress := config.ApiGateway.Address + ":" + config.ApiGateway.Port
 
 	//set log
@@ -149,37 +137,33 @@ func initGateway(errs chan error) error {
 	kitLogger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
 	kitLogger = kitlog.With(kitLogger, "ts", kitlog.DefaultTimestampUTC)
 
-	//set subscriber
-	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Event")
-
-	//set blockchain tesseract and repo
-
-	blockchainDB := "./.test/blockchain"
+	// set blockchain
+	blockchainDB := "./api-db/block"
 	BlockPoolRepo := api_gateway.NewBlockPoolRepository()
 	CommittedBlockRepo, err := api_gateway.NewCommitedBlockRepositoryImpl(blockchainDB)
-	blockQueryApi = api_gateway.NewBlockQueryApi(BlockPoolRepo, CommittedBlockRepo)
-	blockEventListener := api_gateway.NewBlockEventListener(BlockPoolRepo, CommittedBlockRepo)
-
-	//set icode tesseract and repo
-
-	icodeDb := "./.test/icode"
-	icodeRepo := api_gateway.NewLevelDbMetaRepository(icodeDb)
-	metaQueryApi := api_gateway.NewICodeQueryApi(&icodeRepo)
-	metaEventListener := api_gateway.NewIcodeEventHandler(&icodeRepo)
-
 	if err != nil {
 		logger.Panic(&logger.Fields{"err_msg": err.Error()}, "error while init gateway")
 		panic(err)
 	}
 
+	blockQueryApi := api_gateway.NewBlockQueryApi(BlockPoolRepo, CommittedBlockRepo)
+	blockEventListener := api_gateway.NewBlockEventListener(BlockPoolRepo, CommittedBlockRepo)
+
+	// set icode
+	icodeDB := "./api-db/icode"
+	icodeRepo := api_gateway.NewLevelDbMetaRepository(icodeDB)
+	metaQueryApi := api_gateway.NewICodeQueryApi(&icodeRepo)
+	metaEventListener := api_gateway.NewIcodeEventHandler(&icodeRepo)
+
 	//set mux
 	mux := http.NewServeMux()
 	httpLogger := kitlog.With(kitLogger, "component", "http")
 
-	err = subscriber.SubscribeTopic("block.*", &blockEventListener)
-	err = subscriber.SubscribeTopic("meta.*", &metaEventListener)
-
-	if err != nil {
+	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Event")
+	if err := subscriber.SubscribeTopic("block.*", &blockEventListener); err != nil {
+		panic(err)
+	}
+	if err := subscriber.SubscribeTopic("meta.*", &metaEventListener); err != nil {
 		panic(err)
 	}
 
@@ -188,23 +172,19 @@ func initGateway(errs chan error) error {
 	http.Handle("/", mux)
 
 	go func() {
-		log.Println("transport", "http", "address", ipAddress, "msg", "listening")
+		logger.Infof(nil, "api gateway is staring on port:%s", config.ApiGateway.Port)
 		errs <- http.ListenAndServe(ipAddress, nil)
 	}()
 
-	return nil
+	return func() {
+		CommittedBlockRepo.Close()
+		os.RemoveAll("./api-db")
+	}
 }
 
-func initIcode() error {
+func initICode(config *conf.Configuration, server rpc.Server) func() {
 
-	log.Println("icode is running...")
-
-	config := conf.GetConfiguration()
-	server := rpc.NewServer(config.Engine.Amqp)
-	//publisher := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
-
-	// tesseract generate
-	//commandService := icodeAdapter.NewCommandService(publisher.Publish)
+	logger.Infof(nil, "icode is staring")
 
 	// git generate
 	storeApi := icodeInfra.NewRepositoryService()
@@ -216,40 +196,35 @@ func initIcode() error {
 	deployHandler := icodeAdapter.NewDeployCommandHandler(api)
 	unDeployHandler := icodeAdapter.NewUnDeployCommandHandler(api)
 	icodeExecuteHandler := icodeAdapter.NewIcodeExecuteCommandHandler(api)
+	blockCommittedEventHandler := icodeAdapter.NewBlockCommittedEventHandler(api)
 
 	server.Register("icode.execute", icodeExecuteHandler.HandleTransactionExecuteCommandHandler)
 	server.Register("icode.deploy", deployHandler.HandleDeployCommand)
 	server.Register("icode.undeploy", unDeployHandler.HandleUnDeployCommand)
 
-	return nil
+	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Event")
+	if err := subscriber.SubscribeTopic("block.*", blockCommittedEventHandler); err != nil {
+		panic(err)
+	}
 
+	return func() {
+		containerIDs := containerService.GetRunningICodeIDList()
+		for _, ID := range containerIDs {
+			containerService.StopContainer(ID)
+		}
+	}
 }
 
-func initPeer() error {
-	return nil
-}
+func initTxPool(config *conf.Configuration, server rpc.Server, client rpc.Client) func() {
 
-func initTxPool() error {
-
-	log.Println("txpool is running...")
-
-	config := conf.GetConfiguration()
-	client := rpc.NewClient(config.Engine.Amqp)
-	server := rpc.NewServer(config.Engine.Amqp)
+	logger.Infof(nil, "txpool is staring")
 
 	//todo get id from pubkey
 	tmpPeerID := "tmp peer 1"
-
 	transactionRepo := txpoolMem.NewTransactionRepository()
-
-	//tesseract
 	blockProposalService := txpoolAdapter.NewBlockProposalService(client, transactionRepo, config.Engine.Mode)
-
-	//infra
 	txApi := txpoolApi.NewTransactionApi(tmpPeerID, transactionRepo)
 	txCommandHandler := txpoolAdapter.NewTxCommandHandler(txApi)
-
-	//10초마다 block propose
 	txpoolBatch.GetTimeOutBatcherInstance().Run(blockProposalService.ProposeBlock, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
 
 	err := server.Register("transaction.create", txCommandHandler.HandleTxCreateCommand)
@@ -258,40 +233,35 @@ func initTxPool() error {
 		panic(err)
 	}
 
-	return nil
+	return func() {}
 }
 
-func initConsensus() error {
-	return nil
-}
+func initBlockchain(config *conf.Configuration, server rpc.Server) func() {
 
-func initBlockchain() error {
-
-	log.Println("blockchain is running...")
+	logger.Infof(nil, "blockchain is staring")
 
 	publisherId := "publisher.1"
-
-	config := conf.GetConfiguration()
-	server := rpc.NewServer(config.Engine.Amqp)
-
-	blockRepo, err := blockchainMem.NewBlockRepository("./blockchain/db")
+	blockRepo, err := blockchainMem.NewBlockRepository("./db")
 
 	if err != nil {
 		panic(err)
 	}
 
 	eventService := common.NewEventService(config.Engine.Amqp, "Event")
-
-	// api
 	blockApi, err := blockchainApi.NewBlockApi(publisherId, blockRepo, eventService)
 	if err != nil {
 		panic(err)
 	}
 
-	// infra
-	blockProposeHandler := blockchainAdapter.NewBlockProposeCommandHandler(blockApi, config.Engine.Mode)
+	err = blockApi.CommitGenesisBlock(config.Blockchain.GenesisConfPath)
+	if err != nil {
+		panic(err)
+	}
 
+	blockProposeHandler := blockchainAdapter.NewBlockProposeCommandHandler(blockApi, config.Engine.Mode)
 	server.Register("block.propose", blockProposeHandler.HandleProposeBlockCommand)
 
-	return nil
+	return func() {
+		os.RemoveAll("./db")
+	}
 }
