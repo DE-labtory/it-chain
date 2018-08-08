@@ -53,10 +53,7 @@ func (mpp *MockP2PProcess) Init(id string, ipAddress string) {
 
 	peerRepository := mem.NewPeerReopository()
 
-	//todo replace with component repo
-	queryPeerRepository := api_gateway.PeerRepository{}
-
-	peerQueryService := api_gateway.NewPeerQueryApi(&queryPeerRepository)
+	peerQueryService := api_gateway.NewPeerQueryApi(&peerRepository)
 
 	communicationService := p2p.NewCommunicationService(mpp.Publish)
 
