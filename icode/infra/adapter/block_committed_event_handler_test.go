@@ -1,5 +1,3 @@
-// +build ignore
-
 /*
  * Copyright 2018 It-chain
  *
