@@ -19,6 +19,8 @@ package api
 import (
 	"errors"
 
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/p2p"
 )
 
@@ -33,14 +35,14 @@ type ILeaderApi interface {
 
 type LeaderApi struct {
 	PeerRepository p2p.PeerRepository
-	publishService p2p.PublishService
+	eventService   common.EventService
 }
 
-func NewLeaderApi(peerRepository p2p.PeerRepository, publishService p2p.PublishService) LeaderApi {
+func NewLeaderApi(peerRepository p2p.PeerRepository, eventService common.EventService) LeaderApi {
 
 	return LeaderApi{
 		PeerRepository: peerRepository,
-		publishService: publishService,
+		eventService:   eventService,
 	}
 }
 
@@ -66,17 +68,11 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 				return err
 			}
 
-			err2 := la.publishService.LeaderUpdated(p2p.Leader{
-				LeaderId: p2p.LeaderId{
-					Id: peer.PeerId.Id,
-				},
-			})
-
-			if err2 != nil {
-				return err2
+			event := event.LeaderUpdated{
+				LeaderId: peer.PeerId.Id,
 			}
 
-			return nil
+			return la.eventService.Publish("leader.updated", event)
 		}
 
 	}
@@ -98,13 +94,11 @@ func (la *LeaderApi) UpdateLeaderWithLargePeerTable(oppositePLTable p2p.PLTable)
 			return err
 		}
 
-		err2 := la.publishService.LeaderUpdated(oppositePLTable.Leader)
-
-		if err2 != nil {
-			return err2
+		event := event.LeaderUpdated{
+			LeaderId: oppositePLTable.Leader.LeaderId.Id,
 		}
 
-		return nil
+		return la.eventService.Publish("leader.updated", event)
 
 	} else {
 
@@ -114,13 +108,11 @@ func (la *LeaderApi) UpdateLeaderWithLargePeerTable(oppositePLTable p2p.PLTable)
 			return err
 		}
 
-		err2 := la.publishService.LeaderUpdated(myLeader)
-
-		if err2 != nil {
-			return err2
+		event := event.LeaderUpdated{
+			LeaderId: myLeader.LeaderId.Id,
 		}
 
-		return nil
+		return la.eventService.Publish("leader.updated", event)
 
 	}
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package test
+package mock
 
 type MockProcess interface {
 	Init(id string, ipAddress string)

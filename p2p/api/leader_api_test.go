@@ -19,14 +19,12 @@ package api_test
 import (
 	"testing"
 
+	"github.com/it-chain/engine/common/test/mock"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/api"
 	"github.com/it-chain/engine/p2p/infra/mem"
-	"github.com/it-chain/engine/p2p/test/mock"
 	"github.com/magiconair/properties/assert"
 )
-
-var MockPLTable = mock.MakeFakePLTable()
 
 func TestLeaderApi_UpdateLeaderWithAddress(t *testing.T) {
 
@@ -247,13 +245,13 @@ func SetupLeaderApi(myPLTable p2p.PLTable) api.LeaderApi {
 		peerRepository.Save(v)
 	}
 
-	mockPublishService := mock.MockPublishService{}
+	eventService := mock.EventService{}
 
-	mockPublishService.LeaderUpdatedFunc = func(leader p2p.Leader) error {
+	eventService.PublishFunc = func(topic string, event interface{}) error {
 		return nil
 	}
 
-	leaderApi := api.NewLeaderApi(&peerRepository, &mockPublishService)
+	leaderApi := api.NewLeaderApi(&peerRepository, &eventService)
 
 	return leaderApi
 }

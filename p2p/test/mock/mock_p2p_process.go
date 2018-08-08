@@ -20,6 +20,7 @@ import (
 	"reflect"
 
 	"github.com/it-chain/engine/api_gateway"
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
@@ -65,11 +66,11 @@ func (mpp *MockP2PProcess) Init(id string, ipAddress string) {
 	peerApi := &MockPeerApi{}
 
 	//todo should be replaced with real struct
-	publishService := p2p.PublishServiceImpl{}
+	eventService := common.EventServiceImpl{}
 
 	mpp.eventHandler = adapter.NewEventHandler(&communicationApi, peerApi)
 
-	leaderApi := api.NewLeaderApi(&peerRepository, &publishService)
+	leaderApi := api.NewLeaderApi(&peerRepository, &eventService)
 
 	election := p2p.NewElection(0, "candidate", 0)
 
