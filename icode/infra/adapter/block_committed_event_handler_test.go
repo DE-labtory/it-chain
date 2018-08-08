@@ -32,13 +32,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestBlockCommittedEventHandler_HandleBlockCommittedEventHandler_When_Event_Occur(t *testing.T) {
+
+}
+
 func TestBlockCommittedEventHandler_HandleBlockCommittedEventHandler(t *testing.T) {
 
 	//given
 	handler, containerService, tearDown := setUp(t)
 	defer tearDown()
 
-	testBlock := event.BlockCreated{
+	testBlock := event.BlockCommitted{
 		TxList: []event.Tx{
 			event.Tx{
 				ICodeID:  "1",

@@ -39,6 +39,7 @@ func (i *IcodeExecuteCommandHandler) HandleTransactionExecuteCommandHandler(comm
 		Args:     command.Args,
 		Function: command.Function,
 		ICodeID:  command.ID,
+		Type:     command.Method,
 	}
 
 	result, err := i.iCodeApi.ExecuteRequest(request)

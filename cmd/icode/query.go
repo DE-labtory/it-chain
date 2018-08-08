@@ -18,6 +18,7 @@ package icode
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
@@ -62,11 +63,13 @@ func query(id string, functionName string, args []string) {
 		},
 		Function: functionName,
 		Args:     args,
+		Method:   "query",
 	}
 
 	logger.Info(nil, "query icode ...")
 
 	err := client.Call("icode.execute", queryCommand, func(result icode.Result, err rpc.Error) {
+		fmt.Println(result)
 		if !err.IsNil() {
 			logger.Errorf(nil, "fail to query icode err: [%s]", err.Message)
 			return
