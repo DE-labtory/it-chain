@@ -1,3 +1,5 @@
+// +build ignore
+
 /*
  * Copyright 2018 It-chain
  *
@@ -35,7 +37,7 @@ import (
 func TestBlockCommittedEventHandler_HandleBlockCommittedEventHandler(t *testing.T) {
 
 	//given
-	handler, containerSerivce, tearDown := setUp(t)
+	handler, containerService, tearDown := setUp(t)
 	defer tearDown()
 
 	testBlock := event.BlockCreated{
@@ -53,7 +55,7 @@ func TestBlockCommittedEventHandler_HandleBlockCommittedEventHandler(t *testing.
 
 	//then
 	// success case
-	result, err := containerSerivce.ExecuteRequest(icode.Request{
+	result, err := containerService.ExecuteRequest(icode.Request{
 		ICodeID:  "1",
 		Function: "getA",
 		Type:     "query",
@@ -67,7 +69,6 @@ func TestBlockCommittedEventHandler_HandleBlockCommittedEventHandler(t *testing.
 
 // setup handler and start container
 func setUp(t *testing.T) (*adapter.BlockCommittedEventHandler, *tesseract.ContainerService, func()) {
-
 	GOPATH := os.Getenv("GOPATH")
 
 	if GOPATH == "" {

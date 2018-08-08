@@ -21,6 +21,8 @@ import (
 	"errors"
 	"fmt"
 
+	"sync"
+
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/icode"
 	"github.com/it-chain/tesseract"
@@ -32,6 +34,7 @@ import (
 var ErrContainerDoesNotExist = errors.New("container does not exist")
 
 type ContainerService struct {
+	sync.RWMutex
 	containerMap map[tesseract.ContainerID]tesseract.Container
 }
 
@@ -39,11 +42,14 @@ func NewContainerService() *ContainerService {
 
 	return &ContainerService{
 		containerMap: make(map[tesseract.ContainerID]tesseract.Container),
+		RWMutex:      sync.RWMutex{},
 	}
 }
 
 func (cs ContainerService) StartContainer(meta icode.Meta) error {
 	logger.Info(nil, fmt.Sprintf("[ICode] deploying icode, id:%s", meta.ICodeID))
+	cs.Lock()
+	defer cs.Unlock()
 
 	conf := tesseract.ContainerConfig{
 		Name:      meta.RepositoryName,
