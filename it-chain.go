@@ -154,7 +154,6 @@ func start() error {
 	default:
 
 	}
-	log.Println("terminated", <-errs)
 
 	return nil
 }
@@ -162,11 +161,11 @@ func start() error {
 //todo other way to inject each query Api to component
 var blockQueryApi api_gateway.BlockQueryApi
 
-func initCommon() (*rpc.Server, *rpc.Client, *conf.Configuration) {
+func initCommon() (rpc.Server, rpc.Client, *conf.Configuration) {
 	config := conf.GetConfiguration()
 	server := rpc.NewServer(config.Engine.Amqp)
 	client := rpc.NewClient(config.Engine.Amqp)
-	return &server, &client, config
+	return server, client, config
 }
 
 func initGateway(errs chan error) func() error {
@@ -223,11 +222,15 @@ func initGateway(errs chan error) func() error {
 		log.Println("transport", "http", "address", ipAddress, "msg", "listening")
 		errs <- http.ListenAndServe(ipAddress, nil)
 	}()
-
-	return nil
+	tearDown := func() error {
+		CommittedBlockRepo.Close()
+		e := os.RemoveAll("./.test")
+		return e
+	}
+	return tearDown
 }
 
-func initIcode(server *rpc.Server, config *conf.Configuration) func() error {
+func initIcode(server rpc.Server, config *conf.Configuration) func() error {
 
 	log.Println("icode is running...")
 	//publisher := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
@@ -250,15 +253,18 @@ func initIcode(server *rpc.Server, config *conf.Configuration) func() error {
 	server.Register("icode.deploy", deployHandler.HandleDeployCommand)
 	server.Register("icode.undeploy", unDeployHandler.HandleUnDeployCommand)
 
-	return nil
-
+	tearDown := func() error {
+		server.Close()
+		return nil
+	}
+	return tearDown
 }
 
 func initPeer() func() error {
 	return nil
 }
 
-func initTxPool(server *rpc.Server, client *rpc.Client, config *conf.Configuration) func() error {
+func initTxPool(server rpc.Server, client rpc.Client, config *conf.Configuration) func() error {
 
 	log.Println("txpool is running...")
 
@@ -268,7 +274,7 @@ func initTxPool(server *rpc.Server, client *rpc.Client, config *conf.Configurati
 	transactionRepo := txpoolMem.NewTransactionRepository()
 
 	//tesseract
-	blockProposalService := txpoolAdapter.NewBlockProposalService(*client, transactionRepo, config.Engine.Mode)
+	blockProposalService := txpoolAdapter.NewBlockProposalService(client, transactionRepo, config.Engine.Mode)
 
 	//infra
 	txApi := txpoolApi.NewTransactionApi(tmpPeerID, transactionRepo)
@@ -283,14 +289,19 @@ func initTxPool(server *rpc.Server, client *rpc.Client, config *conf.Configurati
 		panic(err)
 	}
 
-	return nil
+	tearDown := func() error {
+		server.Close()
+		client.Close()
+		return nil
+	}
+	return tearDown
 }
 
 func initConsensus() func() error {
 	return nil
 }
 
-func initBlockchain(server *rpc.Server, config *conf.Configuration) func() error {
+func initBlockchain(server rpc.Server, config *conf.Configuration) func() error {
 
 	log.Println("blockchain is running...")
 
@@ -315,5 +326,11 @@ func initBlockchain(server *rpc.Server, config *conf.Configuration) func() error
 
 	server.Register("block.propose", blockProposeHandler.HandleProposeBlockCommand)
 
-	return nil
+	tearDown := func() error {
+		server.Close()
+		blockRepo.Close()
+		e := os.RemoveAll("./blockchain/db")
+		return e
+	}
+	return tearDown
 }
