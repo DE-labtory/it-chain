@@ -21,12 +21,14 @@ import (
 
 	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/p2p"
+	"github.com/it-chain/engine/p2p/infra/mem"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestParliamentService_RequestLeader(t *testing.T) {
 	// given (case 1 : no leader)
-	peerRepository := api_gateway.NewPeerReopository()
+	peerRepository := mem.NewPeerReopository()
+
 	peerRepository.Save(p2p.Peer{
 		IpAddress: "1.1.1.1",
 		PeerId:    p2p.PeerId{"p1"},
@@ -41,9 +43,8 @@ func TestParliamentService_RequestLeader(t *testing.T) {
 	assert.Equal(t, "", l.ToString())
 
 	// given (case 2 : good case)
-	peerRepository.SetLeader(p2p.Peer{
-		IpAddress: "2.2.2.2",
-		PeerId:    p2p.PeerId{"leader"},
+	peerRepository.SetLeader(p2p.Leader{
+		LeaderId: p2p.LeaderId{Id: "leader"},
 	})
 
 	// when
@@ -56,7 +57,7 @@ func TestParliamentService_RequestLeader(t *testing.T) {
 
 func TestParliamentService_RequestPeerList(t *testing.T) {
 	// given
-	peerRepository := api_gateway.NewPeerReopository()
+	peerRepository := mem.NewPeerReopository()
 
 	p1 := p2p.Peer{
 		IpAddress: "1.1.1.1",
@@ -83,7 +84,7 @@ func TestParliamentService_RequestPeerList(t *testing.T) {
 
 func TestParliamentService_IsNeedConsensus(t *testing.T) {
 	// given (case 1 : no member)
-	peerRepository := api_gateway.NewPeerReopository()
+	peerRepository := mem.NewPeerReopository()
 	ps := NewParliamentService(api_gateway.NewPeerQueryApi(&peerRepository))
 
 	// when
