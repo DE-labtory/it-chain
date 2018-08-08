@@ -27,7 +27,6 @@ import (
 )
 
 func setContainer(t *testing.T) (*tesseract.ContainerService, func()) {
-
 	GOPATH := os.Getenv("GOPATH")
 
 	if GOPATH == "" {
