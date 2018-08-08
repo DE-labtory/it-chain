@@ -17,6 +17,8 @@
 package api
 
 import (
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/p2p"
 )
 
@@ -27,7 +29,7 @@ type PeerApi interface {
 
 type PeerApiImpl struct {
 	peerRepository p2p.PeerRepository
-	publishService p2p.PublishService
+	eventService   common.EventService
 }
 
 func (ps *PeerApiImpl) Save(peer p2p.Peer) error {
@@ -38,9 +40,12 @@ func (ps *PeerApiImpl) Save(peer p2p.Peer) error {
 		return err
 	}
 
-	ps.publishService.PeerCreated(peer)
+	event := event.PeerCreated{
+		PeerId:    peer.PeerId.Id,
+		IpAddress: peer.IpAddress,
+	}
 
-	return nil
+	return ps.eventService.Publish("peer.created", event)
 }
 
 func (ps *PeerApiImpl) Remove(peerId p2p.PeerId) error {
@@ -51,7 +56,10 @@ func (ps *PeerApiImpl) Remove(peerId p2p.PeerId) error {
 		return err
 	}
 
-	ps.publishService.PeerDeleted(peerId)
+	event := event.PeerDeleted{
+		PeerId: peerId.Id,
+	}
 
-	return nil
+	return ps.eventService.Publish("peer.deleted", event)
+
 }

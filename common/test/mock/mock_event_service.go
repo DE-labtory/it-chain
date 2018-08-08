@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package p2p
+package mock
 
-import "github.com/it-chain/engine/common/command"
-
-type Publish func(topic string, data interface{}) (err error) //pubsub publish
-
-type PLTableService interface {
-	GetPLTableFromCommand(command command.ReceiveGrpc) (PLTable, error)
+type EventService struct {
+	PublishFunc func(topic string, event interface{}) error
 }
 
-type Client interface {
-	Call(queue string, params interface{}, callback interface{}) error
+func (es *EventService) Publish(topic string, event interface{}) error {
+	return es.PublishFunc(topic, event)
 }
