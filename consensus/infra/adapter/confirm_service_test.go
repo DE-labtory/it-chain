@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package adapter
+package adapter_test
 
 import (
 	"errors"
 	"testing"
 
 	"github.com/it-chain/engine/consensus"
+	"github.com/it-chain/engine/consensus/infra/adapter"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -66,14 +67,13 @@ func TestConfirmService_ConfirmBlock(t *testing.T) {
 		},
 	}
 
-	publish := func(exchange string, topic string, data interface{}) (e error) {
-		assert.Equal(t, "Command", exchange)
-		assert.Equal(t, "block.create", topic)
+	publish := func(topic string, data interface{}) (e error) {
+		assert.Equal(t, "block.confirm", topic)
 
 		return nil
 	}
 
-	confirmService := NewConfirmService(publish)
+	confirmService := adapter.NewConfirmService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
