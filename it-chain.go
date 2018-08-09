@@ -116,11 +116,12 @@ func start() error {
 
 	errs := make(chan error, 2)
 
-	initGateway(errs)
-	initTxPool()
-	initIcode()
-	initPeer()
-	initBlockchain()
+	server, client, config := initCommon()
+	gatewayTearDown := initGateway(errs)
+	txPoolTearDown := initTxPool(server, client, config)
+	iCodeTearDown := initIcode(server, config)
+	peerTearDown := initPeer()
+	blockChainTearDown := initBlockchain(server, config)
 
 	go func() {
 		c := make(chan os.Signal, 1)
@@ -128,16 +129,46 @@ func start() error {
 		errs <- fmt.Errorf("%s", <-c)
 	}()
 
-	log.Println("terminated", <-errs)
+	select {
+	case <-errs:
+		e := gatewayTearDown()
+		if e != nil {
+			logger.Error(nil, "error while tear down gateway")
+		}
+		e = txPoolTearDown()
+		if e != nil {
+			logger.Error(nil, "error while tear down txpool")
+		}
+		e = iCodeTearDown()
+		if e != nil {
+			logger.Error(nil, "error while tear down icode")
+		}
+		e = peerTearDown()
+		if e != nil {
+			logger.Error(nil, "error while tear down peer")
+		}
+		e = blockChainTearDown()
+		if e != nil {
+			logger.Error(nil, "error while tear down block chain")
+		}
+	default:
+
+	}
 
 	return nil
 }
 
 //todo other way to inject each query Api to component
 var blockQueryApi api_gateway.BlockQueryApi
-var metaQueryApi api_gateway.ICodeQueryApi
 
-func initGateway(errs chan error) error {
+func initCommon() (rpc.Server, rpc.Client, *conf.Configuration) {
+	config := conf.GetConfiguration()
+	server := rpc.NewServer(config.Engine.Amqp)
+	client := rpc.NewClient(config.Engine.Amqp)
+	return server, client, config
+}
+
+func initGateway(errs chan error) func() error {
 
 	log.Println("gateway is running...")
 
@@ -191,16 +222,17 @@ func initGateway(errs chan error) error {
 		log.Println("transport", "http", "address", ipAddress, "msg", "listening")
 		errs <- http.ListenAndServe(ipAddress, nil)
 	}()
-
-	return nil
+	tearDown := func() error {
+		CommittedBlockRepo.Close()
+		e := os.RemoveAll("./.test")
+		return e
+	}
+	return tearDown
 }
 
-func initIcode() error {
+func initIcode(server rpc.Server, config *conf.Configuration) func() error {
 
 	log.Println("icode is running...")
-
-	config := conf.GetConfiguration()
-	server := rpc.NewServer(config.Engine.Amqp)
 	//publisher := pubsub.NewTopicPublisher(config.Engine.Amqp, "Command")
 
 	// tesseract generate
@@ -221,21 +253,20 @@ func initIcode() error {
 	server.Register("icode.deploy", deployHandler.HandleDeployCommand)
 	server.Register("icode.undeploy", unDeployHandler.HandleUnDeployCommand)
 
-	return nil
-
+	tearDown := func() error {
+		server.Close()
+		return nil
+	}
+	return tearDown
 }
 
-func initPeer() error {
+func initPeer() func() error {
 	return nil
 }
 
-func initTxPool() error {
+func initTxPool(server rpc.Server, client rpc.Client, config *conf.Configuration) func() error {
 
 	log.Println("txpool is running...")
-
-	config := conf.GetConfiguration()
-	client := rpc.NewClient(config.Engine.Amqp)
-	server := rpc.NewServer(config.Engine.Amqp)
 
 	//todo get id from pubkey
 	tmpPeerID := "tmp peer 1"
@@ -258,21 +289,23 @@ func initTxPool() error {
 		panic(err)
 	}
 
+	tearDown := func() error {
+		server.Close()
+		client.Close()
+		return nil
+	}
+	return tearDown
+}
+
+func initConsensus() func() error {
 	return nil
 }
 
-func initConsensus() error {
-	return nil
-}
-
-func initBlockchain() error {
+func initBlockchain(server rpc.Server, config *conf.Configuration) func() error {
 
 	log.Println("blockchain is running...")
 
 	publisherId := "publisher.1"
-
-	config := conf.GetConfiguration()
-	server := rpc.NewServer(config.Engine.Amqp)
 
 	blockRepo, err := blockchainMem.NewBlockRepository("./blockchain/db")
 
@@ -293,5 +326,11 @@ func initBlockchain() error {
 
 	server.Register("block.propose", blockProposeHandler.HandleProposeBlockCommand)
 
-	return nil
+	tearDown := func() error {
+		server.Close()
+		blockRepo.Close()
+		e := os.RemoveAll("./blockchain/db")
+		return e
+	}
+	return tearDown
 }
