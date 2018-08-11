@@ -30,16 +30,16 @@ import (
 	blockchainApi "github.com/it-chain/engine/blockchain/api"
 	blockchainAdapter "github.com/it-chain/engine/blockchain/infra/adapter"
 	blockchainMem "github.com/it-chain/engine/blockchain/infra/mem"
-	"github.com/it-chain/engine/cmd/icode"
+	"github.com/it-chain/engine/cmd/ivm"
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
-	icodeApi "github.com/it-chain/engine/icode/api"
-	icodeAdapter "github.com/it-chain/engine/icode/infra/adapter"
-	icodeInfra "github.com/it-chain/engine/icode/infra/git"
-	"github.com/it-chain/engine/icode/infra/tesseract"
+	icodeApi "github.com/it-chain/engine/ivm/api"
+	icodeAdapter "github.com/it-chain/engine/ivm/infra/adapter"
+	icodeInfra "github.com/it-chain/engine/ivm/infra/git"
+	"github.com/it-chain/engine/ivm/infra/tesseract"
 	txpoolApi "github.com/it-chain/engine/txpool/api"
 	txpoolAdapter "github.com/it-chain/engine/txpool/infra/adapter"
 	txpoolBatch "github.com/it-chain/engine/txpool/infra/batch"
@@ -79,7 +79,7 @@ func main() {
 		},
 	}
 	app.Commands = []cli.Command{}
-	app.Commands = append(app.Commands, icode.IcodeCmd())
+	app.Commands = append(app.Commands, ivm.IcodeCmd())
 	app.Action = func(c *cli.Context) error {
 		PrintLogo()
 		configName := c.String("config")
@@ -149,8 +149,8 @@ func initApiGateway(config *conf.Configuration, errs chan error) func() {
 	blockQueryApi := api_gateway.NewBlockQueryApi(BlockPoolRepo, CommittedBlockRepo)
 	blockEventListener := api_gateway.NewBlockEventListener(BlockPoolRepo, CommittedBlockRepo)
 
-	// set icode
-	icodeDB := "./api-db/icode"
+	// set ivm
+	icodeDB := "./api-db/ivm"
 	icodeRepo := api_gateway.NewLevelDbMetaRepository(icodeDB)
 	metaQueryApi := api_gateway.NewICodeQueryApi(&icodeRepo)
 	metaEventListener := api_gateway.NewIcodeEventHandler(&icodeRepo)
@@ -184,7 +184,7 @@ func initApiGateway(config *conf.Configuration, errs chan error) func() {
 
 func initICode(config *conf.Configuration, server rpc.Server) func() {
 
-	logger.Infof(nil, "icode is staring")
+	logger.Infof(nil, "ivm is staring")
 
 	// git generate
 	storeApi := icodeInfra.NewRepositoryService()
@@ -198,9 +198,9 @@ func initICode(config *conf.Configuration, server rpc.Server) func() {
 	icodeExecuteHandler := icodeAdapter.NewIcodeExecuteCommandHandler(api)
 	blockCommittedEventHandler := icodeAdapter.NewBlockCommittedEventHandler(api)
 
-	server.Register("icode.execute", icodeExecuteHandler.HandleTransactionExecuteCommandHandler)
-	server.Register("icode.deploy", deployHandler.HandleDeployCommand)
-	server.Register("icode.undeploy", unDeployHandler.HandleUnDeployCommand)
+	server.Register("ivm.execute", icodeExecuteHandler.HandleTransactionExecuteCommandHandler)
+	server.Register("ivm.deploy", deployHandler.HandleDeployCommand)
+	server.Register("ivm.undeploy", unDeployHandler.HandleUnDeployCommand)
 
 	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Event")
 	if err := subscriber.SubscribeTopic("block.*", blockCommittedEventHandler); err != nil {

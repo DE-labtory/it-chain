@@ -21,8 +21,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/it-chain/engine/icode"
-	"github.com/it-chain/engine/icode/infra/tesseract"
+	"github.com/it-chain/engine/ivm"
+	"github.com/it-chain/engine/ivm/infra/tesseract"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,10 +36,10 @@ func setContainer(t *testing.T) (*tesseract.ContainerService, func()) {
 
 	containerService := tesseract.NewContainerService()
 
-	meta := icode.Meta{
+	meta := ivm.Meta{
 		ICodeID:        "1",
-		RepositoryName: "test icode",
-		Path:           GOPATH + "/src/github.com/it-chain/engine/icode/mock/",
+		RepositoryName: "test ivm",
+		Path:           GOPATH + "/src/github.com/it-chain/engine/ivm/mock/",
 		GitUrl:         "github.com/mock",
 	}
 
@@ -62,7 +62,7 @@ func TestTesseractContainerService_ExecuteRequest(t *testing.T) {
 	defer tearDown()
 
 	// success case
-	result, err := cs.ExecuteRequest(icode.Request{
+	result, err := cs.ExecuteRequest(ivm.Request{
 		ICodeID:  "1",
 		Function: "initA",
 		Type:     "invoke",
@@ -72,7 +72,7 @@ func TestTesseractContainerService_ExecuteRequest(t *testing.T) {
 	assert.Equal(t, result.Err, "")
 
 	// success case
-	result, err = cs.ExecuteRequest(icode.Request{
+	result, err = cs.ExecuteRequest(ivm.Request{
 		ICodeID:  "1",
 		Function: "getA",
 		Type:     "query",
@@ -83,8 +83,8 @@ func TestTesseractContainerService_ExecuteRequest(t *testing.T) {
 	assert.Equal(t, result.Data["A"], "0")
 	assert.Equal(t, result.Err, "")
 
-	// no corresponding icode id
-	result, err = cs.ExecuteRequest(icode.Request{
+	// no corresponding ivm id
+	result, err = cs.ExecuteRequest(ivm.Request{
 		ICodeID:  "2",
 		Function: "initA",
 		Type:     "invoke",
@@ -93,7 +93,7 @@ func TestTesseractContainerService_ExecuteRequest(t *testing.T) {
 	assert.Equal(t, err, tesseract.ErrContainerDoesNotExist)
 
 	// invalid type
-	result, err = cs.ExecuteRequest(icode.Request{
+	result, err = cs.ExecuteRequest(ivm.Request{
 		ICodeID:  "1",
 		Function: "initA",
 		Type:     "invoke2",
@@ -103,7 +103,7 @@ func TestTesseractContainerService_ExecuteRequest(t *testing.T) {
 	assert.NotEqual(t, result.Err, "")
 
 	// invalid func
-	result, err = cs.ExecuteRequest(icode.Request{
+	result, err = cs.ExecuteRequest(ivm.Request{
 		ICodeID:  "1",
 		Function: "initAb",
 		Type:     "invoke",

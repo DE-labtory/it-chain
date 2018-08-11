@@ -24,11 +24,11 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/icode"
-	"github.com/it-chain/engine/icode/api"
-	"github.com/it-chain/engine/icode/infra/adapter"
-	"github.com/it-chain/engine/icode/infra/git"
-	"github.com/it-chain/engine/icode/infra/tesseract"
+	"github.com/it-chain/engine/ivm"
+	"github.com/it-chain/engine/ivm/api"
+	"github.com/it-chain/engine/ivm/infra/adapter"
+	"github.com/it-chain/engine/ivm/infra/git"
+	"github.com/it-chain/engine/ivm/infra/tesseract"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -57,7 +57,7 @@ func TestBlockCommittedEventHandler_HandleBlockCommittedEventHandler(t *testing.
 
 	//then
 	// success case
-	result, err := containerService.ExecuteRequest(icode.Request{
+	result, err := containerService.ExecuteRequest(ivm.Request{
 		ICodeID:  "1",
 		Function: "getA",
 		Type:     "query",
@@ -84,10 +84,10 @@ func setUp(t *testing.T) (*adapter.BlockCommittedEventHandler, *tesseract.Contai
 	eventService := common.NewEventService("", "Event")
 	icodeApi := api.NewICodeApi(containerService, storeApi, eventService)
 
-	meta := icode.Meta{
+	meta := ivm.Meta{
 		ICodeID:        "1",
-		RepositoryName: "test icode",
-		Path:           GOPATH + "/src/github.com/it-chain/engine/icode/mock/",
+		RepositoryName: "test ivm",
+		Path:           GOPATH + "/src/github.com/it-chain/engine/ivm/mock/",
 		GitUrl:         "github.com/mock",
 	}
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package icode
+package ivm
 
 import (
 	"log"
@@ -29,7 +29,7 @@ import (
 func UnDeployCmd() cli.Command {
 	return cli.Command{
 		Name:  "undeploy",
-		Usage: "it-chain icode undeploy [icode id] ",
+		Usage: "it-chain ivm undeploy [icode id] ",
 		Action: func(c *cli.Context) error {
 
 			icodeId := c.Args().Get(0)
@@ -51,7 +51,7 @@ func unDeploy(icodeId string) {
 		},
 	}
 
-	err := client.Call("icode.undeploy", undeployCommand, func(empty struct{}, err rpc.Error) {
+	err := client.Call("ivm.undeploy", undeployCommand, func(empty struct{}, err rpc.Error) {
 
 		if !err.IsNil() {
 			log.Printf("fail to undeploy icode err: [%s]", err.Message)

@@ -23,8 +23,8 @@ import (
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/engine/icode"
-	"github.com/it-chain/engine/icode/api"
+	"github.com/it-chain/engine/ivm"
+	"github.com/it-chain/engine/ivm/api"
 )
 
 type DeployCommandHandler struct {
@@ -37,14 +37,14 @@ func NewDeployCommandHandler(icodeApi api.ICodeApi) *DeployCommandHandler {
 	}
 }
 
-func (d *DeployCommandHandler) HandleDeployCommand(deployCommand command.Deploy) (icode.Meta, rpc.Error) {
+func (d *DeployCommandHandler) HandleDeployCommand(deployCommand command.Deploy) (ivm.Meta, rpc.Error) {
 
 	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/.tmp/"
 	meta, err := d.icodeApi.Deploy(deployCommand.GetID(), savePath, deployCommand.Url, deployCommand.SshPath)
 
 	if err != nil {
-		logger.Error(nil, fmt.Sprintf("[Icode] fail to deploy icode, url %s", deployCommand.Url))
-		return icode.Meta{}, rpc.Error{Message: err.Error()}
+		logger.Error(nil, fmt.Sprintf("[Icode] fail to deploy ivm, url %s", deployCommand.Url))
+		return ivm.Meta{}, rpc.Error{Message: err.Error()}
 	}
 
 	return meta, rpc.Error{}

@@ -56,7 +56,7 @@ func TestICodeApi_Deploy(t *testing.T) {
 //	eventstore.InitForMock(mockEventStore{})
 //
 //	// txInvoke data 준비
-//	txInvoke := icode.Transaction{
+//	txInvoke := ivm.Transaction{
 //		TxId:      "1",
 //		TimeStamp: time.Now(),
 //		Jsonrpc:   "2.0",
@@ -66,7 +66,7 @@ func TestICodeApi_Deploy(t *testing.T) {
 //		Args:      nil,
 //	}
 //	// txQuery data 준비
-//	txQuery := icode.Transaction{
+//	txQuery := ivm.Transaction{
 //		TxId:      "2",
 //		TimeStamp: time.Now(),
 //		Jsonrpc:   "2.0",
@@ -92,7 +92,7 @@ func TestICodeApi_Deploy(t *testing.T) {
 //	meta, err := icodeApi.Deploy("1", baseSaveUrl, icodeGitUrl, sshPath)
 //	assert.NoError(t, err, "err in deploy")
 //
-//	// icode 정보 주입
+//	// ivm 정보 주입
 //	txInvoke.ICodeID = meta.ICodeID
 //	txQuery.ICodeID = meta.ICodeID
 //	// Txs 데이터 준비

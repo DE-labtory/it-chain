@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package icode
+package ivm
 
-import "github.com/urfave/cli"
-
-var icodeCmd = cli.Command{
-	Name:        "icode",
-	Aliases:     []string{"p"},
-	Usage:       "options for icode",
-	Subcommands: []cli.Command{},
+type ContainerService interface {
+	StartContainer(meta Meta) error
+	StopContainer(id ID) error
+	ExecuteRequest(request Request) (Result, error)
+	GetRunningICodeIDList() []ID
 }
 
-func IcodeCmd() cli.Command {
-	icodeCmd.Subcommands = append(icodeCmd.Subcommands, DeployCmd())
-	icodeCmd.Subcommands = append(icodeCmd.Subcommands, UnDeployCmd())
-	icodeCmd.Subcommands = append(icodeCmd.Subcommands, InvokeCmd())
-	icodeCmd.Subcommands = append(icodeCmd.Subcommands, QueryCmd())
-	return icodeCmd
+type GitService interface {
+	//clone code from deploy info
+	Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (Meta, error)
+}
+
+type EventService interface {
+	Publish(topic string, event interface{}) error
 }

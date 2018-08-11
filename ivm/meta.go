@@ -14,27 +14,30 @@
  * limitations under the License.
  */
 
-package icode
+package ivm
 
-type Request struct {
-	ICodeID  string
-	Function string
-	Args     []string
-	Type     string
+type Version struct {
 }
 
-type Invoke struct {
-	Request
+type ID = string
+type MetaStatus = int
+
+type Meta struct {
+	ICodeID        ID
+	RepositoryName string
+	GitUrl         string
+	Path           string
+	CommitHash     string
+	Version        Version
 }
 
-type Query struct {
-	Request
-}
+func NewMeta(id string, repositoryName string, gitUrl string, path string, commitHash string) Meta {
 
-type Result struct {
-	Data map[key]value
-	Err  string
+	return Meta{
+		ICodeID:        id,
+		CommitHash:     commitHash,
+		Path:           path,
+		GitUrl:         gitUrl,
+		RepositoryName: repositoryName,
+	}
 }
-
-type key = string
-type value = string

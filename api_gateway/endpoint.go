@@ -42,7 +42,7 @@ func makeFindCommittedBlocksEndpoint(b BlockQueryApi) endpoint.Endpoint {
 	}
 }
 
-//icode
+//ivm
 func makeFindAllMetaEndpoint(i ICodeQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		metas, err := i.metaRepository.FindAllMeta()

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package icode
+package ivm
 
 import (
 	"log"
@@ -22,7 +22,7 @@ import (
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/icode"
+	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 	"github.com/urfave/cli"
@@ -31,7 +31,7 @@ import (
 func DeployCmd() cli.Command {
 	return cli.Command{
 		Name:  "deploy",
-		Usage: "it-chain icode deploy [icode git url] [ssh path]",
+		Usage: "it-chain ivm deploy [icode git url] [ssh path]",
 		Action: func(c *cli.Context) error {
 
 			gitUrl := c.Args().Get(0)
@@ -61,7 +61,7 @@ func deploy(gitUrl string, sshPath string) {
 	log.Printf("deploying icode...")
 	log.Printf("This may take a few minutes")
 
-	err := client.Call("icode.deploy", deployCommand, func(meta icode.Meta, err rpc.Error) {
+	err := client.Call("ivm.deploy", deployCommand, func(meta ivm.Meta, err rpc.Error) {
 
 		if !err.IsNil() {
 			log.Printf("fail to deploy icode err: [%s]", err.Message)

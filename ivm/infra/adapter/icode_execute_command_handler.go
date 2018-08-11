@@ -19,8 +19,8 @@ package adapter
 import (
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/engine/icode"
-	"github.com/it-chain/engine/icode/api"
+	"github.com/it-chain/engine/ivm"
+	"github.com/it-chain/engine/ivm/api"
 )
 
 type IcodeExecuteCommandHandler struct {
@@ -33,9 +33,9 @@ func NewIcodeExecuteCommandHandler(icodeApi api.ICodeApi) IcodeExecuteCommandHan
 	}
 }
 
-func (i *IcodeExecuteCommandHandler) HandleTransactionExecuteCommandHandler(command command.ExecuteICode) (icode.Result, rpc.Error) {
+func (i *IcodeExecuteCommandHandler) HandleTransactionExecuteCommandHandler(command command.ExecuteICode) (ivm.Result, rpc.Error) {
 
-	request := icode.Request{
+	request := ivm.Request{
 		Args:     command.Args,
 		Function: command.Function,
 		ICodeID:  command.ID,
@@ -45,7 +45,7 @@ func (i *IcodeExecuteCommandHandler) HandleTransactionExecuteCommandHandler(comm
 	result, err := i.iCodeApi.ExecuteRequest(request)
 
 	if err != nil {
-		return icode.Result{}, rpc.Error{Message: err.Error()}
+		return ivm.Result{}, rpc.Error{Message: err.Error()}
 	}
 
 	return result, rpc.Error{}

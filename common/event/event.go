@@ -77,7 +77,7 @@ type BlockSaved struct {
  * grpc-gateway
  */
 
-// icode meta 생성
+// ivm meta 생성
 type MetaCreated struct {
 	ICodeID        string
 	RepositoryName string
@@ -87,12 +87,12 @@ type MetaCreated struct {
 	Version        struct{}
 }
 
-// icode meta deleted
+// ivm meta deleted
 type MetaDeleted struct {
 	ICodeID string
 }
 
-// icode meta status changed
+// ivm meta status changed
 type MetaStatusChanged struct {
 	midgard.EventModel
 	Status int
