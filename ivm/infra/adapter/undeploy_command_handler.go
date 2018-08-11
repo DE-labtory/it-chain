@@ -19,7 +19,7 @@ package adapter
 import (
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/engine/icode/api"
+	"github.com/it-chain/engine/ivm/api"
 )
 
 type UnDeployCommandHandler struct {

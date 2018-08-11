@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
-package icode
+package ivm
 
-type Version struct {
+import "github.com/urfave/cli"
+
+var icodeCmd = cli.Command{
+	Name:        "ivm",
+	Aliases:     []string{"p"},
+	Usage:       "options for ivm",
+	Subcommands: []cli.Command{},
 }
 
-type ID = string
-type MetaStatus = int
-
-type Meta struct {
-	ICodeID        ID
-	RepositoryName string
-	GitUrl         string
-	Path           string
-	CommitHash     string
-	Version        Version
-}
-
-func NewMeta(id string, repositoryName string, gitUrl string, path string, commitHash string) Meta {
-
-	return Meta{
-		ICodeID:        id,
-		CommitHash:     commitHash,
-		Path:           path,
-		GitUrl:         gitUrl,
-		RepositoryName: repositoryName,
-	}
+func IcodeCmd() cli.Command {
+	icodeCmd.Subcommands = append(icodeCmd.Subcommands, DeployCmd())
+	icodeCmd.Subcommands = append(icodeCmd.Subcommands, UnDeployCmd())
+	icodeCmd.Subcommands = append(icodeCmd.Subcommands, InvokeCmd())
+	icodeCmd.Subcommands = append(icodeCmd.Subcommands, QueryCmd())
+	return icodeCmd
 }

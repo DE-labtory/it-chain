@@ -21,8 +21,8 @@ import (
 
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/common/logger"
-	"github.com/it-chain/engine/icode"
-	"github.com/it-chain/engine/icode/api"
+	"github.com/it-chain/engine/ivm"
+	"github.com/it-chain/engine/ivm/api"
 )
 
 type BlockCommittedEventHandler struct {
@@ -46,12 +46,12 @@ func (b *BlockCommittedEventHandler) HandleBlockCommittedEventHandler(blockCommi
 	b.icodeApi.ExecuteRequestList(createRequestList(blockCommittedEvent.TxList))
 }
 
-func createRequestList(transactionList []event.Tx) []icode.Request {
+func createRequestList(transactionList []event.Tx) []ivm.Request {
 
-	requestList := make([]icode.Request, 0)
+	requestList := make([]ivm.Request, 0)
 
 	for _, transaction := range transactionList {
-		requestList = append(requestList, icode.Request{
+		requestList = append(requestList, ivm.Request{
 			Function: transaction.Function,
 			Args:     transaction.Args,
 			ICodeID:  transaction.ICodeID,

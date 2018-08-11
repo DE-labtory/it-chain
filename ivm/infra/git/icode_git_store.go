@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	"github.com/it-chain/engine/common/logger"
-	"github.com/it-chain/engine/icode"
+	"github.com/it-chain/engine/ivm"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
@@ -42,18 +42,18 @@ func NewRepositoryService() *RepositoryService {
 	return &RepositoryService{}
 }
 
-func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (icode.Meta, error) {
+func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (ivm.Meta, error) {
 	logger.Info(nil, fmt.Sprintf("[ICode] cloning [%s]", repositoryUrl))
 
 	giturl, err := toSshUrl(repositoryUrl)
 	if err != nil {
-		return icode.Meta{}, err
+		return ivm.Meta{}, err
 	}
 
 	name := getNameFromGitUrl(giturl)
 
 	if name == "" {
-		return icode.Meta{}, errors.New(fmt.Sprintf("Invalid url name [%s]", repositoryUrl))
+		return ivm.Meta{}, errors.New(fmt.Sprintf("Invalid url name [%s]", repositoryUrl))
 	}
 
 	//check file already exist
@@ -61,13 +61,13 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 		// if iCode already exist, remove that
 		err = os.RemoveAll(baseSavePath + "/" + name)
 		if err != nil {
-			return icode.Meta{}, err
+			return ivm.Meta{}, err
 		}
 	}
 
 	sshAuth, err := ssh.NewPublicKeysFromFile("git", sshPath, "")
 	if err != nil {
-		return icode.Meta{}, err
+		return ivm.Meta{}, err
 	}
 
 	r, err := git.PlainClone(baseSavePath+"/"+name, false, &git.CloneOptions{
@@ -77,23 +77,23 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 	})
 
 	if err != nil {
-		return icode.Meta{}, err
+		return ivm.Meta{}, err
 	}
 
 	head, err := r.Head()
 
 	if err != nil {
-		return icode.Meta{}, err
+		return ivm.Meta{}, err
 	}
 
 	lastHeadCommit, err := r.CommitObject(head.Hash())
 	commitHash := lastHeadCommit.Hash.String()
 
 	if err != nil {
-		return icode.Meta{}, err
+		return ivm.Meta{}, err
 	}
 
-	metaData := icode.NewMeta(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash)
+	metaData := ivm.NewMeta(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash)
 	logger.Info(nil, fmt.Sprintf("[ICode] [%s] has successfully cloned ", repositoryUrl))
 
 	return metaData, nil

@@ -22,7 +22,7 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/icode"
+	"github.com/it-chain/engine/ivm"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,17 +37,17 @@ func TestLevelDbMetaRepository_Save(t *testing.T) {
 
 	// given
 	tests := map[string]struct {
-		Input  icode.Meta
+		Input  ivm.Meta
 		Output error
 	}{
 		"success": {
-			Input: icode.Meta{
+			Input: ivm.Meta{
 				ICodeID:        "1",
 				RepositoryName: "name",
 				GitUrl:         "url",
 				Path:           "path",
 				CommitHash:     "hash",
-				Version:        icode.Version{},
+				Version:        ivm.Version{},
 			},
 			Output: nil,
 		},
@@ -62,7 +62,7 @@ func TestLevelDbMetaRepository_Save(t *testing.T) {
 		//check
 		b, err := repo.leveldb.Get([]byte(test.Input.ICodeID))
 		assert.NoError(t, err)
-		checkMeta := &icode.Meta{}
+		checkMeta := &ivm.Meta{}
 		assert.NoError(t, err, "error in checking process, leveldb get")
 		err = common.Deserialize(b, checkMeta)
 		assert.NoError(t, err, "error in checking process, deserialize")
@@ -80,11 +80,11 @@ func TestLevelDbMetaRepository_FindAllMeta(t *testing.T) {
 	}()
 
 	tests := map[string]struct {
-		SettingData []icode.Meta
+		SettingData []ivm.Meta
 		Output      error
 	}{
 		"success": {
-			SettingData: []icode.Meta{{
+			SettingData: []ivm.Meta{{
 				ICodeID:        "1",
 				RepositoryName: "a",
 				GitUrl:         "a",
@@ -124,7 +124,7 @@ func TestLevelDbMetaRepository_FindMetaById(t *testing.T) {
 		os.RemoveAll(dbPath)
 	}()
 
-	setData := icode.Meta{
+	setData := ivm.Meta{
 		ICodeID:        "123",
 		RepositoryName: "a",
 		GitUrl:         "a",
@@ -137,8 +137,8 @@ func TestLevelDbMetaRepository_FindMetaById(t *testing.T) {
 
 	//setting map
 	tests := map[string]struct {
-		Input       icode.ID
-		Output      icode.Meta
+		Input       ivm.ID
+		Output      ivm.Meta
 		OutputError error
 	}{
 		"success": {
@@ -169,7 +169,7 @@ func TestLevelDbMetaRepository_FindMetaByUrl(t *testing.T) {
 		os.RemoveAll(dbPath)
 	}()
 
-	setData := icode.Meta{
+	setData := ivm.Meta{
 		ICodeID:        "123",
 		RepositoryName: "a",
 		GitUrl:         "gitUrl",
@@ -183,7 +183,7 @@ func TestLevelDbMetaRepository_FindMetaByUrl(t *testing.T) {
 	//setting map
 	tests := map[string]struct {
 		Input       string
-		Output      icode.Meta
+		Output      ivm.Meta
 		OutputError error
 	}{
 		"success": {
@@ -213,12 +213,12 @@ func TestLevelDbMetaRepository_FindMetaByUrl(t *testing.T) {
 //	defer tearDown()
 //
 //	tests := map[string]struct {
-//		Input         icode.MetaCreatedEvent
+//		Input         ivm.MetaCreatedEvent
 //		OutputError   error
 //		ExpectDataNum int
 //	}{
 //		"success": {
-//			Input: icode.MetaCreatedEvent{
+//			Input: ivm.MetaCreatedEvent{
 //				EventModel: midgard.EventModel{
 //					ID:   "1",
 //					Type: "meta.created",

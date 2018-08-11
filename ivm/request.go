@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-package icode
+package ivm
 
-type ContainerService interface {
-	StartContainer(meta Meta) error
-	StopContainer(id ID) error
-	ExecuteRequest(request Request) (Result, error)
-	GetRunningICodeIDList() []ID
+type Request struct {
+	ICodeID  string
+	Function string
+	Args     []string
+	Type     string
 }
 
-type GitService interface {
-	//clone code from deploy info
-	Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (Meta, error)
+type Invoke struct {
+	Request
 }
 
-type EventService interface {
-	Publish(topic string, event interface{}) error
+type Query struct {
+	Request
 }
+
+type Result struct {
+	Data map[key]value
+	Err  string
+}
+
+type key = string
+type value = string

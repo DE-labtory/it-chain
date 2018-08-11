@@ -21,16 +21,16 @@ import (
 
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/common/logger"
-	"github.com/it-chain/engine/icode"
+	"github.com/it-chain/engine/ivm"
 )
 
 type ICodeApi struct {
-	ContainerService icode.ContainerService
-	GitService       icode.GitService
-	EventService     icode.EventService
+	ContainerService ivm.ContainerService
+	GitService       ivm.GitService
+	EventService     ivm.EventService
 }
 
-func NewICodeApi(containerService icode.ContainerService, gitService icode.GitService, eventService icode.EventService) ICodeApi {
+func NewICodeApi(containerService ivm.ContainerService, gitService ivm.GitService, eventService ivm.EventService) ICodeApi {
 
 	return ICodeApi{
 		ContainerService: containerService,
@@ -39,28 +39,28 @@ func NewICodeApi(containerService icode.ContainerService, gitService icode.GitSe
 	}
 }
 
-func (i ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath string) (icode.Meta, error) {
+func (i ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath string) (ivm.Meta, error) {
 
 	// clone meta. in clone function, metaCreatedEvent will publish
 	meta, err := i.GitService.Clone(id, baseSaveUrl, gitUrl, sshPath)
 
 	if err != nil {
-		return icode.Meta{}, err
+		return ivm.Meta{}, err
 	}
 
 	//start ICode with container
 	if err = i.ContainerService.StartContainer(meta); err != nil {
-		return icode.Meta{}, err
+		return ivm.Meta{}, err
 	}
 
 	if err := i.EventService.Publish("meta.created", createMetaCreatedEvent(meta)); err != nil {
-		return icode.Meta{}, nil
+		return ivm.Meta{}, nil
 	}
 
 	return meta, nil
 }
 
-func createMetaCreatedEvent(meta icode.Meta) event.MetaCreated {
+func createMetaCreatedEvent(meta ivm.Meta) event.MetaCreated {
 	return event.MetaCreated{
 		ICodeID:        meta.ICodeID,
 		Path:           meta.Path,
@@ -71,7 +71,7 @@ func createMetaCreatedEvent(meta icode.Meta) event.MetaCreated {
 	}
 }
 
-func (i ICodeApi) UnDeploy(id icode.ID) error {
+func (i ICodeApi) UnDeploy(id ivm.ID) error {
 	// stop iCode container
 	err := i.ContainerService.StopContainer(id)
 
@@ -82,9 +82,9 @@ func (i ICodeApi) UnDeploy(id icode.ID) error {
 	return i.EventService.Publish("meta.deleted", event.MetaDeleted{ICodeID: id})
 }
 
-func (i ICodeApi) ExecuteRequestList(RequestList []icode.Request) []icode.Result {
+func (i ICodeApi) ExecuteRequestList(RequestList []ivm.Request) []ivm.Result {
 
-	resultList := make([]icode.Result, 0)
+	resultList := make([]ivm.Result, 0)
 
 	for _, request := range RequestList {
 
@@ -100,7 +100,7 @@ func (i ICodeApi) ExecuteRequestList(RequestList []icode.Request) []icode.Result
 	return resultList
 }
 
-func (i ICodeApi) ExecuteRequest(request icode.Request) (icode.Result, error) {
+func (i ICodeApi) ExecuteRequest(request ivm.Request) (ivm.Result, error) {
 
 	return i.ContainerService.ExecuteRequest(request)
 }

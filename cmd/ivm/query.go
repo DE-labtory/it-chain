@@ -14,68 +14,64 @@
  * limitations under the License.
  */
 
-package icode
+package ivm
 
 import (
 	"errors"
-
 	"fmt"
 
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/icode"
+	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/midgard"
 	"github.com/urfave/cli"
 )
 
-func InvokeCmd() cli.Command {
+func QueryCmd() cli.Command {
 	return cli.Command{
-		Name:  "invoke",
-		Usage: "it-chain icode invoke [icode id] [function name] [...args]",
+		Name:  "query",
+		Usage: "it-chain ivm query [icode id] [function name] [...args]",
 		Action: func(c *cli.Context) error {
-			if c.NArg() < 2 {
+			if c.NArg() < 3 {
 				return errors.New("not enough args")
 			}
-
 			icodeId := c.Args().Get(0)
 			functionName := c.Args().Get(1)
 			args := make([]string, 0)
-
 			for i := 2; i < c.NArg(); i++ {
 				args = append(args, c.Args().Get(i))
 			}
-
-			invoke(icodeId, functionName, args)
+			query(icodeId, functionName, args)
 
 			return nil
 		},
 	}
 }
 
-func invoke(id string, functionName string, args []string) {
+func query(id string, functionName string, args []string) {
 
 	config := conf.GetConfiguration()
 	client := rpc.NewClient(config.Engine.Amqp)
 
 	defer client.Close()
 
-	invokeCommand := command.ExecuteICode{
+	queryCommand := command.ExecuteICode{
 		CommandModel: midgard.CommandModel{
 			ID: id,
 		},
 		Function: functionName,
 		Args:     args,
-		Method:   "invoke",
+		Method:   "query",
 	}
 
-	logger.Info(nil, "invoke icode ...")
+	logger.Info(nil, "query icode ...")
 
-	err := client.Call("icode.execute", invokeCommand, func(result icode.Result, err rpc.Error) {
+	err := client.Call("ivm.execute", queryCommand, func(result ivm.Result, err rpc.Error) {
 		fmt.Println(result)
 		if !err.IsNil() {
-			logger.Errorf(nil, "fail to invoke icode err: [%s]", err.Message)
+			logger.Errorf(nil, "fail to query icode err: [%s]", err.Message)
 			return
 		}
 
@@ -90,7 +86,6 @@ func invoke(id string, functionName string, args []string) {
 			logger.Infof(nil, "%s : %s", "[result]"+key, val)
 		}
 	})
-
 	if err != nil {
 		logger.Fatal(&logger.Fields{"err_msg": err.Error()}, "fatal err in query cmd")
 	}

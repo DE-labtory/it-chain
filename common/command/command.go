@@ -86,7 +86,7 @@ type ReceiveGrpc struct {
 }
 
 /*
- * icode
+ * ivm
  */
 type ExecuteICode struct {
 	midgard.CommandModel

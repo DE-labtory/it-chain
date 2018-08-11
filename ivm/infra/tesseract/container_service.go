@@ -24,7 +24,7 @@ import (
 	"sync"
 
 	"github.com/it-chain/engine/common/logger"
-	"github.com/it-chain/engine/icode"
+	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/tesseract"
 	"github.com/it-chain/tesseract/container"
 	"github.com/it-chain/tesseract/pb"
@@ -46,8 +46,8 @@ func NewContainerService() *ContainerService {
 	}
 }
 
-func (cs ContainerService) StartContainer(meta icode.Meta) error {
-	logger.Info(nil, fmt.Sprintf("[ICode] deploying icode, id:%s", meta.ICodeID))
+func (cs ContainerService) StartContainer(meta ivm.Meta) error {
+	logger.Info(nil, fmt.Sprintf("[ICode] deploying ivm, id:%s", meta.ICodeID))
 	cs.Lock()
 	defer cs.Unlock()
 
@@ -68,16 +68,16 @@ func (cs ContainerService) StartContainer(meta icode.Meta) error {
 	return nil
 }
 
-func (cs ContainerService) ExecuteRequest(request icode.Request) (icode.Result, error) {
-	logger.Info(nil, fmt.Sprintf("[ICode] executing icode, id:%s", request.ICodeID))
+func (cs ContainerService) ExecuteRequest(request ivm.Request) (ivm.Result, error) {
+	logger.Info(nil, fmt.Sprintf("[ICode] executing ivm, id:%s", request.ICodeID))
 
 	container, ok := cs.containerMap[request.ICodeID]
 
 	if !ok {
-		return icode.Result{}, ErrContainerDoesNotExist
+		return ivm.Result{}, ErrContainerDoesNotExist
 	}
 
-	resultCh := make(chan icode.Result)
+	resultCh := make(chan ivm.Result)
 	errCh := make(chan error)
 
 	var callback = func(response *pb.Response, err error) {
@@ -95,7 +95,7 @@ func (cs ContainerService) ExecuteRequest(request icode.Request) (icode.Result, 
 			}
 		}
 
-		resultCh <- icode.Result{
+		resultCh <- ivm.Result{
 			Err:  response.Error,
 			Data: data,
 		}
@@ -114,14 +114,14 @@ func (cs ContainerService) ExecuteRequest(request icode.Request) (icode.Result, 
 
 	select {
 	case err := <-errCh:
-		logger.Error(nil, fmt.Sprintf("[ICode] fail executing icode, id:%s", request.ICodeID))
-		return icode.Result{}, err
+		logger.Error(nil, fmt.Sprintf("[ICode] fail executing ivm, id:%s", request.ICodeID))
+		return ivm.Result{}, err
 	case result := <-resultCh:
 		return result, nil
 	}
 }
 
-func (cs ContainerService) StopContainer(id icode.ID) error {
+func (cs ContainerService) StopContainer(id ivm.ID) error {
 
 	container, ok := cs.containerMap[id]
 
@@ -139,9 +139,9 @@ func (cs ContainerService) StopContainer(id icode.ID) error {
 	return nil
 }
 
-func (cs ContainerService) GetRunningICodeIDList() []icode.ID {
+func (cs ContainerService) GetRunningICodeIDList() []ivm.ID {
 
-	icodeIDList := make([]icode.ID, 0)
+	icodeIDList := make([]ivm.ID, 0)
 
 	for id, _ := range cs.containerMap {
 		icodeIDList = append(icodeIDList, id)
