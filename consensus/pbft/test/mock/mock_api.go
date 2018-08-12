@@ -17,30 +17,30 @@
 package mock
 
 import (
-	"github.com/it-chain/engine/consensus"
+	"github.com/it-chain/engine/consensus/pbft"
 )
 
-type MockConsensusApi struct {
-	StartConsensusFunc       func(userId consensus.MemberId, proposedBlock consensus.ProposedBlock) error
-	ReceivePrePrepareMsgFunc func(msg consensus.PrePrepareMsg) error
-	ReceivePrepareMsgFunc    func(msg consensus.PrepareMsg) error
-	ReceiveCommitMsgFunc     func(msg consensus.CommitMsg) error
+type MockStateApi struct {
+	StartConsensusFunc      func(userId pbft.MemberID, proposedBlock pbft.ProposedBlock) error
+	HandlePrePrepareMsgFunc func(msg pbft.PrePrepareMsg) error
+	HandlePrepareMsgFunc    func(msg pbft.PrepareMsg) error
+	HandleCommitMsgFunc     func(msg pbft.CommitMsg) error
 }
 
-func (mca *MockConsensusApi) StartConsensus(userId consensus.MemberId, proposedBlock consensus.ProposedBlock) error {
+func (mca *MockStateApi) StartConsensus(userId pbft.MemberID, proposedBlock pbft.ProposedBlock) error {
 	return mca.StartConsensus(userId, proposedBlock)
 }
 
-func (mca *MockConsensusApi) ReceivePrePrepareMsg(msg consensus.PrePrepareMsg) error {
-	return mca.ReceivePrePrepareMsgFunc(msg)
+func (mca *MockStateApi) ReceivePrePrepareMsg(msg pbft.PrePrepareMsg) error {
+	return mca.HandlePrePrepareMsgFunc(msg)
 }
 
-func (mca *MockConsensusApi) ReceivePrepareMsg(msg consensus.PrepareMsg) error {
+func (mca *MockStateApi) ReceivePrepareMsg(msg pbft.PrepareMsg) error {
 
-	return mca.ReceivePrepareMsgFunc(msg)
+	return mca.HandlePrepareMsgFunc(msg)
 }
 
-func (mca *MockConsensusApi) ReceiveCommitMsg(msg consensus.CommitMsg) error {
+func (mca *MockStateApi) ReceiveCommitMsg(msg pbft.CommitMsg) error {
 
-	return mca.ReceiveCommitMsgFunc(msg)
+	return mca.HandleCommitMsgFunc(msg)
 }
