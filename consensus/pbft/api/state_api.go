@@ -32,41 +32,70 @@ type StateApi struct {
 
 var ConsensusCreateError = errors.New("Consensus can't be created")
 
+func NewStateApi(propagateService pbft.PropagateService,
+	confirmService pbft.ConfirmService, parliamentService pbft.ParliamentService, repo mem.StateRepository) StateApi {
+	return StateApi{
+		propagateService:  propagateService,
+		confirmService:    confirmService,
+		parliamentService: parliamentService,
+		repo:              repo,
+	}
+}
+
 func (cApi StateApi) StartConsensus(userId pbft.MemberID, proposedBlock pbft.ProposedBlock) error {
 
-	peerList, _ := cApi.parliamentService.RequestPeerList()
+	peerList, err := cApi.parliamentService.RequestPeerList()
+	if err != nil {
+		return err
+	}
 
 	if !cApi.parliamentService.IsNeedConsensus() {
 		return ConsensusCreateError
 	}
 
-	createdConsensus, _ := pbft.CreateConsensus(peerList, proposedBlock)
-	createdConsensus.Start()
+	createdConsensus, err := pbft.CreateConsensus(peerList, proposedBlock)
+	if err != nil {
+		return err
+	}
+
 	if err := cApi.repo.Save(*createdConsensus); err != nil {
 		return err
 	}
 
-	createdPrepareMsg := pbft.NewPrePrepareMsg(createdConsensus)
-	cApi.propagateService.BroadcastPrePrepareMsg(*createdPrepareMsg)
+	createdPrePrepareMsg := pbft.NewPrePrepareMsg(createdConsensus)
+	if err := cApi.propagateService.BroadcastPrePrepareMsg(*createdPrePrepareMsg); err != nil {
+		return err
+	}
+	createdConsensus.Start()
 
 	return nil
 }
 
 func (cApi StateApi) HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error {
 
-	lid, _ := cApi.parliamentService.RequestLeader()
+	lid, err := cApi.parliamentService.RequestLeader()
+	if err != nil {
+		return err
+	}
+
 	if lid.ToString() != msg.SenderID {
 		return pbft.InvalidLeaderIdError
 	}
 
-	constructedConsensus, _ := pbft.ConstructConsensus(msg)
-	constructedConsensus.ToPrepareStage()
+	constructedConsensus, err := pbft.ConstructConsensus(msg)
+	if err != nil {
+		return err
+	}
+
 	if err := cApi.repo.Save(*constructedConsensus); err != nil {
 		return err
 	}
 
 	prepareMsg := pbft.NewPrepareMsg(constructedConsensus)
-	cApi.propagateService.BroadcastPrepareMsg(*prepareMsg)
+	if err := cApi.propagateService.BroadcastPrepareMsg(*prepareMsg); err != nil {
+		return err
+	}
+	constructedConsensus.ToPrepareStage()
 
 	return nil
 }
@@ -74,7 +103,6 @@ func (cApi StateApi) HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error {
 func (cApi StateApi) HandlePrepareMsg(msg pbft.PrepareMsg) error {
 
 	loadedConsensus, err := cApi.repo.Load()
-
 	if err != nil {
 		return err
 	}
@@ -83,30 +111,39 @@ func (cApi StateApi) HandlePrepareMsg(msg pbft.PrepareMsg) error {
 		return err
 	}
 
-	if loadedConsensus.CheckPrepareCondition() {
-		newCommitMsg := pbft.NewCommitMsg(loadedConsensus)
-		loadedConsensus.ToCommitStage()
-		cApi.propagateService.BroadcastCommitMsg(*newCommitMsg)
+	if !loadedConsensus.CheckPrepareCondition() {
+		return nil
 	}
+
+	newCommitMsg := pbft.NewCommitMsg(loadedConsensus)
+	if err := cApi.propagateService.BroadcastCommitMsg(*newCommitMsg); err != nil {
+		return err
+	}
+	loadedConsensus.ToCommitStage()
 
 	return nil
 }
 
 func (cApi StateApi) HandleCommitMsg(msg pbft.CommitMsg) error {
 
-	loadedConsensus, _ := cApi.repo.Load()
+	loadedConsensus, err := cApi.repo.Load()
 
-	err := loadedConsensus.SaveCommitMsg(&msg)
 	if err != nil {
 		return err
 	}
-	representativeNum := len(loadedConsensus.Representatives)
-	commitMsgNum := len(loadedConsensus.PrepareMsgPool.Get())
-	satisfyNum := representativeNum / 3
 
-	if commitMsgNum > (satisfyNum + 1) {
-		cApi.confirmService.ConfirmBlock(loadedConsensus.Block)
-
+	if err := loadedConsensus.SaveCommitMsg(&msg); err != nil {
+		return err
 	}
+
+	if !loadedConsensus.CheckCommitCondition() {
+		return nil
+	}
+
+	if err := cApi.confirmService.ConfirmBlock(loadedConsensus.Block); err != nil {
+		return err
+	}
+	cApi.repo.Remove()
+
 	return nil
 }
