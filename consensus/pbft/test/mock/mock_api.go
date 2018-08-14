@@ -31,16 +31,16 @@ func (mca *MockStateApi) StartConsensus(userId pbft.MemberID, proposedBlock pbft
 	return mca.StartConsensus(userId, proposedBlock)
 }
 
-func (mca *MockStateApi) ReceivePrePrepareMsg(msg pbft.PrePrepareMsg) error {
+func (mca *MockStateApi) HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error {
 	return mca.HandlePrePrepareMsgFunc(msg)
 }
 
-func (mca *MockStateApi) ReceivePrepareMsg(msg pbft.PrepareMsg) error {
+func (mca *MockStateApi) HandlePrepareMsg(msg pbft.PrepareMsg) error {
 
 	return mca.HandlePrepareMsgFunc(msg)
 }
 
-func (mca *MockStateApi) ReceiveCommitMsg(msg pbft.CommitMsg) error {
+func (mca *MockStateApi) HandleCommitMsg(msg pbft.CommitMsg) error {
 
 	return mca.HandleCommitMsgFunc(msg)
 }
