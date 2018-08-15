@@ -18,10 +18,8 @@ package api_gateway
 
 import (
 	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/yggdrasill"
 
 	"errors"
-	"log"
 	"sync"
 
 	"time"
@@ -30,13 +28,12 @@ import (
 
 	"encoding/hex"
 
+	"encoding/json"
+
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/leveldb-wrapper"
 )
 
-var ErrGetCommitedBlock = errors.New("Error in getting commited block")
-var ErrAddCommitingBlock = errors.New("Error in add block which is going to be commited")
-var ErrNewBlockStorage = errors.New("Error in construct block storage")
 var ErrNoCreatedBlock = errors.New("Error can not find created block")
 var ErrNoStagedBlock = errors.New("Error can not find staged block")
 var ErrNoBlock = errors.New("Error can not find block")
@@ -44,8 +41,7 @@ var ErrInvalidStateBlock = errors.New("Error invalid state block")
 var ErrFailRemoveBlock = errors.New("Error failed removing block")
 var ErrFailBlockTypeCasting = errors.New("Error failed type casting block")
 var ErrIdEmpty = errors.New("Error that seal is empty string")
-var ErrEmptyBlock = errors.New("Error empty block when getting block")
-var ErrCheckEmpty = errors.New("Error when checking repo empty")
+var ErrEmptyBlock = errors.New("Error empty block when not expected")
 
 type BlockQueryApi struct {
 	blockPoolRepository     BlockPoolRepository
@@ -64,14 +60,6 @@ func (q BlockQueryApi) GetStagedBlockByHeight(height blockchain.BlockHeight) (bl
 }
 func (q BlockQueryApi) GetStagedBlockById(blockId string) (blockchain.DefaultBlock, error) {
 	return q.blockPoolRepository.FindStagedBlockById(blockId)
-}
-
-func (q BlockQueryApi) GetLastCommitedBlock() (blockchain.DefaultBlock, error) {
-	return q.commitedBlockRepository.FindLastBlock()
-}
-
-func (q BlockQueryApi) GetCommitedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
-	return q.commitedBlockRepository.FindBlockByHeight(height)
 }
 
 type BlockPoolRepository interface {
@@ -242,29 +230,22 @@ func isBlockIdEqualWith(block blockchain.Block, id string) bool {
 
 type CommitedBlockRepository interface {
 	Save(block blockchain.DefaultBlock) error
-	FindLastBlock() (blockchain.DefaultBlock, error)
-	FindBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
+	FindBlockByHeight(height uint64) (blockchain.DefaultBlock, error)
 	FindAllBlock() ([]blockchain.DefaultBlock, error)
 }
 
 type CommitedBlockRepositoryImpl struct {
-	mux *sync.RWMutex
-	yggdrasill.BlockStorageManager
+	mux     *sync.RWMutex
+	leveldb *leveldbwrapper.DB
 }
 
 func NewCommitedBlockRepositoryImpl(dbPath string) (*CommitedBlockRepositoryImpl, error) {
-	validator := new(blockchain.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	opts := map[string]interface{}{}
-
-	blockStorage, err := yggdrasill.NewBlockStorage(db, validator, opts)
-	if err != nil {
-		return nil, ErrNewBlockStorage
-	}
+	db.Open()
 
 	return &CommitedBlockRepositoryImpl{
-		mux:                 &sync.RWMutex{},
-		BlockStorageManager: blockStorage,
+		mux:     &sync.RWMutex{},
+		leveldb: db,
 	}, nil
 }
 
@@ -272,83 +253,77 @@ func (cbr *CommitedBlockRepositoryImpl) Save(block blockchain.DefaultBlock) erro
 	cbr.mux.Lock()
 	defer cbr.mux.Unlock()
 
-	err := cbr.BlockStorageManager.AddBlock(&block)
+	if block.IsEmpty() {
+		return ErrEmptyBlock
+	}
+
+	b, err := block.Serialize()
+
 	if err != nil {
-		log.Fatal(err)
-		return ErrAddCommitingBlock
+		return err
+	}
+
+	key := []byte(string(block.Height))
+
+	if err = cbr.leveldb.Put(key, b, true); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (cbr *CommitedBlockRepositoryImpl) FindLastBlock() (blockchain.DefaultBlock, error) {
-	cbr.mux.Lock()
-	defer cbr.mux.Unlock()
-
-	block := &blockchain.DefaultBlock{}
-
-	err := cbr.BlockStorageManager.GetLastBlock(block)
-	if err != nil {
-		return blockchain.DefaultBlock{}, ErrGetCommitedBlock
-	}
-
-	return *block, nil
-}
 func (cbr *CommitedBlockRepositoryImpl) FindBlockByHeight(height uint64) (blockchain.DefaultBlock, error) {
 	cbr.mux.Lock()
 	defer cbr.mux.Unlock()
 
-	block := &blockchain.DefaultBlock{}
+	key := []byte(string(height))
 
-	err := cbr.BlockStorageManager.GetBlockByHeight(block, height)
+	b, err := cbr.leveldb.Get(key)
+
 	if err != nil {
-		return blockchain.DefaultBlock{}, ErrGetCommitedBlock
+		return blockchain.DefaultBlock{}, err
 	}
 
-	return *block, nil
+	block := blockchain.DefaultBlock{}
+
+	err = json.Unmarshal(b, &block)
+
+	if err != nil {
+		return blockchain.DefaultBlock{}, err
+	}
+
+	return block, nil
+
 }
 
 func (cbr *CommitedBlockRepositoryImpl) FindAllBlock() ([]blockchain.DefaultBlock, error) {
 	cbr.mux.Lock()
 	defer cbr.mux.Unlock()
 
+	iter := cbr.leveldb.GetIteratorWithPrefix([]byte(""))
+
 	blocks := []blockchain.DefaultBlock{}
 
-	// set
-	lastBlock := &blockchain.DefaultBlock{}
+	for iter.Next() {
 
-	err := cbr.BlockStorageManager.GetLastBlock(lastBlock)
-
-	if err != nil {
-		return nil, err
-	}
-
-	// check empty
-	if lastBlock.IsEmpty() {
-		return blocks, nil
-	}
-
-	lastHeight := lastBlock.GetHeight()
-
-	// get blocks
-	for i := uint64(0); i <= lastHeight; i++ {
+		val := iter.Value()
 
 		block := &blockchain.DefaultBlock{}
 
-		err := cbr.BlockStorageManager.GetBlockByHeight(block, i)
+		err := block.Deserialize(val)
 
 		if err != nil {
 			return nil, err
-		}
-
-		if block.IsEmpty() {
-			return nil, ErrEmptyBlock
 		}
 
 		blocks = append(blocks, *block)
 	}
 
 	return blocks, nil
+}
+
+func (cbr *CommitedBlockRepositoryImpl) Close() {
+	cbr.leveldb.Close()
 }
 
 type BlockEventListener struct {
@@ -396,22 +371,25 @@ func (l BlockEventListener) HandleBlockStagedEvent(event event.BlockStaged) erro
 }
 
 func (l BlockEventListener) HandleBlockCommitedEvent(event event.BlockCommitted) error {
-	blockID := event.ID
 
-	if blockID == "" {
-		return ErrIdEmpty
-	}
+	txList, err := deserializeTxListType(event.TxList)
 
-	block, err := l.blockPoolRepository.FindBlockById(blockID)
-
-	block.State = event.State
-
-	err = l.commitedBlockRepository.Save(block)
 	if err != nil {
 		return err
 	}
 
-	err = l.blockPoolRepository.RemoveBlockById(blockID)
+	block := blockchain.DefaultBlock{
+		Seal:      event.Seal,
+		PrevSeal:  event.PrevSeal,
+		Height:    event.Height,
+		TxList:    txList,
+		TxSeal:    event.TxSeal,
+		Timestamp: event.Timestamp,
+		Creator:   event.Creator,
+		State:     event.State,
+	}
+
+	err = l.commitedBlockRepository.Save(block)
 	if err != nil {
 		return err
 	}

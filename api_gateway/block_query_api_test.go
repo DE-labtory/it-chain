@@ -453,78 +453,6 @@ func TestBlockPoolRepositoryImpl_RemoveById_FailRemoving(t *testing.T) {
 	assert.Equal(t, api_gateway.ErrFailRemoveBlock, err)
 }
 
-func TestBlockQueryApi_FindLastCommitedBlock(t *testing.T) {
-	dbPath := "./.db"
-
-	// when
-	cbr, err := api_gateway.NewCommitedBlockRepositoryImpl(dbPath)
-	// then
-	assert.Equal(t, nil, err)
-
-	defer func() {
-		cbr.Close()
-		os.RemoveAll(dbPath)
-	}()
-
-	// when
-	block1 := mock.GetNewBlock([]byte("genesis"), 0)
-	err = cbr.AddBlock(block1)
-	// then
-	assert.NoError(t, err)
-
-	// when
-	block2 := mock.GetNewBlock(block1.GetSeal(), 1)
-	err = cbr.AddBlock(block2)
-	// then
-	assert.NoError(t, err)
-
-	blockQueryApi := api_gateway.NewBlockQueryApi(nil, cbr)
-
-	// when
-	block3, err := blockQueryApi.GetLastCommitedBlock()
-	// then
-	assert.NoError(t, err)
-	assert.Equal(t, block2.GetSeal(), block3.GetSeal())
-	assert.Equal(t, block2.GetHeight(), block3.GetHeight())
-	assert.Equal(t, block2.GetPrevSeal(), block3.GetPrevSeal())
-}
-
-func TestBlockQueryApi_FindCommitedBlockByHeight(t *testing.T) {
-	dbPath := "./.db"
-
-	// when
-	cbr, err := api_gateway.NewCommitedBlockRepositoryImpl(dbPath)
-	// then
-	assert.Equal(t, nil, err)
-
-	defer func() {
-		cbr.Close()
-		os.RemoveAll(dbPath)
-	}()
-
-	// when
-	block1 := mock.GetNewBlock([]byte("genesis"), 0)
-	err = cbr.AddBlock(block1)
-	// then
-	assert.NoError(t, err)
-
-	// when
-	block2 := mock.GetNewBlock(block1.GetSeal(), 1)
-	err = cbr.AddBlock(block2)
-	// then
-	assert.NoError(t, err)
-
-	blockQueryApi := api_gateway.NewBlockQueryApi(nil, cbr)
-
-	// when
-	block3, err := blockQueryApi.GetCommitedBlockByHeight(blockchain.BlockHeight(1))
-	// then
-	assert.NoError(t, err)
-	assert.Equal(t, block2.GetSeal(), block3.GetSeal())
-	assert.Equal(t, block2.GetHeight(), block3.GetHeight())
-	assert.Equal(t, block2.GetPrevSeal(), block3.GetPrevSeal())
-}
-
 func TestCommitedBlockRepositoryImpl(t *testing.T) {
 	dbPath := "./.db"
 
@@ -541,20 +469,18 @@ func TestCommitedBlockRepositoryImpl(t *testing.T) {
 
 	// when
 	block1 := mock.GetNewBlock([]byte("genesis"), 0)
-	err = cbr.AddBlock(block1)
+	err = cbr.Save(*block1)
 	// then
 	assert.NoError(t, err)
 
 	// when
 	block2 := mock.GetNewBlock(block1.GetSeal(), 1)
-	err = cbr.AddBlock(block2)
+	err = cbr.Save(*block2)
 	// then
 	assert.NoError(t, err)
 
-	blockQueryApi := api_gateway.NewBlockQueryApi(nil, cbr)
-
 	// when
-	block3, err := blockQueryApi.GetLastCommitedBlock()
+	block3, err := cbr.FindBlockByHeight(block2.Height)
 	// then
 	assert.NoError(t, err)
 	assert.Equal(t, block2.GetSeal(), block3.GetSeal())
@@ -684,42 +610,68 @@ func TestBlockEventListener_HandleBlockCommitedEvent(t *testing.T) {
 	}()
 
 	// when
-	block1 := mock.GetNewBlock([]byte("genesis"), 0)
-	err = cbr.AddBlock(block1)
+	lastCommittedBlock := mock.GetNewBlock([]byte("genesis"), 0)
+	err = cbr.Save(*lastCommittedBlock)
 	// then
 	assert.NoError(t, err)
 
 	eh := api_gateway.NewBlockEventListener(poolRepo, cbr)
 
 	// when
-	block2 := mock.GetNewBlock(block1.GetSeal(), 1)
-	block2.State = blockchain.Staged
+	ConfirmedBlock := mock.GetNewBlock(lastCommittedBlock.GetSeal(), 1)
+	ConfirmedBlock.State = blockchain.Committed
+
+	txList, err := serializeTxListType(ConfirmedBlock.TxList)
+	assert.NoError(t, err)
+
 	// when
-	poolRepo.Blocks = append(poolRepo.Blocks, block2)
-	// when
-	block2ID := hex.EncodeToString(block2.GetSeal())
-	event1 := event.BlockCommitted{
-		EventModel: midgard.EventModel{
-			ID: block2ID,
-		},
-		State: blockchain.Committed,
+	blockCommittedEvent := event.BlockCommitted{
+		Seal:      ConfirmedBlock.Seal,
+		PrevSeal:  ConfirmedBlock.PrevSeal,
+		Height:    ConfirmedBlock.Height,
+		TxList:    txList,
+		TxSeal:    ConfirmedBlock.TxSeal,
+		Timestamp: ConfirmedBlock.Timestamp,
+		Creator:   ConfirmedBlock.Creator,
+		State:     ConfirmedBlock.State,
 	}
 	// when - Handle BlockCommited event
-	err1 := eh.HandleBlockCommitedEvent(event1)
+	err = eh.HandleBlockCommitedEvent(blockCommittedEvent)
 	// then
-	assert.NoError(t, err1)
+	assert.NoError(t, err)
 
 	// when - Test whether save target block to yggdrasill
-	block3, err2 := cbr.FindBlockByHeight(1)
+	retrievedBlock, err := cbr.FindBlockByHeight(1)
 	// then
-	assert.NoError(t, err2)
-	assert.Equal(t, block3.Seal, block2.GetSeal())
-	assert.Equal(t, blockchain.Committed, block3.State)
+	assert.NoError(t, err)
+	assert.Equal(t, retrievedBlock.Seal, ConfirmedBlock.GetSeal())
+	assert.Equal(t, blockchain.Committed, retrievedBlock.State)
 
-	// when - Test whether target block is removed from block pool
-	block4, err3 := poolRepo.FindStagedBlockById(block2ID)
-	// then
-	assert.Equal(t, api_gateway.ErrNoStagedBlock, err3)
-	assert.Equal(t, true, block4.IsEmpty())
+}
 
+func serializeTxListType(txlist []*blockchain.DefaultTransaction) ([]event.Tx, error) {
+	eventTxList := make([]event.Tx, 0)
+
+	for _, tx := range txlist {
+		eventTx, err := serializeTxType(tx)
+		if err != nil {
+			return eventTxList, err
+		}
+		eventTxList = append(eventTxList, eventTx)
+	}
+
+	return eventTxList, nil
+}
+
+func serializeTxType(tx *blockchain.DefaultTransaction) (event.Tx, error) {
+	return event.Tx{
+		ID:        tx.ID,
+		ICodeID:   tx.ICodeID,
+		PeerID:    tx.PeerID,
+		TimeStamp: tx.Timestamp,
+		Jsonrpc:   tx.Jsonrpc,
+		Function:  tx.Function,
+		Args:      tx.Args,
+		Signature: tx.Signature,
+	}, nil
 }
