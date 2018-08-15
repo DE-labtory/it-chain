@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package consensus
+package consensus_test
 
 import (
 	"testing"
 
+	"github.com/it-chain/engine/consensus"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateConsensus(t *testing.T) {
 	// given
-	p := make([]MemberId, 0)
-	l := MemberId("leader")
-	m := MemberId("member")
-	b := ProposedBlock{
+	p := make([]consensus.MemberId, 0)
+	l := consensus.MemberId("leader")
+	m := consensus.MemberId("member")
+	b := consensus.ProposedBlock{
 		Seal: make([]byte, 0),
 		Body: make([]byte, 0),
 	}
 
 	// when
-	c, err := CreateConsensus(p, b)
+	c, err := consensus.CreateConsensus(p, b)
 
 	// then
 	assert.Error(t, err)
@@ -42,7 +43,7 @@ func TestCreateConsensus(t *testing.T) {
 	p = append(p, l)
 	p = append(p, m)
 
-	c, err = CreateConsensus(p, b)
+	c, err = consensus.CreateConsensus(p, b)
 
 	// then
 	assert.NoError(t, err)
@@ -53,28 +54,28 @@ func TestCreateConsensus(t *testing.T) {
 
 func TestConstructConsensus(t *testing.T) {
 	// given
-	l := NewRepresentative("leader")
-	m := NewRepresentative("member")
+	l := consensus.NewRepresentative("leader")
+	m := consensus.NewRepresentative("member")
 
-	r := make([]*Representative, 0)
+	r := make([]*consensus.Representative, 0)
 	r = append(r, l, m)
 
-	msg := PrePrepareMsg{
-		ConsensusId:    NewConsensusId("consensusID"),
+	msg := consensus.PrePrepareMsg{
+		ConsensusId:    consensus.NewConsensusId("consensusID"),
 		SenderId:       "me",
 		Representative: r,
-		ProposedBlock: ProposedBlock{
+		ProposedBlock: consensus.ProposedBlock{
 			Seal: make([]byte, 0),
 			Body: make([]byte, 0),
 		},
 	}
 
 	// when
-	c, err := ConstructConsensus(msg)
+	c, err := consensus.ConstructConsensus(msg)
 
 	// then
 	assert.NoError(t, err)
 	assert.Equal(t, "consensusID", c.ConsensusID.Id)
-	assert.Equal(t, IDLE_STATE, c.CurrentState)
+	assert.Equal(t, consensus.IDLE_STATE, c.CurrentState)
 	assert.Equal(t, 2, len(c.Representatives))
 }

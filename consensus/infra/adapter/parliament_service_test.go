@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package adapter
+package adapter_test
 
 import (
 	"testing"
 
 	"github.com/it-chain/engine/api_gateway"
+	"github.com/it-chain/engine/consensus/infra/adapter"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/infra/mem"
 	"github.com/stretchr/testify/assert"
@@ -34,7 +35,7 @@ func TestParliamentService_RequestLeader(t *testing.T) {
 		PeerId:    p2p.PeerId{"p1"},
 	})
 
-	ps := NewParliamentService(api_gateway.NewPeerQueryApi(&peerRepository))
+	ps := adapter.NewParliamentService(api_gateway.NewPeerQueryApi(&peerRepository))
 
 	// when
 	l, _ := ps.RequestLeader()
@@ -72,7 +73,7 @@ func TestParliamentService_RequestPeerList(t *testing.T) {
 	peerRepository.Save(p1)
 	peerRepository.Save(p2)
 
-	ps := NewParliamentService(api_gateway.NewPeerQueryApi(&peerRepository))
+	ps := adapter.NewParliamentService(api_gateway.NewPeerQueryApi(&peerRepository))
 
 	// when
 	peerList, err := ps.RequestPeerList()
@@ -85,7 +86,7 @@ func TestParliamentService_RequestPeerList(t *testing.T) {
 func TestParliamentService_IsNeedConsensus(t *testing.T) {
 	// given (case 1 : no member)
 	peerRepository := mem.NewPeerReopository()
-	ps := NewParliamentService(api_gateway.NewPeerQueryApi(&peerRepository))
+	ps := adapter.NewParliamentService(api_gateway.NewPeerQueryApi(&peerRepository))
 
 	// when
 	flag := ps.IsNeedConsensus()
