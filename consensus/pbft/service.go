@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package consensus
+package pbft
 
 import "errors"
 

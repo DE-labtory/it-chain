@@ -20,27 +20,27 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/it-chain/engine/consensus"
-	"github.com/it-chain/engine/consensus/infra/adapter"
+	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			msg consensus.PrePrepareMsg
+			msg pbft.PrePrepareMsg
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				msg consensus.PrePrepareMsg
+				msg pbft.PrePrepareMsg
 			}{
-				msg: consensus.PrePrepareMsg{
-					ConsensusId:    consensus.ConsensusId{"c1"},
+				msg: pbft.PrePrepareMsg{
+					ConsensusId:    pbft.ConsensusId{"c1"},
 					SenderId:       "s1",
-					Representative: make([]*consensus.Representative, 0),
-					ProposedBlock: consensus.ProposedBlock{
+					Representative: make([]*pbft.Representative, 0),
+					ProposedBlock: pbft.ProposedBlock{
 						Seal: make([]byte, 0),
 						Body: make([]byte, 0),
 					},
@@ -50,13 +50,13 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 		},
 		"Consensus ID empty test": {
 			input: struct {
-				msg consensus.PrePrepareMsg
+				msg pbft.PrePrepareMsg
 			}{
-				msg: consensus.PrePrepareMsg{
-					ConsensusId:    consensus.ConsensusId{""},
+				msg: pbft.PrePrepareMsg{
+					ConsensusId:    pbft.ConsensusId{""},
 					SenderId:       "s1",
-					Representative: make([]*consensus.Representative, 0),
-					ProposedBlock: consensus.ProposedBlock{
+					Representative: make([]*pbft.Representative, 0),
+					ProposedBlock: pbft.ProposedBlock{
 						Seal: make([]byte, 0),
 						Body: make([]byte, 0),
 					},
@@ -66,13 +66,13 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 		},
 		"Block empty test": {
 			input: struct {
-				msg consensus.PrePrepareMsg
+				msg pbft.PrePrepareMsg
 			}{
-				msg: consensus.PrePrepareMsg{
-					ConsensusId:    consensus.ConsensusId{"c1"},
+				msg: pbft.PrePrepareMsg{
+					ConsensusId:    pbft.ConsensusId{"c1"},
 					SenderId:       "s1",
-					Representative: make([]*consensus.Representative, 0),
-					ProposedBlock: consensus.ProposedBlock{
+					Representative: make([]*pbft.Representative, 0),
+					ProposedBlock: pbft.ProposedBlock{
 						Seal: make([]byte, 0),
 						Body: nil,
 					},
@@ -88,7 +88,7 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 		return nil
 	}
 
-	representatives := make([]*consensus.Representative, 0)
+	representatives := make([]*pbft.Representative, 0)
 	propagateService := adapter.NewPropagateService(publish, representatives)
 
 	for testName, test := range tests {
@@ -103,16 +103,16 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			msg consensus.PrepareMsg
+			msg pbft.PrepareMsg
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				msg consensus.PrepareMsg
+				msg pbft.PrepareMsg
 			}{
-				msg: consensus.PrepareMsg{
-					ConsensusId: consensus.ConsensusId{"c1"},
+				msg: pbft.PrepareMsg{
+					ConsensusId: pbft.ConsensusId{"c1"},
 					SenderId:    "s1",
 					BlockHash:   make([]byte, 0),
 				},
@@ -121,10 +121,10 @@ func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 		},
 		"Consensus ID empty test": {
 			input: struct {
-				msg consensus.PrepareMsg
+				msg pbft.PrepareMsg
 			}{
-				msg: consensus.PrepareMsg{
-					ConsensusId: consensus.ConsensusId{""},
+				msg: pbft.PrepareMsg{
+					ConsensusId: pbft.ConsensusId{""},
 					SenderId:    "s1",
 					BlockHash:   make([]byte, 0),
 				},
@@ -133,10 +133,10 @@ func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 		},
 		"Block hash empty test": {
 			input: struct {
-				msg consensus.PrepareMsg
+				msg pbft.PrepareMsg
 			}{
-				msg: consensus.PrepareMsg{
-					ConsensusId: consensus.ConsensusId{"c1"},
+				msg: pbft.PrepareMsg{
+					ConsensusId: pbft.ConsensusId{"c1"},
 					SenderId:    "s1",
 					BlockHash:   nil,
 				},
@@ -151,7 +151,7 @@ func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 		return nil
 	}
 
-	representatives := make([]*consensus.Representative, 0)
+	representatives := make([]*pbft.Representative, 0)
 	propagateService := adapter.NewPropagateService(publish, representatives)
 
 	for testName, test := range tests {
@@ -166,16 +166,16 @@ func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 func TestPropagateService_BroadcastCommitMsg(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			msg consensus.CommitMsg
+			msg pbft.CommitMsg
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				msg consensus.CommitMsg
+				msg pbft.CommitMsg
 			}{
-				msg: consensus.CommitMsg{
-					ConsensusId: consensus.ConsensusId{"c1"},
+				msg: pbft.CommitMsg{
+					ConsensusId: pbft.ConsensusId{"c1"},
 					SenderId:    "s1",
 				},
 			},
@@ -183,10 +183,10 @@ func TestPropagateService_BroadcastCommitMsg(t *testing.T) {
 		},
 		"Consensus ID empty test": {
 			input: struct {
-				msg consensus.CommitMsg
+				msg pbft.CommitMsg
 			}{
-				msg: consensus.CommitMsg{
-					ConsensusId: consensus.ConsensusId{""},
+				msg: pbft.CommitMsg{
+					ConsensusId: pbft.ConsensusId{""},
 					SenderId:    "s1",
 				},
 			},
@@ -200,7 +200,7 @@ func TestPropagateService_BroadcastCommitMsg(t *testing.T) {
 		return nil
 	}
 
-	representatives := make([]*consensus.Representative, 0)
+	representatives := make([]*pbft.Representative, 0)
 	propagateService := adapter.NewPropagateService(publish, representatives)
 
 	for testName, test := range tests {

@@ -20,7 +20,7 @@ import (
 
 	"errors"
 
-	"github.com/it-chain/engine/consensus"
+	"github.com/it-chain/engine/consensus/pbft"
 )
 
 var ConsensusAlreadyExistError = errors.New("Consensus Already Exist")
@@ -28,7 +28,7 @@ var EmptyConsensusIdError = errors.New("empty Consensus Id")
 var LoadConsensusError = errors.New("There is no consensus for loading")
 
 type ConsensusRepository struct {
-	consensus *consensus.Consensus
+	consensus *pbft.Consensus
 	sync.RWMutex
 }
 
@@ -38,7 +38,7 @@ func NewConsensusRepository() ConsensusRepository {
 		RWMutex:   sync.RWMutex{},
 	}
 }
-func (repo *ConsensusRepository) Save(consensus consensus.Consensus) error {
+func (repo *ConsensusRepository) Save(consensus pbft.Consensus) error {
 
 	repo.Lock()
 	defer repo.Unlock()
@@ -50,7 +50,7 @@ func (repo *ConsensusRepository) Save(consensus consensus.Consensus) error {
 
 	return nil
 }
-func (repo *ConsensusRepository) Load() (*consensus.Consensus, error) {
+func (repo *ConsensusRepository) Load() (*pbft.Consensus, error) {
 
 	if repo.consensus == nil {
 		return nil, LoadConsensusError

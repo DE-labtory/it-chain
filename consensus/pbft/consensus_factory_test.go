@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package consensus_test
+package pbft_test
 
 import (
 	"testing"
 
-	"github.com/it-chain/engine/consensus"
+	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateConsensus(t *testing.T) {
 	// given
-	p := make([]consensus.MemberId, 0)
-	l := consensus.MemberId("leader")
-	m := consensus.MemberId("member")
-	b := consensus.ProposedBlock{
+	p := make([]pbft.MemberId, 0)
+	l := pbft.MemberId("leader")
+	m := pbft.MemberId("member")
+	b := pbft.ProposedBlock{
 		Seal: make([]byte, 0),
 		Body: make([]byte, 0),
 	}
 
 	// when
-	c, err := consensus.CreateConsensus(p, b)
+	c, err := pbft.CreateConsensus(p, b)
 
 	// then
 	assert.Error(t, err)
@@ -43,7 +43,7 @@ func TestCreateConsensus(t *testing.T) {
 	p = append(p, l)
 	p = append(p, m)
 
-	c, err = consensus.CreateConsensus(p, b)
+	c, err = pbft.CreateConsensus(p, b)
 
 	// then
 	assert.NoError(t, err)
@@ -54,28 +54,28 @@ func TestCreateConsensus(t *testing.T) {
 
 func TestConstructConsensus(t *testing.T) {
 	// given
-	l := consensus.NewRepresentative("leader")
-	m := consensus.NewRepresentative("member")
+	l := pbft.NewRepresentative("leader")
+	m := pbft.NewRepresentative("member")
 
-	r := make([]*consensus.Representative, 0)
+	r := make([]*pbft.Representative, 0)
 	r = append(r, l, m)
 
-	msg := consensus.PrePrepareMsg{
-		ConsensusId:    consensus.NewConsensusId("consensusID"),
+	msg := pbft.PrePrepareMsg{
+		ConsensusId:    pbft.NewConsensusId("consensusID"),
 		SenderId:       "me",
 		Representative: r,
-		ProposedBlock: consensus.ProposedBlock{
+		ProposedBlock: pbft.ProposedBlock{
 			Seal: make([]byte, 0),
 			Body: make([]byte, 0),
 		},
 	}
 
 	// when
-	c, err := consensus.ConstructConsensus(msg)
+	c, err := pbft.ConstructConsensus(msg)
 
 	// then
 	assert.NoError(t, err)
 	assert.Equal(t, "consensusID", c.ConsensusID.Id)
-	assert.Equal(t, consensus.IDLE_STATE, c.CurrentState)
+	assert.Equal(t, pbft.IDLE_STATE, c.CurrentState)
 	assert.Equal(t, 2, len(c.Representatives))
 }

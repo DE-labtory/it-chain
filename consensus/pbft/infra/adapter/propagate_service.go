@@ -21,7 +21,7 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/consensus"
+	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
@@ -30,17 +30,17 @@ type Publish func(topic string, data interface{}) (err error)
 
 type PropagateService struct {
 	publish         Publish
-	representatives []*consensus.Representative
+	representatives []*pbft.Representative
 }
 
-func NewPropagateService(publish Publish, representatives []*consensus.Representative) PropagateService {
+func NewPropagateService(publish Publish, representatives []*pbft.Representative) PropagateService {
 	return PropagateService{
 		publish:         publish,
 		representatives: representatives,
 	}
 }
 
-func (ps PropagateService) BroadcastPrePrepareMsg(msg consensus.PrePrepareMsg) error {
+func (ps PropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg) error {
 	if msg.ConsensusId.Id == "" {
 		return errors.New("Consensus ID is empty")
 	}
@@ -62,7 +62,7 @@ func (ps PropagateService) BroadcastPrePrepareMsg(msg consensus.PrePrepareMsg) e
 	return nil
 }
 
-func (ps PropagateService) BroadcastPrepareMsg(msg consensus.PrepareMsg) error {
+func (ps PropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg) error {
 	if msg.ConsensusId.Id == "" {
 		return errors.New("Consensus ID is empty")
 	}
@@ -84,7 +84,7 @@ func (ps PropagateService) BroadcastPrepareMsg(msg consensus.PrepareMsg) error {
 	return nil
 }
 
-func (ps PropagateService) BroadcastCommitMsg(msg consensus.CommitMsg) error {
+func (ps PropagateService) BroadcastCommitMsg(msg pbft.CommitMsg) error {
 	if msg.ConsensusId.Id == "" {
 		return errors.New("Consensus ID is empty")
 	}

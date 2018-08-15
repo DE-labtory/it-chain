@@ -20,23 +20,23 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/it-chain/engine/consensus"
-	"github.com/it-chain/engine/consensus/infra/adapter"
+	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConfirmService_ConfirmBlock(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			block consensus.ProposedBlock
+			block pbft.ProposedBlock
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				block consensus.ProposedBlock
+				block pbft.ProposedBlock
 			}{
-				block: consensus.ProposedBlock{
+				block: pbft.ProposedBlock{
 					Seal: make([]byte, 0),
 					Body: make([]byte, 0),
 				},
@@ -45,9 +45,9 @@ func TestConfirmService_ConfirmBlock(t *testing.T) {
 		},
 		"block seal empty test": {
 			input: struct {
-				block consensus.ProposedBlock
+				block pbft.ProposedBlock
 			}{
-				block: consensus.ProposedBlock{
+				block: pbft.ProposedBlock{
 					Seal: nil,
 					Body: make([]byte, 0),
 				},
@@ -56,9 +56,9 @@ func TestConfirmService_ConfirmBlock(t *testing.T) {
 		},
 		"block body empty test": {
 			input: struct {
-				block consensus.ProposedBlock
+				block pbft.ProposedBlock
 			}{
-				block: consensus.ProposedBlock{
+				block: pbft.ProposedBlock{
 					Seal: make([]byte, 0),
 					Body: nil,
 				},
