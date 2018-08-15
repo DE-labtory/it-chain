@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package adapter
+package adapter_test
 
 import (
 	"errors"
 	"testing"
 
 	"github.com/it-chain/engine/consensus"
+	"github.com/it-chain/engine/consensus/infra/adapter"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -88,7 +89,7 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 	}
 
 	representatives := make([]*consensus.Representative, 0)
-	propagateService := NewPropagateService(publish, representatives)
+	propagateService := adapter.NewPropagateService(publish, representatives)
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
@@ -151,7 +152,7 @@ func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 	}
 
 	representatives := make([]*consensus.Representative, 0)
-	propagateService := NewPropagateService(publish, representatives)
+	propagateService := adapter.NewPropagateService(publish, representatives)
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
@@ -200,7 +201,7 @@ func TestPropagateService_BroadcastCommitMsg(t *testing.T) {
 	}
 
 	representatives := make([]*consensus.Representative, 0)
-	propagateService := NewPropagateService(publish, representatives)
+	propagateService := adapter.NewPropagateService(publish, representatives)
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
