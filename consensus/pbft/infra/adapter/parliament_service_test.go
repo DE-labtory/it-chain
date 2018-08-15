@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/it-chain/engine/api_gateway"
-	"github.com/it-chain/engine/consensus/infra/adapter"
+	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/infra/mem"
 	"github.com/stretchr/testify/assert"

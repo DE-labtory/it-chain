@@ -18,7 +18,7 @@ package adapter
 
 import (
 	"github.com/it-chain/engine/api_gateway"
-	"github.com/it-chain/engine/consensus"
+	"github.com/it-chain/engine/consensus/pbft"
 )
 
 type ParliamentService struct {
@@ -31,27 +31,27 @@ func NewParliamentService(api api_gateway.PeerQueryApi) *ParliamentService {
 	}
 }
 
-func (ps *ParliamentService) RequestLeader() (consensus.MemberId, error) {
+func (ps *ParliamentService) RequestLeader() (pbft.MemberId, error) {
 	l, err := ps.pQuery.GetLeader()
 
 	if err != nil {
 		return "", err
 	}
 
-	return consensus.MemberId(l.GetID()), nil
+	return pbft.MemberId(l.GetID()), nil
 }
 
-func (ps *ParliamentService) RequestPeerList() ([]consensus.MemberId, error) {
+func (ps *ParliamentService) RequestPeerList() ([]pbft.MemberId, error) {
 	pl, err := ps.pQuery.GetPeerList()
 
 	if err != nil {
 		return nil, err
 	}
 
-	peerList := make([]consensus.MemberId, 0)
+	peerList := make([]pbft.MemberId, 0)
 
 	for _, p := range pl {
-		peerList = append(peerList, consensus.MemberId(p.GetID()))
+		peerList = append(peerList, pbft.MemberId(p.GetID()))
 	}
 
 	return peerList, nil

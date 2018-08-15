@@ -14,31 +14,36 @@
  * limitations under the License.
  */
 
-package api
+package adapter
 
 import (
-	"github.com/it-chain/engine/consensus"
-	"github.com/it-chain/midgard"
+	"errors"
+
+	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/consensus/pbft"
 )
 
-type ConsensusApi struct {
-	eventRepository *midgard.Repository
+type ConfirmService struct {
+	publish Publish
 }
 
-// todo : Event Sourcing 첨가
-
-func (cApi ConsensusApi) StartConsensus(userId consensus.MemberId, block consensus.ProposedBlock) error {
-	return nil
+func NewConfirmService(publish Publish) *ConfirmService {
+	return &ConfirmService{
+		publish: publish,
+	}
 }
 
-func (cApi ConsensusApi) ReceivePrePrepareMsg(msg consensus.PrePrepareMsg) {
-	return
-}
+func (cs *ConfirmService) ConfirmBlock(block pbft.ProposedBlock) error {
+	if block.Seal == nil {
+		return errors.New("Block hash is nil")
+	}
 
-func (cApi ConsensusApi) ReceivePrepareMsg(msg consensus.PrepareMsg) {
-	return
-}
+	if block.Body == nil {
+		return errors.New("There is no block")
+	}
 
-func (cApi ConsensusApi) ReceiveCommitMsg(msg consensus.CommitMsg) {
-	return
+	// todo : consensus finished event 날려야함
+	e := event.ConsensusFinished{}
+
+	return cs.publish("block.confirm", e)
 }
