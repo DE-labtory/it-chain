@@ -37,12 +37,12 @@ func TestLevelDbMetaRepository_Save(t *testing.T) {
 
 	// given
 	tests := map[string]struct {
-		Input  ivm.Meta
+		Input  ivm.ICode
 		Output error
 	}{
 		"success": {
-			Input: ivm.Meta{
-				ICodeID:        "1",
+			Input: ivm.ICode{
+				ID:             "1",
 				RepositoryName: "name",
 				GitUrl:         "url",
 				Path:           "path",
@@ -60,9 +60,9 @@ func TestLevelDbMetaRepository_Save(t *testing.T) {
 		//then
 		assert.Equal(t, test.Output, outputError, "error in save")
 		//check
-		b, err := repo.leveldb.Get([]byte(test.Input.ICodeID))
+		b, err := repo.leveldb.Get([]byte(test.Input.ID))
 		assert.NoError(t, err)
-		checkMeta := &ivm.Meta{}
+		checkMeta := &ivm.ICode{}
 		assert.NoError(t, err, "error in checking process, leveldb get")
 		err = common.Deserialize(b, checkMeta)
 		assert.NoError(t, err, "error in checking process, deserialize")
@@ -80,18 +80,18 @@ func TestLevelDbMetaRepository_FindAllMeta(t *testing.T) {
 	}()
 
 	tests := map[string]struct {
-		SettingData []ivm.Meta
+		SettingData []ivm.ICode
 		Output      error
 	}{
 		"success": {
-			SettingData: []ivm.Meta{{
-				ICodeID:        "1",
+			SettingData: []ivm.ICode{{
+				ID:             "1",
 				RepositoryName: "a",
 				GitUrl:         "a",
 				Path:           "a",
 				CommitHash:     "a",
 			}, {
-				ICodeID:        "2",
+				ID:             "2",
 				RepositoryName: "b",
 				GitUrl:         "b",
 				Path:           "b",
@@ -124,8 +124,8 @@ func TestLevelDbMetaRepository_FindMetaById(t *testing.T) {
 		os.RemoveAll(dbPath)
 	}()
 
-	setData := ivm.Meta{
-		ICodeID:        "123",
+	setData := ivm.ICode{
+		ID:             "123",
 		RepositoryName: "a",
 		GitUrl:         "a",
 		Path:           "a",
@@ -138,7 +138,7 @@ func TestLevelDbMetaRepository_FindMetaById(t *testing.T) {
 	//setting map
 	tests := map[string]struct {
 		Input       ivm.ID
-		Output      ivm.Meta
+		Output      ivm.ICode
 		OutputError error
 	}{
 		"success": {
@@ -169,8 +169,8 @@ func TestLevelDbMetaRepository_FindMetaByUrl(t *testing.T) {
 		os.RemoveAll(dbPath)
 	}()
 
-	setData := ivm.Meta{
-		ICodeID:        "123",
+	setData := ivm.ICode{
+		ID:             "123",
 		RepositoryName: "a",
 		GitUrl:         "gitUrl",
 		Path:           "a",
@@ -183,7 +183,7 @@ func TestLevelDbMetaRepository_FindMetaByUrl(t *testing.T) {
 	//setting map
 	tests := map[string]struct {
 		Input       string
-		Output      ivm.Meta
+		Output      ivm.ICode
 		OutputError error
 	}{
 		"success": {

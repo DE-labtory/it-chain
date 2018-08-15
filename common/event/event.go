@@ -78,8 +78,8 @@ type BlockSaved struct {
  */
 
 // ivm meta 생성
-type MetaCreated struct {
-	ICodeID        string
+type ICodeCreated struct {
+	ID             string
 	RepositoryName string
 	GitUrl         string
 	Path           string

@@ -46,15 +46,15 @@ func NewContainerService() *ContainerService {
 	}
 }
 
-func (cs ContainerService) StartContainer(meta ivm.Meta) error {
-	logger.Info(nil, fmt.Sprintf("[ICode] deploying ivm, id:%s", meta.ICodeID))
+func (cs ContainerService) StartContainer(icode ivm.ICode) error {
+	logger.Info(nil, fmt.Sprintf("[ICode] deploying ivm, id:%s", icode.ID))
 	cs.Lock()
 	defer cs.Unlock()
 
 	conf := tesseract.ContainerConfig{
-		Name:      meta.RepositoryName,
-		Directory: meta.Path,
-		Url:       meta.GitUrl,
+		Name:      icode.RepositoryName,
+		Directory: icode.Path,
+		Url:       icode.GitUrl,
 	}
 
 	container, err := container.Create(conf)
@@ -63,7 +63,7 @@ func (cs ContainerService) StartContainer(meta ivm.Meta) error {
 		return err
 	}
 
-	cs.containerMap[meta.ICodeID] = container
+	cs.containerMap[icode.ID] = container
 
 	return nil
 }
