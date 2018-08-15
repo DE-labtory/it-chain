@@ -61,14 +61,14 @@ func deploy(gitUrl string, sshPath string) {
 	log.Printf("deploying icode...")
 	log.Printf("This may take a few minutes")
 
-	err := client.Call("ivm.deploy", deployCommand, func(meta ivm.Meta, err rpc.Error) {
+	err := client.Call("ivm.deploy", deployCommand, func(icode ivm.ICode, err rpc.Error) {
 
 		if !err.IsNil() {
 			log.Printf("fail to deploy icode err: [%s]", err.Message)
 			return
 		}
 
-		log.Printf("[%s] icode has deployed", meta.ICodeID)
+		log.Printf("[%s] icode has deployed", icode.ID)
 	})
 
 	if err != nil {

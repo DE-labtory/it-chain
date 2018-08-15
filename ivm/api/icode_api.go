@@ -39,35 +39,35 @@ func NewICodeApi(containerService ivm.ContainerService, gitService ivm.GitServic
 	}
 }
 
-func (i ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath string) (ivm.Meta, error) {
+func (i ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath string) (ivm.ICode, error) {
 
-	// clone meta. in clone function, metaCreatedEvent will publish
-	meta, err := i.GitService.Clone(id, baseSaveUrl, gitUrl, sshPath)
+	// clone icode. in clone function, metaCreatedEvent will publish
+	icode, err := i.GitService.Clone(id, baseSaveUrl, gitUrl, sshPath)
 
 	if err != nil {
-		return ivm.Meta{}, err
+		return ivm.ICode{}, err
 	}
 
 	//start ICode with container
-	if err = i.ContainerService.StartContainer(meta); err != nil {
-		return ivm.Meta{}, err
+	if err = i.ContainerService.StartContainer(icode); err != nil {
+		return ivm.ICode{}, err
 	}
 
-	if err := i.EventService.Publish("meta.created", createMetaCreatedEvent(meta)); err != nil {
-		return ivm.Meta{}, nil
+	if err := i.EventService.Publish("icode.created", createMetaCreatedEvent(icode)); err != nil {
+		return ivm.ICode{}, nil
 	}
 
-	return meta, nil
+	return icode, nil
 }
 
-func createMetaCreatedEvent(meta ivm.Meta) event.MetaCreated {
-	return event.MetaCreated{
-		ICodeID:        meta.ICodeID,
-		Path:           meta.Path,
-		Version:        meta.Version,
-		CommitHash:     meta.CommitHash,
-		GitUrl:         meta.GitUrl,
-		RepositoryName: meta.RepositoryName,
+func createMetaCreatedEvent(icode ivm.ICode) event.ICodeCreated {
+	return event.ICodeCreated{
+		ID:             icode.ID,
+		Path:           icode.Path,
+		Version:        icode.Version,
+		CommitHash:     icode.CommitHash,
+		GitUrl:         icode.GitUrl,
+		RepositoryName: icode.RepositoryName,
 	}
 }
 
@@ -79,7 +79,7 @@ func (i ICodeApi) UnDeploy(id ivm.ID) error {
 		return err
 	}
 
-	return i.EventService.Publish("meta.deleted", event.MetaDeleted{ICodeID: id})
+	return i.EventService.Publish("icode.deleted", event.MetaDeleted{ICodeID: id})
 }
 
 func (i ICodeApi) ExecuteRequestList(RequestList []ivm.Request) []ivm.Result {

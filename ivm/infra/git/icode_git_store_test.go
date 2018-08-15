@@ -42,19 +42,19 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 	tests := map[string]struct {
 		ID          string
 		InputGitURL string
-		OutputMeta  ivm.Meta
+		OutputMeta  ivm.ICode
 		OutputErr   error
 	}{
 		"success": {
 			ID:          "1",
 			InputGitURL: "github.com/junbeomlee/test_icode",
-			OutputMeta:  ivm.Meta{RepositoryName: "test_icode", GitUrl: "github.com/junbeomlee/test_icode", Path: baseTempPath + "/" + "test_icode"},
+			OutputMeta:  ivm.ICode{RepositoryName: "test_icode", GitUrl: "github.com/junbeomlee/test_icode", Path: baseTempPath + "/" + "test_icode"},
 			OutputErr:   nil,
 		},
 		"fail": {
 			ID:          "2",
 			InputGitURL: "github.com/nonono",
-			OutputMeta:  ivm.Meta{},
+			OutputMeta:  ivm.ICode{},
 			OutputErr:   errors.New("repository not found"),
 		},
 	}
@@ -68,7 +68,7 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 		if err == nil {
 			// ivm ID 는 랜덤이기때문에 실데이터에서 주입
 			// commit hash 는 repo 상황에따라 바뀌기 때문에 주입
-			test.OutputMeta.ICodeID = meta.ICodeID
+			test.OutputMeta.ID = meta.ID
 			test.OutputMeta.CommitHash = meta.CommitHash
 		}
 

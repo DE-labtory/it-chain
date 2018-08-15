@@ -22,8 +22,8 @@ type Version struct {
 type ID = string
 type MetaStatus = int
 
-type Meta struct {
-	ICodeID        ID
+type ICode struct {
+	ID             ID
 	RepositoryName string
 	GitUrl         string
 	Path           string
@@ -31,10 +31,10 @@ type Meta struct {
 	Version        Version
 }
 
-func NewMeta(id string, repositoryName string, gitUrl string, path string, commitHash string) Meta {
+func NewICode(id string, repositoryName string, gitUrl string, path string, commitHash string) ICode {
 
-	return Meta{
-		ICodeID:        id,
+	return ICode{
+		ID:             id,
 		CommitHash:     commitHash,
 		Path:           path,
 		GitUrl:         gitUrl,

@@ -84,19 +84,19 @@ func setUp(t *testing.T) (*adapter.BlockCommittedEventHandler, *tesseract.Contai
 	eventService := common.NewEventService("", "Event")
 	icodeApi := api.NewICodeApi(containerService, storeApi, eventService)
 
-	meta := ivm.Meta{
-		ICodeID:        "1",
+	icode := ivm.ICode{
+		ID:             "1",
 		RepositoryName: "test ivm",
 		Path:           GOPATH + "/src/github.com/it-chain/engine/ivm/mock/",
 		GitUrl:         "github.com/mock",
 	}
 
-	err := containerService.StartContainer(meta)
+	err := containerService.StartContainer(icode)
 	assert.NoError(t, err)
 
 	blockCommittedEventHandler := adapter.NewBlockCommittedEventHandler(icodeApi)
 
 	return blockCommittedEventHandler, containerService, func() {
-		containerService.StopContainer(meta.ICodeID)
+		containerService.StopContainer(icode.ID)
 	}
 }

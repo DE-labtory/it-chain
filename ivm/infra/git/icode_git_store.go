@@ -42,18 +42,18 @@ func NewRepositoryService() *RepositoryService {
 	return &RepositoryService{}
 }
 
-func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (ivm.Meta, error) {
+func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (ivm.ICode, error) {
 	logger.Info(nil, fmt.Sprintf("[ICode] cloning [%s]", repositoryUrl))
 
 	giturl, err := toSshUrl(repositoryUrl)
 	if err != nil {
-		return ivm.Meta{}, err
+		return ivm.ICode{}, err
 	}
 
 	name := getNameFromGitUrl(giturl)
 
 	if name == "" {
-		return ivm.Meta{}, errors.New(fmt.Sprintf("Invalid url name [%s]", repositoryUrl))
+		return ivm.ICode{}, errors.New(fmt.Sprintf("Invalid url name [%s]", repositoryUrl))
 	}
 
 	//check file already exist
@@ -61,13 +61,13 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 		// if iCode already exist, remove that
 		err = os.RemoveAll(baseSavePath + "/" + name)
 		if err != nil {
-			return ivm.Meta{}, err
+			return ivm.ICode{}, err
 		}
 	}
 
 	sshAuth, err := ssh.NewPublicKeysFromFile("git", sshPath, "")
 	if err != nil {
-		return ivm.Meta{}, err
+		return ivm.ICode{}, err
 	}
 
 	r, err := git.PlainClone(baseSavePath+"/"+name, false, &git.CloneOptions{
@@ -77,23 +77,23 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 	})
 
 	if err != nil {
-		return ivm.Meta{}, err
+		return ivm.ICode{}, err
 	}
 
 	head, err := r.Head()
 
 	if err != nil {
-		return ivm.Meta{}, err
+		return ivm.ICode{}, err
 	}
 
 	lastHeadCommit, err := r.CommitObject(head.Hash())
 	commitHash := lastHeadCommit.Hash.String()
 
 	if err != nil {
-		return ivm.Meta{}, err
+		return ivm.ICode{}, err
 	}
 
-	metaData := ivm.NewMeta(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash)
+	metaData := ivm.NewICode(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash)
 	logger.Info(nil, fmt.Sprintf("[ICode] [%s] has successfully cloned ", repositoryUrl))
 
 	return metaData, nil
