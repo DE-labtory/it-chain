@@ -17,8 +17,11 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/common/logger"
 )
 
 type BlockApi struct {
@@ -54,6 +57,7 @@ func (bApi BlockApi) SyncIsProgressing() blockchain.ProgressState {
 }
 
 func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
+	logger.Info(nil, "[Blockchain] Committing genesis block")
 
 	// create
 	GenesisBlock, err := blockchain.CreateGenesisBlock(GenesisConfPath)
@@ -78,10 +82,13 @@ func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
 		return ErrCreateEvent
 	}
 
+	logger.Info(nil, fmt.Sprintf("[Blockchain] Genesis block has Committed - seal: [%x], height: [%d]", GenesisBlock.Seal, GenesisBlock.Height))
+
 	return bApi.eventService.Publish("block.committed", commitEvent)
 }
 
 func (bApi BlockApi) CommitProposedBlock(txList []*blockchain.DefaultTransaction) error {
+	logger.Info(nil, "[Blockchain] Committing proposed block")
 
 	// create
 	lastBlock, err := bApi.blockRepository.FindLast()
@@ -117,6 +124,8 @@ func (bApi BlockApi) CommitProposedBlock(txList []*blockchain.DefaultTransaction
 	if err != nil {
 		return ErrCreateEvent
 	}
+
+	logger.Info(nil, fmt.Sprintf("[Blockchain] Proposed block has Committed - seal: [%x],  height: [%d]", ProposedBlock.Seal, ProposedBlock.Height))
 
 	return bApi.eventService.Publish("block.committed", commitEvent)
 }

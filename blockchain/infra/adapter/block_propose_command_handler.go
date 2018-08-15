@@ -39,7 +39,6 @@ func NewBlockProposeCommandHandler(blockApi BlockCommitApi, engineMode string) *
 }
 
 func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.ProposeBlock) (struct{}, rpc.Error) {
-
 	if err := validateCommand(command); err != nil {
 		return struct{}{}, rpc.Error{Message: err.Error()}
 	}
