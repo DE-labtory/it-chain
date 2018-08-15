@@ -32,10 +32,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBlockCommittedEventHandler_HandleBlockCommittedEventHandler_When_Event_Occur(t *testing.T) {
-
-}
-
 func TestBlockCommittedEventHandler_HandleBlockCommittedEventHandler(t *testing.T) {
 
 	//given
