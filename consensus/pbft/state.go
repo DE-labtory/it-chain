@@ -23,13 +23,13 @@ import (
 	"encoding/json"
 )
 
-type State string
+type Stage string
 
 const (
-	IDLE_STATE       State = "IdleState"
-	PREPREPARE_STATE State = "PrePrepareState"
-	PREPARE_STATE    State = "PrepareState"
-	COMMIT_STATE     State = "CommitState"
+	IDLE_STAGE       Stage = "IdleStage"
+	PREPREPARE_STAGE Stage = "PrePrepareStage"
+	PREPARE_STAGE    Stage = "PrepareStage"
+	COMMIT_STAGE     Stage = "CommitStage"
 )
 
 var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
@@ -60,38 +60,38 @@ func (block *ProposedBlock) Deserialize(serializedBlock []byte) error {
 	return nil
 }
 
-type MemberId string
+type MemberID string
 
-func (m MemberId) ToString() string {
+func (m MemberID) ToString() string {
 	return string(m)
 }
 
-type RepresentativeId string
+type RepresentativeID string
 
 type Representative struct {
-	Id RepresentativeId
+	ID RepresentativeID
 }
 
 func (r Representative) GetID() string {
-	return string(r.Id)
+	return string(r.ID)
 }
 
-func NewRepresentative(Id string) *Representative {
-	return &Representative{Id: RepresentativeId(Id)}
+func NewRepresentative(ID string) *Representative {
+	return &Representative{ID: RepresentativeID(ID)}
 }
 
 type PrePrepareMsg struct {
-	ConsensusId    ConsensusId
-	SenderId       string
+	StateID        StateID
+	SenderID       string
 	Representative []*Representative
 	ProposedBlock  ProposedBlock
 }
 
-func NewPrePrepareMsg(c *Consensus) *PrePrepareMsg {
+func NewPrePrepareMsg(s *State) *PrePrepareMsg {
 	return &PrePrepareMsg{
-		ConsensusId:    c.ConsensusID,
-		Representative: c.Representatives,
-		ProposedBlock:  c.Block,
+		StateID:        s.StateID,
+		Representative: s.Representatives,
+		ProposedBlock:  s.Block,
 	}
 }
 
@@ -104,15 +104,15 @@ func (pp PrePrepareMsg) ToByte() ([]byte, error) {
 }
 
 type PrepareMsg struct {
-	ConsensusId ConsensusId
-	SenderId    string
-	BlockHash   []byte
+	StateID   StateID
+	SenderID  string
+	BlockHash []byte
 }
 
-func NewPrepareMsg(c *Consensus) *PrepareMsg {
+func NewPrepareMsg(s *State) *PrepareMsg {
 	return &PrepareMsg{
-		ConsensusId: c.ConsensusID,
-		BlockHash:   c.Block.Seal,
+		StateID:   s.StateID,
+		BlockHash: s.Block.Seal,
 	}
 }
 
@@ -125,13 +125,13 @@ func (p PrepareMsg) ToByte() ([]byte, error) {
 }
 
 type CommitMsg struct {
-	ConsensusId ConsensusId
-	SenderId    string
+	StateID  StateID
+	SenderID string
 }
 
-func NewCommitMsg(c *Consensus) *CommitMsg {
+func NewCommitMsg(s *State) *CommitMsg {
 	return &CommitMsg{
-		ConsensusId: c.ConsensusID,
+		StateID: s.StateID,
 	}
 }
 
@@ -153,13 +153,13 @@ func NewPrepareMsgPool() PrepareMsgPool {
 	}
 }
 
-func (pmp *PrepareMsgPool) Save(prepareMsg *PrepareMsg) error {
+func (p *PrepareMsgPool) Save(prepareMsg *PrepareMsg) error {
 	if prepareMsg == nil {
 		return errors.New("Prepare msg is nil")
 	}
 
-	senderID := prepareMsg.SenderId
-	index := pmp.findIndexOfPrepareMsg(senderID)
+	senderID := prepareMsg.SenderID
+	index := p.findIndexOfPrepareMsg(senderID)
 
 	if index != -1 {
 		return errors.New(fmt.Sprintf("Already exist member [%s]", senderID))
@@ -171,22 +171,22 @@ func (pmp *PrepareMsgPool) Save(prepareMsg *PrepareMsg) error {
 		return errors.New("Block hash is nil")
 	}
 
-	pmp.messages = append(pmp.messages, *prepareMsg)
+	p.messages = append(p.messages, *prepareMsg)
 
 	return nil
 }
 
-func (pmp *PrepareMsgPool) RemoveAllMsgs() {
-	pmp.messages = make([]PrepareMsg, 0)
+func (p *PrepareMsgPool) RemoveAllMsgs() {
+	p.messages = make([]PrepareMsg, 0)
 }
 
-func (pmp *PrepareMsgPool) Get() []PrepareMsg {
-	return pmp.messages
+func (p *PrepareMsgPool) Get() []PrepareMsg {
+	return p.messages
 }
 
-func (pmp *PrepareMsgPool) findIndexOfPrepareMsg(senderID string) int {
-	for i, msg := range pmp.messages {
-		if msg.SenderId == senderID {
+func (p *PrepareMsgPool) findIndexOfPrepareMsg(senderID string) int {
+	for i, msg := range p.messages {
+		if msg.SenderID == senderID {
 			return i
 		}
 	}
@@ -204,34 +204,34 @@ func NewCommitMsgPool() CommitMsgPool {
 	}
 }
 
-func (cmp *CommitMsgPool) Save(commitMsg *CommitMsg) error {
+func (c *CommitMsgPool) Save(commitMsg *CommitMsg) error {
 	if commitMsg == nil {
 		return errors.New("Commit msg is nil")
 	}
 
-	senderID := commitMsg.SenderId
-	index := cmp.findIndexOfCommitMsg(senderID)
+	senderID := commitMsg.SenderID
+	index := c.findIndexOfCommitMsg(senderID)
 
 	if index != -1 {
 		return errors.New(fmt.Sprintf("Already exist member [%s]", senderID))
 	}
 
-	cmp.messages = append(cmp.messages, *commitMsg)
+	c.messages = append(c.messages, *commitMsg)
 
 	return nil
 }
 
-func (cmp *CommitMsgPool) RemoveAllMsgs() {
-	cmp.messages = make([]CommitMsg, 0)
+func (c *CommitMsgPool) RemoveAllMsgs() {
+	c.messages = make([]CommitMsg, 0)
 }
 
-func (cmp *CommitMsgPool) Get() []CommitMsg {
-	return cmp.messages
+func (c *CommitMsgPool) Get() []CommitMsg {
+	return c.messages
 }
 
-func (cmp *CommitMsgPool) findIndexOfCommitMsg(senderID string) int {
-	for i, msg := range cmp.messages {
-		if msg.SenderId == senderID {
+func (c *CommitMsgPool) findIndexOfCommitMsg(senderID string) int {
+	for i, msg := range c.messages {
+		if msg.SenderID == senderID {
 			return i
 		}
 	}
@@ -239,73 +239,73 @@ func (cmp *CommitMsgPool) findIndexOfCommitMsg(senderID string) int {
 	return -1
 }
 
-type ConsensusId struct {
-	Id string
+type StateID struct {
+	ID string
 }
 
-func NewConsensusId(id string) ConsensusId {
-	return ConsensusId{
-		Id: id,
+func NewStateID(id string) StateID {
+	return StateID{
+		ID: id,
 	}
 }
 
-type Consensus struct {
-	ConsensusID     ConsensusId
+type State struct {
+	StateID         StateID
 	Representatives []*Representative
 	Block           ProposedBlock
-	CurrentState    State
+	CurrentStage    Stage
 	PrepareMsgPool  PrepareMsgPool
 	CommitMsgPool   CommitMsgPool
 }
 
-func (c *Consensus) GetID() string {
-	return c.ConsensusID.Id
+func (s *State) GetID() string {
+	return s.StateID.ID
 }
 
-func (c *Consensus) Start() {
-	c.CurrentState = PREPREPARE_STATE
+func (s *State) Start() {
+	s.CurrentStage = PREPREPARE_STAGE
 }
 
-func (c *Consensus) IsPrepareState() bool {
+func (s *State) IsPrepareStage() bool {
 
-	if c.CurrentState == PREPARE_STATE {
+	if s.CurrentStage == PREPARE_STAGE {
 		return true
 	}
 	return false
 }
 
-func (c *Consensus) IsCommitState() bool {
+func (s *State) IsCommitStage() bool {
 
-	if c.CurrentState == COMMIT_STATE {
+	if s.CurrentStage == COMMIT_STAGE {
 		return true
 	}
 	return false
 }
 
-func (c *Consensus) ToPrepareState() {
-	c.CurrentState = PREPARE_STATE
+func (s *State) ToPrepareStage() {
+	s.CurrentStage = PREPARE_STAGE
 }
 
-func (c *Consensus) ToCommitState() {
-	c.CurrentState = COMMIT_STATE
+func (s *State) ToCommitStage() {
+	s.CurrentStage = COMMIT_STAGE
 }
 
-func (c *Consensus) ToIdleState() {
-	c.CurrentState = IDLE_STATE
+func (s *State) ToIdleStage() {
+	s.CurrentStage = IDLE_STAGE
 }
 
-func (c *Consensus) SavePrepareMsg(prepareMsg *PrepareMsg) error {
-	if c.ConsensusID.Id != prepareMsg.ConsensusId.Id {
-		return errors.New("Consensus ID is not same")
+func (s *State) SavePrepareMsg(prepareMsg *PrepareMsg) error {
+	if s.StateID.ID != prepareMsg.StateID.ID {
+		return errors.New("State ID is not same")
 	}
 
-	return c.PrepareMsgPool.Save(prepareMsg)
+	return s.PrepareMsgPool.Save(prepareMsg)
 }
 
-func (c *Consensus) SaveCommitMsg(commitMsg *CommitMsg) error {
-	if c.ConsensusID.Id != commitMsg.ConsensusId.Id {
-		return errors.New("Consensus ID is not same")
+func (s *State) SaveCommitMsg(commitMsg *CommitMsg) error {
+	if s.StateID.ID != commitMsg.StateID.ID {
+		return errors.New("State ID is not same")
 	}
 
-	return c.CommitMsgPool.Save(commitMsg)
+	return s.CommitMsgPool.Save(commitMsg)
 }

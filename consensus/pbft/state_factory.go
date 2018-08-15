@@ -21,34 +21,34 @@ import (
 )
 
 // leader
-func CreateConsensus(parliament []MemberId, block ProposedBlock) (*Consensus, error) {
+func CreateConsensus(parliament []MemberID, block ProposedBlock) (*State, error) {
 	representatives, err := Elect(parliament)
 	if err != nil {
-		return &Consensus{}, err
+		return &State{}, err
 	}
 
-	newConsensus := Consensus{
-		ConsensusID:     NewConsensusId(xid.New().String()),
+	newState := State{
+		StateID:         NewStateID(xid.New().String()),
 		Representatives: representatives,
 		Block:           block,
-		CurrentState:    IDLE_STATE,
+		CurrentStage:    IDLE_STAGE,
 		PrepareMsgPool:  NewPrepareMsgPool(),
 		CommitMsgPool:   NewCommitMsgPool(),
 	}
 
-	return &newConsensus, nil
+	return &newState, nil
 }
 
 // member
-func ConstructConsensus(msg PrePrepareMsg) (*Consensus, error) {
-	newConsensus := &Consensus{
-		ConsensusID:     msg.ConsensusId,
+func ConstructConsensus(msg PrePrepareMsg) (*State, error) {
+	newState := &State{
+		StateID:         msg.StateID,
 		Representatives: msg.Representative,
 		Block:           msg.ProposedBlock,
-		CurrentState:    IDLE_STATE,
+		CurrentStage:    IDLE_STAGE,
 		PrepareMsgPool:  NewPrepareMsgPool(),
 		CommitMsgPool:   NewCommitMsgPool(),
 	}
 
-	return newConsensus, nil
+	return newState, nil
 }

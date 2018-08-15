@@ -25,14 +25,14 @@ import (
 
 func TestConsensusRepository_Save(t *testing.T) {
 
-	mock1 := pbft.Consensus{
-		ConsensusID: pbft.ConsensusId{"mock1"},
+	mock1 := pbft.State{
+		StateID: pbft.StateID{"mock1"},
 	}
-	repo := mem.NewConsensusRepository()
+	repo := mem.NewStateRepository()
 	err := repo.Save(mock1)
 	assert.Equal(t, nil, err)
-	mock2 := pbft.Consensus{
-		ConsensusID: pbft.ConsensusId{"mock2"},
+	mock2 := pbft.State{
+		StateID: pbft.StateID{"mock2"},
 	}
 	err2 := repo.Save(mock2)
 	assert.Equal(t, mem.ConsensusAlreadyExistError, err2)
@@ -41,14 +41,14 @@ func TestConsensusRepository_Save(t *testing.T) {
 
 func TestConsensusRepository_Load(t *testing.T) {
 
-	repo := mem.NewConsensusRepository()
+	repo := mem.NewStateRepository()
 	_, err := repo.Load()
 	// case1 : Repository has no consensus
 	assert.Equal(t, err, mem.LoadConsensusError)
 
 	// case2 : Repository has consensus
-	mockConsensus := pbft.Consensus{
-		ConsensusID: pbft.ConsensusId{"hihi"},
+	mockConsensus := pbft.State{
+		StateID: pbft.StateID{"hihi"},
 	}
 	repo.Save(mockConsensus)
 
@@ -57,9 +57,9 @@ func TestConsensusRepository_Load(t *testing.T) {
 
 }
 func TestConsensusRepository_Remove(t *testing.T) {
-	repo := mem.NewConsensusRepository()
-	mockConsensus := pbft.Consensus{
-		ConsensusID: pbft.ConsensusId{"hihi"},
+	repo := mem.NewStateRepository()
+	mockConsensus := pbft.State{
+		StateID: pbft.StateID{"hihi"},
 	}
 	repo.Save(mockConsensus)
 	repo.Remove()

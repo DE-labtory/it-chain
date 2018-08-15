@@ -41,8 +41,8 @@ func NewPropagateService(publish Publish, representatives []*pbft.Representative
 }
 
 func (ps PropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg) error {
-	if msg.ConsensusId.Id == "" {
-		return errors.New("Consensus ID is empty")
+	if msg.StateID.ID == "" {
+		return errors.New("State ID is empty")
 	}
 
 	if msg.ProposedBlock.Body == nil {
@@ -63,8 +63,8 @@ func (ps PropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg) error 
 }
 
 func (ps PropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg) error {
-	if msg.ConsensusId.Id == "" {
-		return errors.New("Consensus ID is empty")
+	if msg.StateID.ID == "" {
+		return errors.New("State ID is empty")
 	}
 
 	if msg.BlockHash == nil {
@@ -85,8 +85,8 @@ func (ps PropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg) error {
 }
 
 func (ps PropagateService) BroadcastCommitMsg(msg pbft.CommitMsg) error {
-	if msg.ConsensusId.Id == "" {
-		return errors.New("Consensus ID is empty")
+	if msg.StateID.ID == "" {
+		return errors.New("State ID is empty")
 	}
 
 	SerializedMsg, err := common.Serialize(msg)

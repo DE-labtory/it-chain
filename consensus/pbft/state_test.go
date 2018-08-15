@@ -29,9 +29,9 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 
 	// case 1 : save
 	pMsg := pbft.PrepareMsg{
-		ConsensusId: pbft.ConsensusId{"c1"},
-		SenderId:    "s1",
-		BlockHash:   make([]byte, 0),
+		StateID:   pbft.StateID{"c1"},
+		SenderID:  "s1",
+		BlockHash: make([]byte, 0),
 	}
 
 	// when
@@ -42,9 +42,9 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 
 	// case 2 : save
 	pMsg = pbft.PrepareMsg{
-		ConsensusId: pbft.ConsensusId{"c1"},
-		SenderId:    "s2",
-		BlockHash:   make([]byte, 0),
+		StateID:   pbft.StateID{"c1"},
+		SenderID:  "s2",
+		BlockHash: make([]byte, 0),
 	}
 
 	// when
@@ -55,9 +55,9 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 
 	// case 3 : same sender
 	pMsg = pbft.PrepareMsg{
-		ConsensusId: pbft.ConsensusId{"c1"},
-		SenderId:    "s2",
-		BlockHash:   make([]byte, 0),
+		StateID:   pbft.StateID{"c1"},
+		SenderID:  "s2",
+		BlockHash: make([]byte, 0),
 	}
 
 	// when
@@ -68,9 +68,9 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 
 	// case 4 : block hash is is nil
 	pMsg = pbft.PrepareMsg{
-		ConsensusId: pbft.ConsensusId{"c1"},
-		SenderId:    "s3",
-		BlockHash:   nil,
+		StateID:   pbft.StateID{"c1"},
+		SenderID:  "s3",
+		BlockHash: nil,
 	}
 
 	// when
@@ -85,9 +85,9 @@ func TestPrepareMsgPool_RemoveAllMsgs(t *testing.T) {
 	pPool := pbft.NewPrepareMsgPool()
 
 	pMsg := pbft.PrepareMsg{
-		ConsensusId: pbft.ConsensusId{"c1"},
-		SenderId:    "s1",
-		BlockHash:   make([]byte, 0),
+		StateID:   pbft.StateID{"c1"},
+		SenderID:  "s1",
+		BlockHash: make([]byte, 0),
 	}
 
 	pPool.Save(&pMsg)
@@ -105,8 +105,8 @@ func TestCommitMsgPool_Save(t *testing.T) {
 
 	// case 1 : save
 	cMsg := pbft.CommitMsg{
-		ConsensusId: pbft.ConsensusId{"c1"},
-		SenderId:    "s1",
+		StateID:  pbft.StateID{"c1"},
+		SenderID: "s1",
 	}
 
 	// when
@@ -117,8 +117,8 @@ func TestCommitMsgPool_Save(t *testing.T) {
 
 	// case 2 : save
 	cMsg = pbft.CommitMsg{
-		ConsensusId: pbft.ConsensusId{"c1"},
-		SenderId:    "s2",
+		StateID:  pbft.StateID{"c1"},
+		SenderID: "s2",
 	}
 
 	// when
@@ -129,8 +129,8 @@ func TestCommitMsgPool_Save(t *testing.T) {
 
 	// case 3 : same sender
 	cMsg = pbft.CommitMsg{
-		ConsensusId: pbft.ConsensusId{"c1"},
-		SenderId:    "s2",
+		StateID:  pbft.StateID{"c1"},
+		SenderID: "s2",
 	}
 
 	// when
@@ -145,8 +145,8 @@ func TestCommitMsgPool_RemoveAllMsgs(t *testing.T) {
 	cPool := pbft.NewCommitMsgPool()
 
 	cMsg := pbft.CommitMsg{
-		ConsensusId: pbft.ConsensusId{"c1"},
-		SenderId:    "s1",
+		StateID:  pbft.StateID{"c1"},
+		SenderID: "s1",
 	}
 
 	cPool.Save(&cMsg)
@@ -160,22 +160,22 @@ func TestCommitMsgPool_RemoveAllMsgs(t *testing.T) {
 
 func TestConsensus_SavePrepareMsg(t *testing.T) {
 	// given
-	c := pbft.Consensus{
-		ConsensusID:     pbft.NewConsensusId("c1"),
+	c := pbft.State{
+		StateID:         pbft.NewStateID("c1"),
 		Representatives: nil,
 		Block: pbft.ProposedBlock{
 			Seal: make([]byte, 0),
 		},
-		CurrentState:   pbft.IDLE_STATE,
+		CurrentStage:   pbft.IDLE_STAGE,
 		PrepareMsgPool: pbft.NewPrepareMsgPool(),
 		CommitMsgPool:  pbft.NewCommitMsgPool(),
 	}
 
 	// case 1 : save
 	pMsg := &pbft.PrepareMsg{
-		ConsensusId: pbft.NewConsensusId("c1"),
-		SenderId:    "s1",
-		BlockHash:   make([]byte, 0),
+		StateID:   pbft.NewStateID("c1"),
+		SenderID:  "s1",
+		BlockHash: make([]byte, 0),
 	}
 
 	// when
@@ -188,9 +188,9 @@ func TestConsensus_SavePrepareMsg(t *testing.T) {
 
 	// case 2 : incorrect consensus ID
 	pMsg = &pbft.PrepareMsg{
-		ConsensusId: pbft.NewConsensusId("c2"),
-		SenderId:    "s1",
-		BlockHash:   make([]byte, 0),
+		StateID:   pbft.NewStateID("c2"),
+		SenderID:  "s1",
+		BlockHash: make([]byte, 0),
 	}
 
 	// when
@@ -203,21 +203,21 @@ func TestConsensus_SavePrepareMsg(t *testing.T) {
 
 func TestConsensus_SaveCommitMsg(t *testing.T) {
 	// given
-	c := pbft.Consensus{
-		ConsensusID:     pbft.NewConsensusId("c1"),
+	c := pbft.State{
+		StateID:         pbft.NewStateID("c1"),
 		Representatives: nil,
 		Block: pbft.ProposedBlock{
 			Seal: make([]byte, 0),
 		},
-		CurrentState:   pbft.IDLE_STATE,
+		CurrentStage:   pbft.IDLE_STAGE,
 		PrepareMsgPool: pbft.NewPrepareMsgPool(),
 		CommitMsgPool:  pbft.NewCommitMsgPool(),
 	}
 
 	// case 1 : save
 	cMsg := &pbft.CommitMsg{
-		ConsensusId: pbft.NewConsensusId("c1"),
-		SenderId:    "s1",
+		StateID:  pbft.NewStateID("c1"),
+		SenderID: "s1",
 	}
 
 	// when
@@ -230,8 +230,8 @@ func TestConsensus_SaveCommitMsg(t *testing.T) {
 
 	// case 2 : incorrect consensus ID
 	cMsg = &pbft.CommitMsg{
-		ConsensusId: pbft.NewConsensusId("c2"),
-		SenderId:    "s1",
+		StateID:  pbft.NewStateID("c2"),
+		SenderID: "s1",
 	}
 
 	// when

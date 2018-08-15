@@ -25,9 +25,9 @@ import (
 
 func TestCreateConsensus(t *testing.T) {
 	// given
-	p := make([]pbft.MemberId, 0)
-	l := pbft.MemberId("leader")
-	m := pbft.MemberId("member")
+	p := make([]pbft.MemberID, 0)
+	l := pbft.MemberID("leader")
+	m := pbft.MemberID("member")
 	b := pbft.ProposedBlock{
 		Seal: make([]byte, 0),
 		Body: make([]byte, 0),
@@ -61,8 +61,8 @@ func TestConstructConsensus(t *testing.T) {
 	r = append(r, l, m)
 
 	msg := pbft.PrePrepareMsg{
-		ConsensusId:    pbft.NewConsensusId("consensusID"),
-		SenderId:       "me",
+		StateID:        pbft.NewStateID("consensusID"),
+		SenderID:       "me",
 		Representative: r,
 		ProposedBlock: pbft.ProposedBlock{
 			Seal: make([]byte, 0),
@@ -75,7 +75,7 @@ func TestConstructConsensus(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, "consensusID", c.ConsensusID.Id)
-	assert.Equal(t, pbft.IDLE_STATE, c.CurrentState)
+	assert.Equal(t, "consensusID", c.StateID.ID)
+	assert.Equal(t, pbft.IDLE_STAGE, c.CurrentStage)
 	assert.Equal(t, 2, len(c.Representatives))
 }

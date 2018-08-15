@@ -31,27 +31,27 @@ func NewParliamentService(api api_gateway.PeerQueryApi) *ParliamentService {
 	}
 }
 
-func (ps *ParliamentService) RequestLeader() (pbft.MemberId, error) {
+func (ps *ParliamentService) RequestLeader() (pbft.MemberID, error) {
 	l, err := ps.pQuery.GetLeader()
 
 	if err != nil {
 		return "", err
 	}
 
-	return pbft.MemberId(l.GetID()), nil
+	return pbft.MemberID(l.GetID()), nil
 }
 
-func (ps *ParliamentService) RequestPeerList() ([]pbft.MemberId, error) {
+func (ps *ParliamentService) RequestPeerList() ([]pbft.MemberID, error) {
 	pl, err := ps.pQuery.GetPeerList()
 
 	if err != nil {
 		return nil, err
 	}
 
-	peerList := make([]pbft.MemberId, 0)
+	peerList := make([]pbft.MemberID, 0)
 
 	for _, p := range pl {
-		peerList = append(peerList, pbft.MemberId(p.GetID()))
+		peerList = append(peerList, pbft.MemberID(p.GetID()))
 	}
 
 	return peerList, nil

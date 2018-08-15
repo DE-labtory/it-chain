@@ -37,8 +37,8 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 				msg pbft.PrePrepareMsg
 			}{
 				msg: pbft.PrePrepareMsg{
-					ConsensusId:    pbft.ConsensusId{"c1"},
-					SenderId:       "s1",
+					StateID:        pbft.StateID{"c1"},
+					SenderID:       "s1",
 					Representative: make([]*pbft.Representative, 0),
 					ProposedBlock: pbft.ProposedBlock{
 						Seal: make([]byte, 0),
@@ -48,13 +48,13 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 			},
 			err: nil,
 		},
-		"Consensus ID empty test": {
+		"State ID empty test": {
 			input: struct {
 				msg pbft.PrePrepareMsg
 			}{
 				msg: pbft.PrePrepareMsg{
-					ConsensusId:    pbft.ConsensusId{""},
-					SenderId:       "s1",
+					StateID:        pbft.StateID{""},
+					SenderID:       "s1",
 					Representative: make([]*pbft.Representative, 0),
 					ProposedBlock: pbft.ProposedBlock{
 						Seal: make([]byte, 0),
@@ -62,15 +62,15 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 					},
 				},
 			},
-			err: errors.New("Consensus ID is empty"),
+			err: errors.New("State ID is empty"),
 		},
 		"Block empty test": {
 			input: struct {
 				msg pbft.PrePrepareMsg
 			}{
 				msg: pbft.PrePrepareMsg{
-					ConsensusId:    pbft.ConsensusId{"c1"},
-					SenderId:       "s1",
+					StateID:        pbft.StateID{"c1"},
+					SenderID:       "s1",
 					Representative: make([]*pbft.Representative, 0),
 					ProposedBlock: pbft.ProposedBlock{
 						Seal: make([]byte, 0),
@@ -112,33 +112,33 @@ func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 				msg pbft.PrepareMsg
 			}{
 				msg: pbft.PrepareMsg{
-					ConsensusId: pbft.ConsensusId{"c1"},
-					SenderId:    "s1",
-					BlockHash:   make([]byte, 0),
+					StateID:   pbft.StateID{"c1"},
+					SenderID:  "s1",
+					BlockHash: make([]byte, 0),
 				},
 			},
 			err: nil,
 		},
-		"Consensus ID empty test": {
+		"State ID empty test": {
 			input: struct {
 				msg pbft.PrepareMsg
 			}{
 				msg: pbft.PrepareMsg{
-					ConsensusId: pbft.ConsensusId{""},
-					SenderId:    "s1",
-					BlockHash:   make([]byte, 0),
+					StateID:   pbft.StateID{""},
+					SenderID:  "s1",
+					BlockHash: make([]byte, 0),
 				},
 			},
-			err: errors.New("Consensus ID is empty"),
+			err: errors.New("State ID is empty"),
 		},
 		"Block hash empty test": {
 			input: struct {
 				msg pbft.PrepareMsg
 			}{
 				msg: pbft.PrepareMsg{
-					ConsensusId: pbft.ConsensusId{"c1"},
-					SenderId:    "s1",
-					BlockHash:   nil,
+					StateID:   pbft.StateID{"c1"},
+					SenderID:  "s1",
+					BlockHash: nil,
 				},
 			},
 			err: errors.New("Block hash is empty"),
@@ -175,22 +175,22 @@ func TestPropagateService_BroadcastCommitMsg(t *testing.T) {
 				msg pbft.CommitMsg
 			}{
 				msg: pbft.CommitMsg{
-					ConsensusId: pbft.ConsensusId{"c1"},
-					SenderId:    "s1",
+					StateID:  pbft.StateID{"c1"},
+					SenderID: "s1",
 				},
 			},
 			err: nil,
 		},
-		"Consensus ID empty test": {
+		"State ID empty test": {
 			input: struct {
 				msg pbft.CommitMsg
 			}{
 				msg: pbft.CommitMsg{
-					ConsensusId: pbft.ConsensusId{""},
-					SenderId:    "s1",
+					StateID:  pbft.StateID{""},
+					SenderID: "s1",
 				},
 			},
-			err: errors.New("Consensus ID is empty"),
+			err: errors.New("State ID is empty"),
 		},
 	}
 
