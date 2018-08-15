@@ -184,7 +184,7 @@ func initApiGateway(config *conf.Configuration, errs chan error) func() {
 
 func initICode(config *conf.Configuration, server rpc.Server) func() {
 
-	logger.Infof(nil, "ivm is staring")
+	logger.Infof(nil, "[Main] Ivm is staring")
 
 	// git generate
 	storeApi := icodeInfra.NewRepositoryService()
@@ -217,7 +217,7 @@ func initICode(config *conf.Configuration, server rpc.Server) func() {
 
 func initTxPool(config *conf.Configuration, server rpc.Server, client rpc.Client) func() {
 
-	logger.Infof(nil, "txpool is staring")
+	logger.Infof(nil, "[Main] Txpool is staring")
 
 	//todo get id from pubkey
 	tmpPeerID := "tmp peer 1"
@@ -238,7 +238,7 @@ func initTxPool(config *conf.Configuration, server rpc.Server, client rpc.Client
 
 func initBlockchain(config *conf.Configuration, server rpc.Server) func() {
 
-	logger.Infof(nil, "blockchain is staring")
+	logger.Infof(nil, "[Main] Blockchain is staring")
 
 	publisherId := "publisher.1"
 	blockRepo, err := blockchainMem.NewBlockRepository("./db")

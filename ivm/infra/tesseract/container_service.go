@@ -47,7 +47,7 @@ func NewContainerService() *ContainerService {
 }
 
 func (cs ContainerService) StartContainer(icode ivm.ICode) error {
-	logger.Info(nil, fmt.Sprintf("[ICode] deploying ivm, id:%s", icode.ID))
+	logger.Info(nil, fmt.Sprintf("[IVM] Starting container - icodeID: [%s]", icode.ID))
 	cs.Lock()
 	defer cs.Unlock()
 
@@ -69,7 +69,7 @@ func (cs ContainerService) StartContainer(icode ivm.ICode) error {
 }
 
 func (cs ContainerService) ExecuteRequest(request ivm.Request) (ivm.Result, error) {
-	logger.Info(nil, fmt.Sprintf("[ICode] executing ivm, id:%s", request.ICodeID))
+	logger.Info(nil, fmt.Sprintf("[IVM] Executing icode - icodeID: [%s]", request.ICodeID))
 
 	container, ok := cs.containerMap[request.ICodeID]
 
@@ -114,7 +114,7 @@ func (cs ContainerService) ExecuteRequest(request ivm.Request) (ivm.Result, erro
 
 	select {
 	case err := <-errCh:
-		logger.Error(nil, fmt.Sprintf("[ICode] fail executing ivm, id:%s", request.ICodeID))
+		logger.Error(nil, fmt.Sprintf("[IVM] fail executing ivm, id:%s", request.ICodeID))
 		return ivm.Result{}, err
 	case result := <-resultCh:
 		return result, nil
