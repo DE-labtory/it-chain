@@ -19,9 +19,8 @@ package adapter
 import (
 	"errors"
 
-	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/consensus"
-	"github.com/it-chain/midgard"
 )
 
 type ConfirmService struct {
@@ -43,11 +42,8 @@ func (cs *ConfirmService) ConfirmBlock(block consensus.ProposedBlock) error {
 		return errors.New("There is no block")
 	}
 
-	cmd := command.ConfirmBlock{
-		CommandModel: midgard.CommandModel{},
-		Seal:         nil,
-		Body:         nil,
-	}
+	// todo : consensus finished event 날려야함
+	e := event.ConsensusFinished{}
 
-	return cs.publish("Command", "block.create", cmd)
+	return cs.publish("block.confirm", e)
 }

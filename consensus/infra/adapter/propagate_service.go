@@ -26,7 +26,7 @@ import (
 	"github.com/rs/xid"
 )
 
-type Publish func(exchange string, topic string, data interface{}) (err error)
+type Publish func(topic string, data interface{}) (err error)
 
 type PropagateService struct {
 	publish         Publish
@@ -55,7 +55,7 @@ func (ps PropagateService) BroadcastPrePrepareMsg(msg consensus.PrePrepareMsg) e
 		return err
 	}
 
-	if err = ps.broadcastMsg(SerializedMsg, "SendPrePrepareMsgProtocol"); err != nil {
+	if err = ps.broadcastMsg(SerializedMsg, "PrePrepareMsgProtocol"); err != nil {
 		return err
 	}
 
@@ -77,7 +77,7 @@ func (ps PropagateService) BroadcastPrepareMsg(msg consensus.PrepareMsg) error {
 		return err
 	}
 
-	if err = ps.broadcastMsg(SerializedMsg, "SendPrepareMsgProtocol"); err != nil {
+	if err = ps.broadcastMsg(SerializedMsg, "PrepareMsgProtocol"); err != nil {
 		return err
 	}
 
@@ -95,7 +95,7 @@ func (ps PropagateService) BroadcastCommitMsg(msg consensus.CommitMsg) error {
 		return err
 	}
 
-	if err = ps.broadcastMsg(SerializedMsg, "SendCommitMsgProtocol"); err != nil {
+	if err = ps.broadcastMsg(SerializedMsg, "CommitMsgProtocol"); err != nil {
 		return err
 	}
 
@@ -117,7 +117,7 @@ func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string) e
 		command.RecipientList = append(command.RecipientList, r.GetID())
 	}
 
-	return ps.publish("Command", "message.deliver", command)
+	return ps.publish("message.deliver", command)
 }
 
 func createDeliverGrpcCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
