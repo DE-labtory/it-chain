@@ -40,6 +40,7 @@ func NewICodeApi(containerService ivm.ContainerService, gitService ivm.GitServic
 }
 
 func (i ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath string) (ivm.ICode, error) {
+	logger.Info(nil, fmt.Sprintf("[IVM] Deploying icode - url: [%s]", gitUrl))
 
 	// clone icode. in clone function, metaCreatedEvent will publish
 	icode, err := i.GitService.Clone(id, baseSaveUrl, gitUrl, sshPath)
@@ -57,6 +58,7 @@ func (i ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath s
 		return ivm.ICode{}, nil
 	}
 
+	logger.Info(nil, fmt.Sprintf("[IVM] ICode has deployed - icodeID: [%s]", id))
 	return icode, nil
 }
 
@@ -72,12 +74,15 @@ func createMetaCreatedEvent(icode ivm.ICode) event.ICodeCreated {
 }
 
 func (i ICodeApi) UnDeploy(id ivm.ID) error {
+	logger.Info(nil, fmt.Sprintf("[IVM] Undeploying icode - icodeID: [%s]", id))
 	// stop iCode container
 	err := i.ContainerService.StopContainer(id)
 
 	if err != nil {
 		return err
 	}
+
+	logger.Info(nil, fmt.Sprintf("[IVM] Icode has undeployed - icodeID: [%s] ", id))
 
 	return i.EventService.Publish("icode.deleted", event.MetaDeleted{ICodeID: id})
 }

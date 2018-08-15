@@ -43,7 +43,7 @@ func NewRepositoryService() *RepositoryService {
 }
 
 func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (ivm.ICode, error) {
-	logger.Info(nil, fmt.Sprintf("[ICode] cloning [%s]", repositoryUrl))
+	logger.Info(nil, fmt.Sprintf("[IVM] Cloning Icode - url: [%s]", repositoryUrl))
 
 	giturl, err := toSshUrl(repositoryUrl)
 	if err != nil {
@@ -93,9 +93,9 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 		return ivm.ICode{}, err
 	}
 
-	metaData := ivm.NewICode(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash)
-	logger.Info(nil, fmt.Sprintf("[ICode] [%s] has successfully cloned ", repositoryUrl))
+	logger.Info(nil, fmt.Sprintf("[IVM] ICode has successfully cloned - url: [%s], icodeID: [%s]", repositoryUrl, id))
 
+	metaData := ivm.NewICode(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash)
 	return metaData, nil
 }
 
@@ -121,6 +121,7 @@ func after(value string, a string) string {
 	if adjustedPos >= len(value) {
 		return ""
 	}
+
 	return value[adjustedPos:len(value)]
 }
 
