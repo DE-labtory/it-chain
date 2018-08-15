@@ -23,45 +23,45 @@ import (
 	"github.com/it-chain/engine/consensus/pbft"
 )
 
-var ConsensusAlreadyExistError = errors.New("Consensus Already Exist")
-var EmptyConsensusIdError = errors.New("empty Consensus Id")
-var LoadConsensusError = errors.New("There is no consensus for loading")
+var ConsensusAlreadyExistError = errors.New("State Already Exist")
+var EmptyConsensusIdError = errors.New("empty State ID")
+var LoadConsensusError = errors.New("There is no state for loading")
 
-type ConsensusRepository struct {
-	consensus *pbft.Consensus
+type StateRepository struct {
+	state *pbft.State
 	sync.RWMutex
 }
 
-func NewConsensusRepository() ConsensusRepository {
-	return ConsensusRepository{
-		consensus: nil,
-		RWMutex:   sync.RWMutex{},
+func NewStateRepository() StateRepository {
+	return StateRepository{
+		state:   nil,
+		RWMutex: sync.RWMutex{},
 	}
 }
-func (repo *ConsensusRepository) Save(consensus pbft.Consensus) error {
+func (repo *StateRepository) Save(state pbft.State) error {
 
 	repo.Lock()
 	defer repo.Unlock()
 
-	if repo.consensus != nil {
+	if repo.state != nil {
 		return ConsensusAlreadyExistError
 	}
-	repo.consensus = &consensus
+	repo.state = &state
 
 	return nil
 }
-func (repo *ConsensusRepository) Load() (*pbft.Consensus, error) {
+func (repo *StateRepository) Load() (*pbft.State, error) {
 
-	if repo.consensus == nil {
+	if repo.state == nil {
 		return nil, LoadConsensusError
 	}
 
-	return repo.consensus, nil
+	return repo.state, nil
 }
 
-func (repo *ConsensusRepository) Remove() {
+func (repo *StateRepository) Remove() {
 
-	if repo.consensus != nil {
-		repo.consensus = nil
+	if repo.state != nil {
+		repo.state = nil
 	}
 }

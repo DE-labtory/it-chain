@@ -21,24 +21,24 @@ import (
 	"github.com/it-chain/midgard"
 )
 
-type ConsensusApi struct {
+type StateApi struct {
 	eventRepository *midgard.Repository
 }
 
 // todo : Event Sourcing 첨가
 
-func (cApi ConsensusApi) StartConsensus(userId pbft.MemberId, block pbft.ProposedBlock) error {
+func (sApi StateApi) StartConsensus(userId pbft.MemberID, block pbft.ProposedBlock) error {
 	return nil
 }
 
-func (cApi ConsensusApi) ReceivePrePrepareMsg(msg pbft.PrePrepareMsg) {
+func (sApi StateApi) ReceivePrePrepareMsg(msg pbft.PrePrepareMsg) {
 	return
 }
 
-func (cApi ConsensusApi) ReceivePrepareMsg(msg pbft.PrepareMsg) {
+func (sApi StateApi) ReceivePrepareMsg(msg pbft.PrepareMsg) {
 	return
 }
 
-func (cApi ConsensusApi) ReceiveCommitMsg(msg pbft.CommitMsg) {
+func (sApi StateApi) ReceiveCommitMsg(msg pbft.CommitMsg) {
 	return
 }

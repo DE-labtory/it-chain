@@ -29,13 +29,13 @@ type ConfirmService interface {
 }
 
 type ParliamentService interface {
-	RequestLeader() (MemberId, error)
-	RequestPeerList() ([]MemberId, error)
+	RequestLeader() (MemberID, error)
+	RequestPeerList() ([]MemberID, error)
 	IsNeedConsensus() bool
 }
 
 // 연결된 peer 중에서 consensus 에 참여할 representative 들을 선출
-func Elect(parliament []MemberId) ([]*Representative, error) {
+func Elect(parliament []MemberID) ([]*Representative, error) {
 	representatives := make([]*Representative, 0)
 
 	if len(parliament) == 0 {
