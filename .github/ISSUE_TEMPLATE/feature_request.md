@@ -1,5 +1,5 @@
 ---
-name: Feature request
+name: [Component Name] Feature request
 about: Suggest an idea for this project
 
 ---
