@@ -29,18 +29,16 @@ import (
 type Publish func(topic string, data interface{}) (err error)
 
 type PropagateService struct {
-	publish         Publish
-	representatives []*pbft.Representative
+	publish Publish
 }
 
-func NewPropagateService(publish Publish, representatives []*pbft.Representative) PropagateService {
+func NewPropagateService(publish Publish) PropagateService {
 	return PropagateService{
-		publish:         publish,
-		representatives: representatives,
+		publish: publish,
 	}
 }
 
-func (ps PropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg) error {
+func (ps PropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg, representatives []*pbft.Representative) error {
 	if msg.StateID.ID == "" {
 		return errors.New("State ID is empty")
 	}
@@ -55,14 +53,14 @@ func (ps PropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg) error 
 		return err
 	}
 
-	if err = ps.broadcastMsg(SerializedMsg, "PrePrepareMsgProtocol"); err != nil {
+	if err = ps.broadcastMsg(SerializedMsg, "PrePrepareMsgProtocol", representatives); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (ps PropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg) error {
+func (ps PropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg, representatives []*pbft.Representative) error {
 	if msg.StateID.ID == "" {
 		return errors.New("State ID is empty")
 	}
@@ -77,14 +75,14 @@ func (ps PropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg) error {
 		return err
 	}
 
-	if err = ps.broadcastMsg(SerializedMsg, "PrepareMsgProtocol"); err != nil {
+	if err = ps.broadcastMsg(SerializedMsg, "PrepareMsgProtocol", representatives); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (ps PropagateService) BroadcastCommitMsg(msg pbft.CommitMsg) error {
+func (ps PropagateService) BroadcastCommitMsg(msg pbft.CommitMsg, representatives []*pbft.Representative) error {
 	if msg.StateID.ID == "" {
 		return errors.New("State ID is empty")
 	}
@@ -95,14 +93,14 @@ func (ps PropagateService) BroadcastCommitMsg(msg pbft.CommitMsg) error {
 		return err
 	}
 
-	if err = ps.broadcastMsg(SerializedMsg, "CommitMsgProtocol"); err != nil {
+	if err = ps.broadcastMsg(SerializedMsg, "CommitMsgProtocol", representatives); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string) error {
+func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string, representatives []*pbft.Representative) error {
 	if SerializedMsg == nil {
 		return errors.New("Message is empty")
 	}
@@ -113,7 +111,7 @@ func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string) e
 		return err
 	}
 
-	for _, r := range ps.representatives {
+	for _, r := range representatives {
 		command.RecipientList = append(command.RecipientList, r.GetID())
 	}
 
