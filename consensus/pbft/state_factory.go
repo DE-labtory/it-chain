@@ -21,7 +21,7 @@ import (
 )
 
 // leader
-func CreateConsensus(parliament []MemberID, block ProposedBlock) (*State, error) {
+func NewState(parliament []MemberID, block ProposedBlock) (*State, error) {
 	representatives, err := Elect(parliament)
 	if err != nil {
 		return &State{}, err
@@ -40,7 +40,7 @@ func CreateConsensus(parliament []MemberID, block ProposedBlock) (*State, error)
 }
 
 // member
-func ConstructConsensus(msg PrePrepareMsg) (*State, error) {
+func BuildState(msg PrePrepareMsg) (*State, error) {
 	newState := &State{
 		StateID:         msg.StateID,
 		Representatives: msg.Representative,
