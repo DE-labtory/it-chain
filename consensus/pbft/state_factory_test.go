@@ -34,7 +34,7 @@ func TestCreateConsensus(t *testing.T) {
 	}
 
 	// when
-	c, err := pbft.CreateConsensus(p, b)
+	c, err := pbft.NewState(p, b)
 
 	// then
 	assert.Error(t, err)
@@ -43,7 +43,7 @@ func TestCreateConsensus(t *testing.T) {
 	p = append(p, l)
 	p = append(p, m)
 
-	c, err = pbft.CreateConsensus(p, b)
+	c, err = pbft.NewState(p, b)
 
 	// then
 	assert.NoError(t, err)
@@ -71,7 +71,7 @@ func TestConstructConsensus(t *testing.T) {
 	}
 
 	// when
-	c, err := pbft.ConstructConsensus(msg)
+	c, err := pbft.BuildState(msg)
 
 	// then
 	assert.NoError(t, err)
