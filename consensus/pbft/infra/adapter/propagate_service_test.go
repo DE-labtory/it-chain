@@ -89,12 +89,12 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 	}
 
 	representatives := make([]*pbft.Representative, 0)
-	propagateService := adapter.NewPropagateService(publish, representatives)
+	propagateService := adapter.NewPropagateService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
 
-		err := propagateService.BroadcastPrePrepareMsg(test.input.msg)
+		err := propagateService.BroadcastPrePrepareMsg(test.input.msg, representatives)
 
 		assert.Equal(t, test.err, err)
 	}
@@ -152,12 +152,12 @@ func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 	}
 
 	representatives := make([]*pbft.Representative, 0)
-	propagateService := adapter.NewPropagateService(publish, representatives)
+	propagateService := adapter.NewPropagateService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
 
-		err := propagateService.BroadcastPrepareMsg(test.input.msg)
+		err := propagateService.BroadcastPrepareMsg(test.input.msg, representatives)
 
 		assert.Equal(t, test.err, err)
 	}
@@ -201,12 +201,12 @@ func TestPropagateService_BroadcastCommitMsg(t *testing.T) {
 	}
 
 	representatives := make([]*pbft.Representative, 0)
-	propagateService := adapter.NewPropagateService(publish, representatives)
+	propagateService := adapter.NewPropagateService(publish)
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
 
-		err := propagateService.BroadcastCommitMsg(test.input.msg)
+		err := propagateService.BroadcastCommitMsg(test.input.msg, representatives)
 
 		assert.Equal(t, test.err, err)
 	}
