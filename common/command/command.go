@@ -21,6 +21,16 @@ import (
 )
 
 /*
+ * Consensus - pbft
+ */
+
+// Blockchain이 consensus를 요청하는 command
+type StartConsensus struct {
+	Seal   []byte
+	TxList []Tx
+}
+
+/*
  * grpc-gateway
  */
 
