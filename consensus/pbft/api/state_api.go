@@ -53,20 +53,20 @@ func (cApi StateApi) StartConsensus(userId pbft.MemberID, proposedBlock pbft.Pro
 		return ConsensusCreateError
 	}
 
-	createdConsensus, err := pbft.CreateConsensus(peerList, proposedBlock)
+	createdState, err := pbft.NewState(peerList, proposedBlock)
 	if err != nil {
 		return err
 	}
 
-	if err := cApi.repo.Save(*createdConsensus); err != nil {
+	if err := cApi.repo.Save(*createdState); err != nil {
 		return err
 	}
 
-	createdPrePrepareMsg := pbft.NewPrePrepareMsg(createdConsensus)
+	createdPrePrepareMsg := pbft.NewPrePrepareMsg(createdState)
 	if err := cApi.propagateService.BroadcastPrePrepareMsg(*createdPrePrepareMsg); err != nil {
 		return err
 	}
-	createdConsensus.Start()
+	createdState.Start()
 
 	return nil
 }
@@ -82,65 +82,65 @@ func (cApi StateApi) HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error {
 		return pbft.InvalidLeaderIdError
 	}
 
-	constructedConsensus, err := pbft.ConstructConsensus(msg)
+	builtState, err := pbft.BuildState(msg)
 	if err != nil {
 		return err
 	}
 
-	if err := cApi.repo.Save(*constructedConsensus); err != nil {
+	if err := cApi.repo.Save(*builtState); err != nil {
 		return err
 	}
 
-	prepareMsg := pbft.NewPrepareMsg(constructedConsensus)
+	prepareMsg := pbft.NewPrepareMsg(builtState)
 	if err := cApi.propagateService.BroadcastPrepareMsg(*prepareMsg); err != nil {
 		return err
 	}
-	constructedConsensus.ToPrepareStage()
+	builtState.ToPrepareStage()
 
 	return nil
 }
 
 func (cApi StateApi) HandlePrepareMsg(msg pbft.PrepareMsg) error {
 
-	loadedConsensus, err := cApi.repo.Load()
+	loadedState, err := cApi.repo.Load()
 	if err != nil {
 		return err
 	}
 
-	if err := loadedConsensus.SavePrepareMsg(&msg); err != nil {
+	if err := loadedState.SavePrepareMsg(&msg); err != nil {
 		return err
 	}
 
-	if !loadedConsensus.CheckPrepareCondition() {
+	if !loadedState.CheckPrepareCondition() {
 		return nil
 	}
 
-	newCommitMsg := pbft.NewCommitMsg(loadedConsensus)
+	newCommitMsg := pbft.NewCommitMsg(loadedState)
 	if err := cApi.propagateService.BroadcastCommitMsg(*newCommitMsg); err != nil {
 		return err
 	}
-	loadedConsensus.ToCommitStage()
+	loadedState.ToCommitStage()
 
 	return nil
 }
 
 func (cApi StateApi) HandleCommitMsg(msg pbft.CommitMsg) error {
 
-	loadedConsensus, err := cApi.repo.Load()
+	loadedState, err := cApi.repo.Load()
 
 	if err != nil {
 		return err
 	}
 
-	if err := loadedConsensus.SaveCommitMsg(&msg); err != nil {
+	if err := loadedState.SaveCommitMsg(&msg); err != nil {
 		return err
 	}
 
-	if !loadedConsensus.CheckCommitCondition() {
+	if !loadedState.CheckCommitCondition() {
 		return nil
 	}
 
-	if err := cApi.confirmService.ConfirmBlock(loadedConsensus.Block); err != nil {
+	if err := cApi.confirmService.ConfirmBlock(loadedState.Block); err != nil {
 		return err
 	}
 	cApi.repo.Remove()
