@@ -91,12 +91,14 @@ func Warn(fields *Fields, message string) {
 	if fields == nil {
 		fields = &Fields{}
 	}
+
+	if (*fields)["cause"] != nil {
+		fields = addLineInfo(fields, 2)
+	}
 	if stdLogger != nil {
-		fields = addLineInfo(fields)
 		stdLogger.WithFields(*fields).Warn(message)
 	}
 	if fileLogger != nil {
-		fields = addLineInfo(fields)
 		fileLogger.WithFields(*fields).Warn(message)
 	}
 }
@@ -104,12 +106,13 @@ func Fatal(fields *Fields, message string) {
 	if fields == nil {
 		fields = &Fields{}
 	}
+	if (*fields)["cause"] != nil {
+		fields = addLineInfo(fields, 2)
+	}
 	if stdLogger != nil {
-		fields = addLineInfo(fields)
 		stdLogger.WithFields(*fields).Fatal(message)
 	}
 	if fileLogger != nil {
-		fields = addLineInfo(fields)
 		fileLogger.WithFields(*fields).Fatal(message)
 	}
 }
@@ -117,12 +120,13 @@ func Error(fields *Fields, message string) {
 	if fields == nil {
 		fields = &Fields{}
 	}
+	if (*fields)["cause"] != nil {
+		fields = addLineInfo(fields, 2)
+	}
 	if stdLogger != nil {
-		fields = addLineInfo(fields)
 		stdLogger.WithFields(*fields).Error(message)
 	}
 	if fileLogger != nil {
-		fields = addLineInfo(fields)
 		fileLogger.WithFields(*fields).Error(message)
 	}
 }
@@ -131,12 +135,13 @@ func Panic(fields *Fields, message string) {
 	if fields == nil {
 		fields = &Fields{}
 	}
+	if (*fields)["cause"] != nil {
+		fields = addLineInfo(fields, 2)
+	}
 	if stdLogger != nil {
-		fields = addLineInfo(fields)
 		stdLogger.WithFields(*fields).Panic(message)
 	}
 	if fileLogger != nil {
-		fields = addLineInfo(fields)
 		fileLogger.WithFields(*fields).Panic(message)
 	}
 }
@@ -150,15 +155,31 @@ func Infof(fields *Fields, format string, args ...interface{}) {
 	Info(fields, fmt.Sprintf(format, args...))
 }
 func Warnf(fields *Fields, format string, args ...interface{}) {
+	if fields == nil {
+		fields = &Fields{}
+	}
+	fields = addLineInfo(fields, 2)
 	Warn(fields, fmt.Sprintf(format, args...))
 }
 func Fatalf(fields *Fields, format string, args ...interface{}) {
+	if fields == nil {
+		fields = &Fields{}
+	}
+	fields = addLineInfo(fields, 2)
 	Fatal(fields, fmt.Sprintf(format, args...))
 }
 func Errorf(fields *Fields, format string, args ...interface{}) {
+	if fields == nil {
+		fields = &Fields{}
+	}
+	fields = addLineInfo(fields, 2)
 	Error(fields, fmt.Sprintf(format, args...))
 }
 func Panicf(fields *Fields, format string, args ...interface{}) {
+	if fields == nil {
+		fields = &Fields{}
+	}
+	fields = addLineInfo(fields, 2)
 	Panic(fields, fmt.Sprintf(format, args...))
 }
 
@@ -205,8 +226,8 @@ func initFileLogger(logger *logrus.Logger, savePath string) error {
 	return nil
 }
 
-func addLineInfo(fields *Fields) *Fields {
-	pc, _, _, _ := runtime.Caller(2)
+func addLineInfo(fields *Fields, skip int) *Fields {
+	pc, _, _, _ := runtime.Caller(skip)
 	dataField := Fields{"cause": runtime.FuncForPC(pc).Name()}
 	data := make(Fields, len(dataField)+len(*fields))
 	for k, v := range dataField {
