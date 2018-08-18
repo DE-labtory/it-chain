@@ -50,22 +50,18 @@ type DefaultBlock struct {
 	State     BlockState
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) SetSeal(seal []byte) {
 	block.Seal = seal
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) SetPrevSeal(prevSeal []byte) {
 	block.PrevSeal = prevSeal
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) SetHeight(height uint64) {
 	block.Height = height
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) PutTx(transaction Transaction) error {
 	convTx, ok := transaction.(*DefaultTransaction)
 	if ok {
@@ -80,17 +76,14 @@ func (block *DefaultBlock) PutTx(transaction Transaction) error {
 	return ErrTransactionType
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) SetTxSeal(txSeal [][]byte) {
 	block.TxSeal = txSeal
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) SetCreator(creator []byte) {
 	block.Creator = creator
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) SetTimestamp(currentTime time.Time) {
 	block.Timestamp = currentTime
 }
@@ -99,22 +92,18 @@ func (block *DefaultBlock) SetState(state BlockState) {
 	block.State = state
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) GetSeal() []byte {
 	return block.Seal
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) GetPrevSeal() []byte {
 	return block.PrevSeal
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) GetHeight() uint64 {
 	return block.Height
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) GetTxList() []Transaction {
 	txList := make([]Transaction, 0)
 	for _, tx := range block.TxList {
@@ -123,17 +112,14 @@ func (block *DefaultBlock) GetTxList() []Transaction {
 	return txList
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) GetTxSeal() [][]byte {
 	return block.TxSeal
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) GetCreator() []byte {
 	return block.Creator
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) GetTimestamp() time.Time {
 	return block.Timestamp
 }
@@ -170,7 +156,6 @@ func (block *DefaultBlock) IsReadyToPublish() bool {
 	return block.Seal != nil
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) IsPrev(serializedPrevBlock []byte) bool {
 	prevBlock := &DefaultBlock{}
 	prevBlock.Deserialize(serializedPrevBlock)
@@ -180,14 +165,6 @@ func (block *DefaultBlock) IsPrev(serializedPrevBlock []byte) bool {
 
 func (block *DefaultBlock) IsEmpty() bool {
 	return reflect.DeepEqual(*block, DefaultBlock{})
-}
-
-func (block *DefaultBlock) GetBlockState() BlockState {
-	return block.State
-}
-
-func (block *DefaultBlock) SetBlockState(state BlockState) {
-	block.State = state
 }
 
 type BlockRepository interface {
