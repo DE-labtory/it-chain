@@ -26,7 +26,6 @@ import (
 	"github.com/it-chain/engine/api_gateway/test/mock"
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/midgard"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -175,9 +174,7 @@ func TestBlockEventListener_HandleBlockCommitedEvent(t *testing.T) {
 	txList, _ := convertToTxList(block2.TxList)
 
 	event1 := event.BlockCommitted{
-		EventModel: midgard.EventModel{
-			ID: block2ID,
-		},
+		BlockId:   block2ID,
 		Seal:      block2.Seal,
 		PrevSeal:  block2.PrevSeal,
 		Height:    block2.Height,

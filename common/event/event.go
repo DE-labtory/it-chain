@@ -18,8 +18,6 @@ package event
 
 import (
 	"time"
-
-	"github.com/it-chain/midgard"
 )
 
 /*
@@ -59,19 +57,13 @@ type MetaDeleted struct {
 	ICodeID string
 }
 
-// ivm meta status changed
-type MetaStatusChanged struct {
-	midgard.EventModel
-	Status int
-}
-
 /*
  * blockChain
  */
 
 // event when block is committed to event store
 type BlockCommitted struct {
-	midgard.EventModel
+	BlockId   string
 	Seal      []byte
 	PrevSeal  []byte
 	Height    uint64
@@ -84,13 +76,13 @@ type BlockCommitted struct {
 
 // event when block is staged to event store
 type BlockStaged struct {
-	midgard.EventModel
-	State string
+	BlockId string
+	State   string
 }
 
 //event when block is created in event store
 type BlockCreated struct {
-	midgard.EventModel
+	BlockId   string
 	Seal      []byte
 	PrevSeal  []byte
 	Height    uint64
@@ -113,11 +105,11 @@ type Tx struct {
 }
 
 type SyncStart struct {
-	midgard.EventModel
+	EventId string
 }
 
 type SyncDone struct {
-	midgard.EventModel
+	EventId string
 }
 
 /*
@@ -126,19 +118,19 @@ type SyncDone struct {
 
 // transaction created event
 type TxCreated struct {
-	midgard.EventModel
-	ICodeID   string
-	PeerID    string
-	TimeStamp time.Time
-	Jsonrpc   string
-	Function  string
-	Args      []string
-	Signature []byte
+	TransactionId string
+	ICodeID       string
+	PeerID        string
+	TimeStamp     time.Time
+	Jsonrpc       string
+	Function      string
+	Args          []string
+	Signature     []byte
 }
 
 // when block committed check transaction and delete
 type TxDeleted struct {
-	midgard.EventModel
+	TransactionId string
 }
 
 /*

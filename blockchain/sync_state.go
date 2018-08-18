@@ -17,11 +17,7 @@
 package blockchain
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/midgard"
 )
 
 // BlockSyncState Aggregate ID
@@ -40,15 +36,13 @@ type SyncState interface {
 
 // 현재 블록 동기화가 진행 중인지 정보를 가진다.
 type BlockSyncState struct {
-	midgard.AggregateModel
+	Id         string
 	isProgress ProgressState
 }
 
 func NewBlockSyncState() *BlockSyncState {
 	return &BlockSyncState{
-		AggregateModel: midgard.AggregateModel{
-			ID: BC_SYNC_STATE_AID,
-		},
+		Id:         BC_SYNC_STATE_AID,
 		isProgress: DONE,
 	}
 }
@@ -58,47 +52,25 @@ func (bss *BlockSyncState) GetID() string {
 }
 
 func (bss *BlockSyncState) SetProgress(state ProgressState) {
-	var event midgard.Event
 	if state == PROGRESSING {
-		event = createSyncStartEvent()
+		bss.isProgress = PROGRESSING
 	} else { // state == DONE
-		event = createSyncDoneEvent()
+		bss.isProgress = DONE
 	}
-	bss.On(event)
 }
 
 func createSyncStartEvent() *event.SyncStart {
 	return &event.SyncStart{
-		EventModel: midgard.EventModel{
-			ID: BC_SYNC_STATE_AID,
-		},
+		EventId: BC_SYNC_STATE_AID,
 	}
 }
 
 func createSyncDoneEvent() *event.SyncDone {
 	return &event.SyncDone{
-		EventModel: midgard.EventModel{
-			ID: BC_SYNC_STATE_AID,
-		},
+		EventId: BC_SYNC_STATE_AID,
 	}
 }
 
 func (bss *BlockSyncState) IsProgressing() ProgressState {
 	return bss.isProgress
-}
-
-func (bss *BlockSyncState) On(e midgard.Event) error {
-	switch v := e.(type) {
-
-	case *(event.SyncStart):
-		bss.isProgress = PROGRESSING
-
-	case *(event.SyncDone):
-		bss.isProgress = DONE
-
-	default:
-		return errors.New(fmt.Sprintf("unhandled event [%s]", v))
-	}
-
-	return nil
 }

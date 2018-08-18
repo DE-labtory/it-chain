@@ -178,7 +178,7 @@ func NewBlockEventListener(blockRepo BlockRepository) BlockEventListener {
 }
 
 func (l BlockEventListener) HandleBlockCommittedEvent(event event.BlockCommitted) error {
-	blockID := event.ID
+	blockID := event.BlockId
 
 	if blockID == "" {
 		return ErrIdEmpty
