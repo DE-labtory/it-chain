@@ -23,6 +23,9 @@ import (
 	"github.com/it-chain/engine/consensus/pbft"
 )
 
+var ErrBlockHashNil = errors.New("Block hash is nil")
+var ErrNoBlock = errors.New("There is no block")
+
 type ConfirmService struct {
 	publish Publish
 }
@@ -35,11 +38,11 @@ func NewConfirmService(publish Publish) *ConfirmService {
 
 func (cs *ConfirmService) ConfirmBlock(block pbft.ProposedBlock) error {
 	if block.Seal == nil {
-		return errors.New("Block hash is nil")
+		return ErrBlockHashNil
 	}
 
 	if block.Body == nil {
-		return errors.New("There is no block")
+		return ErrNoBlock
 	}
 
 	// todo : consensus finished event 날려야함

@@ -17,7 +17,6 @@
 package adapter_test
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/it-chain/engine/consensus/pbft"
@@ -52,7 +51,7 @@ func TestConfirmService_ConfirmBlock(t *testing.T) {
 					Body: make([]byte, 0),
 				},
 			},
-			err: errors.New("Block hash is nil"),
+			err: adapter.ErrBlockHashNil,
 		},
 		"block body empty test": {
 			input: struct {
@@ -63,7 +62,7 @@ func TestConfirmService_ConfirmBlock(t *testing.T) {
 					Body: nil,
 				},
 			},
-			err: errors.New("There is no block"),
+			err: adapter.ErrNoBlock,
 		},
 	}
 

@@ -23,9 +23,8 @@ import (
 	"github.com/it-chain/engine/consensus/pbft"
 )
 
-var ConsensusAlreadyExistError = errors.New("State Already Exist")
-var EmptyConsensusIdError = errors.New("empty State ID")
-var LoadConsensusError = errors.New("There is no state for loading")
+var ErrConsensusAlreadyExist = errors.New("State Already Exist")
+var ErrLoadConsensus = errors.New("There is no state for loading")
 
 type StateRepository struct {
 	state *pbft.State
@@ -44,7 +43,7 @@ func (repo *StateRepository) Save(state pbft.State) error {
 	defer repo.Unlock()
 
 	if repo.state != nil {
-		return ConsensusAlreadyExistError
+		return ErrConsensusAlreadyExist
 	}
 	repo.state = &state
 
@@ -53,7 +52,7 @@ func (repo *StateRepository) Save(state pbft.State) error {
 func (repo *StateRepository) Load() (*pbft.State, error) {
 
 	if repo.state == nil {
-		return nil, LoadConsensusError
+		return nil, ErrLoadConsensus
 	}
 
 	return repo.state, nil

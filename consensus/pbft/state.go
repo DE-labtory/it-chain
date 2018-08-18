@@ -33,6 +33,10 @@ const (
 )
 
 var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
+var ErrPrepareMsgNil = errors.New("Prepare msg is nil")
+var ErrBlockHashNil = errors.New("Block hash is nil")
+var ErrCommitMsgNil = errors.New("Commit msg is nil")
+var ErrStateIdNotSame = errors.New("State ID is not same")
 
 type ProposedBlock struct {
 	Seal []byte
@@ -155,7 +159,7 @@ func NewPrepareMsgPool() PrepareMsgPool {
 
 func (p *PrepareMsgPool) Save(prepareMsg *PrepareMsg) error {
 	if prepareMsg == nil {
-		return errors.New("Prepare msg is nil")
+		return ErrPrepareMsgNil
 	}
 
 	senderID := prepareMsg.SenderID
@@ -168,7 +172,7 @@ func (p *PrepareMsgPool) Save(prepareMsg *PrepareMsg) error {
 	blockHash := prepareMsg.BlockHash
 
 	if blockHash == nil {
-		return errors.New("Block hash is nil")
+		return ErrBlockHashNil
 	}
 
 	p.messages = append(p.messages, *prepareMsg)
@@ -206,7 +210,7 @@ func NewCommitMsgPool() CommitMsgPool {
 
 func (c *CommitMsgPool) Save(commitMsg *CommitMsg) error {
 	if commitMsg == nil {
-		return errors.New("Commit msg is nil")
+		return ErrCommitMsgNil
 	}
 
 	senderID := commitMsg.SenderID
@@ -296,7 +300,7 @@ func (s *State) ToIdleStage() {
 
 func (s *State) SavePrepareMsg(prepareMsg *PrepareMsg) error {
 	if s.StateID.ID != prepareMsg.StateID.ID {
-		return errors.New("State ID is not same")
+		return ErrStateIdNotSame
 	}
 
 	return s.PrepareMsgPool.Save(prepareMsg)
@@ -304,7 +308,7 @@ func (s *State) SavePrepareMsg(prepareMsg *PrepareMsg) error {
 
 func (s *State) SaveCommitMsg(commitMsg *CommitMsg) error {
 	if s.StateID.ID != commitMsg.StateID.ID {
-		return errors.New("State ID is not same")
+		return ErrStateIdNotSame
 	}
 
 	return s.CommitMsgPool.Save(commitMsg)

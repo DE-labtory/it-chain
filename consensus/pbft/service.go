@@ -18,6 +18,8 @@ package pbft
 
 import "errors"
 
+var ErrNoParliamentMember = errors.New("No parliament member.")
+
 type PropagateService interface {
 	BroadcastPrePrepareMsg(msg PrePrepareMsg) error
 	BroadcastPrepareMsg(msg PrepareMsg) error
@@ -39,7 +41,7 @@ func Elect(parliament []MemberID) ([]*Representative, error) {
 	representatives := make([]*Representative, 0)
 
 	if len(parliament) == 0 {
-		return []*Representative{}, errors.New("No parliament member.")
+		return []*Representative{}, ErrNoParliamentMember
 	}
 
 	for _, peerId := range parliament {
