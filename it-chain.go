@@ -139,15 +139,14 @@ func initApiGateway(config *conf.Configuration, errs chan error) func() {
 
 	// set blockchain
 	blockchainDB := "./api-db/block"
-	BlockPoolRepo := api_gateway.NewBlockPoolRepository()
-	CommittedBlockRepo, err := api_gateway.NewCommitedBlockRepositoryImpl(blockchainDB)
+	CommittedBlockRepo, err := api_gateway.NewBlockRepositoryImpl(blockchainDB)
 	if err != nil {
 		logger.Panic(&logger.Fields{"err_msg": err.Error()}, "error while init gateway")
 		panic(err)
 	}
 
-	blockQueryApi := api_gateway.NewBlockQueryApi(BlockPoolRepo, CommittedBlockRepo)
-	blockEventListener := api_gateway.NewBlockEventListener(BlockPoolRepo, CommittedBlockRepo)
+	blockQueryApi := api_gateway.NewBlockQueryApi(CommittedBlockRepo)
+	blockEventListener := api_gateway.NewBlockEventListener(CommittedBlockRepo)
 
 	// set ivm
 	icodeDB := "./api-db/ivm"
