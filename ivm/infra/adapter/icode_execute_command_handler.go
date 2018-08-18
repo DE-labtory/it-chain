@@ -38,7 +38,7 @@ func (i *IcodeExecuteCommandHandler) HandleTransactionExecuteCommandHandler(comm
 	request := ivm.Request{
 		Args:     command.Args,
 		Function: command.Function,
-		ICodeID:  command.ID,
+		ICodeID:  command.ICodeId,
 		Type:     command.Method,
 	}
 

@@ -28,7 +28,6 @@ import (
 	"github.com/it-chain/engine/p2p/api"
 	"github.com/it-chain/engine/p2p/infra/adapter"
 	"github.com/it-chain/engine/p2p/infra/mem"
-	"github.com/it-chain/midgard"
 )
 
 type MockP2PProcess struct {
@@ -160,11 +159,9 @@ func (mpp *MockP2PProcess) RpcListen(mpt map[string]MockP2PProcess) {
 				// trigger grpc receive protocol to target peer
 
 				grpcReceiveCommand := command.ReceiveGrpc{
-					CommandModel: midgard.CommandModel{
-						ID: c.(command.DeliverGrpc).ID,
-					},
+					MessageId: c.(command.DeliverGrpc).MessageId,
 				}
-				mpp.TriggerOutboundCommand(grpcReceiveCommand, mpt[grpcReceiveCommand.ID])
+				mpp.TriggerOutboundCommand(grpcReceiveCommand, mpt[grpcReceiveCommand.MessageId])
 
 			}
 

@@ -67,7 +67,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc)
 		break
 
 	case "RequestVoteProtocol":
-		gch.electionService.Vote(command.CommandModel.ID)
+		gch.electionService.Vote(command.MessageId)
 
 	case "VoteLeaderProtocol":
 		//	1. if candidate, reset left time

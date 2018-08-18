@@ -7,7 +7,6 @@ import (
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/txpool"
-	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
 
@@ -18,14 +17,12 @@ func main() {
 	defer client.Close()
 
 	txCreateCommand := command.CreateTransaction{
-		CommandModel: midgard.CommandModel{
-			ID: xid.New().String(),
-		},
-		ICodeID:  "bdeshe0e2r74d1hr8pv0",
-		Jsonrpc:  "2.0",
-		Method:   "invoke",
-		Args:     []string{},
-		Function: "initA",
+		TransactionId: xid.New().String(),
+		ICodeID:       "bdeshe0e2r74d1hr8pv0",
+		Jsonrpc:       "2.0",
+		Method:        "invoke",
+		Args:          []string{},
+		Function:      "initA",
 	}
 
 	err := client.Call("transaction.create", txCreateCommand, func(transaction txpool.Transaction, err rpc.Error) {

@@ -25,7 +25,6 @@ import (
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/txpool"
-	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
 
@@ -86,11 +85,8 @@ func (b BlockProposalService) sendBlockProposal(transactions []txpool.Transactio
 	}
 
 	proposeCommand := command.ProposeBlock{
-		CommandModel: midgard.CommandModel{
-			ID: xid.New().String(),
-		},
-
-		TxList: make([]command.Tx, 0),
+		BlockId: xid.New().String(),
+		TxList:  make([]command.Tx, 0),
 	}
 
 	for _, tx := range transactions {

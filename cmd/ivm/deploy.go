@@ -23,7 +23,6 @@ import (
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/ivm"
-	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 	"github.com/urfave/cli"
 )
@@ -51,9 +50,7 @@ func deploy(gitUrl string, sshPath string) {
 	defer client.Close()
 
 	deployCommand := command.Deploy{
-		CommandModel: midgard.CommandModel{
-			ID: xid.New().String(),
-		},
+		ICodeId: xid.New().String(),
 		Url:     gitUrl,
 		SshPath: sshPath,
 	}

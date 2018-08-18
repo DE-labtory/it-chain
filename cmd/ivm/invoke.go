@@ -26,7 +26,6 @@ import (
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/ivm"
-	"github.com/it-chain/midgard"
 	"github.com/urfave/cli"
 )
 
@@ -62,9 +61,7 @@ func invoke(id string, functionName string, args []string) {
 	defer client.Close()
 
 	invokeCommand := command.ExecuteICode{
-		CommandModel: midgard.CommandModel{
-			ID: id,
-		},
+		ICodeId:  id,
 		Function: functionName,
 		Args:     args,
 		Method:   "invoke",

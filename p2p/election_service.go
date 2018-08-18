@@ -25,7 +25,6 @@ import (
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/midgard"
 	"github.com/rs/xid"
 )
 
@@ -197,9 +196,7 @@ func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.Delive
 	}
 
 	return command.DeliverGrpc{
-		CommandModel: midgard.CommandModel{
-			ID: xid.New().String(),
-		},
+		MessageId:     xid.New().String(),
 		RecipientList: make([]string, 0),
 		Body:          data,
 		Protocol:      protocol,
