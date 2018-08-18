@@ -18,8 +18,6 @@ package command
 
 import (
 	"time"
-
-	"github.com/it-chain/midgard"
 )
 
 /*
@@ -28,18 +26,17 @@ import (
 
 //Connection 생성 command
 type CreateConnection struct {
-	midgard.CommandModel
 	Address string
 }
 
 //Connection close command
 type CloseConnection struct {
-	midgard.CommandModel
+	Address string
 }
 
 //다른 Peer에게 Message전송 command
 type DeliverGrpc struct {
-	midgard.CommandModel
+	MessageId     string
 	RecipientList []string
 	Body          []byte
 	Protocol      string
@@ -47,7 +44,7 @@ type DeliverGrpc struct {
 
 //다른 Peer에게 Message수신 command
 type ReceiveGrpc struct {
-	midgard.CommandModel
+	MessageId    string
 	Body         []byte
 	ConnectionID string
 	Protocol     string
@@ -57,19 +54,19 @@ type ReceiveGrpc struct {
  * ivm
  */
 type ExecuteICode struct {
-	midgard.CommandModel
+	ICodeId  string
 	Function string
 	Args     []string
 	Method   string
 }
 
 type Deploy struct {
-	midgard.CommandModel
+	ICodeId string
 	Url     string
 	SshPath string
 }
 type UnDeploy struct {
-	midgard.CommandModel
+	ICodeId string
 }
 
 /*
@@ -78,7 +75,7 @@ type UnDeploy struct {
 
 //Icode에게 block 내 TxList 실행 command
 type ExecuteBlock struct {
-	midgard.CommandModel
+	BlockId   string
 	Seal      []byte
 	PrevSeal  []byte
 	Height    uint64
@@ -103,7 +100,7 @@ type ExecuteTransaction struct {
 }
 
 type ReturnBlockResult struct {
-	midgard.CommandModel
+	BlockId      string
 	TxResultList []TxResult
 }
 
@@ -115,8 +112,8 @@ type TxResult struct {
 
 // Blockchain에게 block 생성 command
 type ProposeBlock struct {
-	midgard.CommandModel
-	TxList []Tx
+	BlockId string
+	TxList  []Tx
 }
 
 type Tx struct {
@@ -137,11 +134,11 @@ type Tx struct {
  */
 
 type CreateTransaction struct {
-	midgard.CommandModel
-	Jsonrpc   string
-	Method    string
-	ICodeID   string
-	Function  string
-	Args      []string
-	Signature []byte
+	TransactionId string
+	Jsonrpc       string
+	Method        string
+	ICodeID       string
+	Function      string
+	Args          []string
+	Signature     []byte
 }

@@ -34,7 +34,7 @@ func NewUnDeployCommandHandler(icodeApi api.ICodeApi) *UnDeployCommandHandler {
 
 func (u *UnDeployCommandHandler) HandleUnDeployCommand(undeployCommand command.UnDeploy) (struct{}, rpc.Error) {
 
-	err := u.icodeApi.UnDeploy(undeployCommand.ID)
+	err := u.icodeApi.UnDeploy(undeployCommand.ICodeId)
 
 	if err != nil {
 		return struct{}{}, rpc.Error{Message: err.Error()}

@@ -22,7 +22,6 @@ import (
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/midgard"
 	"github.com/urfave/cli"
 )
 
@@ -46,9 +45,7 @@ func unDeploy(icodeId string) {
 	defer client.Close()
 
 	undeployCommand := command.UnDeploy{
-		CommandModel: midgard.CommandModel{
-			ID: icodeId,
-		},
+		ICodeId: icodeId,
 	}
 
 	err := client.Call("ivm.undeploy", undeployCommand, func(empty struct{}, err rpc.Error) {
