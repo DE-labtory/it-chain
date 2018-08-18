@@ -7,7 +7,7 @@ about: Suggest a idea of the feature for this project
 **Component**
 write here
 
-**Asisgnee**
+**Assignee**
 write here
 
 **Problem or Necessity**
