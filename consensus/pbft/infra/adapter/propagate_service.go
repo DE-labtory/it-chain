@@ -26,6 +26,11 @@ import (
 	"github.com/rs/xid"
 )
 
+var ErrStateIdEmpty = errors.New("State ID is empty")
+var ErrEmptyBlock = errors.New("Block is empty")
+var ErrEmptyBlockHash = errors.New("Block hash is empty")
+var ErrEmptyMsg = errors.New("Message is empty")
+
 type Publish func(topic string, data interface{}) (err error)
 
 type PropagateService struct {
@@ -40,11 +45,11 @@ func NewPropagateService(publish Publish) PropagateService {
 
 func (ps PropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg, representatives []*pbft.Representative) error {
 	if msg.StateID.ID == "" {
-		return errors.New("State ID is empty")
+		return ErrStateIdEmpty
 	}
 
 	if msg.ProposedBlock.Body == nil {
-		return errors.New("Block is empty")
+		return ErrEmptyBlock
 	}
 
 	SerializedMsg, err := common.Serialize(msg)
@@ -62,11 +67,11 @@ func (ps PropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg, repres
 
 func (ps PropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg, representatives []*pbft.Representative) error {
 	if msg.StateID.ID == "" {
-		return errors.New("State ID is empty")
+		return ErrStateIdEmpty
 	}
 
 	if msg.BlockHash == nil {
-		return errors.New("Block hash is empty")
+		return ErrEmptyBlockHash
 	}
 
 	SerializedMsg, err := common.Serialize(msg)
@@ -84,7 +89,7 @@ func (ps PropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg, representati
 
 func (ps PropagateService) BroadcastCommitMsg(msg pbft.CommitMsg, representatives []*pbft.Representative) error {
 	if msg.StateID.ID == "" {
-		return errors.New("State ID is empty")
+		return ErrStateIdEmpty
 	}
 
 	SerializedMsg, err := common.Serialize(msg)
@@ -102,7 +107,7 @@ func (ps PropagateService) BroadcastCommitMsg(msg pbft.CommitMsg, representative
 
 func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string, representatives []*pbft.Representative) error {
 	if SerializedMsg == nil {
-		return errors.New("Message is empty")
+		return ErrEmptyMsg
 	}
 
 	command, err := createDeliverGrpcCommand(protocol, SerializedMsg)
