@@ -26,7 +26,7 @@ import (
 type StateApi struct {
 	publisherID       string
 	propagateService  pbft.PropagateService
-	confirmService    pbft.ConfirmService
+	confirmService    pbft.EventService
 	parliamentService pbft.ParliamentService
 	repo              mem.StateRepository
 }
@@ -34,7 +34,7 @@ type StateApi struct {
 var ConsensusCreateError = errors.New("Consensus can't be created")
 
 func NewStateApi(publisherID string, propagateService pbft.PropagateService,
-	confirmService pbft.ConfirmService, parliamentService pbft.ParliamentService, repo mem.StateRepository) StateApi {
+	confirmService pbft.EventService, parliamentService pbft.ParliamentService, repo mem.StateRepository) StateApi {
 	return StateApi{
 		publisherID:       publisherID,
 		propagateService:  propagateService,
