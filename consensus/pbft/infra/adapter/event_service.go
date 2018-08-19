@@ -17,36 +17,26 @@
 package adapter
 
 import (
-	"errors"
-
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/consensus/pbft"
 )
 
-var ErrBlockHashNil = errors.New("Block hash is nil")
-var ErrNoBlock = errors.New("There is no block")
+type Publish func(topic string, data interface{}) (err error)
 
-type ConfirmService struct {
+type EventService struct {
 	publish Publish
 }
 
-func NewConfirmService(publish Publish) *ConfirmService {
-	return &ConfirmService{
+func NewEventService(publish Publish) EventService {
+	return EventService{
 		publish: publish,
 	}
 }
 
-func (cs *ConfirmService) ConfirmBlock(block pbft.ProposedBlock) error {
-	if block.Seal == nil {
-		return ErrBlockHashNil
-	}
+func (es EventService) ConfirmBlock(block pbft.ProposedBlock) error {
 
-	if block.Body == nil {
-		return ErrNoBlock
-	}
-
-	// todo : consensus finished event 날려야함
+	// todo : block을 consensus finished event로 변경하여 날려야함
 	e := event.ConsensusFinished{}
 
-	return cs.publish("block.confirm", e)
+	return es.publish("block.confirm", e)
 }

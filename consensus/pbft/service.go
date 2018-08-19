@@ -26,7 +26,8 @@ type PropagateService interface {
 	BroadcastCommitMsg(msg CommitMsg) error
 }
 
-type ConfirmService interface {
+type EventService interface {
+	Publish(topic string, event interface{}) error
 	ConfirmBlock(block ProposedBlock) error
 }
 
