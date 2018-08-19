@@ -20,6 +20,14 @@ import (
 	"github.com/it-chain/engine/consensus/pbft"
 )
 
+type EventService struct {
+	PublishFunc func(topic string, event interface{}) error
+}
+
+func (m EventService) Publish(topic string, event interface{}) error {
+	return m.PublishFunc(topic, event)
+}
+
 type MockConfirmService struct {
 	ConfirmBlockFunc func(block pbft.ProposedBlock) error
 }

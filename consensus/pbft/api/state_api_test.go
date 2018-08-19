@@ -23,6 +23,7 @@ import (
 
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
+	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
 	"github.com/it-chain/engine/consensus/pbft/infra/mem"
 	"github.com/it-chain/engine/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
@@ -256,7 +257,7 @@ func TestConsensusApi_HandleCommitMsg(t *testing.T) {
 			}{invalidCommitMsg, false, 5, true, true},
 			err: errors.New("State ID is not same"),
 		},
-		"Case 4 repo에 저장된 pbft cid와 commitMsg의 cid가 일치하고, Commit조건을 만족하며, 블록의 hash가 nil일 경우": {
+		"Case 4 repo에 저장된 pbft cid와 commitMsg의 cid가 일치하고, Commit조건을 만족할 경우": {
 			input: struct {
 				commitMsg       pbft.CommitMsg
 				isNeedConsensus bool
@@ -264,7 +265,7 @@ func TestConsensusApi_HandleCommitMsg(t *testing.T) {
 				isRepoFull      bool
 				isNormalBlock   bool
 			}{validCommitMsg, false, 5, true, false},
-			err: errors.New("Block hash is nil"),
+			err: nil,
 		},
 	}
 
@@ -323,17 +324,10 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNor
 		return "Leader", nil
 	}
 
-	confirmService := &mock.MockConfirmService{}
-	confirmService.ConfirmBlockFunc = func(block pbft.ProposedBlock) error {
-		if block.Seal == nil {
-			return errors.New("Block hash is nil")
-		}
-
-		if block.Body == nil {
-			return errors.New("There is no block")
-		}
+	eventService := adapter.NewEventService(func(topic string, data interface{}) (err error) {
 		return nil
-	}
+	})
+
 	repo := mem.NewStateRepository()
 	if isRepoFull && isNormalBlock {
 
@@ -358,6 +352,6 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNor
 		}
 		repo.Save(savedConsensus)
 	}
-	cApi := api.NewStateApi("my", propagateService, confirmService, parliamentService, repo)
+	cApi := api.NewStateApi("my", propagateService, eventService, parliamentService, repo)
 	return cApi
 }
