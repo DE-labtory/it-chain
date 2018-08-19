@@ -18,35 +18,34 @@ package p2p
 
 //todo implement it!
 func init() {
-	//publisher := rabbitmq.Connect("")
-	//eventRepository := midgard.NewRepo(store, publisher)
-	//publisher :=
-	//grpcCommandService := adapter.NewGrpcCommandService(publisher)
-	//peerApi := api.NewPeerApi(eventRepository, grpcCommandService)
-	////myIp := conf.GetConfiguration().Common.NodeIp
 	//
-	//config := conf.GetConfiguration()
-	////create rabbitmq client
-	//rabbitmqClient := rabbitmq.Connect(config.Common.Messaging.Url)
-	//// todo change node repo and leader repo after managing peerTable
+	//peerRepository := mem.NewPeerReopository()
 	//
-	//messageDispatcher := adapter.NewMessageDispatcher(publisher)
+	//peerQueryService := api_gateway.NewPeerQueryApi(&peerRepository)
 	//
+	//communicationService := NewCommunicationService(mpp.Publish)
 	//
-	////create rabbitmq Handler
-	//eventHandler := adapter.NewNodeEventHandler(nodeRepository, leaderRepository)
-	//grpcMessageHandler := adapter.NewGrpcMessageHandler(leaderApi, nodeApi, messageDispatcher)
+	//communicationApi := api.NewCommunicationApi(&peerQueryService, communicationService)
 	//
-	//// Subscribe rabbitmq server
-	//err1 := rabbitmqClient.Subscribe("Command", "connection.*", eventHandler)
+	////todo should be replaced with real struct
+	//peerApi := &MockPeerApi{}
 	//
-	//if err1 != nil {
-	//	panic(err1)
-	//}
+	////todo should be replaced with real struct
+	//eventService := common.EventServiceImpl{}
 	//
-	//err2 := rabbitmqClient.Subscribe("Command", "message.*", grpcMessageHandler)
+	//mpp.eventHandler = adapter.NewEventHandler(&communicationApi, peerApi)
 	//
-	//if err2 != nil {
-	//	panic(err2)
-	//}
+	//leaderApi := api.NewLeaderApi(&peerRepository, &eventService)
+	//
+	//election := NewElection(0, "candidate", 0)
+	//
+	//electionRepository := NewElectionRepository(election)
+	//
+	////todo should be replaced with mock client
+	//client := rpc.NewClient("")
+	//
+	//electionService := NewElectionService(electionRepository, &peerQueryService, client)
+	//
+	//pLTableService := PLTableServiceImpl{}
+
 }

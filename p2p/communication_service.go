@@ -24,29 +24,34 @@ import (
 
 var ErrEmptyConnectionId = errors.New("empty connection ")
 
-type CommunicationService struct {
-	publish Publish
+type CallOnlyClient interface{
+	Call(queue string, params interface{}, callback interface{}) error
 }
 
-func NewCommunicationService(publish Publish) *CommunicationService {
+type CommunicationService struct {
+	client CallOnlyClient
+}
+
+func NewCommunicationService(client CallOnlyClient) *CommunicationService {
 
 	return &CommunicationService{
-		publish: publish,
+		client: client,
 	}
 }
 
-//todo use rpc instead of publish
+//dial to specific node
 func (cs *CommunicationService) Dial(ipAddress string) error {
 
 	c := command.CreateConnection{
 		Address: ipAddress,
 	}
 
-	cs.publish("connection.create", c)
+	cs.client.Call("connection.create", c, func(){})
 
 	return nil
 }
 
+//deliver peer leader table to specific peer
 func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTable PLTable) error {
 
 	if connectionId == "" {
@@ -70,5 +75,5 @@ func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTa
 
 	grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
 
-	return cs.publish("message.deliver", grpcDeliverCommand)
+	return cs.client.Call("message.deliver", grpcDeliverCommand, func(){})
 }
