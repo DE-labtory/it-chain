@@ -34,17 +34,17 @@ type StateApi struct {
 var ConsensusCreateError = errors.New("Consensus can't be created")
 
 func NewStateApi(publisherID string, propagateService pbft.PropagateService,
-	confirmService pbft.EventService, parliamentService pbft.ParliamentService, repo mem.StateRepository) StateApi {
+	eventService pbft.EventService, parliamentService pbft.ParliamentService, repo mem.StateRepository) StateApi {
 	return StateApi{
 		publisherID:       publisherID,
 		propagateService:  propagateService,
-		eventService:      confirmService,
+		eventService:      eventService,
 		parliamentService: parliamentService,
 		repo:              repo,
 	}
 }
 
-func (cApi StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
+func (cApi *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 
 	peerList, err := cApi.parliamentService.RequestPeerList()
 	if err != nil {
@@ -60,20 +60,20 @@ func (cApi StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 		return err
 	}
 
-	if err := cApi.repo.Save(*createdState); err != nil {
-		return err
-	}
-
 	createdPrePrepareMsg := pbft.NewPrePrepareMsg(createdState, cApi.publisherID)
 	if err := cApi.propagateService.BroadcastPrePrepareMsg(*createdPrePrepareMsg); err != nil {
 		return err
 	}
+
 	createdState.Start()
+	if err := cApi.repo.Save(*createdState); err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (cApi StateApi) HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error {
+func (cApi *StateApi) HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error {
 
 	lid, err := cApi.parliamentService.RequestLeader()
 	if err != nil {
@@ -89,20 +89,20 @@ func (cApi StateApi) HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error {
 		return err
 	}
 
-	if err := cApi.repo.Save(*builtState); err != nil {
-		return err
-	}
-
 	prepareMsg := pbft.NewPrepareMsg(builtState, cApi.publisherID)
 	if err := cApi.propagateService.BroadcastPrepareMsg(*prepareMsg); err != nil {
 		return err
 	}
 	builtState.ToPrepareStage()
 
+	if err := cApi.repo.Save(*builtState); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (cApi StateApi) HandlePrepareMsg(msg pbft.PrepareMsg) error {
+func (cApi *StateApi) HandlePrepareMsg(msg pbft.PrepareMsg) error {
 
 	loadedState, err := cApi.repo.Load()
 	if err != nil {
@@ -117,19 +117,22 @@ func (cApi StateApi) HandlePrepareMsg(msg pbft.PrepareMsg) error {
 		return nil
 	}
 
-	newCommitMsg := pbft.NewCommitMsg(loadedState, cApi.publisherID)
+	newCommitMsg := pbft.NewCommitMsg(&loadedState, cApi.publisherID)
 	if err := cApi.propagateService.BroadcastCommitMsg(*newCommitMsg); err != nil {
 		return err
 	}
 	loadedState.ToCommitStage()
 
+	if err := cApi.repo.Save(loadedState); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (cApi StateApi) HandleCommitMsg(msg pbft.CommitMsg) error {
+func (cApi *StateApi) HandleCommitMsg(msg pbft.CommitMsg) error {
 
 	loadedState, err := cApi.repo.Load()
-
 	if err != nil {
 		return err
 	}
