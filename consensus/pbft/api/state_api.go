@@ -24,6 +24,7 @@ import (
 )
 
 type StateApi struct {
+	publisherID       string
 	propagateService  pbft.PropagateService
 	confirmService    pbft.ConfirmService
 	parliamentService pbft.ParliamentService
@@ -32,9 +33,10 @@ type StateApi struct {
 
 var ConsensusCreateError = errors.New("Consensus can't be created")
 
-func NewStateApi(propagateService pbft.PropagateService,
+func NewStateApi(publisherID string, propagateService pbft.PropagateService,
 	confirmService pbft.ConfirmService, parliamentService pbft.ParliamentService, repo mem.StateRepository) StateApi {
 	return StateApi{
+		publisherID:       publisherID,
 		propagateService:  propagateService,
 		confirmService:    confirmService,
 		parliamentService: parliamentService,
@@ -42,7 +44,7 @@ func NewStateApi(propagateService pbft.PropagateService,
 	}
 }
 
-func (cApi StateApi) StartConsensus(userId pbft.MemberID, proposedBlock pbft.ProposedBlock) error {
+func (cApi StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 
 	peerList, err := cApi.parliamentService.RequestPeerList()
 	if err != nil {
@@ -62,7 +64,7 @@ func (cApi StateApi) StartConsensus(userId pbft.MemberID, proposedBlock pbft.Pro
 		return err
 	}
 
-	createdPrePrepareMsg := pbft.NewPrePrepareMsg(createdState)
+	createdPrePrepareMsg := pbft.NewPrePrepareMsg(createdState, cApi.publisherID)
 	if err := cApi.propagateService.BroadcastPrePrepareMsg(*createdPrePrepareMsg); err != nil {
 		return err
 	}
@@ -91,7 +93,7 @@ func (cApi StateApi) HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error {
 		return err
 	}
 
-	prepareMsg := pbft.NewPrepareMsg(builtState)
+	prepareMsg := pbft.NewPrepareMsg(builtState, cApi.publisherID)
 	if err := cApi.propagateService.BroadcastPrepareMsg(*prepareMsg); err != nil {
 		return err
 	}
@@ -115,7 +117,7 @@ func (cApi StateApi) HandlePrepareMsg(msg pbft.PrepareMsg) error {
 		return nil
 	}
 
-	newCommitMsg := pbft.NewCommitMsg(loadedState)
+	newCommitMsg := pbft.NewCommitMsg(loadedState, cApi.publisherID)
 	if err := cApi.propagateService.BroadcastCommitMsg(*newCommitMsg); err != nil {
 		return err
 	}

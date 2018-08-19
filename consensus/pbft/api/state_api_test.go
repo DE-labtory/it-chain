@@ -81,7 +81,7 @@ func TestConsensusApi_StartConsensus(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.isNeedConsensus, test.input.peerNum, test.input.isRepoFull, true)
-		assert.EqualValues(t, test.err, cApi.StartConsensus("my", test.input.block))
+		assert.EqualValues(t, test.err, cApi.StartConsensus(test.input.block))
 
 	}
 
@@ -358,6 +358,6 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNor
 		}
 		repo.Save(savedConsensus)
 	}
-	cApi := api.NewStateApi(propagateService, confirmService, parliamentService, repo)
+	cApi := api.NewStateApi("my", propagateService, confirmService, parliamentService, repo)
 	return cApi
 }
