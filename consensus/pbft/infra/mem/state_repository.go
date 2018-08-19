@@ -16,24 +16,23 @@
 package mem
 
 import (
-	"sync"
-
 	"errors"
+	"sync"
 
 	"github.com/it-chain/engine/consensus/pbft"
 )
 
-var ErrConsensusAlreadyExist = errors.New("State Already Exist")
-var ErrLoadConsensus = errors.New("There is no state for loading")
+var ErrInvalidSave = errors.New("Invalid Save Error")
+var ErrEmptyRepo = errors.New("Repository has empty state")
 
 type StateRepository struct {
-	state *pbft.State
+	state pbft.State
 	sync.RWMutex
 }
 
 func NewStateRepository() StateRepository {
 	return StateRepository{
-		state:   nil,
+		state:   pbft.State{},
 		RWMutex: sync.RWMutex{},
 	}
 }
@@ -41,26 +40,22 @@ func (repo *StateRepository) Save(state pbft.State) error {
 
 	repo.Lock()
 	defer repo.Unlock()
-
-	if repo.state != nil {
-		return ErrConsensusAlreadyExist
+	id := repo.state.StateID.ID
+	if id == state.StateID.ID || id == "" {
+		repo.state = state
+		return nil
 	}
-	repo.state = &state
-
-	return nil
+	return ErrInvalidSave
 }
-func (repo *StateRepository) Load() (*pbft.State, error) {
+func (repo *StateRepository) Load() (pbft.State, error) {
 
-	if repo.state == nil {
-		return nil, ErrLoadConsensus
+	if repo.state.StateID.ID == "" {
+		return repo.state, ErrEmptyRepo
 	}
 
 	return repo.state, nil
 }
 
 func (repo *StateRepository) Remove() {
-
-	if repo.state != nil {
-		repo.state = nil
-	}
+	repo.state = pbft.State{}
 }
