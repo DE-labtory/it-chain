@@ -91,9 +91,10 @@ type PrePrepareMsg struct {
 	ProposedBlock  ProposedBlock
 }
 
-func NewPrePrepareMsg(s *State) *PrePrepareMsg {
+func NewPrePrepareMsg(s *State, senderID string) *PrePrepareMsg {
 	return &PrePrepareMsg{
 		StateID:        s.StateID,
+		SenderID:       senderID,
 		Representative: s.Representatives,
 		ProposedBlock:  s.Block,
 	}
@@ -113,9 +114,10 @@ type PrepareMsg struct {
 	BlockHash []byte
 }
 
-func NewPrepareMsg(s *State) *PrepareMsg {
+func NewPrepareMsg(s *State, senderID string) *PrepareMsg {
 	return &PrepareMsg{
 		StateID:   s.StateID,
+		SenderID:  senderID,
 		BlockHash: s.Block.Seal,
 	}
 }
@@ -133,9 +135,10 @@ type CommitMsg struct {
 	SenderID string
 }
 
-func NewCommitMsg(s *State) *CommitMsg {
+func NewCommitMsg(s *State, senderID string) *CommitMsg {
 	return &CommitMsg{
-		StateID: s.StateID,
+		StateID:  s.StateID,
+		SenderID: senderID,
 	}
 }
 
