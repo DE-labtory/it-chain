@@ -27,7 +27,6 @@ type PropagateService interface {
 }
 
 type EventService interface {
-	Publish(topic string, event interface{}) error
 	ConfirmBlock(block ProposedBlock) error
 }
 

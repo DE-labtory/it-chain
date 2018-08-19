@@ -26,7 +26,7 @@ import (
 type StateApi struct {
 	publisherID       string
 	propagateService  pbft.PropagateService
-	confirmService    pbft.EventService
+	eventService      pbft.EventService
 	parliamentService pbft.ParliamentService
 	repo              mem.StateRepository
 }
@@ -38,7 +38,7 @@ func NewStateApi(publisherID string, propagateService pbft.PropagateService,
 	return StateApi{
 		publisherID:       publisherID,
 		propagateService:  propagateService,
-		confirmService:    confirmService,
+		eventService:      confirmService,
 		parliamentService: parliamentService,
 		repo:              repo,
 	}
@@ -142,7 +142,7 @@ func (cApi StateApi) HandleCommitMsg(msg pbft.CommitMsg) error {
 		return nil
 	}
 
-	if err := cApi.confirmService.ConfirmBlock(loadedState.Block); err != nil {
+	if err := cApi.eventService.ConfirmBlock(loadedState.Block); err != nil {
 		return err
 	}
 	cApi.repo.Remove()
