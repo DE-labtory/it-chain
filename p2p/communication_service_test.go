@@ -17,11 +17,11 @@
 package p2p_test
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/it-chain/engine/p2p"
 	"github.com/magiconair/properties/assert"
+	"github.com/it-chain/avengers/mock"
 )
 
 func TestGrpcCommandService_DeliverPLTable(t *testing.T) {
@@ -73,16 +73,12 @@ func TestGrpcCommandService_DeliverPLTable(t *testing.T) {
 			err: nil,
 		},
 	}
-	publish := func(topic string, data interface{}) error {
-		{
-			assert.Equal(t, topic, "message.deliver")
-			assert.Equal(t, reflect.TypeOf(data).String(), "command.DeliverGrpc")
+	networkManager := mock.NewNetworkManager()
+	process := mock.NewProcess()
+	process.Init("1")
+	client := mock.NewClient(process.Id, networkManager.GrpcCall)
 
-			return nil
-		}
-	}
-
-	communicationService := p2p.NewCommunicationService(publish)
+	communicationService := p2p.NewCommunicationService(&client)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
