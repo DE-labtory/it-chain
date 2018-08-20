@@ -59,9 +59,9 @@ func (pt *PLTable) GetPeerTable() (map[string]Peer, error) {
 	return pt.PeerTable, nil
 }
 
-type PLTableServiceImpl struct{}
+type PLTableService struct{}
 
-func (plts *PLTableServiceImpl) GetPLTableFromCommand(command command.ReceiveGrpc) (PLTable, error) {
+func (plts *PLTableService) GetPLTableFromCommand(command command.ReceiveGrpc) (PLTable, error) {
 
 	peerTable := PLTable{}
 

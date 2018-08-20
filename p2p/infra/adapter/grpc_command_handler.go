@@ -19,6 +19,8 @@ package adapter
 import (
 	"errors"
 
+	"fmt"
+
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/p2p"
@@ -32,14 +34,14 @@ var ErrUnmarshal = errors.New("error during unmarshal")
 
 type GrpcCommandHandler struct {
 	leaderApi        api.ILeaderApi
-	electionService  p2p.ElectionService
+	electionService  *p2p.ElectionService
 	communicationApi CommunicationApi // api.CommunicationApi
 	pLTableService   p2p.PLTableService
 }
 
 func NewGrpcCommandHandler(
 	leaderApi api.ILeaderApi,
-	electionService p2p.ElectionService, communicationApi CommunicationApi,
+	electionService *p2p.ElectionService, communicationApi CommunicationApi,
 	pLTableService p2p.PLTableService) GrpcCommandHandler {
 	return GrpcCommandHandler{
 		leaderApi:        leaderApi,
@@ -50,6 +52,7 @@ func NewGrpcCommandHandler(
 }
 
 func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc) error {
+	fmt.Println("handling received message:", command)
 
 	switch command.Protocol {
 
@@ -67,12 +70,14 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc)
 		break
 
 	case "RequestVoteProtocol":
-		gch.electionService.Vote(command.MessageId)
+		gch.electionService.Vote(command.ConnectionID)
 
 	case "VoteLeaderProtocol":
 		//	1. if candidate, reset left time
 		//	2. count up
 		//	3. if counted is same with num of peer-1 set leader and publish
+		fmt.Println("received VoteLeaderProtocol command:", command)
+		fmt.Println("received VoteLeaderProtocol current election :", gch.electionService.Election)
 		gch.electionService.DecideToBeLeader(command)
 
 	case "UpdateLeaderProtocol":

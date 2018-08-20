@@ -46,6 +46,6 @@ func init() {
 	//
 	//electionService := NewElectionService(electionRepository, &peerQueryService, client)
 	//
-	//pLTableService := PLTableServiceImpl{}
+	//pLTableService := PLTableService{}
 
 }

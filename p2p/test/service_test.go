@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package p2p
+package test
 
-type Publish func(topic string, data interface{}) (err error) //pubsub publish
+import "testing"
 
-type Client interface {
-	Call(queue string, params interface{}, callback interface{}) error
+func TestSetEnvironment(t *testing.T) {
+	list := SetTestEnvironment([]string{"1", "2"})
+	t.Logf("list is : %v", list)
 }
