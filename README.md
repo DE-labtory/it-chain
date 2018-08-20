@@ -27,6 +27,7 @@ A more detailed explanation is given below.
 
 - Go-lang >= 1.9
 - Docker >= 17.12.0
+- Rabbitmq >= 3.7.7
 
 ## Implementation Details
 Core implementation decisions can be found in the Project Implementation Details. <br>
