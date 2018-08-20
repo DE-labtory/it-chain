@@ -18,3 +18,9 @@
 ### CLA
 
 To get started, <a href="https://www.clahub.com/agreements/it-chain/engine">sign the Contributor License Agreement</a>.
+
+
+### Tip
+
+* 최대한 다른 사람과 작업하는 부분이 겹치지 않도록 feature를 작게 잡고 작업해주세요.
+* 이슈는 다른 사람들이 볼 때 쉽게 이해할 수 있도록 되도록이면 구체적으로 작성해주세요.
