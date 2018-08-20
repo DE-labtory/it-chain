@@ -71,7 +71,7 @@ func TestBlockRepositoryImpl_FindBySeal(t *testing.T) {
 
 }
 
-func TestBlockRepositoryImpl_FindLast(t *testing.T) {
+func TestBlockRepositoryImpl_FindLastAndFindAll(t *testing.T) {
 
 	dbPath := "./.db"
 

@@ -83,7 +83,6 @@ func (br *blockRepository) FindByHeight(height blockchain.BlockHeight) (blockcha
 	return *block, nil
 }
 
-//ToDo: Testcase 작성
 func (br *blockRepository) FindBySeal(seal []byte) (blockchain.DefaultBlock, error) {
 	br.mux.Lock()
 	defer br.mux.Unlock()
