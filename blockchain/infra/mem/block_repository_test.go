@@ -25,6 +25,52 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestBlockRepositoryImpl_NewBlockRepository(t *testing.T) {
+
+	dbPath := "./.db"
+
+	// when
+	br, err := mem.NewBlockRepository(dbPath)
+
+	// then
+	assert.Equal(t, nil, err)
+	defer func() {
+		br.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+}
+
+func TestBlockRepositoryImpl_FindBySeal(t *testing.T) {
+
+	dbPath := "./.db"
+
+	// when
+	br, err := mem.NewBlockRepository(dbPath)
+
+	// then
+	assert.Equal(t, nil, err)
+	defer func() {
+		br.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	// when
+	block := mock.GetNewBlock([]byte("genesis"), 0)
+	err = br.AddBlock(block)
+	// then
+	assert.NoError(t, err)
+
+	// when
+	seal := block.GetSeal()
+	blockFindbySeal, err := br.FindBySeal(seal)
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, block.GetSeal(), blockFindbySeal.GetSeal())
+
+}
+
 func TestBlockRepositoryImpl_FindLast(t *testing.T) {
 
 	dbPath := "./.db"
@@ -65,4 +111,54 @@ func TestBlockRepositoryImpl_FindLast(t *testing.T) {
 	assert.NoError(t, err4)
 	assert.Equal(t, 2, len(AllBlock))
 
+}
+
+func TestBlockRepositoryImpl_FindByHeight(t *testing.T) {
+
+	dbPath := "./.db"
+
+	// when
+	br, err := mem.NewBlockRepository(dbPath)
+
+	// then
+	assert.Equal(t, nil, err)
+	defer func() {
+		br.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	// when
+	blockHeight0 := mock.GetNewBlock([]byte("genesis"), 0)
+	err = br.AddBlock(blockHeight0)
+	// then
+	assert.NoError(t, err)
+
+	// when
+	blockFind, err := br.FindByHeight(uint64(0))
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, blockHeight0.GetSeal(), blockFind.GetSeal())
+	assert.Equal(t, blockHeight0.GetHeight(), blockFind.GetHeight())
+}
+
+func TestBlockRepositoryImpl_Save(t *testing.T) {
+	dbPath := "./.db"
+
+	// when
+	br, err := mem.NewBlockRepository(dbPath)
+
+	// then
+	assert.Equal(t, nil, err)
+	defer func() {
+		br.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	// when
+	block := mock.GetNewBlock([]byte("genesis"), 0)
+	err = br.Save(*block)
+
+	//then
+	assert.NoError(t, err)
 }
