@@ -35,7 +35,7 @@ Core implementation decisions can be found in the Project Implementation Details
 
 ## Contribution
 Contribution Guide <br>
-[CONTRIBUTION](CONTRIBUTION.md)
+[CONTRIBUTION](CONTRIBUTING.md)
 
 ## Contact
 Slack URL : https://it-chain-opensource.slack.com/
