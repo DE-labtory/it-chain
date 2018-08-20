@@ -14,20 +14,4 @@
  * limitations under the License.
  */
 
-package mock
-
-type MockProcess interface {
-	Init(id string, ipAddress string)
-
-	GetId() string
-
-	Publish(exchange string, topic string, data interface{}) error
-
-	HandleEvent()
-
-	HandleCommand()
-
-	TriggerCommand(data interface{}, process MockProcess)
-
-	TriggerEvent(data interface{}, process MockProcess)
-}
+package test

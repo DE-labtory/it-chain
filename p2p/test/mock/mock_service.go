@@ -147,3 +147,11 @@ func (mp *MockPublishService) PeerDeleted(peerId p2p.PeerId) error {
 func (mp *MockPublishService) LeaderUpdated(leader p2p.Leader) error {
 	return mp.LeaderUpdatedFunc(leader)
 }
+
+type MockEventService struct {
+	PublishFunc func(topic string, event interface{}) error
+}
+
+func (m *MockEventService) Publish(topic string, event interface{}) error {
+	return m.PublishFunc(topic, event)
+}

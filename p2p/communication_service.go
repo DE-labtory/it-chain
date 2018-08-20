@@ -24,7 +24,7 @@ import (
 
 var ErrEmptyConnectionId = errors.New("empty connection ")
 
-type CallOnlyClient interface{
+type CallOnlyClient interface {
 	Call(queue string, params interface{}, callback interface{}) error
 }
 
@@ -46,7 +46,7 @@ func (cs *CommunicationService) Dial(ipAddress string) error {
 		Address: ipAddress,
 	}
 
-	cs.client.Call("connection.create", c, func(){})
+	cs.client.Call("connection.create", c, func() {})
 
 	return nil
 }
@@ -75,5 +75,5 @@ func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTa
 
 	grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
 
-	return cs.client.Call("message.deliver", grpcDeliverCommand, func(){})
+	return cs.client.Call("message.deliver", grpcDeliverCommand, func() {})
 }

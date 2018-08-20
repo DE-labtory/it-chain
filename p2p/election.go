@@ -16,7 +16,10 @@
 
 package p2p
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type Election struct {
 	leftTime  int    //left time in millisecond
@@ -66,6 +69,8 @@ func (election *Election) SetState(state string) {
 	election.mux.Lock()
 	defer election.mux.Unlock()
 
+	fmt.Println("set state to:", state)
+
 	election.state = state
 }
 
@@ -104,35 +109,4 @@ func (election *Election) CountUp() {
 	defer election.mux.Unlock()
 
 	election.voteCount = election.voteCount + 1
-}
-
-type ElectionRepository struct {
-	election Election
-	mux      sync.Mutex
-}
-
-func NewElectionRepository(election Election) ElectionRepository {
-
-	return ElectionRepository{
-		election: election,
-		mux:      sync.Mutex{},
-	}
-}
-
-func (er ElectionRepository) GetElection() Election {
-
-	er.mux.Lock()
-	defer er.mux.Unlock()
-
-	return er.election
-}
-
-func (er ElectionRepository) SetElection(election Election) error {
-
-	er.mux.Lock()
-	defer er.mux.Unlock()
-
-	er.election = election
-
-	return nil
 }

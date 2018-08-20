@@ -19,9 +19,9 @@ package p2p_test
 import (
 	"testing"
 
+	"github.com/it-chain/avengers/mock"
 	"github.com/it-chain/engine/p2p"
 	"github.com/magiconair/properties/assert"
-	"github.com/it-chain/avengers/mock"
 )
 
 func TestGrpcCommandService_DeliverPLTable(t *testing.T) {

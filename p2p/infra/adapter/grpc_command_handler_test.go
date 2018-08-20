@@ -65,9 +65,9 @@ func TestGrpcCommandHandler_HandleMessageReceive(t *testing.T) {
 
 	communicationApi := &mock.MockCommunicationApi{}
 
-	pLTableService := &mock.MockPLTableService{}
+	pLTableService := p2p.PLTableService{}
 
-	messageHandler := adapter.NewGrpcCommandHandler(leaderApi, electionService, communicationApi, pLTableService)
+	messageHandler := adapter.NewGrpcCommandHandler(leaderApi, &electionService, communicationApi, pLTableService)
 
 	for testName, test := range tests {
 		grpcReceiveCommand := command.ReceiveGrpc{

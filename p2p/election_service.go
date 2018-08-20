@@ -21,40 +21,40 @@ import (
 	"sync"
 	"time"
 
+	"fmt"
+
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/rs/xid"
 )
 
 type ElectionService struct {
-	mux                sync.Mutex
-	electionRepository ElectionRepository
-	peerQueryService   PeerQueryService
-	client             rpc.Client
+	mux              sync.Mutex
+	Election         *Election
+	peerQueryService PeerQueryService
+	client           Client
 }
 
-func NewElectionService(electionRepository ElectionRepository, peerQueryService PeerQueryService, client rpc.Client) ElectionService {
+func NewElectionService(election *Election, peerQueryService PeerQueryService, client Client) ElectionService {
 
 	return ElectionService{
-		mux:                sync.Mutex{},
-		electionRepository: electionRepository,
-		peerQueryService:   peerQueryService,
-		client:             client,
+		mux:              sync.Mutex{},
+		Election:         election,
+		peerQueryService: peerQueryService,
+		client:           client,
 	}
 }
 
 func (es *ElectionService) Vote(connectionId string) error {
 
 	//if leftTime >0, reset left time and send VoteLeaderMessage
-	election := es.electionRepository.GetElection()
 
-	if election.GetLeftTime() < 0 {
+	if es.Election.GetLeftTime() < 0 {
 		return nil
 	}
 
-	election.ResetLeftTime()
+	es.Election.ResetLeftTime()
 
 	voteLeaderMessage := VoteMessage{}
 
@@ -86,21 +86,20 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 
 //broad case leader when voted fully
 func (es *ElectionService) DecideToBeLeader(command command.ReceiveGrpc) error {
-	election := es.electionRepository.GetElection()
 
+	fmt.Println("current state:", es.Election)
 	//	1. if candidate, reset left time
 	//	2. count up
-	if election.GetState() == "candidate" {
+	if es.Election.GetState() == "candidate" {
 
-		election.CountUp()
-		es.electionRepository.SetElection(election)
+		es.Election.CountUp()
 	}
 
 	//	3. if counted is same with num of peer-1 set leader and publish
 	pLTable, _ := es.peerQueryService.GetPLTable()
 	numOfPeers := len(pLTable.PeerTable)
 
-	if election.GetVoteCount() == numOfPeers-1 {
+	if es.Election.GetVoteCount() == numOfPeers-1 {
 
 		peer := Peer{
 			PeerId:    PeerId{Id: ""},
@@ -122,21 +121,19 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 	go func() {
 
 		timeoutNum := genRandomInRange(150, 300)
-		timeout := time.After(time.Duration(timeoutNum) * time.Microsecond)
+		timeout := time.After(time.Duration(timeoutNum) * time.Millisecond)
 		tick := time.Tick(1 * time.Millisecond)
-		election := es.electionRepository.GetElection()
-
-		for {
+		end := true
+		for end {
 			select {
 
 			case <-timeout:
 				// when timed out
 				// 1. if state is ticking, be candidate and request vote
 				// 2. if state is candidate, reset state and left time
-				if election.GetState() == "Ticking" {
+				if es.Election.GetState() == "Ticking" {
 
-					election.SetState("Candidate")
-					es.electionRepository.SetElection(election)
+					es.Election.SetState("Candidate")
 
 					pLTable, _ := es.peerQueryService.GetPLTable()
 
@@ -148,29 +145,28 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 						connectionIds = append(connectionIds, peer.PeerId.Id)
 					}
 
-					es.requestVote(connectionIds)
+					es.RequestVote(connectionIds)
 
-				} else if election.GetState() == "Candidate" {
+				} else if es.Election.GetState() == "Candidate" {
 					//reset time and state chane candidate -> ticking when timed in candidate state
-					election.ResetLeftTime()
-					election.SetState("Ticking")
+					es.Election.ResetLeftTime()
+					es.Election.SetState("Ticking")
 				}
-
-				es.electionRepository.SetElection(election)
 
 			case <-tick:
 				// count down left time while ticking
-				election.CountDownLeftTimeBy(1)
-
-				es.electionRepository.SetElection(election)
-
+				es.Election.CountDownLeftTimeBy(1)
+			case <-time.After(5 * time.Second):
+				end = false
 			}
+
 		}
 	}()
 }
 
-func (es *ElectionService) requestVote(connectionIds []string) error {
-
+func (es *ElectionService) RequestVote(connectionIds []string) error {
+	// 0. be candidate
+	es.Election.state = "candidate"
 	// 1. create request vote message
 	// 2. send message
 	requestVoteMessage := RequestVoteMessage{}
