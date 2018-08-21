@@ -73,10 +73,12 @@ func TestGrpcCommandService_DeliverPLTable(t *testing.T) {
 			err: nil,
 		},
 	}
-	networkManager := mock.NewNetworkManager()
-	process := mock.NewProcess()
-	process.Init("1")
-	client := mock.NewClient(process.Id, networkManager.GrpcCall)
+
+	client := mock.NewClient("1", func(processId string, queue string, params interface{}, callback interface{}) error { return nil })
+
+	client.CallFunc = func(processId string, queue string, params interface{}, callback interface{}) error {
+		return nil
+	}
 
 	communicationService := p2p.NewCommunicationService(&client)
 
