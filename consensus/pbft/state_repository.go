@@ -13,30 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package mem
+package pbft
 
 import (
 	"errors"
 	"sync"
-
-	"github.com/it-chain/engine/consensus/pbft"
 )
 
 var ErrInvalidSave = errors.New("Invalid Save Error")
 var ErrEmptyRepo = errors.New("Repository has empty state")
 
 type StateRepository struct {
-	state pbft.State
+	state State
 	sync.RWMutex
 }
 
 func NewStateRepository() StateRepository {
 	return StateRepository{
-		state:   pbft.State{},
+		state:   State{},
 		RWMutex: sync.RWMutex{},
 	}
 }
-func (repo *StateRepository) Save(state pbft.State) error {
+func (repo *StateRepository) Save(state State) error {
 
 	repo.Lock()
 	defer repo.Unlock()
@@ -47,7 +45,7 @@ func (repo *StateRepository) Save(state pbft.State) error {
 	}
 	return ErrInvalidSave
 }
-func (repo *StateRepository) Load() (pbft.State, error) {
+func (repo *StateRepository) Load() (State, error) {
 
 	if repo.state.StateID.ID == "" {
 		return repo.state, ErrEmptyRepo
@@ -57,5 +55,5 @@ func (repo *StateRepository) Load() (pbft.State, error) {
 }
 
 func (repo *StateRepository) Remove() {
-	repo.state = pbft.State{}
+	repo.state = State{}
 }

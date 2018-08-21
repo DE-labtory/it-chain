@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package mem_test
+package pbft_test
 
 import (
 	"testing"
 
 	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/engine/consensus/pbft/infra/mem"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,23 +27,23 @@ func TestConsensusRepository_Save(t *testing.T) {
 	mock1 := pbft.State{
 		StateID: pbft.StateID{"mock1"},
 	}
-	repo := mem.NewStateRepository()
+	repo := pbft.NewStateRepository()
 	err := repo.Save(mock1)
 	assert.Equal(t, nil, err)
 	mock2 := pbft.State{
 		StateID: pbft.StateID{"mock2"},
 	}
 	err2 := repo.Save(mock2)
-	assert.Equal(t, mem.ErrInvalidSave, err2)
+	assert.Equal(t, pbft.ErrInvalidSave, err2)
 
 }
 
 func TestConsensusRepository_Load(t *testing.T) {
 
-	repo := mem.NewStateRepository()
+	repo := pbft.NewStateRepository()
 	_, err := repo.Load()
 	// case1 : Repository has no consensus
-	assert.Equal(t, err, mem.ErrEmptyRepo)
+	assert.Equal(t, err, pbft.ErrEmptyRepo)
 
 	// case2 : Repository has consensus
 	mockConsensus := pbft.State{
@@ -57,13 +56,13 @@ func TestConsensusRepository_Load(t *testing.T) {
 
 }
 func TestConsensusRepository_Remove(t *testing.T) {
-	repo := mem.NewStateRepository()
+	repo := pbft.NewStateRepository()
 	mockConsensus := pbft.State{
 		StateID: pbft.StateID{"hihi"},
 	}
 	repo.Save(mockConsensus)
 	repo.Remove()
 	_, err := repo.Load()
-	assert.Equal(t, mem.ErrEmptyRepo, err)
+	assert.Equal(t, pbft.ErrEmptyRepo, err)
 
 }

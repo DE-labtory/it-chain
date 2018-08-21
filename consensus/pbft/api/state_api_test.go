@@ -22,7 +22,6 @@ import (
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
-	"github.com/it-chain/engine/consensus/pbft/infra/mem"
 	"github.com/it-chain/engine/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
 )
@@ -73,7 +72,7 @@ func TestConsensusApi_StartConsensus(t *testing.T) {
 				peerNum         int
 				isRepoFull      bool
 			}{normalBlock, true, 5, true},
-			err: mem.ErrInvalidSave,
+			err: pbft.ErrInvalidSave,
 		},
 	}
 
@@ -124,7 +123,7 @@ func TestConsensusApi_HandlePrePrepareMsg(t *testing.T) {
 				peerNum         int
 				isRepoFull      bool
 			}{validLeaderPrePrepareMsg, false, 5, true},
-			err: mem.ErrInvalidSave,
+			err: pbft.ErrInvalidSave,
 		},
 		"Case 3 PrePrepareMsg의 Sender id와 Request된 Leader id가 일치하지 않을 경우": {
 			input: struct {
@@ -192,7 +191,7 @@ func TestConsensusApi_HandlePrepareMsg(t *testing.T) {
 				peerNum         int
 				isRepoFull      bool
 			}{invalidPrepareMsg, false, 5, false},
-			err: mem.ErrEmptyRepo,
+			err: pbft.ErrEmptyRepo,
 		},
 	}
 
@@ -253,7 +252,7 @@ func TestConsensusApi_HandleCommitMsg(t *testing.T) {
 				isRepoFull      bool
 				isNormalBlock   bool
 			}{validCommitMsg, false, 5, false, false},
-			err: mem.ErrEmptyRepo,
+			err: pbft.ErrEmptyRepo,
 		},
 	}
 
@@ -316,7 +315,7 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNor
 		return nil
 	})
 
-	repo := mem.NewStateRepository()
+	repo := pbft.NewStateRepository()
 	if isRepoFull && isNormalBlock {
 
 		savedConsensus := pbft.State{
