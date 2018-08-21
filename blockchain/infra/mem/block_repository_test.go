@@ -69,6 +69,14 @@ func TestBlockRepositoryImpl_FindBySeal(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, block.GetSeal(), blockFindbySeal.GetSeal())
 
+	// when
+	block2 := mock.GetNewBlock([]byte("genesis"), 0)
+	sealError := block2.GetSeal()
+	_, err = br.FindBySeal(sealError)
+
+	// then
+	assert.Error(t, err)
+
 }
 
 func TestBlockRepositoryImpl_FindLastAndFindAll(t *testing.T) {
@@ -140,6 +148,12 @@ func TestBlockRepositoryImpl_FindByHeight(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, blockHeight0.GetSeal(), blockFind.GetSeal())
 	assert.Equal(t, blockHeight0.GetHeight(), blockFind.GetHeight())
+
+	// when
+
+	_, err = br.FindByHeight(uint64(1))
+	assert.Error(t, err)
+
 }
 
 func TestBlockRepositoryImpl_Save(t *testing.T) {
