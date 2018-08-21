@@ -18,6 +18,7 @@ package p2p
 
 import (
 	"sync"
+
 	"github.com/it-chain/engine/common/logger"
 )
 

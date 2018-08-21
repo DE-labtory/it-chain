@@ -23,9 +23,9 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/conf"
 	"github.com/rs/xid"
-	"github.com/it-chain/engine/common/logger"
 )
 
 type ElectionService struct {
