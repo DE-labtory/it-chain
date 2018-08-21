@@ -21,12 +21,11 @@ import (
 	"sync"
 	"time"
 
-	"fmt"
-
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/conf"
 	"github.com/rs/xid"
+	"github.com/it-chain/engine/common/logger"
 )
 
 type ElectionService struct {
@@ -87,7 +86,7 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 //broad case leader when voted fully
 func (es *ElectionService) DecideToBeLeader(command command.ReceiveGrpc) error {
 
-	fmt.Println("current state:", es.Election)
+	logger.Infof(nil, "current state", es.Election)
 	//	1. if candidate, reset left time
 	//	2. count up
 	if es.Election.GetState() == "candidate" {

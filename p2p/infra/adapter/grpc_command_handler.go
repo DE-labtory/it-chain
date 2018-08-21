@@ -25,6 +25,7 @@ import (
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/api"
+	"github.com/it-chain/engine/common/logger"
 )
 
 var ErrLeaderInfoDeliver = errors.New("leader info deliver failed")
@@ -52,8 +53,8 @@ func NewGrpcCommandHandler(
 }
 
 func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc) error {
-	fmt.Println("handling received message:", command)
 
+	logger.Info(nil,"handling received message:" )
 	switch command.Protocol {
 
 	case "PLTableDeliverProtocol": //receive peer table

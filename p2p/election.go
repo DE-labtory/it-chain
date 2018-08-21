@@ -17,8 +17,8 @@
 package p2p
 
 import (
-	"fmt"
 	"sync"
+	"github.com/it-chain/engine/common/logger"
 )
 
 type Election struct {
@@ -69,7 +69,7 @@ func (election *Election) SetState(state string) {
 	election.mux.Lock()
 	defer election.mux.Unlock()
 
-	fmt.Println("set state to:", state)
+	logger.Infof(nil, "set state to:", state)
 
 	election.state = state
 }
