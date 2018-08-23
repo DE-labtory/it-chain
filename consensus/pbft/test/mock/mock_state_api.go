@@ -21,14 +21,14 @@ import (
 )
 
 type MockStateApi struct {
-	StartConsensusFunc      func(userId pbft.MemberID, proposedBlock pbft.ProposedBlock) error
+	StartConsensusFunc      func(proposedBlock pbft.ProposedBlock) error
 	HandlePrePrepareMsgFunc func(msg pbft.PrePrepareMsg) error
 	HandlePrepareMsgFunc    func(msg pbft.PrepareMsg) error
 	HandleCommitMsgFunc     func(msg pbft.CommitMsg) error
 }
 
-func (mca *MockStateApi) StartConsensus(userId pbft.MemberID, proposedBlock pbft.ProposedBlock) error {
-	return mca.StartConsensus(userId, proposedBlock)
+func (mca *MockStateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
+	return mca.StartConsensusFunc(proposedBlock)
 }
 
 func (mca *MockStateApi) HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error {

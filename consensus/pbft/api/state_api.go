@@ -22,7 +22,14 @@ import (
 	"github.com/it-chain/engine/consensus/pbft"
 )
 
-type StateApi struct {
+type StateApi interface {
+	StartConsensus(block pbft.ProposedBlock) error
+	HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error
+	HandlePrepareMsg(msg pbft.PrepareMsg) error
+	HandleCommitMsg(msg pbft.CommitMsg) error
+}
+
+type StateApiImpl struct {
 	publisherID       string
 	propagateService  pbft.PropagateService
 	eventService      pbft.EventService
@@ -33,8 +40,8 @@ type StateApi struct {
 var ConsensusCreateError = errors.New("Consensus can't be created")
 
 func NewStateApi(publisherID string, propagateService pbft.PropagateService,
-	eventService pbft.EventService, parliamentService pbft.ParliamentService, repo pbft.StateRepository) StateApi {
-	return StateApi{
+	eventService pbft.EventService, parliamentService pbft.ParliamentService, repo pbft.StateRepository) StateApiImpl {
+	return StateApiImpl{
 		publisherID:       publisherID,
 		propagateService:  propagateService,
 		eventService:      eventService,
@@ -43,7 +50,7 @@ func NewStateApi(publisherID string, propagateService pbft.PropagateService,
 	}
 }
 
-func (cApi *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
+func (cApi *StateApiImpl) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 
 	peerList, err := cApi.parliamentService.RequestPeerList()
 	if err != nil {
@@ -72,7 +79,7 @@ func (cApi *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 	return nil
 }
 
-func (cApi *StateApi) HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error {
+func (cApi *StateApiImpl) HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error {
 
 	lid, err := cApi.parliamentService.RequestLeader()
 	if err != nil {
@@ -101,7 +108,7 @@ func (cApi *StateApi) HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error {
 	return nil
 }
 
-func (cApi *StateApi) HandlePrepareMsg(msg pbft.PrepareMsg) error {
+func (cApi *StateApiImpl) HandlePrepareMsg(msg pbft.PrepareMsg) error {
 
 	loadedState, err := cApi.repo.Load()
 	if err != nil {
@@ -129,7 +136,7 @@ func (cApi *StateApi) HandlePrepareMsg(msg pbft.PrepareMsg) error {
 	return nil
 }
 
-func (cApi *StateApi) HandleCommitMsg(msg pbft.CommitMsg) error {
+func (cApi *StateApiImpl) HandleCommitMsg(msg pbft.CommitMsg) error {
 
 	loadedState, err := cApi.repo.Load()
 	if err != nil {
