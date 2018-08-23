@@ -97,7 +97,7 @@ func (api BlockApi) CreateProposedBlock(txList []*blockchain.DefaultTransaction)
 		return err
 	}
 
-	return api.consensusService.ConsensusBlock(proposedBlock)
+	return api.consensusService.ConsentBlock(proposedBlock)
 }
 
 func (bApi BlockApi) CommitProposedBlock(txList []*blockchain.DefaultTransaction) error {

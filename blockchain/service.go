@@ -22,5 +22,5 @@ type EventService interface {
 
 // TODO: should be implemented in infrastructure layer
 type ConsensusService interface {
-	ConsensusBlock(block DefaultBlock) error
+	ConsentBlock(block DefaultBlock) error
 }
