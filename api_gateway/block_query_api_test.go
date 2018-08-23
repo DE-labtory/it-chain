@@ -20,8 +20,6 @@ import (
 	"os"
 	"testing"
 
-	"encoding/hex"
-
 	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/api_gateway/test/mock"
 	"github.com/it-chain/engine/blockchain"
@@ -170,11 +168,9 @@ func TestBlockEventListener_HandleBlockCommitedEvent(t *testing.T) {
 	// when
 	block2 := mock.GetNewBlock(block1.GetSeal(), 1)
 	// when
-	block2ID := hex.EncodeToString(block2.GetSeal())
 	txList, _ := convertToTxList(block2.TxList)
 
 	event1 := event.BlockCommitted{
-		BlockId:   block2ID,
 		Seal:      block2.Seal,
 		PrevSeal:  block2.PrevSeal,
 		Height:    block2.Height,

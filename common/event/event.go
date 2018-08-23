@@ -63,7 +63,6 @@ type MetaDeleted struct {
 
 // event when block is committed to event store
 type BlockCommitted struct {
-	BlockId   string
 	Seal      []byte
 	PrevSeal  []byte
 	Height    uint64

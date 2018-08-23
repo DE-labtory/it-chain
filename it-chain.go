@@ -151,8 +151,8 @@ func initApiGateway(config *conf.Configuration, errs chan error) func() {
 	// set ivm
 	icodeDB := "./api-db/ivm"
 	icodeRepo := api_gateway.NewLevelDbMetaRepository(icodeDB)
-	metaQueryApi := api_gateway.NewICodeQueryApi(&icodeRepo)
-	metaEventListener := api_gateway.NewIcodeEventHandler(&icodeRepo)
+	icodeQueryApi := api_gateway.NewICodeQueryApi(&icodeRepo)
+	icodeEventListener := api_gateway.NewIcodeEventHandler(&icodeRepo)
 
 	//set mux
 	mux := http.NewServeMux()
@@ -162,16 +162,16 @@ func initApiGateway(config *conf.Configuration, errs chan error) func() {
 	if err := subscriber.SubscribeTopic("block.*", &blockEventListener); err != nil {
 		panic(err)
 	}
-	if err := subscriber.SubscribeTopic("meta.*", &metaEventListener); err != nil {
+	if err := subscriber.SubscribeTopic("icode.*", &icodeEventListener); err != nil {
 		panic(err)
 	}
 
 	mux.Handle("/blocks", api_gateway.BlockchainApiHandler(blockQueryApi, httpLogger))
-	mux.Handle("/metas", api_gateway.ICodeApiHandler(metaQueryApi, httpLogger))
+	mux.Handle("/icodes", api_gateway.ICodeApiHandler(icodeQueryApi, httpLogger))
 	http.Handle("/", mux)
 
 	go func() {
-		logger.Infof(nil, "api gateway is staring on port:%s", config.ApiGateway.Port)
+		logger.Infof(nil, "[Main] Api-gateway is staring on port:%s", config.ApiGateway.Port)
 		errs <- http.ListenAndServe(ipAddress, nil)
 	}()
 
