@@ -32,7 +32,7 @@ func QueryCmd() cli.Command {
 		Name:  "query",
 		Usage: "it-chain ivm query [icode id] [function name] [...args]",
 		Action: func(c *cli.Context) error {
-			if c.NArg() < 3 {
+			if c.NArg() < 2 {
 				return errors.New("not enough args")
 			}
 			icodeId := c.Args().Get(0)
