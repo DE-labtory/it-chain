@@ -59,7 +59,7 @@ func ICodeApiHandler(api ICodeQueryApi, logger kitlog.Logger) http.Handler {
 	)
 	r := mux.NewRouter()
 
-	r.Handle("/metas", findAllMetasHandler).Methods("GET")
+	r.Handle("/icodes", findAllMetasHandler).Methods("GET")
 
 	return r
 }
