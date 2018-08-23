@@ -45,6 +45,13 @@ type Configuration struct {
 	ApiGateway  model.ApiGatewayConfiguration
 }
 
+// EngineConfiguration Mode용
+var modeConsts = [...]string{
+	"solo",
+	"test",
+	"pbft",
+}
+
 // it-chain의 각종 설정을 받아온다.
 func SetConfigName(name string) {
 	instance.configName = name
@@ -70,8 +77,23 @@ func GetConfiguration() *Configuration {
 		if err != nil {
 			panic("error in read config")
 		}
+
+		if !HasValidMode(instance) {
+			panic("NewEngineConfiguration mode is wrong.")
+		}
 	})
 
 	// it-chain의 설정내용을 반환한다.
 	return instance
+}
+
+func HasValidMode(c *Configuration) bool {
+
+	for _, modeConst := range modeConsts {
+		if instance.Engine.Mode == modeConst {
+			return true
+		}
+	}
+	return false
+
 }
