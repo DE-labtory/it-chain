@@ -253,3 +253,35 @@ func TestBlockApi_CommitGenesisBlock(t *testing.T) {
 	assert.NoError(t, err)
 	wg.Wait()
 }
+
+func TestBlockApi_CreateProposedBlock(t *testing.T) {
+	// given
+	publisherID := "zf"
+
+	lastBlock := mock.GetNewBlock([]byte("prevSeal"), 1)
+
+	blockRepo := mock.BlockRepository{}
+	blockRepo.FindLastFunc = func() (blockchain.DefaultBlock, error) {
+		return *lastBlock, nil
+	}
+
+	eventService := mock.EventService{}
+
+	consensusService := mock.ConsensusService{}
+	consensusService.ConsensusBlockFunc = func(block blockchain.DefaultBlock) error {
+		assert.Equal(t, uint64(2), block.GetHeight())
+		assert.Equal(t, lastBlock.GetSeal(), block.GetPrevSeal())
+		assert.Equal(t, []byte("zf"), block.GetCreator())
+		return nil
+	}
+
+	blockApi, err := api.NewBlockApi(publisherID, blockRepo, eventService, consensusService)
+	assert.NoError(t, err)
+
+	txList := mock.GetTxList(time.Now())
+
+	// when
+	err = blockApi.CreateProposedBlock(txList)
+	// then
+	assert.NoError(t, err)
+}
