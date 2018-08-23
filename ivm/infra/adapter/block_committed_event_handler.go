@@ -20,7 +20,6 @@ import (
 	"sync"
 
 	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/engine/ivm/api"
 )
@@ -38,7 +37,6 @@ func NewBlockCommittedEventHandler(icodeApi api.ICodeApi) *BlockCommittedEventHa
 }
 
 func (b *BlockCommittedEventHandler) HandleBlockCommittedEventHandler(blockCommittedEvent event.BlockCommitted) {
-	logger.Info(nil, "[Icode] handle blockCommitedEvent")
 
 	b.mutex.Lock()
 	defer b.mutex.Unlock()

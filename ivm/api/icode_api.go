@@ -96,7 +96,8 @@ func (i ICodeApi) ExecuteRequestList(RequestList []ivm.Request) []ivm.Result {
 		result, err := i.ExecuteRequest(request)
 
 		if err != nil {
-			logger.Fatal(nil, fmt.Sprintf("[ICode] request error %s", err.Error()))
+			logger.Error(nil, fmt.Sprintf("[IVM] Fail to invoke icode - message: [%s] ", err.Error()))
+			result = ivm.Result{Err: err.Error()}
 		}
 
 		resultList = append(resultList, result)
