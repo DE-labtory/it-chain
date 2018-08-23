@@ -19,13 +19,12 @@ package ivm
 import (
 	"errors"
 
-	"fmt"
-
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/ivm"
+	"github.com/it-chain/engine/txpool"
+	"github.com/rs/xid"
 	"github.com/urfave/cli"
 )
 
@@ -60,32 +59,25 @@ func invoke(id string, functionName string, args []string) {
 
 	defer client.Close()
 
-	invokeCommand := command.ExecuteICode{
-		ICodeId:  id,
-		Function: functionName,
-		Args:     args,
-		Method:   "invoke",
+	invokeCommand := command.CreateTransaction{
+		TransactionId: xid.New().String(),
+		ICodeID:       id,
+		Jsonrpc:       "2.0",
+		Method:        "invoke",
+		Args:          args,
+		Function:      functionName,
 	}
 
-	logger.Info(nil, "invoke icode ...")
+	logger.Infof(nil, "[Cmd] Invoke icode - icodeID: [%s]", id)
 
-	err := client.Call("ivm.execute", invokeCommand, func(result ivm.Result, err rpc.Error) {
-		fmt.Println(result)
+	err := client.Call("transaction.create", invokeCommand, func(transaction txpool.Transaction, err rpc.Error) {
+
 		if !err.IsNil() {
-			logger.Errorf(nil, "fail to invoke icode err: [%s]", err.Message)
+			logger.Errorf(nil, "[Cmd] Fail to invoke icode err: [%s]", err.Message)
 			return
 		}
 
-		logger.Infof(nil, "%15s : [%s]", "icodeId", id)
-		logger.Infof(nil, "%15s : [%s]", "function Name", functionName)
-
-		for i, arg := range args {
-			logger.Infof(nil, "%15s : [%s]", "arg"+string(i), arg)
-		}
-
-		for key, val := range result.Data {
-			logger.Infof(nil, "%s : %s", "[result]"+key, val)
-		}
+		logger.Infof(nil, "[Cmd] Transactions are created - ID: [%s]", transaction.ID)
 	})
 
 	if err != nil {

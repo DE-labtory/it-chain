@@ -109,7 +109,7 @@ func (b BlockProposalService) sendBlockProposal(transactions []txpool.Transactio
 			return
 		}
 
-		logger.Info(nil, "a block has proposed")
+		logger.Infof(nil, "[Txpool] Block has proposed")
 	})
 
 	return err
