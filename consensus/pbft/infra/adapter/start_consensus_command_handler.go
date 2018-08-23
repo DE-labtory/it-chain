@@ -22,7 +22,10 @@ import (
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
+	"github.com/pkg/errors"
 )
+
+var BlockSealIsNilError = errors.New("Block seal in command is nil!")
 
 type StartConsensusCommandHandler struct {
 	sApi api.StateApi
@@ -51,6 +54,10 @@ func (r StartConsensusCommandHandler) HandleStartConsensusCommand(startConsensus
 }
 
 func extractProposedBlock(Seal []byte, TxList []command.Tx) (pbft.ProposedBlock, error) {
+	if Seal == nil {
+		return pbft.ProposedBlock{}, BlockSealIsNilError
+	}
+
 	body, err := common.Serialize(TxList)
 	if err != nil {
 		return pbft.ProposedBlock{}, err
