@@ -72,7 +72,7 @@ func GetStagedBlockWithId(blockId string) blockchain.DefaultBlock {
 		Seal:      []byte(blockId),
 		PrevSeal:  []byte{0x2},
 		Height:    blockchain.BlockHeight(1),
-		TxList:    getTxList(testingTime),
+		TxList:    GetTxList(testingTime),
 		TxSeal:    [][]byte{{0x1}},
 		Timestamp: testingTime,
 		Creator:   []byte("creator01"),
@@ -84,7 +84,7 @@ func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
 	validator := &blockchain.DefaultValidator{}
 	testingTime := time.Now()
 	blockCreator := []byte("testUser")
-	txList := getTxList(testingTime)
+	txList := GetTxList(testingTime)
 	block := &blockchain.DefaultBlock{}
 	block.SetPrevSeal(prevSeal)
 	block.SetHeight(height)
@@ -102,7 +102,7 @@ func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
 	return block
 }
 
-func getTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
+func GetTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 	return []*blockchain.DefaultTransaction{
 		{
 			ID:        "tx01",
@@ -112,6 +112,7 @@ func getTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 			Jsonrpc:   "jsonRPC01",
 			Function:  "function01",
 			Args:      []string{"arg1", "arg2"},
+			Signature: []byte("signature01"),
 		},
 		{
 
@@ -122,6 +123,7 @@ func getTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 			Jsonrpc:   "jsonRPC02",
 			Function:  "function02",
 			Args:      []string{"arg1", "arg2"},
+			Signature: []byte("signature02"),
 		},
 		{
 			ID:        "tx03",
@@ -131,6 +133,7 @@ func getTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 			Jsonrpc:   "jsonRPC03",
 			Function:  "function03",
 			Args:      []string{"arg1", "arg2"},
+			Signature: []byte("signature03"),
 		},
 		{
 			ID:        "tx04",
@@ -140,6 +143,7 @@ func getTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
 			Jsonrpc:   "jsonRPC04",
 			Function:  "function04",
 			Args:      []string{"arg1", "arg2"},
+			Signature: []byte("signature04"),
 		},
 	}
 }
