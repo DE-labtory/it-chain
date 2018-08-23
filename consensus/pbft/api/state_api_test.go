@@ -263,7 +263,7 @@ func TestConsensusApi_HandleCommitMsg(t *testing.T) {
 	}
 }
 
-func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNormalBlock bool) api.StateApi {
+func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNormalBlock bool) api.StateApiImpl {
 
 	reps := make([]*pbft.Representative, 0)
 	for i := 0; i < 6; i++ {

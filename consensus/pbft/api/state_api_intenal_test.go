@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
 	"github.com/it-chain/engine/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
 )
@@ -135,7 +134,7 @@ func TestConsensusApi_HandlePrepareMsg_State(t *testing.T) {
 }
 
 func setUpApiCondition(isNeedConsensus bool, peerNum int, isNormalBlock bool,
-	isPrepareConditionSatisfied bool, isCommitConditionSatisfied bool) StateApi {
+	isPrepareConditionSatisfied bool, isCommitConditionSatisfied bool) StateApiImpl {
 
 	reps := make([]*pbft.Representative, 0)
 	for i := 0; i < 6; i++ {
@@ -193,9 +192,13 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isNormalBlock bool,
 		return "Leader", nil
 	}
 
-	eventService := adapter.NewEventService(func(topic string, data interface{}) (err error) {
+	eventService := mock.EventService{}
+	eventService.PublishFunc = func(topic string, event interface{}) error {
 		return nil
-	})
+	}
+	eventService.ConfirmBlockFunc = func(block pbft.ProposedBlock) error {
+		return nil
+	}
 
 	repo := pbft.NewStateRepository()
 	if isPrepareConditionSatisfied && isNormalBlock {

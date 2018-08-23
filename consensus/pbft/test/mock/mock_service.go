@@ -21,11 +21,16 @@ import (
 )
 
 type EventService struct {
-	PublishFunc func(topic string, event interface{}) error
+	PublishFunc      func(topic string, event interface{}) error
+	ConfirmBlockFunc func(block pbft.ProposedBlock) error
 }
 
 func (m EventService) Publish(topic string, event interface{}) error {
 	return m.PublishFunc(topic, event)
+}
+
+func (m EventService) ConfirmBlock(block pbft.ProposedBlock) error {
+	return m.ConfirmBlockFunc(block)
 }
 
 type MockConfirmService struct {
