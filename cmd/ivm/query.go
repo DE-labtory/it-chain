@@ -18,7 +18,6 @@ package ivm
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
@@ -63,26 +62,19 @@ func query(id string, functionName string, args []string) {
 		Method:   "query",
 	}
 
-	logger.Info(nil, "query icode ...")
+	logger.Infof(nil, "[Cmd] Querying icode - icodeID: [%s], func: [%s]", id, functionName)
 
 	err := client.Call("ivm.execute", queryCommand, func(result ivm.Result, err rpc.Error) {
-		fmt.Println(result)
 		if !err.IsNil() {
-			logger.Errorf(nil, "fail to query icode err: [%s]", err.Message)
+			logger.Errorf(nil, "[Cmd] Fail to query icode err: [%s]", err.Message)
 			return
 		}
 
-		logger.Infof(nil, "%15s : [%s]", "icodeId", id)
-		logger.Infof(nil, "%15s : [%s]", "function Name", functionName)
-
-		for i, arg := range args {
-			logger.Infof(nil, "%15s : [%s]", "arg"+string(i), arg)
-		}
-
 		for key, val := range result.Data {
-			logger.Infof(nil, "%s : %s", "[result]"+key, val)
+			logger.Infof(nil, "[CMD] Querying result - key: [%s], value: [%s]", key, val)
 		}
 	})
+
 	if err != nil {
 		logger.Fatal(&logger.Fields{"err_msg": err.Error()}, "fatal err in query cmd")
 	}
