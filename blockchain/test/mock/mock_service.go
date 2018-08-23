@@ -72,3 +72,11 @@ type EventService struct {
 func (s EventService) Publish(topic string, event interface{}) error {
 	return s.PublishFunc(topic, event)
 }
+
+type ConsensusService struct {
+	ConsensusBlockFunc func(block blockchain.DefaultBlock) error
+}
+
+func (s ConsensusService) ConsensusBlock(block blockchain.DefaultBlock) error {
+	return s.ConsensusBlockFunc(block)
+}

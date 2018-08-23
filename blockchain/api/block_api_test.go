@@ -52,8 +52,9 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 	publisherId := "zf"
 	blockRepo := mock.BlockRepository{}
 	eventService := mock.EventService{}
+	consensusService := mock.ConsensusService{}
 
-	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService)
+	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService, consensusService)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -79,9 +80,10 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 	publisherId := "zf"
 	blockRepo := mock.BlockRepository{}
 	eventService := mock.EventService{}
+	consensusService := mock.ConsensusService{}
 
 	// When
-	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService)
+	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService, consensusService)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -99,9 +101,10 @@ func TestBlockApi_SyncIsProgressing(t *testing.T) {
 	publisherId := "zf"
 	blockRepo := mock.BlockRepository{}
 	eventService := mock.EventService{}
+	consensusService := mock.ConsensusService{}
 
 	// when
-	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService)
+	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService, consensusService)
 
 	// then
 	state := blockApi.SyncIsProgressing()
@@ -182,7 +185,9 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 
 	eventService := common.NewEventService("", "Event")
 
-	bApi, err := api.NewBlockApi(publisherID, blockRepo, eventService)
+	consensusService := mock.ConsensusService{}
+
+	bApi, err := api.NewBlockApi(publisherID, blockRepo, eventService, consensusService)
 
 	assert.NoError(t, err)
 
@@ -237,7 +242,9 @@ func TestBlockApi_CommitGenesisBlock(t *testing.T) {
 
 	eventService := common.NewEventService("", "Event")
 
-	bApi, err := api.NewBlockApi(publisherID, blockRepo, eventService)
+	consensusService := mock.ConsensusService{}
+
+	bApi, err := api.NewBlockApi(publisherID, blockRepo, eventService, consensusService)
 	assert.NoError(t, err)
 
 	// when
