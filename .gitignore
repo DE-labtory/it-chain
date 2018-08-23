@@ -34,7 +34,9 @@ sample/db/test/*
 .tmp
 
 # vendor
+/vendor-new
 /vendor
+/.vendor-new
 
 # leveldb output
 *.log
