@@ -77,6 +77,6 @@ type ConsensusService struct {
 	ConsensusBlockFunc func(block blockchain.DefaultBlock) error
 }
 
-func (s ConsensusService) ConsensusBlock(block blockchain.DefaultBlock) error {
+func (s ConsensusService) ConsentBlock(block blockchain.DefaultBlock) error {
 	return s.ConsensusBlockFunc(block)
 }
