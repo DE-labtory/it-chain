@@ -23,15 +23,19 @@ import (
 )
 
 type Election struct {
+	ipAddress string
+	candidate *Peer  // candidate peer to be leader later
 	leftTime  int    //left time in millisecond
 	state     string //candidate, ticking
 	voteCount int
 	mux       sync.Mutex
 }
 
-func NewElection(leftTime int, state string, voteCount int) Election {
+func NewElection(ipAddress string, leftTime int, state string, voteCount int) Election {
 
 	return Election{
+		ipAddress: ipAddress,
+		candidate: &Peer{},
 		leftTime:  leftTime,
 		state:     state,
 		voteCount: voteCount,
@@ -52,7 +56,7 @@ func (election *Election) ResetLeftTime() {
 	election.mux.Lock()
 	defer election.mux.Unlock()
 
-	election.leftTime = genRandomInRange(150, 300)
+	election.leftTime = GenRandomInRange(150, 300)
 }
 
 //count down left time by tick millisecond  until 0
@@ -110,4 +114,12 @@ func (election *Election) CountUp() {
 	defer election.mux.Unlock()
 
 	election.voteCount = election.voteCount + 1
+}
+
+func (e *Election) SetCandidate(peer *Peer) {
+	e.candidate = peer
+}
+
+func (e *Election) GetCandidate() *Peer {
+	return e.candidate
 }

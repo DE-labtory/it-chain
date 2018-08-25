@@ -36,8 +36,9 @@ func SetTestEnvironment(processList []string) map[string]*mock.Process {
 		process := mock.NewProcess()
 		process.Init(processId)
 
-		election := p2p.NewElection(30, "ticking", 0)
+		election := p2p.NewElection(processId, 30, "ticking", 0)
 		peerRepository := mem.NewPeerReopository()
+
 		peerQueryService := api_gateway.NewPeerQueryApi(&peerRepository)
 		client := mock.NewClient(processId, networkManager.GrpcCall)
 		server := mock.NewServer(processId, networkManager.GrpcConsume)
@@ -60,8 +61,8 @@ func SetTestEnvironment(processList []string) map[string]*mock.Process {
 		grpcCommandHandler := adapter.NewGrpcCommandHandler(&leaderApi, &electionService, &communicationApi, pLTableService)
 		server.Register("message.receive", grpcCommandHandler.HandleMessageReceive)
 
-		process.Register(electionService)
-
+		process.Register(&electionService)
+		process.Register(&peerRepository)
 		networkManager.AddProcess(process)
 		m[process.Id] = &process
 	}
