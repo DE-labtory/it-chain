@@ -21,6 +21,7 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/p2p"
 )
 
@@ -57,6 +58,8 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 	for _, peer := range peers {
 
 		if peer.IpAddress == ipAddress {
+
+			logger.Infof(nil, "matching peer to be leader: ", peer)
 
 			err := la.PeerRepository.SetLeader(p2p.Leader{
 				LeaderId: p2p.LeaderId{
