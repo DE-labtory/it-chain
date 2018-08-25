@@ -19,8 +19,6 @@ package adapter
 import (
 	"errors"
 
-	"fmt"
-
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
@@ -54,7 +52,6 @@ func NewGrpcCommandHandler(
 
 func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc) error {
 
-	logger.Info(nil, "handling received message:")
 	switch command.Protocol {
 
 	case "PLTableDeliverProtocol": //receive peer table
@@ -77,20 +74,27 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc)
 		//	1. if candidate, reset left time
 		//	2. count up
 		//	3. if counted is same with num of peer-1 set leader and publish
-		fmt.Println("received VoteLeaderProtocol command:", command)
-		fmt.Println("received VoteLeaderProtocol current election :", gch.electionService.Election)
+
+		logger.Infof(nil, "received VoteLeaderProtocol command:", command)
+		logger.Infof(nil, "received VoteLeaderProtocol current election :", gch.electionService.Election)
 		gch.electionService.DecideToBeLeader(command)
 
 	case "UpdateLeaderProtocol":
 
-		toBeLeader := p2p.Peer{}
+		// if received leader is not what i voted for, return nil
+		if gch.electionService.Election.GetCandidate().PeerId.Id != command.ConnectionID {
+			return nil
+		}
+
+		toBeLeader := &p2p.UpdateLeaderMessage{}
 		err := common.Deserialize(command.Body, toBeLeader)
 
+		logger.Infof(nil, "update leader with", toBeLeader.Peer)
 		if err != nil {
 			return err
 		}
 
-		gch.leaderApi.UpdateLeaderWithAddress(toBeLeader.IpAddress)
+		gch.leaderApi.UpdateLeaderWithAddress(toBeLeader.Peer.IpAddress)
 	}
 
 	return nil
