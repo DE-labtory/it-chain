@@ -24,7 +24,6 @@ import (
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
-	"github.com/it-chain/engine/conf"
 	"github.com/rs/xid"
 )
 
@@ -47,6 +46,10 @@ func NewElectionService(election *Election, peerQueryService PeerQueryService, c
 
 func (es *ElectionService) Vote(connectionId string) error {
 
+	peer, _ := es.peerQueryService.FindPeerById(PeerId{Id: connectionId})
+
+	es.Election.SetCandidate(&peer)
+
 	//if leftTime >0, reset left time and send VoteLeaderMessage
 
 	if es.Election.GetLeftTime() < 0 {
@@ -67,8 +70,11 @@ func (es *ElectionService) Vote(connectionId string) error {
 
 // broadcast leader to other peers
 func (es *ElectionService) BroadcastLeader(peer Peer) error {
+	logger.Info(nil, "broadcast leader!")
 
-	updateLeaderMessage := UpdateLeaderMessage{}
+	updateLeaderMessage := UpdateLeaderMessage{
+		Peer: peer,
+	}
 
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
 
@@ -83,13 +89,13 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 	return nil
 }
 
-//broad case leader when voted fully
+//broadcast leader when voted fully
 func (es *ElectionService) DecideToBeLeader(command command.ReceiveGrpc) error {
 
 	logger.Infof(nil, "current state", es.Election)
 	//	1. if candidate, reset left time
 	//	2. count up
-	if es.Election.GetState() == "candidate" {
+	if es.Election.GetState() == "Candidate" {
 
 		es.Election.CountUp()
 	}
@@ -102,7 +108,7 @@ func (es *ElectionService) DecideToBeLeader(command command.ReceiveGrpc) error {
 
 		peer := Peer{
 			PeerId:    PeerId{Id: ""},
-			IpAddress: conf.GetConfiguration().GrpcGateway.Address + ":" + conf.GetConfiguration().GrpcGateway.Port,
+			IpAddress: es.Election.ipAddress,
 		}
 
 		es.BroadcastLeader(peer)
@@ -118,8 +124,10 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 	//3. while ticking, count down leader repo left time
 	//4. Send message having 'RequestVoteProtocol' to other node
 	go func() {
-
-		timeoutNum := genRandomInRange(150, 300)
+		es.Election.state = "Ticking"
+		logger.Info(nil, "elect leader with raft started!")
+		timeoutNum := GenRandomInRange(150, 300)
+		logger.Infof(nil, "generated timeout number:", timeoutNum)
 		timeout := time.After(time.Duration(timeoutNum) * time.Millisecond)
 		tick := time.Tick(1 * time.Millisecond)
 		end := true
@@ -127,11 +135,12 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 			select {
 
 			case <-timeout:
+				logger.Info(nil, "timed out!")
 				// when timed out
 				// 1. if state is ticking, be candidate and request vote
 				// 2. if state is candidate, reset state and left time
 				if es.Election.GetState() == "Ticking" {
-
+					logger.Info(nil, "be candidate!")
 					es.Election.SetState("Candidate")
 
 					pLTable, _ := es.peerQueryService.GetPLTable()
@@ -165,7 +174,7 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 
 func (es *ElectionService) RequestVote(connectionIds []string) error {
 	// 0. be candidate
-	es.Election.state = "candidate"
+	es.Election.state = "Candidate"
 	// 1. create request vote message
 	// 2. send message
 	requestVoteMessage := RequestVoteMessage{}
@@ -198,9 +207,9 @@ func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.Delive
 	}, err
 }
 
-func genRandomInRange(min, max int) int {
+func GenRandomInRange(min, max int) int {
 
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().UnixNano())
 
 	return rand.Intn(max-min) + min
 }
