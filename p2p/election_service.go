@@ -95,7 +95,7 @@ func (es *ElectionService) DecideToBeLeader(command command.ReceiveGrpc) error {
 	logger.Infof(nil, "current state", es.Election)
 	//	1. if candidate, reset left time
 	//	2. count up
-	if es.Election.GetState() == "Candidate" {
+	if es.Election.GetState() == Candidate {
 
 		es.Election.CountUp()
 	}
@@ -124,7 +124,7 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 	//3. while ticking, count down leader repo left time
 	//4. Send message having 'RequestVoteProtocol' to other node
 	go func() {
-		es.Election.state = "Ticking"
+		es.Election.state = Ticking
 		logger.Info(nil, "elect leader with raft started!")
 		timeoutNum := GenRandomInRange(150, 300)
 		logger.Infof(nil, "generated timeout number:", timeoutNum)
@@ -139,9 +139,9 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 				// when timed out
 				// 1. if state is ticking, be candidate and request vote
 				// 2. if state is candidate, reset state and left time
-				if es.Election.GetState() == "Ticking" {
+				if es.Election.GetState() == Ticking {
 					logger.Info(nil, "be candidate!")
-					es.Election.SetState("Candidate")
+					es.Election.SetState(Candidate)
 
 					pLTable, _ := es.peerQueryService.GetPLTable()
 
@@ -155,10 +155,10 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 
 					es.RequestVote(connectionIds)
 
-				} else if es.Election.GetState() == "Candidate" {
+				} else if es.Election.GetState() == Candidate {
 					//reset time and state chane candidate -> ticking when timed in candidate state
 					es.Election.ResetLeftTime()
-					es.Election.SetState("Ticking")
+					es.Election.SetState(Ticking)
 				}
 
 			case <-tick:
@@ -174,7 +174,7 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 
 func (es *ElectionService) RequestVote(connectionIds []string) error {
 	// 0. be candidate
-	es.Election.state = "Candidate"
+	es.Election.state = Candidate
 	// 1. create request vote message
 	// 2. send message
 	requestVoteMessage := RequestVoteMessage{}

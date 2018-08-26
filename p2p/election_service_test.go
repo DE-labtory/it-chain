@@ -44,7 +44,7 @@ func TestElectionService_Vote(t *testing.T) {
 		processMap := test2.SetTestEnvironment(test.input.processList)
 		electionServiceOf2 := (processMap["2"].Services["ElectionService"]).(*p2p.ElectionService)
 
-		electionServiceOf2.Election.SetState("Candidate")
+		electionServiceOf2.Election.SetState(p2p.Candidate)
 
 		electionServiceOf1 := (processMap["1"].Services["ElectionService"]).(*p2p.ElectionService)
 

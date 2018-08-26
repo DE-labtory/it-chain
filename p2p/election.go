@@ -22,6 +22,9 @@ import (
 	"github.com/it-chain/engine/common/logger"
 )
 
+const Candidate = "Candidate"
+const Ticking = "Ticking"
+
 type Election struct {
 	ipAddress string
 	candidate *Peer  // candidate peer to be leader later
