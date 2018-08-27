@@ -23,13 +23,6 @@ The `it-chain` is implemented as six independently operating core components(txp
 A more detailed explanation is given below.
 [LOGICAL ARCHITECTURE KR](doc/LOGICAL-ARCHITECTURE-KR.md)
 
-
-
-## Tutorial
-
-How to install it-chain and run simple icode(smartContract) can be found in the tutorial docs.<br>
-[TUTORIAL](doc/TUTORIAL.md)
-
 ## Requirements
 
 - Go-lang >= 1.9
