@@ -68,6 +68,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc)
 		break
 
 	case "RequestVoteProtocol":
+		logger.Infof(nil, "handling request vote from process: %v", gch.electionService.Election.GetIpAddress())
 		gch.electionService.Vote(command.ConnectionID)
 
 	case "VoteLeaderProtocol":

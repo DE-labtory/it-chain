@@ -55,11 +55,12 @@ func (election *Election) SetLeftTime() int {
 }
 
 func (election *Election) ResetLeftTime() {
+	logger.Infof(nil, "reset lefttime from %s", election.ipAddress)
 
 	election.mux.Lock()
 	defer election.mux.Unlock()
 
-	election.leftTime = GenRandomInRange(150, 300)
+	election.leftTime = GenRandomInRange(290, 300)
 }
 
 //count down left time by tick millisecond  until 0
@@ -77,7 +78,7 @@ func (election *Election) SetState(state string) {
 	election.mux.Lock()
 	defer election.mux.Unlock()
 
-	logger.Infof(nil, "set state to:", state)
+	logger.Infof(nil, "set state to: %s", state)
 
 	election.state = state
 }
@@ -125,4 +126,8 @@ func (e *Election) SetCandidate(peer *Peer) {
 
 func (e *Election) GetCandidate() *Peer {
 	return e.candidate
+}
+
+func (e *Election) GetIpAddress() string {
+	return e.ipAddress
 }

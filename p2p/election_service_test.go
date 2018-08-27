@@ -78,18 +78,18 @@ func TestElectionService_RequestVote(t *testing.T) {
 
 		processMap := test2.SetTestEnvironment(test.input.processList)
 
-		electionServiceOf2 := (processMap["2"].Services["ElectionService"]).(*p2p.ElectionService)
-
 		electionServiceOf1 := (processMap["1"].Services["ElectionService"]).(*p2p.ElectionService)
 
-		t.Logf("electionService: %v", processMap["1"].Services["ElectionService"])
+		t.Logf("electionService of 1: %v", processMap["1"].Services["ElectionService"])
+		t.Logf("electionService of 2: %v", processMap["2"].Services["ElectionService"])
 
-		t.Logf("before vote check state: %v", electionServiceOf2.Election.GetState())
-		t.Logf("election of 2: %v", electionServiceOf2.Election)
+		t.Logf("before vote check state: %v", electionServiceOf1.Election.GetState())
+		t.Logf("election of 1: %v", electionServiceOf1.Election)
+
 		electionServiceOf1.RequestVote([]string{"2"})
-		t.Logf("after vote check state: %v", electionServiceOf2.Election.GetState())
+		t.Logf("after vote check state: %v", electionServiceOf1.Election.GetState())
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(4 * time.Second)
 
 		assert.Equal(t, electionServiceOf1.Election.GetVoteCount(), 1)
 	}
@@ -123,7 +123,6 @@ func TestElectionService_ElectLeaderWithRaft(t *testing.T) {
 
 		for _, p := range processMap {
 			process := *p
-			t.Logf("proces!!!!! %v", process)
 			peerRepository := process.Services["PeerRepository"]
 			electionService := process.Services["ElectionService"]
 

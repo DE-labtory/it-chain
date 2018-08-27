@@ -52,10 +52,6 @@ func (es *ElectionService) Vote(connectionId string) error {
 
 	//if leftTime >0, reset left time and send VoteLeaderMessage
 
-	if es.Election.GetLeftTime() < 0 {
-		return nil
-	}
-
 	es.Election.ResetLeftTime()
 
 	voteLeaderMessage := VoteMessage{}
@@ -125,10 +121,10 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 	//4. Send message having 'RequestVoteProtocol' to other node
 	go func() {
 		es.Election.state = Ticking
-		logger.Info(nil, "elect leader with raft started!")
-		timeoutNum := GenRandomInRange(150, 300)
-		logger.Infof(nil, "generated timeout number:", timeoutNum)
-		timeout := time.After(time.Duration(timeoutNum) * time.Millisecond)
+
+		es.Election.leftTime = GenRandomInRange(150, 300)
+
+		timeout := time.After(time.Duration(es.Election.leftTime) * time.Millisecond)
 		tick := time.Tick(1 * time.Millisecond)
 		end := true
 		for end {
@@ -140,7 +136,7 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 				// 1. if state is ticking, be candidate and request vote
 				// 2. if state is candidate, reset state and left time
 				if es.Election.GetState() == Ticking {
-					logger.Info(nil, "be candidate!")
+					logger.Infof(nil, "candidate process: %v", es.Election.candidate)
 					es.Election.SetState(Candidate)
 
 					pLTable, _ := es.peerQueryService.GetPLTable()
@@ -173,6 +169,7 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 }
 
 func (es *ElectionService) RequestVote(connectionIds []string) error {
+
 	// 0. be candidate
 	es.Election.state = Candidate
 	// 1. create request vote message
