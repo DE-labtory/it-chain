@@ -17,10 +17,9 @@
 package test
 
 import (
-	"fmt"
-
 	"github.com/it-chain/avengers/mock"
 	"github.com/it-chain/engine/api_gateway"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/api"
 	"github.com/it-chain/engine/p2p/infra/adapter"
@@ -35,8 +34,9 @@ func SetTestEnvironment(processList []string) map[string]*mock.Process {
 	for _, processId := range processList {
 		process := mock.NewProcess()
 		process.Init(processId)
+		networkManager.AddProcess(process)
 
-		election := p2p.NewElection(processId, 30, "ticking", 0)
+		election := p2p.NewElection(processId, 30, p2p.Ticking, 0)
 		peerRepository := mem.NewPeerReopository()
 
 		peerQueryService := api_gateway.NewPeerQueryApi(&peerRepository)
@@ -63,11 +63,10 @@ func SetTestEnvironment(processList []string) map[string]*mock.Process {
 
 		process.Register(&electionService)
 		process.Register(&peerRepository)
-		networkManager.AddProcess(process)
 		m[process.Id] = &process
 	}
 
-	fmt.Println("created process:", m)
+	logger.Infof(nil, "created process: %v", m)
 
 	return m
 }
