@@ -125,6 +125,7 @@ func (e *Election) SetCandidate(peer *Peer) {
 }
 
 func (e *Election) GetCandidate() *Peer {
+
 	return e.candidate
 }
 
