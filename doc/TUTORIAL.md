@@ -1,4 +1,4 @@
-# Install and runing Tutorial
+# Install and running tutorial
 
  Currently only solo mode is supported.
 
