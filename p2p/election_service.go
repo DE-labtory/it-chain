@@ -48,7 +48,15 @@ func (es *ElectionService) Vote(connectionId string) error {
 
 	peer, _ := es.peerQueryService.FindPeerById(PeerId{Id: connectionId})
 
-	es.Election.SetCandidate(&peer)
+	candidate := es.Election.GetCandidate()
+
+	// if peer has already received request vote message return nil
+	if candidate.PeerId.Id == "" {
+
+		es.Election.SetCandidate(&peer)
+	} else {
+		return nil
+	}
 
 	//if leftTime >0, reset left time and send VoteLeaderMessage
 
