@@ -30,11 +30,18 @@ import (
 func TestElectionService_Vote(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			processList []string
+			processList []test2.ProcessIdentity
 		}
 	}{
 		"4 node test": {
-			input: struct{ processList []string }{processList: []string{"1", "2", "3", "4"}},
+			input: struct{ processList []test2.ProcessIdentity }{
+				processList: []test2.ProcessIdentity{
+					{"1", ""},
+					{"2", ""},
+					{"3", ""},
+					{"4", ""},
+				},
+			},
 		},
 	}
 
@@ -65,11 +72,18 @@ func TestElectionService_Vote(t *testing.T) {
 func TestElectionService_RequestVote(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			processList []string
+			processList []test2.ProcessIdentity
 		}
 	}{
 		"4 node test": {
-			input: struct{ processList []string }{processList: []string{"1", "2", "3", "4"}},
+			input: struct{ processList []test2.ProcessIdentity }{
+				processList: []test2.ProcessIdentity{
+					{"1", ""},
+					{"2", ""},
+					{"3", ""},
+					{"4", ""},
+				},
+			},
 		},
 	}
 
@@ -102,11 +116,18 @@ func TestElectionService_DecideToBeLeader(t *testing.T) {
 func TestElectionService_BroadcastLeader(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			processList []string
+			processList []test2.ProcessIdentity
 		}
 	}{
 		"4 node test": {
-			input: struct{ processList []string }{processList: []string{"1", "2", "3", "4"}},
+			input: struct{ processList []test2.ProcessIdentity }{
+				processList: []test2.ProcessIdentity{
+					{"1", "1.ipAddress"},
+					{"2", "2.ipAddress"},
+					{"3", "3.ipAddress"},
+					{"4", "4.ipAddress"},
+				},
+			},
 		},
 	}
 
@@ -129,7 +150,6 @@ func TestElectionService_BroadcastLeader(t *testing.T) {
 		peerRepositoryOf2 := (processMap["2"].Services["PeerRepository"]).(*mem.PeerRepository)
 		broadcastedLeaderOf2, _ := peerRepositoryOf2.GetLeader()
 
-
 		t.Logf("broadcasted leader %v", broadcastedLeaderOf2)
 		assert.Equal(t, "1", broadcastedLeaderOf2.GetID())
 	}
@@ -139,11 +159,22 @@ func TestElectionService_BroadcastLeader(t *testing.T) {
 func TestElectionService_ElectLeaderWithRaft(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			processList []string
+			processList []test2.ProcessIdentity
 		}
 	}{
 		"8 node test": {
-			input: struct{ processList []string }{processList: []string{"1", "2", "3", "4", "5", "6", "7", "8"}},
+			input: struct{ processList []test2.ProcessIdentity }{
+				processList: []test2.ProcessIdentity{
+					{"1", ""},
+					{"2", ""},
+					{"3", ""},
+					{"4", ""},
+					{"5", ""},
+					{"6", ""},
+					{"7", ""},
+					{"8", ""},
+				},
+			},
 		},
 	}
 
@@ -159,11 +190,11 @@ func TestElectionService_ElectLeaderWithRaft(t *testing.T) {
 			peerRepository := process.Services["PeerRepository"]
 			electionService := process.Services["ElectionService"]
 
-			for _, peerId := range test.input.processList {
+			for _, peer := range test.input.processList {
 				peerRepository.(*mem.PeerRepository).Save(
 					p2p.Peer{
-						PeerId:    struct{ Id string }{Id: peerId},
-						IpAddress: peerId,
+						PeerId:    struct{ Id string }{Id: peer.Id},
+						IpAddress: peer.Id,
 					},
 				)
 			}
