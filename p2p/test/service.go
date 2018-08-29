@@ -25,28 +25,32 @@ import (
 	"github.com/it-chain/engine/p2p/infra/adapter"
 	"github.com/it-chain/engine/p2p/infra/mem"
 	mock2 "github.com/it-chain/engine/p2p/test/mock"
-	"fmt"
 )
 
-func SetTestEnvironment(processList []string) map[string]*mock.Process {
+type ProcessIdentity struct {
+	Id        string
+	IpAddress string
+}
+
+func SetTestEnvironment(processList []ProcessIdentity) map[string]*mock.Process {
 	networkManager := mock.NewNetworkManager()
 
 	m := make(map[string]*mock.Process)
-	for _, processId := range processList {
+	for _, entity := range processList {
 		// avengers - create process and network
 		process := mock.NewProcess()
-		process.Init(processId)
+		process.Init(entity.Id)
 		networkManager.AddProcess(process)
 
-		election := p2p.NewElection(processId, 30, p2p.Ticking, 0)
+		election := p2p.NewElection(entity.Id, 30, p2p.Ticking, 0)
 		peerRepository := mem.NewPeerReopository()
 		savePeerList(peerRepository, processList)
 
 		peerQueryService := api_gateway.NewPeerQueryApi(&peerRepository)
 
 		// avengers - mock client, server
-		client := mock.NewClient(processId, networkManager.GrpcCall)
-		server := mock.NewServer(processId, networkManager.GrpcConsume)
+		client := mock.NewClient(entity.Id, networkManager.GrpcCall)
+		server := mock.NewServer(entity.Id, networkManager.GrpcConsume)
 
 		eventService := mock2.MockEventService{}
 		eventService.PublishFunc = func(topic string, event interface{}) error {
@@ -75,15 +79,14 @@ func SetTestEnvironment(processList []string) map[string]*mock.Process {
 	}
 
 	logger.Infof(nil, "created process: %v", m)
-
 	return m
 }
 
-func savePeerList(peerRepository mem.PeerRepository, processList []string) {
-	for _, processId := range processList {
+func savePeerList(peerRepository mem.PeerRepository, processList []ProcessIdentity) {
+	for _, identity := range processList {
 		peerRepository.Save(p2p.Peer{
-			IpAddress: fmt.Sprintf("%v.ipAddress", processId),
-			PeerId: p2p.PeerId{Id: processId},
+			IpAddress: identity.IpAddress,
+			PeerId:    p2p.PeerId{Id: identity.Id},
 		})
 	}
 }

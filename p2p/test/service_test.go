@@ -19,6 +19,6 @@ package test
 import "testing"
 
 func TestSetEnvironment(t *testing.T) {
-	list := SetTestEnvironment([]string{"1", "2"})
+	list := SetTestEnvironment([]ProcessIdentity{{"1", ""}, {"2", ""}})
 	t.Logf("list is : %v", list)
 }
