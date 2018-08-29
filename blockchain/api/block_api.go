@@ -25,18 +25,16 @@ import (
 )
 
 type BlockApi struct {
-	publisherId      string
-	blockRepository  blockchain.BlockRepository
-	eventService     blockchain.EventService
-	consensusService blockchain.ConsensusService
+	publisherId     string
+	blockRepository blockchain.BlockRepository
+	eventService    blockchain.EventService
 }
 
-func NewBlockApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService, consensusService blockchain.ConsensusService) (BlockApi, error) {
+func NewBlockApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService) (BlockApi, error) {
 	return BlockApi{
-		publisherId:      publisherId,
-		blockRepository:  blockRepository,
-		eventService:     eventService,
-		consensusService: consensusService,
+		publisherId:     publisherId,
+		blockRepository: blockRepository,
+		eventService:    eventService,
 	}, nil
 }
 
@@ -89,22 +87,11 @@ func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
 	return bApi.eventService.Publish("block.committed", commitEvent)
 }
 
-func (api BlockApi) CreateProposedBlock(txList []*blockchain.DefaultTransaction) error {
-	logger.Info(nil, "[Blockchain] Creating proposed block")
-
-	proposedBlock, err := api.createBlock(txList)
-	if err != nil {
-		return err
-	}
-
-	return api.consensusService.ConsentBlock(proposedBlock)
-}
-
 func (bApi BlockApi) CommitProposedBlock(txList []*blockchain.DefaultTransaction) error {
 	logger.Info(nil, "[Blockchain] Committing proposed block")
 
 	// create
-	ProposedBlock, err := bApi.createBlock(txList)
+	ProposedBlock, err := bApi.CreateProposedBlock(txList)
 	if err != nil {
 		return err
 	}
@@ -130,7 +117,7 @@ func (bApi BlockApi) CommitProposedBlock(txList []*blockchain.DefaultTransaction
 	return bApi.eventService.Publish("block.committed", commitEvent)
 }
 
-func (api BlockApi) createBlock(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error) {
+func (api BlockApi) CreateProposedBlock(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error) {
 	lastBlock, err := api.blockRepository.FindLast()
 	if err != nil {
 		return blockchain.DefaultBlock{}, ErrGetLastBlock

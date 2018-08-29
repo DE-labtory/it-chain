@@ -52,9 +52,8 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 	publisherId := "zf"
 	blockRepo := mock.BlockRepository{}
 	eventService := mock.EventService{}
-	consensusService := mock.ConsensusService{}
 
-	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService, consensusService)
+	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -80,10 +79,9 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 	publisherId := "zf"
 	blockRepo := mock.BlockRepository{}
 	eventService := mock.EventService{}
-	consensusService := mock.ConsensusService{}
 
 	// When
-	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService, consensusService)
+	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService)
 
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
@@ -101,10 +99,9 @@ func TestBlockApi_SyncIsProgressing(t *testing.T) {
 	publisherId := "zf"
 	blockRepo := mock.BlockRepository{}
 	eventService := mock.EventService{}
-	consensusService := mock.ConsensusService{}
 
 	// when
-	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService, consensusService)
+	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService)
 
 	// then
 	state := blockApi.SyncIsProgressing()
@@ -185,9 +182,7 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 
 	eventService := common.NewEventService("", "Event")
 
-	consensusService := mock.ConsensusService{}
-
-	bApi, err := api.NewBlockApi(publisherID, blockRepo, eventService, consensusService)
+	bApi, err := api.NewBlockApi(publisherID, blockRepo, eventService)
 
 	assert.NoError(t, err)
 
@@ -242,9 +237,7 @@ func TestBlockApi_CommitGenesisBlock(t *testing.T) {
 
 	eventService := common.NewEventService("", "Event")
 
-	consensusService := mock.ConsensusService{}
-
-	bApi, err := api.NewBlockApi(publisherID, blockRepo, eventService, consensusService)
+	bApi, err := api.NewBlockApi(publisherID, blockRepo, eventService)
 	assert.NoError(t, err)
 
 	// when
@@ -267,21 +260,16 @@ func TestBlockApi_CreateProposedBlock(t *testing.T) {
 
 	eventService := mock.EventService{}
 
-	consensusService := mock.ConsensusService{}
-	consensusService.ConsensusBlockFunc = func(block blockchain.DefaultBlock) error {
-		assert.Equal(t, uint64(2), block.GetHeight())
-		assert.Equal(t, lastBlock.GetSeal(), block.GetPrevSeal())
-		assert.Equal(t, []byte("zf"), block.GetCreator())
-		return nil
-	}
-
-	blockApi, err := api.NewBlockApi(publisherID, blockRepo, eventService, consensusService)
+	blockApi, err := api.NewBlockApi(publisherID, blockRepo, eventService)
 	assert.NoError(t, err)
 
 	txList := mock.GetTxList(time.Now())
 
 	// when
-	err = blockApi.CreateProposedBlock(txList)
+	block, err := blockApi.CreateProposedBlock(txList)
+
 	// then
 	assert.NoError(t, err)
+	assert.Equal(t, lastBlock.GetSeal(), block.GetPrevSeal())
+	assert.Equal(t, uint64(2), block.GetHeight())
 }

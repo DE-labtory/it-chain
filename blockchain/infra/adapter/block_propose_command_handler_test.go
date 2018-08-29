@@ -76,9 +76,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 
 	eventService := common.NewEventService("", "Event")
 
-	consensusService := mock.ConsensusService{}
-
-	bApi, err := api.NewBlockApi(publisherID, br, eventService, consensusService)
+	bApi, err := api.NewBlockApi(publisherID, br, eventService)
 	assert.NoError(t, err)
 
 	commandHandler := adapter.NewBlockProposeCommandHandler(bApi, "solo")

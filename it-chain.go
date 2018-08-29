@@ -247,8 +247,7 @@ func initBlockchain(config *conf.Configuration, server rpc.Server) func() {
 	}
 
 	eventService := common.NewEventService(config.Engine.Amqp, "Event")
-	consensusService := blockchainAdapter.NewConsensusService()
-	blockApi, err := blockchainApi.NewBlockApi(publisherId, blockRepo, eventService, consensusService)
+	blockApi, err := blockchainApi.NewBlockApi(publisherId, blockRepo, eventService)
 	if err != nil {
 		panic(err)
 	}
