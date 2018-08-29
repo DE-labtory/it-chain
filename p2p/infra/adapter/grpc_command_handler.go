@@ -81,7 +81,6 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc)
 		gch.electionService.DecideToBeLeader(command)
 
 	case "UpdateLeaderProtocol":
-
 		// if received leader is not what i voted for, return nil
 		if gch.electionService.Election.GetCandidate().PeerId.Id != command.ConnectionID {
 			return nil

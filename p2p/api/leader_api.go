@@ -48,7 +48,6 @@ func NewLeaderApi(peerRepository p2p.PeerRepository, eventService common.EventSe
 }
 
 func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
-
 	//1. loop peer list and find specific address
 	//2. update specific peer as leader
 	pLTable, _ := la.PeerRepository.GetPLTable()
