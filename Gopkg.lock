@@ -157,6 +157,12 @@
   revision = "ef8a98b0bbce4a65b5aa4c368430a80ddc533168"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/it-chain/avengers"
+  packages = ["mock"]
+  revision = "35496cf12fcd437c68a738cae43edf1a06295b65"
+
+[[projects]]
   name = "github.com/it-chain/bifrost"
   packages = [
     ".",
@@ -187,12 +193,7 @@
 
 [[projects]]
   name = "github.com/it-chain/midgard"
-  packages = [
-    ".",
-    "store",
-    "store/leveldb",
-    "store/mongodb"
-  ]
+  packages = ["."]
   revision = "cfaf91f623b0f65430dbef4b00804ab72088f6f3"
   version = "v0.0.4"
 
@@ -536,18 +537,6 @@
   version = "v1.14.0"
 
 [[projects]]
-  branch = "v2"
-  name = "gopkg.in/mgo.v2"
-  packages = [
-    ".",
-    "bson",
-    "internal/json",
-    "internal/sasl",
-    "internal/scram"
-  ]
-  revision = "9856a29383ce1c59f308dd1cf0363a79b5bef6b5"
-
-[[projects]]
   name = "gopkg.in/src-d/go-billy.v4"
   packages = [
     ".",
@@ -621,6 +610,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6741b514bbfd0e70140e2c64f01aac6e81008fb6afb8725ade748cb6071f33d0"
+  inputs-digest = "3836d73f7a909cd9c236bc1ab2f57de1865e7b4851b8a6f689abfa2d08b8ab61"
   solver-name = "gps-cdcl"
   solver-version = 1

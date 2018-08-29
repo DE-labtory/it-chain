@@ -25,6 +25,7 @@ import (
 	"github.com/it-chain/engine/p2p/infra/adapter"
 	"github.com/it-chain/engine/p2p/infra/mem"
 	mock2 "github.com/it-chain/engine/p2p/test/mock"
+	"fmt"
 )
 
 func SetTestEnvironment(processList []string) map[string]*mock.Process {
@@ -32,33 +33,40 @@ func SetTestEnvironment(processList []string) map[string]*mock.Process {
 
 	m := make(map[string]*mock.Process)
 	for _, processId := range processList {
+		// avengers - create process and network
 		process := mock.NewProcess()
 		process.Init(processId)
 		networkManager.AddProcess(process)
 
 		election := p2p.NewElection(processId, 30, p2p.Ticking, 0)
 		peerRepository := mem.NewPeerReopository()
+		savePeerList(peerRepository, processList)
 
 		peerQueryService := api_gateway.NewPeerQueryApi(&peerRepository)
+
+		// avengers - mock client, server
 		client := mock.NewClient(processId, networkManager.GrpcCall)
 		server := mock.NewServer(processId, networkManager.GrpcConsume)
 
 		eventService := mock2.MockEventService{}
-
 		eventService.PublishFunc = func(topic string, event interface{}) error {
 			return nil
 		}
 
+		// inject avengers client
 		electionService := p2p.NewElectionService(&election, &peerQueryService, &client)
 
 		pLTableService := p2p.PLTableService{}
 
+		// inject avengers client
 		communicationService := p2p.NewCommunicationService(&client)
 
 		communicationApi := api.NewCommunicationApi(&peerQueryService, communicationService)
 
 		leaderApi := api.NewLeaderApi(&peerRepository, &eventService)
 		grpcCommandHandler := adapter.NewGrpcCommandHandler(&leaderApi, &electionService, &communicationApi, pLTableService)
+
+		// avengers server register command handler
 		server.Register("message.receive", grpcCommandHandler.HandleMessageReceive)
 
 		process.Register(&electionService)
@@ -69,4 +77,13 @@ func SetTestEnvironment(processList []string) map[string]*mock.Process {
 	logger.Infof(nil, "created process: %v", m)
 
 	return m
+}
+
+func savePeerList(peerRepository mem.PeerRepository, processList []string) {
+	for _, processId := range processList {
+		peerRepository.Save(p2p.Peer{
+			IpAddress: fmt.Sprintf("%v.ipAddress", processId),
+			PeerId: p2p.PeerId{Id: processId},
+		})
+	}
 }
