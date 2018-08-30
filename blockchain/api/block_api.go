@@ -87,32 +87,26 @@ func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
 	return bApi.eventService.Publish("block.committed", commitEvent)
 }
 
-func (bApi BlockApi) CommitProposedBlock(txList []*blockchain.DefaultTransaction) error {
+func (bApi BlockApi) CommitBlock(block blockchain.DefaultBlock) error {
 	logger.Info(nil, "[Blockchain] Committing proposed block")
 
-	// create
-	ProposedBlock, err := bApi.CreateProposedBlock(txList)
-	if err != nil {
-		return err
-	}
-
 	// save(commit)
-	ProposedBlock.SetState(blockchain.Committed)
+	block.SetState(blockchain.Committed)
 
-	err = bApi.blockRepository.Save(ProposedBlock)
+	err := bApi.blockRepository.Save(block)
 
 	if err != nil {
 		return ErrSaveBlock
 	}
 
 	// publish
-	commitEvent, err := createBlockCommittedEvent(ProposedBlock)
+	commitEvent, err := createBlockCommittedEvent(block)
 
 	if err != nil {
 		return ErrCreateEvent
 	}
 
-	logger.Info(nil, fmt.Sprintf("[Blockchain] Proposed block has Committed - seal: [%x],  height: [%d]", ProposedBlock.Seal, ProposedBlock.Height))
+	logger.Info(nil, fmt.Sprintf("[Blockchain] Proposed block has Committed - seal: [%x],  height: [%d]", block.Seal, block.Height))
 
 	return bApi.eventService.Publish("block.committed", commitEvent)
 }
