@@ -30,6 +30,7 @@ import (
 	blockchainApi "github.com/it-chain/engine/blockchain/api"
 	blockchainAdapter "github.com/it-chain/engine/blockchain/infra/adapter"
 	blockchainMem "github.com/it-chain/engine/blockchain/infra/mem"
+	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/cmd/ivm"
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/logger"
@@ -257,7 +258,10 @@ func initBlockchain(config *conf.Configuration, server rpc.Server) func() {
 		panic(err)
 	}
 
-	blockProposeHandler := blockchainAdapter.NewBlockProposeCommandHandler(blockApi, config.Engine.Mode)
+	// TODO: Change with real consensus service
+	consensusService := mock.ConsensusService{}
+
+	blockProposeHandler := blockchainAdapter.NewBlockProposeCommandHandler(blockApi, consensusService, config.Engine.Mode)
 	server.Register("block.propose", blockProposeHandler.HandleProposeBlockCommand)
 
 	return func() {

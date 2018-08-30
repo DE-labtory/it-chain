@@ -29,6 +29,8 @@ import (
 
 	"time"
 
+	"errors"
+
 	"github.com/it-chain/engine/blockchain/api"
 	"github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/blockchain/test/mock"
@@ -38,7 +40,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
+func TestBlockProposeCommandHandler_HandleProposeBlockCommand_Solo(t *testing.T) {
 
 	//set subscriber
 	var wg sync.WaitGroup
@@ -48,7 +50,6 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 	defer subscriber.Close()
 
 	handler := &mock.CommitEventHandler{}
-
 	handler.HandleFunc = func(event event.BlockCommitted) {
 		assert.Equal(t, "tx01", event.TxList[0].ID)
 		assert.Equal(t, blockchain.Committed, event.State)
@@ -57,12 +58,16 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 
 	subscriber.SubscribeTopic("block.*", handler)
 
+	consensusService := mock.ConsensusService{}
+	consensusService.ConsensusBlockFunc = func(block blockchain.DefaultBlock) error {
+		return nil
+	}
+
 	//set bApi
 	publisherID := "junksound"
 	dbPath := "./.db"
 
 	br, err := mem.NewBlockRepository(dbPath)
-
 	assert.Equal(t, nil, err)
 	defer func() {
 		br.Close()
@@ -79,17 +84,15 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 	bApi, err := api.NewBlockApi(publisherID, br, eventService)
 	assert.NoError(t, err)
 
-	commandHandler := adapter.NewBlockProposeCommandHandler(bApi, "solo")
+	commandHandler := adapter.NewBlockProposeCommandHandler(bApi, consensusService, "solo")
 
 	//when
 	_, errRPC := commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: nil})
-
 	//then
 	assert.Equal(t, errRPC, rpc.Error{Message: adapter.ErrCommandTransactions.Error()})
 
 	//when
 	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: make([]command.Tx, 0)})
-
 	//then
 	assert.Equal(t, errRPC, rpc.Error{Message: adapter.ErrCommandTransactions.Error()})
 
@@ -143,4 +146,186 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand(t *testing.T) {
 	assert.Equal(t, errRPC, rpc.Error{})
 
 	wg.Wait()
+}
+
+func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_OneTransaction(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	dbPath := "./.db"
+	blockRepository, err := mem.NewBlockRepository(dbPath)
+	assert.Equal(t, nil, err)
+	defer func() {
+		blockRepository.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	prevBlock := mock.GetNewBlock([]byte("genesis"), 0)
+	err = blockRepository.AddBlock(prevBlock)
+	assert.NoError(t, err)
+
+	consensusService := mock.ConsensusService{}
+	consensusService.ConsensusBlockFunc = func(block blockchain.DefaultBlock) error {
+		t.Log("consensus service")
+		assert.Equal(t, uint64(1), block.GetHeight())
+		assert.Equal(t, prevBlock.GetSeal(), block.GetPrevSeal())
+		assert.Equal(t, []byte("iAmPublisher"), block.Creator)
+		assert.Equal(t, 1, len(block.GetTxList()))
+		wg.Done()
+		return nil
+	}
+
+	publisherID := "iAmPublisher"
+	eventService := common.NewEventService("", "Event")
+
+	api, err := api.NewBlockApi(publisherID, blockRepository, eventService)
+	assert.NoError(t, err)
+
+	commandHandler := adapter.NewBlockProposeCommandHandler(api, consensusService, "notSolo")
+
+	//when
+	_, errRPC := commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
+		TxList: []command.Tx{
+			{
+				ID:        "tx01",
+				ICodeID:   "ICodeID",
+				PeerID:    "2",
+				TimeStamp: time.Now().Round(0),
+				Jsonrpc:   "123",
+				Function:  "function1",
+				Args:      []string{"arg1", "arg2"},
+				Signature: []byte{0x1},
+			},
+		},
+	})
+	//then
+	assert.Equal(t, errRPC, rpc.Error{})
+
+	wg.Wait()
+}
+
+func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_TwoTransaction(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	dbPath := "./.db"
+	blockRepository, err := mem.NewBlockRepository(dbPath)
+	assert.Equal(t, nil, err)
+	defer func() {
+		blockRepository.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	prevBlock := mock.GetNewBlock([]byte("genesis"), 0)
+	err = blockRepository.AddBlock(prevBlock)
+	assert.NoError(t, err)
+
+	consensusService := mock.ConsensusService{}
+	consensusService.ConsensusBlockFunc = func(block blockchain.DefaultBlock) error {
+		t.Log("consensus service")
+		assert.Equal(t, uint64(1), block.GetHeight())
+		assert.Equal(t, prevBlock.GetSeal(), block.GetPrevSeal())
+		assert.Equal(t, []byte("iAmPublisher"), block.Creator)
+		assert.Equal(t, 2, len(block.GetTxList()))
+		wg.Done()
+		return nil
+	}
+
+	publisherID := "iAmPublisher"
+	eventService := common.NewEventService("", "Event")
+
+	api, err := api.NewBlockApi(publisherID, blockRepository, eventService)
+	assert.NoError(t, err)
+
+	commandHandler := adapter.NewBlockProposeCommandHandler(api, consensusService, "notSolo")
+
+	//when
+	_, errRPC := commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
+		TxList: []command.Tx{
+			{
+				ID:        "tx01",
+				ICodeID:   "ICodeID",
+				PeerID:    "2",
+				TimeStamp: time.Now().Round(0),
+				Jsonrpc:   "123",
+				Function:  "function1",
+				Args:      []string{"arg1", "arg2"},
+				Signature: []byte{0x1},
+			},
+			{
+				ID:        "tx02",
+				ICodeID:   "ICodeID",
+				PeerID:    "2",
+				TimeStamp: time.Now().Round(0),
+				Jsonrpc:   "123",
+				Function:  "function1",
+				Args:      []string{"arg1", "arg2"},
+				Signature: []byte{0x1},
+			},
+		},
+	})
+	//then
+	assert.Equal(t, errRPC, rpc.Error{})
+
+	wg.Wait()
+}
+
+func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_ExceptionCases(t *testing.T) {
+	ErrConsesnsusService := errors.New("Consensus Error")
+
+	dbPath := "./.db"
+	blockRepository, err := mem.NewBlockRepository(dbPath)
+	assert.Equal(t, nil, err)
+	defer func() {
+		blockRepository.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	prevBlock := mock.GetNewBlock([]byte("genesis"), 0)
+	err = blockRepository.AddBlock(prevBlock)
+	assert.NoError(t, err)
+
+	consensusService := mock.ConsensusService{}
+	consensusService.ConsensusBlockFunc = func(block blockchain.DefaultBlock) error {
+		t.Log("consensus service")
+		return ErrConsesnsusService
+	}
+
+	publisherID := "iAmPublisher"
+	eventService := common.NewEventService("", "Event")
+
+	api, err := api.NewBlockApi(publisherID, blockRepository, eventService)
+	assert.NoError(t, err)
+
+	commandHandler := adapter.NewBlockProposeCommandHandler(api, consensusService, "notSolo")
+
+	//when
+	_, errRPC := commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: nil})
+	//then
+	assert.Equal(t, errRPC, rpc.Error{Message: adapter.ErrCommandTransactions.Error()})
+
+	//when
+	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: make([]command.Tx, 0)})
+	//then
+	assert.Equal(t, errRPC, rpc.Error{Message: adapter.ErrCommandTransactions.Error()})
+
+	//when
+	//when
+	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
+		TxList: []command.Tx{
+			{
+				ID:        "tx01",
+				ICodeID:   "ICodeID",
+				PeerID:    "2",
+				TimeStamp: time.Now().Round(0),
+				Jsonrpc:   "123",
+				Function:  "function1",
+				Args:      []string{"arg1", "arg2"},
+				Signature: []byte{0x1},
+			},
+		},
+	})
+	//then
+	assert.Equal(t, errRPC, rpc.Error{Message: ErrConsesnsusService.Error()})
+
 }

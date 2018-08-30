@@ -117,7 +117,7 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 		Height:   uint64(11),
 		TxList: []*blockchain.DefaultTransaction{
 			{
-				ID:        "tx01",
+				ID:        "lastBlockID",
 				ICodeID:   "ICodeID",
 				PeerID:    "junksound",
 				Timestamp: time.Now().Round(0),
@@ -133,18 +133,7 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 		State:     "",
 	}
 
-	txList := []*blockchain.DefaultTransaction{
-		{
-			ID:        "tx02",
-			ICodeID:   "ICodeID",
-			PeerID:    "junksound",
-			Timestamp: time.Now().Round(0),
-			Jsonrpc:   "",
-			Function:  "",
-			Args:      make([]string, 0),
-			Signature: []byte("Signature"),
-		},
-	}
+	block := mock.GetNewBlock(lastBlock.GetSeal(), lastBlock.GetHeight()+1)
 
 	//set subscriber
 	var wg sync.WaitGroup
@@ -154,40 +143,31 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 	defer subscriber.Close()
 
 	handler := &mock.CommitEventHandler{}
-
 	handler.HandleFunc = func(event event.BlockCommitted) {
-		assert.Equal(t, "tx02", event.TxList[0].ID)
+		assert.Equal(t, "tx01", event.TxList[0].ID)
 		assert.Equal(t, blockchain.Committed, event.State)
 		wg.Done()
 	}
 
 	subscriber.SubscribeTopic("block.*", handler)
 
-	//set api param
-
 	publisherID := "junksound"
 
 	blockRepo := mock.BlockRepository{}
-
 	blockRepo.FindLastFunc = func() (blockchain.DefaultBlock, error) {
 		return lastBlock, nil
 	}
-
 	blockRepo.SaveFunc = func(block blockchain.DefaultBlock) error {
-
-		assert.Equal(t, "tx02", block.GetTxList()[0].GetID())
-
+		assert.Equal(t, "tx01", block.GetTxList()[0].GetID())
 		return nil
 	}
 
 	eventService := common.NewEventService("", "Event")
 
 	bApi, err := api.NewBlockApi(publisherID, blockRepo, eventService)
-
 	assert.NoError(t, err)
-
 	// when
-	err = bApi.CommitProposedBlock(txList)
+	err = bApi.CommitBlock(*block)
 
 	// then
 	assert.NoError(t, err)

@@ -23,18 +23,21 @@ import (
 )
 
 type BlockCommitApi interface {
-	CommitProposedBlock(txList []*blockchain.DefaultTransaction) error
+	CreateProposedBlock(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error)
+	CommitBlock(txList blockchain.DefaultBlock) error
 }
 
 type BlockProposeCommandHandler struct {
-	blockApi   BlockCommitApi
-	engineMode string
+	blockApi         BlockCommitApi
+	consensusService blockchain.ConsensusService
+	engineMode       string
 }
 
-func NewBlockProposeCommandHandler(blockApi BlockCommitApi, engineMode string) *BlockProposeCommandHandler {
+func NewBlockProposeCommandHandler(blockApi BlockCommitApi, consensusService blockchain.ConsensusService, engineMode string) *BlockProposeCommandHandler {
 	return &BlockProposeCommandHandler{
-		blockApi:   blockApi,
-		engineMode: engineMode,
+		blockApi:         blockApi,
+		consensusService: consensusService,
+		engineMode:       engineMode,
 	}
 }
 
@@ -44,19 +47,25 @@ func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.P
 	}
 
 	txList := command.TxList
-
 	defaultTxList := getBackTxList(txList)
 
+	proposedBlock, err := h.blockApi.CreateProposedBlock(defaultTxList)
+	if err != nil {
+		return struct{}{}, rpc.Error{Message: err.Error()}
+	}
+
 	if h.engineMode == "solo" {
-
-		//commit
-		err := h.blockApi.CommitProposedBlock(defaultTxList)
-
+		err = h.blockApi.CommitBlock(proposedBlock)
 		if err != nil {
 			return struct{}{}, rpc.Error{Message: err.Error()}
 		}
 
 		return struct{}{}, rpc.Error{}
+	}
+
+	err = h.consensusService.ConsentBlock(proposedBlock)
+	if err != nil {
+		return struct{}{}, rpc.Error{Message: err.Error()}
 	}
 
 	return struct{}{}, rpc.Error{}
