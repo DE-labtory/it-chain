@@ -17,9 +17,10 @@
 package p2p_test
 
 import (
+	"testing"
+
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
-	"testing"
 
 	"time"
 
@@ -130,10 +131,10 @@ func TestElectionService_DecideToBeLeader(t *testing.T) {
 			},
 		},
 		"when election is candidate state, vote count not reached majority": {
-			input: struct {election p2p.Election}{
+			input: struct{ election p2p.Election }{
 				election: p2p.NewElection("this.should.not.broadcast", 30, p2p.Candidate, 0),
 			},
-			output: struct{voteCount int}{
+			output: struct{ voteCount int }{
 				voteCount: 1,
 			},
 		},
@@ -168,11 +169,11 @@ func TestElectionService_DecideToBeLeader(t *testing.T) {
 	queryService := mock.MockPeerQueryService{}
 	queryService.GetPLTableFunc = func() (p2p.PLTable, error) {
 		return p2p.PLTable{
-			Leader: p2p.Leader{LeaderId:p2p.LeaderId{Id: "FollowMe"}},
+			Leader: p2p.Leader{LeaderId: p2p.LeaderId{Id: "FollowMe"}},
 			PeerTable: map[string]p2p.Peer{
-				"1": p2p.Peer{IpAddress: "1.ipAddr", PeerId: p2p.PeerId{Id:"1"}},
-				"2": p2p.Peer{IpAddress: "2.ipAddr", PeerId: p2p.PeerId{Id:"2"}},
-				"3": p2p.Peer{IpAddress: "3.ipAddr", PeerId: p2p.PeerId{Id:"3"}},
+				"1": p2p.Peer{IpAddress: "1.ipAddr", PeerId: p2p.PeerId{Id: "1"}},
+				"2": p2p.Peer{IpAddress: "2.ipAddr", PeerId: p2p.PeerId{Id: "2"}},
+				"3": p2p.Peer{IpAddress: "3.ipAddr", PeerId: p2p.PeerId{Id: "3"}},
 			},
 		}, nil
 	}
@@ -198,11 +199,11 @@ func TestElectionService_DecideToBeLeader_WhenElectionCandiateState(t *testing.T
 	queryService := mock.MockPeerQueryService{}
 	queryService.GetPLTableFunc = func() (p2p.PLTable, error) {
 		return p2p.PLTable{
-			Leader: p2p.Leader{LeaderId:p2p.LeaderId{Id: "FollowMe"}},
+			Leader: p2p.Leader{LeaderId: p2p.LeaderId{Id: "FollowMe"}},
 			PeerTable: map[string]p2p.Peer{
-				"1": p2p.Peer{IpAddress: "1.ipAddr", PeerId: p2p.PeerId{Id:"1"}},
-				"2": p2p.Peer{IpAddress: "2.ipAddr", PeerId: p2p.PeerId{Id:"2"}},
-				"3": p2p.Peer{IpAddress: "3.ipAddr", PeerId: p2p.PeerId{Id:"3"}},
+				"1": p2p.Peer{IpAddress: "1.ipAddr", PeerId: p2p.PeerId{Id: "1"}},
+				"2": p2p.Peer{IpAddress: "2.ipAddr", PeerId: p2p.PeerId{Id: "2"}},
+				"3": p2p.Peer{IpAddress: "3.ipAddr", PeerId: p2p.PeerId{Id: "3"}},
 			},
 		}, nil
 	}
@@ -328,7 +329,15 @@ func TestElectionService_ElectLeaderWithRaft(t *testing.T) {
 }
 
 func TestNewElectionService(t *testing.T) {
+	election := p2p.NewElection("this.is.ip.addres", 30, p2p.Ticking, 123)
+	queryService := mock.MockPeerQueryService{}
+	client := mock.MockClient{}
 
+	electionService := p2p.NewElectionService(&election, queryService, client)
+
+	assert.Equal(t, 123, electionService.Election.GetVoteCount())
+	assert.Equal(t, 30, electionService.Election.GetLeftTime())
+	assert.Equal(t, p2p.Ticking, electionService.Election.GetState())
 }
 
 func TestGenRandomInRange(t *testing.T) {

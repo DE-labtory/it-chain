@@ -160,6 +160,6 @@ type MockClient struct {
 	CallFunc func(queue string, params interface{}, callback interface{}) error
 }
 
-func(c MockClient) Call(queue string, params interface{}, callback interface{}) error {
+func (c MockClient) Call(queue string, params interface{}, callback interface{}) error {
 	return c.CallFunc(queue, params, callback)
 }
