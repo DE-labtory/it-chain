@@ -66,27 +66,27 @@ type MockPeerQueryService struct {
 	FindPeerByAddressFunc func(ipAddress string) (p2p.Peer, error)
 }
 
-func (mpltqs *MockPeerQueryService) GetPLTable() (p2p.PLTable, error) {
+func (mpltqs MockPeerQueryService) GetPLTable() (p2p.PLTable, error) {
 
 	return mpltqs.GetPLTableFunc()
 }
 
-func (mpltqs *MockPeerQueryService) GetPeerList() ([]p2p.Peer, error) {
+func (mpltqs MockPeerQueryService) GetPeerList() ([]p2p.Peer, error) {
 
 	return mpltqs.GetPeerListFunc()
 }
 
-func (mpltqs *MockPeerQueryService) GetLeader() (p2p.Leader, error) {
+func (mpltqs MockPeerQueryService) GetLeader() (p2p.Leader, error) {
 
 	return mpltqs.GetLeaderFunc()
 }
 
-func (mpltqs *MockPeerQueryService) FindPeerById(peerId p2p.PeerId) (p2p.Peer, error) {
+func (mpltqs MockPeerQueryService) FindPeerById(peerId p2p.PeerId) (p2p.Peer, error) {
 
 	return mpltqs.FindPeerByIdFunc(peerId)
 }
 
-func (mpltqs *MockPeerQueryService) FindPeerByAddress(ipAddress string) (p2p.Peer, error) {
+func (mpltqs MockPeerQueryService) FindPeerByAddress(ipAddress string) (p2p.Peer, error) {
 
 	return mpltqs.FindPeerByAddressFunc(ipAddress)
 }
@@ -154,4 +154,12 @@ type MockEventService struct {
 
 func (m *MockEventService) Publish(topic string, event interface{}) error {
 	return m.PublishFunc(topic, event)
+}
+
+type MockClient struct {
+	CallFunc func(queue string, params interface{}, callback interface{}) error
+}
+
+func(c MockClient) Call(queue string, params interface{}, callback interface{}) error {
+	return c.CallFunc(queue, params, callback)
 }
