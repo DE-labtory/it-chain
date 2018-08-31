@@ -25,7 +25,9 @@ import (
 	"io"
 	"math/big"
 	"os"
+	"os/user"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -106,4 +108,53 @@ func CryptoRandomGeneration(min int64, max int64) int64 {
 	n, _ := rand.Int(rand.Reader, big.NewInt(max+1-min))
 	ret := n.Int64() + min
 	return ret
+}
+
+// absolute path로 변경하기
+func RelativeToAbsolutePath(rpath string) (string, error) {
+
+	var absolutePath string
+
+	// user home 얻기
+	usr, err := user.Current()
+
+	// 지금 이거 입력하는 위치 얻기
+	cur, err := filepath.Abs(rpath)
+	if err != nil {
+		return absolutePath, err
+	}
+
+	// 1. ./ ../ 경우
+
+	if strings.Contains(rpath, "./") {
+		i := strings.Index(rpath, "./")
+
+		if i > -1 {
+			pathRemain := rpath[i+1:]
+			absolutePath = path.Join(cur, pathRemain)
+
+		} else {
+			absolutePath = rpath
+		}
+
+	}
+
+	// 2. ~/ 홈폴더 경우
+
+	if strings.Contains(rpath, "~") {
+
+		i := strings.Index(rpath, "~") // 처음 나온 ~만 반환
+
+		if i > -1 {
+			pathRemain := rpath[i+1:]
+			absolutePath = path.Join(usr.HomeDir, pathRemain)
+
+		} else {
+			absolutePath = rpath
+		}
+
+	}
+
+	return absolutePath, err
+
 }
