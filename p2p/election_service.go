@@ -94,7 +94,7 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 }
 
 //broadcast leader when voted fully
-func (es *ElectionService) DecideToBeLeader(command command.ReceiveGrpc) error {
+func (es *ElectionService) DecideToBeLeader() error {
 
 	logger.Infof(nil, "current state", es.Election)
 	//	1. if candidate, reset left time
