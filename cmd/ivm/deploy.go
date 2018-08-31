@@ -30,19 +30,20 @@ import (
 func DeployCmd() cli.Command {
 	return cli.Command{
 		Name:  "deploy",
-		Usage: "it-chain ivm deploy [icode git url] [ssh path]",
+		Usage: "it-chain ivm deploy [icode git url] [ssh path] [password]",
 		Action: func(c *cli.Context) error {
 
 			gitUrl := c.Args().Get(0)
 			sshPath := c.Args().Get(1)
-			deploy(gitUrl, sshPath)
+			password := c.Args().Get(2)
+			deploy(gitUrl, sshPath, password)
 
 			return nil
 		},
 	}
 }
 
-func deploy(gitUrl string, sshPath string) {
+func deploy(gitUrl string, sshPath string, password string) {
 
 	config := conf.GetConfiguration()
 	client := rpc.NewClient(config.Engine.Amqp)
@@ -50,9 +51,10 @@ func deploy(gitUrl string, sshPath string) {
 	defer client.Close()
 
 	deployCommand := command.Deploy{
-		ICodeId: xid.New().String(),
-		Url:     gitUrl,
-		SshPath: sshPath,
+		ICodeId:  xid.New().String(),
+		Url:      gitUrl,
+		SshPath:  sshPath,
+		Password: password,
 	}
 
 	log.Printf("[Cmd] deploying icode...")
