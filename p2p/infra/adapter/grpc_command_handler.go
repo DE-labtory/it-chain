@@ -78,7 +78,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc)
 
 		logger.Infof(nil, "received VoteLeaderProtocol command:", command)
 		logger.Infof(nil, "received VoteLeaderProtocol current election :", gch.electionService.Election)
-		gch.electionService.DecideToBeLeader(command)
+		gch.electionService.DecideToBeLeader()
 
 	case "UpdateLeaderProtocol":
 		// if received leader is not what i voted for, return nil
