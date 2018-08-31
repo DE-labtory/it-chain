@@ -115,7 +115,9 @@ func (es *ElectionService) DecideToBeLeader() error {
 			IpAddress: es.Election.ipAddress,
 		}
 
-		es.BroadcastLeader(peer)
+		if err := es.BroadcastLeader(peer); err != nil {
+			return err
+		}
 	}
 
 	return nil

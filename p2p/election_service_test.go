@@ -17,6 +17,8 @@
 package p2p_test
 
 import (
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/command"
 	"testing"
 
 	"time"
@@ -24,7 +26,8 @@ import (
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/infra/mem"
 	test2 "github.com/it-chain/engine/p2p/test"
-	"github.com/magiconair/properties/assert"
+	"github.com/it-chain/engine/p2p/test/mock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestElectionService_Vote(t *testing.T) {
@@ -110,7 +113,110 @@ func TestElectionService_RequestVote(t *testing.T) {
 }
 
 func TestElectionService_DecideToBeLeader(t *testing.T) {
+	tests := map[string]struct {
+		input struct {
+			election p2p.Election
+		}
+		output struct {
+			voteCount int
+		}
+	}{
+		"when election is ticking state, vote count not reached majority": {
+			input: struct{ election p2p.Election }{
+				election: p2p.NewElection("this.should.not.broadcast", 30, p2p.Ticking, 0),
+			},
+			output: struct{ voteCount int }{
+				voteCount: 0,
+			},
+		},
+		"when election is candidate state, vote count not reached majority": {
+			input: struct {election p2p.Election}{
+				election: p2p.NewElection("this.should.not.broadcast", 30, p2p.Candidate, 0),
+			},
+			output: struct{voteCount int}{
+				voteCount: 1,
+			},
+		},
+		"when election is ticking state, vote count reached majority": {
+			input: struct{ election p2p.Election }{
+				election: p2p.NewElection("this.is.input.address", 30, p2p.Ticking, 2),
+			},
+			output: struct{ voteCount int }{
+				voteCount: 2,
+			},
+		},
+		"when election is candidate state, vote count reached majority": {
+			input: struct{ election p2p.Election }{
+				election: p2p.NewElection("this.is.input.address", 30, p2p.Candidate, 1),
+			},
+			output: struct{ voteCount int }{
+				voteCount: 2,
+			},
+		},
+	}
 
+	client := mock.MockClient{}
+	client.CallFunc = func(queue string, params interface{}, callback interface{}) error {
+		message := p2p.UpdateLeaderMessage{}
+		common.Deserialize(params.(command.DeliverGrpc).Body, &message)
+
+		assert.Equal(t, "this.is.input.address", message.Peer.IpAddress)
+
+		assert.Equal(t, "message.deliver", queue)
+		return nil
+	}
+	queryService := mock.MockPeerQueryService{}
+	queryService.GetPLTableFunc = func() (p2p.PLTable, error) {
+		return p2p.PLTable{
+			Leader: p2p.Leader{LeaderId:p2p.LeaderId{Id: "FollowMe"}},
+			PeerTable: map[string]p2p.Peer{
+				"1": p2p.Peer{IpAddress: "1.ipAddr", PeerId: p2p.PeerId{Id:"1"}},
+				"2": p2p.Peer{IpAddress: "2.ipAddr", PeerId: p2p.PeerId{Id:"2"}},
+				"3": p2p.Peer{IpAddress: "3.ipAddr", PeerId: p2p.PeerId{Id:"3"}},
+			},
+		}, nil
+	}
+
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+
+		electionService := p2p.NewElectionService(&test.input.election, queryService, client)
+
+		// when, then
+		err := electionService.DecideToBeLeader()
+		assert.NoError(t, err)
+		// when, then
+		count := electionService.Election.GetVoteCount()
+		assert.Equal(t, test.output.voteCount, count)
+	}
+
+}
+
+func TestElectionService_DecideToBeLeader_WhenElectionCandiateState(t *testing.T) {
+	election := p2p.NewElection("ip.address", 30, p2p.Candidate, 0)
+
+	queryService := mock.MockPeerQueryService{}
+	queryService.GetPLTableFunc = func() (p2p.PLTable, error) {
+		return p2p.PLTable{
+			Leader: p2p.Leader{LeaderId:p2p.LeaderId{Id: "FollowMe"}},
+			PeerTable: map[string]p2p.Peer{
+				"1": p2p.Peer{IpAddress: "1.ipAddr", PeerId: p2p.PeerId{Id:"1"}},
+				"2": p2p.Peer{IpAddress: "2.ipAddr", PeerId: p2p.PeerId{Id:"2"}},
+				"3": p2p.Peer{IpAddress: "3.ipAddr", PeerId: p2p.PeerId{Id:"3"}},
+			},
+		}, nil
+	}
+
+	client := mock.MockClient{}
+
+	electionService := p2p.NewElectionService(&election, queryService, client)
+
+	// when, then
+	err := electionService.DecideToBeLeader()
+	assert.NoError(t, err)
+	// when, then
+	count := electionService.Election.GetVoteCount()
+	assert.Equal(t, 1, count)
 }
 
 func TestElectionService_BroadcastLeader(t *testing.T) {
