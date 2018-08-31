@@ -45,7 +45,7 @@ func TestICodeApi_Deploy(t *testing.T) {
 
 	api, containerService := setUp(t)
 
-	icode, err := api.Deploy("1", savePath, "github.com/junbeomlee/learn-icode", sshPath)
+	icode, err := api.Deploy("1", savePath, "github.com/junbeomlee/learn-icode", sshPath, "")
 	defer api.UnDeploy("1")
 
 	assert.NoError(t, err)
@@ -65,7 +65,7 @@ func TestICodeApi_UnDeploy(t *testing.T) {
 	defer tearDown1()
 
 	api, containerService := setUp(t)
-	_, err = api.Deploy("1", savePath, "github.com/junbeomlee/learn-icode", sshPath)
+	_, err = api.Deploy("1", savePath, "github.com/junbeomlee/learn-icode", sshPath, "")
 	assert.NoError(t, err)
 	assert.Equal(t, containerService.GetRunningICodeIDList()[0], "1")
 
@@ -84,7 +84,7 @@ func TestICodeApi_ExecuteRequest(t *testing.T) {
 	defer tearDown1()
 
 	api, _ := setUp(t)
-	_, err = api.Deploy("1", savePath, "github.com/junbeomlee/learn-icode", sshPath)
+	_, err = api.Deploy("1", savePath, "github.com/junbeomlee/learn-icode", sshPath, "")
 	defer api.UnDeploy("1")
 
 	result, err := api.ExecuteRequest(ivm.Request{
@@ -108,7 +108,7 @@ func TestICodeApi_ExecuteRequestList(t *testing.T) {
 	defer tearDown1()
 
 	api, _ := setUp(t)
-	_, err = api.Deploy("1", savePath, "github.com/junbeomlee/learn-icode", sshPath)
+	_, err = api.Deploy("1", savePath, "github.com/junbeomlee/learn-icode", sshPath, "")
 	defer api.UnDeploy("1")
 
 	results := api.ExecuteRequestList([]ivm.Request{
