@@ -42,7 +42,7 @@ func NewRepositoryService() *RepositoryService {
 	return &RepositoryService{}
 }
 
-func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string) (ivm.ICode, error) {
+func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string, password string) (ivm.ICode, error) {
 	logger.Info(nil, fmt.Sprintf("[IVM] Cloning Icode - url: [%s]", repositoryUrl))
 
 	giturl, err := toSshUrl(repositoryUrl)
@@ -65,7 +65,7 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 		}
 	}
 
-	sshAuth, err := ssh.NewPublicKeysFromFile("git", sshPath, "")
+	sshAuth, err := ssh.NewPublicKeysFromFile("git", sshPath, password)
 	if err != nil {
 		return ivm.ICode{}, err
 	}
