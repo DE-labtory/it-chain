@@ -209,11 +209,13 @@ func TestElectionService_ElectLeaderWithRaft(t *testing.T) {
 		leader3, _ := peerRepoList[2].GetLeader()
 		leader4, _ := peerRepoList[3].GetLeader()
 		leader5, _ := peerRepoList[4].GetLeader()
+
 		t.Logf("leader1: %v", leader1)
 		t.Logf("leader2: %v", leader2)
 		t.Logf("leader3: %v", leader3)
 		t.Logf("leader4: %v", leader4)
 		t.Logf("leader5: %v", leader5)
+
 		assert.Equal(t, leader2, leader1)
 		assert.Equal(t, leader3, leader1)
 		assert.Equal(t, leader4, leader1)
