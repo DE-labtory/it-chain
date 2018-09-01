@@ -42,20 +42,20 @@ func (m MockConfirmService) ConfirmBlock(block pbft.ProposedBlock) error {
 }
 
 type MockPropagateService struct {
-	BroadcastPrepareMsgFunc    func(msg pbft.PrepareMsg) error
-	BroadcastPrePrepareMsgFunc func(msg pbft.PrePrepareMsg) error
-	BroadcastCommitMsgFunc     func(msg pbft.CommitMsg) error
+	BroadcastPrePrepareMsgFunc func(msg pbft.PrePrepareMsg, representatives []*pbft.Representative) error
+	BroadcastPrepareMsgFunc    func(msg pbft.PrepareMsg, representatives []*pbft.Representative) error
+	BroadcastCommitMsgFunc     func(msg pbft.CommitMsg, representatives []*pbft.Representative) error
 }
 
-func (m MockPropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg) error {
-	return m.BroadcastPrepareMsgFunc(msg)
+func (m MockPropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg, representatives []*pbft.Representative) error {
+	return m.BroadcastPrepareMsgFunc(msg, nil)
 }
 
-func (m MockPropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg) error {
-	return m.BroadcastPrePrepareMsgFunc(msg)
+func (m MockPropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg, representatives []*pbft.Representative) error {
+	return m.BroadcastPrePrepareMsgFunc(msg, nil)
 }
-func (m MockPropagateService) BroadcastCommitMsg(msg pbft.CommitMsg) error {
-	return m.BroadcastCommitMsgFunc(msg)
+func (m MockPropagateService) BroadcastCommitMsg(msg pbft.CommitMsg, representatives []*pbft.Representative) error {
+	return m.BroadcastCommitMsgFunc(msg, nil)
 }
 
 type MockParliamentService struct {
