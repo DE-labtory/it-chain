@@ -82,14 +82,8 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 		},
 	}
 
-	publish := func(topic string, data interface{}) (e error) {
-		assert.Equal(t, "message.deliver", topic)
-
-		return nil
-	}
-
 	representatives := make([]*pbft.Representative, 0)
-	propagateService := adapter.NewPropagateService(publish)
+	propagateService := adapter.NewPropagateService()
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
@@ -145,14 +139,8 @@ func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 		},
 	}
 
-	publish := func(topic string, data interface{}) (e error) {
-		assert.Equal(t, "message.deliver", topic)
-
-		return nil
-	}
-
 	representatives := make([]*pbft.Representative, 0)
-	propagateService := adapter.NewPropagateService(publish)
+	propagateService := adapter.NewPropagateService()
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
@@ -194,14 +182,8 @@ func TestPropagateService_BroadcastCommitMsg(t *testing.T) {
 		},
 	}
 
-	publish := func(topic string, data interface{}) (e error) {
-		assert.Equal(t, "message.deliver", topic)
-
-		return nil
-	}
-
 	representatives := make([]*pbft.Representative, 0)
-	propagateService := adapter.NewPropagateService(publish)
+	propagateService := adapter.NewPropagateService()
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)

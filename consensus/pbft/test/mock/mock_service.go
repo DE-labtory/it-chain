@@ -21,55 +21,50 @@ import (
 )
 
 type EventService struct {
-	PublishFunc      func(topic string, event interface{}) error
-	ConfirmBlockFunc func(block pbft.ProposedBlock) error
+	PublishFunc func(topic string, event interface{}) error
 }
 
 func (m EventService) Publish(topic string, event interface{}) error {
 	return m.PublishFunc(topic, event)
 }
 
-func (m EventService) ConfirmBlock(block pbft.ProposedBlock) error {
-	return m.ConfirmBlockFunc(block)
-}
-
-type MockConfirmService struct {
+type ConfirmService struct {
 	ConfirmBlockFunc func(block pbft.ProposedBlock) error
 }
 
-func (m MockConfirmService) ConfirmBlock(block pbft.ProposedBlock) error {
+func (m ConfirmService) ConfirmBlock(block pbft.ProposedBlock) error {
 	return m.ConfirmBlockFunc(block)
 }
 
-type MockPropagateService struct {
+type PropagateService struct {
 	BroadcastPrepareMsgFunc    func(msg pbft.PrepareMsg) error
 	BroadcastPrePrepareMsgFunc func(msg pbft.PrePrepareMsg) error
 	BroadcastCommitMsgFunc     func(msg pbft.CommitMsg) error
 }
 
-func (m MockPropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg) error {
+func (m PropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg) error {
 	return m.BroadcastPrepareMsgFunc(msg)
 }
 
-func (m MockPropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg) error {
+func (m PropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg) error {
 	return m.BroadcastPrePrepareMsgFunc(msg)
 }
-func (m MockPropagateService) BroadcastCommitMsg(msg pbft.CommitMsg) error {
+func (m PropagateService) BroadcastCommitMsg(msg pbft.CommitMsg) error {
 	return m.BroadcastCommitMsgFunc(msg)
 }
 
-type MockParliamentService struct {
+type ParliamentService struct {
 	RequestLeaderFunc   func() (pbft.MemberID, error)
 	RequestPeerListFunc func() ([]pbft.MemberID, error)
 	IsNeedConsensusFunc func() bool
 }
 
-func (m MockParliamentService) RequestLeader() (pbft.MemberID, error) {
+func (m ParliamentService) RequestLeader() (pbft.MemberID, error) {
 	return m.RequestLeaderFunc()
 }
-func (m MockParliamentService) RequestPeerList() ([]pbft.MemberID, error) {
+func (m ParliamentService) RequestPeerList() ([]pbft.MemberID, error) {
 	return m.RequestPeerListFunc()
 }
-func (m MockParliamentService) IsNeedConsensus() bool {
+func (m ParliamentService) IsNeedConsensus() bool {
 	return m.IsNeedConsensusFunc()
 }
