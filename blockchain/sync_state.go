@@ -37,13 +37,13 @@ type SyncState interface {
 // 현재 블록 동기화가 진행 중인지 정보를 가진다.
 type BlockSyncState struct {
 	Id         string
-	isProgress ProgressState
+	IsProgress ProgressState
 }
 
 func NewBlockSyncState() *BlockSyncState {
 	return &BlockSyncState{
 		Id:         BC_SYNC_STATE_AID,
-		isProgress: DONE,
+		IsProgress: DONE,
 	}
 }
 
@@ -53,9 +53,9 @@ func (bss *BlockSyncState) GetID() string {
 
 func (bss *BlockSyncState) SetProgress(state ProgressState) {
 	if state == PROGRESSING {
-		bss.isProgress = PROGRESSING
+		bss.IsProgress = PROGRESSING
 	} else { // state == DONE
-		bss.isProgress = DONE
+		bss.IsProgress = DONE
 	}
 }
 
@@ -72,5 +72,5 @@ func createSyncDoneEvent() *event.SyncDone {
 }
 
 func (bss *BlockSyncState) IsProgressing() ProgressState {
-	return bss.isProgress
+	return bss.IsProgress
 }

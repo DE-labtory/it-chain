@@ -19,18 +19,24 @@ package adapter
 import (
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/blockchain/api"
 )
 
+type BlockApiForCommit interface {
+	CommitBlock(block blockchain.DefaultBlock) error
+}
 type ConsensusEventHandler struct {
 	blockSyncState *blockchain.BlockSyncState
 	blockPool      *blockchain.BlockPool
-	blockApi       *api.BlockApi
+	blockApi       BlockApiForCommit
 }
 
-func NewConsensusEventHandler(blockApi *api.BlockApi) *ConsensusEventHandler {
+func NewConsensusEventHandler(blockSyncState *blockchain.BlockSyncState, blockPool *blockchain.BlockPool, blockApi BlockApiForCommit) *ConsensusEventHandler {
 
-	return &ConsensusEventHandler{}
+	return &ConsensusEventHandler{
+		blockSyncState: blockSyncState,
+		blockPool:      blockPool,
+		blockApi:       blockApi,
+	}
 }
 
 /**
@@ -38,8 +44,7 @@ receive consensus finished event
 if block sync is on progress, change state to 'staged' and add to block pool
 if block sync is not on progress, commit block
 */
-func (c *ConsensusEventHandler) HandlerConsensusFinishedEvent(event event.ConsensusFinished) error {
-
+func (c *ConsensusEventHandler) HandleConsensusFinishedEvent(event event.ConsensusFinished) error {
 	receivedBlock := extractBlockFromEvent(event)
 
 	if c.blockSyncState.IsProgressing() {
@@ -54,13 +59,13 @@ func (c *ConsensusEventHandler) HandlerConsensusFinishedEvent(event event.Consen
 	return nil
 }
 
-func extractBlockFromEvent(event event.ConsensusFinished) *blockchain.DefaultBlock{
+func extractBlockFromEvent(event event.ConsensusFinished) *blockchain.DefaultBlock {
 	txList := blockchain.ConvertToTransactionList(event.TxList)
 
 	return &blockchain.DefaultBlock{
-		PrevSeal:event.PrevSeal,
-		Height:event.Height,
-		TxList:txList,
-		Creator:event.Creator,
+		PrevSeal: event.PrevSeal,
+		Height:   event.Height,
+		TxList:   txList,
+		Creator:  event.Creator,
 	}
 }

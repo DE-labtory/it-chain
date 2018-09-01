@@ -43,3 +43,14 @@ func (b *BlockPool) Delete(height uint64) {
 
 	delete(b.blockPool, height)
 }
+
+func (b *BlockPool) Get(height uint64) Block {
+	b.mux.Lock()
+	defer b.mux.Unlock()
+
+	if b.blockPool[height] == nil {
+		return nil
+	}
+
+	return b.blockPool[height]
+}

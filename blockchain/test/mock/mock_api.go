@@ -22,9 +22,17 @@ import (
 )
 
 type BlockApi struct {
+	SyncedCheckFunc               func(block blockchain.Block) error
 	AddBlockToPoolFunc            func(block blockchain.Block) error
 	CheckAndSaveBlockFromPoolFunc func(height blockchain.BlockHeight) error
-	CommitProposedBlockFunc       func(txList []*blockchain.DefaultTransaction) error
+	SyncIsProgressingFunc         func() blockchain.ProgressState
+	CommitGenesisBlockFunc        func(GenesisConfPath string) error
+	CommitBlockFunc               func(block blockchain.DefaultBlock) error
+	CreateProposedBlockFunc       func(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error)
+}
+
+func (api BlockApi) SyncedCheck(block blockchain.Block) error {
+	return api.SyncedCheckFunc(block)
 }
 
 func (api BlockApi) AddBlockToPool(block blockchain.Block) error {
@@ -35,8 +43,20 @@ func (api BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) err
 	return api.CheckAndSaveBlockFromPoolFunc(height)
 }
 
-func (api BlockApi) CommitProposedBlock(txList []*blockchain.DefaultTransaction) error {
-	return api.CommitProposedBlockFunc(txList)
+func (api BlockApi) SyncIsProgressing() blockchain.ProgressState {
+	return api.SyncIsProgressingFunc()
+}
+
+func (api BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
+	return api.CommitGenesisBlockFunc(GenesisConfPath)
+}
+
+func (api BlockApi) CommitBlock(block blockchain.DefaultBlock) error {
+	return api.CommitBlockFunc(block)
+}
+
+func (api BlockApi) CreateProposedBlock(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error) {
+	return api.CreateProposedBlockFunc(txList)
 }
 
 type MockSyncBlockApi struct {
