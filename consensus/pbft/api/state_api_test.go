@@ -339,6 +339,6 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNor
 		}
 		repo.Save(savedConsensus)
 	}
-	cApi := api.NewStateApi("my", propagateService, eventService, parliamentService, repo)
+	cApi := api.NewStateApi("my", propagateService, eventService, parliamentService, &repo)
 	return cApi
 }

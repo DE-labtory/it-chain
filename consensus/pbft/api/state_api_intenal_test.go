@@ -132,6 +132,31 @@ func TestConsensusApi_HandlePrepareMsg_State(t *testing.T) {
 	}
 
 }
+func TestConsensusApi_RepositoryClone(t *testing.T) {
+	// stateApi1 에는 setUpApiCondition에 의해 repo가 set된 상황
+	stateApi1 := setUpApiCondition(false, 5, true, false, false)
+	// stateApi2 에는 stateApi1의 Repo가 주입된 상황
+	stateApi2 := NewStateApi("publish2", nil, nil, nil, stateApi1.repo)
+
+	stateApi1.repo.Remove()
+	_, err := stateApi2.repo.Load()
+
+	assert.Equal(t, pbft.ErrEmptyRepo, err)
+
+	newState := pbft.State{
+		StateID:         pbft.StateID{"state1"},
+		Representatives: nil,
+		Block:           normalBlock,
+		CurrentStage:    pbft.PREPARE_STAGE,
+		PrepareMsgPool:  pbft.PrepareMsgPool{},
+		CommitMsgPool:   pbft.CommitMsgPool{},
+	}
+	stateApi1.repo.Save(newState)
+	_, err2 := stateApi2.repo.Load()
+
+	assert.Equal(t, nil, err2)
+
+}
 
 func setUpApiCondition(isNeedConsensus bool, peerNum int, isNormalBlock bool,
 	isPrepareConditionSatisfied bool, isCommitConditionSatisfied bool) StateApiImpl {
@@ -224,7 +249,7 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isNormalBlock bool,
 		}
 		repo.Save(savedConsensus)
 	}
-	cApi := NewStateApi("my", propagateService, eventService, parliamentService, repo)
+	cApi := NewStateApi("my", propagateService, eventService, parliamentService, &repo)
 
 	return cApi
 }
