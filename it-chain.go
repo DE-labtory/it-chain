@@ -47,6 +47,9 @@ import (
 	"github.com/urfave/cli"
 )
 
+const apidbPath = "./api-db"
+const dbPath = "./db"
+
 func PrintLogo() {
 	fmt.Println(`
 	___  _________               ________  ___  ___  ________  ___  ________
@@ -95,6 +98,7 @@ func main() {
 
 func run() error {
 
+	clearFolder()
 	errs := make(chan error, 2)
 
 	rpcServer, rpcClient, configuration, tearDown := initCommon()
@@ -118,6 +122,19 @@ func run() error {
 	return nil
 }
 
+func clearFolder() {
+
+	if err := os.RemoveAll(apidbPath); err != nil {
+		logger.Panic(&logger.Fields{"err_msg": err.Error()}, "error while clear folder")
+		panic(err)
+	}
+
+	if err := os.RemoveAll(dbPath); err != nil {
+		logger.Panic(&logger.Fields{"err_msg": err.Error()}, "error while clear folder")
+		panic(err)
+	}
+}
+
 func initCommon() (rpc.Server, rpc.Client, *conf.Configuration, func()) {
 	config := conf.GetConfiguration()
 	server := rpc.NewServer(config.Engine.Amqp)
@@ -138,7 +155,7 @@ func initApiGateway(config *conf.Configuration, errs chan error) func() {
 	kitLogger = kitlog.With(kitLogger, "ts", kitlog.DefaultTimestampUTC)
 
 	// set blockchain
-	blockchainDB := "./api-db/block"
+	blockchainDB := apidbPath + "/block"
 	CommittedBlockRepo, err := api_gateway.NewBlockRepositoryImpl(blockchainDB)
 	if err != nil {
 		logger.Panic(&logger.Fields{"err_msg": err.Error()}, "error while init gateway")
@@ -149,7 +166,7 @@ func initApiGateway(config *conf.Configuration, errs chan error) func() {
 	blockEventListener := api_gateway.NewBlockEventListener(CommittedBlockRepo)
 
 	// set ivm
-	icodeDB := "./api-db/ivm"
+	icodeDB := apidbPath + "/ivm"
 	icodeRepo := api_gateway.NewLevelDbMetaRepository(icodeDB)
 	icodeQueryApi := api_gateway.NewICodeQueryApi(&icodeRepo)
 	icodeEventListener := api_gateway.NewIcodeEventHandler(&icodeRepo)
@@ -177,7 +194,7 @@ func initApiGateway(config *conf.Configuration, errs chan error) func() {
 
 	return func() {
 		CommittedBlockRepo.Close()
-		os.RemoveAll("./api-db")
+		os.RemoveAll(apidbPath)
 	}
 }
 
@@ -240,7 +257,7 @@ func initBlockchain(config *conf.Configuration, server rpc.Server) func() {
 	logger.Infof(nil, "[Main] Blockchain is staring")
 
 	publisherId := "publisher.1"
-	blockRepo, err := blockchainMem.NewBlockRepository("./db")
+	blockRepo, err := blockchainMem.NewBlockRepository(dbPath)
 
 	if err != nil {
 		panic(err)
@@ -261,6 +278,6 @@ func initBlockchain(config *conf.Configuration, server rpc.Server) func() {
 	server.Register("block.propose", blockProposeHandler.HandleProposeBlockCommand)
 
 	return func() {
-		os.RemoveAll("./db")
+		os.RemoveAll(dbPath)
 	}
 }
