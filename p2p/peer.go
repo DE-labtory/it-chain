@@ -63,16 +63,6 @@ func (peerId PeerId) ToString() string {
 	return string(peerId.Id)
 }
 
-func PeerFilter(vs []Peer, f func(Peer) bool) []Peer {
-	vsf := make([]Peer, 0)
-	for _, v := range vs {
-		if f(v) {
-			vsf = append(vsf, v)
-		}
-	}
-	return vsf
-}
-
 type PeerRepository interface {
 	GetPLTable() (PLTable, error)
 	GetLeader() (Leader, error)

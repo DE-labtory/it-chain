@@ -15,3 +15,63 @@
  */
 
 package p2p_test
+
+import (
+	"testing"
+
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/p2p"
+	"github.com/magiconair/properties/assert"
+)
+
+func TestPeer_GetID(t *testing.T) {
+	peer := &p2p.Peer{
+		PeerId: p2p.PeerId{
+			Id: "1",
+		},
+		IpAddress: "1",
+	}
+
+	assert.Equal(t, peer.GetID(), "1")
+}
+
+func TestPeer_Serialize(t *testing.T) {
+	peer := &p2p.Peer{
+		PeerId: p2p.PeerId{
+			Id: "1",
+		},
+		IpAddress: "1",
+	}
+
+	byte, _ := common.Serialize(peer)
+	b, _ := peer.Serialize()
+
+	assert.Equal(t, b, byte)
+}
+
+func TestDeserialize(t *testing.T) {
+	peer := &p2p.Peer{
+		PeerId: p2p.PeerId{
+			Id: "1",
+		},
+	}
+
+	targetPeer := &p2p.Peer{}
+
+	byte, _ := peer.Serialize()
+
+	assert.Equal(t, p2p.Deserialize(byte, targetPeer), nil)
+	assert.Equal(t, targetPeer, &p2p.Peer{
+		PeerId: p2p.PeerId{
+			Id: "1",
+		},
+	})
+}
+
+func TestPeerId_ToString(t *testing.T) {
+	peerId := &p2p.PeerId{
+		Id: "1",
+	}
+
+	assert.Equal(t, peerId.ToString(), "1")
+}
