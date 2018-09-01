@@ -28,18 +28,22 @@ type BlockApi struct {
 	publisherId     string
 	blockRepository blockchain.BlockRepository
 	eventService    blockchain.EventService
+	blockPool       *blockchain.BlockPool
 }
 
-func NewBlockApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService) (BlockApi, error) {
+func NewBlockApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService, blockPool *blockchain.BlockPool) (BlockApi, error) {
 	return BlockApi{
 		publisherId:     publisherId,
 		blockRepository: blockRepository,
 		eventService:    eventService,
+		blockPool:       blockPool,
 	}, nil
 }
 
 // 받은 block을 block pool에 추가한다.
 func (bApi BlockApi) AddBlockToPool(block blockchain.Block) error {
+
+	bApi.blockPool.Add(block)
 	return nil
 }
 
@@ -82,6 +86,10 @@ func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
 	return bApi.eventService.Publish("block.committed", commitEvent)
 }
 
+/**
+set state to 'committed'
+publish block committed event
+*/
 func (bApi BlockApi) CommitBlock(block blockchain.DefaultBlock) error {
 	logger.Info(nil, "[Blockchain] Committing proposed block")
 

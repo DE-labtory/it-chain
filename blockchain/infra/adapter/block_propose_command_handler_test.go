@@ -80,8 +80,9 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_Solo(t *testing.T)
 	assert.NoError(t, err)
 
 	eventService := common.NewEventService("", "Event")
+	blockPool := blockchain.NewBlockPool()
 
-	bApi, err := api.NewBlockApi(publisherID, br, eventService)
+	bApi, err := api.NewBlockApi(publisherID, br, eventService, blockPool)
 	assert.NoError(t, err)
 
 	commandHandler := adapter.NewBlockProposeCommandHandler(bApi, consensusService, "solo")
@@ -177,8 +178,9 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_OneTransac
 
 	publisherID := "iAmPublisher"
 	eventService := common.NewEventService("", "Event")
+	blockPool := blockchain.NewBlockPool()
 
-	api, err := api.NewBlockApi(publisherID, blockRepository, eventService)
+	api, err := api.NewBlockApi(publisherID, blockRepository, eventService, blockPool)
 	assert.NoError(t, err)
 
 	commandHandler := adapter.NewBlockProposeCommandHandler(api, consensusService, "notSolo")
@@ -233,8 +235,9 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_TwoTransac
 
 	publisherID := "iAmPublisher"
 	eventService := common.NewEventService("", "Event")
+	blockPool := blockchain.NewBlockPool()
 
-	api, err := api.NewBlockApi(publisherID, blockRepository, eventService)
+	api, err := api.NewBlockApi(publisherID, blockRepository, eventService, blockPool)
 	assert.NoError(t, err)
 
 	commandHandler := adapter.NewBlockProposeCommandHandler(api, consensusService, "notSolo")
@@ -293,8 +296,9 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_ExceptionC
 
 	publisherID := "iAmPublisher"
 	eventService := common.NewEventService("", "Event")
+	blockPool := blockchain.NewBlockPool()
 
-	api, err := api.NewBlockApi(publisherID, blockRepository, eventService)
+	api, err := api.NewBlockApi(publisherID, blockRepository, eventService, blockPool)
 	assert.NoError(t, err)
 
 	commandHandler := adapter.NewBlockProposeCommandHandler(api, consensusService, "notSolo")

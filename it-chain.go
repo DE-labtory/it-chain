@@ -27,6 +27,7 @@ import (
 
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/it-chain/engine/api_gateway"
+	"github.com/it-chain/engine/blockchain"
 	blockchainApi "github.com/it-chain/engine/blockchain/api"
 	blockchainAdapter "github.com/it-chain/engine/blockchain/infra/adapter"
 	blockchainMem "github.com/it-chain/engine/blockchain/infra/mem"
@@ -267,7 +268,9 @@ func initBlockchain(config *conf.Configuration, server rpc.Server) func() {
 	}
 
 	eventService := common.NewEventService(config.Engine.Amqp, "Event")
-	blockApi, err := blockchainApi.NewBlockApi(publisherId, blockRepo, eventService)
+	blockPool := blockchain.NewBlockPool()
+
+	blockApi, err := blockchainApi.NewBlockApi(publisherId, blockRepo, eventService, blockPool)
 	if err != nil {
 		panic(err)
 	}
