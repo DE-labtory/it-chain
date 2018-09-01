@@ -34,13 +34,13 @@ type StateApiImpl struct {
 	propagateService  pbft.PropagateService
 	eventService      pbft.EventService
 	parliamentService pbft.ParliamentService
-	repo              pbft.StateRepository
+	repo              *pbft.StateRepository
 }
 
 var ConsensusCreateError = errors.New("Consensus can't be created")
 
 func NewStateApi(publisherID string, propagateService pbft.PropagateService,
-	eventService pbft.EventService, parliamentService pbft.ParliamentService, repo pbft.StateRepository) StateApiImpl {
+	eventService pbft.EventService, parliamentService pbft.ParliamentService, repo *pbft.StateRepository) StateApiImpl {
 	return StateApiImpl{
 		publisherID:       publisherID,
 		propagateService:  propagateService,
