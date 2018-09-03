@@ -259,3 +259,28 @@ func TestBlockApi_CreateProposedBlock(t *testing.T) {
 	assert.Equal(t, lastBlock.GetSeal(), block.GetPrevSeal())
 	assert.Equal(t, uint64(2), block.GetHeight())
 }
+
+func TestBlockApi_StageBlock(t *testing.T) {
+	// when
+	block := &blockchain.DefaultBlock{
+		Height: 30,
+		State:  blockchain.Committed,
+	}
+	publisherId := "1"
+	blockRepo := mock.BlockRepository{}
+	eventService := mock.EventService{}
+	blockPool := blockchain.NewBlockPool()
+
+	// when
+	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService, blockPool)
+	blockApi.StageBlock(*block)
+
+	// when
+	toBe := &blockchain.DefaultBlock{
+		Height: 30,
+		State:  blockchain.Staged,
+	}
+
+	// then
+	assert.Equal(t, blockApi.BlockPool.Get(30), toBe)
+}
