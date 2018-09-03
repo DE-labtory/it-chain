@@ -21,21 +21,21 @@ import (
 	"github.com/it-chain/engine/common/event"
 )
 
-type BlockApiForCommit interface {
+type BlockApiForCommitAndStage interface {
 	CommitBlock(block blockchain.DefaultBlock) error
-}
-type ConsensusEventHandler struct {
-	blockSyncState *blockchain.BlockSyncState
-	blockPool      *blockchain.BlockPool
-	blockApi       BlockApiForCommit
+	StageBlock(block blockchain.DefaultBlock) error
 }
 
-func NewConsensusEventHandler(blockSyncState *blockchain.BlockSyncState, blockPool *blockchain.BlockPool, blockApi BlockApiForCommit) *ConsensusEventHandler {
+type ConsensusEventHandler struct {
+	BlockSyncState *blockchain.BlockSyncState
+	BlockApi       BlockApiForCommitAndStage
+}
+
+func NewConsensusEventHandler(blockSyncState *blockchain.BlockSyncState, blockApi BlockApiForCommitAndStage) *ConsensusEventHandler {
 
 	return &ConsensusEventHandler{
-		blockSyncState: blockSyncState,
-		blockPool:      blockPool,
-		blockApi:       blockApi,
+		BlockSyncState: blockSyncState,
+		BlockApi:       blockApi,
 	}
 }
 
@@ -47,13 +47,14 @@ if block sync is not on progress, commit block
 func (c *ConsensusEventHandler) HandleConsensusFinishedEvent(event event.ConsensusFinished) error {
 	receivedBlock := extractBlockFromEvent(event)
 
-	if c.blockSyncState.IsProgressing() {
-		receivedBlock.SetState(blockchain.Staged)
-		c.blockPool.Add(receivedBlock)
+	if len(event.TxList) == 0 {
+		return ErrBlockNil
+	}
 
-		return nil
+	if c.BlockSyncState.IsProgressing() {
+		c.BlockApi.StageBlock(*receivedBlock)
 	} else {
-		c.blockApi.CommitBlock(*receivedBlock)
+		c.BlockApi.CommitBlock(*receivedBlock)
 	}
 
 	return nil

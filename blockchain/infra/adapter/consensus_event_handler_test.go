@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package adapter
+package adapter_test
 
 import (
 	"testing"
 
 	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/test/mock"
 	event2 "github.com/it-chain/engine/common/event"
 	"github.com/magiconair/properties/assert"
@@ -27,18 +28,17 @@ import (
 
 func TestNewConsensusEventHandler(t *testing.T) {
 	blockSyncState := blockchain.NewBlockSyncState()
-	blockPool := blockchain.NewBlockPool()
 	blockApi := &mock.BlockApi{}
 
-	consensusEventHandler := &ConsensusEventHandler{blockSyncState: blockSyncState, blockPool: blockPool, blockApi: blockApi}
-	generated := NewConsensusEventHandler(blockSyncState, blockPool, blockApi)
+	consensusEventHandler := &adapter.ConsensusEventHandler{BlockSyncState: blockSyncState, BlockApi: blockApi}
+	generated := adapter.NewConsensusEventHandler(blockSyncState, blockApi)
 
 	assert.Equal(t, consensusEventHandler, generated)
 }
 
 func TestConsensusEventHandler_HandleConsensusFinishedEvent(t *testing.T) {
 
-	event := &event2.ConsensusFinished{
+	event1 := event2.ConsensusFinished{
 		PrevSeal: []byte{},
 		Height:   12,
 		TxList: []event2.Tx{event2.Tx{
@@ -47,32 +47,40 @@ func TestConsensusEventHandler_HandleConsensusFinishedEvent(t *testing.T) {
 		Creator: []byte{},
 	}
 
+	event2 := event2.ConsensusFinished{
+		PrevSeal: []byte{},
+		Height:   12,
+		TxList:   []event2.Tx{},
+		Creator:  []byte{},
+	}
+
+	consensusEventHandler := SetConsensusEventHandler(&blockchain.BlockSyncState{Id: "1", IsProgress: true})
+
 	//	when
-	consensusEventHandler1 := SetConsensusEventHandler(&blockchain.BlockSyncState{Id: "1", IsProgress: true})
-	consensusEventHandler1.HandleConsensusFinishedEvent(*event)
+	consensusEventHandler.HandleConsensusFinishedEvent(event1)
 
 	//then
-	assert.Equal(t, consensusEventHandler1.blockPool.Get(12).GetHeight(), uint64(12))
+	assert.Equal(t, consensusEventHandler.HandleConsensusFinishedEvent(event1), nil)
 
 	//	when
-	consensusEventHandler2 := SetConsensusEventHandler(&blockchain.BlockSyncState{Id: "1", IsProgress: false})
-	consensusEventHandler2.HandleConsensusFinishedEvent(*event)
+	consensusEventHandler.HandleConsensusFinishedEvent(event2)
 
 	//	then
-	assert.Equal(t, consensusEventHandler2.blockPool.Get(12), nil)
+	assert.Equal(t, consensusEventHandler.HandleConsensusFinishedEvent(event2), adapter.ErrBlockNil)
 
 }
 
-func SetConsensusEventHandler(state *blockchain.BlockSyncState) *ConsensusEventHandler {
-	blockPool := blockchain.NewBlockPool()
+func SetConsensusEventHandler(state *blockchain.BlockSyncState) *adapter.ConsensusEventHandler {
 	blockApi := &mock.BlockApi{}
 	blockApi.CommitBlockFunc = func(block blockchain.DefaultBlock) error {
 		return nil
 	}
+	blockApi.StageBlockFunc = func(block blockchain.DefaultBlock) error {
+		return nil
+	}
 
-	return &ConsensusEventHandler{
-		blockSyncState: state,
-		blockPool:      blockPool,
-		blockApi:       blockApi,
+	return &adapter.ConsensusEventHandler{
+		BlockSyncState: state,
+		BlockApi:       blockApi,
 	}
 }

@@ -19,14 +19,14 @@ package blockchain
 import "sync"
 
 type BlockPool struct {
-	blockPool map[uint64]Block
-	mux       sync.Mutex
+	blockMap map[uint64]Block
+	mux      sync.Mutex
 }
 
 func NewBlockPool() *BlockPool {
 	return &BlockPool{
-		blockPool: make(map[uint64]Block),
-		mux:       sync.Mutex{},
+		blockMap: make(map[uint64]Block),
+		mux:      sync.Mutex{},
 	}
 }
 
@@ -34,23 +34,23 @@ func (b *BlockPool) Add(block Block) {
 	b.mux.Lock()
 	defer b.mux.Unlock()
 
-	b.blockPool[block.GetHeight()] = block
+	b.blockMap[block.GetHeight()] = block
 }
 
 func (b *BlockPool) Delete(height uint64) {
 	b.mux.Lock()
 	defer b.mux.Unlock()
 
-	delete(b.blockPool, height)
+	delete(b.blockMap, height)
 }
 
 func (b *BlockPool) Get(height uint64) Block {
 	b.mux.Lock()
 	defer b.mux.Unlock()
 
-	if b.blockPool[height] == nil {
+	if b.blockMap[height] == nil {
 		return nil
 	}
 
-	return b.blockPool[height]
+	return b.blockMap[height]
 }

@@ -28,6 +28,7 @@ type BlockApi struct {
 	SyncIsProgressingFunc         func() blockchain.ProgressState
 	CommitGenesisBlockFunc        func(GenesisConfPath string) error
 	CommitBlockFunc               func(block blockchain.DefaultBlock) error
+	StageBlockFunc                func(block blockchain.DefaultBlock) error
 	CreateProposedBlockFunc       func(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error)
 }
 
@@ -53,6 +54,10 @@ func (api BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
 
 func (api BlockApi) CommitBlock(block blockchain.DefaultBlock) error {
 	return api.CommitBlockFunc(block)
+}
+
+func (api BlockApi) StageBlock(block blockchain.DefaultBlock) error {
+	return api.StageBlockFunc(block)
 }
 
 func (api BlockApi) CreateProposedBlock(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error) {
