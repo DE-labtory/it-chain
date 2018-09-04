@@ -25,18 +25,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
+func TestPropagateService_BroadcastProposeMsg(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			msg pbft.PrePrepareMsg
+			msg pbft.ProposeMsg
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				msg pbft.PrePrepareMsg
+				msg pbft.ProposeMsg
 			}{
-				msg: pbft.PrePrepareMsg{
+				msg: pbft.ProposeMsg{
 					StateID:        pbft.StateID{"c1"},
 					SenderID:       "s1",
 					Representative: make([]*pbft.Representative, 0),
@@ -50,9 +50,9 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 		},
 		"State ID empty test": {
 			input: struct {
-				msg pbft.PrePrepareMsg
+				msg pbft.ProposeMsg
 			}{
-				msg: pbft.PrePrepareMsg{
+				msg: pbft.ProposeMsg{
 					StateID:        pbft.StateID{""},
 					SenderID:       "s1",
 					Representative: make([]*pbft.Representative, 0),
@@ -66,9 +66,9 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 		},
 		"Block empty test": {
 			input: struct {
-				msg pbft.PrePrepareMsg
+				msg pbft.ProposeMsg
 			}{
-				msg: pbft.PrePrepareMsg{
+				msg: pbft.ProposeMsg{
 					StateID:        pbft.StateID{"c1"},
 					SenderID:       "s1",
 					Representative: make([]*pbft.Representative, 0),
@@ -94,24 +94,24 @@ func TestPropagateService_BroadcastPrePrepareMsg(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
 
-		err := propagateService.BroadcastPrePrepareMsg(test.input.msg, representatives)
+		err := propagateService.BroadcastProposeMsg(test.input.msg, representatives)
 
 		assert.Equal(t, test.err, err)
 	}
 }
 
-func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
+func TestPropagateService_BroadcastPrevoteMsg(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			msg pbft.PrepareMsg
+			msg pbft.PrevoteMsg
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				msg pbft.PrepareMsg
+				msg pbft.PrevoteMsg
 			}{
-				msg: pbft.PrepareMsg{
+				msg: pbft.PrevoteMsg{
 					StateID:   pbft.StateID{"c1"},
 					SenderID:  "s1",
 					BlockHash: make([]byte, 0),
@@ -121,9 +121,9 @@ func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 		},
 		"State ID empty test": {
 			input: struct {
-				msg pbft.PrepareMsg
+				msg pbft.PrevoteMsg
 			}{
-				msg: pbft.PrepareMsg{
+				msg: pbft.PrevoteMsg{
 					StateID:   pbft.StateID{""},
 					SenderID:  "s1",
 					BlockHash: make([]byte, 0),
@@ -133,9 +133,9 @@ func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 		},
 		"Block hash empty test": {
 			input: struct {
-				msg pbft.PrepareMsg
+				msg pbft.PrevoteMsg
 			}{
-				msg: pbft.PrepareMsg{
+				msg: pbft.PrevoteMsg{
 					StateID:   pbft.StateID{"c1"},
 					SenderID:  "s1",
 					BlockHash: nil,
@@ -157,24 +157,24 @@ func TestPropagateService_BroadcastPrepareMsg(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
 
-		err := propagateService.BroadcastPrepareMsg(test.input.msg, representatives)
+		err := propagateService.BroadcastPrevoteMsg(test.input.msg, representatives)
 
 		assert.Equal(t, test.err, err)
 	}
 }
 
-func TestPropagateService_BroadcastCommitMsg(t *testing.T) {
+func TestPropagateService_BroadcastPreCommitMsg(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
-			msg pbft.CommitMsg
+			msg pbft.PreCommitMsg
 		}
 		err error
 	}{
 		"success": {
 			input: struct {
-				msg pbft.CommitMsg
+				msg pbft.PreCommitMsg
 			}{
-				msg: pbft.CommitMsg{
+				msg: pbft.PreCommitMsg{
 					StateID:  pbft.StateID{"c1"},
 					SenderID: "s1",
 				},
@@ -183,9 +183,9 @@ func TestPropagateService_BroadcastCommitMsg(t *testing.T) {
 		},
 		"State ID empty test": {
 			input: struct {
-				msg pbft.CommitMsg
+				msg pbft.PreCommitMsg
 			}{
-				msg: pbft.CommitMsg{
+				msg: pbft.PreCommitMsg{
 					StateID:  pbft.StateID{""},
 					SenderID: "s1",
 				},
@@ -206,7 +206,7 @@ func TestPropagateService_BroadcastCommitMsg(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
 
-		err := propagateService.BroadcastCommitMsg(test.input.msg, representatives)
+		err := propagateService.BroadcastPreCommitMsg(test.input.msg, representatives)
 
 		assert.Equal(t, test.err, err)
 	}

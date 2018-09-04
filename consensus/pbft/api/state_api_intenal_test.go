@@ -22,25 +22,25 @@ func TestConsensusApi_StartConsensus_State(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			block                       pbft.ProposedBlock
-			isNeedConsensus             bool
-			peerNum                     int
-			isPrepareConditionSatisfied bool
-			isCommitConditionSatisfied  bool
+			block                         pbft.ProposedBlock
+			isNeedConsensus               bool
+			peerNum                       int
+			isPrevoteConditionSatisfied   bool
+			isPreCommitConditionSatisfied bool
 		}
 		err   error
 		stage pbft.Stage
 	}{
 		"Case : Consensus가 필요하고 Proposed된 Block이 정상인경우 (Normal Case)": {
 			input: struct {
-				block                       pbft.ProposedBlock
-				isNeedConsensus             bool
-				peerNum                     int
-				isPrepareConditionSatisfied bool
-				isCommitConditionSatisfied  bool
+				block                         pbft.ProposedBlock
+				isNeedConsensus               bool
+				peerNum                       int
+				isPrevoteConditionSatisfied   bool
+				isPreCommitConditionSatisfied bool
 			}{normalBlock, true, 5, false, false},
 			err:   nil,
-			stage: pbft.PREPREPARE_STAGE,
+			stage: pbft.PROPOSE_STAGE,
 		},
 	}
 
@@ -53,9 +53,9 @@ func TestConsensusApi_StartConsensus_State(t *testing.T) {
 	}
 }
 
-func TestConsensusApi_HandlePrePrepareMsg_State(t *testing.T) {
+func TestConsensusApi_HandleProposeMsg_State(t *testing.T) {
 
-	var validLeaderPrePrepareMsg = pbft.PrePrepareMsg{
+	var validLeaderProposeMsg = pbft.ProposeMsg{
 		StateID:        pbft.StateID{},
 		SenderID:       "Leader",
 		Representative: nil,
@@ -64,7 +64,7 @@ func TestConsensusApi_HandlePrePrepareMsg_State(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			preprePareMsg   pbft.PrePrepareMsg
+			proposeMsg      pbft.ProposeMsg
 			isNeedConsensus bool
 			peerNum         int
 			isRepoFull      bool
@@ -74,28 +74,28 @@ func TestConsensusApi_HandlePrePrepareMsg_State(t *testing.T) {
 	}{
 		"Case PrePrepareMsg의 Sender id와 Request된 Leader id가 일치하며, repo가 full이 아닌경우 (Normal Case)": {
 			input: struct {
-				preprePareMsg   pbft.PrePrepareMsg
+				proposeMsg      pbft.ProposeMsg
 				isNeedConsensus bool
 				peerNum         int
 				isRepoFull      bool
-			}{validLeaderPrePrepareMsg, false, 5, false},
+			}{validLeaderProposeMsg, false, 5, false},
 			err:   nil,
-			stage: pbft.PREPARE_STAGE,
+			stage: pbft.PREVOTE_STAGE,
 		},
 	}
 
 	for testName, test := range tests {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.isNeedConsensus, test.input.peerNum, true, false, false)
-		assert.EqualValues(t, test.err, cApi.HandlePrePrepareMsg(test.input.preprePareMsg))
+		assert.EqualValues(t, test.err, cApi.HandleProposeMsg(test.input.proposeMsg))
 		loadedState, _ := cApi.repo.Load()
 		assert.Equal(t, string(test.stage), string(loadedState.CurrentStage))
 	}
 }
 
-func TestConsensusApi_HandlePrepareMsg_State(t *testing.T) {
+func TestConsensusApi_HandlePrevoteMsg_State(t *testing.T) {
 
-	var validPrepareMsg = pbft.PrepareMsg{
+	var validPrevoteMsg = pbft.PrevoteMsg{
 		StateID:   pbft.StateID{"state"},
 		SenderID:  "user1",
 		BlockHash: []byte{1, 2, 3, 5},
@@ -103,7 +103,7 @@ func TestConsensusApi_HandlePrepareMsg_State(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			prepareMsg      pbft.PrepareMsg
+			prevoteMsg      pbft.PrevoteMsg
 			isNeedConsensus bool
 			peerNum         int
 			isRepoFull      bool
@@ -113,20 +113,20 @@ func TestConsensusApi_HandlePrepareMsg_State(t *testing.T) {
 	}{
 		"case 1 PrepareMsg의 Cid와 repo의 Cid가 같고, repo에 consensus가 저장된경우 (Normal Case)": {
 			input: struct {
-				prepareMsg      pbft.PrepareMsg
+				prevoteMsg      pbft.PrevoteMsg
 				isNeedConsensus bool
 				peerNum         int
 				isRepoFull      bool
-			}{validPrepareMsg, false, 5, true},
+			}{validPrevoteMsg, false, 5, true},
 			err:   nil,
-			stage: pbft.COMMIT_STAGE,
+			stage: pbft.PRECOMMIT_STAGE,
 		},
 	}
 
 	for testName, test := range tests {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.isNeedConsensus, test.input.peerNum, true, true, false)
-		assert.EqualValues(t, test.err, cApi.HandlePrepareMsg(test.input.prepareMsg))
+		assert.EqualValues(t, test.err, cApi.HandlePrevoteMsg(test.input.prevoteMsg))
 		loadedState, _ := cApi.repo.Load()
 		assert.Equal(t, string(test.stage), string(loadedState.CurrentStage))
 	}
@@ -144,12 +144,12 @@ func TestConsensusApi_RepositoryClone(t *testing.T) {
 	assert.Equal(t, pbft.ErrEmptyRepo, err)
 
 	newState := pbft.State{
-		StateID:         pbft.StateID{"state1"},
-		Representatives: nil,
-		Block:           normalBlock,
-		CurrentStage:    pbft.PREPARE_STAGE,
-		PrepareMsgPool:  pbft.PrepareMsgPool{},
-		CommitMsgPool:   pbft.CommitMsgPool{},
+		StateID:          pbft.StateID{"state1"},
+		Representatives:  nil,
+		Block:            normalBlock,
+		CurrentStage:     pbft.PREVOTE_STAGE,
+		PrevoteMsgPool:   pbft.PrevoteMsgPool{},
+		PreCommitMsgPool: pbft.PreCommitMsgPool{},
 	}
 	stateApi1.repo.Save(newState)
 	_, err2 := stateApi2.repo.Load()
@@ -167,35 +167,35 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isNormalBlock bool,
 			ID: "user",
 		})
 	}
-	prepareMsgPool := pbft.NewPrepareMsgPool()
+	prevoteMsgPool := pbft.NewPrevoteMsgPool()
 	for i := 0; i < 5; i++ {
 		senderStr := "sender"
 		senderStr += string(i)
-		prepareMsgPool.Save(&pbft.PrepareMsg{
+		prevoteMsgPool.Save(&pbft.PrevoteMsg{
 			StateID:   pbft.StateID{"state"},
 			SenderID:  senderStr,
 			BlockHash: []byte{1, 2, 3, 4},
 		})
 	}
 
-	commitMsgPool := pbft.NewCommitMsgPool()
+	precommitMsgPool := pbft.NewPreCommitMsgPool()
 	for i := 0; i < 5; i++ {
 		senderStr := "sender"
 		senderStr += string(i)
-		commitMsgPool.Save(&pbft.CommitMsg{
+		precommitMsgPool.Save(&pbft.PreCommitMsg{
 			StateID:  pbft.StateID{"state"},
 			SenderID: senderStr,
 		})
 	}
 
 	propagateService := &mock.MockPropagateService{}
-	propagateService.BroadcastPrePrepareMsgFunc = func(msg pbft.PrePrepareMsg) error {
+	propagateService.BroadcastProposeMsgFunc = func(msg pbft.ProposeMsg) error {
 		return nil
 	}
-	propagateService.BroadcastPrepareMsgFunc = func(msg pbft.PrepareMsg) error {
+	propagateService.BroadcastPrevoteMsgFunc = func(msg pbft.PrevoteMsg) error {
 		return nil
 	}
-	propagateService.BroadcastCommitMsgFunc = func(msg pbft.CommitMsg) error {
+	propagateService.BroadcastPreCommitMsgFunc = func(msg pbft.PreCommitMsg) error {
 		return nil
 	}
 
@@ -229,23 +229,23 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isNormalBlock bool,
 	if isPrepareConditionSatisfied && isNormalBlock {
 
 		savedConsensus := pbft.State{
-			StateID:         pbft.StateID{"state"},
-			Representatives: reps,
-			Block:           normalBlock,
-			CurrentStage:    pbft.IDLE_STAGE,
-			PrepareMsgPool:  prepareMsgPool,
-			CommitMsgPool:   pbft.CommitMsgPool{},
+			StateID:          pbft.StateID{"state"},
+			Representatives:  reps,
+			Block:            normalBlock,
+			CurrentStage:     pbft.IDLE_STAGE,
+			PrevoteMsgPool:   prevoteMsgPool,
+			PreCommitMsgPool: pbft.PreCommitMsgPool{},
 		}
 		repo.Save(savedConsensus)
 
 	} else if isCommitConditionSatisfied && !isNormalBlock {
 		savedConsensus := pbft.State{
-			StateID:         pbft.StateID{"state"},
-			Representatives: reps,
-			Block:           errorBlock,
-			CurrentStage:    pbft.IDLE_STAGE,
-			PrepareMsgPool:  pbft.PrepareMsgPool{},
-			CommitMsgPool:   commitMsgPool,
+			StateID:          pbft.StateID{"state"},
+			Representatives:  reps,
+			Block:            errorBlock,
+			CurrentStage:     pbft.IDLE_STAGE,
+			PrevoteMsgPool:   pbft.PrevoteMsgPool{},
+			PreCommitMsgPool: precommitMsgPool,
 		}
 		repo.Save(savedConsensus)
 	}

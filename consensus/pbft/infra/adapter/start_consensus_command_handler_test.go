@@ -69,13 +69,13 @@ func newMockStateApi(err error) api.StateApi {
 	mockStateApi.StartConsensusFunc = func(proposedBlock pbft.ProposedBlock) error {
 		return err
 	}
-	mockStateApi.HandlePrePrepareMsgFunc = func(msg pbft.PrePrepareMsg) error {
+	mockStateApi.HandleProposeMsgFunc = func(msg pbft.ProposeMsg) error {
 		return nil
 	}
-	mockStateApi.HandlePrepareMsgFunc = func(msg pbft.PrepareMsg) error {
+	mockStateApi.HandlePrevoteMsgFunc = func(msg pbft.PrevoteMsg) error {
 		return nil
 	}
-	mockStateApi.HandleCommitMsgFunc = func(msg pbft.CommitMsg) error {
+	mockStateApi.HandlePreCommitMsgFunc = func(msg pbft.PreCommitMsg) error {
 		return nil
 	}
 

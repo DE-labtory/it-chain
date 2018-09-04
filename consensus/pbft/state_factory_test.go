@@ -60,7 +60,7 @@ func TestConstructConsensus(t *testing.T) {
 	r := make([]*pbft.Representative, 0)
 	r = append(r, l, m)
 
-	msg := pbft.PrePrepareMsg{
+	msg := pbft.ProposeMsg{
 		StateID:        pbft.NewStateID("consensusID"),
 		SenderID:       "me",
 		Representative: r,
