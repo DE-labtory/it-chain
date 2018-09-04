@@ -84,15 +84,15 @@ func TestConsensusApi_StartConsensus(t *testing.T) {
 	}
 
 }
-func TestConsensusApi_HandlePrePrepareMsg(t *testing.T) {
+func TestConsensusApi_HandleProposeMsg(t *testing.T) {
 
-	var validLeaderPrePrepareMsg = pbft.PrePrepareMsg{
+	var validLeaderProposeMsg = pbft.ProposeMsg{
 		StateID:        pbft.StateID{},
 		SenderID:       "Leader",
 		Representative: nil,
 		ProposedBlock:  pbft.ProposedBlock{},
 	}
-	var invalidLeaderPrePrepareMsg = pbft.PrePrepareMsg{
+	var invalidLeaderProposeMsg = pbft.ProposeMsg{
 		StateID:        pbft.StateID{},
 		SenderID:       "NoLeader",
 		Representative: nil,
@@ -100,7 +100,7 @@ func TestConsensusApi_HandlePrePrepareMsg(t *testing.T) {
 	}
 	tests := map[string]struct {
 		input struct {
-			preprePareMsg   pbft.PrePrepareMsg
+			proposeMsg      pbft.ProposeMsg
 			isNeedConsensus bool
 			peerNum         int
 			isRepoFull      bool
@@ -109,29 +109,29 @@ func TestConsensusApi_HandlePrePrepareMsg(t *testing.T) {
 	}{
 		"Case 1 PrePrepareMsg의 Sender id와 Request된 Leader id가 일치하며, repo가 차있는 경우 (Normal Case)": {
 			input: struct {
-				preprePareMsg   pbft.PrePrepareMsg
+				proposeMsg      pbft.ProposeMsg
 				isNeedConsensus bool
 				peerNum         int
 				isRepoFull      bool
-			}{validLeaderPrePrepareMsg, false, 5, false},
+			}{validLeaderProposeMsg, false, 5, false},
 			err: nil,
 		},
 		"Case 2 PrePrepareMsg의 Sender id와 Request된 Leader id가 일치하며, repo가 차있는 경우": {
 			input: struct {
-				preprePareMsg   pbft.PrePrepareMsg
+				proposeMsg      pbft.ProposeMsg
 				isNeedConsensus bool
 				peerNum         int
 				isRepoFull      bool
-			}{validLeaderPrePrepareMsg, false, 5, true},
+			}{validLeaderProposeMsg, false, 5, true},
 			err: pbft.ErrInvalidSave,
 		},
 		"Case 3 PrePrepareMsg의 Sender id와 Request된 Leader id가 일치하지 않을 경우": {
 			input: struct {
-				preprePareMsg   pbft.PrePrepareMsg
+				proposeMsg      pbft.ProposeMsg
 				isNeedConsensus bool
 				peerNum         int
 				isRepoFull      bool
-			}{invalidLeaderPrePrepareMsg, false, 5, false},
+			}{invalidLeaderProposeMsg, false, 5, false},
 			err: pbft.InvalidLeaderIdError,
 		},
 	}
@@ -139,19 +139,19 @@ func TestConsensusApi_HandlePrePrepareMsg(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.isNeedConsensus, test.input.peerNum, test.input.isRepoFull, true)
-		assert.EqualValues(t, test.err, cApi.HandlePrePrepareMsg(test.input.preprePareMsg))
+		assert.EqualValues(t, test.err, cApi.HandleProposeMsg(test.input.proposeMsg))
 
 	}
 }
 
-func TestConsensusApi_HandlePrepareMsg(t *testing.T) {
+func TestConsensusApi_HandlePrevoteMsg(t *testing.T) {
 
-	var validPrepareMsg = pbft.PrepareMsg{
+	var validPrevoteMsg = pbft.PrevoteMsg{
 		StateID:   pbft.StateID{"state"},
 		SenderID:  "user1",
 		BlockHash: []byte{1, 2, 3, 5},
 	}
-	var invalidPrepareMsg = pbft.PrepareMsg{
+	var invalidPrevoteMsg = pbft.PrevoteMsg{
 		StateID:   pbft.StateID{"invalidState"},
 		SenderID:  "user1",
 		BlockHash: []byte{1, 2, 3, 5},
@@ -159,7 +159,7 @@ func TestConsensusApi_HandlePrepareMsg(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
-			prepareMsg      pbft.PrepareMsg
+			prevoteMsg      pbft.PrevoteMsg
 			isNeedConsensus bool
 			peerNum         int
 			isRepoFull      bool
@@ -168,29 +168,29 @@ func TestConsensusApi_HandlePrepareMsg(t *testing.T) {
 	}{
 		"Case 1 PrepareMsg의 Cid와 repo의 Cid가 같고, repo에 consensus가 저장된경우 (Normal Case)": {
 			input: struct {
-				prepareMsg      pbft.PrepareMsg
+				prevoteMsg      pbft.PrevoteMsg
 				isNeedConsensus bool
 				peerNum         int
 				isRepoFull      bool
-			}{validPrepareMsg, false, 5, true},
+			}{validPrevoteMsg, false, 5, true},
 			err: nil,
 		},
 		"Case 2 PrepareMsg의 Cid와 repo에 저장된 Cid가 다를 경우": {
 			input: struct {
-				prepareMsg      pbft.PrepareMsg
+				prevoteMsg      pbft.PrevoteMsg
 				isNeedConsensus bool
 				peerNum         int
 				isRepoFull      bool
-			}{invalidPrepareMsg, false, 5, true},
+			}{invalidPrevoteMsg, false, 5, true},
 			err: pbft.ErrStateIdNotSame,
 		},
 		"Case 3 Repo의 state가 empty state일때": {
 			input: struct {
-				prepareMsg      pbft.PrepareMsg
+				prevoteMsg      pbft.PrevoteMsg
 				isNeedConsensus bool
 				peerNum         int
 				isRepoFull      bool
-			}{invalidPrepareMsg, false, 5, false},
+			}{invalidPrevoteMsg, false, 5, false},
 			err: pbft.ErrEmptyRepo,
 		},
 	}
@@ -198,25 +198,25 @@ func TestConsensusApi_HandlePrepareMsg(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.isNeedConsensus, test.input.peerNum, test.input.isRepoFull, true)
-		assert.EqualValues(t, test.err, cApi.HandlePrepareMsg(test.input.prepareMsg))
+		assert.EqualValues(t, test.err, cApi.HandlePrevoteMsg(test.input.prevoteMsg))
 	}
 
 }
 
-func TestConsensusApi_HandleCommitMsg(t *testing.T) {
+func TestConsensusApi_HandlePreCommitMsg(t *testing.T) {
 
-	var validCommitMsg = pbft.CommitMsg{
+	var validCommitMsg = pbft.PreCommitMsg{
 		StateID:  pbft.StateID{"state"},
 		SenderID: "user1",
 	}
-	var invalidCommitMsg = pbft.CommitMsg{
+	var invalidCommitMsg = pbft.PreCommitMsg{
 		StateID:  pbft.StateID{"invalidState"},
 		SenderID: "user2",
 	}
 
 	tests := map[string]struct {
 		input struct {
-			commitMsg       pbft.CommitMsg
+			commitMsg       pbft.PreCommitMsg
 			isNeedConsensus bool
 			peerNum         int
 			isRepoFull      bool
@@ -226,7 +226,7 @@ func TestConsensusApi_HandleCommitMsg(t *testing.T) {
 	}{
 		"Case 1 repo에 consensus가 있고 repo의 cid와 commitMsg의 cid가 일치하는 경우(Normal Case)": {
 			input: struct {
-				commitMsg       pbft.CommitMsg
+				commitMsg       pbft.PreCommitMsg
 				isNeedConsensus bool
 				peerNum         int
 				isRepoFull      bool
@@ -236,7 +236,7 @@ func TestConsensusApi_HandleCommitMsg(t *testing.T) {
 		},
 		"Case 2 repo에 저장된 state의 cid와 commitMsg의 cid가 일치하지 않은 경우": {
 			input: struct {
-				commitMsg       pbft.CommitMsg
+				commitMsg       pbft.PreCommitMsg
 				isNeedConsensus bool
 				peerNum         int
 				isRepoFull      bool
@@ -246,7 +246,7 @@ func TestConsensusApi_HandleCommitMsg(t *testing.T) {
 		},
 		"Case 3 repo에 저장된 state가 empty state일때": {
 			input: struct {
-				commitMsg       pbft.CommitMsg
+				commitMsg       pbft.PreCommitMsg
 				isNeedConsensus bool
 				peerNum         int
 				isRepoFull      bool
@@ -259,7 +259,7 @@ func TestConsensusApi_HandleCommitMsg(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.isNeedConsensus, test.input.peerNum, test.input.isRepoFull, test.input.isNormalBlock)
-		assert.EqualValues(t, test.err, cApi.HandleCommitMsg(test.input.commitMsg))
+		assert.EqualValues(t, test.err, cApi.HandlePreCommitMsg(test.input.commitMsg))
 	}
 }
 
@@ -272,24 +272,24 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNor
 		})
 	}
 
-	commitMsgPool := pbft.NewCommitMsgPool()
+	commitMsgPool := pbft.NewPreCommitMsgPool()
 	for i := 0; i < 5; i++ {
 		senderStr := "sender"
 		senderStr += string(i)
-		commitMsgPool.Save(&pbft.CommitMsg{
+		commitMsgPool.Save(&pbft.PreCommitMsg{
 			StateID:  pbft.StateID{"state"},
 			SenderID: senderStr,
 		})
 	}
 
 	propagateService := &mock.MockPropagateService{}
-	propagateService.BroadcastPrePrepareMsgFunc = func(msg pbft.PrePrepareMsg) error {
+	propagateService.BroadcastProposeMsgFunc = func(msg pbft.ProposeMsg) error {
 		return nil
 	}
-	propagateService.BroadcastPrepareMsgFunc = func(msg pbft.PrepareMsg) error {
+	propagateService.BroadcastPrevoteMsgFunc = func(msg pbft.PrevoteMsg) error {
 		return nil
 	}
-	propagateService.BroadcastCommitMsgFunc = func(msg pbft.CommitMsg) error {
+	propagateService.BroadcastPreCommitMsgFunc = func(msg pbft.PreCommitMsg) error {
 		return nil
 	}
 
@@ -319,23 +319,23 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNor
 	if isRepoFull && isNormalBlock {
 
 		savedConsensus := pbft.State{
-			StateID:         pbft.StateID{"state"},
-			Representatives: reps,
-			Block:           normalBlock,
-			CurrentStage:    pbft.IDLE_STAGE,
-			PrepareMsgPool:  pbft.PrepareMsgPool{},
-			CommitMsgPool:   pbft.CommitMsgPool{},
+			StateID:          pbft.StateID{"state"},
+			Representatives:  reps,
+			Block:            normalBlock,
+			CurrentStage:     pbft.IDLE_STAGE,
+			PrevoteMsgPool:   pbft.PrevoteMsgPool{},
+			PreCommitMsgPool: pbft.PreCommitMsgPool{},
 		}
 		repo.Save(savedConsensus)
 
 	} else if isRepoFull && !isNormalBlock {
 		savedConsensus := pbft.State{
-			StateID:         pbft.StateID{"state"},
-			Representatives: reps,
-			Block:           errorBlock,
-			CurrentStage:    pbft.IDLE_STAGE,
-			PrepareMsgPool:  pbft.PrepareMsgPool{},
-			CommitMsgPool:   commitMsgPool,
+			StateID:          pbft.StateID{"state"},
+			Representatives:  reps,
+			Block:            errorBlock,
+			CurrentStage:     pbft.IDLE_STAGE,
+			PrevoteMsgPool:   pbft.PrevoteMsgPool{},
+			PreCommitMsgPool: pbft.PreCommitMsgPool{},
 		}
 		repo.Save(savedConsensus)
 	}

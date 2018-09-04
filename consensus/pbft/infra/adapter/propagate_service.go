@@ -40,7 +40,7 @@ func NewPropagateService(publish Publish) PropagateService {
 	}
 }
 
-func (ps PropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg, representatives []*pbft.Representative) error {
+func (ps PropagateService) BroadcastProposeMsg(msg pbft.ProposeMsg, representatives []*pbft.Representative) error {
 	if msg.StateID.ID == "" {
 		return ErrStateIdEmpty
 	}
@@ -55,14 +55,14 @@ func (ps PropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg, repres
 		return err
 	}
 
-	if err = ps.broadcastMsg(SerializedMsg, "PrePrepareMsgProtocol", representatives); err != nil {
+	if err = ps.broadcastMsg(SerializedMsg, "ProposeMsgProtocol", representatives); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (ps PropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg, representatives []*pbft.Representative) error {
+func (ps PropagateService) BroadcastPrevoteMsg(msg pbft.PrevoteMsg, representatives []*pbft.Representative) error {
 	if msg.StateID.ID == "" {
 		return ErrStateIdEmpty
 	}
@@ -77,14 +77,14 @@ func (ps PropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg, representati
 		return err
 	}
 
-	if err = ps.broadcastMsg(SerializedMsg, "PrepareMsgProtocol", representatives); err != nil {
+	if err = ps.broadcastMsg(SerializedMsg, "PrevoteMsgProtocol", representatives); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (ps PropagateService) BroadcastCommitMsg(msg pbft.CommitMsg, representatives []*pbft.Representative) error {
+func (ps PropagateService) BroadcastPreCommitMsg(msg pbft.PreCommitMsg, representatives []*pbft.Representative) error {
 	if msg.StateID.ID == "" {
 		return ErrStateIdEmpty
 	}
@@ -95,7 +95,7 @@ func (ps PropagateService) BroadcastCommitMsg(msg pbft.CommitMsg, representative
 		return err
 	}
 
-	if err = ps.broadcastMsg(SerializedMsg, "CommitMsgProtocol", representatives); err != nil {
+	if err = ps.broadcastMsg(SerializedMsg, "PreCommitMsgProtocol", representatives); err != nil {
 		return err
 	}
 

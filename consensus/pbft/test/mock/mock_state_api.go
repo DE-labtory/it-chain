@@ -21,26 +21,26 @@ import (
 )
 
 type MockStateApi struct {
-	StartConsensusFunc      func(proposedBlock pbft.ProposedBlock) error
-	HandlePrePrepareMsgFunc func(msg pbft.PrePrepareMsg) error
-	HandlePrepareMsgFunc    func(msg pbft.PrepareMsg) error
-	HandleCommitMsgFunc     func(msg pbft.CommitMsg) error
+	StartConsensusFunc     func(proposedBlock pbft.ProposedBlock) error
+	HandleProposeMsgFunc   func(msg pbft.ProposeMsg) error
+	HandlePrevoteMsgFunc   func(msg pbft.PrevoteMsg) error
+	HandlePreCommitMsgFunc func(msg pbft.PreCommitMsg) error
 }
 
 func (mca *MockStateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 	return mca.StartConsensusFunc(proposedBlock)
 }
 
-func (mca *MockStateApi) HandlePrePrepareMsg(msg pbft.PrePrepareMsg) error {
-	return mca.HandlePrePrepareMsgFunc(msg)
+func (mca *MockStateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
+	return mca.HandleProposeMsgFunc(msg)
 }
 
-func (mca *MockStateApi) HandlePrepareMsg(msg pbft.PrepareMsg) error {
+func (mca *MockStateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) error {
 
-	return mca.HandlePrepareMsgFunc(msg)
+	return mca.HandlePrevoteMsgFunc(msg)
 }
 
-func (mca *MockStateApi) HandleCommitMsg(msg pbft.CommitMsg) error {
+func (mca *MockStateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 
-	return mca.HandleCommitMsgFunc(msg)
+	return mca.HandlePreCommitMsgFunc(msg)
 }

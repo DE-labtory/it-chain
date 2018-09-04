@@ -28,26 +28,26 @@ func NewState(parliament []MemberID, block ProposedBlock) (*State, error) {
 	}
 
 	newState := State{
-		StateID:         NewStateID(xid.New().String()),
-		Representatives: representatives,
-		Block:           block,
-		CurrentStage:    IDLE_STAGE,
-		PrepareMsgPool:  NewPrepareMsgPool(),
-		CommitMsgPool:   NewCommitMsgPool(),
+		StateID:          NewStateID(xid.New().String()),
+		Representatives:  representatives,
+		Block:            block,
+		CurrentStage:     IDLE_STAGE,
+		PrevoteMsgPool:   NewPrevoteMsgPool(),
+		PreCommitMsgPool: NewPreCommitMsgPool(),
 	}
 
 	return &newState, nil
 }
 
 // member
-func BuildState(msg PrePrepareMsg) (*State, error) {
+func BuildState(msg ProposeMsg) (*State, error) {
 	newState := &State{
-		StateID:         msg.StateID,
-		Representatives: msg.Representative,
-		Block:           msg.ProposedBlock,
-		CurrentStage:    IDLE_STAGE,
-		PrepareMsgPool:  NewPrepareMsgPool(),
-		CommitMsgPool:   NewCommitMsgPool(),
+		StateID:          msg.StateID,
+		Representatives:  msg.Representative,
+		Block:            msg.ProposedBlock,
+		CurrentStage:     IDLE_STAGE,
+		PrevoteMsgPool:   NewPrevoteMsgPool(),
+		PreCommitMsgPool: NewPreCommitMsgPool(),
 	}
 
 	return newState, nil

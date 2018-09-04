@@ -23,12 +23,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPrepareMsgPool_Save(t *testing.T) {
+func TestPrevoteMsgPool_Save(t *testing.T) {
 	// given
-	pPool := pbft.NewPrepareMsgPool()
+	pPool := pbft.NewPrevoteMsgPool()
 
 	// case 1 : save
-	pMsg := pbft.PrepareMsg{
+	pMsg := pbft.PrevoteMsg{
 		StateID:   pbft.StateID{"c1"},
 		SenderID:  "s1",
 		BlockHash: make([]byte, 0),
@@ -41,7 +41,7 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 	assert.Equal(t, 1, len(pPool.Get()))
 
 	// case 2 : save
-	pMsg = pbft.PrepareMsg{
+	pMsg = pbft.PrevoteMsg{
 		StateID:   pbft.StateID{"c1"},
 		SenderID:  "s2",
 		BlockHash: make([]byte, 0),
@@ -54,7 +54,7 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 	assert.Equal(t, 2, len(pPool.Get()))
 
 	// case 3 : same sender
-	pMsg = pbft.PrepareMsg{
+	pMsg = pbft.PrevoteMsg{
 		StateID:   pbft.StateID{"c1"},
 		SenderID:  "s2",
 		BlockHash: make([]byte, 0),
@@ -67,7 +67,7 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 	assert.Equal(t, 2, len(pPool.Get()))
 
 	// case 4 : block hash is is nil
-	pMsg = pbft.PrepareMsg{
+	pMsg = pbft.PrevoteMsg{
 		StateID:   pbft.StateID{"c1"},
 		SenderID:  "s3",
 		BlockHash: nil,
@@ -82,9 +82,9 @@ func TestPrepareMsgPool_Save(t *testing.T) {
 
 func TestPrepareMsgPool_RemoveAllMsgs(t *testing.T) {
 	// given
-	pPool := pbft.NewPrepareMsgPool()
+	pPool := pbft.NewPrevoteMsgPool()
 
-	pMsg := pbft.PrepareMsg{
+	pMsg := pbft.PrevoteMsg{
 		StateID:   pbft.StateID{"c1"},
 		SenderID:  "s1",
 		BlockHash: make([]byte, 0),
@@ -101,10 +101,10 @@ func TestPrepareMsgPool_RemoveAllMsgs(t *testing.T) {
 
 func TestCommitMsgPool_Save(t *testing.T) {
 	// given
-	cPool := pbft.NewCommitMsgPool()
+	cPool := pbft.NewPreCommitMsgPool()
 
 	// case 1 : save
-	cMsg := pbft.CommitMsg{
+	cMsg := pbft.PreCommitMsg{
 		StateID:  pbft.StateID{"c1"},
 		SenderID: "s1",
 	}
@@ -116,7 +116,7 @@ func TestCommitMsgPool_Save(t *testing.T) {
 	assert.Equal(t, 1, len(cPool.Get()))
 
 	// case 2 : save
-	cMsg = pbft.CommitMsg{
+	cMsg = pbft.PreCommitMsg{
 		StateID:  pbft.StateID{"c1"},
 		SenderID: "s2",
 	}
@@ -128,7 +128,7 @@ func TestCommitMsgPool_Save(t *testing.T) {
 	assert.Equal(t, 2, len(cPool.Get()))
 
 	// case 3 : same sender
-	cMsg = pbft.CommitMsg{
+	cMsg = pbft.PreCommitMsg{
 		StateID:  pbft.StateID{"c1"},
 		SenderID: "s2",
 	}
@@ -142,9 +142,9 @@ func TestCommitMsgPool_Save(t *testing.T) {
 
 func TestCommitMsgPool_RemoveAllMsgs(t *testing.T) {
 	// given
-	cPool := pbft.NewCommitMsgPool()
+	cPool := pbft.NewPreCommitMsgPool()
 
-	cMsg := pbft.CommitMsg{
+	cMsg := pbft.PreCommitMsg{
 		StateID:  pbft.StateID{"c1"},
 		SenderID: "s1",
 	}
@@ -158,7 +158,7 @@ func TestCommitMsgPool_RemoveAllMsgs(t *testing.T) {
 	assert.Equal(t, 0, len(cPool.Get()))
 }
 
-func TestConsensus_SavePrepareMsg(t *testing.T) {
+func TestConsensus_SavePrevoteMsg(t *testing.T) {
 	// given
 	c := pbft.State{
 		StateID:         pbft.NewStateID("c1"),
@@ -166,42 +166,42 @@ func TestConsensus_SavePrepareMsg(t *testing.T) {
 		Block: pbft.ProposedBlock{
 			Seal: make([]byte, 0),
 		},
-		CurrentStage:   pbft.IDLE_STAGE,
-		PrepareMsgPool: pbft.NewPrepareMsgPool(),
-		CommitMsgPool:  pbft.NewCommitMsgPool(),
+		CurrentStage:     pbft.IDLE_STAGE,
+		PrevoteMsgPool:   pbft.NewPrevoteMsgPool(),
+		PreCommitMsgPool: pbft.NewPreCommitMsgPool(),
 	}
 
 	// case 1 : save
-	pMsg := &pbft.PrepareMsg{
+	pMsg := &pbft.PrevoteMsg{
 		StateID:   pbft.NewStateID("c1"),
 		SenderID:  "s1",
 		BlockHash: make([]byte, 0),
 	}
 
 	// when
-	err := c.SavePrepareMsg(pMsg)
+	err := c.SavePrevoteMsg(pMsg)
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(c.PrepareMsgPool.Get()))
-	assert.Equal(t, *pMsg, c.PrepareMsgPool.Get()[0])
+	assert.Equal(t, 1, len(c.PrevoteMsgPool.Get()))
+	assert.Equal(t, *pMsg, c.PrevoteMsgPool.Get()[0])
 
 	// case 2 : incorrect consensus ID
-	pMsg = &pbft.PrepareMsg{
+	pMsg = &pbft.PrevoteMsg{
 		StateID:   pbft.NewStateID("c2"),
 		SenderID:  "s1",
 		BlockHash: make([]byte, 0),
 	}
 
 	// when
-	err = c.SavePrepareMsg(pMsg)
+	err = c.SavePrevoteMsg(pMsg)
 
 	//then
 	assert.Error(t, err)
-	assert.Equal(t, 1, len(c.PrepareMsgPool.Get()))
+	assert.Equal(t, 1, len(c.PrevoteMsgPool.Get()))
 }
 
-func TestConsensus_SaveCommitMsg(t *testing.T) {
+func TestConsensus_SavePreCommitMsg(t *testing.T) {
 	// given
 	c := pbft.State{
 		StateID:         pbft.NewStateID("c1"),
@@ -209,35 +209,35 @@ func TestConsensus_SaveCommitMsg(t *testing.T) {
 		Block: pbft.ProposedBlock{
 			Seal: make([]byte, 0),
 		},
-		CurrentStage:   pbft.IDLE_STAGE,
-		PrepareMsgPool: pbft.NewPrepareMsgPool(),
-		CommitMsgPool:  pbft.NewCommitMsgPool(),
+		CurrentStage:     pbft.IDLE_STAGE,
+		PrevoteMsgPool:   pbft.NewPrevoteMsgPool(),
+		PreCommitMsgPool: pbft.NewPreCommitMsgPool(),
 	}
 
 	// case 1 : save
-	cMsg := &pbft.CommitMsg{
+	cMsg := &pbft.PreCommitMsg{
 		StateID:  pbft.NewStateID("c1"),
 		SenderID: "s1",
 	}
 
 	// when
-	err := c.SaveCommitMsg(cMsg)
+	err := c.SavePreCommitMsg(cMsg)
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(c.CommitMsgPool.Get()))
-	assert.Equal(t, *cMsg, c.CommitMsgPool.Get()[0])
+	assert.Equal(t, 1, len(c.PreCommitMsgPool.Get()))
+	assert.Equal(t, *cMsg, c.PreCommitMsgPool.Get()[0])
 
 	// case 2 : incorrect consensus ID
-	cMsg = &pbft.CommitMsg{
+	cMsg = &pbft.PreCommitMsg{
 		StateID:  pbft.NewStateID("c2"),
 		SenderID: "s1",
 	}
 
 	// when
-	err = c.SaveCommitMsg(cMsg)
+	err = c.SavePreCommitMsg(cMsg)
 
 	//then
 	assert.Error(t, err)
-	assert.Equal(t, 1, len(c.CommitMsgPool.Get()))
+	assert.Equal(t, 1, len(c.PreCommitMsgPool.Get()))
 }

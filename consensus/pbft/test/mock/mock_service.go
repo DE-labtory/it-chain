@@ -42,20 +42,20 @@ func (m MockConfirmService) ConfirmBlock(block pbft.ProposedBlock) error {
 }
 
 type MockPropagateService struct {
-	BroadcastPrepareMsgFunc    func(msg pbft.PrepareMsg) error
-	BroadcastPrePrepareMsgFunc func(msg pbft.PrePrepareMsg) error
-	BroadcastCommitMsgFunc     func(msg pbft.CommitMsg) error
+	BroadcastPrevoteMsgFunc   func(msg pbft.PrevoteMsg) error
+	BroadcastProposeMsgFunc   func(msg pbft.ProposeMsg) error
+	BroadcastPreCommitMsgFunc func(msg pbft.PreCommitMsg) error
 }
 
-func (m MockPropagateService) BroadcastPrepareMsg(msg pbft.PrepareMsg) error {
-	return m.BroadcastPrepareMsgFunc(msg)
+func (m MockPropagateService) BroadcastPrevoteMsg(msg pbft.PrevoteMsg) error {
+	return m.BroadcastPrevoteMsgFunc(msg)
 }
 
-func (m MockPropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg) error {
-	return m.BroadcastPrePrepareMsgFunc(msg)
+func (m MockPropagateService) BroadcastProposeMsg(msg pbft.ProposeMsg) error {
+	return m.BroadcastProposeMsgFunc(msg)
 }
-func (m MockPropagateService) BroadcastCommitMsg(msg pbft.CommitMsg) error {
-	return m.BroadcastCommitMsgFunc(msg)
+func (m MockPropagateService) BroadcastPreCommitMsg(msg pbft.PreCommitMsg) error {
+	return m.BroadcastPreCommitMsgFunc(msg)
 }
 
 type MockParliamentService struct {
