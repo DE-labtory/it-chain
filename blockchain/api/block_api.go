@@ -47,6 +47,10 @@ func (bApi BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) er
 	return nil
 }
 
+func (bApi BlockApi) SyncIsProgressing() blockchain.ProgressState {
+	return blockchain.DONE
+}
+
 func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
 	logger.Info(nil, "[Blockchain] Committing genesis block")
 
@@ -132,6 +136,6 @@ func createBlockCommittedEvent(block blockchain.DefaultBlock) (event.BlockCommit
 		TxSeal:    block.GetTxSeal(),
 		Timestamp: block.GetTimestamp(),
 		Creator:   block.GetCreator(),
-		State:     block.GetState(),
+		State:     blockchain.Committed,
 	}, nil
 }

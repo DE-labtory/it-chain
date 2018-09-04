@@ -1,6 +1,8 @@
 package api
 
-import "github.com/it-chain/engine/blockchain"
+import (
+	"github.com/it-chain/engine/blockchain"
+)
 
 type SyncApi struct {
 	publisherId     string
@@ -31,7 +33,7 @@ func (sApi SyncApi) Synchronize() error {
 		return nil
 	}
 
-	//필요하면 construct
+	// if sync has not done, start sync
 	sApi.syncWithPeer(randomPeer)
 
 	return nil
@@ -63,11 +65,11 @@ func (sApi SyncApi) isSynced(peer blockchain.Peer) bool {
 	return true
 }
 
-func (sApi SyncApi) syncWithPeer(peer blockchain.Peer) {
+func (sApi SyncApi) syncWithPeer(peer blockchain.Peer) error {
 	standardBlock, err := sApi.queryService.GetLastBlockFromPeer(peer)
 
 	if err != nil {
-
+		return err
 	}
 
 	standardHeight := standardBlock.GetHeight()
@@ -75,42 +77,48 @@ func (sApi SyncApi) syncWithPeer(peer blockchain.Peer) {
 	lastBlock, err := sApi.blockRepository.FindLast()
 
 	if err != nil {
-
+		return err
 	}
 
 	lastHeight := lastBlock.GetHeight()
 
-	sApi.construct(peer, standardHeight, lastHeight)
+	return sApi.construct(peer, standardHeight, lastHeight)
 
 }
 
-func (sApi SyncApi) construct(peer blockchain.Peer, standardHeight blockchain.BlockHeight, lastHeight blockchain.BlockHeight) {
+func (sApi SyncApi) construct(peer blockchain.Peer, standardHeight blockchain.BlockHeight, lastHeight blockchain.BlockHeight) error {
 
 	for lastHeight < standardHeight {
+
 		targetHeight := setTargetHeight(lastHeight)
 		retrievedBlock, err := sApi.queryService.GetBlockByHeightFromPeer(peer, targetHeight)
 
 		if err != nil {
+			return err
 		}
 
 		err = sApi.blockRepository.Save(retrievedBlock)
 
 		if err != nil {
+			return err
 		}
 
 		// publish
 		commitEvent, err := createBlockCommittedEvent(retrievedBlock)
 
 		if err != nil {
+			return err
 		}
 
 		err = sApi.eventService.Publish("block.committed", commitEvent)
 		if err != nil {
-
+			return err
 		}
 
 		raiseHeight(&lastHeight)
 	}
+
+	return nil
 }
 
 func setTargetHeight(lastHeight blockchain.BlockHeight) blockchain.BlockHeight {
