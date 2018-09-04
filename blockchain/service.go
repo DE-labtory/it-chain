@@ -16,6 +16,12 @@
 
 package blockchain
 
+type QueryService interface {
+	GetRandomPeer() (Peer, error)
+	GetLastBlockFromPeer(peer Peer) (DefaultBlock, error)
+	GetBlockByHeightFromPeer(peer Peer, height BlockHeight) (DefaultBlock, error)
+}
+
 type EventService interface {
 	Publish(topic string, event interface{}) error
 }
