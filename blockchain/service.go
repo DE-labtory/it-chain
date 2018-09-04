@@ -16,10 +16,6 @@
 
 package blockchain
 
-type SyncService interface {
-	IsSynced(peer Peer) bool
-}
-
 type QueryService interface {
 	GetRandomPeer() (Peer, error)
 	GetLastBlockFromPeer(peer Peer) (DefaultBlock, error)
