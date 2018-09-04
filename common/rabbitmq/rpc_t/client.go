@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package rpc
+package rpc_t
 
 import (
-	"encoding/json"
-	"errors"
-	"math/rand"
-	"reflect"
-	"log"
-
 	"github.com/it-chain/engine/common/rabbitmq"
+	"encoding/json"
 	"github.com/streadway/amqp"
+	"log"
+	"math/rand"
+	"errors"
 )
+
+type CallBack func (message Message)
 
 type Client struct {
 	rabbitmq.Session
@@ -39,7 +39,7 @@ func NewClient(rabbitmqUrl string) Client {
 }
 
 //todo need to implement timeout
-func (c Client) Call(queue string, params interface{}, callback interface{}) error {
+func (c Client) Call(queue string, data interface{}, callback CallBack) error {
 
 	if !hasConsumer(c.Ch, queue) {
 		return errors.New("no consumer")
@@ -125,53 +125,6 @@ func (c Client) Call(queue string, params interface{}, callback interface{}) err
 	return nil
 }
 
-func handleResponse(data []byte, callback interface{}) error {
-
-	sourceValue := reflect.ValueOf(callback)
-	sourceType := reflect.TypeOf(callback)
-
-	len := sourceType.NumIn()
-
-	if len != 2 {
-		return errors.New("callback function parameter should have only one struct")
-	}
-
-	callbackParam := sourceType.In(0)
-	v, err := toValues(data, callbackParam)
-
-	if err != nil {
-		return err
-	}
-
-	sourceValue.Call(v)
-
-	return nil
-}
-
-func toValues(data []byte, paramType reflect.Type) ([]reflect.Value, error) {
-
-	v := reflect.New(paramType)
-	initializeStruct(paramType, v.Elem())
-	paramInterface := v.Interface()
-
-	r := Result{}
-	err := json.Unmarshal(data, &r)
-
-	if err != nil {
-		return []reflect.Value{}, err
-	}
-
-	err = json.Unmarshal(r.Data, paramInterface)
-
-	if err != nil {
-		return []reflect.Value{}, err
-	}
-
-	paramValue := reflect.ValueOf(paramInterface).Elem().Interface()
-
-	return []reflect.Value{reflect.ValueOf(paramValue), reflect.ValueOf(r.Err)}, nil
-}
-
 func hasConsumer(channel *amqp.Channel, queueName string) bool {
 
 	q, err := channel.QueueDeclare(
@@ -200,33 +153,4 @@ func randomString(l int) string {
 
 func randInt(min int, max int) int {
 	return min + rand.Intn(max-min)
-}
-
-//build empty struct from struct type
-func initializeStruct(t reflect.Type, v reflect.Value) {
-
-	for i := 0; i < v.NumField(); i++ {
-		f := v.Field(i)
-		ft := t.Field(i)
-
-		if !f.CanSet() {
-			continue
-		}
-
-		switch ft.Type.Kind() {
-		case reflect.Map:
-			f.Set(reflect.MakeMap(ft.Type))
-		case reflect.Slice:
-			f.Set(reflect.MakeSlice(ft.Type, 0, 0))
-		case reflect.Chan:
-			f.Set(reflect.MakeChan(ft.Type, 0))
-		case reflect.Struct:
-			initializeStruct(ft.Type, f)
-		case reflect.Ptr:
-			fv := reflect.New(ft.Type.Elem())
-			initializeStruct(ft.Type.Elem(), fv.Elem())
-			f.Set(fv)
-		default:
-		}
-	}
 }
