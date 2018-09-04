@@ -19,9 +19,9 @@ package rpc
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"math/rand"
 	"reflect"
-	"log"
 
 	"github.com/it-chain/engine/common/rabbitmq"
 	"github.com/streadway/amqp"

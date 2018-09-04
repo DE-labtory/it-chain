@@ -17,15 +17,18 @@
 package rpc_t
 
 import (
-	"github.com/it-chain/engine/common/rabbitmq"
 	"encoding/json"
-	"github.com/streadway/amqp"
-	"log"
-	"math/rand"
 	"errors"
+	"math/rand"
+
+	"github.com/it-chain/engine/common/rabbitmq"
+	"github.com/streadway/amqp"
 )
 
-type CallBack func (message Message)
+type Result struct {
+	Data []byte
+	Err  string
+}
 
 type Client struct {
 	rabbitmq.Session
@@ -39,16 +42,10 @@ func NewClient(rabbitmqUrl string) Client {
 }
 
 //todo need to implement timeout
-func (c Client) Call(queue string, data interface{}, callback CallBack) error {
+func (c Client) Call(queue string, data []byte) (Result, error) {
 
 	if !hasConsumer(c.Ch, queue) {
-		return errors.New("no consumer")
-	}
-
-	data, err := json.Marshal(params)
-
-	if err != nil {
-		return err
+		return Result{}, errors.New("no consumer")
 	}
 
 	replyQ, err := c.Ch.QueueDeclare(
@@ -61,7 +58,7 @@ func (c Client) Call(queue string, data interface{}, callback CallBack) error {
 	)
 
 	if err != nil {
-		return err
+		return Result{}, err
 	}
 
 	err = c.Ch.Qos(
@@ -71,7 +68,7 @@ func (c Client) Call(queue string, data interface{}, callback CallBack) error {
 	)
 
 	if err != nil {
-		return err
+		return Result{}, err
 	}
 
 	msgs, err := c.Ch.Consume(
@@ -85,7 +82,7 @@ func (c Client) Call(queue string, data interface{}, callback CallBack) error {
 	)
 
 	if err != nil {
-		return err
+		return Result{}, err
 	}
 
 	corrId := randomString(32)
@@ -103,26 +100,23 @@ func (c Client) Call(queue string, data interface{}, callback CallBack) error {
 		})
 
 	if err != nil {
-		return err
+		return Result{}, err
 	}
 
 	for d := range msgs {
 
 		if corrId == d.CorrelationId {
-
-			err := handleResponse(d.Body, callback)
-
-			if err != nil {
-				log.Fatal(err)
-				return err
+			result := Result{}
+			if err := json.Unmarshal(d.Body, &result); err != nil {
+				return result, err
 			}
 
 			c.Ch.QueueDelete(replyQ.Name, false, false, true)
-			break
+			return result, nil
 		}
 	}
 
-	return nil
+	return Result{}, nil
 }
 
 func hasConsumer(channel *amqp.Channel, queueName string) bool {
