@@ -111,31 +111,26 @@ func CryptoRandomGeneration(min int64, max int64) int64 {
 }
 
 // absolute path로 변경하기
+
 func RelativeToAbsolutePath(rpath string) (string, error) {
 
+	abs, err := filepath.Abs(rpath)
+	if err != nil {
+		return rpath, err
+	}
 	var absolutePath string
 
 	// user home 얻기
 	usr, err := user.Current()
-
-	// 지금 이거 입력하는 위치 얻기
-	cur, err := filepath.Abs(rpath)
 	if err != nil {
-		return absolutePath, err
+		return rpath, err
 	}
 
 	// 1. ./ ../ 경우
 
 	if strings.Contains(rpath, "./") {
-		i := strings.Index(rpath, "./")
 
-		if i > -1 {
-			pathRemain := rpath[i+1:]
-			absolutePath = path.Join(cur, pathRemain)
-
-		} else {
-			absolutePath = rpath
-		}
+		absolutePath = abs
 
 	}
 

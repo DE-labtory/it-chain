@@ -17,8 +17,11 @@
 package common
 
 import (
+	"io/ioutil"
 	"os"
+	"os/user"
 	"path"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -71,4 +74,49 @@ func TestSerialize(t *testing.T) {
 	err = Deserialize(serialized, data)
 	assert.NoError(t, err)
 	assert.Equal(t, testStruct, data)
+}
+
+func TestRelativeToAbsolutePath(t *testing.T) {
+
+	testfile1 := "./util.go"
+	testabsresult1, err := filepath.Abs(testfile1)
+	assert.NoError(t, err)
+	testabs1, err := RelativeToAbsolutePath(testfile1)
+
+	assert.NoError(t, err)
+	assert.Equal(t, testabs1, testabsresult1)
+
+	testfile2 := "../README.md"
+	testabsresult2, err := filepath.Abs(testfile2)
+	assert.NoError(t, err)
+
+	testabs2, err := RelativeToAbsolutePath(testfile2)
+
+	assert.NoError(t, err)
+	assert.Equal(t, testabs2, testabsresult2)
+
+	// 남의 홈패스에 뭐가있는지 알길이 없으니 하나 만들었다 지움
+	usr, err := user.Current()
+	assert.NoError(t, err)
+
+	testfile3 := usr.HomeDir + "/test.txt"
+
+	_, err = os.Stat(usr.HomeDir)
+	if os.IsNotExist(err) {
+		file, err := os.Create(testfile3)
+		assert.NoError(t, err)
+		defer file.Close()
+	}
+
+	err = ioutil.WriteFile(testfile3, []byte("test"), os.ModePerm)
+	assert.NoError(t, err)
+
+	testfile4 := "~/test.txt"
+
+	testabs3, err := RelativeToAbsolutePath(testfile4)
+	assert.NoError(t, err)
+	assert.Equal(t, testfile3, testabs3)
+
+	err = os.Remove(testfile3)
+	assert.NoError(t, err)
 }

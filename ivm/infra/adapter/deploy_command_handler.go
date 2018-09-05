@@ -41,17 +41,13 @@ func NewDeployCommandHandler(icodeApi api.ICodeApi) *DeployCommandHandler {
 func (d *DeployCommandHandler) HandleDeployCommand(deployCommand command.Deploy) (ivm.ICode, rpc.Error) {
 
 	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/.tmp/"
-<<<<<<< HEAD
-	icode, err := d.icodeApi.Deploy(deployCommand.ICodeId, savePath, deployCommand.Url, deployCommand.SshPath, deployCommand.Password)
-=======
 
 	absolutePath, err := common.RelativeToAbsolutePath(deployCommand.SshPath)
 	if err != nil {
 		logger.Error(nil, fmt.Sprintf("[Icode] fail to get ssh path : %s", absolutePath))
 		return ivm.ICode{}, rpc.Error{Message: err.Error()}
 	}
-	icode, err := d.icodeApi.Deploy(deployCommand.ICodeId, savePath, deployCommand.Url, absolutePath)
->>>>>>> icode path conf 상대경로 -> 절대경로 자동변환
+	icode, err := d.icodeApi.Deploy(deployCommand.ICodeId, savePath, deployCommand.Url, absolutePath, "")
 
 	if err != nil {
 		logger.Error(nil, fmt.Sprintf("[Icode] fail to deploy ivm, url %s", deployCommand.Url))
