@@ -62,7 +62,7 @@ Sample icode url:  https://github.com/junbeomlee/learn-icode
 
 3. Deploy learn-icode
 
-   - `it-chain i deploy [learn-icode-url] [ssh-private-key-path]`
+   - `it-chain ivm deploy [learn-icode-url] [ssh-private-key-path]`
 
      ![[tutorial]deploy](./images/[tutorial]deploy.png)
 
