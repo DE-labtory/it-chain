@@ -196,11 +196,13 @@ func initICode(config *conf.Configuration, server rpc.Server) func() {
 	deployHandler := icodeAdapter.NewDeployCommandHandler(api)
 	unDeployHandler := icodeAdapter.NewUnDeployCommandHandler(api)
 	icodeExecuteHandler := icodeAdapter.NewIcodeExecuteCommandHandler(api)
+	listHandler := icodeAdapter.NewListCommandHandler(api)
 	blockCommittedEventHandler := icodeAdapter.NewBlockCommittedEventHandler(api)
 
 	server.Register("ivm.execute", icodeExecuteHandler.HandleTransactionExecuteCommandHandler)
 	server.Register("ivm.deploy", deployHandler.HandleDeployCommand)
 	server.Register("ivm.undeploy", unDeployHandler.HandleUnDeployCommand)
+	server.Register("ivm.list", listHandler.HandleListCommand)
 
 	subscriber := pubsub.NewTopicSubscriber(config.Engine.Amqp, "Event")
 	if err := subscriber.SubscribeTopic("block.*", blockCommittedEventHandler); err != nil {
@@ -208,9 +210,9 @@ func initICode(config *conf.Configuration, server rpc.Server) func() {
 	}
 
 	return func() {
-		containerIDs := containerService.GetRunningICodeIDList()
-		for _, ID := range containerIDs {
-			containerService.StopContainer(ID)
+		iCodeInfos := containerService.GetRunningICodeList()
+		for _, iCodeInfo := range iCodeInfos {
+			containerService.StopContainer(iCodeInfo.ID)
 		}
 	}
 }
