@@ -22,6 +22,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 	"io"
 	"math/big"
 	"os"
@@ -111,45 +112,55 @@ func CryptoRandomGeneration(min int64, max int64) int64 {
 }
 
 // absolute path로 변경하기
-
+// TODO: rename func
+// TODO: Refactoring
 func RelativeToAbsolutePath(rpath string) (string, error) {
-
-	abs, err := filepath.Abs(rpath)
-	if err != nil {
-		return rpath, err
+	if rpath == "" {
+		return rpath, errors.New("given path is empty string")
 	}
-	var absolutePath string
 
-	// user home 얻기
-	usr, err := user.Current()
-	if err != nil {
-		return rpath, err
-	}
+	absolutePath := ""
 
 	// 1. ./ ../ 경우
-
 	if strings.Contains(rpath, "./") {
-
-		absolutePath = abs
-
+		abs, err := filepath.Abs(rpath)
+		if err != nil {
+			return rpath, err
+		}
+		return abs, nil
 	}
 
 	// 2. ~/ 홈폴더 경우
-
 	if strings.Contains(rpath, "~") {
-
 		i := strings.Index(rpath, "~") // 처음 나온 ~만 반환
 
 		if i > -1 {
 			pathRemain := rpath[i+1:]
-			absolutePath = path.Join(usr.HomeDir, pathRemain)
+			// user home 얻기
+			usr, err := user.Current()
+			if err != nil {
+				return rpath, err
+			}
+			return path.Join(usr.HomeDir, pathRemain), nil
 
 		} else {
-			absolutePath = rpath
+			return rpath, nil
 		}
-
 	}
 
-	return absolutePath, err
+	if string(rpath[0]) == "/" {
+		return rpath, nil
+	}
+
+	if string(rpath[0]) != "." && string(rpath[0]) != "/" {
+		currentPath, err := filepath.Abs(".")
+		if err != nil {
+			return rpath, err
+		}
+
+		return path.Join(currentPath, rpath), nil
+	}
+
+	return absolutePath, nil
 
 }
