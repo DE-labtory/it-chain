@@ -32,16 +32,21 @@ import (
 )
 
 var ErrContainerDoesNotExist = errors.New("container does not exist")
+var ErrICodeInfoMapNotEmpty = errors.New("ICode info struct in current container is not empty")
+
+type ICodeInfo struct {
+	container tesseract.Container
+	iCode     ivm.ICode
+}
 
 type ContainerService struct {
 	sync.RWMutex
-	containerMap map[tesseract.ContainerID]tesseract.Container
+	iCodeInfoMap map[tesseract.ContainerID]ICodeInfo
 }
 
 func NewContainerService() *ContainerService {
-
 	return &ContainerService{
-		containerMap: make(map[tesseract.ContainerID]tesseract.Container),
+		iCodeInfoMap: make(map[tesseract.ContainerID]ICodeInfo),
 		RWMutex:      sync.RWMutex{},
 	}
 }
@@ -56,14 +61,24 @@ func (cs ContainerService) StartContainer(icode ivm.ICode) error {
 		Directory: icode.Path,
 		Url:       icode.GitUrl,
 	}
-
 	container, err := container.Create(conf)
 
 	if err != nil {
 		return err
 	}
 
-	cs.containerMap[icode.ID] = container
+	_, ok := cs.iCodeInfoMap[icode.ID]
+
+	if !ok {
+		iCodeInfo := ICodeInfo{
+			container: container,
+			iCode:     icode,
+		}
+
+		cs.iCodeInfoMap[icode.ID] = iCodeInfo
+	} else {
+		return ErrICodeInfoMapNotEmpty
+	}
 
 	return nil
 }
@@ -71,7 +86,7 @@ func (cs ContainerService) StartContainer(icode ivm.ICode) error {
 func (cs ContainerService) ExecuteRequest(request ivm.Request) (ivm.Result, error) {
 	logger.Info(nil, fmt.Sprintf("[IVM] Executing icode - icodeID: [%s]", request.ICodeID))
 
-	container, ok := cs.containerMap[request.ICodeID]
+	iCodeInfo, ok := cs.iCodeInfoMap[request.ICodeID]
 
 	if !ok {
 		return ivm.Result{}, ErrContainerDoesNotExist
@@ -101,7 +116,7 @@ func (cs ContainerService) ExecuteRequest(request ivm.Request) (ivm.Result, erro
 		}
 	}
 
-	err := container.Request(tesseract.Request{
+	err := iCodeInfo.container.Request(tesseract.Request{
 		Uuid:     xid.New().String(),
 		Args:     request.Args,
 		FuncName: request.Function,
@@ -122,30 +137,31 @@ func (cs ContainerService) ExecuteRequest(request ivm.Request) (ivm.Result, erro
 }
 
 func (cs ContainerService) StopContainer(id ivm.ID) error {
-
-	container, ok := cs.containerMap[id]
+	iCodeInfo, ok := cs.iCodeInfoMap[id]
 
 	if !ok {
 		return ErrContainerDoesNotExist
 	}
 
-	err := container.Close()
+	err := iCodeInfo.container.Close()
 
 	if err != nil {
 		return err
 	}
 
-	delete(cs.containerMap, id)
+	delete(cs.iCodeInfoMap, id)
 	return nil
 }
 
-func (cs ContainerService) GetRunningICodeIDList() []ivm.ID {
+func (cs ContainerService) GetRunningICodeList() []ivm.ICode {
+	iCodeList := make([]ivm.ICode, 0)
 
-	icodeIDList := make([]ivm.ID, 0)
-
-	for id, _ := range cs.containerMap {
-		icodeIDList = append(icodeIDList, id)
+	for id := range cs.iCodeInfoMap {
+		iCodeInfo, ok := cs.iCodeInfoMap[id]
+		if ok {
+			iCodeList = append(iCodeList, iCodeInfo.iCode)
+		}
 	}
 
-	return icodeIDList
+	return iCodeList
 }
