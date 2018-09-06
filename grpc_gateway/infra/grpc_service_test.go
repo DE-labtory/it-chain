@@ -473,3 +473,52 @@ func TestGrpcHostService_Close(t *testing.T) {
 		clientHostService.CloseConnection(conn.ConnectionId)
 	}
 }
+
+func TestMemConnectionStore_FindAll(t *testing.T) {
+
+	connStore := infra.NewMemConnectionStore()
+	connectionList := []bifrost.Connection{&bifrost.GrpcConnection{ID:"123"},&bifrost.GrpcConnection{ID:"124"}}
+	for _, connection := range connectionList{
+		connStore.Add(connection)
+	}
+
+	foundedConnectionList := connStore.FindAll()
+	assert.Equal(t,2, len(foundedConnectionList))
+	assert.Contains(t, foundedConnectionList, &bifrost.GrpcConnection{ID:"123"})
+	assert.Contains(t, foundedConnectionList, &bifrost.GrpcConnection{ID:"124"})
+}
+
+func TestGrpcHostService_GetAllConnections(t *testing.T) {
+
+	var publish = func(exchange string, topic string, data interface{}) (err error) {
+		return nil
+	}
+
+	serverHostService, tearDown := setupGrpcHostService(t, "127.0.0.1:7777", "server", publish)
+	clientHostService, tearDown2 := setupGrpcHostService(t, "127.0.0.1:8888", "client", publish)
+
+	//times to need to setup server
+	time.Sleep(3 * time.Second)
+	defer tearDown()
+	defer tearDown2()
+
+	var connID string
+	handler := &MockHandler{}
+	handler.OnConnectionFunc = func(connection grpc_gateway.Connection) {
+		connID = connection.ConnectionId
+	}
+
+	handler.OnDisconnectionFunc = func(connection grpc_gateway.Connection) {
+
+	}
+
+	serverHostService.SetHandler(handler)
+	clientHostService.SetHandler(handler)
+
+	_, err := clientHostService.Dial("127.0.0.1:7777")
+	assert.NoError(t, err)
+
+	connections, err := serverHostService.GetAllConnections()
+	assert.NoError(t, err)
+	assert.Equal(t,connections[0].ConnectionId, connID)
+}
