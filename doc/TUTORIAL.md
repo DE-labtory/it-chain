@@ -18,7 +18,7 @@ Requirements
 1. Install Engine
 
    ```shell
-   go get it-chain/engine
+   go get github.com/it-chain/engine
    ```
 
 2. Move to engine folder
