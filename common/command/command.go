@@ -18,6 +18,8 @@ package command
 
 import (
 	"time"
+
+	"github.com/it-chain/engine/ivm"
 )
 
 /*
@@ -78,6 +80,13 @@ type Deploy struct {
 }
 type UnDeploy struct {
 	ICodeId string
+}
+
+type GetICodeList struct {
+}
+
+type ICodeList struct {
+	ICodes []ivm.ICode
 }
 
 /*
