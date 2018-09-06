@@ -32,12 +32,16 @@ import (
 	blockchainAdapter "github.com/it-chain/engine/blockchain/infra/adapter"
 	blockchainMem "github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/blockchain/test/mock"
+	"github.com/it-chain/engine/cmd/connection"
 	"github.com/it-chain/engine/cmd/ivm"
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
+	gRPCGatewayApi "github.com/it-chain/engine/grpc_gateway/api"
+	gRPCGatewayInfra "github.com/it-chain/engine/grpc_gateway/infra"
+	gRPCGatewayAdapter "github.com/it-chain/engine/grpc_gateway/infra/adapter"
 	icodeApi "github.com/it-chain/engine/ivm/api"
 	icodeAdapter "github.com/it-chain/engine/ivm/infra/adapter"
 	icodeInfra "github.com/it-chain/engine/ivm/infra/git"
@@ -47,7 +51,6 @@ import (
 	txpoolBatch "github.com/it-chain/engine/txpool/infra/batch"
 	txpoolMem "github.com/it-chain/engine/txpool/infra/mem"
 	"github.com/urfave/cli"
-	"github.com/it-chain/engine/cmd/connection"
 )
 
 const apidbPath = "./api-db"
@@ -114,6 +117,7 @@ func run() error {
 	defer initTxPool(configuration, rpcServer, rpcClient)()
 	defer initICode(configuration, rpcServer)()
 	defer initBlockchain(configuration, rpcServer)()
+	defer initgRPCGateway(configuration, rpcServer)()
 
 	go func() {
 		c := make(chan os.Signal, 1)
@@ -207,7 +211,7 @@ func initApiGateway(config *conf.Configuration, errs chan error) func() {
 
 func initICode(config *conf.Configuration, server rpc.Server) func() {
 
-	logger.Infof(nil, "[Main] Ivm is staring")
+	logger.Infof(nil, "[Main] Ivm is starting")
 
 	// git generate
 	storeApi := icodeInfra.NewRepositoryService()
@@ -242,7 +246,7 @@ func initICode(config *conf.Configuration, server rpc.Server) func() {
 
 func initTxPool(config *conf.Configuration, server rpc.Server, client rpc.Client) func() {
 
-	logger.Infof(nil, "[Main] Txpool is staring")
+	logger.Infof(nil, "[Main] Txpool is starting")
 
 	//todo get id from pubkey
 	tmpPeerID := "tmp peer 1"
@@ -263,7 +267,7 @@ func initTxPool(config *conf.Configuration, server rpc.Server, client rpc.Client
 
 func initBlockchain(config *conf.Configuration, server rpc.Server) func() {
 
-	logger.Infof(nil, "[Main] Blockchain is staring")
+	logger.Infof(nil, "[Main] Blockchain is starting")
 
 	publisherId := "publisher.1"
 	blockRepo, err := blockchainMem.NewBlockRepository(dbPath)
@@ -293,5 +297,32 @@ func initBlockchain(config *conf.Configuration, server rpc.Server) func() {
 
 	return func() {
 		os.RemoveAll(dbPath)
+	}
+}
+
+func initgRPCGateway(config *conf.Configuration, server rpc.Server) func() {
+	logger.Infof(nil, "[Main] gRPC-Gateway is starting")
+
+	publisher := pubsub.NewTopicPublisher(config.Engine.Amqp, "Event")
+	priKey, pubKey := gRPCGatewayInfra.LoadKeyPair(conf.GetConfiguration().Engine.KeyPath, "ECDSA256")
+	hostService := gRPCGatewayInfra.NewGrpcHostService(priKey, pubKey, publisher.Publish)
+
+	connectionApi := gRPCGatewayApi.NewConnectionApi(hostService)
+	connectionCommandHandler := gRPCGatewayAdapter.NewConnectionCommandHandler(connectionApi)
+
+	if err := server.Register("connection.create", connectionCommandHandler.HandleCreateConnectionCommand); err != nil {
+		panic(err)
+	}
+
+	if err := server.Register("connection.list", connectionCommandHandler.HandleGetConnectionListCommand); err != nil {
+		panic(err)
+	}
+
+	if err := server.Register("connection.close", connectionCommandHandler.HandleCloseConnectionCommand); err != nil {
+		panic(err)
+	}
+
+	return func() {
+
 	}
 }
