@@ -19,6 +19,7 @@ package command
 import (
 	"time"
 
+	"github.com/it-chain/engine/grpc_gateway"
 	"github.com/it-chain/engine/ivm"
 )
 
@@ -37,7 +38,7 @@ type StartConsensus struct {
  */
 
 //Connection 생성 command
-type Dial struct {
+type CreateConnection struct {
 	Address string
 }
 
@@ -46,8 +47,8 @@ type CloseConnection struct {
 	Address string
 }
 
-type GetConnectionList struct{
-
+type GetConnectionList struct {
+	ConnectionList []grpc_gateway.Connection
 }
 
 //다른 Peer에게 Message전송 command

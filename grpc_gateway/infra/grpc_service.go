@@ -17,9 +17,9 @@
 package infra
 
 import (
+	"errors"
 	"log"
 	"sync"
-	"errors"
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
@@ -31,7 +31,7 @@ import (
 
 var ErrConnAlreadyExist = errors.New("connection is already exist")
 
-type Publish func(exchange string, topic string, data interface{}) (err error)
+type Publish func(topic string, data interface{}) (err error)
 
 type ConnectionHandler interface {
 	OnConnection(connection grpc_gateway.Connection)
@@ -121,15 +121,15 @@ func (g *GrpcHostService) startConnectionUntilClose(connection bifrost.Connectio
 	}
 }
 
-func (g *GrpcHostService) GetAllConnections() ([]grpc_gateway.Connection, error){
+func (g *GrpcHostService) GetAllConnections() ([]grpc_gateway.Connection, error) {
 	connectionList := g.connStore.FindAll()
 	grpcConnectionList := make([]grpc_gateway.Connection, 0)
 
-	for _, connection := range connectionList{
+	for _, connection := range connectionList {
 		grpcConnectionList = append(grpcConnectionList, toGatewayConnectionModel(connection))
 	}
 
-	return grpcConnectionList ,nil
+	return grpcConnectionList, nil
 }
 
 func (g *GrpcHostService) CloseConnection(connID string) {
@@ -259,9 +259,9 @@ func (connStore MemConnectionStore) FindAll() []bifrost.Connection {
 	connStore.Lock()
 	defer connStore.Unlock()
 
-	connectionList := make([]bifrost.Connection,0)
+	connectionList := make([]bifrost.Connection, 0)
 
-	for _, connection := range connStore.connMap{
+	for _, connection := range connStore.connMap {
 		connectionList = append(connectionList, connection)
 	}
 
@@ -274,7 +274,7 @@ type MessageHandler struct {
 
 func (r MessageHandler) ServeRequest(msg bifrost.Message) {
 
-	err := r.publish("Command", "message.receive", command.ReceiveGrpc{
+	err := r.publish("message.receive", command.ReceiveGrpc{
 		Body:         msg.Data,
 		ConnectionID: msg.Conn.GetID(),
 	})

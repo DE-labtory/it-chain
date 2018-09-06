@@ -47,6 +47,7 @@ import (
 	txpoolBatch "github.com/it-chain/engine/txpool/infra/batch"
 	txpoolMem "github.com/it-chain/engine/txpool/infra/mem"
 	"github.com/urfave/cli"
+	"github.com/it-chain/engine/cmd/connection"
 )
 
 const apidbPath = "./api-db"
@@ -85,6 +86,7 @@ func main() {
 	}
 	app.Commands = []cli.Command{}
 	app.Commands = append(app.Commands, ivm.IcodeCmd())
+	app.Commands = append(app.Commands, connection.Cmd())
 	app.Action = func(c *cli.Context) error {
 		PrintLogo()
 		configName := c.String("config")
