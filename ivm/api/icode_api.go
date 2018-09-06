@@ -84,7 +84,7 @@ func (i ICodeApi) UnDeploy(id ivm.ID) error {
 
 	logger.Info(nil, fmt.Sprintf("[IVM] Icode has undeployed - icodeID: [%s] ", id))
 
-	return i.EventService.Publish("icode.deleted", event.MetaDeleted{ICodeID: id})
+	return i.EventService.Publish("icode.deleted", event.ICodeDeleted{ICodeID: id})
 }
 
 func (i ICodeApi) ExecuteRequestList(RequestList []ivm.Request) []ivm.Result {

@@ -53,7 +53,7 @@ type ICodeCreated struct {
 }
 
 // ivm meta deleted
-type MetaDeleted struct {
+type ICodeDeleted struct {
 	ICodeID string
 }
 

@@ -159,9 +159,9 @@ func (i ICodeEventHandler) HandleMetaCreatedEvent(icodeCreatedEvent event.ICodeC
 	}
 }
 
-func (i ICodeEventHandler) HandleMetaDeletedEvent(metaDeleted event.MetaDeleted) {
+func (i ICodeEventHandler) HandleMetaDeletedEvent(iCodeDeleted event.ICodeDeleted) {
 
-	err := i.metaRepository.Remove(metaDeleted.ICodeID)
+	err := i.metaRepository.Remove(iCodeDeleted.ICodeID)
 
 	if err != nil {
 		log.Fatal(err.Error())

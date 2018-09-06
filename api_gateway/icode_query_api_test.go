@@ -19,8 +19,10 @@ package api_gateway
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/ivm"
 	"github.com/stretchr/testify/assert"
@@ -205,51 +207,47 @@ func TestLevelDbMetaRepository_FindMetaByUrl(t *testing.T) {
 	}
 }
 
-// todo test fail 함
-//func TestICodeEventHandler_HandleMetaCreatedEvent(t *testing.T) {
-//
-//	git, client, tearDown := setICodeQueryApi(t)
-//
-//	defer tearDown()
-//
-//	tests := map[string]struct {
-//		Input         ivm.MetaCreatedEvent
-//		OutputError   error
-//		ExpectDataNum int
-//	}{
-//		"success": {
-//			Input: ivm.MetaCreatedEvent{
-//				EventModel: midgard.EventModel{
-//					ID:   "1",
-//					Type: "meta.created",
-//					Time: time.Now(),
-//				},
-//				RepositoryName: "a",
-//				GitUrl:         "b",
-//				Path:           "c",
-//				CommitHash:     "d",
-//			},
-//			OutputError:   nil,
-//			ExpectDataNum: 1,
-//		},
-//	}
-//
-//	for testName, test := range tests {
-//		t.Logf("Running '%s' test, caseName: %s", t.Name(), testName)
-//		//given
-//		err := client.Publish("Event", "transaction.created", test.Input)
-//		time.Sleep(3 * time.Second)
-//
-//		//then
-//		assert.Equal(t, test.OutputError, err, "err in compare err")
-//
-//		//check
-//		metas, err := git.metaRepository.FindAllMeta()
-//		assert.NoError(t, err, "err in check")
-//		assert.Equal(t, test.ExpectDataNum, len(metas), "not equal in check dataNum")
-//
-//	}
-//}
+func TestICodeEventHandler_HandleMetaCreatedEvent(t *testing.T) {
+
+	git, client, tearDown := setICodeQueryApi(t)
+	defer tearDown()
+
+	//setting map
+	tests := map[string]struct {
+		Input         event.ICodeCreated
+		OutputError   error
+		ExpectDataNum int
+	}{
+		"success": {
+			Input: event.ICodeCreated{
+				ID:             "1",
+				RepositoryName: "a",
+				GitUrl:         "b",
+				Path:           "c",
+				CommitHash:     "d",
+			},
+			OutputError:   nil,
+			ExpectDataNum: 1,
+		},
+	}
+
+	for testName, test := range tests {
+		t.Logf("Running '%s' test, caseName: %s", t.Name(), testName)
+		//given
+		err := client.Publish("icode.created", test.Input)
+		time.Sleep(3 * time.Second)
+
+		//then
+		assert.Equal(t, test.OutputError, err, "err in compare err")
+
+		//check
+		metas, err := git.metaRepository.FindAllMeta()
+		assert.NoError(t, err, "err in check")
+		assert.Equal(t, test.ExpectDataNum, len(metas), "not equal in check dataNum")
+		assert.Equal(t, "1", metas[0].ID)
+		assert.Equal(t, "d", metas[0].CommitHash)
+	}
+}
 
 func TestICodeEventHandler_HandleMetaStatusChangeEvent(t *testing.T) {
 	//todo impl like TestICodeEventHandler_HandleMetaCreatedEvent
@@ -270,10 +268,11 @@ func setICodeQueryApi(t *testing.T) (ICodeQueryApi, *pubsub.TopicPublisher, func
 	metaQueryApi := ICodeQueryApi{metaRepository: &repo}
 	metaEventListener := &ICodeEventHandler{metaRepository: &repo}
 
-	err := client.SubscribeTopic("meta.*", metaEventListener)
+	err := client.SubscribeTopic("icode.*", metaEventListener)
 	assert.NoError(t, err)
 
 	return metaQueryApi, &publisher, func() {
+		repo.leveldb.Close()
 		os.RemoveAll(dbPath)
 		client.Close()
 	}
