@@ -20,7 +20,7 @@ type ContainerService interface {
 	StartContainer(icode ICode) error
 	StopContainer(id ID) error
 	ExecuteRequest(request Request) (Result, error)
-	GetRunningICodeIDList() []ID
+	GetRunningICodeList() []ICode
 }
 
 type GitService interface {
