@@ -37,13 +37,17 @@ type StartConsensus struct {
  */
 
 //Connection 생성 command
-type CreateConnection struct {
+type Dial struct {
 	Address string
 }
 
 //Connection close command
 type CloseConnection struct {
 	Address string
+}
+
+type GetConnectionList struct{
+
 }
 
 //다른 Peer에게 Message전송 command
