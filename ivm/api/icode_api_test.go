@@ -52,7 +52,7 @@ func TestICodeApi_Deploy(t *testing.T) {
 	assert.Equal(t, icode.ID, "1")
 	assert.Equal(t, icode.RepositoryName, "learn-icode")
 	assert.Equal(t, icode.GitUrl, "github.com/junbeomlee/learn-icode")
-	assert.Equal(t, containerService.GetRunningICodeIDList()[0], "1")
+	assert.Equal(t, containerService.GetRunningICodeList()[0].ID, "1")
 }
 
 func TestICodeApi_UnDeploy(t *testing.T) {
@@ -67,11 +67,11 @@ func TestICodeApi_UnDeploy(t *testing.T) {
 	api, containerService := setUp(t)
 	_, err = api.Deploy("1", savePath, "github.com/junbeomlee/learn-icode", sshPath, "")
 	assert.NoError(t, err)
-	assert.Equal(t, containerService.GetRunningICodeIDList()[0], "1")
+	assert.Equal(t, containerService.GetRunningICodeList()[0].ID, "1")
 
 	err = api.UnDeploy("1")
 	assert.NoError(t, err)
-	assert.Equal(t, 0, len(containerService.GetRunningICodeIDList()))
+	assert.Equal(t, 0, len(containerService.GetRunningICodeList()))
 }
 
 func TestICodeApi_ExecuteRequest(t *testing.T) {
@@ -130,6 +130,26 @@ func TestICodeApi_ExecuteRequestList(t *testing.T) {
 	for _, result := range results {
 		assert.Equal(t, result.Err, "")
 	}
+}
+
+func TestICodeApi_GetRunningICodeIDList(t *testing.T) {
+	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/.tmp/"
+	defer os.RemoveAll(savePath)
+
+	sshPath := "./id_rsa"
+	err, tearDown1 := generatePriKey(sshPath)
+	assert.NoError(t, err)
+	defer tearDown1()
+
+	api, containerService := setUp(t)
+	_, err = api.Deploy("1", savePath, "github.com/junbeomlee/learn-icode", sshPath, "")
+	defer api.UnDeploy("1")
+	assert.NoError(t, err)
+	assert.Equal(t, containerService.GetRunningICodeList()[0].ID, "1")
+
+	icodeIDs := api.GetRunningICodeList()
+	assert.NotNil(t, icodeIDs)
+	assert.Equal(t, icodeIDs[0].ID, "1")
 }
 
 func setUp(t *testing.T) (*api.ICodeApi, *tesseract.ContainerService) {
