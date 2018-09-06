@@ -44,32 +44,22 @@ func list() {
 
 	config := conf.GetConfiguration()
 	client := rpc.NewClient(config.Engine.Amqp)
-
 	defer client.Close()
 
 	listCommand := command.GetICodeList{}
-
-	fmt.Println("[Cmd] getting icode list...")
-	fmt.Println("[Cmd] This may take a few minutes")
-
 	err := client.Call("ivm.list", listCommand, func(ICodeList command.ICodeList, err rpc.Error) {
 
 		if !err.IsNil() {
 			log.Printf("fail to get icode list err: [%s]", err.Message)
 			return
 		}
+		
+		fmt.Println("Index\t ID\t\t\t Version\t GitUrl")
 
-		if len(ICodeList.ICodes) == 0 {
-			fmt.Printf("[Cmd] there is no icode list")
-		} else {
-			fmt.Println("[Cmd] running icode list")
-			fmt.Println("[Cmd] Index\t ID\t\t\t Version\t GitUrl")
-			for index, iCodes := range ICodeList.ICodes {
-				fmt.Printf("[Cmd] [%d]\t [%s]\t [%s]\t\t [%s]\n",
-					index, iCodes.ID, iCodes.Version, iCodes.GitUrl)
-			}
+		for index, iCodes := range ICodeList.ICodes {
+			fmt.Printf("[%d]\t [%s]\t [%s]\t\t [%s]\n",
+				index, iCodes.ID, iCodes.Version, iCodes.GitUrl)
 		}
-
 	})
 
 	if err != nil {
