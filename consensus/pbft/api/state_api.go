@@ -19,6 +19,7 @@ package api
 import (
 	"errors"
 
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/consensus/pbft"
 )
 
@@ -32,7 +33,7 @@ type StateApi interface {
 type StateApiImpl struct {
 	publisherID       string
 	propagateService  pbft.PropagateService
-	eventService      pbft.EventService
+	eventService      common.EventService
 	parliamentService pbft.ParliamentService
 	repo              *pbft.StateRepository
 }
@@ -40,7 +41,7 @@ type StateApiImpl struct {
 var ConsensusCreateError = errors.New("Consensus can't be created")
 
 func NewStateApi(publisherID string, propagateService pbft.PropagateService,
-	eventService pbft.EventService, parliamentService pbft.ParliamentService, repo *pbft.StateRepository) StateApiImpl {
+	eventService common.EventService, parliamentService pbft.ParliamentService, repo *pbft.StateRepository) StateApiImpl {
 	return StateApiImpl{
 		publisherID:       publisherID,
 		propagateService:  propagateService,
@@ -151,7 +152,7 @@ func (cApi *StateApiImpl) HandleCommitMsg(msg pbft.CommitMsg) error {
 		return nil
 	}
 
-	if err := cApi.eventService.ConfirmBlock(loadedState.Block); err != nil {
+	if err := cApi.eventService.Publish("block.confirm", loadedState.Block); err != nil {
 		return err
 	}
 	cApi.repo.Remove()

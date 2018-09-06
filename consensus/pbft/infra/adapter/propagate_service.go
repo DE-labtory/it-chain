@@ -31,13 +31,11 @@ var ErrEmptyBlockHash = errors.New("Block hash is empty")
 var ErrEmptyMsg = errors.New("Message is empty")
 
 type PropagateService struct {
-	publish Publish
+	publish func(topic string, event interface{}) error
 }
 
-func NewPropagateService(publish Publish) PropagateService {
-	return PropagateService{
-		publish: publish,
-	}
+func NewPropagateService() PropagateService {
+	return PropagateService{}
 }
 
 func (ps PropagateService) BroadcastPrePrepareMsg(msg pbft.PrePrepareMsg, representatives []*pbft.Representative) error {
