@@ -19,6 +19,8 @@ package ivm
 import (
 	"log"
 
+	"github.com/it-chain/engine/common"
+
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
@@ -50,17 +52,22 @@ func deploy(gitUrl string, sshPath string, password string) {
 
 	defer client.Close()
 
+	absPath, err := common.RelativeToAbsolutePath(sshPath)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	deployCommand := command.Deploy{
 		ICodeId:  xid.New().String(),
 		Url:      gitUrl,
-		SshPath:  sshPath,
+		SshPath:  absPath,
 		Password: password,
 	}
 
 	log.Printf("[Cmd] deploying icode...")
 	log.Printf("[Cmd] This may take a few minutes")
 
-	err := client.Call("ivm.deploy", deployCommand, func(icode ivm.ICode, err rpc.Error) {
+	err = client.Call("ivm.deploy", deployCommand, func(icode ivm.ICode, err rpc.Error) {
 
 		if !err.IsNil() {
 			log.Printf("fail to deploy icode err: [%s]", err.Message)
