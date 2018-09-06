@@ -89,10 +89,9 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 		},
 	}
 
-	var publish = func(exchange string, topic string, data interface{}) (err error) {
+	var publish = func(topic string, data interface{}) (err error) {
 
 		//then
-		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.receive")
 		assert.Equal(t, data, command.ReceiveGrpc{
 			Body:         []byte("hello world"),
@@ -221,7 +220,7 @@ func (m *MockHandler) OnDisconnection(connection grpc_gateway.Connection) {
 	m.OnDisconnectionFunc(connection)
 }
 
-var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish func(exchange string, topic string, data interface{}) error) (*infra.GrpcHostService, func()) {
+var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish func(topic string, data interface{}) error) (*infra.GrpcHostService, func()) {
 
 	pri, pub := infra.LoadKeyPair(keyPath, "ECDSA256")
 
@@ -251,7 +250,7 @@ func TestGrpcHostService_Dial(t *testing.T) {
 		},
 	}
 
-	var publish = func(exchange string, topic string, data interface{}) (err error) {
+	var publish = func(topic string, data interface{}) (err error) {
 
 		return nil
 	}
@@ -302,7 +301,7 @@ func TestGrpcHostService_Dial_When_connection_exist(t *testing.T) {
 		},
 	}
 
-	var publish = func(exchange string, topic string, data interface{}) (err error) {
+	var publish = func(topic string, data interface{}) (err error) {
 
 		return nil
 	}
@@ -371,9 +370,8 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 	var publishedData []byte
 	var connID string
 
-	var publish = func(exchange string, topic string, data interface{}) (err error) {
+	var publish = func(topic string, data interface{}) (err error) {
 
-		assert.Equal(t, exchange, "Command")
 		assert.Equal(t, topic, "message.receive")
 		assert.Equal(t, data, command.ReceiveGrpc{
 			Body:         publishedData,
@@ -435,7 +433,7 @@ func TestGrpcHostService_Close(t *testing.T) {
 		},
 	}
 
-	var publish = func(exchange string, topic string, data interface{}) (err error) {
+	var publish = func(topic string, data interface{}) (err error) {
 
 		return nil
 	}
@@ -477,20 +475,20 @@ func TestGrpcHostService_Close(t *testing.T) {
 func TestMemConnectionStore_FindAll(t *testing.T) {
 
 	connStore := infra.NewMemConnectionStore()
-	connectionList := []bifrost.Connection{&bifrost.GrpcConnection{ID:"123"},&bifrost.GrpcConnection{ID:"124"}}
-	for _, connection := range connectionList{
+	connectionList := []bifrost.Connection{&bifrost.GrpcConnection{ID: "123"}, &bifrost.GrpcConnection{ID: "124"}}
+	for _, connection := range connectionList {
 		connStore.Add(connection)
 	}
 
 	foundedConnectionList := connStore.FindAll()
-	assert.Equal(t,2, len(foundedConnectionList))
-	assert.Contains(t, foundedConnectionList, &bifrost.GrpcConnection{ID:"123"})
-	assert.Contains(t, foundedConnectionList, &bifrost.GrpcConnection{ID:"124"})
+	assert.Equal(t, 2, len(foundedConnectionList))
+	assert.Contains(t, foundedConnectionList, &bifrost.GrpcConnection{ID: "123"})
+	assert.Contains(t, foundedConnectionList, &bifrost.GrpcConnection{ID: "124"})
 }
 
 func TestGrpcHostService_GetAllConnections(t *testing.T) {
 
-	var publish = func(exchange string, topic string, data interface{}) (err error) {
+	var publish = func(topic string, data interface{}) (err error) {
 		return nil
 	}
 
@@ -520,5 +518,5 @@ func TestGrpcHostService_GetAllConnections(t *testing.T) {
 
 	connections, err := serverHostService.GetAllConnections()
 	assert.NoError(t, err)
-	assert.Equal(t,connections[0].ConnectionId, connID)
+	assert.Equal(t, connections[0].ConnectionId, connID)
 }
