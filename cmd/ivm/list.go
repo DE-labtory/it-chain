@@ -34,7 +34,6 @@ func ListCmd() cli.Command {
 		Action: func(c *cli.Context) error {
 
 			list()
-
 			return nil
 		},
 	}
@@ -55,7 +54,6 @@ func list() {
 		}
 		
 		fmt.Println("Index\t ID\t\t\t Version\t GitUrl")
-
 		for index, iCodes := range ICodeList.ICodes {
 			fmt.Printf("[%d]\t [%s]\t [%s]\t\t [%s]\n",
 				index, iCodes.ID, iCodes.Version, iCodes.GitUrl)
