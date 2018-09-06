@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
@@ -39,15 +38,10 @@ func NewDeployCommandHandler(icodeApi api.ICodeApi) *DeployCommandHandler {
 }
 
 func (d *DeployCommandHandler) HandleDeployCommand(deployCommand command.Deploy) (ivm.ICode, rpc.Error) {
-
+	sshPath := deployCommand.SshPath
 	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/.tmp/"
 
-	absolutePath, err := common.RelativeToAbsolutePath(deployCommand.SshPath)
-	if err != nil {
-		logger.Error(nil, fmt.Sprintf("[Icode] fail to get ssh path : %s", absolutePath))
-		return ivm.ICode{}, rpc.Error{Message: err.Error()}
-	}
-	icode, err := d.icodeApi.Deploy(deployCommand.ICodeId, savePath, deployCommand.Url, absolutePath, "")
+	icode, err := d.icodeApi.Deploy(deployCommand.ICodeId, savePath, deployCommand.Url, sshPath, "")
 
 	if err != nil {
 		logger.Error(nil, fmt.Sprintf("[Icode] fail to deploy ivm, url %s", deployCommand.Url))

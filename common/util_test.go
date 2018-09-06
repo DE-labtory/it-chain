@@ -120,3 +120,18 @@ func TestRelativeToAbsolutePath(t *testing.T) {
 	err = os.Remove(testfile3)
 	assert.NoError(t, err)
 }
+
+// TODO
+func TestRelativeToAbsolutePath_WhenGivenPathIsAbsolute(t *testing.T) {
+
+}
+
+// TODO
+func TestRelativeToAbsolutePath_WhenGivenPathWithOnlyName(t *testing.T) {
+
+}
+
+// TODO
+func TestRelativeToAbsolutePath_WhenGIvenPathIsEmpty(t *testing.T) {
+
+}
