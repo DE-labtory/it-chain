@@ -110,3 +110,7 @@ func (i ICodeApi) ExecuteRequest(request ivm.Request) (ivm.Result, error) {
 
 	return i.ContainerService.ExecuteRequest(request)
 }
+
+func (i ICodeApi) GetRunningICodeList() []ivm.ICode {
+	return i.ContainerService.GetRunningICodeList()
+}
