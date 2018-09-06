@@ -19,7 +19,6 @@ package infra
 import (
 	"log"
 	"sync"
-
 	"errors"
 
 	"github.com/it-chain/bifrost"
@@ -122,6 +121,17 @@ func (g *GrpcHostService) startConnectionUntilClose(connection bifrost.Connectio
 	}
 }
 
+func (g *GrpcHostService) GetAllConnections() ([]grpc_gateway.Connection, error){
+	connectionList := g.connStore.FindAll()
+	grpcConnectionList := make([]grpc_gateway.Connection, 0)
+
+	for _, connection := range connectionList{
+		grpcConnectionList = append(grpcConnectionList, toGatewayConnectionModel(connection))
+	}
+
+	return grpcConnectionList ,nil
+}
+
 func (g *GrpcHostService) CloseConnection(connID string) {
 
 	connection := g.connStore.Find(connID)
@@ -178,6 +188,7 @@ type ConnectionStore interface {
 	Add(conn bifrost.Connection) error
 	Delete(connID bifrost.ConnID)
 	Find(connID bifrost.ConnID) bifrost.Connection
+	FindAll() []bifrost.Connection
 }
 
 type MemConnectionStore struct {
@@ -242,6 +253,19 @@ func (connStore MemConnectionStore) Find(connID bifrost.ConnID) bifrost.Connecti
 	}
 
 	return nil
+}
+
+func (connStore MemConnectionStore) FindAll() []bifrost.Connection {
+	connStore.Lock()
+	defer connStore.Unlock()
+
+	connectionList := make([]bifrost.Connection,0)
+
+	for _, connection := range connStore.connMap{
+		connectionList = append(connectionList, connection)
+	}
+
+	return connectionList
 }
 
 type MessageHandler struct {

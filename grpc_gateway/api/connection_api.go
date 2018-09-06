@@ -52,3 +52,7 @@ func (c ConnectionApi) CloseConnection(connectionID string) error {
 
 	return nil
 }
+
+func (c ConnectionApi) GetAllConnections() ([]grpc_gateway.Connection, error){
+	return c.grpcService.GetAllConnections()
+}
