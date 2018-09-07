@@ -16,7 +16,7 @@ func TestDefaultValidator_BuildAndValidateSeal(t *testing.T) {
 	TimeStamp := time.Now().Round(0)
 	PrevSeal := []byte("PrevSeal")
 	TxSeal := make([][]byte, 0)
-	Creator := []byte("Creator")
+	Creator := "Creator"
 
 	//when
 

@@ -128,13 +128,13 @@ func (t *DefaultValidator) ValidateTransaction(txSeal [][]byte, transaction Tran
 
 // BuildSeal 함수는 block 객체를 받아서 Seal 값을 만들고, Seal 값을 반환한다.
 // 인풋 파라미터의 block에 자동으로 할당해주지는 않는다.
-func (t *DefaultValidator) BuildSeal(timeStamp time.Time, prevSeal []byte, txSeal [][]byte, creator []byte) ([]byte, error) {
+func (t *DefaultValidator) BuildSeal(timeStamp time.Time, prevSeal []byte, txSeal [][]byte, creator string) ([]byte, error) {
 	timestamp, err := timeStamp.MarshalText()
 	if err != nil {
 		return nil, err
 	}
 
-	if prevSeal == nil || txSeal == nil || creator == nil {
+	if prevSeal == nil || txSeal == nil || creator == "" {
 		return nil, ErrInsufficientFields
 	}
 	var rootHash []byte
