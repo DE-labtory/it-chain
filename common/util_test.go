@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package common
+package common_test
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -24,6 +25,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/it-chain/engine/common"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -39,7 +42,7 @@ func TestCreateDirIfMissing(t *testing.T) {
 
 	dirPath := "./test_path"
 
-	CreateDirIfMissing(dirPath)
+	common.CreateDirIfMissing(dirPath)
 	assert.DirExists(t, dirPath)
 
 	//clean up
@@ -52,7 +55,7 @@ func TestDirEmpty(t *testing.T) {
 
 	os.MkdirAll(path.Dir(dirPath), 0755)
 
-	isExist, err := DirEmpty(dirPath)
+	isExist, err := common.DirEmpty(dirPath)
 
 	if err != nil {
 		//error
@@ -67,11 +70,11 @@ func TestDirEmpty(t *testing.T) {
 func TestSerialize(t *testing.T) {
 	testStruct := &TestStruct{MemberString: "test"}
 
-	serialized, err := Serialize(testStruct)
+	serialized, err := common.Serialize(testStruct)
 	assert.NoError(t, err)
 
 	data := &TestStruct{}
-	err = Deserialize(serialized, data)
+	err = common.Deserialize(serialized, data)
 	assert.NoError(t, err)
 	assert.Equal(t, testStruct, data)
 }
@@ -81,7 +84,7 @@ func TestRelativeToAbsolutePath(t *testing.T) {
 	testfile1 := "./util.go"
 	testabsresult1, err := filepath.Abs(testfile1)
 	assert.NoError(t, err)
-	testabs1, err := RelativeToAbsolutePath(testfile1)
+	testabs1, err := common.RelativeToAbsolutePath(testfile1)
 
 	assert.NoError(t, err)
 	assert.Equal(t, testabs1, testabsresult1)
@@ -90,7 +93,7 @@ func TestRelativeToAbsolutePath(t *testing.T) {
 	testabsresult2, err := filepath.Abs(testfile2)
 	assert.NoError(t, err)
 
-	testabs2, err := RelativeToAbsolutePath(testfile2)
+	testabs2, err := common.RelativeToAbsolutePath(testfile2)
 
 	assert.NoError(t, err)
 	assert.Equal(t, testabs2, testabsresult2)
@@ -113,7 +116,7 @@ func TestRelativeToAbsolutePath(t *testing.T) {
 
 	testfile4 := "~/test.txt"
 
-	testabs3, err := RelativeToAbsolutePath(testfile4)
+	testabs3, err := common.RelativeToAbsolutePath(testfile4)
 	assert.NoError(t, err)
 	assert.Equal(t, testfile3, testabs3)
 
@@ -121,17 +124,30 @@ func TestRelativeToAbsolutePath(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// TODO
 func TestRelativeToAbsolutePath_WhenGivenPathIsAbsolute(t *testing.T) {
+	sshPath := "/iAmRoot"
 
+	absPath, err := common.RelativeToAbsolutePath(sshPath)
+
+	assert.NoError(t, err)
+	assert.Equal(t, sshPath, absPath)
 }
 
-// TODO
 func TestRelativeToAbsolutePath_WhenGivenPathWithOnlyName(t *testing.T) {
+	sshPath := "test-dir"
 
+	absPath, err := common.RelativeToAbsolutePath(sshPath)
+	currentPath, _ := filepath.Abs(".")
+
+	assert.NoError(t, err)
+	assert.Equal(t, path.Join(currentPath, sshPath), absPath)
 }
 
-// TODO
-func TestRelativeToAbsolutePath_WhenGIvenPathIsEmpty(t *testing.T) {
+func TestRelativeToAbsolutePath_WhenGivenPathIsEmpty(t *testing.T) {
+	sshPath := ""
 
+	absPath, err := common.RelativeToAbsolutePath(sshPath)
+
+	assert.Equal(t, errors.New("given path is empty string"), err)
+	assert.Equal(t, "", absPath)
 }
