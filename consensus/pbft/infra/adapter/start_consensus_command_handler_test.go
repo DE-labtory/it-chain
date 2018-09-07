@@ -64,7 +64,7 @@ func TestStartConsensusCommandHandler_HandleStartConsensusCommand(t *testing.T) 
 }
 
 func newMockStateApi(err error) api.StateApi {
-	mockStateApi := mock.MockStateApi{}
+	mockStateApi := mock.StateApi{}
 
 	mockStateApi.StartConsensusFunc = func(proposedBlock pbft.ProposedBlock) error {
 		return err

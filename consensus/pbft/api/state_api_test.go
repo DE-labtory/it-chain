@@ -21,7 +21,6 @@ import (
 
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
-	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
 	"github.com/it-chain/engine/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
 )
@@ -282,7 +281,7 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNor
 		})
 	}
 
-	propagateService := &mock.MockPropagateService{}
+	propagateService := &mock.PropagateService{}
 	propagateService.BroadcastProposeMsgFunc = func(msg pbft.ProposeMsg, representatives []*pbft.Representative) error {
 		return nil
 	}
@@ -293,7 +292,7 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNor
 		return nil
 	}
 
-	parliamentService := &mock.MockParliamentService{}
+	parliamentService := &mock.ParliamentService{}
 	parliamentService.RequestPeerListFunc = func() ([]pbft.MemberID, error) {
 		peerList := make([]pbft.MemberID, peerNum)
 		for i := 0; i < peerNum; i++ {
@@ -311,9 +310,13 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNor
 		return "Leader", nil
 	}
 
-	eventService := adapter.NewEventService(func(topic string, data interface{}) (err error) {
+	eventService := mock.EventService{}
+	eventService.PublishFunc = func(topic string, event interface{}) error {
 		return nil
-	})
+	}
+	eventService.ConfirmBlockFunc = func(block pbft.ProposedBlock) error {
+		return nil
+	}
 
 	repo := pbft.NewStateRepository()
 	if isRepoFull && isNormalBlock {

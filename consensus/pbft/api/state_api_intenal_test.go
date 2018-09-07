@@ -188,7 +188,7 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isNormalBlock bool,
 		})
 	}
 
-	propagateService := &mock.MockPropagateService{}
+	propagateService := &mock.PropagateService{}
 	propagateService.BroadcastProposeMsgFunc = func(msg pbft.ProposeMsg, representatives []*pbft.Representative) error {
 		return nil
 	}
@@ -199,7 +199,7 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isNormalBlock bool,
 		return nil
 	}
 
-	parliamentService := &mock.MockParliamentService{}
+	parliamentService := &mock.ParliamentService{}
 	parliamentService.RequestPeerListFunc = func() ([]pbft.MemberID, error) {
 		peerList := make([]pbft.MemberID, peerNum)
 		for i := 0; i < peerNum; i++ {

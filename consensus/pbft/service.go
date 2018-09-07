@@ -26,10 +26,6 @@ type PropagateService interface {
 	BroadcastPreCommitMsg(msg PreCommitMsg, representatives []*Representative) error
 }
 
-type EventService interface {
-	ConfirmBlock(block ProposedBlock) error
-}
-
 type ParliamentService interface {
 	RequestLeader() (MemberID, error)
 	RequestPeerList() ([]MemberID, error)

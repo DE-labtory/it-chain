@@ -20,27 +20,27 @@ import (
 	"github.com/it-chain/engine/consensus/pbft"
 )
 
-type MockStateApi struct {
+type StateApi struct {
 	StartConsensusFunc     func(proposedBlock pbft.ProposedBlock) error
 	HandleProposeMsgFunc   func(msg pbft.ProposeMsg) error
 	HandlePrevoteMsgFunc   func(msg pbft.PrevoteMsg) error
 	HandlePreCommitMsgFunc func(msg pbft.PreCommitMsg) error
 }
 
-func (mca *MockStateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
+func (mca *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 	return mca.StartConsensusFunc(proposedBlock)
 }
 
-func (mca *MockStateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
+func (mca *StateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
 	return mca.HandleProposeMsgFunc(msg)
 }
 
-func (mca *MockStateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) error {
+func (mca *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) error {
 
 	return mca.HandlePrevoteMsgFunc(msg)
 }
 
-func (mca *MockStateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
+func (mca *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 
 	return mca.HandlePreCommitMsgFunc(msg)
 }
