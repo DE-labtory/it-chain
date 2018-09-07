@@ -67,7 +67,7 @@ func (cApi *StateApiImpl) StartConsensus(proposedBlock pbft.ProposedBlock) error
 	}
 
 	createdProposeMsg := pbft.NewProposeMsg(createdState, cApi.publisherID)
-	if err := cApi.propagateService.BroadcastProposeMsg(*createdProposeMsg); err != nil {
+	if err := cApi.propagateService.BroadcastProposeMsg(*createdProposeMsg, createdState.Representatives); err != nil {
 		return err
 	}
 
@@ -96,7 +96,7 @@ func (cApi *StateApiImpl) HandleProposeMsg(msg pbft.ProposeMsg) error {
 	}
 
 	prevoteMsg := pbft.NewPrevoteMsg(builtState, cApi.publisherID)
-	if err := cApi.propagateService.BroadcastPrevoteMsg(*prevoteMsg); err != nil {
+	if err := cApi.propagateService.BroadcastPrevoteMsg(*prevoteMsg, builtState.Representatives); err != nil {
 		return err
 	}
 	builtState.ToPrevoteStage()
@@ -124,7 +124,7 @@ func (cApi *StateApiImpl) HandlePrevoteMsg(msg pbft.PrevoteMsg) error {
 	}
 
 	newCommitMsg := pbft.NewPreCommitMsg(&loadedState, cApi.publisherID)
-	if err := cApi.propagateService.BroadcastPreCommitMsg(*newCommitMsg); err != nil {
+	if err := cApi.propagateService.BroadcastPreCommitMsg(*newCommitMsg, loadedState.Representatives); err != nil {
 		return err
 	}
 	loadedState.ToPreCommitStage()
