@@ -283,13 +283,13 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNor
 	}
 
 	propagateService := &mock.MockPropagateService{}
-	propagateService.BroadcastProposeMsgFunc = func(msg pbft.ProposeMsg) error {
+	propagateService.BroadcastProposeMsgFunc = func(msg pbft.ProposeMsg, representatives []*pbft.Representative) error {
 		return nil
 	}
-	propagateService.BroadcastPrevoteMsgFunc = func(msg pbft.PrevoteMsg) error {
+	propagateService.BroadcastPrevoteMsgFunc = func(msg pbft.PrevoteMsg, representatives []*pbft.Representative) error {
 		return nil
 	}
-	propagateService.BroadcastPreCommitMsgFunc = func(msg pbft.PreCommitMsg) error {
+	propagateService.BroadcastPreCommitMsgFunc = func(msg pbft.PreCommitMsg, representatives []*pbft.Representative) error {
 		return nil
 	}
 
