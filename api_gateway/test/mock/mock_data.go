@@ -11,7 +11,7 @@ import (
 func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
 	validator := &blockchain.DefaultValidator{}
 	testingTime := time.Now()
-	blockCreator := []byte("testUser")
+	blockCreator := "testUser"
 	txList := GetTxList(testingTime)
 	block := &blockchain.DefaultBlock{}
 	block.SetPrevSeal(prevSeal)
