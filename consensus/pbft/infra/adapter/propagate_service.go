@@ -30,6 +30,8 @@ var ErrEmptyBlock = errors.New("Block is empty")
 var ErrEmptyBlockHash = errors.New("Block hash is empty")
 var ErrEmptyMsg = errors.New("Message is empty")
 
+type Publish func(topic string, data interface{}) (err error)
+
 type PropagateService struct {
 	publish Publish
 }
