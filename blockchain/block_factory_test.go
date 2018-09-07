@@ -56,7 +56,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 				TxList:    make([]*blockchain.DefaultTransaction, 0),
 				TxSeal:    make([][]byte, 0),
 				Timestamp: timeStamp,
-				Creator:   []byte("junksound"),
+				Creator:   "junksound",
 				State:     blockchain.Created,
 			},
 
@@ -131,7 +131,7 @@ func TestCreateProposedBlock(t *testing.T) {
 			prevSeal []byte
 			height   uint64
 			txList   []*blockchain.DefaultTransaction
-			creator  []byte
+			creator  string
 		}
 		output blockchain.DefaultBlock
 		err    error
@@ -142,7 +142,7 @@ func TestCreateProposedBlock(t *testing.T) {
 				prevSeal []byte
 				height   uint64
 				txList   []*blockchain.DefaultTransaction
-				creator  []byte
+				creator  string
 			}{
 				prevSeal: []byte("prevseal"),
 				height:   1,
@@ -158,7 +158,7 @@ func TestCreateProposedBlock(t *testing.T) {
 						Signature: []byte("Signature"),
 					},
 				},
-				creator: []byte("junksound"),
+				creator: "junksound",
 			},
 
 			output: blockchain.DefaultBlock{
@@ -177,7 +177,7 @@ func TestCreateProposedBlock(t *testing.T) {
 					},
 				},
 				Timestamp: timeStamp,
-				Creator:   []byte("junksound"),
+				Creator:   "junksound",
 				State:     blockchain.Created,
 			},
 
@@ -190,12 +190,12 @@ func TestCreateProposedBlock(t *testing.T) {
 				prevSeal []byte
 				height   uint64
 				txList   []*blockchain.DefaultTransaction
-				creator  []byte
+				creator  string
 			}{
 				prevSeal: []byte("prevseal"),
 				height:   1,
 				txList:   nil,
-				creator:  []byte("junksound"),
+				creator:  "junksound",
 			},
 
 			output: blockchain.DefaultBlock{},
@@ -209,7 +209,7 @@ func TestCreateProposedBlock(t *testing.T) {
 				prevSeal []byte
 				height   uint64
 				txList   []*blockchain.DefaultTransaction
-				creator  []byte
+				creator  string
 			}{
 				prevSeal: nil,
 				height:   1,
@@ -225,7 +225,7 @@ func TestCreateProposedBlock(t *testing.T) {
 						Signature: []byte("Signature"),
 					},
 				},
-				creator: nil,
+				creator: "",
 			},
 
 			output: blockchain.DefaultBlock{},

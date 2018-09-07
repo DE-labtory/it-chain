@@ -34,7 +34,7 @@ type ConsensusFinished struct {
 	TxList    []Tx
 	TxSeal    [][]byte
 	Timestamp time.Time
-	Creator   []byte
+	Creator   string
 	State     string
 }
 
@@ -69,7 +69,7 @@ type BlockCommitted struct {
 	TxList    []Tx
 	TxSeal    [][]byte
 	Timestamp time.Time
-	Creator   []byte
+	Creator   string
 	State     string
 }
 
@@ -88,7 +88,7 @@ type BlockCreated struct {
 	TxList    []Tx
 	TxSeal    [][]byte
 	Timestamp time.Time
-	Creator   []byte
+	Creator   string
 	State     string
 }
 

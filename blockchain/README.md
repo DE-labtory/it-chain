@@ -39,7 +39,7 @@ yggdrasill에는 block 저장을 위한 3개의 interface(`block`, `transaction`
      TxList    []*DefaultTransaction
      TxSeal    [][]byte   
      Timestamp time.Time   
-     Creator   []byte   
+     Creator   string
      State     BlockState
  }
 ```

@@ -129,7 +129,7 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 		},
 		TxSeal:    nil,
 		Timestamp: time.Time{},
-		Creator:   nil,
+		Creator:   "",
 		State:     "",
 	}
 
@@ -199,7 +199,7 @@ func TestBlockApi_CommitGenesisBlock(t *testing.T) {
 	handler := &mock.CommitEventHandler{}
 
 	handler.HandleFunc = func(event event.BlockCommitted) {
-		assert.Equal(t, hex.EncodeToString([]byte("junksound")), hex.EncodeToString(event.Creator))
+		assert.Equal(t, hex.EncodeToString("junksound"), hex.EncodeToString(event.Creator))
 		assert.Equal(t, blockchain.Committed, event.State)
 		wg.Done()
 	}

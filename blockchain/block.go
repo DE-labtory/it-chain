@@ -46,7 +46,7 @@ type DefaultBlock struct {
 	TxList    []*DefaultTransaction
 	TxSeal    [][]byte
 	Timestamp time.Time
-	Creator   []byte
+	Creator   string
 	State     BlockState
 }
 
@@ -80,7 +80,7 @@ func (block *DefaultBlock) SetTxSeal(txSeal [][]byte) {
 	block.TxSeal = txSeal
 }
 
-func (block *DefaultBlock) SetCreator(creator []byte) {
+func (block *DefaultBlock) SetCreator(creator string) {
 	block.Creator = creator
 }
 
@@ -116,7 +116,7 @@ func (block *DefaultBlock) GetTxSeal() [][]byte {
 	return block.TxSeal
 }
 
-func (block *DefaultBlock) GetCreator() []byte {
+func (block *DefaultBlock) GetCreator() string {
 	return block.Creator
 }
 

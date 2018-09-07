@@ -205,7 +205,7 @@ func (l BlockEventListener) HandleBlockCommittedEvent(event event.BlockCommitted
 	return nil
 }
 
-func createDefaultBlock(Seal []byte, PrevSeal []byte, Height uint64, TxList []event.Tx, TxSeal [][]byte, Timestamp time.Time, Creator []byte, State string) (blockchain.DefaultBlock, error) {
+func createDefaultBlock(Seal []byte, PrevSeal []byte, Height uint64, TxList []event.Tx, TxSeal [][]byte, Timestamp time.Time, Creator string, State string) (blockchain.DefaultBlock, error) {
 	txList, err := deserializeTxListType(TxList)
 	if err != nil {
 		return blockchain.DefaultBlock{}, err

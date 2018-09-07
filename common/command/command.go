@@ -102,7 +102,7 @@ type ExecuteBlock struct {
 	TxList    []Tx
 	TxSeal    [][]byte
 	Timestamp time.Time
-	Creator   []byte
+	Creator   string
 	State     string
 }
 

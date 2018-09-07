@@ -116,7 +116,7 @@ func (api BlockApi) CreateProposedBlock(txList []*blockchain.DefaultTransaction)
 	height := lastBlock.GetHeight() + 1
 	creator := api.publisherId
 
-	block, err := blockchain.CreateProposedBlock(prevSeal, height, txList, []byte(creator))
+	block, err := blockchain.CreateProposedBlock(prevSeal, height, txList, creator)
 	if err != nil {
 		return blockchain.DefaultBlock{}, ErrCreateProposedBlock
 	}
