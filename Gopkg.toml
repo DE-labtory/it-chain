@@ -56,7 +56,7 @@ ignored = ["github.com/mock/handler"]
 
 [[constraint]]
   name = "github.com/it-chain/tesseract"
-  version = "0.2.5"
+  version = "0.3.0"
 
 [[constraint]]
   name = "github.com/it-chain/yggdrasill"
