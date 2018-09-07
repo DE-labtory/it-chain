@@ -21,9 +21,9 @@ import "errors"
 var ErrNoParliamentMember = errors.New("No parliament member.")
 
 type PropagateService interface {
-	BroadcastProposeMsg(msg ProposeMsg) error
-	BroadcastPrevoteMsg(msg PrevoteMsg) error
-	BroadcastPreCommitMsg(msg PreCommitMsg) error
+	BroadcastProposeMsg(msg ProposeMsg, representatives []*Representative) error
+	BroadcastPrevoteMsg(msg PrevoteMsg, representatives []*Representative) error
+	BroadcastPreCommitMsg(msg PreCommitMsg, representatives []*Representative) error
 }
 
 type EventService interface {
