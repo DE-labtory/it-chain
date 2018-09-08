@@ -16,7 +16,11 @@
 
 package pbft
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/it-chain/engine/p2p"
+)
 
 var ErrNoParliamentMember = errors.New("No parliament member.")
 
@@ -30,6 +34,14 @@ type ParliamentService interface {
 	RequestLeader() (MemberID, error)
 	RequestPeerList() ([]MemberID, error)
 	IsNeedConsensus() bool
+}
+
+type PeerQueryApi interface {
+	GetPLTable() (p2p.PLTable, error)
+	GetPeerList() ([]p2p.Peer, error)
+	GetLeader() (p2p.Leader, error)
+	FindPeerById(peerId p2p.PeerId) (p2p.Peer, error)
+	FindPeerByAddress(ipAddress string) (p2p.Peer, error)
 }
 
 // 연결된 peer 중에서 consensus 에 참여할 representative 들을 선출
