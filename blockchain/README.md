@@ -9,7 +9,6 @@ Blockchain Component는 **block 생성 • 저장 • 조회**, **blockchain 동
 ## Table of Contents
 
 1. [Key Concepts](#Key Concepts)
-
 2. [Block Create](#Block Create)
 3. [Block Save](#Block Save)
 4. [Block Retrieve](#Block Retrieve)
