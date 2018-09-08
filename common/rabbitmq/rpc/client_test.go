@@ -19,6 +19,7 @@ package rpc_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"sync"
 
@@ -66,6 +67,39 @@ func TestClient_Call(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+
+	wg.Wait()
+}
+
+func TestClient_InfiniteCall(t *testing.T) {
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	server := rpc.NewServer("")
+	defer server.Close()
+
+	server.Register("transaction.create", func(sample Sample) (Sample, rpc.Error) {
+		assert.Equal(t, sample.ID, "123")
+		assert.Equal(t, sample.TxData.ID, "1234")
+
+		time.Sleep(time.Second * 70)
+
+		return Sample{ID: "1234"}, rpc.Error{}
+	})
+
+	client := rpc.NewClient("")
+	defer client.Close()
+
+	err := client.Call("transaction.create", Sample{ID: "123", TxData: TxData{ID: "1234"}}, func(sample Sample, err rpc.Error) {
+
+		assert.True(t, err.IsNil())
+		assert.Equal(t, sample.ID, "1234")
+		wg.Done()
+	})
+
+	assert.Equal(t, err, rpc.ErrTimeout, "Timeout queue")
+	wg.Done()
 
 	wg.Wait()
 }
