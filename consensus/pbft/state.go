@@ -70,20 +70,6 @@ func (m MemberID) ToString() string {
 	return string(m)
 }
 
-type RepresentativeID string
-
-type Representative struct {
-	ID RepresentativeID
-}
-
-func (r Representative) GetID() string {
-	return string(r.ID)
-}
-
-func NewRepresentative(ID string) *Representative {
-	return &Representative{ID: RepresentativeID(ID)}
-}
-
 type ProposeMsg struct {
 	StateID        StateID
 	SenderID       string
