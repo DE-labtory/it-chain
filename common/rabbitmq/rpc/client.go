@@ -22,6 +22,7 @@ import (
 	"log"
 	"math/rand"
 	"reflect"
+	"time"
 
 	"github.com/it-chain/engine/common/rabbitmq"
 	"github.com/streadway/amqp"
@@ -31,8 +32,9 @@ type Client struct {
 	rabbitmq.Session
 }
 
-func NewClient(rabbitmqUrl string) *Client {
+var ErrTimeout error = errors.New("Timeout queue")
 
+func NewClient(rabbitmqUrl string) *Client {
 	return &Client{
 		Session: rabbitmq.CreateSession(rabbitmqUrl),
 	}
@@ -106,20 +108,22 @@ func (c Client) Call(queue string, params interface{}, callback interface{}) err
 		return err
 	}
 
-	for d := range msgs {
+	timeout := time.After(time.Second * 60)
 
+	select {
+	case d := <-msgs:
 		if corrId == d.CorrelationId {
-
 			err := handleResponse(d.Body, callback)
-
 			if err != nil {
 				log.Fatal(err)
 				return err
 			}
-
 			c.Ch.QueueDelete(replyQ.Name, false, false, true)
 			break
 		}
+	case <-timeout:
+		c.Ch.QueueDelete(replyQ.Name, false, false, true)
+		return ErrTimeout
 	}
 
 	return nil
