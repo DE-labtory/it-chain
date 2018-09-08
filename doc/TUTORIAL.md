@@ -58,11 +58,21 @@ Sample icode url:  https://github.com/junbeomlee/learn-icode
 
 2. Add deploy key
 
+   > #### How to generate key?
+   >
+   > In terminal or cmd, type `ssh-keygen -t rsa`
+   >
+   > Then you can see `.ssh` directory on the path where you typed keygen command
+   >
+   > In `.ssh`, there's `id_rsa`, `id_rsa.pub`. You need to add Deploy keys to github using `id_rsa.pub`
+
    ![[tutorial]sshkey](./images/[tutorial]sshkey.png)
 
 3. Deploy learn-icode
 
    - `it-chain ivm deploy [learn-icode-url] [ssh-private-key-path]`
+
+     `deploy` command clone from target repsoitory, and create docker container with that code 
 
      ![[tutorial]deploy](./images/[tutorial]deploy.png)
 
