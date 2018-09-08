@@ -16,9 +16,7 @@
 
 package ivm
 
-type Version struct {
-}
-
+type Version = string
 type ID = string
 type MetaStatus = int
 
@@ -31,7 +29,7 @@ type ICode struct {
 	Version        Version
 }
 
-func NewICode(id string, repositoryName string, gitUrl string, path string, commitHash string) ICode {
+func NewICode(id string, repositoryName string, gitUrl string, path string, commitHash string, version string) ICode {
 
 	return ICode{
 		ID:             id,
@@ -39,5 +37,6 @@ func NewICode(id string, repositoryName string, gitUrl string, path string, comm
 		Path:           path,
 		GitUrl:         gitUrl,
 		RepositoryName: repositoryName,
+		Version:		version,
 	}
 }
