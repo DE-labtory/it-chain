@@ -75,7 +75,7 @@ func GetStagedBlockWithId(blockId string) blockchain.DefaultBlock {
 		TxList:    GetTxList(testingTime),
 		TxSeal:    [][]byte{{0x1}},
 		Timestamp: testingTime,
-		Creator:   []byte("creator01"),
+		Creator:   "creator01",
 		State:     blockchain.Staged,
 	}
 }
@@ -83,7 +83,7 @@ func GetStagedBlockWithId(blockId string) blockchain.DefaultBlock {
 func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
 	validator := &blockchain.DefaultValidator{}
 	testingTime := time.Now()
-	blockCreator := []byte("testUser")
+	blockCreator := "testUser"
 	txList := GetTxList(testingTime)
 	block := &blockchain.DefaultBlock{}
 	block.SetPrevSeal(prevSeal)

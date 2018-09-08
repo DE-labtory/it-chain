@@ -86,7 +86,7 @@ func setBlockWithConfig(filePath string, block *DefaultBlock) error {
 	block.SetHeight(uint64(GenesisConfig.Height))
 	block.SetTxSeal(make([][]byte, 0))
 	block.SetTimestamp(timeStamp)
-	block.SetCreator([]byte(GenesisConfig.Creator))
+	block.SetCreator(GenesisConfig.Creator)
 	block.SetState(Created)
 
 	return nil
@@ -100,7 +100,7 @@ type GenesisConfig struct {
 	Creator      string
 }
 
-func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransaction, Creator []byte) (DefaultBlock, error) {
+func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransaction, Creator string) (DefaultBlock, error) {
 
 	//declare
 	ProposedBlock := &DefaultBlock{}

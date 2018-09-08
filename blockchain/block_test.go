@@ -12,7 +12,7 @@ import (
 func TestDefaultBlock_BasicFunctions(t *testing.T) {
 
 	//given
-	Creator := []byte("junksound")
+	Creator := "junksound"
 	TimeStamp := time.Now().Round(0)
 	State := blockchain.Created
 
