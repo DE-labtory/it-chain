@@ -212,55 +212,6 @@
   version = "v0.1.4"
 
 [[projects]]
-  branch = "develop"
-  digest = "1:5b5b5840a8c55381a65c81d1c9c2de9716e2657d957ca3cbfba12920884233d8"
-  name = "github.com/it-chain/engine"
-  packages = [
-    "api_gateway",
-    "api_gateway/test/mock",
-    "blockchain",
-    "blockchain/api",
-    "blockchain/infra/adapter",
-    "blockchain/infra/mem",
-    "blockchain/test/mock",
-    "cmd/ivm",
-    "common",
-    "common/command",
-    "common/event",
-    "common/logger",
-    "common/rabbitmq",
-    "common/rabbitmq/pubsub",
-    "common/rabbitmq/rpc",
-    "common/test/mock",
-    "conf",
-    "conf/model",
-    "consensus/pbft",
-    "consensus/pbft/api",
-    "consensus/pbft/infra/adapter",
-    "consensus/pbft/test/mock",
-    "grpc_gateway",
-    "grpc_gateway/infra",
-    "ivm",
-    "ivm/api",
-    "ivm/infra/adapter",
-    "ivm/infra/git",
-    "ivm/infra/tesseract",
-    "p2p",
-    "p2p/api",
-    "p2p/infra/adapter",
-    "p2p/infra/mem",
-    "p2p/test",
-    "p2p/test/mock",
-    "txpool",
-    "txpool/api",
-    "txpool/infra/adapter",
-    "txpool/infra/batch",
-    "txpool/infra/mem",
-  ]
-  pruneopts = "UT"
-  revision = "af4d37e1fcd97c232c72b84059034847c8066504"
-
-[[projects]]
   digest = "1:0bcb0e788ad02f6ee289a8ca5e21bdc29de60910fd3460bccbc6498f37bc3743"
   name = "github.com/it-chain/heimdall"
   packages = [
@@ -318,15 +269,15 @@
   version = "v0.3.0"
 
 [[projects]]
-  digest = "1:a642a0b58acad41f13a508af7b641fca6678f0fee3242e44dce8ae0734289c36"
+  digest = "1:92a0759cdad65d0ede663774eb9a25c2397c849c618e4f28e3fba09670ccd69e"
   name = "github.com/it-chain/yggdrasill"
   packages = [
     ".",
     "common",
   ]
   pruneopts = "UT"
-  revision = "0f07bf6f14a5f5cdc2a334b42cb170bb92d3dd87"
-  version = "0.1.0"
+  revision = "c51efa6f8546056d2dbbf41b46e33aeb21807ed1"
+  version = "0.1.1"
 
 [[projects]]
   digest = "1:fa3a7dc0a780fb19838fb96d4e18c0b9a019d9bb618798308d7b6ca48fcb9876"
@@ -471,15 +422,15 @@
   version = "v1.0.6"
 
 [[projects]]
-  digest = "1:bd1ae00087d17c5a748660b8e89e1043e1e5479d0fea743352cda2f8dd8c4f84"
+  digest = "1:6a4a11ba764a56d2758899ec6f3848d24698d48442ebce85ee7a3f63284526cd"
   name = "github.com/spf13/afero"
   packages = [
     ".",
     "mem",
   ]
   pruneopts = "UT"
-  revision = "787d034dfe70e44075ccc060d346146ef53270ad"
-  version = "v1.1.1"
+  revision = "d40851caa0d747393da1ffb28f7f9d8b4eeffebd"
+  version = "v1.1.2"
 
 [[projects]]
   digest = "1:516e71bed754268937f57d4ecb190e01958452336fa73dbac880894164e91c1f"
@@ -490,12 +441,12 @@
   version = "v1.2.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:8a020f916b23ff574845789daee6818daf8d25a4852419aae3f0b12378ba432a"
+  digest = "1:68ea4e23713989dc20b1bded5d9da2c5f9be14ff9885beef481848edd18c26cb"
   name = "github.com/spf13/jwalterweatherman"
   packages = ["."]
   pruneopts = "UT"
-  revision = "14d3d4c518341bea657dd8a226f5121c0ff8c9f2"
+  revision = "4a4406e478ca629068e7768fc33f3f044173c0a6"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:dab83a1bbc7ad3d7a6ba1a1cc1760f25ac38cdf7d96a5cdd55cd915a4f5ceaf9"
@@ -506,12 +457,12 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:4fc8a61287ccfb4286e1ca5ad2ce3b0b301d746053bf44ac38cf34e40ae10372"
+  digest = "1:6e30a27eac59a148b3f7a32e0ba54706b31dcde5a42f63b22cb47873b62fa343"
   name = "github.com/spf13/viper"
   packages = ["."]
   pruneopts = "UT"
-  revision = "907c19d40d9a6c9bb55f040ff4ae45271a4754b9"
-  version = "v1.1.0"
+  revision = "8fb642006536c8d3760c99d4fa2389f5e2205631"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:3681df693b35e7df9937dbd54b9f179aee5b54f4a28f72ad191e87038e6ffcab"
@@ -626,14 +577,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:eb687625ffed87cbfa4d219ddb6c344bd9d0dc5900e461b86269373470534bae"
+  digest = "1:0ed1788dc3845fa86e9ade2183538e920adf76fb9f8760e69236fa2cb0d7c9d9"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "8cf3aee429924738c56c34bb819c4ea8273fc434"
+  revision = "917fdcba135dcbaccd57425db91723541b4427c8"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -794,46 +745,6 @@
     "github.com/it-chain/bifrost",
     "github.com/it-chain/bifrost/client",
     "github.com/it-chain/bifrost/server",
-    "github.com/it-chain/engine/api_gateway",
-    "github.com/it-chain/engine/api_gateway/test/mock",
-    "github.com/it-chain/engine/blockchain",
-    "github.com/it-chain/engine/blockchain/api",
-    "github.com/it-chain/engine/blockchain/infra/adapter",
-    "github.com/it-chain/engine/blockchain/infra/mem",
-    "github.com/it-chain/engine/blockchain/test/mock",
-    "github.com/it-chain/engine/cmd/ivm",
-    "github.com/it-chain/engine/common",
-    "github.com/it-chain/engine/common/command",
-    "github.com/it-chain/engine/common/event",
-    "github.com/it-chain/engine/common/logger",
-    "github.com/it-chain/engine/common/rabbitmq",
-    "github.com/it-chain/engine/common/rabbitmq/pubsub",
-    "github.com/it-chain/engine/common/rabbitmq/rpc",
-    "github.com/it-chain/engine/common/test/mock",
-    "github.com/it-chain/engine/conf",
-    "github.com/it-chain/engine/conf/model",
-    "github.com/it-chain/engine/consensus/pbft",
-    "github.com/it-chain/engine/consensus/pbft/api",
-    "github.com/it-chain/engine/consensus/pbft/infra/adapter",
-    "github.com/it-chain/engine/consensus/pbft/test/mock",
-    "github.com/it-chain/engine/grpc_gateway",
-    "github.com/it-chain/engine/grpc_gateway/infra",
-    "github.com/it-chain/engine/ivm",
-    "github.com/it-chain/engine/ivm/api",
-    "github.com/it-chain/engine/ivm/infra/adapter",
-    "github.com/it-chain/engine/ivm/infra/git",
-    "github.com/it-chain/engine/ivm/infra/tesseract",
-    "github.com/it-chain/engine/p2p",
-    "github.com/it-chain/engine/p2p/api",
-    "github.com/it-chain/engine/p2p/infra/adapter",
-    "github.com/it-chain/engine/p2p/infra/mem",
-    "github.com/it-chain/engine/p2p/test",
-    "github.com/it-chain/engine/p2p/test/mock",
-    "github.com/it-chain/engine/txpool",
-    "github.com/it-chain/engine/txpool/api",
-    "github.com/it-chain/engine/txpool/infra/adapter",
-    "github.com/it-chain/engine/txpool/infra/batch",
-    "github.com/it-chain/engine/txpool/infra/mem",
     "github.com/it-chain/heimdall/key",
     "github.com/it-chain/leveldb-wrapper",
     "github.com/it-chain/midgard",

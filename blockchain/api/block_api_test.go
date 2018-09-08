@@ -19,7 +19,6 @@ package api_test
 import (
 	"testing"
 
-	"encoding/hex"
 	"io/ioutil"
 	"os"
 	"sync"
@@ -203,7 +202,7 @@ func TestBlockApi_CommitGenesisBlock(t *testing.T) {
 	handler := &mock.CommitEventHandler{}
 
 	handler.HandleFunc = func(event event.BlockCommitted) {
-		assert.Equal(t, hex.EncodeToString("junksound"), hex.EncodeToString(event.Creator))
+		assert.Equal(t, "junksound", event.Creator)
 		assert.Equal(t, blockchain.Committed, event.State)
 		wg.Done()
 	}
@@ -215,7 +214,7 @@ func TestBlockApi_CommitGenesisBlock(t *testing.T) {
 	blockRepo := mock.BlockRepository{}
 
 	blockRepo.SaveFunc = func(block blockchain.DefaultBlock) error {
-		assert.Equal(t, hex.EncodeToString([]byte("junksound")), hex.EncodeToString(block.GetCreator()))
+		assert.Equal(t, "junksound", block.GetCreator())
 		return nil
 	}
 

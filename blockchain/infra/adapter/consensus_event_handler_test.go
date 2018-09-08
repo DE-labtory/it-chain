@@ -44,14 +44,14 @@ func TestConsensusEventHandler_HandleConsensusFinishedEvent(t *testing.T) {
 		TxList: []event2.Tx{event2.Tx{
 			ID: "1",
 		}},
-		Creator: []byte{},
+		Creator: "",
 	}
 
 	event2 := event2.ConsensusFinished{
 		PrevSeal: []byte{},
 		Height:   12,
 		TxList:   []event2.Tx{},
-		Creator:  []byte{},
+		Creator:  "",
 	}
 
 	consensusEventHandler := SetConsensusEventHandler(&blockchain.BlockSyncState{Id: "1", IsProgress: true})

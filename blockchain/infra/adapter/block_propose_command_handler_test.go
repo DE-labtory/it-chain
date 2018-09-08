@@ -170,7 +170,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_OneTransac
 		t.Log("consensus service")
 		assert.Equal(t, uint64(1), block.GetHeight())
 		assert.Equal(t, prevBlock.GetSeal(), block.GetPrevSeal())
-		assert.Equal(t, []byte("iAmPublisher"), block.Creator)
+		assert.Equal(t, "iAmPublisher", block.Creator)
 		assert.Equal(t, 1, len(block.GetTxList()))
 		wg.Done()
 		return nil
@@ -227,7 +227,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_TwoTransac
 		t.Log("consensus service")
 		assert.Equal(t, uint64(1), block.GetHeight())
 		assert.Equal(t, prevBlock.GetSeal(), block.GetPrevSeal())
-		assert.Equal(t, []byte("iAmPublisher"), block.Creator)
+		assert.Equal(t, "iAmPublisher", block.Creator)
 		assert.Equal(t, 2, len(block.GetTxList()))
 		wg.Done()
 		return nil
