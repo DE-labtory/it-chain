@@ -25,9 +25,20 @@ import (
 var ErrNoParliamentMember = errors.New("No parliament member.")
 
 type PropagateService interface {
+<<<<<<< HEAD
 	BroadcastProposeMsg(msg ProposeMsg, representatives []*Representative) error
 	BroadcastPrevoteMsg(msg PrevoteMsg, representatives []*Representative) error
 	BroadcastPreCommitMsg(msg PreCommitMsg, representatives []*Representative) error
+=======
+	BroadcastPrePrepareMsg(msg PrePrepareMsg) error
+	BroadcastPrepareMsg(msg PrepareMsg) error
+	BroadcastCommitMsg(msg CommitMsg) error
+}
+
+type EventService interface {
+	ConfirmBlock(block ProposedBlock) error
+	Publish(topic string, event interface{}) error
+>>>>>>> implement declare leader in parliament
 }
 
 type ParliamentService interface {

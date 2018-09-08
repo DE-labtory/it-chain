@@ -19,24 +19,39 @@ package pbft
 import (
 	"sync"
 
-	"github.com/it-chain/engine/p2p"
 )
 
 type Parliament struct {
-	Leader              p2p.Leader
+	Leader              Leader
 	RepresentativeTable map[string]*Representative
 	peerQueryApi        PeerQueryApi
+	eventService        EventService
 	mux                 sync.Mutex
 }
 
-type Representative struct {
-	ID RepresentativeID
+type Leader struct {
+	LeaderId LeaderId
 }
 
-type RepresentativeID string
+type LeaderId struct {
+	Id string
+}
 
-func NewRepresentative(ID string) *Representative {
-	return &Representative{ID: RepresentativeID(ID)}
+func (l LeaderId) ToString() string {
+	return string(l.Id)
+}
+
+func (l Leader) GetID() string {
+	return l.LeaderId.ToString()
+}
+
+
+type Representative struct {
+	ID string
+}
+
+func NewRepresentative(id string) *Representative {
+	return &Representative{ID: id}
 }
 
 func (r Representative) GetID() string {
@@ -55,7 +70,7 @@ func (p *Parliament) RefreshRepresentatives() error {
 	for id, peer := range pLTable.PeerTable {
 
 		p.RepresentativeTable[id] = &Representative{
-			ID: RepresentativeID(peer.PeerId.Id),
+			ID: peer.PeerId.Id,
 		}
 	}
 
@@ -64,4 +79,18 @@ func (p *Parliament) RefreshRepresentatives() error {
 	}
 
 	return nil
+}
+
+// declare leader
+func(p *Parliament) DeclareLeader(representative Representative){
+	p.mux.Lock()
+	defer p.mux.Unlock()
+
+	p.Leader = Leader{
+		LeaderId:LeaderId{
+			Id:representative.ID,
+		},
+	}
+
+	p.eventService.Publish("leader.updated", p.Leader)
 }
