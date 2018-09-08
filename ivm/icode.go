@@ -37,6 +37,6 @@ func NewICode(id string, repositoryName string, gitUrl string, path string, comm
 		Path:           path,
 		GitUrl:         gitUrl,
 		RepositoryName: repositoryName,
-		Version:		version,
+		Version:        version,
 	}
 }
