@@ -49,7 +49,7 @@ func TestLevelDbMetaRepository_Save(t *testing.T) {
 				GitUrl:         "url",
 				Path:           "path",
 				CommitHash:     "hash",
-				Version:        ivm.Version{},
+				Version:        "version",
 			},
 			Output: nil,
 		},

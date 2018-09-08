@@ -48,7 +48,7 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 		"success": {
 			ID:          "1",
 			InputGitURL: "github.com/junbeomlee/test_icode",
-			OutputMeta:  ivm.ICode{RepositoryName: "test_icode", GitUrl: "github.com/junbeomlee/test_icode", Path: baseTempPath + "/" + "test_icode"},
+			OutputMeta:  ivm.ICode{RepositoryName: "test_icode", GitUrl: "github.com/junbeomlee/test_icode", Path: baseTempPath + "/" + "test_icode", Version: "1.0"},
 			OutputErr:   nil,
 		},
 		"fail": {
@@ -99,7 +99,7 @@ func TestICodeGitStoreApi_CloneWithPassword(t *testing.T) {
 			ID:          "1",
 			InputGitURL: "github.com/nesticat/test_icode",
 			InputPwd:    "pwdtest",
-			OutputMeta:  ivm.ICode{RepositoryName: "test_icode", GitUrl: "github.com/nesticat/test_icode", Path: baseTempPath + "/" + "test_icode"},
+			OutputMeta:  ivm.ICode{RepositoryName: "test_icode", GitUrl: "github.com/nesticat/test_icode", Path: baseTempPath + "/" + "test_icode", Version: "1.0"},
 			OutputErr:   nil,
 		},
 		"fail": {

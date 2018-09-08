@@ -32,8 +32,9 @@ import (
 var ErrUnsupportedUrl = errors.New("unsupported url [format: github.com/xxx/yyyy], currently only github url is supported")
 
 const (
-	github = "github.com"
-	gitlab = "gitlab.com"
+	github         = "github.com"
+	gitlab         = "gitlab.com"
+	defaultVersion = "1.0"
 )
 
 type RepositoryService struct {
@@ -88,14 +89,18 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 	}
 
 	lastHeadCommit, err := r.CommitObject(head.Hash())
-	commitHash := lastHeadCommit.Hash.String()
-
 	if err != nil {
 		return ivm.ICode{}, err
 	}
 
-	version := "1.0"
+	commitHash := lastHeadCommit.Hash.String()
+
+	version := defaultVersion
 	tags, err := r.Tags()
+	if err != nil {
+		return ivm.ICode{}, err
+	}
+
 	tags.ForEach(func(tag *plumbing.Reference) error {
 		if strings.Compare(tag.Hash().String(), head.Hash().String()) == 0 {
 			s := strings.Split(tag.Name().String(), "/")
