@@ -25,6 +25,7 @@ import (
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/ivm"
 	"gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
@@ -93,9 +94,19 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 		return ivm.ICode{}, err
 	}
 
-	logger.Info(nil, fmt.Sprintf("[IVM] ICode has successfully cloned - url: [%s], icodeID: [%s]", repositoryUrl, id))
+	version := "1.0"
+	tags, err := r.Tags()
+	tags.ForEach(func(tag *plumbing.Reference) error {
+		if strings.Compare(tag.Hash().String(), head.Hash().String()) == 0 {
+			s := strings.Split(tag.Name().String(), "/")
+			version = s[len(s)-1]
+		}
+		return nil
+	})
 
-	metaData := ivm.NewICode(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash)
+	logger.Info(nil, fmt.Sprintf("[IVM] ICode has successfully cloned - url: [%s], icodeID: [%s], version[%s]", repositoryUrl, id, version))
+
+	metaData := ivm.NewICode(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash, version)
 	return metaData, nil
 }
 

@@ -49,7 +49,7 @@ type ICodeCreated struct {
 	GitUrl         string
 	Path           string
 	CommitHash     string
-	Version        struct{}
+	Version        string
 }
 
 // ivm meta deleted
