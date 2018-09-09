@@ -28,7 +28,7 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
-var ErrUnsupportedUrl = errors.New("unsupported url [format: github.com/xxx/yyyy], currently only github url is supported")
+var ErrUnsupportedUrl = errors.New("unsupported url [format: github.com/xxx/yyyy], currently github and gitlab url is supported")
 
 const (
 	github = "github.com"
@@ -45,12 +45,12 @@ func NewRepositoryService() *RepositoryService {
 func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string, password string) (ivm.ICode, error) {
 	logger.Info(nil, fmt.Sprintf("[IVM] Cloning Icode - url: [%s]", repositoryUrl))
 
-	giturl, err := toSshUrl(repositoryUrl)
+	gitUrl, err := toGitUrl(repositoryUrl, sshPath)
 	if err != nil {
 		return ivm.ICode{}, err
 	}
 
-	name := getNameFromGitUrl(giturl)
+	name := getNameFromGitUrl(gitUrl)
 
 	if name == "" {
 		return ivm.ICode{}, errors.New(fmt.Sprintf("Invalid url name [%s]", repositoryUrl))
@@ -65,16 +65,21 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 		}
 	}
 
-	sshAuth, err := ssh.NewPublicKeysFromFile("git", sshPath, password)
-	if err != nil {
-		return ivm.ICode{}, err
+	cloneOptions := &git.CloneOptions{
+		URL:               gitUrl,
+		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 	}
 
-	r, err := git.PlainClone(baseSavePath+"/"+name, false, &git.CloneOptions{
-		URL:               giturl,
-		Auth:              sshAuth,
-		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
-	})
+	if sshPath != "" {
+		sshAuth, err := ssh.NewPublicKeysFromFile("git", sshPath, password)
+		if err != nil {
+			return ivm.ICode{}, err
+		}
+
+		cloneOptions.Auth = sshAuth
+	}
+
+	r, err := git.PlainClone(baseSavePath+"/"+name, false, cloneOptions)
 
 	if err != nil {
 		return ivm.ICode{}, err
@@ -99,16 +104,28 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 	return metaData, nil
 }
 
-// transfer github.com/it-chain/engine to // git@github.com:it-chain/engine.git
-func toSshUrl(repositoryUrl string) (string, error) {
-	prefix := "git@"
-	postfix := ".git"
+// transfer github.com/it-chain/engine to
+// is ssh (git@github.com:it-chain/engine.git) or is not ssh (https://github.com/it-chain/engine.git)
+func toGitUrl(repositoryUrl string, sshAuth string) (string, error) {
+	const postfix = ".git"
 
+	var gitUrlsort string
 	if strings.HasPrefix(repositoryUrl, github) {
-		return prefix + github + ":" + after(repositoryUrl, github+"/") + postfix, nil
+		gitUrlsort = github
+	} else if strings.HasPrefix(repositoryUrl, gitlab) {
+		gitUrlsort = gitlab
+	} else {
+		return "", ErrUnsupportedUrl
 	}
 
-	return "", ErrUnsupportedUrl
+	var prefix string
+	if sshAuth != "" {
+		prefix = "git@" + gitUrlsort + ":"
+	} else {
+		prefix = "https://" + gitUrlsort + "/"
+	}
+
+	return prefix + after(repositoryUrl, gitUrlsort+"/") + postfix, nil
 }
 
 func after(value string, a string) string {

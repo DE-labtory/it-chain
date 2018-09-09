@@ -21,7 +21,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"math/big"
@@ -116,7 +115,7 @@ func CryptoRandomGeneration(min int64, max int64) int64 {
 // TODO: Refactoring
 func RelativeToAbsolutePath(rpath string) (string, error) {
 	if rpath == "" {
-		return rpath, errors.New("given path is empty string")
+		return rpath, nil
 	}
 
 	absolutePath := ""
