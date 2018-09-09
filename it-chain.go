@@ -185,13 +185,16 @@ func initApiGateway(config *conf.Configuration, errs chan error) func() {
 		panic(err)
 	}
 
-	mux.Handle("/blocks", api_gateway.BlockchainApiHandler(blockQueryApi, httpLogger))
-	mux.Handle("/icodes", api_gateway.ICodeApiHandler(icodeQueryApi, httpLogger))
+	var h http.Handler
+	{
+		h = api_gateway.BlockchainApiHandler(blockQueryApi, icodeQueryApi, httpLogger)
+	}
+
 	http.Handle("/", mux)
 
 	go func() {
 		logger.Infof(nil, "[Main] Api-gateway is staring on port:%s", config.ApiGateway.Port)
-		errs <- http.ListenAndServe(ipAddress, nil)
+		errs <- http.ListenAndServe(ipAddress, h)
 	}()
 
 	return func() {

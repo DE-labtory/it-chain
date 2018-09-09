@@ -19,47 +19,56 @@ package api_gateway
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strconv"
 
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 )
 
-func BlockchainApiHandler(bqa BlockQueryApi, logger kitlog.Logger) http.Handler {
+var (
+	// ErrBadRouting is returned when an expected path variable is missing.
+	ErrBadRouting    = errors.New("inconsistent mapping between route and handler.")
+	ErrBadConversion = errors.New("Conversion failed: invalid argument in url endpoint.")
+)
 
-	opts := []kithttp.ServerOption{
-		kithttp.ServerErrorLogger(logger),
-	}
-
-	findAllCommittedBlocksHandler := kithttp.NewServer(
-		makeFindCommittedBlocksEndpoint(bqa),
-		decodeFindAllCommittedBlocksRequest,
-		encodeResponse,
-		opts...,
-	)
-
+func BlockchainApiHandler(bqa BlockQueryApi, iqa ICodeQueryApi, logger kitlog.Logger) http.Handler {
 	r := mux.NewRouter()
 
-	r.Handle("/blocks", findAllCommittedBlocksHandler).Methods("GET")
+	be := MakeBlockchainEndpoints(bqa)
+	ie := MakeIvmEndpoints(iqa)
 
-	return r
-}
-
-func ICodeApiHandler(api ICodeQueryApi, logger kitlog.Logger) http.Handler {
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorLogger(logger),
 	}
 
-	findAllMetasHandler := kithttp.NewServer(
-		makeFindAllMetaEndpoint(api),
+	// GET     /blocks/				retrieves all blocks committed
+	// GET     /blocks/:seal		retrieves a particular block committed
+	// GET     /blocks/:height		retrieves a particular block committed
+	// GET     /icodes				about icodes
+
+	r.Methods("GET").Path("/blocks").Handler(kithttp.NewServer(
+		be.FindAllCommittedBlocksEndpoint,
+		decodeFindAllUncommittedTransactionsRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Methods("GET").Path("/blocks/height/{id}").Handler(kithttp.NewServer(
+		be.FindCommittedBlockByHeightEndpoint,
+		decodeFindCommittedBlockByHeightRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Methods("GET").Path("/icodes").Handler(kithttp.NewServer(
+		ie.FindAllMetaEndpoint,
 		decodeFindAllMetaRequest,
 		encodeResponse,
 		opts...,
-	)
-	r := mux.NewRouter()
-
-	r.Handle("/icodes", findAllMetasHandler).Methods("GET")
+	))
 
 	return r
 }
@@ -75,6 +84,23 @@ func decodeFindAllCommittedBlocksRequest(_ context.Context, r *http.Request) (in
 
 func decodeFindAllMetaRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	return nil, nil
+}
+
+func decodeFindCommittedBlockByHeightRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	heightStr, ok := vars["id"]
+
+	if !ok {
+		return nil, ErrBadRouting
+	}
+
+	height, err := strconv.ParseUint(heightStr, 10, 64)
+
+	if err != nil {
+		return nil, ErrBadConversion
+	}
+
+	return FindCommittedBlockByIdsRequest{Height: height}, nil
 }
 
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {

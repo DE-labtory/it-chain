@@ -23,13 +23,33 @@ import (
 	"github.com/it-chain/engine/common/logger"
 )
 
-//This file is based on the following sample.
-// https://github.com/marcusolsson/goddd/blob/master/booking/endpoint.go
+type Endpoints struct {
+	FindAllCommittedBlocksEndpoint     endpoint.Endpoint
+	FindCommittedBlockByHeightEndpoint endpoint.Endpoint
+	FindAllMetaEndpoint                endpoint.Endpoint
+}
+
+/*
+ * returns endpoints
+ */
+
+func MakeBlockchainEndpoints(b BlockQueryApi) Endpoints {
+	return Endpoints{
+		FindAllCommittedBlocksEndpoint:     makeFindAllCommittedBlocksEndpoint(b),
+		FindCommittedBlockByHeightEndpoint: makeFindCommittedBlockByHeightEndpoint(b),
+	}
+}
+
+func MakeIvmEndpoints(i ICodeQueryApi) Endpoints {
+	return Endpoints{
+		FindAllMetaEndpoint: makeFindAllMetaEndpoint(i),
+	}
+}
 
 /*
  * blockchain
  */
-func makeFindCommittedBlocksEndpoint(b BlockQueryApi) endpoint.Endpoint {
+func makeFindAllCommittedBlocksEndpoint(b BlockQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 
 		blocks, err := b.blockRepository.FindAllBlock()
@@ -39,6 +59,19 @@ func makeFindCommittedBlocksEndpoint(b BlockQueryApi) endpoint.Endpoint {
 		}
 
 		return blocks, nil
+	}
+}
+
+func makeFindCommittedBlockByHeightEndpoint(b BlockQueryApi) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(FindCommittedBlockByIdsRequest)
+		block, err := b.blockRepository.FindBlockByHeight(req.Height)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return block, nil
 	}
 }
 
@@ -52,4 +85,9 @@ func makeFindAllMetaEndpoint(i ICodeQueryApi) endpoint.Endpoint {
 		}
 		return metas, nil
 	}
+}
+
+type FindCommittedBlockByIdsRequest struct {
+	Height uint64
+	Seal   []byte
 }
