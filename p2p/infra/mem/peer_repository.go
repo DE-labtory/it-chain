@@ -45,6 +45,13 @@ func (pr *PeerRepository) GetPLTable() (p2p.PLTable, error) {
 	return pr.pLTable, nil
 }
 
+func (pr *PeerRepository) GetPeerTable() (map[string]p2p.Peer, error) {
+	pr.mux.Lock()
+	defer pr.mux.Unlock()
+
+	return pr.pLTable.PeerTable, nil
+}
+
 func (pr *PeerRepository) GetLeader() (p2p.Leader, error) {
 
 	return pr.pLTable.Leader, nil
