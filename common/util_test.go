@@ -17,7 +17,6 @@
 package common_test
 
 import (
-	"errors"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -148,6 +147,6 @@ func TestRelativeToAbsolutePath_WhenGivenPathIsEmpty(t *testing.T) {
 
 	absPath, err := common.RelativeToAbsolutePath(sshPath)
 
-	assert.Equal(t, errors.New("given path is empty string"), err)
+	assert.Equal(t, nil, err)
 	assert.Equal(t, "", absPath)
 }

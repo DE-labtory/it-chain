@@ -130,6 +130,51 @@ func TestICodeGitStoreApi_CloneWithPassword(t *testing.T) {
 	}
 }
 
+func TestICodeGitStoreApi_CloneWithoutSsh(t *testing.T) {
+	baseTempPath := "./.tmp"
+	os.RemoveAll(baseTempPath)
+	defer os.RemoveAll(baseTempPath)
+
+	//given
+	tests := map[string]struct {
+		ID          string
+		InputGitURL string
+		OutputMeta  ivm.ICode
+		OutputErr   error
+	}{
+		"success": {
+			ID:          "1",
+			InputGitURL: "github.com/junbeomlee/test_icode",
+			OutputMeta:  ivm.ICode{RepositoryName: "test_icode", GitUrl: "github.com/junbeomlee/test_icode", Path: baseTempPath + "/" + "test_icode", Version: "1.0"},
+			OutputErr:   nil,
+		},
+		"fail": {
+			ID:          "2",
+			InputGitURL: "github.com/nonono",
+			OutputMeta:  ivm.ICode{},
+			OutputErr:   errors.New("repository not found"),
+		},
+	}
+
+	icodeApi := git.NewRepositoryService()
+
+	for _, test := range tests {
+		//when
+		meta, err := icodeApi.Clone(test.ID, baseTempPath, test.InputGitURL, "", "")
+
+		if err == nil {
+			// ivm ID 는 랜덤이기때문에 실데이터에서 주입
+			// commit hash 는 repo 상황에따라 바뀌기 때문에 주입
+			test.OutputMeta.ID = meta.ID
+			test.OutputMeta.CommitHash = meta.CommitHash
+		}
+
+		//then
+		assert.Equal(t, test.OutputMeta, meta)
+		assert.Equal(t, test.OutputErr, err)
+	}
+}
+
 func generatePriKey(path string) (error, func() error) {
 	_, err := os.Stat(path)
 	if err == nil {
