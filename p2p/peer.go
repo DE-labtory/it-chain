@@ -65,6 +65,7 @@ func (peerId PeerId) ToString() string {
 
 type PeerRepository interface {
 	GetPLTable() (PLTable, error)
+	GetPeerTable() (map[string]Peer, error)
 	GetLeader() (Leader, error)
 	FindPeerById(peerId PeerId) (Peer, error)
 	FindPeerByAddress(ipAddress string) (Peer, error)

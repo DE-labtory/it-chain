@@ -44,6 +44,28 @@ func (pqa *PeerQueryApi) GetPLTable() (p2p.PLTable, error) {
 	return pqa.peerRepository.GetPLTable()
 }
 
+func (p *PeerQueryApi) GetPeerTable() (map[string]struct {
+	ID        string
+	IpAddress string
+}, error) {
+
+	table, _ := p.peerRepository.GetPeerTable()
+
+	extracted := make(map[string]struct {
+		ID        string
+		IpAddress string
+	})
+
+	for _, peer := range table {
+		extracted[peer.PeerId.Id] = struct {
+			ID        string
+			IpAddress string
+		}{ID: string(peer.PeerId.Id), IpAddress: peer.IpAddress}
+	}
+
+	return extracted, nil
+}
+
 func (pqa *PeerQueryApi) GetPeerList() ([]p2p.Peer, error) {
 	pTable, err := pqa.peerRepository.GetPLTable()
 
