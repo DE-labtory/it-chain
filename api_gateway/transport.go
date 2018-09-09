@@ -18,6 +18,7 @@ package api_gateway
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -63,6 +64,13 @@ func BlockchainApiHandler(bqa BlockQueryApi, iqa ICodeQueryApi, logger kitlog.Lo
 		opts...,
 	))
 
+	r.Methods("GET").Path("/blocks/seal/{seal}").Handler(kithttp.NewServer(
+		be.FindCommittedBlockBySealEndpoint,
+		decodeFindCommittedBlockBySealRequest,
+		encodeResponse,
+		opts...,
+	))
+
 	r.Methods("GET").Path("/icodes").Handler(kithttp.NewServer(
 		ie.FindAllMetaEndpoint,
 		decodeFindAllMetaRequest,
@@ -101,6 +109,25 @@ func decodeFindCommittedBlockByHeightRequest(_ context.Context, r *http.Request)
 	}
 
 	return FindCommittedBlockByIdsRequest{Height: height}, nil
+}
+
+func decodeFindCommittedBlockBySealRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	sealStr, ok := vars["seal"]
+
+	if !ok {
+		return nil, ErrBadRouting
+	}
+
+	seal, err := hex.DecodeString(sealStr)
+
+	if err != nil {
+		return nil, ErrBadRouting
+	}
+
+	seal = []byte(seal)
+
+	return FindCommittedBlockByIdsRequest{Seal: seal}, nil
 }
 
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {

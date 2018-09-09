@@ -57,10 +57,15 @@ func (q BlockQueryApi) GetCommittedBlockByHeight(height blockchain.BlockHeight) 
 	return q.blockRepository.FindBlockByHeight(height)
 }
 
+func (q BlockQueryApi) GetCommittedBlockBySeal(seal []byte) (blockchain.DefaultBlock, error) {
+	return q.blockRepository.FindBlockBySeal(seal)
+}
+
 type BlockRepository interface {
 	Save(block blockchain.DefaultBlock) error
 	FindLastBlock() (blockchain.DefaultBlock, error)
 	FindBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
+	FindBlockBySeal(seal []byte) (blockchain.DefaultBlock, error)
 	FindAllBlock() ([]blockchain.DefaultBlock, error)
 }
 
@@ -117,6 +122,20 @@ func (r *BlockRepositoryImpl) FindBlockByHeight(height uint64) (blockchain.Defau
 	block := &blockchain.DefaultBlock{}
 
 	err := r.BlockStorageManager.GetBlockByHeight(block, height)
+	if err != nil {
+		return blockchain.DefaultBlock{}, ErrGetCommittedBlock
+	}
+
+	return *block, nil
+}
+
+func (r *BlockRepositoryImpl) FindBlockBySeal(seal []byte) (blockchain.DefaultBlock, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	block := &blockchain.DefaultBlock{}
+
+	err := r.BlockStorageManager.GetBlockBySeal(block, seal)
 	if err != nil {
 		return blockchain.DefaultBlock{}, ErrGetCommittedBlock
 	}

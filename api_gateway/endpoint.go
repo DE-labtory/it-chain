@@ -26,6 +26,7 @@ import (
 type Endpoints struct {
 	FindAllCommittedBlocksEndpoint     endpoint.Endpoint
 	FindCommittedBlockByHeightEndpoint endpoint.Endpoint
+	FindCommittedBlockBySealEndpoint   endpoint.Endpoint
 	FindAllMetaEndpoint                endpoint.Endpoint
 }
 
@@ -37,6 +38,7 @@ func MakeBlockchainEndpoints(b BlockQueryApi) Endpoints {
 	return Endpoints{
 		FindAllCommittedBlocksEndpoint:     makeFindAllCommittedBlocksEndpoint(b),
 		FindCommittedBlockByHeightEndpoint: makeFindCommittedBlockByHeightEndpoint(b),
+		FindCommittedBlockBySealEndpoint:   makeFindCommittedBlockBySealEndpoint(b),
 	}
 }
 
@@ -59,6 +61,19 @@ func makeFindAllCommittedBlocksEndpoint(b BlockQueryApi) endpoint.Endpoint {
 		}
 
 		return blocks, nil
+	}
+}
+
+func makeFindCommittedBlockBySealEndpoint(b BlockQueryApi) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(FindCommittedBlockByIdsRequest)
+		block, err := b.blockRepository.FindBlockBySeal(req.Seal)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return block, nil
 	}
 }
 
