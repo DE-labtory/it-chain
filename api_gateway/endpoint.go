@@ -24,10 +24,9 @@ import (
 )
 
 type Endpoints struct {
-	FindAllCommittedBlocksEndpoint     endpoint.Endpoint
-	FindCommittedBlockByHeightEndpoint endpoint.Endpoint
-	FindCommittedBlockBySealEndpoint   endpoint.Endpoint
-	FindAllMetaEndpoint                endpoint.Endpoint
+	FindAllCommittedBlocksEndpoint   endpoint.Endpoint
+	FindCommittedBlockBySealEndpoint endpoint.Endpoint
+	FindAllMetaEndpoint              endpoint.Endpoint
 }
 
 /*
@@ -36,9 +35,8 @@ type Endpoints struct {
 
 func MakeBlockchainEndpoints(b BlockQueryApi) Endpoints {
 	return Endpoints{
-		FindAllCommittedBlocksEndpoint:     makeFindAllCommittedBlocksEndpoint(b),
-		FindCommittedBlockByHeightEndpoint: makeFindCommittedBlockByHeightEndpoint(b),
-		FindCommittedBlockBySealEndpoint:   makeFindCommittedBlockBySealEndpoint(b),
+		FindAllCommittedBlocksEndpoint:   makeFindAllCommittedBlocksEndpoint(b),
+		FindCommittedBlockBySealEndpoint: makeFindCommittedBlockBySealEndpoint(b),
 	}
 }
 
@@ -53,39 +51,31 @@ func MakeIvmEndpoints(i ICodeQueryApi) Endpoints {
  */
 func makeFindAllCommittedBlocksEndpoint(b BlockQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-
-		blocks, err := b.blockRepository.FindAllBlock()
-
-		if err != nil {
-			return nil, err
+		if request == nil {
+			blocks, err := b.blockRepository.FindAllBlock()
+			if err != nil {
+				return nil, err
+			}
+			return blocks, nil
+			// when request is not nil, it means endponint takes attribute(params) as a request
+		} else {
+			req := request.(FindCommittedBlockByHeightRequest)
+			block, err := b.blockRepository.FindBlockByHeight(req.Height)
+			if err != nil {
+				return nil, err
+			}
+			return block, nil
 		}
-
-		return blocks, nil
 	}
 }
 
 func makeFindCommittedBlockBySealEndpoint(b BlockQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(FindCommittedBlockByIdsRequest)
+		req := request.(FindCommittedBlockBySealRequest)
 		block, err := b.blockRepository.FindBlockBySeal(req.Seal)
-
 		if err != nil {
 			return nil, err
 		}
-
-		return block, nil
-	}
-}
-
-func makeFindCommittedBlockByHeightEndpoint(b BlockQueryApi) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(FindCommittedBlockByIdsRequest)
-		block, err := b.blockRepository.FindBlockByHeight(req.Height)
-
-		if err != nil {
-			return nil, err
-		}
-
 		return block, nil
 	}
 }
@@ -102,7 +92,10 @@ func makeFindAllMetaEndpoint(i ICodeQueryApi) endpoint.Endpoint {
 	}
 }
 
-type FindCommittedBlockByIdsRequest struct {
+type FindCommittedBlockByHeightRequest struct {
 	Height uint64
-	Seal   []byte
+}
+
+type FindCommittedBlockBySealRequest struct {
+	Seal []byte
 }
