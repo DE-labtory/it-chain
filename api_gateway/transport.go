@@ -35,7 +35,7 @@ var (
 	ErrBadConversion = errors.New("Conversion failed: invalid argument in url endpoint.")
 )
 
-func BlockchainApiHandler(bqa BlockQueryApi, iqa ICodeQueryApi, logger kitlog.Logger) http.Handler {
+func NewApiHandler(bqa BlockQueryApi, iqa ICodeQueryApi, logger kitlog.Logger) http.Handler {
 	r := mux.NewRouter()
 
 	be := MakeBlockchainEndpoints(bqa)
@@ -45,26 +45,19 @@ func BlockchainApiHandler(bqa BlockQueryApi, iqa ICodeQueryApi, logger kitlog.Lo
 		kithttp.ServerErrorLogger(logger),
 	}
 
-	// GET     /blocks/				retrieves all blocks committed
-	// GET     /blocks/:seal		retrieves a particular block committed
-	// GET     /blocks/:height		retrieves a particular block committed
-	// GET     /icodes				about icodes
+	// GET     /blocks/						retrieves all blocks committed
+	// GET     /blocks?height=:height		retrieves a particular block committed
+	// GET     /blocks/:seal				retrieves a particular block committed
+	// GET     /icodes						about icodes
 
 	r.Methods("GET").Path("/blocks").Handler(kithttp.NewServer(
 		be.FindAllCommittedBlocksEndpoint,
-		decodeFindAllUncommittedTransactionsRequest,
+		decodeFindAllCommittedBlocksRequest,
 		encodeResponse,
 		opts...,
 	))
 
-	r.Methods("GET").Path("/blocks/height/{id}").Handler(kithttp.NewServer(
-		be.FindCommittedBlockByHeightEndpoint,
-		decodeFindCommittedBlockByHeightRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Methods("GET").Path("/blocks/seal/{seal}").Handler(kithttp.NewServer(
+	r.Methods("GET").Path("/blocks/{id}").Handler(kithttp.NewServer(
 		be.FindCommittedBlockBySealEndpoint,
 		decodeFindCommittedBlockBySealRequest,
 		encodeResponse,
@@ -87,6 +80,14 @@ func decodeFindAllUncommittedTransactionsRequest(_ context.Context, r *http.Requ
 }
 
 func decodeFindAllCommittedBlocksRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	if heightStr := r.URL.Query().Get("height"); heightStr != "" {
+		height, err := strconv.ParseUint(heightStr, 10, 64)
+		if err != nil {
+			return nil, ErrBadConversion
+		}
+		return FindCommittedBlockByHeightRequest{Height: height}, nil
+	}
+	// length of query string is zero => means that there are no restful params
 	return nil, nil
 }
 
@@ -94,40 +95,21 @@ func decodeFindAllMetaRequest(_ context.Context, r *http.Request) (interface{}, 
 	return nil, nil
 }
 
-func decodeFindCommittedBlockByHeightRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	vars := mux.Vars(r)
-	heightStr, ok := vars["id"]
-
-	if !ok {
-		return nil, ErrBadRouting
-	}
-
-	height, err := strconv.ParseUint(heightStr, 10, 64)
-
-	if err != nil {
-		return nil, ErrBadConversion
-	}
-
-	return FindCommittedBlockByIdsRequest{Height: height}, nil
-}
-
 func decodeFindCommittedBlockBySealRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
-	sealStr, ok := vars["seal"]
-
+	sealStr, ok := vars["id"]
 	if !ok {
 		return nil, ErrBadRouting
 	}
 
 	seal, err := hex.DecodeString(sealStr)
-
 	if err != nil {
-		return nil, ErrBadRouting
+		return nil, ErrBadConversion
 	}
 
 	seal = []byte(seal)
 
-	return FindCommittedBlockByIdsRequest{Seal: seal}, nil
+	return FindCommittedBlockBySealRequest{Seal: seal}, nil
 }
 
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
