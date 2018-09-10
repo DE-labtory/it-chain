@@ -83,7 +83,7 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "config",
-			Value: "config",
+			Value: "",
 			Usage: "name for config",
 		},
 	}
@@ -92,8 +92,15 @@ func main() {
 	app.Commands = append(app.Commands, connection.Cmd())
 	app.Action = func(c *cli.Context) error {
 		PrintLogo()
-		configName := c.String("config")
-		conf.SetConfigName(configName)
+
+		if configPath := c.String("config"); configPath != "" {
+			absPath, err := common.RelativeToAbsolutePath(configPath)
+			if err != nil {
+				return err
+			}
+			conf.SetConfigPath(absPath)
+		}
+
 		return run()
 	}
 
