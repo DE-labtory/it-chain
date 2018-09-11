@@ -90,9 +90,7 @@ func main() {
 	app.Commands = []cli.Command{}
 	app.Commands = append(app.Commands, ivm.IcodeCmd())
 	app.Commands = append(app.Commands, connection.Cmd())
-	app.Action = func(c *cli.Context) error {
-		PrintLogo()
-
+	app.Before = func(c *cli.Context) error {
 		if configPath := c.String("config"); configPath != "" {
 			absPath, err := common.RelativeToAbsolutePath(configPath)
 			if err != nil {
@@ -100,6 +98,10 @@ func main() {
 			}
 			conf.SetConfigPath(absPath)
 		}
+		return nil
+	}
+	app.Action = func(c *cli.Context) error {
+		PrintLogo()
 
 		return run()
 	}
@@ -314,8 +316,10 @@ func initgRPCGateway(config *conf.Configuration, server rpc.Server) func() {
 	priKey, pubKey := gRPCGatewayInfra.LoadKeyPair(conf.GetConfiguration().Engine.KeyPath, "ECDSA256")
 	hostService := gRPCGatewayInfra.NewGrpcHostService(priKey, pubKey, publisher.Publish)
 
-	connectionApi := gRPCGatewayApi.NewConnectionApi(hostService)
+	eventService := common.NewEventService(config.Engine.Amqp, "Event")
+	connectionApi := gRPCGatewayApi.NewConnectionApi(hostService, eventService)
 	connectionCommandHandler := gRPCGatewayAdapter.NewConnectionCommandHandler(connectionApi)
+	hostService.SetHandler(connectionApi)
 
 	if err := server.Register("connection.create", connectionCommandHandler.HandleCreateConnectionCommand); err != nil {
 		panic(err)
@@ -329,7 +333,15 @@ func initgRPCGateway(config *conf.Configuration, server rpc.Server) func() {
 		panic(err)
 	}
 
-	return func() {
+	go func() {
+		hostService.Listen(config.GrpcGateway.Address + ":" + config.GrpcGateway.Port)
+	}()
 
+	return func() {
+		connections, _ := hostService.GetAllConnections()
+		for _, connection := range connections {
+			hostService.CloseConnection(connection.ConnectionId)
+		}
+		hostService.Stop()
 	}
 }

@@ -17,42 +17,81 @@
 package api
 
 import (
-	"log"
-
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/grpc_gateway"
 )
 
 type ConnectionApi struct {
-	grpcService grpc_gateway.GrpcService
+	grpcService  grpc_gateway.GrpcService
+	eventService common.EventService
 }
 
-func NewConnectionApi(grpcService grpc_gateway.GrpcService) *ConnectionApi {
+func NewConnectionApi(grpcService grpc_gateway.GrpcService, eventService common.EventService) *ConnectionApi {
 	return &ConnectionApi{
-		grpcService: grpcService,
+		grpcService:  grpcService,
+		eventService: eventService,
 	}
 }
 
 func (c ConnectionApi) CreateConnection(address string) (grpc_gateway.Connection, error) {
 
-	log.Printf("dialing [%s]", address)
+	logger.Infof(nil, "[gRPC-Gateway] Dialing - Address: [%s]", address)
 
 	connection, err := c.grpcService.Dial(address)
-
 	if err != nil {
-		log.Printf("fail to dial [%s]", err)
+		logger.Fatalf(nil, "[gRPC-Gateway] Fail to dial - Err: [%s]", err)
 		return grpc_gateway.Connection{}, err
 	}
 
-	return connection, err
+	err = c.eventService.Publish("connection.created", createConnectionCreatedEvent(connection))
+	if err != nil {
+		return connection, err
+	}
+
+	logger.Infof(nil, "[gRPC-Gateway] Connection created - Address [%s], ConnectionId [%s]", connection.Address, connection.ConnectionId)
+
+	return connection, nil
+}
+
+func createConnectionCreatedEvent(connection grpc_gateway.Connection) event.ConnectionCreated {
+	return event.ConnectionCreated{
+		Address:      connection.Address,
+		ConnectionID: connection.ConnectionId,
+	}
 }
 
 func (c ConnectionApi) CloseConnection(connectionID string) error {
+	logger.Infof(nil, "[gRPC-Gateway] Close connection - ConnectionId [%s]", connectionID)
 
 	c.grpcService.CloseConnection(connectionID)
 
-	return nil
+	return c.eventService.Publish("connection.closed", createConnectionClosedEvent(connectionID))
 }
 
-func (c ConnectionApi) GetAllConnections() ([]grpc_gateway.Connection, error){
+func createConnectionClosedEvent(connectionID string) event.ConnectionClosed {
+	return event.ConnectionClosed{
+		ConnectionId: connectionID,
+	}
+}
+
+func (c ConnectionApi) OnConnection(connection grpc_gateway.Connection) {
+	logger.Infof(nil, "[gRPC-Gateway] Connection created - Address [%s], ConnectionId [%s]", connection.Address, connection.ConnectionId)
+
+	if err := c.eventService.Publish("connection.created", createConnectionCreatedEvent(connection)); err != nil {
+		logger.Infof(nil, "[gRPC-Gateway] Fail to publish connection createdEvent - ConnectionId: [%s]", connection.ConnectionId)
+	}
+}
+
+func (c ConnectionApi) OnDisconnection(connection grpc_gateway.Connection) {
+	logger.Infof(nil, "[gRPC-Gateway] Connection closed - ConnectionId [%s]", connection.ConnectionId)
+
+	if err := c.eventService.Publish("connection.closed", connection); err != nil {
+		logger.Infof(nil, "[gRPC-Gateway] Fail to publish connection createdEvent - ConnectionId: [%s]", connection.ConnectionId)
+	}
+}
+
+func (c ConnectionApi) GetAllConnections() ([]grpc_gateway.Connection, error) {
 	return c.grpcService.GetAllConnections()
 }
