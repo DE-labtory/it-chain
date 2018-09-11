@@ -17,6 +17,7 @@
 package api
 
 import (
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/grpc_gateway"
 )
 
@@ -31,7 +32,6 @@ func NewMessageApi(grpcService grpc_gateway.GrpcService) *MessageApi {
 }
 
 func (c MessageApi) DeliverMessage(body []byte, protocol string, ids ...string) {
-
-	//validation rule add
+	logger.Infof(nil, "[gRPC-gateway] Sending grpc message - protocol: [%s] body: [%s] ids:[%s]", protocol, body, ids)
 	c.grpcService.SendMessages(body, protocol, ids...)
 }

@@ -18,13 +18,13 @@ package infra
 
 import (
 	"errors"
-	"log"
 	"sync"
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/bifrost/server"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/grpc_gateway"
 	"github.com/it-chain/heimdall/key"
 )
@@ -112,6 +112,7 @@ func (g *GrpcHostService) onConnection(connection bifrost.Connection) {
 
 func (g *GrpcHostService) startConnectionUntilClose(connection bifrost.Connection) {
 
+	logger.Infof(nil, "[gRPC-Gateway] Handling connection - ConnectionID: [%s]", connection.GetID())
 	connection.Handle(NewMessageHandler(g.publish))
 
 	if err := connection.Start(); err != nil {
@@ -176,7 +177,7 @@ func (s *GrpcHostService) Listen(ip string) {
 }
 
 func (s *GrpcHostService) onError(err error) {
-	log.Fatalln(err.Error())
+	logger.Fatalf(nil, "[gRPC-Gateway] Connection error - [Err]: ", err.Error())
 }
 
 func (s *GrpcHostService) Stop() {
@@ -280,7 +281,7 @@ func (r MessageHandler) ServeRequest(msg bifrost.Message) {
 	})
 
 	if err != nil {
-		log.Println(err.Error())
+		logger.Fatalf(nil, "[gRPC-Gateway] Fail to publish message received error - [Err]: ", err.Error())
 	}
 }
 
