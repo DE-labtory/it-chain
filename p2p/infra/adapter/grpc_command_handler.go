@@ -76,8 +76,8 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc)
 		//	2. count up
 		//	3. if counted is same with num of peer-1 set leader and publish
 
-		logger.Infof(nil, "received VoteLeaderProtocol command:", command)
-		logger.Infof(nil, "received VoteLeaderProtocol current election :", gch.electionService.Election)
+		//logger.Infof(nil, "received VoteLeaderProtocol command:", command)
+		//logger.Infof(nil, "received VoteLeaderProtocol current election :", gch.electionService.Election)
 		gch.electionService.DecideToBeLeader()
 
 	case "UpdateLeaderProtocol":
@@ -89,7 +89,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc)
 		toBeLeader := &p2p.UpdateLeaderMessage{}
 		err := common.Deserialize(command.Body, toBeLeader)
 
-		logger.Infof(nil, "update leader with", toBeLeader.Peer)
+		//logger.Infof(nil, "update leader with", toBeLeader.Peer)
 		if err != nil {
 			return err
 		}

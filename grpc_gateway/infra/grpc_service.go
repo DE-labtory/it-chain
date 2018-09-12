@@ -177,7 +177,7 @@ func (s *GrpcHostService) Listen(ip string) {
 }
 
 func (s *GrpcHostService) onError(err error) {
-	logger.Fatalf(nil, "[gRPC-Gateway] Connection error - [Err]: ", err.Error())
+	logger.Fatalf(nil, "[gRPC-Gateway] Connection error - [Err]: [%s]", err.Error())
 }
 
 func (s *GrpcHostService) Stop() {
@@ -281,7 +281,7 @@ func (r MessageHandler) ServeRequest(msg bifrost.Message) {
 	})
 
 	if err != nil {
-		logger.Fatalf(nil, "[gRPC-Gateway] Fail to publish message received error - [Err]: ", err.Error())
+		logger.Fatalf(nil, "[gRPC-Gateway] Fail to publish message received error - [Err]: [%s]", err.Error())
 	}
 }
 

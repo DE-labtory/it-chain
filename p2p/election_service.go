@@ -74,7 +74,7 @@ func (es *ElectionService) Vote(connectionId string) error {
 
 // broadcast leader to other peers
 func (es *ElectionService) BroadcastLeader(peer Peer) error {
-	logger.Info(nil, "broadcast leader!")
+	logger.Info(nil, "[P2P] Broadcast leader")
 
 	updateLeaderMessage := UpdateLeaderMessage{
 		Peer: peer,
@@ -96,7 +96,6 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 //broadcast leader when voted fully
 func (es *ElectionService) DecideToBeLeader() error {
 
-	logger.Infof(nil, "current state", es.Election)
 	//	1. if candidate, reset left time
 	//	2. count up
 	if es.Election.GetState() == Candidate {
