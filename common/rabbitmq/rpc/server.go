@@ -30,9 +30,9 @@ type Server struct {
 	rabbitmq.Session
 }
 
-func NewServer(rabbitmqUrl string) Server {
+func NewServer(rabbitmqUrl string) *Server {
 
-	return Server{
+	return &Server{
 		Session: rabbitmq.CreateSession(rabbitmqUrl),
 	}
 }
