@@ -30,10 +30,10 @@ type EventService interface {
 }
 
 type EventServiceImpl struct {
-	topicPublisher pubsub.TopicPublisher
+	topicPublisher *pubsub.TopicPublisher
 }
 
-func NewEventService(mqUrl string, exchange string) EventService {
+func NewEventService(mqUrl string, exchange string) *EventServiceImpl {
 	return &EventServiceImpl{
 		topicPublisher: pubsub.NewTopicPublisher(mqUrl, exchange),
 	}

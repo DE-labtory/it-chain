@@ -31,9 +31,9 @@ type Client struct {
 	rabbitmq.Session
 }
 
-func NewClient(rabbitmqUrl string) Client {
+func NewClient(rabbitmqUrl string) *Client {
 
-	return Client{
+	return &Client{
 		Session: rabbitmq.CreateSession(rabbitmqUrl),
 	}
 }

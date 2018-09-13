@@ -29,13 +29,13 @@ import (
 )
 
 type BlockProposalService struct {
-	client           rpc.Client // midgard.client
+	client           *rpc.Client // midgard.client
 	engineMode       string
 	txpoolRepository txpool.TransactionRepository
 	sync.RWMutex
 }
 
-func NewBlockProposalService(client rpc.Client, txpoolRepository txpool.TransactionRepository, engineMode string) *BlockProposalService {
+func NewBlockProposalService(client *rpc.Client, txpoolRepository txpool.TransactionRepository, engineMode string) *BlockProposalService {
 	return &BlockProposalService{
 		client:           client,
 		engineMode:       engineMode,

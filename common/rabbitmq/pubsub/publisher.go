@@ -30,7 +30,7 @@ type TopicPublisher struct {
 	exchange string
 }
 
-func NewTopicPublisher(rabbitmqUrl string, exchange string) TopicPublisher {
+func NewTopicPublisher(rabbitmqUrl string, exchange string) *TopicPublisher {
 
 	session := rabbitmq.CreateSession(rabbitmqUrl)
 
@@ -48,7 +48,7 @@ func NewTopicPublisher(rabbitmqUrl string, exchange string) TopicPublisher {
 		panic(err.Error())
 	}
 
-	return TopicPublisher{
+	return &TopicPublisher{
 		Session:  session,
 		exchange: exchange,
 	}
