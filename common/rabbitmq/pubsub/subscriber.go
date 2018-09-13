@@ -20,7 +20,10 @@ import (
 	"encoding/json"
 	"log"
 
+	"regexp"
+
 	"github.com/it-chain/engine/common/rabbitmq"
+	"github.com/streadway/amqp"
 )
 
 type Message struct {
@@ -32,9 +35,10 @@ type TopicSubscriber struct {
 	rabbitmq.Session
 	exchange string
 	router   Router
+	topics   []string
 }
 
-func NewTopicSubscriber(rabbitmqUrl string, exchange string) TopicSubscriber {
+func NewTopicSubscriber(rabbitmqUrl string, exchange string) *TopicSubscriber {
 
 	session := rabbitmq.CreateSession(rabbitmqUrl)
 
@@ -54,37 +58,42 @@ func NewTopicSubscriber(rabbitmqUrl string, exchange string) TopicSubscriber {
 
 	p, _ := NewParamBasedRouter()
 
-	return TopicSubscriber{
+	return &TopicSubscriber{
 		Session:  session,
 		exchange: exchange,
 		router:   p,
+		topics:   make([]string, 0),
 	}
 }
 
-func (t TopicSubscriber) SubscribeTopic(topic string, source interface{}) error {
+func (t *TopicSubscriber) SubscribeTopic(topic string, source interface{}) error {
 
-	q, err := t.Ch.QueueDeclare(
-		"",    // name
-		false, // durable
-		true,  // delete when usused
-		false, // exclusive
-		false, // no-wait
-		nil,   // arguments
-	)
+	var q amqp.Queue
+	var err error
+	if t.checkRegex(topic) {
+		q, err = t.Ch.QueueDeclare(
+			"",    // name
+			false, // durable
+			true,  // delete when usused
+			false, // exclusive
+			false, // no-wait
+			nil,   // arguments
+		)
 
-	if err != nil {
-		return err
-	}
+		if err != nil {
+			return err
+		}
 
-	err = t.Ch.QueueBind(
-		q.Name,     // queue name
-		topic,      // routing key
-		t.exchange, // exchange
-		false,
-		nil)
+		err = t.Ch.QueueBind(
+			q.Name,     // queue name
+			topic,      // routing key
+			t.exchange, // exchange
+			false,
+			nil)
 
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
 	msgs, err := t.Ch.Consume(
@@ -123,6 +132,25 @@ func (t TopicSubscriber) SubscribeTopic(topic string, source interface{}) error 
 	}()
 
 	return nil
+}
+
+func (t *TopicSubscriber) checkRegex(topic string) bool {
+	r, _ := regexp.Compile(topic)
+
+	var index = -1
+	for i, topic := range t.topics {
+		if r.MatchString(topic) {
+			index = i
+		}
+	}
+
+	if index >= 0 {
+		t.topics[index] = topic
+		return false
+	} else {
+		t.topics = append(t.topics, topic)
+		return true
+	}
 }
 
 func (t *TopicSubscriber) Close() {

@@ -36,13 +36,13 @@ type Router interface {
 
 //ParamBasedRouter routes data through the structure and structure name(matching value) of the parameter
 type ParamBasedRouter struct {
-	handlerMap map[reflect.Type]func(param interface{})
+	handlerMap map[reflect.Type][]func(param interface{})
 }
 
 func NewParamBasedRouter(handlers ...interface{}) (*ParamBasedRouter, error) {
 
 	p := &ParamBasedRouter{
-		handlerMap: make(map[reflect.Type]func(param interface{})),
+		handlerMap: make(map[reflect.Type][]func(param interface{})),
 	}
 
 	for _, handler := range handlers {
@@ -85,14 +85,14 @@ func (c *ParamBasedRouter) SetHandler(handler interface{}) error {
 		_, ok := c.handlerMap[paramType]
 
 		// 핸들러맵에 이미 동일 파라미터가 등록되 있는 경우 에러 반환
-		if ok {
-			return errors.New(fmt.Sprintf("same param already exist [%s]", paramType))
+		if !ok {
+			c.handlerMap[paramType] = make([]func(param interface{}), 0)
 		}
 
 		handler := createEventHandler(method, handler)
 
 		// 핸들러맵에 핸들러 매소드 등록
-		c.handlerMap[paramType] = handler
+		c.handlerMap[paramType] = append(c.handlerMap[paramType], handler)
 	}
 
 	return nil
@@ -125,7 +125,7 @@ func (c ParamBasedRouter) Route(data []byte, structName string) (err error) {
 		}
 	}()
 
-	paramType, handler, err := c.findTypeOfHandler(structName)
+	paramType, handlers, err := c.findTypeOfHandlers(structName)
 
 	if err != nil {
 		errors.New(fmt.Sprintf("No handler found for struct [%s]", structName))
@@ -143,19 +143,21 @@ func (c ParamBasedRouter) Route(data []byte, structName string) (err error) {
 
 	paramValue := reflect.ValueOf(paramInterface).Elem().Interface()
 
-	handler(paramValue) //execute handler
+	for _, handler := range handlers {
+		handler(paramValue) //execute handler
+	}
 
 	return nil
 }
 
 //find type of handler by struct name
-func (c ParamBasedRouter) findTypeOfHandler(typeName string) (reflect.Type, func(param interface{}), error) {
+func (c ParamBasedRouter) findTypeOfHandlers(typeName string) (reflect.Type, []func(param interface{}), error) {
 
-	for paramType, handler := range c.handlerMap {
+	for paramType, handlers := range c.handlerMap {
 		name := paramType.Name()
 
 		if name == typeName {
-			return paramType, handler, nil
+			return paramType, handlers, nil
 		}
 	}
 
