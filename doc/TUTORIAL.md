@@ -67,16 +67,27 @@ Sample icode url:  https://github.com/junbeomlee/learn-icode
    > In `.ssh`, there's `id_rsa`, `id_rsa.pub`. You need to add Deploy keys to github using `id_rsa.pub`
 
    ![[tutorial]sshkey](./images/[tutorial]sshkey.png)
+   - If you clone public repository, you can skip this process.
 
 3. Deploy learn-icode
 
-   - `it-chain ivm deploy [learn-icode-url] [ssh-private-key-path]`
-
-     `deploy` command clone from target repsoitory, and create docker container with that code 
+   - Deploy with ssh key
+     ```shell
+     it-chain ivm deploy [learn-icode-url] [ssh-private-key-path] [password]
+     ```
+     `deploy` command clone from target repsoitory, and create docker container with that code  
+     If you don't set ssh key password, you can skip to write [password]
 
      ![[tutorial]deploy](./images/[tutorial]deploy.png)
 
      ![[tutorial]deploy-result](./images/[tutorial]deploy-result.png)
+
+   - Deploy with no ssh key
+     ```shell
+     it-chain ivm deploy [learn-icode-url]
+     ```
+     We support to clone public repository. You can deploy learn-icode with no ssh
+     ![[tutorial]deploy](./images/[tutorial]deploy_with_no_ssh.png)
 
    - Check docker container
 
@@ -119,5 +130,4 @@ it-chain ivm invoke [IcodeID] incA
 
 ![[tutorial]incA](./images/[tutorial]incA.png)
 
-4. Check block on https://localhost:4444/blocks
-
+4. Check block on http://localhost:4444/blocks
