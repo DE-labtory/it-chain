@@ -37,7 +37,6 @@ func NewBlockCommittedEventHandler(icodeApi api.ICodeApi) *BlockCommittedEventHa
 }
 
 func (b *BlockCommittedEventHandler) HandleBlockCommittedEventHandler(blockCommittedEvent event.BlockCommitted) {
-
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
 

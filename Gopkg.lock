@@ -531,6 +531,47 @@
   version = "v0.2.0"
 
 [[projects]]
+  digest = "1:3c1a69cdae3501bf75e76d0d86dc6f2b0a7421bc205c0cb7b96b19eed464a34d"
+  name = "go.uber.org/atomic"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1ea20fb1cbb1cc08cbd0d913a96dead89aa18289"
+  version = "v1.3.2"
+
+[[projects]]
+  digest = "1:15b8c7dfaa421c7a5f4a9ccdee8eef607adc8f3d77812fa8f413833cc0d2871a"
+  name = "go.uber.org/dig"
+  packages = [
+    ".",
+    "internal/digreflect",
+    "internal/dot",
+  ]
+  pruneopts = "UT"
+  revision = "d6ba99365e475c24e8ac02392eb3f78ccab2a6f3"
+  version = "v1.4.0"
+
+[[projects]]
+  digest = "1:e8ff8ed2000bbf5f363e27ca67cd8b857c4ede0a68ed77b19e8beb460a5b6e6b"
+  name = "go.uber.org/fx"
+  packages = [
+    ".",
+    "internal/fxlog",
+    "internal/fxreflect",
+    "internal/lifecycle",
+  ]
+  pruneopts = "UT"
+  revision = "b156a883a62423b7d9ab651d1689c42c4d788787"
+  version = "v1.7.0"
+
+[[projects]]
+  digest = "1:60bf2a5e347af463c42ed31a493d817f8a72f102543060ed992754e689805d1a"
+  name = "go.uber.org/multierr"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3c4937480c32f4c13a875a1829af76c98ca3d40a"
+  version = "v1.1.0"
+
+[[projects]]
   branch = "master"
   digest = "1:7f30b1215b753cd6dd4b63adeac67c0f69c7303ce289bf4f8f7fdaf903b13f91"
   name = "golang.org/x/crypto"
@@ -765,7 +806,10 @@
     "github.com/streadway/amqp",
     "github.com/stretchr/testify/assert",
     "github.com/urfave/cli",
+    "go.uber.org/dig",
+    "go.uber.org/fx",
     "gopkg.in/src-d/go-git.v4",
+    "gopkg.in/src-d/go-git.v4/plumbing",
     "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh",
     "gopkg.in/yaml.v2",
   ]

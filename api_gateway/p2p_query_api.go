@@ -17,9 +17,8 @@
 package api_gateway
 
 import (
-	"sync"
-
 	"errors"
+	"sync"
 
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/p2p"

@@ -241,7 +241,7 @@ func TestICodeEventHandler_HandleMetaCreatedEvent(t *testing.T) {
 		assert.Equal(t, test.OutputError, err, "err in compare err")
 
 		//check
-		metas, err := git.metaRepository.FindAllMeta()
+		metas, err := git.iCodeRepository.FindAllMeta()
 		assert.NoError(t, err, "err in check")
 		assert.Equal(t, test.ExpectDataNum, len(metas), "not equal in check dataNum")
 		assert.Equal(t, "1", metas[0].ID)
@@ -265,13 +265,13 @@ func setICodeQueryApi(t *testing.T) (ICodeQueryApi, *pubsub.TopicPublisher, func
 
 	repo := NewLevelDbMetaRepository(dbPath)
 
-	metaQueryApi := ICodeQueryApi{metaRepository: &repo}
-	metaEventListener := &ICodeEventHandler{metaRepository: &repo}
+	metaQueryApi := ICodeQueryApi{iCodeRepository: repo}
+	metaEventListener := &ICodeEventHandler{iCodeRepository: repo}
 
 	err := client.SubscribeTopic("icode.*", metaEventListener)
 	assert.NoError(t, err)
 
-	return metaQueryApi, &publisher, func() {
+	return metaQueryApi, publisher, func() {
 		repo.leveldb.Close()
 		os.RemoveAll(dbPath)
 		client.Close()

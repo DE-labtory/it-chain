@@ -31,8 +31,8 @@ type BlockApi struct {
 	BlockPool       *blockchain.BlockPool
 }
 
-func NewBlockApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService, blockPool *blockchain.BlockPool) (BlockApi, error) {
-	return BlockApi{
+func NewBlockApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService, blockPool *blockchain.BlockPool) (*BlockApi, error) {
+	return &BlockApi{
 		publisherId:     publisherId,
 		blockRepository: blockRepository,
 		eventService:    eventService,

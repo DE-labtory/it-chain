@@ -24,10 +24,10 @@ import (
 )
 
 type TxCommandHandler struct {
-	transactionApi api.TransactionApi
+	transactionApi *api.TransactionApi
 }
 
-func NewTxCommandHandler(transactionApi api.TransactionApi) *TxCommandHandler {
+func NewTxCommandHandler(transactionApi *api.TransactionApi) *TxCommandHandler {
 	return &TxCommandHandler{
 		transactionApi: transactionApi,
 	}

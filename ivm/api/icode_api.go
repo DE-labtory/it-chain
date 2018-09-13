@@ -19,6 +19,7 @@ package api
 import (
 	"fmt"
 
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/ivm"
@@ -27,10 +28,10 @@ import (
 type ICodeApi struct {
 	ContainerService ivm.ContainerService
 	GitService       ivm.GitService
-	EventService     ivm.EventService
+	EventService     common.EventService
 }
 
-func NewICodeApi(containerService ivm.ContainerService, gitService ivm.GitService, eventService ivm.EventService) ICodeApi {
+func NewICodeApi(containerService ivm.ContainerService, gitService ivm.GitService, eventService common.EventService) ICodeApi {
 
 	return ICodeApi{
 		ContainerService: containerService,
@@ -49,7 +50,7 @@ func (i ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath s
 		return ivm.ICode{}, err
 	}
 
-	//start ICode with container
+	//on ICode with container
 	if err = i.ContainerService.StartContainer(icode); err != nil {
 		return ivm.ICode{}, err
 	}
@@ -107,7 +108,6 @@ func (i ICodeApi) ExecuteRequestList(RequestList []ivm.Request) []ivm.Result {
 }
 
 func (i ICodeApi) ExecuteRequest(request ivm.Request) (ivm.Result, error) {
-
 	return i.ContainerService.ExecuteRequest(request)
 }
 

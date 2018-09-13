@@ -27,36 +27,37 @@ import (
 )
 
 type ICodeQueryApi struct {
-	metaRepository ICodeMetaRepository
+	iCodeRepository ICodeRepository
 }
 
-func NewICodeQueryApi(repository ICodeMetaRepository) ICodeQueryApi {
+func NewICodeQueryApi(repository ICodeRepository) ICodeQueryApi {
 	return ICodeQueryApi{
-		metaRepository: repository,
+		iCodeRepository: repository,
 	}
 }
 
-type ICodeMetaRepository interface {
+type ICodeRepository interface {
 	FindAllMeta() ([]ivm.ICode, error)
 	FindMetaByUrl(url string) (ivm.ICode, error)
 	FindMetaById(id ivm.ID) (ivm.ICode, error)
 	Save(icode ivm.ICode) error
 	Remove(id ivm.ID) error
+	Close()
 }
 
-type LevelDbMetaRepository struct {
+type LevelDbICodeRepository struct {
 	leveldb *leveldbwrapper.DB
 }
 
-func NewLevelDbMetaRepository(path string) LevelDbMetaRepository {
+func NewLevelDbMetaRepository(path string) *LevelDbICodeRepository {
 	db := leveldbwrapper.CreateNewDB(path)
 	db.Open()
-	return LevelDbMetaRepository{
+	return &LevelDbICodeRepository{
 		leveldb: db,
 	}
 }
 
-func (l *LevelDbMetaRepository) FindAllMeta() ([]ivm.ICode, error) {
+func (l *LevelDbICodeRepository) FindAllMeta() ([]ivm.ICode, error) {
 	iter := l.leveldb.GetIteratorWithPrefix([]byte(""))
 	metaList := []ivm.ICode{}
 	for iter.Next() {
@@ -71,7 +72,7 @@ func (l *LevelDbMetaRepository) FindAllMeta() ([]ivm.ICode, error) {
 	return metaList, nil
 }
 
-func (l *LevelDbMetaRepository) FindMetaByUrl(url string) (ivm.ICode, error) {
+func (l *LevelDbICodeRepository) FindMetaByUrl(url string) (ivm.ICode, error) {
 	allMetaList, err := l.FindAllMeta()
 	if err != nil {
 		return ivm.ICode{}, err
@@ -86,7 +87,7 @@ func (l *LevelDbMetaRepository) FindMetaByUrl(url string) (ivm.ICode, error) {
 	return ivm.ICode{}, nil
 }
 
-func (l *LevelDbMetaRepository) FindMetaById(id ivm.ID) (ivm.ICode, error) {
+func (l *LevelDbICodeRepository) FindMetaById(id ivm.ID) (ivm.ICode, error) {
 
 	metaByte, err := l.leveldb.Get([]byte(id))
 	if err != nil {
@@ -108,7 +109,7 @@ func (l *LevelDbMetaRepository) FindMetaById(id ivm.ID) (ivm.ICode, error) {
 	return *icode, nil
 }
 
-func (l *LevelDbMetaRepository) Save(icode ivm.ICode) error {
+func (l *LevelDbICodeRepository) Save(icode ivm.ICode) error {
 
 	if icode.ID == "" {
 		return errors.New("icode is empty")
@@ -127,17 +128,21 @@ func (l *LevelDbMetaRepository) Save(icode ivm.ICode) error {
 	return nil
 }
 
-func (l *LevelDbMetaRepository) Remove(id ivm.ID) error {
+func (l *LevelDbICodeRepository) Remove(id ivm.ID) error {
 	return l.leveldb.Delete([]byte(id), true)
 }
 
-type ICodeEventHandler struct {
-	metaRepository ICodeMetaRepository
+func (l *LevelDbICodeRepository) Close() {
+	l.leveldb.Close()
 }
 
-func NewIcodeEventHandler(repository ICodeMetaRepository) ICodeEventHandler {
-	return ICodeEventHandler{
-		metaRepository: repository,
+type ICodeEventHandler struct {
+	iCodeRepository ICodeRepository
+}
+
+func NewIcodeEventHandler(repository ICodeRepository) *ICodeEventHandler {
+	return &ICodeEventHandler{
+		iCodeRepository: repository,
 	}
 }
 
@@ -152,7 +157,7 @@ func (i ICodeEventHandler) HandleMetaCreatedEvent(icodeCreatedEvent event.ICodeC
 		Version:        icodeCreatedEvent.Version,
 	}
 
-	err := i.metaRepository.Save(icode)
+	err := i.iCodeRepository.Save(icode)
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -161,7 +166,7 @@ func (i ICodeEventHandler) HandleMetaCreatedEvent(icodeCreatedEvent event.ICodeC
 
 func (i ICodeEventHandler) HandleMetaDeletedEvent(iCodeDeleted event.ICodeDeleted) {
 
-	err := i.metaRepository.Remove(iCodeDeleted.ICodeID)
+	err := i.iCodeRepository.Remove(iCodeDeleted.ICodeID)
 
 	if err != nil {
 		log.Fatal(err.Error())

@@ -87,7 +87,6 @@ func (cs ContainerService) ExecuteRequest(request ivm.Request) (ivm.Result, erro
 	logger.Info(nil, fmt.Sprintf("[IVM] Executing icode - icodeID: [%s]", request.ICodeID))
 
 	iCodeInfo, ok := cs.iCodeInfoMap[request.ICodeID]
-
 	if !ok {
 		return ivm.Result{}, ErrContainerDoesNotExist
 	}
@@ -96,13 +95,11 @@ func (cs ContainerService) ExecuteRequest(request ivm.Request) (ivm.Result, erro
 	errCh := make(chan error)
 
 	var callback = func(response *pb.Response, err error) {
-
 		if err != nil {
 			errCh <- err
 		}
 
 		data := make(map[string]string)
-
 		if len(response.Data) != 0 {
 			if err = json.Unmarshal(response.Data, &data); err != nil {
 				errCh <- err

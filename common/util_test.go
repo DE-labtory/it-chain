@@ -27,6 +27,10 @@ import (
 
 	"github.com/it-chain/engine/common"
 
+	"regexp"
+
+	"fmt"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -149,4 +153,12 @@ func TestRelativeToAbsolutePath_WhenGivenPathIsEmpty(t *testing.T) {
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, "", absPath)
+}
+
+func TestCheckRegex(t *testing.T) {
+	r, err := regexp.Compile("block")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(r.MatchString("block.created"))
 }

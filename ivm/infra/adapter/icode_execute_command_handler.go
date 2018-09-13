@@ -27,8 +27,8 @@ type IcodeExecuteCommandHandler struct {
 	iCodeApi api.ICodeApi
 }
 
-func NewIcodeExecuteCommandHandler(icodeApi api.ICodeApi) IcodeExecuteCommandHandler {
-	return IcodeExecuteCommandHandler{
+func NewIcodeExecuteCommandHandler(icodeApi api.ICodeApi) *IcodeExecuteCommandHandler {
+	return &IcodeExecuteCommandHandler{
 		iCodeApi: icodeApi,
 	}
 }

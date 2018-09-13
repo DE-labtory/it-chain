@@ -67,6 +67,7 @@ type BlockRepository interface {
 	FindBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
 	FindBlockBySeal(seal []byte) (blockchain.DefaultBlock, error)
 	FindAllBlock() ([]blockchain.DefaultBlock, error)
+	Close()
 }
 
 type BlockRepositoryImpl struct {
@@ -190,8 +191,8 @@ type BlockEventListener struct {
 	blockRepository BlockRepository
 }
 
-func NewBlockEventListener(blockRepo BlockRepository) BlockEventListener {
-	return BlockEventListener{
+func NewBlockEventListener(blockRepo BlockRepository) *BlockEventListener {
+	return &BlockEventListener{
 		blockRepository: blockRepo,
 	}
 }
