@@ -22,6 +22,7 @@ import (
 	"github.com/it-chain/engine/common"
 
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/ivm"
@@ -64,17 +65,17 @@ func deploy(gitUrl string, sshPath string, password string) {
 		Password: password,
 	}
 
-	log.Printf("[Cmd] deploying icode...")
-	log.Printf("[Cmd] This may take a few minutes")
+	logger.Infof(nil, "[Cmd] deploying icode...")
+	logger.Infof(nil, "[Cmd] This may take a few minutes")
 
 	err = client.Call("ivm.deploy", deployCommand, func(icode ivm.ICode, err rpc.Error) {
 
 		if !err.IsNil() {
-			log.Printf("fail to deploy icode err: [%s]", err.Message)
+			logger.Infof(nil, "fail to deploy icode err: [%s]", err.Message)
 			return
 		}
 
-		log.Printf("[Cmd] icode has deployed - icodeID: [%s]", icode.ID)
+		logger.Infof(nil, "[Cmd] icode has deployed - icodeID: [%s]", icode.ID)
 	})
 
 	if err != nil {
