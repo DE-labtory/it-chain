@@ -83,7 +83,7 @@ func makeFindCommittedBlockBySealEndpoint(b BlockQueryApi) endpoint.Endpoint {
 //ivm
 func makeFindAllMetaEndpoint(i ICodeQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		metas, err := i.metaRepository.FindAllMeta()
+		metas, err := i.iCodeRepository.FindAllMeta()
 		if err != nil {
 			logger.Error(&logger.Fields{"err_message": err.Error()}, "error while find all meta endpoint")
 			return nil, err

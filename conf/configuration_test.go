@@ -34,7 +34,7 @@ func TestHasValid(t *testing.T) {
 func TestGetConfiguration(t *testing.T) {
 
 	path := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/conf"
-	confFilename := "/config.yaml"
+	confFilename := "/config-test.yaml"
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.Mkdir(path, os.ModePerm)
 	}
@@ -70,6 +70,7 @@ func TestGetConfiguration(t *testing.T) {
 	err := ioutil.WriteFile(path+confFilename, ConfJson, os.ModePerm)
 	assert.NoError(t, err)
 
+	SetConfigPath(path + confFilename)
 	config := GetConfiguration()
 	assert.Equal(t, config.GrpcGateway.Address, "127.0.0.1")
 	assert.Equal(t, config.Engine.Mode, "solo")

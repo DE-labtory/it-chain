@@ -27,8 +27,8 @@ type TransactionApi struct {
 	transactionRepository txpool.TransactionRepository
 }
 
-func NewTransactionApi(publisherId string, transactionRepository txpool.TransactionRepository) TransactionApi {
-	return TransactionApi{
+func NewTransactionApi(publisherId string, transactionRepository txpool.TransactionRepository) *TransactionApi {
+	return &TransactionApi{
 		publisherId:           publisherId,
 		transactionRepository: transactionRepository,
 	}

@@ -33,7 +33,7 @@ func (sApi SyncApi) Synchronize() error {
 		return nil
 	}
 
-	// if sync has not done, start sync
+	// if sync has not done, on sync
 	sApi.syncWithPeer(randomPeer)
 
 	return nil

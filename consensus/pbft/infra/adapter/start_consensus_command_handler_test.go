@@ -52,8 +52,8 @@ func TestStartConsensusCommandHandler_HandleStartConsensusCommand(t *testing.T) 
 	assert.True(t, testResult)
 	assert.Equal(t, "", testErr.Message)
 
-	// case 2 : consensus start error
-	consensusStartError := errors.New("start consensus failed!")
+	// case 2 : consensus on error
+	consensusStartError := errors.New("on consensus failed!")
 	mockStateApi = newMockStateApi(consensusStartError)
 	testHandler = adapter.NewStartConsensusCommandHandler(mockStateApi)
 

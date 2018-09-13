@@ -24,12 +24,12 @@ import (
 	"github.com/it-chain/yggdrasill"
 )
 
-type blockRepository struct {
+type BlockRepository struct {
 	mux *sync.RWMutex
 	yggdrasill.BlockStorageManager
 }
 
-func NewBlockRepository(dbPath string) (*blockRepository, error) {
+func NewBlockRepository(dbPath string) (*BlockRepository, error) {
 	validator := new(blockchain.DefaultValidator)
 	db := leveldbwrapper.CreateNewDB(dbPath)
 	opts := map[string]interface{}{}
@@ -39,13 +39,13 @@ func NewBlockRepository(dbPath string) (*blockRepository, error) {
 		return nil, ErrNewBlockStorage
 	}
 
-	return &blockRepository{
+	return &BlockRepository{
 		mux:                 &sync.RWMutex{},
 		BlockStorageManager: blockStorage,
 	}, nil
 }
 
-func (br *blockRepository) Save(block blockchain.DefaultBlock) error {
+func (br *BlockRepository) Save(block blockchain.DefaultBlock) error {
 	br.mux.Lock()
 	defer br.mux.Unlock()
 	err := br.BlockStorageManager.AddBlock(&block)
@@ -56,7 +56,7 @@ func (br *blockRepository) Save(block blockchain.DefaultBlock) error {
 	return nil
 }
 
-func (br *blockRepository) FindLast() (blockchain.DefaultBlock, error) {
+func (br *BlockRepository) FindLast() (blockchain.DefaultBlock, error) {
 	br.mux.Lock()
 	defer br.mux.Unlock()
 
@@ -69,7 +69,7 @@ func (br *blockRepository) FindLast() (blockchain.DefaultBlock, error) {
 
 	return *block, nil
 }
-func (br *blockRepository) FindByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
+func (br *BlockRepository) FindByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
 	br.mux.Lock()
 	defer br.mux.Unlock()
 
@@ -83,7 +83,7 @@ func (br *blockRepository) FindByHeight(height blockchain.BlockHeight) (blockcha
 	return *block, nil
 }
 
-func (br *blockRepository) FindBySeal(seal []byte) (blockchain.DefaultBlock, error) {
+func (br *BlockRepository) FindBySeal(seal []byte) (blockchain.DefaultBlock, error) {
 	br.mux.Lock()
 	defer br.mux.Unlock()
 
@@ -97,7 +97,7 @@ func (br *blockRepository) FindBySeal(seal []byte) (blockchain.DefaultBlock, err
 	return *block, nil
 }
 
-func (br *blockRepository) FindAll() ([]blockchain.DefaultBlock, error) {
+func (br *BlockRepository) FindAll() ([]blockchain.DefaultBlock, error) {
 	br.mux.Lock()
 	defer br.mux.Unlock()
 

@@ -65,7 +65,7 @@ func TestBlockCommittedEventHandler_HandleBlockCommittedEventHandler(t *testing.
 	assert.Equal(t, result.Err, "")
 }
 
-// setup handler and start container
+// setup handler and on container
 func setUp(t *testing.T) (*adapter.BlockCommittedEventHandler, *tesseract.ContainerService, func()) {
 	GOPATH := os.Getenv("GOPATH")
 

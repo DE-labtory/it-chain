@@ -105,3 +105,11 @@ ignored = ["github.com/mock/handler"]
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  name = "go.uber.org/dig"
+  version = "1.4.0"
+
+[[constraint]]
+  name = "go.uber.org/fx"
+  version = "1.7.0"

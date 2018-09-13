@@ -59,9 +59,7 @@ func SetConfigPath(path string) {
 
 func GetConfiguration() *Configuration {
 
-	// 최초로 go application의 configuration을 해당 파일을 통해 설정한다.
 	once.Do(func() {
-
 		viper.SetConfigFile(confPath)
 		if err := viper.ReadInConfig(); err != nil {
 			panic("cannot read config")
@@ -75,8 +73,6 @@ func GetConfiguration() *Configuration {
 			panic("NewEngineConfiguration mode is wrong.")
 		}
 	})
-
-	// it-chain의 설정내용을 반환한다.
 	return instance
 }
 

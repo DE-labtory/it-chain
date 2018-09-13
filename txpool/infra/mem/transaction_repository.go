@@ -26,8 +26,8 @@ import (
 var ErrTransactionDoesNotExist = errors.New("transaction does not exist")
 var ErrEmptyID = errors.New("transaction ID is empty")
 
-func NewTransactionRepository() TransactionRepository {
-	return TransactionRepository{
+func NewTransactionRepository() *TransactionRepository {
+	return &TransactionRepository{
 		TxMap:   make(map[txpool.TransactionId]txpool.Transaction),
 		RWMutex: sync.RWMutex{},
 	}
