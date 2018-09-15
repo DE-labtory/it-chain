@@ -72,6 +72,14 @@ func (ba MockSyncBlockApi) SyncedCheck(block blockchain.Block) error {
 	return ba.SyncedCheckFunc(block)
 }
 
+type CreateEventHandler struct {
+	HandleFunc func(event event.BlockCreated)
+}
+
+func (h *CreateEventHandler) Handle(event event.BlockCreated) {
+	h.HandleFunc(event)
+}
+
 type CommitEventHandler struct {
 	HandleFunc func(event event.BlockCommitted)
 }

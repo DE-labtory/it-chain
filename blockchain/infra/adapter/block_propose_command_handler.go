@@ -22,22 +22,20 @@ import (
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 )
 
-type BlockCommitApi interface {
+type BlockProposeApi interface {
 	CreateProposedBlock(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error)
-	CommitBlock(txList blockchain.DefaultBlock) error
+	ConsentBlock(consensusType string, block blockchain.DefaultBlock) error
 }
 
 type BlockProposeCommandHandler struct {
-	blockApi         BlockCommitApi
-	consensusService blockchain.ConsensusService
-	engineMode       string
+	blockApi   BlockProposeApi
+	engineMode string
 }
 
-func NewBlockProposeCommandHandler(blockApi BlockCommitApi, consensusService blockchain.ConsensusService, engineMode string) *BlockProposeCommandHandler {
+func NewBlockProposeCommandHandler(blockApi BlockProposeApi, engineMode string) *BlockProposeCommandHandler {
 	return &BlockProposeCommandHandler{
-		blockApi:         blockApi,
-		consensusService: consensusService,
-		engineMode:       engineMode,
+		blockApi:   blockApi,
+		engineMode: engineMode,
 	}
 }
 
@@ -54,17 +52,7 @@ func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.P
 		return struct{}{}, rpc.Error{Message: err.Error()}
 	}
 
-	if h.engineMode == "solo" {
-		err = h.blockApi.CommitBlock(proposedBlock)
-		if err != nil {
-			return struct{}{}, rpc.Error{Message: err.Error()}
-		}
-
-		return struct{}{}, rpc.Error{}
-	}
-
-	err = h.consensusService.ConsentBlock(proposedBlock)
-	if err != nil {
+	if err := h.blockApi.ConsentBlock(h.engineMode, proposedBlock); err != nil {
 		return struct{}{}, rpc.Error{Message: err.Error()}
 	}
 
