@@ -16,7 +16,9 @@
 
 package pbft
 
-import "errors"
+import (
+	"errors"
+)
 
 var ErrNoParliamentMember = errors.New("No parliament member.")
 
@@ -45,4 +47,11 @@ func Elect(parliament []MemberID) ([]*Representative, error) {
 	}
 
 	return representatives, nil
+}
+
+type PeerQueryApi interface {
+	GetPeerTable() (map[string]struct {
+		ID        string
+		IpAddress string
+	}, error)
 }
