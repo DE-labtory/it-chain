@@ -50,7 +50,7 @@ func list() error {
 			return
 		}
 
-		fmt.Println("Index\t ID\t\t\t Address")
+		fmt.Println("Index\t ID\t\t\t\t\t\t Address")
 		for index, connection := range getConnectionListCommand.ConnectionList {
 			fmt.Printf("[%d]\t [%s]\t [%s]\n",
 				index, connection.ConnectionId, connection.Address)
