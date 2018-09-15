@@ -18,7 +18,7 @@ icode:
   repositorypath: empty
 grpcgateway:
   address: 127.0.0.1
-  port: "13572"
+  port: "5002"
 apigateway:
   address: 127.0.0.1
-  port: "5555"
+  port: "4002"
