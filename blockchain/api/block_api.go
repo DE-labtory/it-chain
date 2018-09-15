@@ -82,7 +82,7 @@ func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
 	GenesisBlock, err := blockchain.CreateGenesisBlock(GenesisConfPath)
 
 	if err != nil {
-		return ErrCreateGenesisBlock
+		return err
 	}
 
 	// save(commit)
@@ -142,6 +142,7 @@ func (bApi BlockApi) StageBlock(block blockchain.DefaultBlock) error {
 }
 
 func (api BlockApi) CreateProposedBlock(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error) {
+	logger.Info(nil, "[Blockchain] Create proposed block")
 	lastBlock, err := api.blockRepository.FindLast()
 	if err != nil {
 		return blockchain.DefaultBlock{}, ErrGetLastBlock
@@ -153,7 +154,7 @@ func (api BlockApi) CreateProposedBlock(txList []*blockchain.DefaultTransaction)
 
 	block, err := blockchain.CreateProposedBlock(prevSeal, height, txList, creator)
 	if err != nil {
-		return blockchain.DefaultBlock{}, ErrCreateProposedBlock
+		return blockchain.DefaultBlock{}, err
 	}
 
 	return block, nil
