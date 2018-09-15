@@ -88,7 +88,12 @@ func InitApiGatewayServer(lifecycle fx.Lifecycle, config *conf.Configuration, ha
 	lifecycle.Append(fx.Hook{
 		OnStart: func(context context.Context) error {
 			logger.Infof(nil, "[Main] Api-gateway is staring on port:%s", config.ApiGateway.Port)
-			go http.ListenAndServe(ipAddress, handler)
+			go func() {
+				err := http.ListenAndServe(ipAddress, handler)
+				if err != nil {
+					panic(err.Error())
+				}
+			}()
 			return nil
 		},
 		OnStop: func(context context.Context) error {
