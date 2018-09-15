@@ -24,7 +24,6 @@ import (
 	"github.com/it-chain/engine/blockchain/api"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/infra/mem"
-	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
@@ -58,7 +57,7 @@ func NewBlockApi(blockRepository *mem.BlockRepository, blockPool *blockchain.Blo
 }
 
 func NewBlockProposeHandler(blockApi *api.BlockApi, config *conf.Configuration) *adapter.BlockProposeCommandHandler {
-	return adapter.NewBlockProposeCommandHandler(blockApi, mock.ConsensusService{}, config.Engine.Mode)
+	return adapter.NewBlockProposeCommandHandler(blockApi, config.Engine.Mode)
 }
 
 func CreateGenesisBlock(blockApi *api.BlockApi, config *conf.Configuration) {

@@ -29,8 +29,6 @@ import (
 
 	"time"
 
-	"errors"
-
 	"github.com/it-chain/engine/blockchain/api"
 	"github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/blockchain/test/mock"
@@ -58,11 +56,6 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_Solo(t *testing.T)
 
 	subscriber.SubscribeTopic("block.*", handler)
 
-	consensusService := mock.ConsensusService{}
-	consensusService.ConsensusBlockFunc = func(block blockchain.DefaultBlock) error {
-		return nil
-	}
-
 	//set bApi
 	publisherID := "junksound"
 	dbPath := "./.db"
@@ -85,7 +78,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_Solo(t *testing.T)
 	bApi, err := api.NewBlockApi(publisherID, br, eventService, blockPool)
 	assert.NoError(t, err)
 
-	commandHandler := adapter.NewBlockProposeCommandHandler(bApi, consensusService, "solo")
+	commandHandler := adapter.NewBlockProposeCommandHandler(bApi, "solo")
 
 	//when
 	_, errRPC := commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: nil})
@@ -149,9 +142,21 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_Solo(t *testing.T)
 	wg.Wait()
 }
 
-func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_OneTransaction(t *testing.T) {
+func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_OneTransaction(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
+
+	subscriber := pubsub.NewTopicSubscriber("", "Event")
+	defer subscriber.Close()
+
+	handler := &mock.CreateEventHandler{}
+	handler.HandleFunc = func(event event.BlockCreated) {
+		assert.Equal(t, "tx01", event.TxList[0].ID)
+		assert.Equal(t, blockchain.Created, event.State)
+		wg.Done()
+	}
+
+	subscriber.SubscribeTopic("block.*", handler)
 
 	dbPath := "./.db"
 	blockRepository, err := mem.NewBlockRepository(dbPath)
@@ -165,17 +170,6 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_OneTransac
 	err = blockRepository.AddBlock(prevBlock)
 	assert.NoError(t, err)
 
-	consensusService := mock.ConsensusService{}
-	consensusService.ConsensusBlockFunc = func(block blockchain.DefaultBlock) error {
-		t.Log("consensus service")
-		assert.Equal(t, uint64(1), block.GetHeight())
-		assert.Equal(t, prevBlock.GetSeal(), block.GetPrevSeal())
-		assert.Equal(t, "iAmPublisher", block.Creator)
-		assert.Equal(t, 1, len(block.GetTxList()))
-		wg.Done()
-		return nil
-	}
-
 	publisherID := "iAmPublisher"
 	eventService := common.NewEventService("", "Event")
 	blockPool := blockchain.NewBlockPool()
@@ -183,7 +177,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_OneTransac
 	api, err := api.NewBlockApi(publisherID, blockRepository, eventService, blockPool)
 	assert.NoError(t, err)
 
-	commandHandler := adapter.NewBlockProposeCommandHandler(api, consensusService, "notSolo")
+	commandHandler := adapter.NewBlockProposeCommandHandler(api, "pbft")
 
 	//when
 	_, errRPC := commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
@@ -206,9 +200,21 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_OneTransac
 	wg.Wait()
 }
 
-func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_TwoTransaction(t *testing.T) {
+func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_TwoTransaction(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
+
+	subscriber := pubsub.NewTopicSubscriber("", "Event")
+	defer subscriber.Close()
+
+	handler := &mock.CreateEventHandler{}
+	handler.HandleFunc = func(event event.BlockCreated) {
+		assert.Equal(t, "tx01", event.TxList[0].ID)
+		assert.Equal(t, blockchain.Created, event.State)
+		wg.Done()
+	}
+
+	subscriber.SubscribeTopic("block.*", handler)
 
 	dbPath := "./.db"
 	blockRepository, err := mem.NewBlockRepository(dbPath)
@@ -222,17 +228,6 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_TwoTransac
 	err = blockRepository.AddBlock(prevBlock)
 	assert.NoError(t, err)
 
-	consensusService := mock.ConsensusService{}
-	consensusService.ConsensusBlockFunc = func(block blockchain.DefaultBlock) error {
-		t.Log("consensus service")
-		assert.Equal(t, uint64(1), block.GetHeight())
-		assert.Equal(t, prevBlock.GetSeal(), block.GetPrevSeal())
-		assert.Equal(t, "iAmPublisher", block.Creator)
-		assert.Equal(t, 2, len(block.GetTxList()))
-		wg.Done()
-		return nil
-	}
-
 	publisherID := "iAmPublisher"
 	eventService := common.NewEventService("", "Event")
 	blockPool := blockchain.NewBlockPool()
@@ -240,7 +235,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_TwoTransac
 	api, err := api.NewBlockApi(publisherID, blockRepository, eventService, blockPool)
 	assert.NoError(t, err)
 
-	commandHandler := adapter.NewBlockProposeCommandHandler(api, consensusService, "notSolo")
+	commandHandler := adapter.NewBlockProposeCommandHandler(api, "pbft")
 
 	//when
 	_, errRPC := commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
@@ -273,8 +268,8 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_TwoTransac
 	wg.Wait()
 }
 
-func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_ExceptionCases(t *testing.T) {
-	ErrConsesnsusService := errors.New("Consensus Error")
+func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_ExceptionCases(t *testing.T) {
+	//ErrConsesnsusService := errors.New("Consensus Error")
 
 	dbPath := "./.db"
 	blockRepository, err := mem.NewBlockRepository(dbPath)
@@ -288,12 +283,6 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_ExceptionC
 	err = blockRepository.AddBlock(prevBlock)
 	assert.NoError(t, err)
 
-	consensusService := mock.ConsensusService{}
-	consensusService.ConsensusBlockFunc = func(block blockchain.DefaultBlock) error {
-		t.Log("consensus service")
-		return ErrConsesnsusService
-	}
-
 	publisherID := "iAmPublisher"
 	eventService := common.NewEventService("", "Event")
 	blockPool := blockchain.NewBlockPool()
@@ -301,7 +290,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_ExceptionC
 	api, err := api.NewBlockApi(publisherID, blockRepository, eventService, blockPool)
 	assert.NoError(t, err)
 
-	commandHandler := adapter.NewBlockProposeCommandHandler(api, consensusService, "notSolo")
+	commandHandler := adapter.NewBlockProposeCommandHandler(api, "pbft")
 
 	//when
 	_, errRPC := commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: nil})
@@ -330,6 +319,6 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_NotSolo_ExceptionC
 		},
 	})
 	//then
-	assert.Equal(t, errRPC, rpc.Error{Message: ErrConsesnsusService.Error()})
+	assert.Equal(t, errRPC, rpc.Error{})
 
 }

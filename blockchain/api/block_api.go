@@ -55,6 +55,26 @@ func (bApi BlockApi) SyncIsProgressing() blockchain.ProgressState {
 	return blockchain.DONE
 }
 
+func (api BlockApi) ConsentBlock(consensusType string, block blockchain.DefaultBlock) error {
+
+	switch consensusType {
+	case "solo":
+		return api.CommitBlock(block)
+
+	case "pbft":
+		event, err := createBlockCreatedEvent(block)
+		if err != nil {
+			return err
+		}
+		return api.eventService.Publish("block.consent", event)
+
+	default:
+		logger.Error(nil, fmt.Sprintf("[blockchain] undefined consensus type: %v", consensusType))
+		return ErrUndefinedConsensusType
+	}
+
+}
+
 func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
 	logger.Info(nil, "[Blockchain] Committing genesis block")
 
@@ -152,5 +172,21 @@ func createBlockCommittedEvent(block blockchain.DefaultBlock) (event.BlockCommit
 		Timestamp: block.GetTimestamp(),
 		Creator:   block.GetCreator(),
 		State:     blockchain.Committed,
+	}, nil
+}
+
+func createBlockCreatedEvent(block blockchain.DefaultBlock) (event.BlockCreated, error) {
+
+	txList := blockchain.ConvBackFromTransactionList(block.TxList)
+
+	return event.BlockCreated{
+		Seal:      block.GetSeal(),
+		PrevSeal:  block.GetPrevSeal(),
+		Height:    block.GetHeight(),
+		TxList:    txList,
+		TxSeal:    block.GetTxSeal(),
+		Timestamp: block.GetTimestamp(),
+		Creator:   block.GetCreator(),
+		State:     block.GetState(),
 	}, nil
 }
