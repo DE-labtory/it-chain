@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-package p2p_test
+package common
+
+import "errors"
+
+var ErrPublishFailed = errors.New("publish event failed")

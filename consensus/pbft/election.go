@@ -14,31 +14,35 @@
  * limitations under the License.
  */
 
-package p2p
+package pbft
 
 import (
 	"sync"
 
-	"github.com/it-chain/iLogger"
+	"github.com/it-chain/engine/common/logger"
 )
 
-const CANDIDATE = "CANDIDATE"
-const TICKING = "TICKING"
+const (
+	CANDIDATE ElectionState = "CANDIDATE"
+	TICKING   ElectionState = "TICKING"
+)
 
 type Election struct {
 	ipAddress string
-	candidate *Peer  // candidate peer to be leader later
-	leftTime  int    //left time in millisecond
-	state     string //candidate, ticking
+	candidate *Representative // candidate peer to be leader later
+	leftTime  int             //left time in millisecond
+	state     ElectionState
 	voteCount int
 	mux       sync.Mutex
 }
 
-func NewElection(ipAddress string, leftTime int, state string, voteCount int) Election {
+type ElectionState string
+
+func NewElection(ipAddress string, leftTime int, state ElectionState, voteCount int) Election {
 
 	return Election{
 		ipAddress: ipAddress,
-		candidate: &Peer{},
+		candidate: &Representative{},
 		leftTime:  leftTime,
 		state:     state,
 		voteCount: voteCount,
@@ -55,7 +59,7 @@ func (election *Election) SetLeftTime() int {
 }
 
 func (election *Election) ResetLeftTime() {
-	iLogger.Infof(nil, "reset lefttime from %s", election.ipAddress)
+	logger.Infof(nil, "reset lefttime from %s", election.ipAddress)
 
 	election.mux.Lock()
 	defer election.mux.Unlock()
@@ -67,23 +71,24 @@ func (election *Election) ResetLeftTime() {
 func (election *Election) CountDownLeftTimeBy(tick int) {
 
 	if election.leftTime == 0 {
+		logger.Info(nil, "[consensus] left time is 0")
 		return
 	}
 
 	election.leftTime = election.leftTime - tick
 }
 
-func (election *Election) SetState(state string) {
+func (election *Election) SetState(state ElectionState) {
 
 	election.mux.Lock()
 	defer election.mux.Unlock()
 
-	iLogger.Infof(nil, "set state to: %s", state)
+	logger.Infof(nil, "set state to: %s", state)
 
 	election.state = state
 }
 
-func (election *Election) GetState() string {
+func (election *Election) GetState() ElectionState {
 
 	election.mux.Lock()
 	defer election.mux.Unlock()
@@ -120,11 +125,11 @@ func (election *Election) CountUpVoteCount() {
 	election.voteCount = election.voteCount + 1
 }
 
-func (e *Election) SetCandidate(peer *Peer) {
-	e.candidate = peer
+func (e *Election) SetCandidate(representative *Representative) {
+	e.candidate = representative
 }
 
-func (e *Election) GetCandidate() *Peer {
+func (e *Election) GetCandidate() *Representative {
 
 	return e.candidate
 }

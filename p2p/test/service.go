@@ -38,11 +38,10 @@ func SetTestEnvironment(processList []ProcessIdentity) map[string]*mock.Process 
 	m := make(map[string]*mock.Process)
 	for _, entity := range processList {
 		// avengers - create process and network
-		process := mock.NewProcess()
-		process.Init(entity.Id)
+		process := mock.NewProcess(entity.Id)
 		networkManager.AddProcess(process)
 
-		election := p2p.NewElection(entity.Id, 30, p2p.Ticking, 0)
+		election := p2p.NewElection(entity.Id, 30, p2p.TICKING, 0)
 		peerRepository := mem.NewPeerReopository()
 		savePeerList(peerRepository, processList)
 
@@ -75,7 +74,7 @@ func SetTestEnvironment(processList []ProcessIdentity) map[string]*mock.Process 
 
 		process.Register(&electionService)
 		process.Register(&peerRepository)
-		m[process.Id] = &process
+		m[process.Id] = process
 	}
 
 	iLogger.Infof(nil, "created process: %v", m)

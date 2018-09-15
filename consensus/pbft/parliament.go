@@ -21,7 +21,7 @@ import (
 )
 
 type Parliament struct {
-	Leader
+	Leader              Leader
 	RepresentativeTable map[string]*Representative
 	peerQueryApi        PeerQueryApi
 	mux                 sync.Mutex
@@ -44,21 +44,20 @@ func (l Leader) GetID() string {
 }
 
 type Representative struct {
-	ID RepresentativeID
+	ID        string
+	IpAddress string
 }
-
-type RepresentativeID string
 
 func (r Representative) GetID() string {
 	return string(r.ID)
 }
 
 func NewRepresentative(ID string) *Representative {
-	return &Representative{ID: RepresentativeID(ID)}
+	return &Representative{ID: ID}
 }
 
-// refresh representatives
-func (p *Parliament) RefreshRepresentatives() error {
+// build parliament
+func (p *Parliament) Build() error {
 	p.mux.Lock()
 	defer p.mux.Unlock()
 
@@ -69,7 +68,7 @@ func (p *Parliament) RefreshRepresentatives() error {
 	for id, peer := range pt {
 
 		p.RepresentativeTable[id] = &Representative{
-			ID: RepresentativeID(peer.ID),
+			ID: peer.ID,
 		}
 	}
 
