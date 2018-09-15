@@ -29,13 +29,13 @@ import (
 )
 
 type ElectionApi struct {
-	election     *pbft.Election
+	election     *pbft.ElectionService
 	parliament   *pbft.Parliament
 	eventService common.EventService
 	mux          sync.Mutex
 }
 
-func NewElectionApi(election *pbft.Election, parliament *pbft.Parliament, eventService common.EventService) *ElectionApi {
+func NewElectionApi(election *pbft.ElectionService, parliament *pbft.Parliament, eventService common.EventService) *ElectionApi {
 
 	return &ElectionApi{
 		mux:          sync.Mutex{},
@@ -76,7 +76,7 @@ func (es *ElectionApi) Vote(connectionId string) error {
 }
 
 // broadcast leader to other peers
-func (es *ElectionApi) BroadcastLeader(rep pbft.Representative) error {
+func (es *ElectionApi) broadcastLeader(rep pbft.Representative) error {
 	logger.Info(nil, "[consensus] Broadcast leader")
 
 	updateLeaderMessage := pbft.UpdateLeaderMessage{
@@ -118,7 +118,7 @@ func (es *ElectionApi) DecideToBeLeader() error {
 			IpAddress: es.election.GetIpAddress(),
 		}
 
-		if err := es.BroadcastLeader(representative); err != nil {
+		if err := es.broadcastLeader(representative); err != nil {
 			return err
 		}
 	}
@@ -143,7 +143,7 @@ func (es *ElectionApi) ElectLeaderWithRaft() {
 	go func() {
 		es.election.SetState(pbft.TICKING)
 
-		es.election.SetLeftTime()
+		es.election.InitLeftTime()
 
 		timeout := time.After(time.Duration(es.election.GetLeftTime()) * time.Millisecond)
 		tick := time.Tick(1 * time.Millisecond)
@@ -201,6 +201,14 @@ func (es *ElectionApi) RequestVote(connectionIds []string) error {
 	es.eventService.Publish("message.deliver", grpcDeliverCommand)
 
 	return nil
+}
+
+func (ea *ElectionApi) GetIpAddress() string {
+	return ea.election.GetIpAddress()
+}
+
+func (ea *ElectionApi) GetCandidate() *pbft.Representative {
+	return ea.election.GetCandidate()
 }
 
 func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
