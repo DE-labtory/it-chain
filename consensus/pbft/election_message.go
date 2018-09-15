@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package p2p
-
-type RequestLeaderInfoMessage struct {
-	TimeUnix int64
-}
+package pbft
 
 type UpdateLeaderMessage struct {
-	Peer Peer
+	Representative Representative
 }
 
-type PLTableMessage struct {
-	PLTable PLTable
+type ParliamentMessage struct {
+	Parliament Parliament
 }
 
 type RequestVoteMessage struct {

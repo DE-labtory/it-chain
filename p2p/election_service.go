@@ -98,9 +98,9 @@ func (es *ElectionService) DecideToBeLeader() error {
 
 	//	1. if candidate, reset left time
 	//	2. count up
-	if es.Election.GetState() == Candidate {
+	if es.Election.GetState() == CANDIDATE {
 
-		es.Election.CountUp()
+		es.Election.CountUpVoteCount()
 	}
 
 	//	3. if counted is same with num of peer-1 set leader and publish
@@ -129,7 +129,7 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 	//3. while ticking, count down leader repo left time
 	//4. Send message having 'RequestVoteProtocol' to other node
 	go func() {
-		es.Election.state = Ticking
+		es.Election.state = TICKING
 
 		es.Election.leftTime = GenRandomInRange(150, 300)
 
@@ -144,9 +144,9 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 				// when timed out
 				// 1. if state is ticking, be candidate and request vote
 				// 2. if state is candidate, reset state and left time
-				if es.Election.GetState() == Ticking {
+				if es.Election.GetState() == TICKING {
 					iLogger.Infof(nil, "candidate process: %v", es.Election.candidate)
-					es.Election.SetState(Candidate)
+					es.Election.SetState(CANDIDATE)
 
 					pLTable, _ := es.peerQueryService.GetPLTable()
 
@@ -160,10 +160,10 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 
 					es.RequestVote(connectionIds)
 
-				} else if es.Election.GetState() == Candidate {
+				} else if es.Election.GetState() == CANDIDATE {
 					//reset time and state chane candidate -> ticking when timed in candidate state
 					es.Election.ResetLeftTime()
-					es.Election.SetState(Ticking)
+					es.Election.SetState(TICKING)
 				}
 
 			case <-tick:
@@ -180,7 +180,7 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 func (es *ElectionService) RequestVote(connectionIds []string) error {
 
 	// 0. be candidate
-	es.Election.state = Candidate
+	es.Election.state = CANDIDATE
 	// 1. create request vote message
 	// 2. send message
 	requestVoteMessage := RequestVoteMessage{}

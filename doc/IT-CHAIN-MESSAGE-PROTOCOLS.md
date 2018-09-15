@@ -3,7 +3,7 @@
 ### LeaderInfoRequestProtocol
 request of leader info
 
-Message: `LeaderInfoRequestMessage`
+Message: `RequestLeaderInfoMessage`
 
 ### LeaderInfoDeliverProtocol
 delivery of leader info

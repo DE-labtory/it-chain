@@ -43,12 +43,12 @@ func (ps *PeerService) RequestLeaderInfo(connectionId string) error {
 		return ErrEmptyPeerId
 	}
 
-	body := p2p.LeaderInfoRequestMessage{
+	body := p2p.RequestLeaderInfoMessage{
 		TimeUnix: time.Now().Unix(),
 	}
 
 	//message deliver command for delivering leader info
-	deliverCommand, err := CreateGrpcDeliverCommand("LeaderInfoRequestMessage", body)
+	deliverCommand, err := CreateGrpcDeliverCommand("RequestLeaderInfoMessage", body)
 
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func (ps *PeerService) RequestPeerList(peerId p2p.PeerId) error {
 	if peerId.Id == "" {
 		return ErrEmptyPeerId
 	}
-	body := p2p.LeaderInfoRequestMessage{
+	body := p2p.RequestLeaderInfoMessage{
 		TimeUnix: time.Now().Unix(),
 	}
 

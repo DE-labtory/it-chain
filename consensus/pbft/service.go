@@ -18,6 +18,8 @@ package pbft
 
 import (
 	"errors"
+	"math/rand"
+	"time"
 )
 
 var ErrNoParliamentMember = errors.New("No parliament member.")
@@ -54,4 +56,11 @@ type PeerQueryApi interface {
 		ID        string
 		IpAddress string
 	}, error)
+}
+
+func GenRandomInRange(min, max int) int {
+
+	rand.Seed(time.Now().UnixNano())
+
+	return rand.Intn(max-min) + min
 }
