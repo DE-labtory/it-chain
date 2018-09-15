@@ -80,7 +80,7 @@ func TestPrevoteMsgPool_Save(t *testing.T) {
 	assert.Equal(t, 2, len(pPool.Get()))
 }
 
-func TestPrepareMsgPool_RemoveAllMsgs(t *testing.T) {
+func TestPrevoteMsgPool_RemoveAllMsgs(t *testing.T) {
 	// given
 	pPool := pbft.NewPrevoteMsgPool()
 
@@ -99,7 +99,7 @@ func TestPrepareMsgPool_RemoveAllMsgs(t *testing.T) {
 	assert.Equal(t, 0, len(pPool.Get()))
 }
 
-func TestCommitMsgPool_Save(t *testing.T) {
+func TestPreCommitMsgPool_Save(t *testing.T) {
 	// given
 	cPool := pbft.NewPreCommitMsgPool()
 
@@ -140,7 +140,7 @@ func TestCommitMsgPool_Save(t *testing.T) {
 	assert.Equal(t, 2, len(cPool.Get()))
 }
 
-func TestCommitMsgPool_RemoveAllMsgs(t *testing.T) {
+func TestPreCommitMsgPool_RemoveAllMsgs(t *testing.T) {
 	// given
 	cPool := pbft.NewPreCommitMsgPool()
 
@@ -158,7 +158,7 @@ func TestCommitMsgPool_RemoveAllMsgs(t *testing.T) {
 	assert.Equal(t, 0, len(cPool.Get()))
 }
 
-func TestConsensus_SavePrevoteMsg(t *testing.T) {
+func TestState_SavePrevoteMsg(t *testing.T) {
 	// given
 	c := pbft.State{
 		StateID:         pbft.NewStateID("c1"),
@@ -201,7 +201,7 @@ func TestConsensus_SavePrevoteMsg(t *testing.T) {
 	assert.Equal(t, 1, len(c.PrevoteMsgPool.Get()))
 }
 
-func TestConsensus_SavePreCommitMsg(t *testing.T) {
+func TestState_SavePreCommitMsg(t *testing.T) {
 	// given
 	c := pbft.State{
 		StateID:         pbft.NewStateID("c1"),
