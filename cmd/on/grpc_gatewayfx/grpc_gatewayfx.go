@@ -67,7 +67,8 @@ func RegisterHandlers(connectionCommandHandler *adapter.ConnectionCommandHandler
 	}
 }
 
-func InitgRPCServer(lifecycle fx.Lifecycle, config *conf.Configuration, hostService *infra.GrpcHostService) {
+func InitgRPCServer(lifecycle fx.Lifecycle, config *conf.Configuration, hostService *infra.GrpcHostService, connectionApi *api.ConnectionApi) {
+	hostService.SetHandler(connectionApi)
 
 	lifecycle.Append(fx.Hook{
 		OnStart: func(context context.Context) error {
