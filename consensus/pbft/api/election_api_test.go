@@ -62,39 +62,9 @@ func TestElectionApi_Vote(t *testing.T) {
 	}
 }
 
-func TestElectionApi_RequestVote(t *testing.T) {
-	tests := map[string]struct {
-		input struct {
-			processList []string
-		}
-	}{
-		"4 node test": {
-			input: struct{ processList []string }{
-				processList: []string{"1", "2", "3", "4"},
-			},
-		},
-	}
+//TODO: implement it!
+func TestElectionApi_BroadcastLeader(t *testing.T) {
 
-	for testName, test := range tests {
-		t.Logf("running test case %s", testName)
-
-		env := test2.SetTestEnvironment(test.input.processList)
-
-		electionApi := (env.ProcessMap["1"].Services["ElectionApi"]).(*api.ElectionApi)
-
-		t.Logf("electionService of 1: %v", env.ProcessMap["1"].Services["ElectionApi"])
-		t.Logf("electionService of 2: %v", env.ProcessMap["2"].Services["ElectionApi"])
-
-		t.Logf("before vote check state: %v", electionApi.GetState())
-
-		electionApi.SetState(pbft.CANDIDATE)
-		electionApi.RequestVote([]string{"2"})
-		t.Logf("after vote check state: %v", electionApi.GetState())
-
-		time.Sleep(4 * time.Second)
-
-		assert.Equal(t, electionApi.GetVoteCount(), 1)
-	}
 }
 
 func TestElectionApi_DecideToBeLeader(t *testing.T) {
@@ -160,6 +130,41 @@ func TestElectionApi_DecideToBeLeader(t *testing.T) {
 
 }
 
+func TestElectionApi_RequestVote(t *testing.T) {
+	tests := map[string]struct {
+		input struct {
+			processList []string
+		}
+	}{
+		"4 node test": {
+			input: struct{ processList []string }{
+				processList: []string{"1", "2", "3", "4"},
+			},
+		},
+	}
+
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+
+		env := test2.SetTestEnvironment(test.input.processList)
+
+		electionApi := (env.ProcessMap["1"].Services["ElectionApi"]).(*api.ElectionApi)
+
+		t.Logf("electionService of 1: %v", env.ProcessMap["1"].Services["ElectionApi"])
+		t.Logf("electionService of 2: %v", env.ProcessMap["2"].Services["ElectionApi"])
+
+		t.Logf("before vote check state: %v", electionApi.GetState())
+
+		electionApi.SetState(pbft.CANDIDATE)
+		electionApi.RequestVote([]string{"2"})
+		t.Logf("after vote check state: %v", electionApi.GetState())
+
+		time.Sleep(4 * time.Second)
+
+		assert.Equal(t, electionApi.GetVoteCount(), 1)
+	}
+}
+
 //func TestElectionService_BroadcastLeader(t *testing.T) {
 //	tests := map[string]struct {
 //		input struct {
@@ -203,7 +208,7 @@ func TestElectionApi_DecideToBeLeader(t *testing.T) {
 //
 //}
 //
-func TestElectionService_ElectLeaderWithRaft(t *testing.T) {
+func TestElectionApi_ElectLeaderWithRaft(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			processList []string
@@ -253,4 +258,24 @@ func TestGenRandomInRange(t *testing.T) {
 	t.Logf("%v", v1)
 	t.Logf("%v", v2)
 	t.Logf("%v", v3)
+}
+
+//TODO: implement it!
+func TestElectionApi_GetCandidate(t *testing.T) {
+
+}
+
+//TODO
+func TestElectionApi_GetIpAddress(t *testing.T) {
+
+}
+
+//TODO
+func TestElectionApi_GetState(t *testing.T) {
+
+}
+
+//TODO
+func TestElectionApi_GetVoteCount(t *testing.T) {
+
 }

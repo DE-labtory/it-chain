@@ -16,7 +16,6 @@
 
 package api_test
 
-//
 //func TestNewLeaderApi(t *testing.T) {
 //	parliament := &pbft.Parliament{
 //		Leader: &pbft.Leader{
