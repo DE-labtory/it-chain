@@ -52,6 +52,13 @@ var modeConsts = [...]string{
 	"pbft",
 }
 
+// GOPATH 설정유무 확인, conf package 호출 시 최초 실행되는 func
+func init() {
+	if os.Getenv("GOPATH") == "" {
+		panic("Need to set GOPATH")
+	}
+}
+
 // it-chain의 conf path를 받아온다.
 func SetConfigPath(path string) {
 	confPath = path
