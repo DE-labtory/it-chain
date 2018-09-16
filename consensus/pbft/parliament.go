@@ -16,15 +16,16 @@
 
 package pbft
 
-import (
-	"sync"
-)
-
 type Parliament struct {
 	Leader              *Leader
 	RepresentativeTable map[string]*Representative
-	peerQueryApi        PeerQueryApi
-	mux                 sync.Mutex
+}
+
+func NewParliament() *Parliament {
+	return &Parliament{
+		Leader:              &Leader{},
+		RepresentativeTable: make(map[string]*Representative),
+	}
 }
 
 type Leader struct {
@@ -46,52 +47,4 @@ func (r Representative) GetID() string {
 
 func NewRepresentative(ID string) *Representative {
 	return &Representative{ID: ID}
-}
-
-func (p *Parliament) SetLeader(representative *Representative) error {
-	p.mux.Lock()
-	defer p.mux.Unlock()
-
-	p.Leader = &Leader{
-		LeaderId: representative.ID,
-	}
-
-	return nil
-
-}
-
-// build parliament
-func (p *Parliament) Build() error {
-	p.mux.Lock()
-	defer p.mux.Unlock()
-
-	// get peer table from peer query api
-	pt, err := p.peerQueryApi.GetPeerTable()
-
-	// extract representatives from peer table
-	for id, peer := range pt {
-
-		p.RepresentativeTable[id] = &Representative{
-			ID: peer.ID,
-		}
-	}
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (p *Parliament) FindRepresentativeByIpAddress(ipAddress string) *Representative {
-	for _, rep := range p.RepresentativeTable {
-
-		if rep.IpAddress == ipAddress {
-
-			return rep
-		}
-
-	}
-
-	return nil
 }

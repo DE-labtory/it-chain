@@ -17,22 +17,28 @@
 package adapter
 
 import (
+	"sync"
+
 	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/consensus/pbft"
 )
 
 type ParliamentService struct {
-	pQuery api_gateway.PeerQueryApi
+	Parliament   *pbft.Parliament
+	peerQueryApi api_gateway.PeerQueryApi
+	mux          sync.Mutex
 }
 
-func NewParliamentService(api api_gateway.PeerQueryApi) *ParliamentService {
+func NewParliamentService(parliament *pbft.Parliament, api api_gateway.PeerQueryApi) *ParliamentService {
 	return &ParliamentService{
-		pQuery: api,
+		Parliament:   parliament,
+		peerQueryApi: api,
+		mux:          sync.Mutex{},
 	}
 }
 
 func (ps *ParliamentService) RequestLeader() (pbft.MemberID, error) {
-	l, err := ps.pQuery.GetLeader()
+	l, err := ps.peerQueryApi.GetLeader()
 
 	if err != nil {
 		return "", err
@@ -42,7 +48,7 @@ func (ps *ParliamentService) RequestLeader() (pbft.MemberID, error) {
 }
 
 func (ps *ParliamentService) RequestPeerList() ([]pbft.MemberID, error) {
-	pl, err := ps.pQuery.GetPeerList()
+	pl, err := ps.peerQueryApi.GetPeerList()
 
 	if err != nil {
 		return nil, err
@@ -72,4 +78,79 @@ func (p *ParliamentService) IsNeedConsensus() bool {
 	}
 
 	return false
+}
+
+// build parliament
+func (p *ParliamentService) Build() error {
+	p.mux.Lock()
+	defer p.mux.Unlock()
+
+	// get peer table from peer query api
+	pt, err := p.peerQueryApi.GetPeerTable()
+
+	if err != nil {
+		return err
+	}
+
+	// extract representatives from peer table
+	for _, peer := range pt {
+		p.Parliament.RepresentativeTable[peer.ID] = &pbft.Representative{
+			ID:        peer.ID,
+			IpAddress: peer.IpAddress,
+		}
+	}
+
+	return nil
+}
+
+func (p *ParliamentService) SetLeader(representative *pbft.Representative) error {
+	p.mux.Lock()
+	defer p.mux.Unlock()
+
+	p.Parliament.Leader = &pbft.Leader{
+		LeaderId: representative.ID,
+	}
+
+	return nil
+}
+
+func (p *ParliamentService) GetRepresentativeById(id string) *pbft.Representative {
+	p.mux.Lock()
+	defer p.mux.Unlock()
+
+	return p.Parliament.RepresentativeTable[id]
+}
+
+func (p *ParliamentService) GetRepresentativeTable() map[string]*pbft.Representative {
+	p.mux.Lock()
+	defer p.mux.Unlock()
+
+	return p.Parliament.RepresentativeTable
+}
+
+func (p *ParliamentService) GetParliament() *pbft.Parliament {
+	p.mux.Lock()
+	defer p.mux.Unlock()
+
+	return p.Parliament
+}
+
+func (p *ParliamentService) GetLeader() *pbft.Leader {
+	p.mux.Lock()
+	defer p.mux.Unlock()
+
+	return p.Parliament.Leader
+}
+
+func (p *ParliamentService) FindRepresentativeByIpAddress(ipAddress string) *pbft.Representative {
+	for _, rep := range p.Parliament.RepresentativeTable {
+
+		if rep.IpAddress == ipAddress {
+
+			return rep
+		}
+
+	}
+
+	return nil
 }

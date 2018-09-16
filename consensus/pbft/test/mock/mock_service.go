@@ -59,9 +59,16 @@ func (m PropagateService) BroadcastPreCommitMsg(msg pbft.PreCommitMsg, represent
 }
 
 type ParliamentService struct {
-	RequestLeaderFunc   func() (pbft.MemberID, error)
-	RequestPeerListFunc func() ([]pbft.MemberID, error)
-	IsNeedConsensusFunc func() bool
+	RequestLeaderFunc                 func() (pbft.MemberID, error)
+	RequestPeerListFunc               func() ([]pbft.MemberID, error)
+	IsNeedConsensusFunc               func() bool
+	BuildFunc                         func() error
+	SetLeaderFunc                     func(representative *pbft.Representative) error
+	GetRepresentativeByIdFunc         func(id string) *pbft.Representative
+	GetRepresentativeTableFunc        func() map[string]*pbft.Representative
+	GetParliamentFunc                 func() *pbft.Parliament
+	GetLeaderFunc                     func() *pbft.Leader
+	FindRepresentativeByIpAddressFunc func(ipAddress string) *pbft.Representative
 }
 
 func (m ParliamentService) RequestLeader() (pbft.MemberID, error) {
@@ -72,4 +79,25 @@ func (m ParliamentService) RequestPeerList() ([]pbft.MemberID, error) {
 }
 func (m ParliamentService) IsNeedConsensus() bool {
 	return m.IsNeedConsensusFunc()
+}
+func (m ParliamentService) Build() error {
+	return m.BuildFunc()
+}
+func (m ParliamentService) SetLeader(representative *pbft.Representative) error {
+	return m.SetLeaderFunc(representative)
+}
+func (m ParliamentService) GetRepresentativeById(id string) *pbft.Representative {
+	return m.GetRepresentativeByIdFunc(id)
+}
+func (m ParliamentService) GetRepresentativeTable() map[string]*pbft.Representative {
+	return m.GetRepresentativeTableFunc()
+}
+func (m ParliamentService) GetParliament() *pbft.Parliament {
+	return m.GetParliamentFunc()
+}
+func (m ParliamentService) GetLeader() *pbft.Leader {
+	return m.GetLeaderFunc()
+}
+func (m ParliamentService) FindRepresentativeByIpAddress(ipAddress string) *pbft.Representative {
+	return m.FindRepresentativeByIpAddressFunc(ipAddress)
 }

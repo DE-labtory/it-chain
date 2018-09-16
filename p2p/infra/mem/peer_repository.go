@@ -30,8 +30,8 @@ type PeerRepository struct {
 	pLTable p2p.PLTable
 }
 
-func NewPeerReopository() PeerRepository {
-	return PeerRepository{
+func NewPeerReopository() *PeerRepository {
+	return &PeerRepository{
 		mux:     sync.RWMutex{},
 		pLTable: *p2p.NewPLTable(p2p.Leader{p2p.LeaderId{""}}, make(map[string]p2p.Peer)),
 	}

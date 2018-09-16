@@ -34,6 +34,13 @@ type ParliamentService interface {
 	RequestLeader() (MemberID, error)
 	RequestPeerList() ([]MemberID, error)
 	IsNeedConsensus() bool
+	Build() error
+	SetLeader(representative *Representative) error
+	GetRepresentativeById(id string) *Representative
+	GetRepresentativeTable() map[string]*Representative
+	GetParliament() *Parliament
+	GetLeader() *Leader
+	FindRepresentativeByIpAddress(ipAddress string) *Representative
 }
 
 // 연결된 peer 중에서 consensus 에 참여할 representative 들을 선출

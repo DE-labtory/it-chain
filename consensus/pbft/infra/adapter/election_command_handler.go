@@ -22,8 +22,8 @@ import (
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
+	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
-	"github.com/it-chain/engine/p2p"
 )
 
 var ErrLeaderInfoDeliver = errors.New("leader info deliver failed")
@@ -32,12 +32,12 @@ var ErrPeerDeliver = errors.New("peer deliver failed")
 var ErrUnmarshal = errors.New("error during unmarshal")
 
 type ElectionCommandHandler struct {
-	leaderApi   api.LeaderApi
+	leaderApi   *api.LeaderApi
 	electionApi api.ElectionApi
 }
 
 func NewElectionCommandHandler(
-	leaderApi api.LeaderApi,
+	leaderApi *api.LeaderApi,
 	electionApi *api.ElectionApi) *ElectionCommandHandler {
 	return &ElectionCommandHandler{
 		leaderApi:   leaderApi,
@@ -51,15 +51,27 @@ func (gch *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveG
 
 	case "RequestVoteProtocol":
 		logger.Infof(nil, "[consensus] handling request vote from process: %v", gch.electionApi.GetIpAddress())
-		gch.electionApi.Vote(command.ConnectionID)
+
+		err := gch.electionApi.Vote(command.ConnectionID)
+
+		if err != nil {
+			return err
+		}
 
 	case "VoteLeaderProtocol":
+		logger.Infof(nil, "voted from process: %v", command.ConnectionID)
+
 		//	1. if candidate, reset left time
 		//	2. count up
 		//	3. if counted is same with num of peer-1 set leader and publish
 
 		logger.Infof(nil, "[consensus] received VoteLeaderProtocol command:", command)
-		gch.electionApi.DecideToBeLeader()
+
+		err := gch.electionApi.DecideToBeLeader()
+
+		if err != nil {
+			return err
+		}
 
 	case "UpdateLeaderProtocol":
 		// if received leader is not what i voted for, return nil
@@ -67,15 +79,19 @@ func (gch *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveG
 			return nil
 		}
 
-		toBeLeader := &p2p.UpdateLeaderMessage{}
+		toBeLeader := &pbft.UpdateLeaderMessage{}
 		err := common.Deserialize(command.Body, toBeLeader)
 
-		logger.Infof(nil, "[consensus] update leader with", toBeLeader.Peer)
+		logger.Infof(nil, "[consensus] update leader with", toBeLeader.Representative)
 		if err != nil {
 			return err
 		}
 
-		gch.leaderApi.UpdateLeaderWithAddress(toBeLeader.Peer.IpAddress)
+		err2 := gch.leaderApi.UpdateLeaderWithAddress(toBeLeader.Representative.IpAddress)
+
+		if err2 != nil {
+			return err2
+		}
 	}
 
 	return nil
