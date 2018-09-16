@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/it-chain/engine/api_gateway"
+	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/infra/mem"
@@ -34,8 +35,9 @@ func TestParliamentService_RequestLeader(t *testing.T) {
 		IpAddress: "1.1.1.1",
 		PeerId:    p2p.PeerId{"p1"},
 	})
+	parliament := pbft.NewParliament()
 
-	ps := adapter.NewParliamentService(api_gateway.NewPeerQueryApi(&peerRepository))
+	ps := adapter.NewParliamentService(parliament, api_gateway.NewPeerQueryApi(peerRepository))
 
 	// when
 	l, _ := ps.RequestLeader()
@@ -73,7 +75,9 @@ func TestParliamentService_RequestPeerList(t *testing.T) {
 	peerRepository.Save(p1)
 	peerRepository.Save(p2)
 
-	ps := adapter.NewParliamentService(api_gateway.NewPeerQueryApi(&peerRepository))
+	parliament := pbft.NewParliament()
+
+	ps := adapter.NewParliamentService(parliament, api_gateway.NewPeerQueryApi(peerRepository))
 
 	// when
 	peerList, err := ps.RequestPeerList()
@@ -86,7 +90,8 @@ func TestParliamentService_RequestPeerList(t *testing.T) {
 func TestParliamentService_IsNeedConsensus(t *testing.T) {
 	// given (case 1 : no member)
 	peerRepository := mem.NewPeerReopository()
-	ps := adapter.NewParliamentService(api_gateway.NewPeerQueryApi(&peerRepository))
+	parliament := pbft.NewParliament()
+	ps := adapter.NewParliamentService(parliament, api_gateway.NewPeerQueryApi(peerRepository))
 
 	// when
 	flag := ps.IsNeedConsensus()

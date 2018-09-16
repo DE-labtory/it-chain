@@ -29,28 +29,28 @@ var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 var ErrNoMatchingPeerWithIpAddress = errors.New("no matching peer with ip address")
 
 type LeaderApi struct {
-	parliament   *pbft.Parliament
-	eventService common.EventService
+	parliamentService pbft.ParliamentService
+	eventService      common.EventService
 }
 
-func NewLeaderApi(parliament *pbft.Parliament, eventService common.EventService) *LeaderApi {
+func NewLeaderApi(ps pbft.ParliamentService, eventService common.EventService) *LeaderApi {
 
 	return &LeaderApi{
-		parliament:   parliament,
-		eventService: eventService,
+		parliamentService: ps,
+		eventService:      eventService,
 	}
 }
 
 func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 	//1. loop peer list and find specific address
 	//2. update specific peer as leader
-	rep := la.parliament.FindRepresentativeByIpAddress(ipAddress)
+	rep := la.parliamentService.FindRepresentativeByIpAddress(ipAddress)
 
 	if rep == nil {
 		return ErrNoMatchingPeerWithIpAddress
 	}
 
-	la.parliament.SetLeader(&pbft.Representative{
+	la.parliamentService.SetLeader(&pbft.Representative{
 		ID:        rep.ID,
 		IpAddress: ipAddress,
 	})
@@ -64,9 +64,9 @@ func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
 }
 
 func (la *LeaderApi) GetParliament() *pbft.Parliament {
-	return la.parliament
+	return la.parliamentService.GetParliament()
 }
 
 func (la *LeaderApi) GetLeader() *pbft.Leader {
-	return la.parliament.Leader
+	return la.parliamentService.GetLeader()
 }

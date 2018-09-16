@@ -29,48 +29,47 @@ import (
 )
 
 type ElectionApi struct {
-	election     *pbft.ElectionService
-	parliament   *pbft.Parliament
-	eventService common.EventService
-	mux          sync.Mutex
+	ElectionService   *pbft.ElectionService
+	parliamentService pbft.ParliamentService
+	eventService      common.EventService
+	mux               sync.Mutex
 }
 
-func NewElectionApi(election *pbft.ElectionService, parliament *pbft.Parliament, eventService common.EventService) *ElectionApi {
+func NewElectionApi(electionService *pbft.ElectionService, parliamentService pbft.ParliamentService, eventService common.EventService) *ElectionApi {
 
 	return &ElectionApi{
-		mux:          sync.Mutex{},
-		election:     election,
-		parliament:   parliament,
-		eventService: eventService,
+		mux:               sync.Mutex{},
+		ElectionService:   electionService,
+		parliamentService: parliamentService,
+		eventService:      eventService,
 	}
 }
 
-func (es *ElectionApi) Vote(connectionId string) error {
+func (ea *ElectionApi) Vote(connectionId string) error {
 
-	representative := es.parliament.RepresentativeTable[connectionId]
+	representative := ea.parliamentService.GetRepresentativeById(connectionId)
 
-	candidate := es.election.GetCandidate()
+	candidate := ea.ElectionService.GetCandidate()
 
-	// if peer has no candidate set candidate
-	if candidate.ID == "" {
-
-		es.election.SetCandidate(representative)
-	} else {
-
+	if candidate.ID != "" {
 		logger.Info(nil, "[consensus] peer has already received request vote message")
 		return nil
 	}
 
+	ea.ElectionService.SetCandidate(representative)
+
+	logger.Infof(nil, "[consensus] vote for candidate: %v", ea.ElectionService.GetCandidate())
+
 	//if leftTime >0, reset left time and send VoteLeaderMessage
 
-	es.election.ResetLeftTime()
+	ea.ElectionService.ResetLeftTime()
 
 	voteLeaderMessage := pbft.VoteMessage{}
 
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("VoteLeaderProtocol", voteLeaderMessage)
 	grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
 
-	es.eventService.Publish("message.deliver", grpcDeliverCommand)
+	ea.eventService.Publish("message.deliver", grpcDeliverCommand)
 
 	return nil
 }
@@ -85,7 +84,8 @@ func (es *ElectionApi) broadcastLeader(rep pbft.Representative) error {
 
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
 
-	for _, r := range es.parliament.RepresentativeTable {
+	table := es.parliamentService.GetRepresentativeTable()
+	for _, r := range table {
 		grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, r.ID)
 	}
 
@@ -101,13 +101,14 @@ func (es *ElectionApi) broadcastLeader(rep pbft.Representative) error {
 
 //broadcast leader when voted fully
 func (es *ElectionApi) DecideToBeLeader() error {
-
-	if es.election.GetState() != pbft.CANDIDATE {
-		return nil
-	}
 	//	1. if candidate, reset left time
 	//	2. count up
-	es.election.CountUpVoteCount()
+	if es.ElectionService.GetState() != pbft.CANDIDATE {
+		return nil
+	}
+	logger.Infof(nil, "[consensus] number of votes: %v", es.ElectionService.GetVoteCount())
+
+	es.ElectionService.CountUpVoteCount()
 
 	//	3. if fully voted set leader and publish
 
@@ -115,7 +116,7 @@ func (es *ElectionApi) DecideToBeLeader() error {
 
 		representative := pbft.Representative{
 			ID:        "",
-			IpAddress: es.election.GetIpAddress(),
+			IpAddress: es.ElectionService.GetIpAddress(),
 		}
 
 		if err := es.broadcastLeader(representative); err != nil {
@@ -127,8 +128,8 @@ func (es *ElectionApi) DecideToBeLeader() error {
 }
 
 func (ea *ElectionApi) isFullyVoted() bool {
-	numOfPeers := len(ea.parliament.RepresentativeTable)
-	if ea.election.GetVoteCount() == numOfPeers-1 {
+	numOfPeers := len(ea.parliamentService.GetParliament().RepresentativeTable)
+	if ea.ElectionService.GetVoteCount() == numOfPeers-1 {
 		return true
 	}
 	return false
@@ -141,11 +142,11 @@ func (es *ElectionApi) ElectLeaderWithRaft() {
 	//3. while ticking, count down leader repo left time
 	//4. Send message having 'RequestVoteProtocol' to other node
 	go func() {
-		es.election.SetState(pbft.TICKING)
+		es.ElectionService.SetState(pbft.TICKING)
 
-		es.election.InitLeftTime()
+		es.ElectionService.InitLeftTime()
 
-		timeout := time.After(time.Duration(es.election.GetLeftTime()) * time.Millisecond)
+		timeout := time.After(time.Duration(es.ElectionService.GetLeftTime()) * time.Millisecond)
 		tick := time.Tick(1 * time.Millisecond)
 		end := true
 		for end {
@@ -156,27 +157,28 @@ func (es *ElectionApi) ElectLeaderWithRaft() {
 				// when timed out
 				// 1. if state is ticking, be candidate and request vote
 				// 2. if state is candidate, reset state and left time
-				if es.election.GetState() == pbft.TICKING {
-					logger.Infof(nil, "[consensus] candidate process: %v", es.election.GetCandidate())
-					es.election.SetState(pbft.CANDIDATE)
+				if es.ElectionService.GetState() == pbft.TICKING {
+					logger.Infof(nil, "[consensus] candidate process: %v", es.ElectionService.GetCandidate())
+					es.ElectionService.SetState(pbft.CANDIDATE)
 
 					connectionIds := make([]string, 0)
 
-					for _, r := range es.parliament.RepresentativeTable {
+					repTable := es.parliamentService.GetRepresentativeTable()
+					for _, r := range repTable {
 						connectionIds = append(connectionIds, r.ID)
 					}
 
 					es.RequestVote(connectionIds)
 
-				} else if es.election.GetState() == pbft.CANDIDATE {
+				} else if es.ElectionService.GetState() == pbft.CANDIDATE {
 					//reset time and state chane candidate -> ticking when timed in candidate state
-					es.election.ResetLeftTime()
-					es.election.SetState(pbft.TICKING)
+					es.ElectionService.ResetLeftTime()
+					es.ElectionService.SetState(pbft.TICKING)
 				}
 
 			case <-tick:
 				// count down left time while ticking
-				es.election.CountDownLeftTimeBy(1)
+				es.ElectionService.CountDownLeftTimeBy(1)
 			case <-time.After(5 * time.Second):
 				end = false
 			}
@@ -186,7 +188,6 @@ func (es *ElectionApi) ElectLeaderWithRaft() {
 }
 
 func (es *ElectionApi) RequestVote(connectionIds []string) error {
-
 	// 1. create request vote message
 	// 2. send message
 	requestVoteMessage := pbft.RequestVoteMessage{}
@@ -204,11 +205,25 @@ func (es *ElectionApi) RequestVote(connectionIds []string) error {
 }
 
 func (ea *ElectionApi) GetIpAddress() string {
-	return ea.election.GetIpAddress()
+	return ea.ElectionService.GetIpAddress()
 }
 
 func (ea *ElectionApi) GetCandidate() *pbft.Representative {
-	return ea.election.GetCandidate()
+	return ea.ElectionService.GetCandidate()
+}
+
+func (ea *ElectionApi) GetState() pbft.ElectionState {
+	return ea.ElectionService.GetState()
+}
+
+func (ea *ElectionApi) SetState(state pbft.ElectionState) error {
+	ea.ElectionService.SetState(state)
+
+	return nil
+}
+
+func (ea *ElectionApi) GetVoteCount() int {
+	return ea.ElectionService.GetVoteCount()
 }
 
 func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {

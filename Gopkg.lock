@@ -71,8 +71,8 @@
     "trees/binaryheap",
     "utils"
   ]
-  revision = "f6c17b524822278a87e3b3bd809fec33b51f5b46"
-  version = "v1.9.0"
+  revision = "1615341f118ae12f353cc8a983f35b584342c9b3"
+  version = "v1.12.0"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -166,10 +166,10 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/it-chain/avengers"
   packages = ["mock"]
-  revision = "35496cf12fcd437c68a738cae43edf1a06295b65"
+  revision = "d82700a16bb6a34c15bb551e6b6729ff0ab717f3"
+  version = "v0.3.1"
 
 [[projects]]
   name = "github.com/it-chain/bifrost"
@@ -270,6 +270,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  revision = "b729f2633dfe35f4d1d8a32385f6685610ce1cb5"
+
+[[projects]]
+  branch = "master"
   name = "github.com/kr/logfmt"
   packages = ["."]
   revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
@@ -349,8 +355,8 @@
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
-  version = "v1.0.6"
+  revision = "a67f783a3814b8729bd2dac5780b5f78f8dbd64d"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -452,8 +458,8 @@
     "internal/digreflect",
     "internal/dot"
   ]
-  revision = "d6ba99365e475c24e8ac02392eb3f78ccab2a6f3"
-  version = "v1.4.0"
+  revision = "27eb30e15ef3e7f67cd86f2b65c618e3e308c104"
+  version = "v1.5.0"
 
 [[projects]]
   name = "go.uber.org/fx"
@@ -512,7 +518,7 @@
     "publicsuffix",
     "trace"
   ]
-  revision = "26e67e76b6c3f6ce91f7c52def5af501b4e0f3a2"
+  revision = "f04abc6bdfa7a0171a8a0c9fd2ada9391044d056"
 
 [[projects]]
   branch = "master"
@@ -521,7 +527,7 @@
     "unix",
     "windows"
   ]
-  revision = "d0be0721c37eeb5299f245a996a483160fc36940"
+  revision = "2f1df4e56cdeb503a08d8577e6f1a7eb12efab82"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -548,7 +554,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "5a2fd4cab2d6d4a18e70c34937662526cd0c4bd1"
+  revision = "0e822944c569bf5c9afd034adaa56208bd2906ac"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -594,8 +600,8 @@
     "osfs",
     "util"
   ]
-  revision = "59952543636f55de3f860b477b615093d5c2c3e4"
-  version = "v4.2.1"
+  revision = "982626487c60a5252e7d0b695ca23fb0fa2fd670"
+  version = "v4.3.0"
 
 [[projects]]
   name = "gopkg.in/src-d/go-git.v4"
@@ -659,6 +665,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "04e77eff4c0e3e6e2869ec38cb129727a0595016e0433169e1539c6120b10d47"
+  inputs-digest = "4b9e412f1503f3f2b77f8c0b55b48106315b33bfd4f8336941292474e79086e8"
   solver-name = "gps-cdcl"
   solver-version = 1

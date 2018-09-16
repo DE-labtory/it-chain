@@ -17,14 +17,18 @@
 package test
 
 import (
+<<<<<<< HEAD
 	"github.com/it-chain/avengers/mock"
 	"github.com/it-chain/engine/api_gateway"
+=======
+>>>>>>> implement consensus leader election test case
 	"github.com/it-chain/engine/p2p"
-	"github.com/it-chain/engine/p2p/api"
-	"github.com/it-chain/engine/p2p/infra/adapter"
 	"github.com/it-chain/engine/p2p/infra/mem"
+<<<<<<< HEAD
 	mock2 "github.com/it-chain/engine/p2p/test/mock"
 	"github.com/it-chain/iLogger"
+=======
+>>>>>>> implement consensus leader election test case
 )
 
 type ProcessIdentity struct {
@@ -32,6 +36,7 @@ type ProcessIdentity struct {
 	IpAddress string
 }
 
+<<<<<<< HEAD
 func SetTestEnvironment(processList []ProcessIdentity) map[string]*mock.Process {
 	networkManager := mock.NewNetworkManager()
 
@@ -80,6 +85,57 @@ func SetTestEnvironment(processList []ProcessIdentity) map[string]*mock.Process 
 	iLogger.Infof(nil, "created process: %v", m)
 	return m
 }
+=======
+//
+//func SetTestEnvironment(processList []ProcessIdentity) map[string]*mock.Process {
+//	networkManager := mock.NewNetworkManager()
+//
+//	m := make(map[string]*mock.Process)
+//	for _, entity := range processList {
+//		// avengers - create process and network
+//		process := mock.NewProcess()
+//		networkManager.AddProcess(process)
+//
+//		election := p2p.NewElection(entity.Id, 30, p2p.Ticking, 0)
+//		peerRepository := mem.NewPeerReopository()
+//		savePeerList(peerRepository, processList)
+//
+//		peerQueryService := api_gateway.NewPeerQueryApi(&peerRepository)
+//
+//		// avengers - mock client, server
+//		client := mock.NewClient(entity.Id, networkManager.GrpcCall)
+//		server := mock.NewServer(entity.Id, networkManager.GrpcConsume)
+//
+//		eventService := mock2.MockEventService{}
+//		eventService.PublishFunc = func(topic string, event interface{}) error {
+//			return nil
+//		}
+//
+//		// inject avengers client
+//		electionService := p2p.NewElectionService(&election, &peerQueryService, &client)
+//
+//		pLTableService := p2p.PLTableService{}
+//
+//		// inject avengers client
+//		communicationService := p2p.NewCommunicationService(&client)
+//
+//		communicationApi := api.NewCommunicationApi(&peerQueryService, communicationService)
+//
+//		leaderApi := api.NewLeaderApi(&peerRepository, &eventService)
+//		grpcCommandHandler := adapter.NewGrpcCommandHandler(&leaderApi, &electionService, &communicationApi, pLTableService)
+//
+//		// avengers server register command handler
+//		server.Register("message.receive", grpcCommandHandler.HandleMessageReceive)
+//
+//		process.Register(&electionService)
+//		process.Register(&peerRepository)
+//		m[process.Id] = &process
+//	}
+//
+//	logger.Infof(nil, "created process: %v", m)
+//	return m
+//}
+>>>>>>> implement consensus leader election test case
 
 func savePeerList(peerRepository mem.PeerRepository, processList []ProcessIdentity) {
 	for _, identity := range processList {
