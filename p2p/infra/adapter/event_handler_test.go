@@ -119,7 +119,7 @@ func TestEventHandler_HandleConnDisconnectedEvent(t *testing.T) {
 		t.Logf("running test case %s", testName)
 
 		e := event.ConnectionClosed{
-			ConnectionId: test.input.id,
+			ConnectionID: test.input.id,
 		}
 
 		err := eventHandler.HandleConnDisconnectedEvent(e)

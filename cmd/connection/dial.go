@@ -54,7 +54,7 @@ func connect(ip string) error {
 			return
 		}
 
-		logger.Infof(nil, "[Cmd] Connection created - Address: [%s], Id:[%s]", connection.Address, connection.ConnectionId)
+		logger.Infof(nil, "[Cmd] Connection created - Address: [%s], Id:[%s]", connection.Address, connection.ConnectionID)
 	})
 
 	if err != nil {

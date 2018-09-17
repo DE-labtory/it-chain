@@ -71,11 +71,11 @@ func (eh *EventHandler) HandleConnCreatedEvent(event event.ConnectionCreated) er
 //todo deleted peer if disconnected peer is leader
 func (eh *EventHandler) HandleConnDisconnectedEvent(event event.ConnectionClosed) error {
 
-	if event.ConnectionId == "" {
+	if event.ConnectionID == "" {
 		return ErrEmptyPeerId
 	}
 
-	err := eh.peerApi.Remove(p2p.PeerId{Id: event.ConnectionId})
+	err := eh.peerApi.Remove(p2p.PeerId{Id: event.ConnectionID})
 
 	if err != nil {
 		log.Println(err)

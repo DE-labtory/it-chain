@@ -78,7 +78,7 @@ func InitgRPCServer(lifecycle fx.Lifecycle, config *conf.Configuration, hostServ
 		OnStop: func(context context.Context) error {
 			connections, _ := hostService.GetAllConnections()
 			for _, connection := range connections {
-				hostService.CloseConnection(connection.ConnectionId)
+				hostService.CloseConnection(connection.ConnectionID)
 			}
 			hostService.Stop()
 			return nil
