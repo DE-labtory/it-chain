@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package blockchain
+package mem
 
 import "sync"
 
