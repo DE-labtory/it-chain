@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mem
+package repo
 
 import "errors"
 

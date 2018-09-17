@@ -7,7 +7,7 @@ import (
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/api"
-	"github.com/it-chain/engine/blockchain/infra/mem"
+	"github.com/it-chain/engine/blockchain/infra/repo"
 	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
@@ -92,7 +92,7 @@ func TestSyncApi_Synchronize(t *testing.T) {
 
 		dbPath := test.dbPath
 
-		br, err := mem.NewBlockRepository(dbPath)
+		br, err := repo.NewBlockRepository(dbPath)
 		assert.Equal(t, nil, err)
 
 		defer func() {
