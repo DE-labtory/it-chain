@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/common/logger"
 )
@@ -28,10 +29,10 @@ type BlockApi struct {
 	publisherId     string
 	blockRepository blockchain.BlockRepository
 	eventService    blockchain.EventService
-	BlockPool       *blockchain.BlockPool
+	BlockPool       *mem.BlockPool
 }
 
-func NewBlockApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService, blockPool *blockchain.BlockPool) (*BlockApi, error) {
+func NewBlockApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService, blockPool *mem.BlockPool) (*BlockApi, error) {
 	return &BlockApi{
 		publisherId:     publisherId,
 		blockRepository: blockRepository,

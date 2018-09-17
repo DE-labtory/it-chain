@@ -21,6 +21,7 @@ import (
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
+	"github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 
@@ -30,7 +31,7 @@ import (
 	"time"
 
 	"github.com/it-chain/engine/blockchain/api"
-	"github.com/it-chain/engine/blockchain/infra/mem"
+	"github.com/it-chain/engine/blockchain/infra/repo"
 	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
@@ -60,7 +61,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_Solo(t *testing.T)
 	publisherID := "junksound"
 	dbPath := "./.db"
 
-	br, err := mem.NewBlockRepository(dbPath)
+	br, err := repo.NewBlockRepository(dbPath)
 	assert.Equal(t, nil, err)
 	defer func() {
 		br.Close()
@@ -73,7 +74,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_Solo(t *testing.T)
 	assert.NoError(t, err)
 
 	eventService := common.NewEventService("", "Event")
-	blockPool := blockchain.NewBlockPool()
+	blockPool := mem.NewBlockPool()
 
 	bApi, err := api.NewBlockApi(publisherID, br, eventService, blockPool)
 	assert.NoError(t, err)
@@ -159,7 +160,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_OneTransactio
 	subscriber.SubscribeTopic("block.*", handler)
 
 	dbPath := "./.db"
-	blockRepository, err := mem.NewBlockRepository(dbPath)
+	blockRepository, err := repo.NewBlockRepository(dbPath)
 	assert.Equal(t, nil, err)
 	defer func() {
 		blockRepository.Close()
@@ -172,7 +173,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_OneTransactio
 
 	publisherID := "iAmPublisher"
 	eventService := common.NewEventService("", "Event")
-	blockPool := blockchain.NewBlockPool()
+	blockPool := mem.NewBlockPool()
 
 	api, err := api.NewBlockApi(publisherID, blockRepository, eventService, blockPool)
 	assert.NoError(t, err)
@@ -217,7 +218,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_TwoTransactio
 	subscriber.SubscribeTopic("block.*", handler)
 
 	dbPath := "./.db"
-	blockRepository, err := mem.NewBlockRepository(dbPath)
+	blockRepository, err := repo.NewBlockRepository(dbPath)
 	assert.Equal(t, nil, err)
 	defer func() {
 		blockRepository.Close()
@@ -230,7 +231,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_TwoTransactio
 
 	publisherID := "iAmPublisher"
 	eventService := common.NewEventService("", "Event")
-	blockPool := blockchain.NewBlockPool()
+	blockPool := mem.NewBlockPool()
 
 	api, err := api.NewBlockApi(publisherID, blockRepository, eventService, blockPool)
 	assert.NoError(t, err)
@@ -272,7 +273,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_ExceptionCase
 	//ErrConsesnsusService := errors.New("Consensus Error")
 
 	dbPath := "./.db"
-	blockRepository, err := mem.NewBlockRepository(dbPath)
+	blockRepository, err := repo.NewBlockRepository(dbPath)
 	assert.Equal(t, nil, err)
 	defer func() {
 		blockRepository.Close()
@@ -285,7 +286,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_ExceptionCase
 
 	publisherID := "iAmPublisher"
 	eventService := common.NewEventService("", "Event")
-	blockPool := blockchain.NewBlockPool()
+	blockPool := mem.NewBlockPool()
 
 	api, err := api.NewBlockApi(publisherID, blockRepository, eventService, blockPool)
 	assert.NoError(t, err)
