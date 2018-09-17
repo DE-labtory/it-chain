@@ -20,10 +20,11 @@ import (
 	"context"
 	"os"
 
-	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/api"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/infra/mem"
+	"github.com/it-chain/engine/blockchain/infra/repo"
+
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
@@ -37,7 +38,7 @@ const BbPath = "./db"
 var Module = fx.Options(
 	fx.Provide(
 		NewBlockRepository,
-		blockchain.NewBlockPool,
+		mem.NewBlockPool,
 		NewBlockApi,
 		NewBlockProposeHandler,
 	),
@@ -48,11 +49,11 @@ var Module = fx.Options(
 	),
 )
 
-func NewBlockRepository() (*mem.BlockRepository, error) {
-	return mem.NewBlockRepository(BbPath)
+func NewBlockRepository() (*repo.BlockRepository, error) {
+	return repo.NewBlockRepository(BbPath)
 }
 
-func NewBlockApi(blockRepository *mem.BlockRepository, blockPool *blockchain.BlockPool, service common.EventService) (*api.BlockApi, error) {
+func NewBlockApi(blockRepository *repo.BlockRepository, blockPool *mem.BlockPool, service common.EventService) (*api.BlockApi, error) {
 	return api.NewBlockApi(publisherID, blockRepository, service, blockPool)
 }
 
