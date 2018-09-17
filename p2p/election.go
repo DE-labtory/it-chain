@@ -19,6 +19,7 @@ package p2p
 import (
 	"sync"
 
+	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/iLogger"
 )
 
@@ -27,14 +28,14 @@ const TICKING = "TICKING"
 
 type Election struct {
 	ipAddress string
-	candidate *Peer  // candidate peer to be leader later
-	leftTime  int    //left time in millisecond
-	state     string //candidate, ticking
+	candidate *Peer              // candidate peer to be leader later
+	leftTime  int                //left time in millisecond
+	state     pbft.ElectionState //candidate, ticking
 	voteCount int
 	mux       sync.Mutex
 }
 
-func NewElection(ipAddress string, leftTime int, state string, voteCount int) Election {
+func NewElection(ipAddress string, leftTime int, state pbft.ElectionState, voteCount int) Election {
 
 	return Election{
 		ipAddress: ipAddress,
@@ -73,7 +74,7 @@ func (election *Election) CountDownLeftTimeBy(tick int) {
 	election.leftTime = election.leftTime - tick
 }
 
-func (election *Election) SetState(state string) {
+func (election *Election) SetState(state pbft.ElectionState) {
 
 	election.mux.Lock()
 	defer election.mux.Unlock()
@@ -83,7 +84,7 @@ func (election *Election) SetState(state string) {
 	election.state = state
 }
 
-func (election *Election) GetState() string {
+func (election *Election) GetState() pbft.ElectionState {
 
 	election.mux.Lock()
 	defer election.mux.Unlock()

@@ -135,18 +135,18 @@ func (ea *ElectionApi) isFullyVoted() bool {
 	return false
 }
 
-func (es *ElectionApi) ElectLeaderWithRaft() {
+func (e *ElectionApi) ElectLeaderWithRaft() {
 
 	//1. Start random timeout
 	//2. timed out! alter state to 'candidate'
 	//3. while ticking, count down leader repo left time
 	//4. Send message having 'RequestVoteProtocol' to other node
 	go func() {
-		es.ElectionService.SetState(pbft.TICKING)
+		e.ElectionService.SetState(pbft.TICKING)
 
-		es.ElectionService.InitLeftTime()
+		e.ElectionService.InitLeftTime()
 
-		timeout := time.After(time.Duration(es.ElectionService.GetLeftTime()) * time.Millisecond)
+		timeout := time.After(time.Duration(e.ElectionService.GetLeftTime()) * time.Millisecond)
 		tick := time.Tick(1 * time.Millisecond)
 		end := true
 		for end {
@@ -157,28 +157,28 @@ func (es *ElectionApi) ElectLeaderWithRaft() {
 				// when timed out
 				// 1. if state is ticking, be candidate and request vote
 				// 2. if state is candidate, reset state and left time
-				if es.ElectionService.GetState() == pbft.TICKING {
-					logger.Infof(nil, "[consensus] candidate process: %v", es.ElectionService.GetCandidate())
-					es.ElectionService.SetState(pbft.CANDIDATE)
+				if e.ElectionService.GetState() == pbft.TICKING {
+					logger.Infof(nil, "[consensus] candidate process: %v", e.ElectionService.GetCandidate())
+					e.ElectionService.SetState(pbft.CANDIDATE)
 
 					connectionIds := make([]string, 0)
 
-					repTable := es.parliamentService.GetRepresentativeTable()
+					repTable := e.parliamentService.GetRepresentativeTable()
 					for _, r := range repTable {
 						connectionIds = append(connectionIds, r.ID)
 					}
 
-					es.RequestVote(connectionIds)
+					e.RequestVote(connectionIds)
 
-				} else if es.ElectionService.GetState() == pbft.CANDIDATE {
+				} else if e.ElectionService.GetState() == pbft.CANDIDATE {
 					//reset time and state chane candidate -> ticking when timed in candidate state
-					es.ElectionService.ResetLeftTime()
-					es.ElectionService.SetState(pbft.TICKING)
+					e.ElectionService.ResetLeftTime()
+					e.ElectionService.SetState(pbft.TICKING)
 				}
 
 			case <-tick:
 				// count down left time while ticking
-				es.ElectionService.CountDownLeftTimeBy(1)
+				e.ElectionService.CountDownLeftTimeBy(1)
 			case <-time.After(5 * time.Second):
 				end = false
 			}

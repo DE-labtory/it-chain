@@ -16,70 +16,78 @@
 
 package api_test
 
-//func TestNewLeaderApi(t *testing.T) {
-//	parliament := &pbft.Parliament{
-//		Leader: &pbft.Leader{
-//			LeaderId: "1",
-//		},
-//	}
+import "testing"
+
+//todo
+func TestNewLeaderApi(t *testing.T) {
+	//	parliament := &pbft.Parliament{
+	//		Leader: &pbft.Leader{
+	//			LeaderId: "1",
+	//		},
+	//	}
+	//
+	//	eventService := &mock.EventService{}
+	//
+	//	leaderApi := api.NewLeaderApi(parliament, eventService)
+	//
+	//	assert.Equal(t, leaderApi.GetParliament(), parliament)
+}
+
 //
-//	eventService := &mock.EventService{}
-//
-//	leaderApi := api.NewLeaderApi(parliament, eventService)
-//
-//	assert.Equal(t, leaderApi.GetParliament(), parliament)
-//}
-//
-//func TestLeaderApi_UpdateLeaderWithAddress(t *testing.T) {
-//
-//	leaderApi := SetLeaderApi()
-//
-//	// when
-//	leaderApi.UpdateLeaderWithAddress("2")
-//
-//	//then
-//	assert.Equal(t, leaderApi.GetLeader().LeaderId, "2")
-//
-//	//	when
-//	err2 := leaderApi.UpdateLeaderWithAddress("4")
-//
-//	//	then
-//	assert.Equal(t, err2, api.ErrNoMatchingPeerWithIpAddress)
-//
-//}
-//
-//func TestLeaderApi_GetLeader(t *testing.T) {
-//	leaderApi := SetLeaderApi()
-//
-//	assert.Equal(t, leaderApi.GetLeader(), &pbft.Leader{LeaderId: "1"})
-//}
-//
-//func TestLeaderApi_GetParliament(t *testing.T) {
-//	leaderApi := SetLeaderApi()
-//
-//	parliament := &pbft.Parliament{
-//		Leader: &pbft.Leader{
-//			LeaderId: "1",
-//		},
-//		RepresentativeTable: map[string]*pbft.Representative{
-//			"1": {
-//				ID:        "1",
-//				IpAddress: "1",
-//			},
-//			"2": {
-//				ID:        "2",
-//				IpAddress: "2",
-//			},
-//			"3": {
-//				ID:        "3",
-//				IpAddress: "3",
-//			},
-//		},
-//	}
-//
-//	assert.Equal(t, leaderApi.GetParliament(), parliament)
-//}
-//
+//todo
+func TestLeaderApi_UpdateLeaderWithAddress(t *testing.T) {
+	//
+	//	leaderApi := SetLeaderApi()
+	//
+	//	// when
+	//	leaderApi.UpdateLeaderWithAddress("2")
+	//
+	//	//then
+	//	assert.Equal(t, leaderApi.GetLeader().LeaderId, "2")
+	//
+	//	//	when
+	//	err2 := leaderApi.UpdateLeaderWithAddress("4")
+	//
+	//	//	then
+	//	assert.Equal(t, err2, api.ErrNoMatchingPeerWithIpAddress)
+	//
+}
+
+//todo
+func TestLeaderApi_GetLeader(t *testing.T) {
+	//	leaderApi := SetLeaderApi()
+	//
+	//	assert.Equal(t, leaderApi.GetLeader(), &pbft.Leader{LeaderId: "1"})
+}
+
+//todo
+func TestLeaderApi_GetParliament(t *testing.T) {
+	//	leaderApi := SetLeaderApi()
+	//
+	//	parliament := &pbft.Parliament{
+	//		Leader: &pbft.Leader{
+	//			LeaderId: "1",
+	//		},
+	//		RepresentativeTable: map[string]*pbft.Representative{
+	//			"1": {
+	//				ID:        "1",
+	//				IpAddress: "1",
+	//			},
+	//			"2": {
+	//				ID:        "2",
+	//				IpAddress: "2",
+	//			},
+	//			"3": {
+	//				ID:        "3",
+	//				IpAddress: "3",
+	//			},
+	//		},
+	//	}
+	//
+	//	assert.Equal(t, leaderApi.GetParliament(), parliament)
+}
+
+//todo
 //func SetLeaderApi() *api.LeaderApi {
 //	parliament := &pbft.Parliament{
 //		Leader: &pbft.Leader{
