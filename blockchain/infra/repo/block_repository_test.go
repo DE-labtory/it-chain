@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mem_test
+package repo
 
 import (
 	"os"
