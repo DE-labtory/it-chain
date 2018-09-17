@@ -165,49 +165,6 @@ func TestElectionApi_RequestVote(t *testing.T) {
 	}
 }
 
-//func TestElectionService_BroadcastLeader(t *testing.T) {
-//	tests := map[string]struct {
-//		input struct {
-//			processList []test2.ProcessIdentity
-//		}
-//	}{
-//		"4 node test": {
-//			input: struct{ processList []test2.ProcessIdentity }{
-//				processList: []test2.ProcessIdentity{
-//					{"1", "1.ipAddress"},
-//					{"2", "2.ipAddress"},
-//					{"3", "3.ipAddress"},
-//					{"4", "4.ipAddress"},
-//				},
-//			},
-//		},
-//	}
-//
-//	for testName, test := range tests {
-//		t.Logf("running test case %s", testName)
-//
-//		processMap := test2.SetTestEnvironment(test.input.processList)
-//
-//		newLeader := p2p.Peer{IpAddress: "1.ipAddress", PeerId: p2p.PeerId{Id: "1"}}
-//
-//		electionServiceOf2 := (processMap["2"].Services["ElectionService"]).(*p2p.ElectionService)
-//		electionServiceOf2.Election.SetCandidate(&newLeader)
-//
-//		electionServiceOf1 := (processMap["1"].Services["ElectionService"]).(*p2p.ElectionService)
-//		electionServiceOf1.Election.SetState(p2p.Candidate)
-//		electionServiceOf1.BroadcastLeader(newLeader)
-//
-//		time.Sleep(4 * time.Second)
-//
-//		peerRepositoryOf2 := (processMap["2"].Services["PeerRepository"]).(*mem.PeerRepository)
-//		broadcastedLeaderOf2, _ := peerRepositoryOf2.GetLeader()
-//
-//		t.Logf("broadcasted leader %v", broadcastedLeaderOf2)
-//		assert.Equal(t, "1", broadcastedLeaderOf2.GetID())
-//	}
-//
-//}
-//
 func TestElectionApi_ElectLeaderWithRaft(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
