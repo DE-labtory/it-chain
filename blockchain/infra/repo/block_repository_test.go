@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/it-chain/engine/api_gateway/test/mock"
-	"github.com/it-chain/engine/blockchain/infra/mem"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,7 +30,7 @@ func TestBlockRepositoryImpl_NewBlockRepository(t *testing.T) {
 	dbPath := "./.db"
 
 	// when
-	br, err := mem.NewBlockRepository(dbPath)
+	br, err := NewBlockRepository(dbPath)
 
 	// then
 	assert.Equal(t, nil, err)
@@ -46,7 +46,7 @@ func TestBlockRepositoryImpl_FindBySeal(t *testing.T) {
 	dbPath := "./.db"
 
 	// when
-	br, err := mem.NewBlockRepository(dbPath)
+	br, err := NewBlockRepository(dbPath)
 
 	// then
 	assert.Equal(t, nil, err)
@@ -84,7 +84,7 @@ func TestBlockRepositoryImpl_FindLastAndFindAll(t *testing.T) {
 	dbPath := "./.db"
 
 	// when
-	br, err := mem.NewBlockRepository(dbPath)
+	br, err := NewBlockRepository(dbPath)
 
 	// then
 	assert.Equal(t, nil, err)
@@ -126,7 +126,7 @@ func TestBlockRepositoryImpl_FindByHeight(t *testing.T) {
 	dbPath := "./.db"
 
 	// when
-	br, err := mem.NewBlockRepository(dbPath)
+	br, err := NewBlockRepository(dbPath)
 
 	// then
 	assert.Equal(t, nil, err)
@@ -160,7 +160,7 @@ func TestBlockRepositoryImpl_Save(t *testing.T) {
 	dbPath := "./.db"
 
 	// when
-	br, err := mem.NewBlockRepository(dbPath)
+	br, err := NewBlockRepository(dbPath)
 
 	// then
 	assert.Equal(t, nil, err)
