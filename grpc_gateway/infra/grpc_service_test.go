@@ -391,7 +391,7 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 
 	handler := &MockHandler{}
 	handler.OnConnectionFunc = func(connection grpc_gateway.Connection) {
-		connID = connection.ConnectionId
+		connID = connection.ConnectionID
 	}
 
 	handler.OnDisconnectionFunc = func(connection grpc_gateway.Connection) {
@@ -409,7 +409,7 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 
 		publishedData = test.input.Message
 
-		clientHostService.SendMessages(test.input.Message, test.input.Protocol, conn.ConnectionId)
+		clientHostService.SendMessages(test.input.Message, test.input.Protocol, conn.ConnectionID)
 	}
 }
 
@@ -452,12 +452,12 @@ func TestGrpcHostService_Close(t *testing.T) {
 	handler := &MockHandler{}
 	handler.OnConnectionFunc = func(connection grpc_gateway.Connection) {
 		fmt.Println(connection)
-		connID = connection.ConnectionId
+		connID = connection.ConnectionID
 	}
 
 	handler.OnDisconnectionFunc = func(connection grpc_gateway.Connection) {
 		fmt.Println("connection is closing", connection)
-		assert.Equal(t, connID, connection.ConnectionId)
+		assert.Equal(t, connID, connection.ConnectionID)
 	}
 
 	serverHostService.SetHandler(handler)
@@ -468,7 +468,7 @@ func TestGrpcHostService_Close(t *testing.T) {
 
 		conn, err := clientHostService.Dial(test.input)
 		assert.NoError(t, err)
-		clientHostService.CloseConnection(conn.ConnectionId)
+		clientHostService.CloseConnection(conn.ConnectionID)
 	}
 }
 
@@ -503,7 +503,7 @@ func TestGrpcHostService_GetAllConnections(t *testing.T) {
 	var connID string
 	handler := &MockHandler{}
 	handler.OnConnectionFunc = func(connection grpc_gateway.Connection) {
-		connID = connection.ConnectionId
+		connID = connection.ConnectionID
 	}
 
 	handler.OnDisconnectionFunc = func(connection grpc_gateway.Connection) {
@@ -518,5 +518,5 @@ func TestGrpcHostService_GetAllConnections(t *testing.T) {
 
 	connections, err := serverHostService.GetAllConnections()
 	assert.NoError(t, err)
-	assert.Equal(t, connections[0].ConnectionId, connID)
+	assert.Equal(t, connections[0].ConnectionID, connID)
 }

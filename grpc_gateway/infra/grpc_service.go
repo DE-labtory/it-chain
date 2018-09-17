@@ -91,7 +91,7 @@ func (g *GrpcHostService) Dial(address string) (grpc_gateway.Connection, error) 
 
 func toGatewayConnectionModel(connection bifrost.Connection) grpc_gateway.Connection {
 	return grpc_gateway.Connection{
-		ConnectionId: connection.GetID(),
+		ConnectionID: connection.GetID(),
 		Address:      connection.GetIP(),
 	}
 }

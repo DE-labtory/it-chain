@@ -168,5 +168,5 @@ type ConnectionCreated struct {
 
 // connection close
 type ConnectionClosed struct {
-	ConnectionId string
+	ConnectionID string
 }
