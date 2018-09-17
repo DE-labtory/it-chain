@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package blockchain
+package mem
 
-import "sync"
+import (
+	"sync"
+	ygg "github.com/it-chain/yggdrasill/common"
+)
+
+type Block = ygg.Block
 
 type BlockPool struct {
 	blockMap map[uint64]Block

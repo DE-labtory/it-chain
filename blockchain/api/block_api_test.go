@@ -26,6 +26,7 @@ import (
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/api"
+	"github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
@@ -51,7 +52,7 @@ func TestBlockApi_AddBlockToPool(t *testing.T) {
 	publisherId := "zf"
 	blockRepo := mock.BlockRepository{}
 	eventService := mock.EventService{}
-	blockPool := blockchain.NewBlockPool()
+	blockPool := mem.NewBlockPool()
 
 	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService, blockPool)
 
@@ -79,7 +80,7 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 	publisherId := "zf"
 	blockRepo := mock.BlockRepository{}
 	eventService := mock.EventService{}
-	blockPool := blockchain.NewBlockPool()
+	blockPool := mem.NewBlockPool()
 
 	// When
 	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService, blockPool)
@@ -100,7 +101,7 @@ func TestBlockApi_SyncIsProgressing(t *testing.T) {
 	publisherId := "zf"
 	blockRepo := mock.BlockRepository{}
 	eventService := mock.EventService{}
-	blockPool := blockchain.NewBlockPool()
+	blockPool := mem.NewBlockPool()
 
 	// when
 	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService, blockPool)
@@ -165,7 +166,7 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 	}
 
 	eventService := common.NewEventService("", "Event")
-	blockPool := blockchain.NewBlockPool()
+	blockPool := mem.NewBlockPool()
 
 	bApi, err := api.NewBlockApi(publisherID, blockRepo, eventService, blockPool)
 	assert.NoError(t, err)
@@ -219,7 +220,7 @@ func TestBlockApi_CommitGenesisBlock(t *testing.T) {
 	}
 
 	eventService := common.NewEventService("", "Event")
-	blockPool := blockchain.NewBlockPool()
+	blockPool := mem.NewBlockPool()
 
 	bApi, err := api.NewBlockApi(publisherID, blockRepo, eventService, blockPool)
 	assert.NoError(t, err)
@@ -243,7 +244,7 @@ func TestBlockApi_CreateProposedBlock(t *testing.T) {
 	}
 
 	eventService := mock.EventService{}
-	blockPool := blockchain.NewBlockPool()
+	blockPool := mem.NewBlockPool()
 
 	blockApi, err := api.NewBlockApi(publisherID, blockRepo, eventService, blockPool)
 	assert.NoError(t, err)
@@ -268,7 +269,7 @@ func TestBlockApi_StageBlock(t *testing.T) {
 	publisherId := "1"
 	blockRepo := mock.BlockRepository{}
 	eventService := mock.EventService{}
-	blockPool := blockchain.NewBlockPool()
+	blockPool := mem.NewBlockPool()
 
 	// when
 	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService, blockPool)
