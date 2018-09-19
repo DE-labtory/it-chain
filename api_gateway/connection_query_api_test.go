@@ -11,7 +11,7 @@ import (
 
 func TestConnectionQueryApi_GetAllConnectionList(t *testing.T) {
 	repo := api_gateway.NewConnectionRepository()
-	api := api_gateway.NewConnectionQueryApi(*repo)
+	api := api_gateway.NewConnectionQueryApi(repo)
 
 	for i := 0; i < 10; i++ {
 		id := strconv.Itoa(i)
@@ -46,7 +46,7 @@ func TestConnectionQueryApi_GetAllConnectionList(t *testing.T) {
 
 func TestConnectionQueryApi_GetConnectionByID(t *testing.T) {
 	repo := api_gateway.NewConnectionRepository()
-	api := api_gateway.NewConnectionQueryApi(*repo)
+	api := api_gateway.NewConnectionQueryApi(repo)
 	ids := [4]string{"it-chain", "engine", "api_gateway", "makehoney"}
 
 	for i := 0; i < len(ids); i++ {
@@ -133,7 +133,7 @@ func TestConnectionRepository_Remove(t *testing.T) {
 
 func TestConnectionEventListener_HandleConnectionCreatedEvent(t *testing.T) {
 	repo := api_gateway.NewConnectionRepository()
-	listener := api_gateway.NewConnectionEventListener(*repo)
+	listener := api_gateway.NewConnectionEventListener(repo)
 
 	err := listener.HandleConnectionCreatedEvent(event.ConnectionCreated{
 		ConnectionID: "0",
@@ -144,7 +144,7 @@ func TestConnectionEventListener_HandleConnectionCreatedEvent(t *testing.T) {
 
 func TestConnectionEventListener_HandleConnectionClosedEvent(t *testing.T) {
 	repo := api_gateway.NewConnectionRepository()
-	listener := api_gateway.NewConnectionEventListener(*repo)
+	listener := api_gateway.NewConnectionEventListener(repo)
 
 	err := listener.HandleConnectionCreatedEvent(event.ConnectionCreated{
 		ConnectionID: "0",

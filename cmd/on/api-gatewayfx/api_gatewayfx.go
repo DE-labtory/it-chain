@@ -33,13 +33,16 @@ const ApidbPath = "./api-db"
 
 var Module = fx.Options(
 	fx.Provide(
+		api_gateway.NewConnectionRepository,
 		NewKitLogger,
 		NewBlockRepository,
 		NewICodeRepository,
-		api_gateway.NewBlockQueryApi,
-		api_gateway.NewBlockEventListener,
-		api_gateway.NewICodeQueryApi,
-		api_gateway.NewIcodeEventHandler,
+		api_gateway.NewConnectionQueryApi,
+		NewBlockQueryApi,
+		NewBlockEventListener,
+		NewICodeQueryApi,
+		NewICodeEventHandler,
+		api_gateway.NewConnectionEventListener,
 		api_gateway.NewApiHandler,
 		http.NewServeMux,
 	),
@@ -50,7 +53,7 @@ var Module = fx.Options(
 	),
 )
 
-func NewBlockRepository() (api_gateway.BlockRepository, error) {
+func NewBlockRepository() (*api_gateway.BlockRepositoryImpl, error) {
 	blockchainDB := ApidbPath + "/block"
 	return api_gateway.NewBlockRepositoryImpl(blockchainDB)
 }
@@ -64,16 +67,36 @@ func NewKitLogger() kitlog.Logger {
 	return httpLogger
 }
 
-func NewICodeRepository() api_gateway.ICodeRepository {
+func NewICodeQueryApi(repository *api_gateway.LevelDbICodeRepository) *api_gateway.ICodeQueryApi {
+	return api_gateway.NewICodeQueryApi(repository)
+}
+
+func NewICodeEventHandler(repository *api_gateway.LevelDbICodeRepository) *api_gateway.ICodeEventHandler {
+	return api_gateway.NewIcodeEventHandler(repository)
+}
+
+func NewBlockEventListener(blockRepository *api_gateway.BlockRepositoryImpl) *api_gateway.BlockEventListener {
+	return api_gateway.NewBlockEventListener(blockRepository)
+}
+
+func NewBlockQueryApi(blockRepository *api_gateway.BlockRepositoryImpl) *api_gateway.BlockQueryApi {
+	return api_gateway.NewBlockQueryApi(blockRepository)
+}
+
+func NewICodeRepository() *api_gateway.LevelDbICodeRepository {
 	icodeDB := ApidbPath + "/ivm"
 	return api_gateway.NewLevelDbMetaRepository(icodeDB)
 }
 
-func RegisterEvent(subscriber *pubsub.TopicSubscriber, blockEventListener *api_gateway.BlockEventListener, icodeEventListener *api_gateway.ICodeEventHandler) {
+func RegisterEvent(subscriber *pubsub.TopicSubscriber, blockEventListener *api_gateway.BlockEventListener, icodeEventListener *api_gateway.ICodeEventHandler, connectionEventlistener *api_gateway.ConnectionEventListener) {
 	if err := subscriber.SubscribeTopic("block.*", blockEventListener); err != nil {
 		panic(err)
 	}
 	if err := subscriber.SubscribeTopic("icode.*", icodeEventListener); err != nil {
+		panic(err)
+	}
+
+	if err := subscriber.SubscribeTopic("connection.*", connectionEventlistener); err != nil {
 		panic(err)
 	}
 }
@@ -82,7 +105,7 @@ func RegisterHandlers(mux *http.ServeMux) {
 	http.Handle("/", mux)
 }
 
-func InitApiGatewayServer(lifecycle fx.Lifecycle, config *conf.Configuration, handler http.Handler, blockRepo api_gateway.BlockRepository, iCodeRepo api_gateway.ICodeRepository) {
+func InitApiGatewayServer(lifecycle fx.Lifecycle, config *conf.Configuration, handler http.Handler, blockRepo *api_gateway.BlockRepositoryImpl, iCodeRepo *api_gateway.LevelDbICodeRepository) {
 	ipAddress := config.ApiGateway.Address + ":" + config.ApiGateway.Port
 
 	lifecycle.Append(fx.Hook{

@@ -35,11 +35,13 @@ var (
 	ErrBadConversion = errors.New("Conversion failed: invalid argument in url endpoint.")
 )
 
-func NewApiHandler(bqa BlockQueryApi, iqa ICodeQueryApi, logger kitlog.Logger) http.Handler {
+func NewApiHandler(bqa *BlockQueryApi, iqa *ICodeQueryApi, cqa *ConnectionQueryApi, logger kitlog.Logger) http.Handler {
+
 	r := mux.NewRouter()
 
 	be := MakeBlockchainEndpoints(bqa)
 	ie := MakeIvmEndpoints(iqa)
+	ce := MakeConnectionEndpoints(cqa)
 
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorLogger(logger),
@@ -71,6 +73,20 @@ func NewApiHandler(bqa BlockQueryApi, iqa ICodeQueryApi, logger kitlog.Logger) h
 		opts...,
 	))
 
+	r.Methods("GET").Path("/connections").Handler(kithttp.NewServer(
+		ce.FindAllConnectionEndpoint,
+		decodeFindAllConnectionRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Methods("GET").Path("/connections/{id}").Handler(kithttp.NewServer(
+		ce.FindConnectionByIdEndpoint,
+		decodeFindConnectionByIdRequest,
+		encodeResponse,
+		opts...,
+	))
+
 	return r
 }
 
@@ -97,6 +113,7 @@ func decodeFindAllMetaRequest(_ context.Context, r *http.Request) (interface{}, 
 
 func decodeFindCommittedBlockBySealRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
+
 	sealStr, ok := vars["id"]
 	if !ok {
 		return nil, ErrBadRouting
@@ -110,6 +127,21 @@ func decodeFindCommittedBlockBySealRequest(_ context.Context, r *http.Request) (
 	seal = []byte(seal)
 
 	return FindCommittedBlockBySealRequest{Seal: seal}, nil
+}
+
+func decodeFindAllConnectionRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	return nil, nil
+}
+
+func decodeFindConnectionByIdRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+
+	connectionId, ok := vars["id"]
+	if !ok {
+		return nil, ErrBadRouting
+	}
+
+	return FindConnectionByIdRequest{ConnectionId: connectionId}, nil
 }
 
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
