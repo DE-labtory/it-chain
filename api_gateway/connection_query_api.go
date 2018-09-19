@@ -11,10 +11,10 @@ var ErrConnectionExists = errors.New("Connection already exists")
 
 type ConnectionQueryApi struct {
 	mux                  *sync.Mutex
-	connectionRepository ConnectionRepository
+	connectionRepository *ConnectionRepository
 }
 
-func NewConnectionQueryApi(connRepo ConnectionRepository) *ConnectionQueryApi {
+func NewConnectionQueryApi(connRepo *ConnectionRepository) *ConnectionQueryApi {
 	return &ConnectionQueryApi{
 		mux:                  &sync.Mutex{},
 		connectionRepository: connRepo,
@@ -91,11 +91,11 @@ func (cr *ConnectionRepository) FindByID(connID string) (Connection, error) {
 }
 
 type ConnectionEventListener struct {
-	connectionRepository ConnectionRepository
+	connectionRepository *ConnectionRepository
 }
 
-func NewConnectionEventListener(connRepo ConnectionRepository) ConnectionEventListener {
-	return ConnectionEventListener{
+func NewConnectionEventListener(connRepo *ConnectionRepository) *ConnectionEventListener {
+	return &ConnectionEventListener{
 		connectionRepository: connRepo,
 	}
 }

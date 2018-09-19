@@ -30,8 +30,8 @@ type ICodeQueryApi struct {
 	iCodeRepository ICodeRepository
 }
 
-func NewICodeQueryApi(repository ICodeRepository) ICodeQueryApi {
-	return ICodeQueryApi{
+func NewICodeQueryApi(repository ICodeRepository) *ICodeQueryApi {
+	return &ICodeQueryApi{
 		iCodeRepository: repository,
 	}
 }

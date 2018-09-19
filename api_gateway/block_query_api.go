@@ -43,8 +43,8 @@ type BlockQueryApi struct {
 	blockRepository BlockRepository
 }
 
-func NewBlockQueryApi(blockRepo BlockRepository) BlockQueryApi {
-	return BlockQueryApi{
+func NewBlockQueryApi(blockRepo BlockRepository) *BlockQueryApi {
+	return &BlockQueryApi{
 		blockRepository: blockRepo,
 	}
 }
