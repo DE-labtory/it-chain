@@ -39,19 +39,13 @@ func TestNewConsensusEventHandler(t *testing.T) {
 func TestConsensusEventHandler_HandleConsensusFinishedEvent(t *testing.T) {
 
 	event1 := event2.ConsensusFinished{
-		PrevSeal: []byte{},
-		Height:   12,
-		TxList: []event2.Tx{event2.Tx{
-			ID: "1",
-		}},
-		Creator: "",
+		Seal: []byte{},
+		Body: []byte{},
 	}
 
 	event2 := event2.ConsensusFinished{
-		PrevSeal: []byte{},
-		Height:   12,
-		TxList:   []event2.Tx{},
-		Creator:  "",
+		Seal: []byte{},
+		Body: []byte{},
 	}
 
 	consensusEventHandler := SetConsensusEventHandler(&blockchain.BlockSyncState{Id: "1", IsProgress: true})
@@ -66,7 +60,7 @@ func TestConsensusEventHandler_HandleConsensusFinishedEvent(t *testing.T) {
 	consensusEventHandler.HandleConsensusFinishedEvent(event2)
 
 	//	then
-	assert.Equal(t, consensusEventHandler.HandleConsensusFinishedEvent(event2), adapter.ErrBlockNil)
+	assert.Equal(t, consensusEventHandler.HandleConsensusFinishedEvent(event2), nil)
 
 }
 
