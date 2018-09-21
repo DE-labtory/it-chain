@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018 It-chain
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package mem_test
 
 import (
@@ -11,17 +26,14 @@ import (
 func TestNewSyncStateRepository(t *testing.T) {
 	repo := mem.NewSyncStateRepository()
 
-	assert.Equal(t, repo.State.SyncProgress(), false)
-	assert.Equal(t, repo.State.Sync(), false)
+	assert.Equal(t, repo.State.SyncProgressing, false)
 
-	state := blockchain.NewSyncState(true, false)
+	state := blockchain.SyncState{SyncProgressing: true}
 	repo.Set(state)
 
-	assert.Equal(t, repo.State.SyncProgress(), true)
-	assert.Equal(t, repo.State.Sync(), false)
+	assert.Equal(t, repo.State.SyncProgressing, true)
 
 	state2 := repo.Get()
 
-	assert.Equal(t, state2.SyncProgress(), true)
-	assert.Equal(t, state2.Sync(), false)
+	assert.Equal(t, state2.SyncProgressing, true)
 }

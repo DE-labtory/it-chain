@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package api
 
 import (
@@ -43,8 +42,14 @@ func NewSyncApi(publisherId string, blockRepository blockchain.BlockRepository, 
 
 
 func (sApi SyncApi) Synchronize() error {
-	state := blockchain.NewSyncState(true, false)
-	sApi.syncStateRepository.Set(state)
+	syncState := blockchain.StartSync()
+	sApi.syncStateRepository.Set(syncState)
+
+	defer func() {
+		syncState = blockchain.FinishSync()
+		sApi.syncStateRepository.Set(syncState)
+	}()
+
 	// get random peer
 	randomPeer, err := sApi.queryService.GetRandomPeer()
 
@@ -56,8 +61,6 @@ func (sApi SyncApi) Synchronize() error {
 
 	if sApi.isSynced(randomPeer) {
 		iLogger.Infof(nil, "[Blockchain] Already Synchronized - PeerID: [%s]", randomPeer.PeerID)
-		state = blockchain.NewSyncState(false, true)
-		sApi.syncStateRepository.Set(state)
 		return nil
 	}
 
@@ -65,15 +68,10 @@ func (sApi SyncApi) Synchronize() error {
 	err = sApi.syncWithPeer(randomPeer)
 	if err != nil {
 		iLogger.Errorf(nil, "[Blockchain] Fail to Synchronize - Err: [%s]", err)
-		state = blockchain.NewSyncState(false, false)
-		sApi.syncStateRepository.Set(state)
 		return err
 	}
 
 	iLogger.Infof(nil, "[Blockchain] Synchronized Successfully - PeerID: [%s]", randomPeer.PeerID)
-
-	state = blockchain.NewSyncState(false, true)
-	sApi.syncStateRepository.Set(state)
 	return sApi.CommitStagedBlocks()
 }
 
@@ -194,6 +192,4 @@ func (sApi *SyncApi) CommitStagedBlocks() error {
 			raiseHeight(&targetHeight)
 		}
 	}
-
-	return nil
 }

@@ -186,31 +186,15 @@ type BlockPool interface {
 }
 
 type SyncState struct {
-	syncProgressing bool
-	synced          bool
+	SyncProgressing bool
 }
 
-func NewSyncState(syncProgressing bool, synced bool) SyncState {
-	return SyncState{
-		syncProgressing: syncProgressing,
-		synced:          synced,
-	}
+func StartSync() SyncState {
+	return SyncState{SyncProgressing: true}
 }
 
-func (s *SyncState) SetSyncProgress(isProgressing bool) {
-	s.syncProgressing = isProgressing
-}
-
-func (s *SyncState) SetSyncState(synced bool) {
-	s.synced = synced
-}
-
-func (s *SyncState) SyncProgress() bool {
-	return s.syncProgressing
-}
-
-func (s *SyncState) Sync() bool {
-	return s.synced
+func FinishSync() SyncState {
+	return SyncState{SyncProgressing: false}
 }
 
 type SyncStateRepository interface {
