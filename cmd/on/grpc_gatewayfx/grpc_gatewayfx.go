@@ -71,6 +71,10 @@ func RegisterHandlers(connectionCommandHandler *adapter.ConnectionCommandHandler
 	if err := server.Register("connection.close", connectionCommandHandler.HandleCloseConnectionCommand); err != nil {
 		panic(err)
 	}
+
+	if err := server.Register("connection.join", connectionCommandHandler.HandleJoinNetworkCommand); err != nil {
+		panic(err)
+	}
 }
 
 func InitgRPCServer(lifecycle fx.Lifecycle, config *conf.Configuration, hostService *infra.GrpcHostService, connectionApi *api.ConnectionApi) {
@@ -82,10 +86,7 @@ func InitgRPCServer(lifecycle fx.Lifecycle, config *conf.Configuration, hostServ
 			return nil
 		},
 		OnStop: func(context context.Context) error {
-			connections, _ := hostService.GetAllConnections()
-			for _, connection := range connections {
-				hostService.CloseConnection(connection.ConnectionID)
-			}
+			hostService.CloseAllConnections()
 			hostService.Stop()
 			return nil
 		},
