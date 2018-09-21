@@ -67,21 +67,6 @@ func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 	}
 }
 
-func TestBlockApi_SyncIsProgressing(t *testing.T) {
-	// when
-	publisherId := "zf"
-	blockRepo := mock.BlockRepository{}
-	eventService := mock.EventService{}
-	blockPool := mem.NewBlockPool()
-
-	// when
-	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService, blockPool)
-
-	// then
-	state := blockApi.SyncIsProgressing()
-	assert.Equal(t, blockchain.DONE, state)
-}
-
 // TODO: Write real situation test code, after finishing implementing api_gatey block_query_api.go
 func TestBlockApi_CommitProposedBlock(t *testing.T) {
 

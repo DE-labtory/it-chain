@@ -184,3 +184,36 @@ type BlockPool interface {
 	GetSortedKeys() []BlockHeight
 	Size() int
 }
+
+type SyncState struct {
+	syncProgressing bool
+	synced          bool
+}
+
+func NewSyncState(syncProgressing bool, synced bool) SyncState {
+	return SyncState{
+		syncProgressing: syncProgressing,
+		synced:          synced,
+	}
+}
+
+func (s *SyncState) SetSyncProgress(isProgressing bool) {
+	s.syncProgressing = isProgressing
+}
+
+func (s *SyncState) SetSyncState(synced bool) {
+	s.synced = synced
+}
+
+func (s *SyncState) SyncProgress() bool {
+	return s.syncProgressing
+}
+
+func (s *SyncState) Sync() bool {
+	return s.synced
+}
+
+type SyncStateRepository interface {
+	Get() SyncState
+	Set(state SyncState)
+}

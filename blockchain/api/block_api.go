@@ -45,10 +45,6 @@ func (bApi BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) er
 	return nil
 }
 
-func (bApi BlockApi) SyncIsProgressing() blockchain.ProgressState {
-	return blockchain.DONE
-}
-
 func (api BlockApi) ConsentBlock(consensusType string, block blockchain.DefaultBlock) error {
 
 	switch consensusType {

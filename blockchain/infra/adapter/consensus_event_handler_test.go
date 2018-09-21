@@ -19,6 +19,8 @@ package adapter_test
 import (
 	"testing"
 
+	"github.com/it-chain/engine/blockchain/infra/mem"
+
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/test/mock"
@@ -27,11 +29,11 @@ import (
 )
 
 func TestNewConsensusEventHandler(t *testing.T) {
-	blockSyncState := blockchain.NewBlockSyncState()
+	syncStateRepository := mem.NewSyncStateRepository()
 	blockApi := &mock.BlockApi{}
 
-	consensusEventHandler := &adapter.ConsensusEventHandler{BlockSyncState: blockSyncState, BlockApi: blockApi}
-	generated := adapter.NewConsensusEventHandler(blockSyncState, blockApi)
+	consensusEventHandler := &adapter.ConsensusEventHandler{SyncStateRepository: syncStateRepository, BlockApi: blockApi}
+	generated := adapter.NewConsensusEventHandler(syncStateRepository, blockApi)
 
 	assert.Equal(t, consensusEventHandler, generated)
 }
@@ -54,7 +56,8 @@ func TestConsensusEventHandler_HandleConsensusFinishedEvent(t *testing.T) {
 		Creator:  "",
 	}
 
-	consensusEventHandler := SetConsensusEventHandler(&blockchain.BlockSyncState{Id: "1", IsProgress: true})
+	syncStateRepository := mem.NewSyncStateRepository()
+	consensusEventHandler := SetConsensusEventHandler(syncStateRepository)
 
 	//	when
 	consensusEventHandler.HandleConsensusFinishedEvent(event1)
@@ -70,7 +73,7 @@ func TestConsensusEventHandler_HandleConsensusFinishedEvent(t *testing.T) {
 
 }
 
-func SetConsensusEventHandler(state *blockchain.BlockSyncState) *adapter.ConsensusEventHandler {
+func SetConsensusEventHandler(state blockchain.SyncStateRepository) *adapter.ConsensusEventHandler {
 	blockApi := &mock.BlockApi{}
 	blockApi.CommitBlockFunc = func(block blockchain.DefaultBlock) error {
 		return nil
@@ -80,7 +83,7 @@ func SetConsensusEventHandler(state *blockchain.BlockSyncState) *adapter.Consens
 	}
 
 	return &adapter.ConsensusEventHandler{
-		BlockSyncState: state,
-		BlockApi:       blockApi,
+		SyncStateRepository: state,
+		BlockApi:            blockApi,
 	}
 }

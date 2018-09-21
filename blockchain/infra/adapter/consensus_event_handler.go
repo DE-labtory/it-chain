@@ -27,15 +27,15 @@ type BlockApiForCommitAndStage interface {
 }
 
 type ConsensusEventHandler struct {
-	BlockSyncState *blockchain.BlockSyncState
-	BlockApi       BlockApiForCommitAndStage
+	SyncStateRepository blockchain.SyncStateRepository
+	BlockApi            BlockApiForCommitAndStage
 }
 
-func NewConsensusEventHandler(blockSyncState *blockchain.BlockSyncState, blockApi BlockApiForCommitAndStage) *ConsensusEventHandler {
+func NewConsensusEventHandler(syncStateRepository blockchain.SyncStateRepository, blockApi BlockApiForCommitAndStage) *ConsensusEventHandler {
 
 	return &ConsensusEventHandler{
-		BlockSyncState: blockSyncState,
-		BlockApi:       blockApi,
+		SyncStateRepository: syncStateRepository,
+		BlockApi:            blockApi,
 	}
 }
 
@@ -51,7 +51,9 @@ func (c *ConsensusEventHandler) HandleConsensusFinishedEvent(event event.Consens
 		return ErrBlockNil
 	}
 
-	if c.BlockSyncState.IsProgressing() {
+	state := c.SyncStateRepository.Get()
+
+	if state.SyncProgress() {
 		c.BlockApi.StageBlock(*receivedBlock)
 	} else {
 		c.BlockApi.CommitBlock(*receivedBlock)

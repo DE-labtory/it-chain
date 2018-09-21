@@ -23,9 +23,7 @@ import (
 
 type BlockApi struct {
 	SyncedCheckFunc               func(block blockchain.Block) error
-	AddBlockToPoolFunc            func(block blockchain.Block) error
 	CheckAndSaveBlockFromPoolFunc func(height blockchain.BlockHeight) error
-	SyncIsProgressingFunc         func() blockchain.ProgressState
 	CommitGenesisBlockFunc        func(GenesisConfPath string) error
 	CommitBlockFunc               func(block blockchain.DefaultBlock) error
 	StageBlockFunc                func(block blockchain.DefaultBlock) error
@@ -36,16 +34,8 @@ func (api BlockApi) SyncedCheck(block blockchain.Block) error {
 	return api.SyncedCheckFunc(block)
 }
 
-func (api BlockApi) AddBlockToPool(block blockchain.Block) error {
-	return api.AddBlockToPoolFunc(block)
-}
-
 func (api BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
 	return api.CheckAndSaveBlockFromPoolFunc(height)
-}
-
-func (api BlockApi) SyncIsProgressing() blockchain.ProgressState {
-	return api.SyncIsProgressingFunc()
 }
 
 func (api BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
