@@ -139,3 +139,101 @@ func TestParliamentService_IsNeedConsensus(t *testing.T) {
 	// then
 	assert.Equal(t, true, flag)
 }
+
+func TestParliamentService_Build(t *testing.T) {
+	p := SetParliamentService()
+
+	p.Build()
+
+	assert.Equal(t, p.GetRepresentativeById("1").GetID(), "1")
+	assert.Equal(t, p.GetRepresentativeById("2").GetID(), "2")
+	assert.Equal(t, p.GetRepresentativeById("3").GetID(), "3")
+}
+
+func TestParliamentService_FindRepresentativeByIpAddress(t *testing.T) {
+	p := SetParliamentService()
+
+	rep := p.FindRepresentativeByIpAddress("1")
+
+	assert.Equal(t, rep.IpAddress, "1")
+}
+
+func TestParliamentService_GetLeader(t *testing.T) {
+	p := SetParliamentService()
+
+	p.SetLeader(&pbft.Representative{
+		IpAddress: "1",
+		ID:        "1",
+	})
+
+	assert.Equal(t, p.GetLeader().LeaderId, "1")
+}
+
+func TestParliamentService_GetParliament(t *testing.T) {
+	p := SetParliamentService()
+
+	parliament := p.GetParliament()
+
+	assert.Equal(t, parliament.RepresentativeTable["1"].ID, "1")
+}
+
+func TestParliamentService_GetRepresentativeById(t *testing.T) {
+	p := SetParliamentService()
+
+	rep := p.GetRepresentativeById("1")
+
+	assert.Equal(t, rep.ID, "1")
+}
+
+func TestParliamentService_GetRepresentativeTable(t *testing.T) {
+	p := SetParliamentService()
+
+	table := p.GetRepresentativeTable()
+
+	assert.Equal(t, table["1"].ID, "1")
+}
+
+func TestParliamentService_SetLeader(t *testing.T) {
+	p := SetParliamentService()
+
+	p.SetLeader(&pbft.Representative{
+		ID:        "1",
+		IpAddress: "1",
+	})
+
+	assert.Equal(t, p.GetLeader().LeaderId, "1")
+}
+
+func TestNewParliamentService(t *testing.T) {
+	p := SetParliamentService()
+
+	assert.Equal(t, p.GetRepresentativeById("1").IpAddress, "1")
+}
+
+func SetParliamentService() *adapter.ParliamentService {
+	parliament := pbft.NewParliament()
+	repository := mem.NewPeerReopository()
+	repository.Save(p2p.Peer{
+		IpAddress: "1",
+		PeerId: p2p.PeerId{
+			Id: "1",
+		},
+	})
+	repository.Save(p2p.Peer{
+		IpAddress: "2",
+		PeerId: p2p.PeerId{
+			Id: "2",
+		},
+	})
+	repository.Save(p2p.Peer{
+		IpAddress: "3",
+		PeerId: p2p.PeerId{
+			Id: "3",
+		},
+	})
+	api := api_gateway.NewPeerQueryApi(repository)
+	p := adapter.NewParliamentService(parliament, api)
+	p.Build()
+
+	return p
+}

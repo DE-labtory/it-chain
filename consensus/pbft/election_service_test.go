@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package pbft
+package pbft_test
 
 import (
 	"testing"
 
+	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/magiconair/properties/assert"
 )
 
 func TestNewElectionService(t *testing.T) {
-	e := NewElectionService("1", 30, CANDIDATE, 0)
-
-	assert.Equal(t, e.GetState(), CANDIDATE)
+	e := pbft.NewElectionService("1", 30, pbft.CANDIDATE, 0)
+	e.SetState(pbft.CANDIDATE)
+	assert.Equal(t, e.GetState(), pbft.CANDIDATE)
 	assert.Equal(t, e.GetLeftTime(), 30)
 }
 
@@ -48,7 +49,7 @@ func TestElectionService_CountUpVoteCount(t *testing.T) {
 
 func TestElectionService_GetCandidate(t *testing.T) {
 	e := SetElectionService()
-	e.SetCandidate(&Representative{ID: "1"})
+	e.SetCandidate(&pbft.Representative{ID: "1"})
 
 	assert.Equal(t, e.GetCandidate().ID, "1")
 }
@@ -65,7 +66,7 @@ func TestElectionService_GetLeftTime(t *testing.T) {
 
 func TestElectionService_GetState(t *testing.T) {
 	e := SetElectionService()
-	assert.Equal(t, e.GetState(), CANDIDATE)
+	assert.Equal(t, e.GetState(), pbft.CANDIDATE)
 }
 
 func TestElectionService_GetVoteCount(t *testing.T) {
@@ -94,7 +95,7 @@ func TestElectionService_ResetVoteCount(t *testing.T) {
 func TestElectionService_SetCandidate(t *testing.T) {
 	e := SetElectionService()
 
-	r := &Representative{
+	r := &pbft.Representative{
 		ID: "1",
 	}
 	e.SetCandidate(r)
@@ -110,9 +111,9 @@ func TestElectionService_SetLeftTime(t *testing.T) {
 
 func TestElectionService_SetState(t *testing.T) {
 	e := SetElectionService()
-	e.SetState(TICKING)
+	e.SetState(pbft.TICKING)
 
-	assert.Equal(t, e.GetState(), TICKING)
+	assert.Equal(t, e.GetState(), pbft.TICKING)
 
 }
 
@@ -123,6 +124,6 @@ func TestElectionService_SetVoteCount(t *testing.T) {
 	assert.Equal(t, e.GetVoteCount(), 100)
 }
 
-func SetElectionService() *ElectionService {
-	return NewElectionService("1", 30, CANDIDATE, 0)
+func SetElectionService() *pbft.ElectionService {
+	return pbft.NewElectionService("1", 30, pbft.CANDIDATE, 0)
 }
