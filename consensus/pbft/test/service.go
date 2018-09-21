@@ -78,8 +78,8 @@ func SetTestEnvironment(processList []string) struct {
 		eventServiceMap[process.Id] = eventService
 	}
 
-	logger.Infof(nil, "created process: %v", processMap)
-	logger.Infof(nil, "created event service: %v", eventServiceMap)
+	logger.Infof(nil, "[consensus] created process: %v", processMap)
+	logger.Infof(nil, "[consensus] created event service: %v", eventServiceMap)
 
 	networkManager.Start()
 	return struct {

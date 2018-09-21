@@ -518,7 +518,7 @@
     "publicsuffix",
     "trace"
   ]
-  revision = "f04abc6bdfa7a0171a8a0c9fd2ada9391044d056"
+  revision = "2f5d2388922f370f4355f327fcf4cfe9f5583908"
 
 [[projects]]
   branch = "master"
@@ -527,7 +527,7 @@
     "unix",
     "windows"
   ]
-  revision = "2f1df4e56cdeb503a08d8577e6f1a7eb12efab82"
+  revision = "90868a75fefd03942536221d7c0e2f84ec62a668"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -554,7 +554,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "0e822944c569bf5c9afd034adaa56208bd2906ac"
+  revision = "221a8d4f74948678f06caaa13c9d41d22e069ae8"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -590,6 +590,12 @@
   ]
   revision = "8dea3dc473e90c8179e519d91302d0597c0ca1d1"
   version = "v1.15.0"
+
+[[projects]]
+  name = "gopkg.in/resty.v1"
+  packages = ["."]
+  revision = "d4920dcf5b7689548a6db640278a9b35a5b48ec6"
+  version = "v1.9.1"
 
 [[projects]]
   name = "gopkg.in/src-d/go-billy.v4"
@@ -665,6 +671,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4b9e412f1503f3f2b77f8c0b55b48106315b33bfd4f8336941292474e79086e8"
+  inputs-digest = "e7b1ee324b8308c95dfa228c1f20700be7f48b0d53acc335c4803d8913379501"
   solver-name = "gps-cdcl"
   solver-version = 1

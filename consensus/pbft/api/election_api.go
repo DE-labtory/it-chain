@@ -23,8 +23,8 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/iLogger"
 	"github.com/rs/xid"
 )
 
@@ -52,13 +52,13 @@ func (ea *ElectionApi) Vote(connectionId string) error {
 	candidate := ea.ElectionService.GetCandidate()
 
 	if candidate.ID != "" {
-		logger.Info(nil, "[consensus] peer has already received request vote message")
+		iLogger.Info(nil, "[consensus] peer has already received request vote message")
 		return nil
 	}
 
 	ea.ElectionService.SetCandidate(representative)
 
-	logger.Infof(nil, "[consensus] vote for candidate: %v", ea.ElectionService.GetCandidate())
+	iLogger.Infof(nil, "[consensus] vote for candidate: %v", ea.ElectionService.GetCandidate())
 
 	//if leftTime >0, reset left time and send VoteLeaderMessage
 
@@ -76,7 +76,7 @@ func (ea *ElectionApi) Vote(connectionId string) error {
 
 // broadcast leader to other peers
 func (es *ElectionApi) broadcastLeader(rep pbft.Representative) error {
-	logger.Info(nil, "[consensus] Broadcast leader")
+	iLogger.Info(nil, "[consensus] Broadcast leader")
 
 	updateLeaderMessage := pbft.UpdateLeaderMessage{
 		Representative: rep,
@@ -92,7 +92,7 @@ func (es *ElectionApi) broadcastLeader(rep pbft.Representative) error {
 	pubErr := es.eventService.Publish("message.deliver", grpcDeliverCommand)
 
 	if pubErr != nil {
-		logger.Infof(nil, "[consensus] Fail to publish update leader message")
+		iLogger.Infof(nil, "[consensus] Fail to publish update leader message")
 		return pubErr
 	}
 
@@ -106,7 +106,7 @@ func (es *ElectionApi) DecideToBeLeader() error {
 	if es.ElectionService.GetState() != pbft.CANDIDATE {
 		return nil
 	}
-	logger.Infof(nil, "[consensus] number of votes: %v", es.ElectionService.GetVoteCount())
+	iLogger.Infof(nil, "[consensus] number of votes: %v", es.ElectionService.GetVoteCount())
 
 	es.ElectionService.CountUpVoteCount()
 
@@ -153,12 +153,9 @@ func (e *ElectionApi) ElectLeaderWithRaft() {
 			select {
 
 			case <-timeout:
-				logger.Info(nil, "[consensus] RAFT timer timed out")
-				// when timed out
-				// 1. if state is ticking, be candidate and request vote
-				// 2. if state is candidate, reset state and left time
+				iLogger.Info(nil, "[consensus] RAFT timer timed out")
 				if e.ElectionService.GetState() == pbft.TICKING {
-					logger.Infof(nil, "[consensus] candidate process: %v", e.ElectionService.GetCandidate())
+					iLogger.Infof(nil, "[consensus] candidate process: %v", e.ElectionService.GetCandidate())
 					e.ElectionService.SetState(pbft.CANDIDATE)
 
 					connectionIds := make([]string, 0)
