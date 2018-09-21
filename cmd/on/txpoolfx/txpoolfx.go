@@ -21,11 +21,13 @@ import (
 	"time"
 
 	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/batch"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
+	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/engine/txpool/api"
 	"github.com/it-chain/engine/txpool/infra/adapter"
-	"github.com/it-chain/engine/txpool/infra/batch"
 	"github.com/it-chain/engine/txpool/infra/mem"
 	"github.com/it-chain/iLogger"
 	"go.uber.org/fx"
@@ -44,8 +46,8 @@ var Module = fx.Options(
 	),
 )
 
-func NewBlockProposalService(repository *mem.TransactionRepository, client *rpc.Client, config *conf.Configuration) *adapter.BlockProposalService {
-	return adapter.NewBlockProposalService(client, repository, config.Engine.Mode)
+func NewBlockProposalService(repository *mem.TransactionRepository, client *rpc.Client, config *conf.Configuration, peerQueryService txpool.PeerQueryService, peer command.MyPeer) *adapter.BlockProposalService {
+	return adapter.NewBlockProposalService(client, repository, config.Engine.Mode, peerQueryService, peer)
 }
 
 func NewTxpoolApi(config *conf.Configuration, repository *mem.TransactionRepository) *api.TransactionApi {

@@ -21,8 +21,11 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/engine/txpool/infra/adapter"
+	"github.com/it-chain/engine/txpool/infra/mem"
+	"github.com/it-chain/engine/txpool/test/mock"
 	"github.com/magiconair/properties/assert"
 )
 
@@ -68,13 +71,34 @@ func TestGrpcCommandService_SendLeaderTransactions(t *testing.T) {
 		return nil
 	}
 
-	transferService := adapter.NewTransferService(publisher)
+	txpoolRepository := mem.NewTransactionRepository()
+	txpoolRepository.Save(txpool.Transaction{ID: "zf"})
 
-	for testName, test := range tests {
-		t.Logf("running test case %s", testName)
+	peerQueryService := &mock.PeerQueryService{}
 
-		err := transferService.SendLeaderTransactions(test.input.transactions, test.input.leader)
+	peerQueryService.GetPeerListFunc = func() ([]p2p.Peer, error) {
+		a := []p2p.Peer{}
 
-		assert.Equal(t, test.err, err)
+		a = append(a, p2p.Peer{IpAddress: "12345", PeerId: struct{ Id string }{Id: "zf"}})
+		a = append(a, p2p.Peer{IpAddress: "54321", PeerId: struct{ Id string }{Id: "zf2"}})
+		return a, nil
 	}
+
+	peerQueryService.GetLeaderFunc = func() (p2p.Leader, error) {
+		return p2p.Leader{LeaderId: struct{ Id string }{Id: "zf2"}}, nil
+	}
+	myself := command.MyPeer{IpAddress: "", PeerId: "zf"}
+
+	transferService := adapter.NewTransferService(publisher, txpoolRepository, "pbft", peerQueryService, myself)
+	t.Logf("running test case %s", "success")
+	err := transferService.SendLeaderTransactions()
+	assert.Equal(t, tests["success"].err, err)
+
+	txpoolRepository = mem.NewTransactionRepository()
+	txpoolRepository.Save(txpool.Transaction{})
+
+	transferService = adapter.NewTransferService(publisher, txpoolRepository, "pbft", peerQueryService, myself)
+	t.Logf("running test case %s", "transaction empty test")
+	err = transferService.SendLeaderTransactions()
+	assert.Equal(t, tests["transaction empty test"].err, err)
 }

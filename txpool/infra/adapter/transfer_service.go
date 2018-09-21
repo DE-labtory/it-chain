@@ -19,6 +19,8 @@ package adapter
 import (
 	"errors"
 
+	"sync"
+
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/txpool"
@@ -31,30 +33,60 @@ type Publisher func(topic string, data interface{}) (err error) //해당 publish
 //모든 의존성 주입은 컴포넌트.go 에서 이루어짐
 
 type TransferService struct {
-	publisher Publisher // midgard.client
+	publisher        Publisher // midgard.client
+	engineMode       string
+	peerQueryService txpool.PeerQueryService
+	txpoolRepository txpool.TransactionRepository
+	sync.RWMutex
+	peer command.MyPeer // myself
 }
 
-func NewTransferService(publisher Publisher) *TransferService {
+func NewTransferService(publisher Publisher, txpoolRepository txpool.TransactionRepository, engineMode string, peerQueryService txpool.PeerQueryService, peer command.MyPeer) *TransferService {
 	return &TransferService{
-		publisher: publisher,
+		publisher:        publisher,
+		engineMode:       engineMode,
+		RWMutex:          sync.RWMutex{},
+		txpoolRepository: txpoolRepository,
+		peerQueryService: peerQueryService,
+		peer:             peer,
 	}
 }
 
-func (ts TransferService) SendLeaderTransactions(transactions []txpool.Transaction, leader txpool.Leader) error {
+func (ts TransferService) SendLeaderTransactions() error {
 
-	if len(transactions) == 0 {
-		return ErrTxEmpty
-	}
+	ts.Lock()
+	defer ts.Unlock()
 
-	deliverCommand, err := createGrpcDeliverCommand("SendLeaderTransactionsProtocol", transactions)
+	transactions, err := ts.txpoolRepository.FindAll()
 
 	if err != nil {
 		return err
 	}
 
-	deliverCommand.RecipientList = append(deliverCommand.RecipientList, leader.LeaderId.ToString())
+	if len(transactions) == 0 {
+		return ErrTxEmpty
+	}
 
-	return ts.publisher("message.deliver", deliverCommand)
+	leader, err := ts.peerQueryService.GetLeader()
+	if err != nil {
+		return err
+	}
+
+	myself := ts.peer
+
+	if ts.engineMode == "pbft" && leader.GetID() != myself.PeerId {
+		deliverCommand, err := createGrpcDeliverCommand("SendLeaderTransactionsProtocol", transactions)
+
+		if err != nil {
+			return err
+		}
+
+		deliverCommand.RecipientList = append(deliverCommand.RecipientList, leader.LeaderId.ToString())
+
+		return ts.publisher("message.deliver", deliverCommand)
+	}
+
+	return nil
 }
 
 func createGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
