@@ -45,7 +45,7 @@ func (c ConnectionApi) JoinNetwork(bootstrapNodeAddress string) ([]grpc_gateway.
 
 	connectedConnection, err := c.CreateConnection(bootstrapNodeAddress)
 	if err != nil {
-		logger.Fatalf(nil, "[gRPC-Gateway] Fail to join - Err: [%s]", err)
+		logger.Errorf(nil, "[gRPC-Gateway] Fail to join - Err: [%s]", err)
 		return []grpc_gateway.Connection{}, err
 	}
 
@@ -59,7 +59,7 @@ func (c ConnectionApi) JoinNetwork(bootstrapNodeAddress string) ([]grpc_gateway.
 	for _, connection := range connectionList {
 		var connectedConnection grpc_gateway.Connection
 		if connectedConnection, err = c.CreateConnection(connection.Address); err != nil {
-			logger.Fatalf(nil, "[gRPC-Gateway] Fail to create connection - Address [%s]", connection.Address)
+			logger.Errorf(nil, "[gRPC-Gateway] Fail to create connection - Address [%s]", connection.Address)
 		}
 		connectedConnectionList = append(connectedConnectionList, connectedConnection)
 	}
@@ -74,7 +74,7 @@ func (c ConnectionApi) CreateConnection(address string) (grpc_gateway.Connection
 
 	connection, err := c.grpcService.Dial(address)
 	if err != nil {
-		logger.Fatalf(nil, "[gRPC-Gateway] Fail to dial - Err: [%s]", err)
+		logger.Errorf(nil, "[gRPC-Gateway] Fail to dial - Err: [%s]", err)
 		return grpc_gateway.Connection{}, err
 	}
 

@@ -26,7 +26,7 @@ import (
 
 func Join() cli.Command {
 	return cli.Command{
-		Name:  "dial",
+		Name:  "join",
 		Usage: "it-chain connection join [node-ip-of-the-network]",
 		Action: func(c *cli.Context) error {
 			nodeIp := c.Args().Get(0)

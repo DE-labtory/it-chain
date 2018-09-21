@@ -40,7 +40,7 @@ func (d *ConnectionCommandHandler) HandleCreateConnectionCommand(createConnectio
 
 	connection, err := d.connectionApi.CreateConnection(createConnectionCommand.Address)
 	if err != nil {
-		logger.Error(nil, fmt.Sprintf("[gRPC-Gateway] fail to dial, url %s", createConnectionCommand.Address))
+		logger.Error(nil, fmt.Sprintf("[gRPC-Gateway] Fail to dial - url [%s], Err: [%s]", createConnectionCommand.Address, err.Error()))
 		return grpc_gateway.Connection{}, rpc.Error{Message: err.Error()}
 	}
 
@@ -51,7 +51,7 @@ func (d *ConnectionCommandHandler) HandleCloseConnectionCommand(closeConnectionC
 
 	err := d.connectionApi.CloseConnection(closeConnectionCommand.Address)
 	if err != nil {
-		logger.Error(nil, fmt.Sprintf("[Grpc-Gateway] fail to close, url %s", closeConnectionCommand.Address))
+		logger.Error(nil, fmt.Sprintf("[gRPC-Gateway] Fail to close - url [%s], Err: [%s]", closeConnectionCommand.Address, err.Error()))
 		return struct{}{}, rpc.Error{Message: err.Error()}
 	}
 
@@ -62,7 +62,7 @@ func (d *ConnectionCommandHandler) HandleGetConnectionListCommand(getConnectionL
 
 	connectionList, err := d.connectionApi.GetAllConnections()
 	if err != nil {
-		logger.Error(nil, fmt.Sprintf("[Grpc-Gateway] fail to get connection list"))
+		logger.Error(nil, fmt.Sprintf("[gRPC-Gateway] Fail to get connection list"))
 		return command.GetConnectionList{}, rpc.Error{Message: err.Error()}
 	}
 
@@ -73,7 +73,7 @@ func (d *ConnectionCommandHandler) HandleJoinNetworkCommand(joinNetworkCommand c
 
 	connectionList, err := d.connectionApi.JoinNetwork(joinNetworkCommand.Address)
 	if err != nil {
-		logger.Error(nil, fmt.Sprintf("[Grpc-Gateway] fail to get connection list"))
+		logger.Error(nil, fmt.Sprintf("[gRPC-Gateway] Fail to join network - Err: [%s]", err.Error()))
 		return command.GetConnectionList{}, rpc.Error{Message: err.Error()}
 	}
 

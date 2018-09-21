@@ -289,7 +289,7 @@ func (r MessageHandler) ServeRequest(msg bifrost.Message) {
 	})
 
 	if err != nil {
-		logger.Fatalf(nil, "[gRPC-Gateway] Fail to publish message received error - [Err]: [%s]", err.Error())
+		logger.Errorf(nil, "[gRPC-Gateway] Fail to publish message received error - [Err]: [%s]", err.Error())
 	}
 }
 
