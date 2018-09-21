@@ -26,15 +26,48 @@ import (
 type ConnectionApi struct {
 	grpcService  grpc_gateway.GrpcService
 	eventService common.EventService
+	peerService  grpc_gateway.PeerService
 }
 
-func NewConnectionApi(grpcService grpc_gateway.GrpcService, eventService common.EventService) *ConnectionApi {
+func NewConnectionApi(grpcService grpc_gateway.GrpcService, eventService common.EventService, peerService grpc_gateway.PeerService) *ConnectionApi {
 	return &ConnectionApi{
 		grpcService:  grpcService,
+		peerService:  peerService,
 		eventService: eventService,
 	}
 }
 
+// create all connections
+func (c ConnectionApi) JoinNetwork(bootstrapNodeAddress string) ([]grpc_gateway.Connection, error) {
+	logger.Infof(nil, "[gRPC-Gateway] Joining it-chain network - BootstrapNodeAddress: [%s]", bootstrapNodeAddress)
+
+	connectedConnectionList := make([]grpc_gateway.Connection, 0)
+
+	connectedConnection, err := c.CreateConnection(bootstrapNodeAddress)
+	if err != nil {
+		logger.Fatalf(nil, "[gRPC-Gateway] Fail to join - Err: [%s]", err)
+		return []grpc_gateway.Connection{}, err
+	}
+
+	connectedConnectionList = append(connectedConnectionList, connectedConnection)
+
+	connectionList, err := c.peerService.GetAllPeerList(connectedConnection)
+	if err != nil {
+		return []grpc_gateway.Connection{}, err
+	}
+
+	for _, connection := range connectionList {
+		var connectedConnection grpc_gateway.Connection
+		if connectedConnection, err = c.CreateConnection(connection.Address); err != nil {
+			logger.Fatalf(nil, "[gRPC-Gateway] Fail to create connection - Address [%s]", connection.Address)
+		}
+		connectedConnectionList = append(connectedConnectionList, connectedConnection)
+	}
+
+	return connectedConnectionList, nil
+}
+
+// create connection only for the address
 func (c ConnectionApi) CreateConnection(address string) (grpc_gateway.Connection, error) {
 
 	logger.Infof(nil, "[gRPC-Gateway] Dialing - Address: [%s]", address)

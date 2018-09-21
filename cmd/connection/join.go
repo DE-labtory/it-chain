@@ -21,40 +21,42 @@ import (
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/grpc_gateway"
 	"github.com/urfave/cli"
 )
 
-func Dial() cli.Command {
+func Join() cli.Command {
 	return cli.Command{
 		Name:  "dial",
-		Usage: "it-chain connection dial [node-ip]",
+		Usage: "it-chain connection join [node-ip-of-the-network]",
 		Action: func(c *cli.Context) error {
 			nodeIp := c.Args().Get(0)
-			return dial(nodeIp)
+			return join(nodeIp)
 		},
 	}
 }
 
-func dial(ip string) error {
+func join(ip string) error {
 
 	config := conf.GetConfiguration()
 	client := rpc.NewClient(config.Engine.Amqp)
 	defer client.Close()
 
-	createConnectionCommand := command.CreateConnection{
+	joinNetworkCommand := command.JoinNetwork{
 		Address: ip,
 	}
 
-	logger.Infof(nil, "[Cmd] Creating connection - Address: [%s]", ip)
-	err := client.Call("connection.create", createConnectionCommand, func(connection grpc_gateway.Connection, err rpc.Error) {
+	logger.Infof(nil, "[Cmd] Joining network - Address: [%s]", ip)
+	err := client.Call("connection.join", joinNetworkCommand, func(getConnectionListCommand command.GetConnectionList, err rpc.Error) {
 
 		if !err.IsNil() {
-			logger.Fatalf(nil, "[Cmd] Fail to create connection - Address: [%s]", ip)
+			logger.Fatalf(nil, "[Cmd] Fail to join network - Address: [%s]", ip)
 			return
 		}
 
-		logger.Infof(nil, "[Cmd] Connection created - Address: [%s], Id:[%s]", connection.Address, connection.ConnectionID)
+		logger.Info(nil, "[Cmd] Successfully joined to network")
+		for index, connection := range getConnectionListCommand.ConnectionList {
+			logger.Infof(nil, "[Cmd] Connected connection - Index: [%s], ConnectionId: [%s], Address: [%s]", index, connection.ConnectionID, connection.Address)
+		}
 	})
 
 	if err != nil {

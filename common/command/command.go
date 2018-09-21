@@ -42,6 +42,10 @@ type CreateConnection struct {
 	Address string
 }
 
+type JoinNetwork struct {
+	Address string
+}
+
 //Connection close command
 type CloseConnection struct {
 	Address string
