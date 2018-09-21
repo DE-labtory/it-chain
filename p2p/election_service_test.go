@@ -20,21 +20,7 @@ import (
 	"testing"
 
 	"github.com/it-chain/engine/p2p"
-	"github.com/it-chain/engine/p2p/test/mock"
-	"github.com/stretchr/testify/assert"
 )
-
-func TestNewElectionService(t *testing.T) {
-	election := p2p.NewElection("this.is.ip.addres", 30, p2p.TICKING, 123)
-	queryService := mock.MockPeerQueryService{}
-	client := mock.MockClient{}
-
-	electionService := p2p.NewElectionService(&election, queryService, client)
-
-	assert.Equal(t, 123, electionService.Election.GetVoteCount())
-	assert.Equal(t, 30, electionService.Election.GetLeftTime())
-	assert.Equal(t, p2p.TICKING, electionService.Election.GetState())
-}
 
 func TestGenRandomInRange(t *testing.T) {
 	v1 := p2p.GenRandomInRange(0, 10)
