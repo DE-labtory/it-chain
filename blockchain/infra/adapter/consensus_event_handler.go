@@ -51,9 +51,9 @@ func (c *ConsensusEventHandler) HandleConsensusFinishedEvent(event event.Consens
 		return ErrBlockNil
 	}
 
-	state := c.SyncStateRepository.Get()
+	syncState := c.SyncStateRepository.Get()
 
-	if state.SyncProgress() {
+	if syncState.SyncProgressing {
 		c.BlockApi.StageBlock(*receivedBlock)
 	} else {
 		c.BlockApi.CommitBlock(*receivedBlock)

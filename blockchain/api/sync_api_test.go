@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package api_test
 
 import (
@@ -29,6 +28,7 @@ import (
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,14 +39,19 @@ func TestSyncApi_Synchronize(t *testing.T) {
 	block2 := mock.GetNewBlock(block1.Seal, 1)
 	block3 := mock.GetNewBlock(block2.Seal, 2)
 
+	errGetRandomPeer := errors.New("GetRandomPeer")
+
 	tests := map[string]struct {
-		blockchain []*blockchain.DefaultBlock
-		peer       blockchain.Peer
-		dbPath     string
-		output     struct {
+		blockchain       []*blockchain.DefaultBlock
+		peer             blockchain.Peer
+		dbPath           string
+		ErrGetRandomPeer error
+		ErrSyncWithPeer  error
+		output           struct {
 			syncProgressing bool
 			synced          bool
 		}
+		err error
 	}{
 		"not synced": {
 			blockchain: []*blockchain.DefaultBlock{
@@ -55,7 +60,9 @@ func TestSyncApi_Synchronize(t *testing.T) {
 			peer: blockchain.Peer{
 				ApiGatewayAddress: "PeerIP",
 			},
-			dbPath: "./.db1",
+			dbPath:           "./.db1",
+			ErrGetRandomPeer: nil,
+			ErrSyncWithPeer:  nil,
 			output: struct {
 				syncProgressing bool
 				synced          bool
@@ -63,6 +70,7 @@ func TestSyncApi_Synchronize(t *testing.T) {
 				syncProgressing: false,
 				synced:          true,
 			},
+			err: nil,
 		},
 
 		"synced": {
@@ -74,7 +82,9 @@ func TestSyncApi_Synchronize(t *testing.T) {
 			peer: blockchain.Peer{
 				ApiGatewayAddress: "PeerIP",
 			},
-			dbPath: "./.db2",
+			dbPath:           "./.db2",
+			ErrGetRandomPeer: nil,
+			ErrSyncWithPeer:  nil,
 			output: struct {
 				syncProgressing bool
 				synced          bool
@@ -82,12 +92,15 @@ func TestSyncApi_Synchronize(t *testing.T) {
 				syncProgressing: false,
 				synced:          true,
 			},
+			err: nil,
 		},
 
 		"No Peer In Network(it is the first peer)": {
-			blockchain: []*blockchain.DefaultBlock{},
-			peer:       blockchain.Peer{},
-			dbPath:     "./.db3",
+			blockchain:       []*blockchain.DefaultBlock{},
+			peer:             blockchain.Peer{},
+			dbPath:           "./.db3",
+			ErrGetRandomPeer: nil,
+			ErrSyncWithPeer:  nil,
 			output: struct {
 				syncProgressing bool
 				synced          bool
@@ -95,6 +108,26 @@ func TestSyncApi_Synchronize(t *testing.T) {
 				syncProgressing: false,
 				synced:          true,
 			},
+			err: nil,
+		},
+
+		"When error occured in GetRandomPeer": {
+			blockchain: []*blockchain.DefaultBlock{
+				block1,
+				block2,
+				block3,
+			},
+			dbPath:           "./.db4",
+			ErrGetRandomPeer: errGetRandomPeer,
+			ErrSyncWithPeer:  nil,
+			output: struct {
+				syncProgressing bool
+				synced          bool
+			}{
+				syncProgressing: false,
+				synced:          false,
+			},
+			err: errGetRandomPeer,
 		},
 	}
 
@@ -111,13 +144,13 @@ func TestSyncApi_Synchronize(t *testing.T) {
 	subscriber := pubsub.NewTopicSubscriber("", "Event")
 	defer subscriber.Close()
 
-	handler := &mock.CommitEventHandler{}
-	handler.HandleFunc = func(event event.BlockCommitted) {
+	commitEventhandler := &mock.CommitEventHandler{}
+	commitEventhandler.HandleFunc = func(event event.BlockCommitted) {
 		assert.Equal(t, blockchain.Committed, event.State)
 		wg.Done()
 	}
 
-	subscriber.SubscribeTopic("block.*", handler)
+	subscriber.SubscribeTopic("block.*", commitEventhandler)
 
 	publisherID := "junksound"
 
@@ -141,7 +174,7 @@ func TestSyncApi_Synchronize(t *testing.T) {
 		queryService := mock.QueryService{}
 
 		queryService.GetRandomPeerFunc = func() (blockchain.Peer, error) {
-			return test.peer, nil
+			return test.peer, test.ErrGetRandomPeer
 		}
 
 		queryService.GetBlockByHeightFromPeerFunc = func(height blockchain.BlockHeight, peer blockchain.Peer) (blockchain.DefaultBlock, error) {
@@ -165,17 +198,14 @@ func TestSyncApi_Synchronize(t *testing.T) {
 		//when
 
 		err = sApi.Synchronize()
-		assert.NoError(t, err)
+		assert.Equal(t, err, test.err)
 
 		lastBlock, err := br.FindLast()
 		assert.NoError(t, err)
 
 		syncState := ssr.Get()
-		synced := syncState.Sync()
-		assert.Equal(t, synced, test.output.synced)
 
-		syncProgressing := syncState.SyncProgress()
-		assert.Equal(t, syncProgressing, test.output.syncProgressing)
+		assert.Equal(t, syncState.SyncProgressing, test.output.syncProgressing)
 
 		if testName == "No Peer In Network(it is the first peer)" {
 

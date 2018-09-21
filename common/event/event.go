@@ -103,14 +103,6 @@ type Tx struct {
 	Signature []byte
 }
 
-type SyncStart struct {
-	EventId string
-}
-
-type SyncDone struct {
-	EventId string
-}
-
 /*
  * txpool
  */

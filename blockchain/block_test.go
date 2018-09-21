@@ -149,13 +149,9 @@ func TestSerializeAndDeserialize(t *testing.T) {
 }
 
 func TestSyncState(t *testing.T) {
-	state := blockchain.NewSyncState(true, false)
-	assert.Equal(t, state.SyncProgress(), true)
-	assert.Equal(t, state.Sync(), false)
+	syncState := blockchain.StartSync()
+	assert.Equal(t, syncState.SyncProgressing, true)
 
-	state.SetSyncProgress(false)
-	assert.Equal(t, state.SyncProgress(), false)
-
-	state.SetSyncState(true)
-	assert.Equal(t, state.Sync(), true)
+	syncState = blockchain.FinishSync()
+	assert.Equal(t, syncState.SyncProgressing, false)
 }
