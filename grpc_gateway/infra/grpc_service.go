@@ -133,6 +133,14 @@ func (g *GrpcHostService) GetAllConnections() ([]grpc_gateway.Connection, error)
 	return grpcConnectionList, nil
 }
 
+func (g *GrpcHostService) CloseAllConnections() error {
+	for _, connection := range g.connStore.FindAll() {
+		connection.Close()
+	}
+
+	return nil
+}
+
 func (g *GrpcHostService) CloseConnection(connID string) {
 
 	connection := g.connStore.Find(connID)
