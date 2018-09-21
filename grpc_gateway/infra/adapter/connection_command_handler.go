@@ -68,3 +68,14 @@ func (d *ConnectionCommandHandler) HandleGetConnectionListCommand(getConnectionL
 
 	return command.GetConnectionList{ConnectionList: connectionList}, rpc.Error{}
 }
+
+func (d *ConnectionCommandHandler) HandleJoinNetworkCommand(joinNetworkCommand command.JoinNetwork) (command.GetConnectionList, rpc.Error) {
+
+	connectionList, err := d.connectionApi.JoinNetwork(joinNetworkCommand.Address)
+	if err != nil {
+		logger.Error(nil, fmt.Sprintf("[Grpc-Gateway] fail to get connection list"))
+		return command.GetConnectionList{}, rpc.Error{Message: err.Error()}
+	}
+
+	return command.GetConnectionList{ConnectionList: connectionList}, rpc.Error{}
+}
