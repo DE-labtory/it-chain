@@ -31,16 +31,20 @@ import (
 type BlockProposalService struct {
 	client           *rpc.Client // midgard.client
 	engineMode       string
+	peerQueryService txpool.PeerQueryService
 	txpoolRepository txpool.TransactionRepository
 	sync.RWMutex
+	peer command.MyPeer // myself
 }
 
-func NewBlockProposalService(client *rpc.Client, txpoolRepository txpool.TransactionRepository, engineMode string) *BlockProposalService {
+func NewBlockProposalService(client *rpc.Client, txpoolRepository txpool.TransactionRepository, engineMode string, peerQueryService txpool.PeerQueryService, peer command.MyPeer) *BlockProposalService {
 	return &BlockProposalService{
 		client:           client,
 		engineMode:       engineMode,
 		RWMutex:          sync.RWMutex{},
 		txpoolRepository: txpoolRepository,
+		peerQueryService: peerQueryService,
+		peer:             peer,
 	}
 }
 
@@ -62,7 +66,8 @@ func (b BlockProposalService) ProposeBlock() error {
 		return nil
 	}
 
-	if b.engineMode == "solo" {
+	switch b.engineMode {
+	case "solo":
 		//propose transaction when solo mode
 		if err := b.sendBlockProposal(transactions); err != nil {
 			return err
@@ -73,9 +78,34 @@ func (b BlockProposalService) ProposeBlock() error {
 		}
 
 		return nil
+
+	case "pbft":
+		leader, err := b.peerQueryService.GetLeader()
+		if err != nil {
+			return err
+		}
+
+		myself := b.peer
+
+		if leader.GetID() == myself.PeerId {
+			//solo와 동일
+			if err := b.sendBlockProposal(transactions); err != nil {
+				return err
+			}
+
+			for _, tx := range transactions {
+				b.txpoolRepository.Remove(tx.ID)
+			}
+
+			return nil
+		}
+
+		return nil
+
+	default:
+		return nil
 	}
 
-	return nil
 }
 
 func (b BlockProposalService) sendBlockProposal(transactions []txpool.Transaction) error {

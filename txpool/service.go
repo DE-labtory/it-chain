@@ -16,8 +16,15 @@
 
 package txpool
 
+import "github.com/it-chain/engine/p2p"
+
 type TxpoolQueryService interface {
 	FindUncommittedTransactions() ([]Transaction, error)
+}
+
+type PeerQueryService interface {
+	GetPeerList() ([]p2p.Peer, error)
+	GetLeader() (p2p.Leader, error)
 }
 
 type TransferService interface {
