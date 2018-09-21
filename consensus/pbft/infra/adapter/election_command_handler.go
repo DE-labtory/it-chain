@@ -59,7 +59,7 @@ func (gch *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveG
 		}
 
 	case "VoteLeaderProtocol":
-		logger.Infof(nil, "voted from process: %v", command.ConnectionID)
+		logger.Infof(nil, "[consensus] voted from process: %v", command.ConnectionID)
 
 		//	1. if candidate, reset left time
 		//	2. count up

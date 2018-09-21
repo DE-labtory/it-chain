@@ -75,7 +75,7 @@ func (election *Election) SetState(state ElectionState) {
 	election.mux.Lock()
 	defer election.mux.Unlock()
 
-	logger.Infof(nil, "set state to: %s", state)
+	logger.Infof(nil, "[consensus] set state to: %s", state)
 
 	election.state = state
 }
