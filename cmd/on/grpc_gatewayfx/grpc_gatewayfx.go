@@ -32,6 +32,8 @@ import (
 
 var Module = fx.Options(
 	fx.Provide(
+		adapter.NewHttpPeerAdapter,
+		NewPeerService,
 		NewGrpcHostService,
 		NewConnectionApi,
 		adapter.NewConnectionCommandHandler,
@@ -42,14 +44,18 @@ var Module = fx.Options(
 	),
 )
 
+func NewPeerService(peerAdapter *adapter.HttpPeerAdapter) *adapter.PeerService {
+	return adapter.NewPeerService(peerAdapter)
+}
+
 func NewGrpcHostService(conf *conf.Configuration, publisher *pubsub.TopicPublisher) *infra.GrpcHostService {
 	priKey, pubKey := infra.LoadKeyPair(conf.Engine.KeyPath, "ECDSA256")
 	hostService := infra.NewGrpcHostService(priKey, pubKey, publisher.Publish)
 	return hostService
 }
 
-func NewConnectionApi(hostService *infra.GrpcHostService, eventService common.EventService) *api.ConnectionApi {
-	return api.NewConnectionApi(hostService, eventService)
+func NewConnectionApi(hostService *infra.GrpcHostService, eventService common.EventService, peerService *adapter.PeerService) *api.ConnectionApi {
+	return api.NewConnectionApi(hostService, eventService, peerService)
 }
 
 func RegisterHandlers(connectionCommandHandler *adapter.ConnectionCommandHandler, server *rpc.Server) {
