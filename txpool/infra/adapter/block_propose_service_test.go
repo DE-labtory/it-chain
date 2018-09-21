@@ -21,9 +21,11 @@ import (
 
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
+	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/engine/txpool/infra/adapter"
 	"github.com/it-chain/engine/txpool/infra/mem"
+	"github.com/it-chain/engine/txpool/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,10 +44,32 @@ func TestBlockService_ProposeBlock(t *testing.T) {
 	txpoolRepository.Save(txpool.Transaction{ID: "tx1"})
 	txpoolRepository.Save(txpool.Transaction{ID: "tx2"})
 
+	peerQueryService := &mock.PeerQueryService{}
+
+	peerQueryService.GetPeerListFunc = func() ([]p2p.Peer, error) {
+		return nil, nil
+	}
+
+	peerQueryService.GetLeaderFunc = func() (p2p.Leader, error) {
+		return p2p.Leader{LeaderId: struct{ Id string }{Id: "1"}}, nil
+	}
+
+	myself := command.MyPeer{IpAddress: "", PeerId: "1"}
+
 	transactions, _ := txpoolRepository.FindAll()
 	assert.Equal(t, 2, len(transactions))
 
-	blockService := adapter.NewBlockProposalService(client, txpoolRepository, "solo")
+	blockService := adapter.NewBlockProposalService(client, txpoolRepository, "solo", peerQueryService, myself)
+	err = blockService.ProposeBlock()
+	assert.NoError(t, err)
+
+	blockService = adapter.NewBlockProposalService(client, txpoolRepository, "pbft", peerQueryService, myself)
+	err = blockService.ProposeBlock()
+	assert.NoError(t, err)
+
+	myself = command.MyPeer{IpAddress: "", PeerId: "2"}
+
+	blockService = adapter.NewBlockProposalService(client, txpoolRepository, "pbft", peerQueryService, myself)
 	err = blockService.ProposeBlock()
 	assert.NoError(t, err)
 

@@ -16,29 +16,13 @@
 
 package txpool
 
-type TxpoolQueryService interface {
-	FindUncommittedTransactions() ([]Transaction, error)
+// 노드 구조체 선언.
+type Peer struct {
+	IpAddress string
+	PeerId    PeerId
 }
 
-type PeerQueryService interface {
-	GetPeerList() ([]Peer, error)
-	GetLeader() (Leader, error)
-}
-
-type TransferService interface {
-	SendTransactionsToLeader(transactions []Transaction, leader Leader) error
-}
-
-type BlockProposalService interface {
-	ProposeBlock() error
-}
-
-func filter(vs []Transaction, f func(Transaction) bool) []Transaction {
-	vsf := make([]Transaction, 0)
-	for _, v := range vs {
-		if f(v) {
-			vsf = append(vsf, v)
-		}
-	}
-	return vsf
+// PeerId 선언
+type PeerId struct {
+	Id string
 }

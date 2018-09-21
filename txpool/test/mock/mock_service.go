@@ -14,31 +14,21 @@
  * limitations under the License.
  */
 
-package txpool
+package mock
 
-type TxpoolQueryService interface {
-	FindUncommittedTransactions() ([]Transaction, error)
+import (
+	"github.com/it-chain/engine/p2p"
+)
+
+type PeerQueryService struct {
+	GetPeerListFunc func() ([]p2p.Peer, error)
+	GetLeaderFunc   func() (p2p.Leader, error)
 }
 
-type PeerQueryService interface {
-	GetPeerList() ([]Peer, error)
-	GetLeader() (Leader, error)
+func (m PeerQueryService) GetPeerList() ([]p2p.Peer, error) {
+	return m.GetPeerListFunc()
 }
 
-type TransferService interface {
-	SendTransactionsToLeader(transactions []Transaction, leader Leader) error
-}
-
-type BlockProposalService interface {
-	ProposeBlock() error
-}
-
-func filter(vs []Transaction, f func(Transaction) bool) []Transaction {
-	vsf := make([]Transaction, 0)
-	for _, v := range vs {
-		if f(v) {
-			vsf = append(vsf, v)
-		}
-	}
-	return vsf
+func (m PeerQueryService) GetLeader() (p2p.Leader, error) {
+	return m.GetLeaderFunc()
 }
