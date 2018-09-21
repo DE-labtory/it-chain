@@ -24,22 +24,27 @@ import (
 type SyncApi struct {
 	publisherId     string
 	blockRepository blockchain.BlockRepository
+	syncStateRepository blockchain.SyncStateRepository
 	eventService    blockchain.EventService
 	queryService    blockchain.QueryService
 	blockPool       blockchain.BlockPool
 }
 
-func NewSyncApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService, queryService blockchain.QueryService, blockPool blockchain.BlockPool) (SyncApi, error) {
+func NewSyncApi(publisherId string, blockRepository blockchain.BlockRepository, syncStateRepository blockchain.SyncStateRepository, eventService blockchain.EventService, queryService blockchain.QueryService, blockPool blockchain.BlockPool) (SyncApi, error) {
 	return SyncApi{
 		publisherId:     publisherId,
 		blockRepository: blockRepository,
+		syncStateRepository: syncStateRepository,
 		eventService:    eventService,
 		queryService:    queryService,
 		blockPool:       blockPool,
 	}, nil
 }
 
+
 func (sApi SyncApi) Synchronize() error {
+	state := blockchain.NewSyncState(true, false)
+	sApi.syncStateRepository.Set(state)
 	// get random peer
 	randomPeer, err := sApi.queryService.GetRandomPeer()
 
@@ -51,6 +56,8 @@ func (sApi SyncApi) Synchronize() error {
 
 	if sApi.isSynced(randomPeer) {
 		iLogger.Infof(nil, "[Blockchain] Already Synchronized - PeerID: [%s]", randomPeer.PeerID)
+		state = blockchain.NewSyncState(false, true)
+		sApi.syncStateRepository.Set(state)
 		return nil
 	}
 
@@ -58,13 +65,16 @@ func (sApi SyncApi) Synchronize() error {
 	err = sApi.syncWithPeer(randomPeer)
 	if err != nil {
 		iLogger.Errorf(nil, "[Blockchain] Fail to Synchronize - Err: [%s]", err)
+		state = blockchain.NewSyncState(false, false)
+		sApi.syncStateRepository.Set(state)
 		return err
 	}
 
 	iLogger.Infof(nil, "[Blockchain] Synchronized Successfully - PeerID: [%s]", randomPeer.PeerID)
 
+	state = blockchain.NewSyncState(false, true)
+	sApi.syncStateRepository.Set(state)
 	return sApi.CommitStagedBlocks()
-
 }
 
 func (sApi SyncApi) isSynced(peer blockchain.Peer) bool {

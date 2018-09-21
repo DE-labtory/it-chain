@@ -43,6 +43,10 @@ func TestSyncApi_Synchronize(t *testing.T) {
 		blockchain []*blockchain.DefaultBlock
 		peer       blockchain.Peer
 		dbPath     string
+		output     struct {
+			syncProgressing bool
+			synced          bool
+		}
 	}{
 		"not synced": {
 			blockchain: []*blockchain.DefaultBlock{
@@ -52,6 +56,13 @@ func TestSyncApi_Synchronize(t *testing.T) {
 				ApiGatewayAddress: "PeerIP",
 			},
 			dbPath: "./.db1",
+			output: struct {
+				syncProgressing bool
+				synced          bool
+			}{
+				syncProgressing: false,
+				synced:          true,
+			},
 		},
 
 		"synced": {
@@ -64,12 +75,26 @@ func TestSyncApi_Synchronize(t *testing.T) {
 				ApiGatewayAddress: "PeerIP",
 			},
 			dbPath: "./.db2",
+			output: struct {
+				syncProgressing bool
+				synced          bool
+			}{
+				syncProgressing: false,
+				synced:          true,
+			},
 		},
 
 		"No Peer In Network(it is the first peer)": {
 			blockchain: []*blockchain.DefaultBlock{},
 			peer:       blockchain.Peer{},
 			dbPath:     "./.db3",
+			output: struct {
+				syncProgressing bool
+				synced          bool
+			}{
+				syncProgressing: false,
+				synced:          true,
+			},
 		},
 	}
 
@@ -111,6 +136,8 @@ func TestSyncApi_Synchronize(t *testing.T) {
 			os.RemoveAll(dbPath)
 		}()
 
+		ssr := mem.NewSyncStateRepository()
+
 		queryService := mock.QueryService{}
 
 		queryService.GetRandomPeerFunc = func() (blockchain.Peer, error) {
@@ -131,19 +158,24 @@ func TestSyncApi_Synchronize(t *testing.T) {
 
 		blockPool := mem.NewBlockPool()
 
-		sApi, err := api.NewSyncApi(publisherID, br, eventService, queryService, blockPool)
+		sApi, err := api.NewSyncApi(publisherID, br, ssr, eventService, queryService, blockPool)
 
 		assert.NoError(t, err)
 
 		//when
 
 		err = sApi.Synchronize()
-
 		assert.NoError(t, err)
 
 		lastBlock, err := br.FindLast()
-
 		assert.NoError(t, err)
+
+		syncState := ssr.Get()
+		synced := syncState.Sync()
+		assert.Equal(t, synced, test.output.synced)
+
+		syncProgressing := syncState.SyncProgress()
+		assert.Equal(t, syncProgressing, test.output.syncProgressing)
 
 		if testName == "No Peer In Network(it is the first peer)" {
 
@@ -192,7 +224,9 @@ func TestSyncApi_CommitStagedBlocks_Add_Blocks_To_Repository(t *testing.T) {
 	blockPool.Add(*block4)
 	blockPool.Add(*block5)
 
-	syncApi, err := api.NewSyncApi(publisherId, blockRepository, eventService, queryService, blockPool)
+	ssr := mem.NewSyncStateRepository()
+
+	syncApi, err := api.NewSyncApi(publisherId, blockRepository, ssr, eventService, queryService, blockPool)
 	assert.NoError(t, err)
 
 	// when
@@ -234,7 +268,9 @@ func TestSyncApi_CommitStagedBlocks_Drop_Blocks_From_BlockPool(t *testing.T) {
 	blockPool.Add(*block2)
 	blockPool.Add(*block3)
 
-	syncApi, err := api.NewSyncApi(publisherId, blockRepository, eventService, queryService, blockPool)
+	ssr := mem.NewSyncStateRepository()
+
+	syncApi, err := api.NewSyncApi(publisherId, blockRepository, ssr, eventService, queryService, blockPool)
 	assert.NoError(t, err)
 
 	// when
@@ -282,7 +318,9 @@ func TestSyncApi_CommitStagedBlocks_When_BlockPool_Has_Higher_Height_Block(t *te
 	blockPool := mem.NewBlockPool()
 	blockPool.Add(*block7)
 
-	syncApi, err := api.NewSyncApi(publisherId, blockRepository, eventService, queryService, blockPool)
+	ssr := mem.NewSyncStateRepository()
+
+	syncApi, err := api.NewSyncApi(publisherId, blockRepository, ssr, eventService, queryService, blockPool)
 	assert.NoError(t, err)
 
 	// when
