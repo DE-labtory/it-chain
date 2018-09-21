@@ -19,6 +19,7 @@ package p2p
 import (
 	"errors"
 
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 )
 
@@ -67,7 +68,7 @@ func (cs *CommunicationService) DeliverPLTable(connectionId string, peerLeaderTa
 		PLTable: peerLeaderTable,
 	}
 
-	grpcDeliverCommand, err := CreateGrpcDeliverCommand("PLTableDeliverProtocol", peerLeaderTableMessage)
+	grpcDeliverCommand, err := common.CreateGrpcDeliverCommand("PLTableDeliverProtocol", peerLeaderTableMessage)
 
 	if err != nil {
 		return err

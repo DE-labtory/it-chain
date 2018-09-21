@@ -20,9 +20,7 @@ import (
 	"errors"
 
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/txpool"
-	"github.com/rs/xid"
 )
 
 var ErrTxEmpty = errors.New("Empty transaction list proposed")
@@ -46,7 +44,7 @@ func (ts TransferService) SendLeaderTransactions(transactions []txpool.Transacti
 		return ErrTxEmpty
 	}
 
-	deliverCommand, err := createGrpcDeliverCommand("SendLeaderTransactionsProtocol", transactions)
+	deliverCommand, err := common.CreateGrpcDeliverCommand("SendLeaderTransactionsProtocol", transactions)
 
 	if err != nil {
 		return err
@@ -55,20 +53,4 @@ func (ts TransferService) SendLeaderTransactions(transactions []txpool.Transacti
 	deliverCommand.RecipientList = append(deliverCommand.RecipientList, leader.LeaderId.ToString())
 
 	return ts.publisher("message.deliver", deliverCommand)
-}
-
-func createGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
-
-	data, err := common.Serialize(body)
-
-	if err != nil {
-		return command.DeliverGrpc{}, err
-	}
-
-	return command.DeliverGrpc{
-		MessageId:     xid.New().String(),
-		RecipientList: make([]string, 0),
-		Body:          data,
-		Protocol:      protocol,
-	}, err
 }

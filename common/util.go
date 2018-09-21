@@ -21,6 +21,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"engine/common"
+	"engine/common/command"
 	"fmt"
 	"io"
 	"math/big"
@@ -30,6 +32,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/rs/xid"
 )
 
 func CreateDirIfMissing(dirPath string) error {
@@ -162,4 +166,20 @@ func RelativeToAbsolutePath(rpath string) (string, error) {
 
 	return absolutePath, nil
 
+}
+
+func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
+
+	data, err := common.Serialize(body)
+
+	if err != nil {
+		return command.DeliverGrpc{}, err
+	}
+
+	return command.DeliverGrpc{
+		MessageId:     xid.New().String(),
+		RecipientList: make([]string, 0),
+		Body:          data,
+		Protocol:      protocol,
+	}, err
 }

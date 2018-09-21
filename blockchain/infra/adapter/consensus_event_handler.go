@@ -17,9 +17,8 @@
 package adapter
 
 import (
-	"engine/common"
-
 	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
 )
 
