@@ -17,8 +17,6 @@
 package adapter
 
 import (
-	"fmt"
-
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/grpc_gateway"
@@ -40,7 +38,7 @@ func (d *ConnectionCommandHandler) HandleCreateConnectionCommand(createConnectio
 
 	connection, err := d.connectionApi.Dial(createConnectionCommand.Address)
 	if err != nil {
-		iLogger.Error(nil, fmt.Sprintf("[gRPC-Gateway] Fail to dial - url [%s], Err: [%s]", createConnectionCommand.Address, err.Error()))
+		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to dial - url [%s], Err: [%s]", createConnectionCommand.Address, err.Error())
 		return grpc_gateway.Connection{}, rpc.Error{Message: err.Error()}
 	}
 
@@ -51,7 +49,7 @@ func (d *ConnectionCommandHandler) HandleCloseConnectionCommand(closeConnectionC
 
 	err := d.connectionApi.CloseConnection(closeConnectionCommand.Address)
 	if err != nil {
-		iLogger.Error(nil, fmt.Sprintf("[gRPC-Gateway] Fail to close - url [%s], Err: [%s]", closeConnectionCommand.Address, err.Error()))
+		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to close - Url [%s], Err: [%s]", closeConnectionCommand.Address, err.Error())
 		return struct{}{}, rpc.Error{Message: err.Error()}
 	}
 
@@ -62,7 +60,7 @@ func (d *ConnectionCommandHandler) HandleGetConnectionListCommand(getConnectionL
 
 	connectionList, err := d.connectionApi.GetAllConnections()
 	if err != nil {
-		iLogger.Error(nil, fmt.Sprintf("[gRPC-Gateway] Fail to get connection list"))
+		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to get connection list")
 		return command.GetConnectionList{}, rpc.Error{Message: err.Error()}
 	}
 
@@ -73,7 +71,7 @@ func (d *ConnectionCommandHandler) HandleJoinNetworkCommand(joinNetworkCommand c
 
 	err := d.connectionApi.JoinNetwork(joinNetworkCommand.Address)
 	if err != nil {
-		iLogger.Error(nil, fmt.Sprintf("[gRPC-Gateway] Fail to join network - Err: [%s]", err.Error()))
+		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to join network - Err: [%s]", err.Error())
 		return struct{}{}, rpc.Error{Message: err.Error()}
 	}
 

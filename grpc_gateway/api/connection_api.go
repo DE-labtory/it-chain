@@ -116,6 +116,7 @@ func (c ConnectionApi) GetAllConnections() ([]grpc_gateway.Connection, error) {
 }
 
 func (c ConnectionApi) HandleRequestPeerList(connectionId string) {
+	iLogger.Infof(nil, "[gRPC-Gateway] Handling peerList reqeust - ConnectionId: [%s]", connectionId)
 
 	connectionList, _ := c.grpcService.GetAllConnections()
 	response, err := json.Marshal(connectionList)
