@@ -17,6 +17,8 @@
 package adapter
 
 import (
+	"strings"
+
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/grpc_gateway"
@@ -29,13 +31,14 @@ type GrpcMessageHandler struct {
 	messageApi    *api.MessageApi
 }
 
-func NewGrpcMessageHandler(connectionApi *api.ConnectionApi) *GrpcMessageHandler {
+func NewGrpcMessageHandler(connectionApi *api.ConnectionApi, messageApi *api.MessageApi) *GrpcMessageHandler {
 	return &GrpcMessageHandler{
 		connectionApi: connectionApi,
+		messageApi:    messageApi,
 	}
 }
 
-func (g GrpcMessageHandler) HandleMessageReceiveEvent(command command.ReceiveGrpc) {
+func (g GrpcMessageHandler) HandleMessageReceiveCommand(command command.ReceiveGrpc) {
 
 	protocol := command.Protocol
 	body := command.Body
@@ -55,5 +58,11 @@ func (g GrpcMessageHandler) HandleMessageReceiveEvent(command command.ReceiveGrp
 		}
 
 		g.connectionApi.DialConnectionList(connectionList)
+	}
+}
+
+func (g GrpcMessageHandler) HandleMessageDeliverCommand(command command.DeliverGrpc) {
+	if err := g.messageApi.DeliverMessage(command.Body, command.Protocol, command.RecipientList...); err != nil {
+		logger.Errorf(nil, "[gRPC-Gateway] Fail to deliver grpc message - Protocol: [%s], RecipientList: [%s], Err: [%s]", command.Protocol, strings.Join(command.RecipientList, ", "), err.Error())
 	}
 }
