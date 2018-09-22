@@ -17,12 +17,9 @@
 package infra_test
 
 import (
-	"testing"
-
-	"os"
-
 	"fmt"
-
+	"os"
+	"testing"
 	"time"
 
 	"github.com/it-chain/bifrost"
@@ -421,7 +418,8 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 
 		publishedData = test.input.Message
 
-		clientHostService.SendMessages(test.input.Message, test.input.Protocol, conn.ConnectionID)
+		err = clientHostService.SendMessages(test.input.Message, test.input.Protocol, conn.ConnectionID)
+		assert.NoError(t, err)
 	}
 }
 

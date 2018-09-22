@@ -181,15 +181,28 @@ func (g *GrpcHostService) CloseConnection(connID string) {
 	g.connStore.Delete(connection.GetID())
 }
 
-func (g *GrpcHostService) SendMessages(message []byte, protocol string, connIDs ...string) {
+func (g *GrpcHostService) SendMessages(message []byte, protocol string, connIDs ...string) error {
 
+	wg := sync.WaitGroup{}
+	wg.Add(len(connIDs))
+
+	var err error
 	for _, connID := range connIDs {
 		connection := g.connStore.Find(connID)
 
 		if connection != nil {
-			connection.Send(message, protocol, nil, nil)
+			connection.Send(message, protocol, func(i interface{}) {
+				err = nil
+				wg.Done()
+			}, func(e error) {
+				err = e
+				wg.Done()
+			})
 		}
 	}
+
+	wg.Wait()
+	return err
 }
 
 func (g *GrpcHostService) IsConnectionExist(connectionID string) bool {
