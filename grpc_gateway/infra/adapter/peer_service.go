@@ -59,5 +59,5 @@ func NewPeerService(peerAdapter PeerAdapter) *PeerService {
 }
 
 func (p PeerService) GetAllPeerList(connection grpc_gateway.Connection) ([]grpc_gateway.Connection, error) {
-	return p.PeerAdapter.GetAllPeerList(connection.Address)
+	return p.PeerAdapter.GetAllPeerList(connection.ApiGatewayAddress)
 }

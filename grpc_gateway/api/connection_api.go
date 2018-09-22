@@ -17,6 +17,8 @@
 package api
 
 import (
+	"encoding/json"
+
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/common/logger"
@@ -38,37 +40,22 @@ func NewConnectionApi(grpcService grpc_gateway.GrpcService, eventService common.
 }
 
 // create all connections
-func (c ConnectionApi) JoinNetwork(bootstrapNodeAddress string) ([]grpc_gateway.Connection, error) {
-	logger.Infof(nil, "[gRPC-Gateway] Joining it-chain network - BootstrapNodeAddress: [%s]", bootstrapNodeAddress)
+func (c ConnectionApi) JoinNetwork(address string) error {
+	logger.Infof(nil, "[gRPC-Gateway] Joining it-chain network - Address: [%s]", address)
 
-	connectedConnectionList := make([]grpc_gateway.Connection, 0)
-
-	connectedConnection, err := c.CreateConnection(bootstrapNodeAddress)
+	connection, err := c.Dial(address)
 	if err != nil {
 		logger.Errorf(nil, "[gRPC-Gateway] Fail to join - Err: [%s]", err)
-		return []grpc_gateway.Connection{}, err
+		return err
 	}
 
-	connectedConnectionList = append(connectedConnectionList, connectedConnection)
+	c.grpcService.SendMessages([]byte(""), grpc_gateway.RequestPeerList, connection.ConnectionID)
 
-	connectionList, err := c.peerService.GetAllPeerList(connectedConnection)
-	if err != nil {
-		return []grpc_gateway.Connection{}, err
-	}
-
-	for _, connection := range connectionList {
-		var connectedConnection grpc_gateway.Connection
-		if connectedConnection, err = c.CreateConnection(connection.Address); err != nil {
-			logger.Errorf(nil, "[gRPC-Gateway] Fail to create connection - Address [%s]", connection.Address)
-		}
-		connectedConnectionList = append(connectedConnectionList, connectedConnection)
-	}
-
-	return connectedConnectionList, nil
+	return nil
 }
 
 // create connection only for the address
-func (c ConnectionApi) CreateConnection(address string) (grpc_gateway.Connection, error) {
+func (c ConnectionApi) Dial(address string) (grpc_gateway.Connection, error) {
 
 	logger.Infof(nil, "[gRPC-Gateway] Dialing - Address: [%s]", address)
 
@@ -83,15 +70,17 @@ func (c ConnectionApi) CreateConnection(address string) (grpc_gateway.Connection
 		return connection, err
 	}
 
-	logger.Infof(nil, "[gRPC-Gateway] Connection created - Address [%s], ConnectionID [%s]", connection.Address, connection.ConnectionID)
+	logger.Infof(nil, "[gRPC-Gateway] Connection created - gRPC-Address [%s], ConnectionID [%s]", connection.GrpcGatewayAddress, connection.ConnectionID)
 
 	return connection, nil
 }
 
 func createConnectionCreatedEvent(connection grpc_gateway.Connection) event.ConnectionCreated {
 	return event.ConnectionCreated{
-		Address:      connection.Address,
-		ConnectionID: connection.ConnectionID,
+
+		ConnectionID:       connection.ConnectionID,
+		GrpcGatewayAddress: connection.GrpcGatewayAddress,
+		ApiGatewayAddress:  connection.ApiGatewayAddress,
 	}
 }
 
@@ -110,7 +99,7 @@ func createConnectionClosedEvent(connectionID string) event.ConnectionClosed {
 }
 
 func (c ConnectionApi) OnConnection(connection grpc_gateway.Connection) {
-	logger.Infof(nil, "[gRPC-Gateway] Connection created - Address [%s], ConnectionID [%s]", connection.Address, connection.ConnectionID)
+	logger.Infof(nil, "[gRPC-Gateway] Connection created - gRPC-Address [%s], ConnectionID [%s]", connection.GrpcGatewayAddress, connection.ConnectionID)
 
 	if err := c.eventService.Publish("connection.created", createConnectionCreatedEvent(connection)); err != nil {
 		logger.Infof(nil, "[gRPC-Gateway] Fail to publish connection createdEvent - ConnectionID: [%s]", connection.ConnectionID)
@@ -120,11 +109,43 @@ func (c ConnectionApi) OnConnection(connection grpc_gateway.Connection) {
 func (c ConnectionApi) OnDisconnection(connection grpc_gateway.Connection) {
 	logger.Infof(nil, "[gRPC-Gateway] Connection closed - ConnectionID [%s]", connection.ConnectionID)
 
-	if err := c.eventService.Publish("connection.closed", connection); err != nil {
+	if err := c.eventService.Publish("connection.closed", createConnectionClosedEvent(connection.ConnectionID)); err != nil {
 		logger.Infof(nil, "[gRPC-Gateway] Fail to publish connection createdEvent - ConnectionID: [%s]", connection.ConnectionID)
 	}
 }
 
 func (c ConnectionApi) GetAllConnections() ([]grpc_gateway.Connection, error) {
 	return c.grpcService.GetAllConnections()
+}
+
+func (c ConnectionApi) HandleRequestPeerList(connectionId string) {
+
+	connectionList, _ := c.grpcService.GetAllConnections()
+	response, err := json.Marshal(connectionList)
+	if err != nil {
+		logger.Errorf(nil, "[gRPC-Gateway] Fail to handle request peer list - Err: [%s]", err.Error())
+		return
+	}
+
+	c.grpcService.SendMessages(response, grpc_gateway.ResponsePeerList, connectionId)
+}
+
+// 자기자신 or 연결되어 있는 connection 제외하고 연결!!
+func (c ConnectionApi) DialConnectionList(connectionList []grpc_gateway.Connection) {
+	logger.Infof(nil, "[gRPC-Gateway] Dialing all peers in it-chain network - Total peer: [%d]", len(connectionList))
+
+	for _, connection := range connectionList {
+
+		//remove already connected connection
+		if c.grpcService.IsConnectionExist(connection.ConnectionID) {
+			continue
+		}
+
+		//자기 자신
+		if c.grpcService.GetHostID() == connection.ConnectionID {
+			continue
+		}
+
+		c.Dial(connection.GrpcGatewayAddress)
+	}
 }
