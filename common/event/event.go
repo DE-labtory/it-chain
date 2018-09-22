@@ -167,6 +167,11 @@ type ConnectionCreated struct {
 	ApiGatewayAddress  string
 }
 
+type ConnectionSaved struct {
+	ConnectionID string
+	Address      string
+}
+
 // connection close
 type ConnectionClosed struct {
 	ConnectionID string
