@@ -23,6 +23,7 @@ import (
 
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/it-chain/engine/api_gateway"
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/conf"
@@ -33,16 +34,17 @@ const ApidbPath = "./api-db"
 
 var Module = fx.Options(
 	fx.Provide(
-		api_gateway.NewConnectionRepository,
+		//api_gateway.NewConnectionRepository,
 		NewKitLogger,
 		NewBlockRepository,
 		NewICodeRepository,
-		api_gateway.NewConnectionQueryApi,
+		NewConnectionRepository,
 		NewBlockQueryApi,
 		NewBlockEventListener,
+		api_gateway.NewConnectionEventListener,
 		NewICodeQueryApi,
 		NewICodeEventHandler,
-		api_gateway.NewConnectionEventListener,
+		api_gateway.NewConnectionQueryApi,
 		api_gateway.NewApiHandler,
 		http.NewServeMux,
 	),
@@ -88,7 +90,11 @@ func NewICodeRepository() *api_gateway.LevelDbICodeRepository {
 	return api_gateway.NewLevelDbMetaRepository(icodeDB)
 }
 
-func RegisterEvent(subscriber *pubsub.TopicSubscriber, blockEventListener *api_gateway.BlockEventListener, icodeEventListener *api_gateway.ICodeEventHandler, connectionEventlistener *api_gateway.ConnectionEventListener) {
+func NewConnectionRepository(eventService common.EventService) *api_gateway.ConnectionRepository {
+	return api_gateway.NewConnectionRepository(eventService)
+}
+
+func RegisterEvent(subscriber *pubsub.TopicSubscriber, blockEventListener *api_gateway.BlockEventListener, icodeEventListener *api_gateway.ICodeEventHandler, connectionEventListener *api_gateway.ConnectionEventListener) {
 	if err := subscriber.SubscribeTopic("block.*", blockEventListener); err != nil {
 		panic(err)
 	}
@@ -96,7 +102,7 @@ func RegisterEvent(subscriber *pubsub.TopicSubscriber, blockEventListener *api_g
 		panic(err)
 	}
 
-	if err := subscriber.SubscribeTopic("connection.*", connectionEventlistener); err != nil {
+	if err := subscriber.SubscribeTopic("connection.*", connectionEventListener); err != nil {
 		panic(err)
 	}
 }

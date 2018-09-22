@@ -117,6 +117,14 @@
   version = "v0.3.0"
 
 [[projects]]
+  digest = "1:b7fc4c3fd91df516486f53cc86f4b55a0c815782dbe852c5a19cce8e6c577aac"
+  name = "github.com/go-resty/resty"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d4920dcf5b7689548a6db640278a9b35a5b48ec6"
+  version = "v1.9.1"
+
+[[projects]]
   digest = "1:586ea76dbd0374d6fb649a91d70d652b7fe0ccffb8910a77468e7702e7901f3d"
   name = "github.com/go-stack/stack"
   packages = ["."]
@@ -790,6 +798,7 @@
     "github.com/go-kit/kit/endpoint",
     "github.com/go-kit/kit/log",
     "github.com/go-kit/kit/transport/http",
+    "github.com/go-resty/resty",
     "github.com/gorilla/mux",
     "github.com/it-chain/avengers/mock",
     "github.com/it-chain/bifrost",

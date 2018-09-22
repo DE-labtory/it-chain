@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 /*
  * Copyright 2018 It-chain
  *
@@ -16,7 +14,6 @@
  * limitations under the License.
  */
 
->>>>>>> Stashed changes
 package mock
 
 import "github.com/it-chain/engine/blockchain"
