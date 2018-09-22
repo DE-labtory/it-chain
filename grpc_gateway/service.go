@@ -16,12 +16,17 @@
 
 package grpc_gateway
 
+const RequestPeerList = "RequestPeerList"
+const ResponsePeerList = "ResponsePeerList"
+
 type GrpcService interface {
 	Dial(address string) (Connection, error)
 	CloseConnection(connID string)
 	SendMessages(message []byte, protocol string, connIDs ...string)
 	GetAllConnections() ([]Connection, error)
 	CloseAllConnections() error
+	IsConnectionExist(connectionID string) bool
+	GetHostID() string
 }
 
 type PeerService interface {

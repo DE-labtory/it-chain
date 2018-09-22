@@ -38,8 +38,17 @@ type ConnectionHandler interface {
 	OnDisconnection(connection grpc_gateway.Connection)
 }
 
+type HostID string
+
+type HostInfo struct {
+	GrpcGatewayAddress string
+	ApiGatewayAddress  string
+}
+
 type GrpcHostService struct {
+	HostID            HostID
 	connStore         ConnectionStore
+	metaData          map[string]string
 	bifrostServer     *server.Server
 	publish           Publish
 	priKey            key.PriKey
@@ -47,14 +56,19 @@ type GrpcHostService struct {
 	connectionHandler ConnectionHandler
 }
 
-func NewGrpcHostService(priKey key.PriKey, pubKey key.PubKey, publish Publish) *GrpcHostService {
+func NewGrpcHostService(priKey key.PriKey, pubKey key.PubKey, publish Publish, hostInfo HostInfo) *GrpcHostService {
 
-	s := server.New(bifrost.KeyOpts{PriKey: priKey, PubKey: pubKey})
+	metaData := make(map[string]string, 0)
+	metaData["GrpcGatewayAddress"] = hostInfo.GrpcGatewayAddress
+	metaData["ApiGatewayAddress"] = hostInfo.ApiGatewayAddress
+
+	s := server.New(bifrost.KeyOpts{PriKey: priKey, PubKey: pubKey}, metaData)
 
 	grpcHostService := &GrpcHostService{
 		connStore:     NewMemConnectionStore(),
 		bifrostServer: s,
 		publish:       publish,
+		metaData:      metaData,
 		priKey:        priKey,
 		pubKey:        pubKey,
 	}
@@ -63,6 +77,10 @@ func NewGrpcHostService(priKey key.PriKey, pubKey key.PubKey, publish Publish) *
 	s.OnError(grpcHostService.onError)
 
 	return grpcHostService
+}
+
+func (g *GrpcHostService) GetHostID() string {
+	return bifrost.FromPriKey(g.priKey)
 }
 
 func (g *GrpcHostService) SetHandler(connectionHandler ConnectionHandler) {
@@ -79,6 +97,7 @@ func (g *GrpcHostService) Dial(address string) (grpc_gateway.Connection, error) 
 
 	if g.connStore.Exist(connection.GetID()) {
 		connection.Close()
+		g.connStore.Find(connection.GetID())
 		return grpc_gateway.Connection{}, ErrConnAlreadyExist
 	}
 
@@ -90,10 +109,19 @@ func (g *GrpcHostService) Dial(address string) (grpc_gateway.Connection, error) 
 }
 
 func toGatewayConnectionModel(connection bifrost.Connection) grpc_gateway.Connection {
-	return grpc_gateway.Connection{
+
+	grpcConnection := grpc_gateway.Connection{
 		ConnectionID: connection.GetID(),
-		Address:      connection.GetIP(),
 	}
+
+	metaData := connection.GetMetaData()
+
+	if metaData != nil {
+		grpcConnection.GrpcGatewayAddress = metaData["GrpcGatewayAddress"]
+		grpcConnection.ApiGatewayAddress = metaData["ApiGatewayAddress"]
+	}
+
+	return grpcConnection
 }
 
 // connection이 형성되는 경우 실행하는 코드이다.
@@ -164,7 +192,15 @@ func (g *GrpcHostService) SendMessages(message []byte, protocol string, connIDs 
 	}
 }
 
-func (g GrpcHostService) buildDialOption(address string) (string, client.ClientOpts, client.GrpcOpts) {
+func (g *GrpcHostService) IsConnectionExist(connectionID string) bool {
+	if g.connStore.Find(connectionID) == nil {
+		return false
+	}
+
+	return true
+}
+
+func (g GrpcHostService) buildDialOption(address string) (string, client.ClientOpts, client.GrpcOpts, map[string]string) {
 
 	clientOpt := client.ClientOpts{
 		Ip:     address,
@@ -177,7 +213,7 @@ func (g GrpcHostService) buildDialOption(address string) (string, client.ClientO
 		Creds:      nil,
 	}
 
-	return address, clientOpt, grpcOpt
+	return address, clientOpt, grpcOpt, g.metaData
 }
 
 func (s *GrpcHostService) Listen(ip string) {
@@ -283,9 +319,14 @@ type MessageHandler struct {
 
 func (r MessageHandler) ServeRequest(msg bifrost.Message) {
 
+	if msg.Envelope == nil {
+		return
+	}
+
 	err := r.publish("message.receive", command.ReceiveGrpc{
 		Body:         msg.Data,
 		ConnectionID: msg.Conn.GetID(),
+		Protocol:     msg.Envelope.Protocol,
 	})
 
 	if err != nil {

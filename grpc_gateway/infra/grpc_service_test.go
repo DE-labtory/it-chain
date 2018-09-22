@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/grpc_gateway"
 	"github.com/it-chain/engine/grpc_gateway/infra"
@@ -65,6 +66,10 @@ func (MockConn) Start() error {
 	panic("implement me")
 }
 
+func (MockConn) GetMetaData() map[string]string {
+	return nil
+}
+
 //MessageHandler
 func TestMessageHandler_ServeRequest(t *testing.T) {
 
@@ -80,10 +85,14 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 				Conn: MockConn{
 					ID: "123",
 				},
+				Envelope: &pb.Envelope{
+					Protocol: "protocol",
+				},
 			},
 			output: command.ReceiveGrpc{
 				Body:         []byte("hello world"),
 				ConnectionID: "123",
+				Protocol:     "protocol",
 			},
 			err: nil,
 		},
@@ -96,6 +105,7 @@ func TestMessageHandler_ServeRequest(t *testing.T) {
 		assert.Equal(t, data, command.ReceiveGrpc{
 			Body:         []byte("hello world"),
 			ConnectionID: "123",
+			Protocol:     "protocol",
 		})
 		return nil
 	}
@@ -224,7 +234,9 @@ var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish
 
 	pri, pub := infra.LoadKeyPair(keyPath, "ECDSA256")
 
-	hostService := infra.NewGrpcHostService(pri, pub, publish)
+	hostService := infra.NewGrpcHostService(pri, pub, publish, infra.HostInfo{
+		GrpcGatewayAddress: ip,
+	})
 
 	go hostService.Listen(ip)
 
@@ -270,8 +282,8 @@ func TestGrpcHostService_Dial(t *testing.T) {
 		fmt.Println("connection is closing", connection)
 	}
 
-	defer tearDown1()
 	defer tearDown2()
+	defer tearDown1()
 
 	serverHostService.SetHandler(handler)
 	clientHostService.SetHandler(handler)
@@ -281,8 +293,7 @@ func TestGrpcHostService_Dial(t *testing.T) {
 
 		conn, err := clientHostService.Dial(test.input)
 		assert.Equal(t, err, test.err)
-		assert.Equal(t, conn.Address, test.output)
-
+		assert.Equal(t, conn.GrpcGatewayAddress, test.output)
 	}
 }
 
@@ -335,7 +346,7 @@ func TestGrpcHostService_Dial_When_connection_exist(t *testing.T) {
 
 		conn, err := clientHostService.Dial(test.input)
 		assert.Equal(t, err, test.err)
-		assert.Equal(t, conn.Address, test.output)
+		assert.Equal(t, conn.GrpcGatewayAddress, test.output)
 
 	}
 }
@@ -376,6 +387,7 @@ func TestGrpcHostService_SendMessages(t *testing.T) {
 		assert.Equal(t, data, command.ReceiveGrpc{
 			Body:         publishedData,
 			ConnectionID: connID,
+			Protocol:     "testProtocol",
 		})
 		return nil
 	}

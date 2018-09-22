@@ -17,6 +17,7 @@
 package grpc_gateway
 
 type Connection struct {
-	ConnectionID string
-	Address      string
+	ConnectionID       string
+	ApiGatewayAddress  string
+	GrpcGatewayAddress string
 }

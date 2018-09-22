@@ -15,3 +15,45 @@
  */
 
 package adapter
+
+import (
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/logger"
+	"github.com/it-chain/engine/grpc_gateway"
+	"github.com/it-chain/engine/grpc_gateway/api"
+)
+
+type GrpcMessageHandler struct {
+	connectionApi *api.ConnectionApi
+	messageApi    *api.MessageApi
+}
+
+func NewGrpcMessageHandler(connectionApi *api.ConnectionApi) *GrpcMessageHandler {
+	return &GrpcMessageHandler{
+		connectionApi: connectionApi,
+	}
+}
+
+func (g GrpcMessageHandler) HandleMessageReceiveEvent(command command.ReceiveGrpc) {
+
+	protocol := command.Protocol
+	body := command.Body
+
+	logger.Infof(nil, "[gRPC-Gateway] Received gRPC message - Protocol [%s]", protocol)
+
+	switch protocol {
+	case grpc_gateway.RequestPeerList:
+		g.connectionApi.HandleRequestPeerList(command.ConnectionID)
+
+	case grpc_gateway.ResponsePeerList:
+		connectionList := []grpc_gateway.Connection{}
+
+		if err := common.Deserialize(body, &connectionList); err != nil {
+			logger.Errorf(nil, "[gRPC-Gateway] Fail to deserialize grpcMessage - Err: [%s]", err.Error())
+			return
+		}
+
+		g.connectionApi.DialConnectionList(connectionList)
+	}
+}
