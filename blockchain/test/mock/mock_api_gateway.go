@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-package blockchain
+package mock
 
-// 노드 구조체 선언.
-type Peer struct {
-	PeerID            string
-	ApiGatewayAddress string
+import "github.com/it-chain/engine/api_gateway"
+
+type ConnectionQueryApi struct {
+	GetAllConnectionListFunc  func() ([]api_gateway.Connection, error)
+	GetConnectionByIDByIdFunc func(connectionId string) (api_gateway.Connection, error)
+}
+
+func (q ConnectionQueryApi) GetAllConnectionList() ([]api_gateway.Connection, error) {
+	return q.GetAllConnectionListFunc()
+}
+
+func (q ConnectionQueryApi) GetConnectionByID(connectionId string) (api_gateway.Connection, error) {
+	return q.GetConnectionByIDByIdFunc(connectionId)
 }

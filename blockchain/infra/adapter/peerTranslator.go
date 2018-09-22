@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-package blockchain
+package adapter
 
-// 노드 구조체 선언.
-type Peer struct {
-	PeerID            string
-	ApiGatewayAddress string
+import (
+	"github.com/it-chain/engine/api_gateway"
+	"github.com/it-chain/engine/blockchain"
+)
+
+func toPeerFromConnection(connection api_gateway.Connection) blockchain.Peer {
+	return blockchain.Peer{
+		PeerID:            connection.ConnectionID,
+		ApiGatewayAddress: connection.ApiGatewayAddress,
+	}
 }

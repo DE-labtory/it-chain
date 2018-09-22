@@ -84,7 +84,7 @@ func (s ConsensusService) ConsentBlock(block blockchain.DefaultBlock) error {
 type QueryService struct {
 	GetRandomPeerFunc            func() (blockchain.Peer, error)
 	GetLastBlockFromPeerFunc     func(peer blockchain.Peer) (blockchain.DefaultBlock, error)
-	GetBlockByHeightFromPeerFunc func(peer blockchain.Peer, height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
+	GetBlockByHeightFromPeerFunc func(height blockchain.BlockHeight, peer blockchain.Peer) (blockchain.DefaultBlock, error)
 }
 
 func (s QueryService) GetRandomPeer() (blockchain.Peer, error) {
@@ -95,6 +95,6 @@ func (s QueryService) GetLastBlockFromPeer(peer blockchain.Peer) (blockchain.Def
 	return s.GetLastBlockFromPeerFunc(peer)
 }
 
-func (s QueryService) GetBlockByHeightFromPeer(peer blockchain.Peer, height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
-	return s.GetBlockByHeightFromPeerFunc(peer, height)
+func (s QueryService) GetBlockByHeightFromPeer(height blockchain.BlockHeight, peer blockchain.Peer) (blockchain.DefaultBlock, error) {
+	return s.GetBlockByHeightFromPeerFunc(height, peer)
 }
