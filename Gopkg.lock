@@ -199,7 +199,7 @@
   revision = "35496cf12fcd437c68a738cae43edf1a06295b65"
 
 [[projects]]
-  digest = "1:ca6b2b3af907eeb9a3b49f60082f27087835bf699a4203f230546675b4557327"
+  digest = "1:d4da968c708333a973138cbb8d8d983f4d7f79b4b00e655f7b49e02f5f453847"
   name = "github.com/it-chain/bifrost"
   packages = [
     ".",
@@ -208,8 +208,8 @@
     "server",
   ]
   pruneopts = "UT"
-  revision = "a1021530947bcb0440baef498da81d2e9ab077a8"
-  version = "v0.1.4"
+  revision = "5faee3f2a081ae8d5af2133cd3757b109efc1cfe"
+  version = "v0.1.13"
 
 [[projects]]
   digest = "1:0bcb0e788ad02f6ee289a8ca5e21bdc29de60910fd3460bccbc6498f37bc3743"
@@ -599,7 +599,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:011a8560e72c79f44e60c64c030a8402e12a36134fd4430aa0333d38ee8e3cd3"
+  digest = "1:9947b1772a720ee64d1647bf60096c7b14bd5a0473f906387a068a0e6ba7fa84"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -611,6 +611,7 @@
     "internal/socks",
     "internal/timeseries",
     "proxy",
+    "publicsuffix",
     "trace",
   ]
   pruneopts = "UT"
@@ -694,6 +695,14 @@
   pruneopts = "UT"
   revision = "8dea3dc473e90c8179e519d91302d0597c0ca1d1"
   version = "v1.15.0"
+
+[[projects]]
+  digest = "1:b7fc4c3fd91df516486f53cc86f4b55a0c815782dbe852c5a19cce8e6c577aac"
+  name = "gopkg.in/resty.v1"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d4920dcf5b7689548a6db640278a9b35a5b48ec6"
+  version = "v1.9.1"
 
 [[projects]]
   digest = "1:2c69bd327969215d23e928e5e7243700c59fff05f558401675107dcf15e438db"
@@ -785,6 +794,7 @@
     "github.com/it-chain/avengers/mock",
     "github.com/it-chain/bifrost",
     "github.com/it-chain/bifrost/client",
+    "github.com/it-chain/bifrost/pb",
     "github.com/it-chain/bifrost/server",
     "github.com/it-chain/heimdall/key",
     "github.com/it-chain/leveldb-wrapper",
@@ -807,6 +817,7 @@
     "github.com/stretchr/testify/assert",
     "github.com/urfave/cli",
     "go.uber.org/fx",
+    "gopkg.in/resty.v1",
     "gopkg.in/src-d/go-git.v4",
     "gopkg.in/src-d/go-git.v4/plumbing",
     "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh",
