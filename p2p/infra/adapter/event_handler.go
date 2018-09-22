@@ -53,7 +53,7 @@ func (eh *EventHandler) HandleConnCreatedEvent(event event.ConnectionCreated) er
 		PeerId: p2p.PeerId{
 			Id: event.ConnectionID,
 		},
-		IpAddress: event.Address,
+		IpAddress: event.GrpcGatewayAddress,
 	}
 
 	err := eh.peerApi.Save(peer)

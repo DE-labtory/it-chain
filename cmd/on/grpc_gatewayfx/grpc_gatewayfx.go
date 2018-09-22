@@ -37,9 +37,11 @@ var Module = fx.Options(
 		NewGrpcHostService,
 		NewConnectionApi,
 		adapter.NewConnectionCommandHandler,
+		adapter.NewGrpcMessageHandler,
 	),
 	fx.Invoke(
 		RegisterHandlers,
+		RegisterEvent,
 		InitgRPCServer,
 	),
 )
@@ -50,7 +52,10 @@ func NewPeerService(peerAdapter *adapter.HttpPeerAdapter) *adapter.PeerService {
 
 func NewGrpcHostService(conf *conf.Configuration, publisher *pubsub.TopicPublisher) *infra.GrpcHostService {
 	priKey, pubKey := infra.LoadKeyPair(conf.Engine.KeyPath, "ECDSA256")
-	hostService := infra.NewGrpcHostService(priKey, pubKey, publisher.Publish)
+	hostService := infra.NewGrpcHostService(priKey, pubKey, publisher.Publish, infra.HostInfo{
+		ApiGatewayAddress:  conf.ApiGateway.Address + ":" + conf.ApiGateway.Port,
+		GrpcGatewayAddress: conf.GrpcGateway.Address + ":" + conf.GrpcGateway.Port,
+	})
 	return hostService
 }
 
@@ -73,6 +78,12 @@ func RegisterHandlers(connectionCommandHandler *adapter.ConnectionCommandHandler
 	}
 
 	if err := server.Register("connection.join", connectionCommandHandler.HandleJoinNetworkCommand); err != nil {
+		panic(err)
+	}
+}
+
+func RegisterEvent(grpcCommandHandler *adapter.GrpcMessageHandler, subscriber *pubsub.TopicSubscriber) {
+	if err := subscriber.SubscribeTopic("message.receive", grpcCommandHandler); err != nil {
 		panic(err)
 	}
 }

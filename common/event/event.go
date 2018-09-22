@@ -162,8 +162,9 @@ type LeaderDeleted struct {
 
 // connection 생성
 type ConnectionCreated struct {
-	ConnectionID string
-	Address      string
+	ConnectionID       string
+	GrpcGatewayAddress string
+	ApiGatewayAddress  string
 }
 
 // connection close

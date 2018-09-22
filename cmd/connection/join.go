@@ -46,17 +46,14 @@ func join(ip string) error {
 	}
 
 	logger.Infof(nil, "[Cmd] Joining network - Address: [%s]", ip)
-	err := client.Call("connection.join", joinNetworkCommand, func(getConnectionListCommand command.GetConnectionList, err rpc.Error) {
+	err := client.Call("connection.join", joinNetworkCommand, func(_ struct{}, err rpc.Error) {
 
 		if !err.IsNil() {
-			logger.Fatalf(nil, "[Cmd] Fail to join network - Address: [%s]", ip)
+			logger.Fatalf(nil, "[Cmd] Fail to join network - Address: [%s], Err: [%s]", ip, err.Message)
 			return
 		}
 
-		logger.Info(nil, "[Cmd] Successfully joined to network")
-		for index, connection := range getConnectionListCommand.ConnectionList {
-			logger.Infof(nil, "[Cmd] Connected connection - Index: [%s], ConnectionId: [%s], Address: [%s]", index, connection.ConnectionID, connection.Address)
-		}
+		logger.Info(nil, "[Cmd] Successfully request to join network")
 	})
 
 	if err != nil {

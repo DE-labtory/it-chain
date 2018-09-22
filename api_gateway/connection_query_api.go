@@ -102,8 +102,9 @@ func NewConnectionEventListener(connRepo *ConnectionRepository) *ConnectionEvent
 
 func (cel *ConnectionEventListener) HandleConnectionCreatedEvent(event event.ConnectionCreated) error {
 	connection := Connection{
-		ConnectionID: event.ConnectionID,
-		Address:      event.Address,
+		ConnectionID:       event.ConnectionID,
+		GrpcGatewayAddress: event.GrpcGatewayAddress,
+		ApiGatewayAddress:  event.ApiGatewayAddress,
 	}
 
 	err := cel.connectionRepository.Save(connection)
@@ -119,6 +120,7 @@ func (cel *ConnectionEventListener) HandleConnectionClosedEvent(event event.Conn
 }
 
 type Connection struct {
-	ConnectionID string
-	Address      string
+	ConnectionID       string
+	GrpcGatewayAddress string
+	ApiGatewayAddress  string
 }
