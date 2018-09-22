@@ -97,6 +97,10 @@ func decodeFindAllUncommittedTransactionsRequest(_ context.Context, r *http.Requ
 
 func decodeFindAllCommittedBlocksRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	if heightStr := r.URL.Query().Get("height"); heightStr != "" {
+		if heightStr == "-1" {
+			return FindLastCommittedBlockRequest{}, nil
+		}
+
 		height, err := strconv.ParseUint(heightStr, 10, 64)
 		if err != nil {
 			return nil, ErrBadConversion
