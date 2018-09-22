@@ -25,8 +25,10 @@ import (
 	"github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/blockchain/infra/repo"
 
+	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/logger"
+	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"go.uber.org/fx"
@@ -39,26 +41,50 @@ var Module = fx.Options(
 	fx.Provide(
 		NewBlockRepository,
 		mem.NewBlockPool,
+		NewBlockAdapter,
+		NewQueryService,
 		NewBlockApi,
+		NewSyncApi,
+		NewConnectionEventHandler,
 		NewBlockProposeHandler,
 	),
 	fx.Invoke(
 		CreateGenesisBlock,
 		RegisterRpcHandlers,
+		RegisterPubsubHandlers,
 		RegisterTearDown,
 	),
 )
 
+func NewBlockAdapter() *adapter.HttpBlockAdapter {
+	return adapter.NewHttpBlockAdapter()
+}
+
+func NewQueryService(blockAdapter *adapter.HttpBlockAdapter, connectionQueryApi *api_gateway.ConnectionQueryApi) *adapter.QuerySerivce {
+	return adapter.NewQueryService(blockAdapter, connectionQueryApi)
+}
+
 func NewBlockRepository() (*repo.BlockRepository, error) {
+
 	return repo.NewBlockRepository(BbPath)
 }
 
 func NewBlockApi(blockRepository *repo.BlockRepository, blockPool *mem.BlockPool, service common.EventService) (*api.BlockApi, error) {
+
 	return api.NewBlockApi(publisherID, blockRepository, service, blockPool)
+}
+
+func NewSyncApi(blockRepository *repo.BlockRepository, eventService common.EventService, queryService *adapter.QuerySerivce) (*api.SyncApi, error) {
+
+	return api.NewSyncApi(publisherID, blockRepository, eventService, queryService)
 }
 
 func NewBlockProposeHandler(blockApi *api.BlockApi, config *conf.Configuration) *adapter.BlockProposeCommandHandler {
 	return adapter.NewBlockProposeCommandHandler(blockApi, config.Engine.Mode)
+}
+
+func NewConnectionEventHandler(syncApi *api.SyncApi) *adapter.ConnectionEventHandler {
+	return adapter.NewConnectionEventHandler(syncApi)
 }
 
 func CreateGenesisBlock(blockApi *api.BlockApi, config *conf.Configuration) {
@@ -72,6 +98,14 @@ func RegisterRpcHandlers(server *rpc.Server, handler *adapter.BlockProposeComman
 	if err := server.Register("block.propose", handler.HandleProposeBlockCommand); err != nil {
 		panic(err)
 	}
+}
+
+func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, handler *adapter.ConnectionEventHandler) {
+
+	if err := subscriber.SubscribeTopic("connection.saved", handler); err != nil {
+		panic(err)
+	}
+
 }
 
 func RegisterTearDown(lifecycle fx.Lifecycle) {
