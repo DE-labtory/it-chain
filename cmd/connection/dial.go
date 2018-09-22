@@ -54,7 +54,7 @@ func dial(ip string) error {
 			return
 		}
 
-		logger.Infof(nil, "[Cmd] Connection created - Address: [%s], Id:[%s]", connection.Address, connection.ConnectionID)
+		logger.Infof(nil, "[Cmd] Connection created - gRPC-Address: [%s], Id:[%s]", connection.GrpcGatewayAddress, connection.ConnectionID)
 	})
 
 	if err != nil {

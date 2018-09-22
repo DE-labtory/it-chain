@@ -28,7 +28,7 @@ import (
 )
 
 func TestHttpPeerAdapter_GetAllPeerList(t *testing.T) {
-	connectionList := []grpc_gateway.Connection{grpc_gateway.Connection{Address: "1"}}
+	connectionList := []grpc_gateway.Connection{grpc_gateway.Connection{GrpcGatewayAddress: "1"}}
 
 	go createMockServer("/connections", connectionList)
 	time.Sleep(3 * time.Second)

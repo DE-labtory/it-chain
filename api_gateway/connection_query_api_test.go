@@ -16,8 +16,8 @@ func TestConnectionQueryApi_GetAllConnectionList(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		id := strconv.Itoa(i)
 		err := repo.Save(api_gateway.Connection{
-			ConnectionID: id,
-			Address:      "address" + id,
+			ConnectionID:       id,
+			GrpcGatewayAddress: "address" + id,
 		})
 		assert.NoError(t, err)
 	}
@@ -51,8 +51,8 @@ func TestConnectionQueryApi_GetConnectionByID(t *testing.T) {
 
 	for i := 0; i < len(ids); i++ {
 		err := repo.Save(api_gateway.Connection{
-			ConnectionID: ids[i],
-			Address:      "address",
+			ConnectionID:       ids[i],
+			GrpcGatewayAddress: "address",
 		})
 		assert.NoError(t, err)
 	}
@@ -71,8 +71,8 @@ func TestConnectionQueryApi_GetConnectionByID(t *testing.T) {
 func TestConnectionRepository_Save(t *testing.T) {
 	repo := api_gateway.NewConnectionRepository()
 	err := repo.Save(api_gateway.Connection{
-		ConnectionID: "1",
-		Address:      "address",
+		ConnectionID:       "1",
+		GrpcGatewayAddress: "address",
 	})
 	assert.NoError(t, err)
 
@@ -82,15 +82,15 @@ func TestConnectionRepository_Save(t *testing.T) {
 	}{
 		"success": {
 			Input: api_gateway.Connection{
-				ConnectionID: "0",
-				Address:      "address",
+				ConnectionID:       "0",
+				GrpcGatewayAddress: "address",
 			},
 			Output: nil,
 		},
 		"fail": {
 			Input: api_gateway.Connection{
-				ConnectionID: "1",
-				Address:      "address",
+				ConnectionID:       "1",
+				GrpcGatewayAddress: "address",
 			},
 			Output: api_gateway.ErrConnectionExists,
 		},
@@ -118,8 +118,8 @@ func TestConnectionRepository_Save(t *testing.T) {
 func TestConnectionRepository_Remove(t *testing.T) {
 	repo := api_gateway.NewConnectionRepository()
 	err := repo.Save(api_gateway.Connection{
-		ConnectionID: "0",
-		Address:      "address",
+		ConnectionID:       "0",
+		GrpcGatewayAddress: "address",
 	})
 	assert.NoError(t, err)
 
@@ -136,8 +136,8 @@ func TestConnectionEventListener_HandleConnectionCreatedEvent(t *testing.T) {
 	listener := api_gateway.NewConnectionEventListener(repo)
 
 	err := listener.HandleConnectionCreatedEvent(event.ConnectionCreated{
-		ConnectionID: "0",
-		Address:      "address",
+		ConnectionID:       "0",
+		GrpcGatewayAddress: "address",
 	})
 	assert.NoError(t, err)
 }
@@ -147,8 +147,8 @@ func TestConnectionEventListener_HandleConnectionClosedEvent(t *testing.T) {
 	listener := api_gateway.NewConnectionEventListener(repo)
 
 	err := listener.HandleConnectionCreatedEvent(event.ConnectionCreated{
-		ConnectionID: "0",
-		Address:      "address",
+		ConnectionID:       "0",
+		GrpcGatewayAddress: "address",
 	})
 	assert.NoError(t, err)
 

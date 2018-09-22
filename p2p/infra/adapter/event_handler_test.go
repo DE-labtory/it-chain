@@ -74,8 +74,8 @@ func TestEventHandler_HandleConnCreatedEvent(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s", testName)
 		err := eventHandler.HandleConnCreatedEvent(event.ConnectionCreated{
-			ConnectionID: test.input.nodeId,
-			Address:      test.input.address,
+			ConnectionID:       test.input.nodeId,
+			GrpcGatewayAddress: test.input.address,
 		})
 		fmt.Println(err)
 		assert.Equal(t, err, test.err)
