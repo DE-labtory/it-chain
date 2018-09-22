@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 It-chain
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package api_test
 
 import (
@@ -32,10 +48,7 @@ func TestSyncApi_Synchronize(t *testing.T) {
 				block1,
 			},
 			peer: blockchain.Peer{
-				IpAddress: "PeerIP",
-				PeerId: blockchain.PeerId{
-					"PeerId",
-				},
+				ApiGatewayAddress: "PeerIP",
 			},
 			dbPath: "./.db1",
 		},
@@ -47,10 +60,7 @@ func TestSyncApi_Synchronize(t *testing.T) {
 				block3,
 			},
 			peer: blockchain.Peer{
-				IpAddress: "PeerIP",
-				PeerId: blockchain.PeerId{
-					"PeerId",
-				},
+				ApiGatewayAddress: "PeerIP",
 			},
 			dbPath: "./.db2",
 		},
@@ -106,7 +116,7 @@ func TestSyncApi_Synchronize(t *testing.T) {
 			return test.peer, nil
 		}
 
-		queryService.GetBlockByHeightFromPeerFunc = func(peer blockchain.Peer, height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
+		queryService.GetBlockByHeightFromPeerFunc = func(height blockchain.BlockHeight, peer blockchain.Peer) (blockchain.DefaultBlock, error) {
 			return *PeerBlockchain[height], nil
 		}
 

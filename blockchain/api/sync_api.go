@@ -1,7 +1,24 @@
+/*
+ * Copyright 2018 It-chain
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package api
 
 import (
 	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/common/logger"
 )
 
 type SyncApi struct {
@@ -11,8 +28,8 @@ type SyncApi struct {
 	queryService    blockchain.QueryService
 }
 
-func NewSyncApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService, queryService blockchain.QueryService) (SyncApi, error) {
-	return SyncApi{
+func NewSyncApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService, queryService blockchain.QueryService) (*SyncApi, error) {
+	return &SyncApi{
 		publisherId:     publisherId,
 		blockRepository: blockRepository,
 		eventService:    eventService,
@@ -21,20 +38,28 @@ func NewSyncApi(publisherId string, blockRepository blockchain.BlockRepository, 
 }
 
 func (sApi SyncApi) Synchronize() error {
-
 	// get random peer
 	randomPeer, err := sApi.queryService.GetRandomPeer()
 
+	logger.Infof(nil, "[Blockchain] Start to Synchronize - PeerID: [%s]", randomPeer.PeerID)
 	if err != nil {
+		logger.Errorf(nil, "[Blockchain] Fail to Synchronize - Err: [%s]", err)
 		return err
 	}
 
 	if sApi.isSynced(randomPeer) {
+		logger.Infof(nil, "[Blockchain] Already Synchronized - PeerID: [%s]", randomPeer.PeerID)
 		return nil
 	}
 
 	// if sync has not done, on sync
-	sApi.syncWithPeer(randomPeer)
+	err = sApi.syncWithPeer(randomPeer)
+	if err != nil {
+		logger.Errorf(nil, "[Blockchain] Fail to Synchronize - Err: [%s]", err)
+		return err
+	}
+
+	logger.Infof(nil, "[Blockchain] Synchronized Successfully - PeerID: [%s]", randomPeer.PeerID)
 
 	return nil
 
@@ -43,7 +68,7 @@ func (sApi SyncApi) Synchronize() error {
 func (sApi SyncApi) isSynced(peer blockchain.Peer) bool {
 
 	// If nil peer is given(when i'm the first node of p2p network) : Synced
-	if peer.IpAddress == "" {
+	if peer.ApiGatewayAddress == "" {
 		return true
 	}
 	// Get last block of my blockChain
@@ -53,7 +78,6 @@ func (sApi SyncApi) isSynced(peer blockchain.Peer) bool {
 	}
 	// Get last block of other peer's blockChain
 	standardBlock, err := sApi.queryService.GetLastBlockFromPeer(peer)
-
 	if err != nil {
 		return false
 	}
@@ -91,26 +115,12 @@ func (sApi SyncApi) construct(peer blockchain.Peer, standardHeight blockchain.Bl
 	for lastHeight < standardHeight {
 
 		targetHeight := setTargetHeight(lastHeight)
-		retrievedBlock, err := sApi.queryService.GetBlockByHeightFromPeer(peer, targetHeight)
-
+		retrievedBlock, err := sApi.queryService.GetBlockByHeightFromPeer(targetHeight, peer)
 		if err != nil {
 			return err
 		}
 
-		err = sApi.blockRepository.Save(retrievedBlock)
-
-		if err != nil {
-			return err
-		}
-
-		// publish
-		commitEvent, err := createBlockCommittedEvent(retrievedBlock)
-
-		if err != nil {
-			return err
-		}
-
-		err = sApi.eventService.Publish("block.committed", commitEvent)
+		err = sApi.commitBlock(retrievedBlock)
 		if err != nil {
 			return err
 		}
@@ -126,4 +136,24 @@ func setTargetHeight(lastHeight blockchain.BlockHeight) blockchain.BlockHeight {
 }
 func raiseHeight(height *blockchain.BlockHeight) {
 	*height++
+}
+
+func (sApi SyncApi) commitBlock(block blockchain.DefaultBlock) error {
+
+	// save(commit)
+	err := sApi.blockRepository.Save(block)
+	if err != nil {
+		logger.Errorf(nil, "[Blockchain] Block is not Committed - Err: [%s]", err)
+		return ErrSaveBlock
+	}
+
+	// publish
+	commitEvent, err := createBlockCommittedEvent(block)
+	if err != nil {
+		return ErrCreateEvent
+	}
+
+	logger.Infof(nil, "[Blockchain] Block has Committed - seal: [%x],  height: [%d]", block.Seal, block.Height)
+
+	return sApi.eventService.Publish("block.committed", commitEvent)
 }
