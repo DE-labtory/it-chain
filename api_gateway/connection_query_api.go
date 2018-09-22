@@ -29,15 +29,21 @@ func (q ConnectionQueryApi) GetConnectionByID(connID string) (Connection, error)
 	return q.connectionRepository.FindByID(connID)
 }
 
+type EventService interface {
+	Publish(topic string, event interface{}) error
+}
+
 type ConnectionRepository struct {
 	mux             *sync.RWMutex
 	ConnectionTable map[string]Connection
+	eventService    EventService
 }
 
-func NewConnectionRepository() *ConnectionRepository {
+func NewConnectionRepository(eventService EventService) *ConnectionRepository {
 	return &ConnectionRepository{
 		mux:             &sync.RWMutex{},
 		ConnectionTable: make(map[string]Connection),
+		eventService:    eventService,
 	}
 }
 
@@ -52,7 +58,16 @@ func (cr *ConnectionRepository) Save(conn Connection) error {
 
 	cr.ConnectionTable[conn.ConnectionID] = conn
 
+	cr.eventService.Publish("connection.Saved", createConnectionSavedEvent(conn))
+
 	return nil
+}
+
+func createConnectionSavedEvent(conn Connection) event.ConnectionSaved {
+	return event.ConnectionSaved{
+		Address:      conn.ApiGatewayAddress,
+		ConnectionID: conn.ConnectionID,
+	}
 }
 
 func (cr *ConnectionRepository) Remove(connID string) error {
@@ -101,6 +116,7 @@ func NewConnectionEventListener(connRepo *ConnectionRepository) *ConnectionEvent
 }
 
 func (cel *ConnectionEventListener) HandleConnectionCreatedEvent(event event.ConnectionCreated) error {
+
 	connection := Connection{
 		ConnectionID:       event.ConnectionID,
 		GrpcGatewayAddress: event.GrpcGatewayAddress,

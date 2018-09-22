@@ -77,7 +77,6 @@ func (c ConnectionApi) Dial(address string) (grpc_gateway.Connection, error) {
 
 func createConnectionCreatedEvent(connection grpc_gateway.Connection) event.ConnectionCreated {
 	return event.ConnectionCreated{
-
 		ConnectionID:       connection.ConnectionID,
 		GrpcGatewayAddress: connection.GrpcGatewayAddress,
 		ApiGatewayAddress:  connection.ApiGatewayAddress,
