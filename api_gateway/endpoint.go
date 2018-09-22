@@ -60,20 +60,17 @@ func MakeConnectionEndpoints(c *ConnectionQueryApi) Endpoints {
  */
 func makeFindAllCommittedBlocksEndpoint(b *BlockQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		if request == nil {
-			blocks, err := b.blockRepository.FindAllBlock()
-			if err != nil {
-				return nil, err
-			}
-			return blocks, nil
-			// when request is not nil, it means endponint takes attribute(params) as a request
-		} else {
-			req := request.(FindCommittedBlockByHeightRequest)
-			block, err := b.blockRepository.FindBlockByHeight(req.Height)
-			if err != nil {
-				return nil, err
-			}
-			return block, nil
+
+		switch v := request.(type) {
+
+		case FindCommittedBlockByHeightRequest:
+			return b.blockRepository.FindBlockByHeight(v.Height)
+
+		case FindLastCommittedBlockRequest:
+			return b.blockRepository.FindLastBlock()
+
+		default:
+			return b.blockRepository.FindAllBlock()
 		}
 	}
 }
@@ -81,10 +78,12 @@ func makeFindAllCommittedBlocksEndpoint(b *BlockQueryApi) endpoint.Endpoint {
 func makeFindCommittedBlockBySealEndpoint(b *BlockQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(FindCommittedBlockBySealRequest)
+
 		block, err := b.blockRepository.FindBlockBySeal(req.Seal)
 		if err != nil {
 			return nil, err
 		}
+
 		return block, nil
 	}
 }
@@ -97,12 +96,16 @@ func makeFindAllMetaEndpoint(i *ICodeQueryApi) endpoint.Endpoint {
 			logger.Error(&logger.Fields{"err_message": err.Error()}, "error while find all meta endpoint")
 			return nil, err
 		}
+
 		return metas, nil
 	}
 }
 
 type FindCommittedBlockByHeightRequest struct {
 	Height uint64
+}
+
+type FindLastCommittedBlockRequest struct {
 }
 
 type FindCommittedBlockBySealRequest struct {
