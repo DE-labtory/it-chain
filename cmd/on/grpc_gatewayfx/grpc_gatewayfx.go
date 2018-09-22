@@ -34,6 +34,7 @@ var Module = fx.Options(
 	fx.Provide(
 		NewGrpcHostService,
 		NewConnectionApi,
+		NewMessageApi,
 		adapter.NewConnectionCommandHandler,
 		adapter.NewGrpcMessageHandler,
 	),
@@ -57,6 +58,10 @@ func NewConnectionApi(hostService *infra.GrpcHostService, eventService common.Ev
 	return api.NewConnectionApi(hostService, eventService)
 }
 
+func NewMessageApi(hostService *infra.GrpcHostService) *api.MessageApi {
+	return api.NewMessageApi(hostService)
+}
+
 func RegisterHandlers(connectionCommandHandler *adapter.ConnectionCommandHandler, server *rpc.Server) {
 	iLogger.Infof(nil, "[Main] gRPC-Gateway is starting")
 	if err := server.Register("connection.create", connectionCommandHandler.HandleCreateConnectionCommand); err != nil {
@@ -77,7 +82,7 @@ func RegisterHandlers(connectionCommandHandler *adapter.ConnectionCommandHandler
 }
 
 func RegisterEvent(grpcCommandHandler *adapter.GrpcMessageHandler, subscriber *pubsub.TopicSubscriber) {
-	if err := subscriber.SubscribeTopic("message.receive", grpcCommandHandler); err != nil {
+	if err := subscriber.SubscribeTopic("message.*", grpcCommandHandler); err != nil {
 		panic(err)
 	}
 }
