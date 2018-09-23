@@ -19,24 +19,22 @@ package mem
 import (
 	"sync"
 
-	ygg "github.com/it-chain/yggdrasill/common"
+	"github.com/it-chain/engine/blockchain"
 )
 
-type Block = ygg.Block
-
 type BlockPool struct {
-	blockMap map[uint64]Block
+	blockMap map[uint64]blockchain.DefaultBlock
 	mux      sync.Mutex
 }
 
 func NewBlockPool() *BlockPool {
 	return &BlockPool{
-		blockMap: make(map[uint64]Block),
+		blockMap: make(map[uint64]blockchain.DefaultBlock),
 		mux:      sync.Mutex{},
 	}
 }
 
-func (b *BlockPool) Add(block Block) {
+func (b *BlockPool) Add(block blockchain.DefaultBlock) {
 	b.mux.Lock()
 	defer b.mux.Unlock()
 
@@ -50,13 +48,17 @@ func (b *BlockPool) Delete(height uint64) {
 	delete(b.blockMap, height)
 }
 
-func (b *BlockPool) Get(height uint64) Block {
+func (b *BlockPool) Get(height uint64) blockchain.DefaultBlock {
 	b.mux.Lock()
 	defer b.mux.Unlock()
 
-	if b.blockMap[height] == nil {
-		return nil
+	if block, ok := b.blockMap[height]; ok {
+		return block
 	}
 
-	return b.blockMap[height]
+	return blockchain.DefaultBlock{}
+}
+
+func (b *BlockPool) Size() int {
+	return len(b.blockMap)
 }

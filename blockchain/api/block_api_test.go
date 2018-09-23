@@ -34,35 +34,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBlockApi_AddBlockToPool(t *testing.T) {
-	tests := map[string]struct {
-		input struct {
-			block blockchain.Block
-		}
-	}{
-		"success": {
-			input: struct {
-				block blockchain.Block
-			}{block: &blockchain.DefaultBlock{
-				Height: uint64(11),
-			}},
-		},
-	}
-
-	publisherId := "zf"
-	blockRepo := mock.BlockRepository{}
-	eventService := mock.EventService{}
-	blockPool := mem.NewBlockPool()
-
-	blockApi, _ := api.NewBlockApi(publisherId, blockRepo, eventService, blockPool)
-
-	for testName, test := range tests {
-		t.Logf("running test case %s", testName)
-
-		blockApi.AddBlockToPool(test.input.block)
-	}
-}
-
 func TestBlockApi_CheckAndSaveBlockFromPool(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
@@ -276,7 +247,7 @@ func TestBlockApi_StageBlock(t *testing.T) {
 	blockApi.StageBlock(*block)
 
 	// when
-	toBe := &blockchain.DefaultBlock{
+	toBe := blockchain.DefaultBlock{
 		Height: 30,
 		State:  blockchain.Staged,
 	}
