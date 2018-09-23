@@ -71,6 +71,11 @@ type ReceiveGrpc struct {
 	Protocol     string
 }
 
+type MyPeer struct {
+	IpAddress string
+	PeerId    string
+}
+
 /*
  * ivm
  */
