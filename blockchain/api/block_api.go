@@ -41,13 +41,6 @@ func NewBlockApi(publisherId string, blockRepository blockchain.BlockRepository,
 	}, nil
 }
 
-// 받은 block을 block pool에 추가한다.
-func (bApi BlockApi) AddBlockToPool(block blockchain.Block) error {
-
-	bApi.BlockPool.Add(block)
-	return nil
-}
-
 func (bApi BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) error {
 	return nil
 }
@@ -137,7 +130,7 @@ func (bApi BlockApi) CommitBlock(block blockchain.DefaultBlock) error {
 
 func (bApi BlockApi) StageBlock(block blockchain.DefaultBlock) error {
 	block.SetState(blockchain.Staged)
-	bApi.BlockPool.Add(&block)
+	bApi.BlockPool.Add(block)
 
 	return nil
 }

@@ -131,6 +131,10 @@ func (sApi SyncApi) construct(peer blockchain.Peer, standardHeight blockchain.Bl
 	return nil
 }
 
+func (sApi *SyncApi) CommitStagedBlocks() error {
+	return nil
+}
+
 func setTargetHeight(lastHeight blockchain.BlockHeight) blockchain.BlockHeight {
 	return lastHeight + 1
 }

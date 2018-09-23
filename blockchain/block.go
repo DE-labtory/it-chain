@@ -174,3 +174,10 @@ type BlockRepository interface {
 	FindBySeal(seal []byte) (DefaultBlock, error)
 	FindAll() ([]DefaultBlock, error)
 }
+
+type BlockPool interface {
+	Add(block DefaultBlock)
+	Delete(height uint64)
+	Get(height uint64) DefaultBlock
+	Size() int
+}
