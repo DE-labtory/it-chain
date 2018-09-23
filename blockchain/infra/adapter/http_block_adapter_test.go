@@ -40,7 +40,7 @@ func TestHttpBlockAdapter_GetLastBlock(t *testing.T) {
 
 	go createServer(lastBlock, "8080")
 
-	time.Sleep(4)
+	time.Sleep(9)
 
 	hAdapter := adapter.HttpBlockAdapter{}
 
@@ -58,7 +58,7 @@ func TestHttpBlockAdapter_GetLastBlock_Fail_NoLastBlock(t *testing.T) {
 
 	go createServer(blockchain.DefaultBlock{}, "8081")
 
-	time.Sleep(4)
+	time.Sleep(9)
 
 	hAdapter := adapter.HttpBlockAdapter{}
 
@@ -92,7 +92,7 @@ func TestHttpBlockAdapter_GetBlockByHeight(t *testing.T) {
 
 	go createServer(_5thBlock, "8083")
 
-	time.Sleep(6)
+	time.Sleep(9)
 
 	hAdapter := adapter.HttpBlockAdapter{}
 
@@ -112,7 +112,7 @@ func TestHttpBlockAdapter_GetBlockByHeight_Fail_NoBlockWithTheHeight(t *testing.
 
 	go createServer(EmptyBlock, "8084")
 
-	time.Sleep(6)
+	time.Sleep(9)
 
 	hAdapter := adapter.HttpBlockAdapter{}
 
