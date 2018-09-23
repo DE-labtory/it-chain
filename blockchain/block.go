@@ -181,6 +181,6 @@ type BlockPool interface {
 	Add(block DefaultBlock)
 	Delete(height uint64)
 	GetByHeight(height uint64) DefaultBlock
-	GetAll() BlockMap
+	GetSortedKeys() []BlockHeight
 	Size() int
 }

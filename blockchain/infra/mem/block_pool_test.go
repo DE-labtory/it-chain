@@ -50,3 +50,20 @@ func TestBlockPool(t *testing.T) {
 	b3 := blockPool.GetByHeight(1)
 	assert.Equal(t, b3, blockchain.DefaultBlock{})
 }
+
+func TestBlockPool_GetSortedKeys(t *testing.T) {
+	blockPool := mem.NewBlockPool()
+
+	block1 := mock.GetNewBlock([]byte("genesis"), 0)
+	block2 := mock.GetNewBlock(block1.GetSeal(), 3120)
+	block3 := mock.GetNewBlock(block2.GetSeal(), 29)
+	block4 := mock.GetNewBlock(block2.GetSeal(), 694)
+
+	blockPool.Add(*block1)
+	blockPool.Add(*block2)
+	blockPool.Add(*block3)
+	blockPool.Add(*block4)
+
+	sortedKeys := blockPool.GetSortedKeys()
+	assert.Equal(t, sortedKeys, []uint64{uint64(0), uint64(29), uint64(694), uint64(3120)})
+}
