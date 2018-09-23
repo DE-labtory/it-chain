@@ -75,9 +75,10 @@ func NewBlockApi(blockRepository *repo.BlockRepository, blockPool *mem.BlockPool
 	return api.NewBlockApi(publisherID, blockRepository, service, blockPool)
 }
 
-func NewSyncApi(blockRepository *repo.BlockRepository, eventService common.EventService, queryService *adapter.QuerySerivce) (*api.SyncApi, error) {
+func NewSyncApi(blockRepository *repo.BlockRepository, eventService common.EventService, queryService *adapter.QuerySerivce, blockPool *mem.BlockPool) (*api.SyncApi, error) {
 
-	return api.NewSyncApi(publisherID, blockRepository, eventService, queryService)
+	api, err := api.NewSyncApi(publisherID, blockRepository, eventService, queryService, blockPool)
+	return &api, err
 }
 
 func NewBlockProposeHandler(blockApi *api.BlockApi, config *conf.Configuration) *adapter.BlockProposeCommandHandler {
