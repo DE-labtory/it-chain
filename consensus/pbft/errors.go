@@ -20,3 +20,5 @@ import "errors"
 var CreateConsensusError = errors.New("Create Consensus Error")
 var ConstructConsensusError = errors.New("Construct Consensus Error")
 var InvalidLeaderIdError = errors.New("Invalid Leader Id")
+var ErrInvalidSave = errors.New("Invalid Save Error")
+var ErrEmptyRepo = errors.New("Repository has empty state")

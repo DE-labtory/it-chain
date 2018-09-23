@@ -336,3 +336,9 @@ func (s *State) CheckPreCommitCondition() bool {
 	}
 	return false
 }
+
+type StateRepository interface {
+	Save(state State) error
+	Load() (State, error)
+	Remove()
+}
