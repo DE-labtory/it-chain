@@ -253,5 +253,5 @@ func TestBlockApi_StageBlock(t *testing.T) {
 	}
 
 	// then
-	assert.Equal(t, blockApi.BlockPool.Get(30), toBe)
+	assert.Equal(t, blockApi.BlockPool.GetByHeight(30), toBe)
 }

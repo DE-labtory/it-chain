@@ -26,7 +26,7 @@ type SyncApi struct {
 	blockRepository blockchain.BlockRepository
 	eventService    blockchain.EventService
 	queryService    blockchain.QueryService
-	blockPool blockchain.BlockPool
+	blockPool       blockchain.BlockPool
 }
 
 func NewSyncApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService, queryService blockchain.QueryService, blockPool blockchain.BlockPool) (SyncApi, error) {
@@ -35,7 +35,7 @@ func NewSyncApi(publisherId string, blockRepository blockchain.BlockRepository, 
 		blockRepository: blockRepository,
 		eventService:    eventService,
 		queryService:    queryService,
-		blockPool: blockPool,
+		blockPool:       blockPool,
 	}, nil
 }
 
@@ -167,9 +167,21 @@ func (sApi *SyncApi) CommitStagedBlocks() error {
 	}
 
 	targetHeight := setTargetHeight(lastBlock.GetHeight())
-	for h, block := range sApi.blockPool.GetAll() {
-		if h == targetHeight {
+	for _, h := range sApi.blockPool.GetSortedKeys() {
+		height := blockchain.BlockHeight(h)
+
+		switch {
+		case height > targetHeight:
+			return nil
+
+		case height < targetHeight:
+			sApi.blockPool.Delete(height)
+
+		case height == targetHeight:
+			block := sApi.blockPool.GetByHeight(height)
 			sApi.commitBlock(block)
+
+			raiseHeight(&targetHeight)
 		}
 	}
 
