@@ -166,9 +166,11 @@ func (sApi *SyncApi) CommitStagedBlocks() error {
 		return err
 	}
 
-	targetHeight := lastBlock
+	targetHeight := setTargetHeight(lastBlock.GetHeight())
 	for h, block := range sApi.blockPool.GetAll() {
-
+		if h == targetHeight {
+			sApi.commitBlock(block)
+		}
 	}
 
 	return nil

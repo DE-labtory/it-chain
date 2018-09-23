@@ -20,6 +20,7 @@ import (
 	"sync"
 
 	"github.com/it-chain/engine/blockchain"
+	"github.com/gogo/protobuf/sortkeys"
 )
 
 type BlockPool struct {
@@ -59,8 +60,15 @@ func (b *BlockPool) GetByHeight(height uint64) blockchain.DefaultBlock {
 	return blockchain.DefaultBlock{}
 }
 
-func (b *BlockPool) GetAll() blockchain.BlockMap {
-	return b.blockMap
+func (b *BlockPool) GetSortedKeys() []blockchain.BlockHeight {
+	keys := make([]blockchain.BlockHeight, 0)
+	for h := range b.blockMap {
+		keys = append(keys, h)
+	}
+
+	sortkeys.Uint64s(keys)
+
+	return keys
 }
 
 func (b *BlockPool) Size() int {
