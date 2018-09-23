@@ -23,7 +23,7 @@ import (
 )
 
 type BlockPool struct {
-	blockMap map[uint64]blockchain.DefaultBlock
+	blockMap blockchain.BlockMap
 	mux      sync.Mutex
 }
 
@@ -48,7 +48,7 @@ func (b *BlockPool) Delete(height uint64) {
 	delete(b.blockMap, height)
 }
 
-func (b *BlockPool) Get(height uint64) blockchain.DefaultBlock {
+func (b *BlockPool) GetByHeight(height uint64) blockchain.DefaultBlock {
 	b.mux.Lock()
 	defer b.mux.Unlock()
 
@@ -59,6 +59,11 @@ func (b *BlockPool) Get(height uint64) blockchain.DefaultBlock {
 	return blockchain.DefaultBlock{}
 }
 
+func (b *BlockPool) GetAll() blockchain.BlockMap {
+	return b.blockMap
+}
+
 func (b *BlockPool) Size() int {
 	return len(b.blockMap)
 }
+

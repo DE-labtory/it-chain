@@ -175,9 +175,12 @@ type BlockRepository interface {
 	FindAll() ([]DefaultBlock, error)
 }
 
+type BlockMap = map[BlockHeight]DefaultBlock
+
 type BlockPool interface {
 	Add(block DefaultBlock)
 	Delete(height uint64)
-	Get(height uint64) DefaultBlock
+	GetByHeight(height uint64) DefaultBlock
+	GetAll() BlockMap
 	Size() int
 }

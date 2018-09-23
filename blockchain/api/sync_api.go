@@ -26,14 +26,16 @@ type SyncApi struct {
 	blockRepository blockchain.BlockRepository
 	eventService    blockchain.EventService
 	queryService    blockchain.QueryService
+	blockPool blockchain.BlockPool
 }
 
-func NewSyncApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService, queryService blockchain.QueryService) (*SyncApi, error) {
-	return &SyncApi{
+func NewSyncApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService, queryService blockchain.QueryService, blockPool blockchain.BlockPool) (SyncApi, error) {
+	return SyncApi{
 		publisherId:     publisherId,
 		blockRepository: blockRepository,
 		eventService:    eventService,
 		queryService:    queryService,
+		blockPool: blockPool,
 	}, nil
 }
 
@@ -61,7 +63,7 @@ func (sApi SyncApi) Synchronize() error {
 
 	logger.Infof(nil, "[Blockchain] Synchronized Successfully - PeerID: [%s]", randomPeer.PeerID)
 
-	return nil
+	return sApi.CommitStagedBlocks()
 
 }
 
@@ -131,10 +133,6 @@ func (sApi SyncApi) construct(peer blockchain.Peer, standardHeight blockchain.Bl
 	return nil
 }
 
-func (sApi *SyncApi) CommitStagedBlocks() error {
-	return nil
-}
-
 func setTargetHeight(lastHeight blockchain.BlockHeight) blockchain.BlockHeight {
 	return lastHeight + 1
 }
@@ -160,4 +158,18 @@ func (sApi SyncApi) commitBlock(block blockchain.DefaultBlock) error {
 	logger.Infof(nil, "[Blockchain] Block has Committed - seal: [%x],  height: [%d]", block.Seal, block.Height)
 
 	return sApi.eventService.Publish("block.committed", commitEvent)
+}
+
+func (sApi *SyncApi) CommitStagedBlocks() error {
+	lastBlock, err := sApi.blockRepository.FindLast()
+	if err != nil {
+		return err
+	}
+
+	targetHeight := lastBlock
+	for h, block := range sApi.blockPool.GetAll() {
+
+	}
+
+	return nil
 }
