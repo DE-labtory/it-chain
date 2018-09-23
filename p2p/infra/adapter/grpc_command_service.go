@@ -19,10 +19,7 @@ package adapter
 import (
 	"errors"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/p2p"
-	"github.com/rs/xid"
 )
 
 //kind of error
@@ -40,21 +37,4 @@ func NewGrpcCommandService(client p2p.Client) *GrpcCommandService {
 
 		client: client,
 	}
-}
-
-func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
-
-	data, err := common.Serialize(body)
-
-	if err != nil {
-
-		return command.DeliverGrpc{}, err
-	}
-
-	return command.DeliverGrpc{
-		MessageId:     xid.New().String(),
-		RecipientList: make([]string, 0),
-		Body:          data,
-		Protocol:      protocol,
-	}, err
 }

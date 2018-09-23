@@ -22,9 +22,7 @@ import (
 	"time"
 
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
-	"github.com/rs/xid"
 )
 
 type ElectionService struct {
@@ -64,7 +62,7 @@ func (es *ElectionService) Vote(connectionId string) error {
 
 	voteLeaderMessage := VoteMessage{}
 
-	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("VoteLeaderProtocol", voteLeaderMessage)
+	grpcDeliverCommand, _ := common.CreateGrpcDeliverCommand("VoteLeaderProtocol", voteLeaderMessage)
 	grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
 
 	es.client.Call("message.deliver", grpcDeliverCommand, func() {})
@@ -80,7 +78,7 @@ func (es *ElectionService) BroadcastLeader(peer Peer) error {
 		Peer: peer,
 	}
 
-	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
+	grpcDeliverCommand, _ := common.CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
 
 	pLTable, _ := es.peerQueryService.GetPLTable()
 
@@ -185,7 +183,7 @@ func (es *ElectionService) RequestVote(connectionIds []string) error {
 	// 2. send message
 	requestVoteMessage := RequestVoteMessage{}
 
-	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("RequestVoteProtocol", requestVoteMessage)
+	grpcDeliverCommand, _ := common.CreateGrpcDeliverCommand("RequestVoteProtocol", requestVoteMessage)
 
 	for _, connectionId := range connectionIds {
 
@@ -195,22 +193,6 @@ func (es *ElectionService) RequestVote(connectionIds []string) error {
 	es.client.Call("message.deliver", grpcDeliverCommand, func() {})
 
 	return nil
-}
-
-func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
-
-	data, err := common.Serialize(body)
-
-	if err != nil {
-		return command.DeliverGrpc{}, err
-	}
-
-	return command.DeliverGrpc{
-		MessageId:     xid.New().String(),
-		RecipientList: make([]string, 0),
-		Body:          data,
-		Protocol:      protocol,
-	}, err
 }
 
 func GenRandomInRange(min, max int) int {

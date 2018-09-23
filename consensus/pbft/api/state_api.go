@@ -153,8 +153,7 @@ func (cApi *StateApiImpl) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 		return nil
 	}
 
-	//TODO ConsensusFinished 인자 추가
-	if err := cApi.eventService.Publish("block.confirm", event.ConsensusFinished{}); err != nil {
+	if err := cApi.eventService.Publish("block.confirm", event.ConsensusFinished{Seal: loadedState.Block.Seal, Body: loadedState.Block.Body}); err != nil {
 		return err
 	}
 	cApi.repo.Remove()

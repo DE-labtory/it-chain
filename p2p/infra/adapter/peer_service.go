@@ -19,6 +19,7 @@ package adapter
 import (
 	"time"
 
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/p2p"
 )
@@ -48,7 +49,7 @@ func (ps *PeerService) RequestLeaderInfo(connectionId string) error {
 	}
 
 	//message deliver command for delivering leader info
-	deliverCommand, err := CreateGrpcDeliverCommand("LeaderInfoRequestMessage", body)
+	deliverCommand, err := common.CreateGrpcDeliverCommand("LeaderInfoRequestMessage", body)
 
 	if err != nil {
 		return err
@@ -69,7 +70,7 @@ func (ps *PeerService) RequestPeerList(peerId p2p.PeerId) error {
 		TimeUnix: time.Now().Unix(),
 	}
 
-	deliverCommand, err := CreateGrpcDeliverCommand("PeerListRequestMessage", body)
+	deliverCommand, err := common.CreateGrpcDeliverCommand("PeerListRequestMessage", body)
 
 	if err != nil {
 		return err

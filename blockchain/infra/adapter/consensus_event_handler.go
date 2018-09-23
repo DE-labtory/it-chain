@@ -18,6 +18,7 @@ package adapter
 
 import (
 	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
 )
 
@@ -47,8 +48,12 @@ if block sync is not on progress, commit block
 func (c *ConsensusEventHandler) HandleConsensusFinishedEvent(event event.ConsensusFinished) error {
 	receivedBlock := extractBlockFromEvent(event)
 
-	if len(event.TxList) == 0 {
+	if len(receivedBlock.TxList) == 0 {
 		return ErrBlockNil
+	}
+
+	if receivedBlock.Seal == nil {
+		return ErrBlockSealNil
 	}
 
 	if c.BlockSyncState.IsProgressing() {
@@ -61,12 +66,8 @@ func (c *ConsensusEventHandler) HandleConsensusFinishedEvent(event event.Consens
 }
 
 func extractBlockFromEvent(event event.ConsensusFinished) *blockchain.DefaultBlock {
-	txList := blockchain.ConvertToTransactionList(event.TxList)
 
-	return &blockchain.DefaultBlock{
-		PrevSeal: event.PrevSeal,
-		Height:   event.Height,
-		TxList:   txList,
-		Creator:  event.Creator,
-	}
+	d := blockchain.DefaultBlock{}
+	common.Deserialize(event.Body, &d)
+	return &d
 }
