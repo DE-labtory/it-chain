@@ -41,6 +41,7 @@ const BbPath = "./db"
 var Module = fx.Options(
 	fx.Provide(
 		NewBlockRepository,
+		NewSyncStateRepository,
 		mem.NewBlockPool,
 		NewBlockAdapter,
 		NewQueryService,
@@ -70,14 +71,17 @@ func NewBlockRepository() (*repo.BlockRepository, error) {
 	return repo.NewBlockRepository(BbPath)
 }
 
+func NewSyncStateRepository() *mem.SyncStateRepository {
+	return mem.NewSyncStateRepository()
+}
+
 func NewBlockApi(blockRepository *repo.BlockRepository, blockPool *mem.BlockPool, service common.EventService) (*api.BlockApi, error) {
 
 	return api.NewBlockApi(publisherID, blockRepository, service, blockPool)
 }
 
-func NewSyncApi(blockRepository *repo.BlockRepository, eventService common.EventService, queryService *adapter.QuerySerivce, blockPool *mem.BlockPool) (*api.SyncApi, error) {
-
-	api, err := api.NewSyncApi(publisherID, blockRepository, eventService, queryService, blockPool)
+func NewSyncApi(blockRepository *repo.BlockRepository, syncStateRepository *mem.SyncStateRepository, eventService common.EventService, queryService *adapter.QuerySerivce, blockPool *mem.BlockPool) (*api.SyncApi, error) {
+	api, err := api.NewSyncApi(publisherID, blockRepository, syncStateRepository, eventService, queryService, blockPool)
 	return &api, err
 }
 
