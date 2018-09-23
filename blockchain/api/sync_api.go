@@ -21,32 +21,33 @@ import (
 )
 
 type SyncApi struct {
-	publisherId     string
-	blockRepository blockchain.BlockRepository
+	publisherId         string
+	blockRepository     blockchain.BlockRepository
 	syncStateRepository blockchain.SyncStateRepository
-	eventService    blockchain.EventService
-	queryService    blockchain.QueryService
-	blockPool       blockchain.BlockPool
+	eventService        blockchain.EventService
+	queryService        blockchain.QueryService
+	blockPool           blockchain.BlockPool
 }
 
 func NewSyncApi(publisherId string, blockRepository blockchain.BlockRepository, syncStateRepository blockchain.SyncStateRepository, eventService blockchain.EventService, queryService blockchain.QueryService, blockPool blockchain.BlockPool) (SyncApi, error) {
 	return SyncApi{
-		publisherId:     publisherId,
-		blockRepository: blockRepository,
+		publisherId:         publisherId,
+		blockRepository:     blockRepository,
 		syncStateRepository: syncStateRepository,
-		eventService:    eventService,
-		queryService:    queryService,
-		blockPool:       blockPool,
+		eventService:        eventService,
+		queryService:        queryService,
+		blockPool:           blockPool,
 	}, nil
 }
 
-
 func (sApi SyncApi) Synchronize() error {
-	syncState := blockchain.StartSync()
+	syncState := sApi.syncStateRepository.Get()
+
+	syncState.Start()
 	sApi.syncStateRepository.Set(syncState)
 
 	defer func() {
-		syncState = blockchain.FinishSync()
+		syncState.Done()
 		sApi.syncStateRepository.Set(syncState)
 	}()
 
@@ -175,6 +176,7 @@ func (sApi *SyncApi) CommitStagedBlocks() error {
 	}
 
 	targetHeight := setTargetHeight(lastBlock.GetHeight())
+
 	for _, h := range sApi.blockPool.GetSortedKeys() {
 		height := blockchain.BlockHeight(h)
 
@@ -187,9 +189,13 @@ func (sApi *SyncApi) CommitStagedBlocks() error {
 
 		case height == targetHeight:
 			block := sApi.blockPool.GetByHeight(height)
-			sApi.commitBlock(block)
+			if err := sApi.commitBlock(block); err != nil {
+				return err
+			}
 
 			raiseHeight(&targetHeight)
 		}
 	}
+
+	return nil
 }

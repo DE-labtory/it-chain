@@ -189,12 +189,12 @@ type SyncState struct {
 	SyncProgressing bool
 }
 
-func StartSync() SyncState {
-	return SyncState{SyncProgressing: true}
+func (s *SyncState) Start() {
+	s.SyncProgressing = true
 }
 
-func FinishSync() SyncState {
-	return SyncState{SyncProgressing: false}
+func (s *SyncState) Done() {
+	s.SyncProgressing = false
 }
 
 type SyncStateRepository interface {

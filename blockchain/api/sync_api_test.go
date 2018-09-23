@@ -28,7 +28,6 @@ import (
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
