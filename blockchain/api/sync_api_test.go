@@ -23,6 +23,7 @@ import (
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/api"
+	"github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/blockchain/infra/repo"
 	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/common"
@@ -128,7 +129,9 @@ func TestSyncApi_Synchronize(t *testing.T) {
 			br.AddBlock(block)
 		}
 
-		sApi, err := api.NewSyncApi(publisherID, br, eventService, queryService)
+		blockPool := mem.NewBlockPool()
+
+		sApi, err := api.NewSyncApi(publisherID, br, eventService, queryService, blockPool)
 
 		assert.NoError(t, err)
 
@@ -155,4 +158,142 @@ func TestSyncApi_Synchronize(t *testing.T) {
 
 	wg.Wait()
 
+}
+
+func TestSyncApi_CommitStagedBlocks_Add_Blocks_To_Repository(t *testing.T) {
+	//given
+	block1 := mock.GetNewBlock([]byte("genesis"), 0)
+	block2 := mock.GetNewBlock(block1.Seal, 1)
+	block3 := mock.GetNewBlock(block2.Seal, 2)
+	block4 := mock.GetNewBlock(block3.Seal, 3)
+	block5 := mock.GetNewBlock(block4.Seal, 4)
+
+	//given
+	publisherId := "zf"
+
+	dbPath := "./.test"
+	blockRepository, err := repo.NewBlockRepository(dbPath)
+	assert.NoError(t, err)
+
+	defer func() {
+		blockRepository.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	blockRepository.Save(*block1)
+	blockRepository.Save(*block2)
+	blockRepository.Save(*block3)
+
+	eventService := common.NewEventService("", "Event")
+	queryService := mock.QueryService{}
+
+	//given
+	blockPool := mem.NewBlockPool()
+	blockPool.Add(*block4)
+	blockPool.Add(*block5)
+
+	syncApi, err := api.NewSyncApi(publisherId, blockRepository, eventService, queryService, blockPool)
+	assert.NoError(t, err)
+
+	// when
+	syncApi.CommitStagedBlocks()
+
+	// then
+	block, err := blockRepository.FindLast()
+	assert.NoError(t, err)
+	assert.Equal(t, block.GetHeight(), (*block5).GetHeight())
+}
+
+func TestSyncApi_CommitStagedBlocks_Drop_Blocks_From_BlockPool(t *testing.T) {
+	//given
+	block1 := mock.GetNewBlock([]byte("genesis"), 0)
+	block2 := mock.GetNewBlock(block1.Seal, 1)
+	block3 := mock.GetNewBlock(block2.Seal, 2)
+
+	//given
+	publisherId := "zf"
+
+	dbPath := "./.test"
+	blockRepository, err := repo.NewBlockRepository(dbPath)
+	assert.NoError(t, err)
+
+	defer func() {
+		blockRepository.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	blockRepository.Save(*block1)
+	blockRepository.Save(*block2)
+	blockRepository.Save(*block3)
+
+	eventService := common.NewEventService("", "Event")
+	queryService := mock.QueryService{}
+
+	//given
+	blockPool := mem.NewBlockPool()
+	blockPool.Add(*block2)
+	blockPool.Add(*block3)
+
+	syncApi, err := api.NewSyncApi(publisherId, blockRepository, eventService, queryService, blockPool)
+	assert.NoError(t, err)
+
+	// when
+	syncApi.CommitStagedBlocks()
+
+	// then
+	block, err := blockRepository.FindLast()
+	assert.NoError(t, err)
+	assert.Equal(t, block.GetHeight(), (*block3).GetHeight())
+
+	// then
+	assert.Equal(t, blockPool.Size(), 0)
+}
+
+func TestSyncApi_CommitStagedBlocks_When_BlockPool_Has_Higher_Height_Block(t *testing.T) {
+	//given
+	block1 := mock.GetNewBlock([]byte("genesis"), 0)
+	block2 := mock.GetNewBlock(block1.Seal, 1)
+	block3 := mock.GetNewBlock(block2.Seal, 2)
+	block4 := mock.GetNewBlock(block3.Seal, 3)
+	block5 := mock.GetNewBlock(block4.Seal, 4)
+	block6 := mock.GetNewBlock(block5.Seal, 5)
+	block7 := mock.GetNewBlock(block6.Seal, 6)
+
+	//given
+	publisherId := "zf"
+
+	dbPath := "./.test"
+	blockRepository, err := repo.NewBlockRepository(dbPath)
+	assert.NoError(t, err)
+
+	defer func() {
+		blockRepository.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	blockRepository.Save(*block1)
+	blockRepository.Save(*block2)
+	blockRepository.Save(*block3)
+
+	eventService := common.NewEventService("", "Event")
+	queryService := mock.QueryService{}
+
+	//given
+	blockPool := mem.NewBlockPool()
+	blockPool.Add(*block7)
+
+	syncApi, err := api.NewSyncApi(publisherId, blockRepository, eventService, queryService, blockPool)
+	assert.NoError(t, err)
+
+	// when
+	syncApi.CommitStagedBlocks()
+
+	// then
+	block, err := blockRepository.FindLast()
+	assert.NoError(t, err)
+	assert.Equal(t, block.GetHeight(), (*block3).GetHeight())
+
+	// then
+	assert.Equal(t, blockPool.GetSortedKeys(), []uint64{uint64(6)})
+	assert.Equal(t, blockPool.Size(), 1)
 }

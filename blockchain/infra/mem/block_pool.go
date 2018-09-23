@@ -19,8 +19,8 @@ package mem
 import (
 	"sync"
 
-	"github.com/it-chain/engine/blockchain"
 	"github.com/gogo/protobuf/sortkeys"
+	"github.com/it-chain/engine/blockchain"
 )
 
 type BlockPool struct {
@@ -74,4 +74,3 @@ func (b *BlockPool) GetSortedKeys() []blockchain.BlockHeight {
 func (b *BlockPool) Size() int {
 	return len(b.blockMap)
 }
-
