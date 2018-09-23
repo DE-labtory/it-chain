@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package pbft_test
+package mem_test
 
 import (
 	"testing"
 
 	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/engine/consensus/pbft/infra/mem"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,7 +28,7 @@ func TestConsensusRepository_Save(t *testing.T) {
 	mock1 := pbft.State{
 		StateID: pbft.StateID{"mock1"},
 	}
-	repo := pbft.NewStateRepository()
+	repo := mem.NewStateRepository()
 	err := repo.Save(mock1)
 	assert.Equal(t, nil, err)
 	mock2 := pbft.State{
@@ -40,7 +41,7 @@ func TestConsensusRepository_Save(t *testing.T) {
 
 func TestConsensusRepository_Load(t *testing.T) {
 
-	repo := pbft.NewStateRepository()
+	repo := mem.NewStateRepository()
 	_, err := repo.Load()
 	// case1 : Repository has no consensus
 	assert.Equal(t, err, pbft.ErrEmptyRepo)
@@ -56,7 +57,7 @@ func TestConsensusRepository_Load(t *testing.T) {
 
 }
 func TestConsensusRepository_Remove(t *testing.T) {
-	repo := pbft.NewStateRepository()
+	repo := mem.NewStateRepository()
 	mockConsensus := pbft.State{
 		StateID: pbft.StateID{"hihi"},
 	}

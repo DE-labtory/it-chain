@@ -21,6 +21,7 @@ import (
 
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
+	"github.com/it-chain/engine/consensus/pbft/infra/mem"
 	"github.com/it-chain/engine/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
 )
@@ -318,7 +319,7 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNor
 		return nil
 	}
 
-	repo := pbft.NewStateRepository()
+	repo := mem.NewStateRepository()
 	if isRepoFull && isNormalBlock {
 
 		savedConsensus := pbft.State{
