@@ -37,16 +37,16 @@ func TestBlockPool(t *testing.T) {
 	blockPool.Add(*block3)
 	assert.Equal(t, blockPool.Size(), 3)
 
-	b := blockPool.Get(1)
+	b := blockPool.GetByHeight(1)
 	assert.Equal(t, b.GetHeight(), uint64(1))
 	assert.Equal(t, b.GetSeal(), (*block2).GetSeal())
 
-	b2 := blockPool.Get(123123)
+	b2 := blockPool.GetByHeight(123123)
 	assert.Equal(t, b2, blockchain.DefaultBlock{})
 
 	blockPool.Delete(1)
 	assert.Equal(t, blockPool.Size(), 2)
 
-	b3 := blockPool.Get(1)
+	b3 := blockPool.GetByHeight(1)
 	assert.Equal(t, b3, blockchain.DefaultBlock{})
 }
