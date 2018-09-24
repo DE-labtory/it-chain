@@ -20,10 +20,10 @@ import (
 	"errors"
 
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/txpool"
+	"github.com/it-chain/iLogger"
 	"github.com/rs/xid"
 	"github.com/urfave/cli"
 )
@@ -68,19 +68,19 @@ func invoke(id string, functionName string, args []string) {
 		Function:      functionName,
 	}
 
-	logger.Infof(nil, "[Cmd] Invoke icode - icodeID: [%s]", id)
+	iLogger.Infof(nil, "[Cmd] Invoke icode - icodeID: [%s]", id)
 
 	err := client.Call("transaction.create", invokeCommand, func(transaction txpool.Transaction, err rpc.Error) {
 
 		if !err.IsNil() {
-			logger.Errorf(nil, "[Cmd] Fail to invoke icode err: [%s]", err.Message)
+			iLogger.Errorf(nil, "[Cmd] Fail to invoke icode err: [%s]", err.Message)
 			return
 		}
 
-		logger.Infof(nil, "[Cmd] Transactions are created - ID: [%s]", transaction.ID)
+		iLogger.Infof(nil, "[Cmd] Transactions are created - ID: [%s]", transaction.ID)
 	})
 
 	if err != nil {
-		logger.Fatal(&logger.Fields{"err_msg": err.Error()}, "fatal err in query cmd")
+		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "fatal err in query cmd")
 	}
 }

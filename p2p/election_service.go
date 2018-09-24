@@ -23,7 +23,7 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
+	"github.com/it-chain/iLogger"
 	"github.com/rs/xid"
 )
 
@@ -74,7 +74,7 @@ func (es *ElectionService) Vote(connectionId string) error {
 
 // broadcast leader to other peers
 func (es *ElectionService) BroadcastLeader(peer Peer) error {
-	logger.Info(nil, "[P2P] Broadcast leader")
+	iLogger.Info(nil, "[P2P] Broadcast leader")
 
 	updateLeaderMessage := UpdateLeaderMessage{
 		Peer: peer,
@@ -140,12 +140,12 @@ func (es *ElectionService) ElectLeaderWithRaft() {
 			select {
 
 			case <-timeout:
-				logger.Info(nil, "timed out!")
+				iLogger.Info(nil, "timed out!")
 				// when timed out
 				// 1. if state is ticking, be candidate and request vote
 				// 2. if state is candidate, reset state and left time
 				if es.Election.GetState() == Ticking {
-					logger.Infof(nil, "candidate process: %v", es.Election.candidate)
+					iLogger.Infof(nil, "candidate process: %v", es.Election.candidate)
 					es.Election.SetState(Candidate)
 
 					pLTable, _ := es.peerQueryService.GetPLTable()

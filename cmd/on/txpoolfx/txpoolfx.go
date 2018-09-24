@@ -19,9 +19,10 @@ package txpoolfx
 import (
 	"time"
 
+	"github.com/it-chain/iLogger"
+
 	"context"
 
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/txpool/api"
@@ -70,7 +71,7 @@ func RunBatcher(lifecycle fx.Lifecycle, blockProposalService *adapter.BlockPropo
 }
 
 func RegisterRpcHandlers(server *rpc.Server, handler *adapter.TxCommandHandler) {
-	logger.Infof(nil, "[Main] Txpool is starting")
+	iLogger.Infof(nil, "[Main] Txpool is starting")
 	if err := server.Register("transaction.create", handler.HandleTxCreateCommand); err != nil {
 		panic(err)
 	}

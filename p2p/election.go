@@ -19,7 +19,7 @@ package p2p
 import (
 	"sync"
 
-	"github.com/it-chain/engine/common/logger"
+	"github.com/it-chain/iLogger"
 )
 
 const Candidate = "Candidate"
@@ -55,7 +55,7 @@ func (election *Election) SetLeftTime() int {
 }
 
 func (election *Election) ResetLeftTime() {
-	logger.Infof(nil, "reset lefttime from %s", election.ipAddress)
+	iLogger.Infof(nil, "reset lefttime from %s", election.ipAddress)
 
 	election.mux.Lock()
 	defer election.mux.Unlock()
@@ -78,7 +78,7 @@ func (election *Election) SetState(state string) {
 	election.mux.Lock()
 	defer election.mux.Unlock()
 
-	logger.Infof(nil, "set state to: %s", state)
+	iLogger.Infof(nil, "set state to: %s", state)
 
 	election.state = state
 }

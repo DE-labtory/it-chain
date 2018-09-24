@@ -22,9 +22,9 @@ import (
 	"sync"
 
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/txpool"
+	"github.com/it-chain/iLogger"
 	"github.com/rs/xid"
 )
 
@@ -105,11 +105,11 @@ func (b BlockProposalService) sendBlockProposal(transactions []txpool.Transactio
 	err := b.client.Call("block.propose", proposeCommand, func(_ struct{}, err rpc.Error) {
 
 		if !err.IsNil() {
-			logger.Fatal(nil, err.Message)
+			iLogger.Fatal(nil, err.Message)
 			return
 		}
 
-		logger.Infof(nil, "[Txpool] Block has proposed")
+		iLogger.Infof(nil, "[Txpool] Block has proposed")
 	})
 
 	return err

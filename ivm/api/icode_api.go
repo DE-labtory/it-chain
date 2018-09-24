@@ -21,8 +21,8 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/ivm"
+	"github.com/it-chain/iLogger"
 )
 
 type ICodeApi struct {
@@ -41,7 +41,7 @@ func NewICodeApi(containerService ivm.ContainerService, gitService ivm.GitServic
 }
 
 func (i ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath string, password string) (ivm.ICode, error) {
-	logger.Info(nil, fmt.Sprintf("[IVM] Deploying icode - url: [%s]", gitUrl))
+	iLogger.Info(nil, fmt.Sprintf("[IVM] Deploying icode - url: [%s]", gitUrl))
 
 	// clone icode. in clone function, metaCreatedEvent will publish
 	icode, err := i.GitService.Clone(id, baseSaveUrl, gitUrl, sshPath, password)
@@ -59,7 +59,7 @@ func (i ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath s
 		return ivm.ICode{}, nil
 	}
 
-	logger.Info(nil, fmt.Sprintf("[IVM] ICode has deployed - icodeID: [%s]", id))
+	iLogger.Info(nil, fmt.Sprintf("[IVM] ICode has deployed - icodeID: [%s]", id))
 	return icode, nil
 }
 
@@ -75,7 +75,7 @@ func createMetaCreatedEvent(icode ivm.ICode) event.ICodeCreated {
 }
 
 func (i ICodeApi) UnDeploy(id ivm.ID) error {
-	logger.Info(nil, fmt.Sprintf("[IVM] Undeploying icode - icodeID: [%s]", id))
+	iLogger.Info(nil, fmt.Sprintf("[IVM] Undeploying icode - icodeID: [%s]", id))
 	// stop iCode container
 	err := i.ContainerService.StopContainer(id)
 
@@ -83,7 +83,7 @@ func (i ICodeApi) UnDeploy(id ivm.ID) error {
 		return err
 	}
 
-	logger.Info(nil, fmt.Sprintf("[IVM] Icode has undeployed - icodeID: [%s] ", id))
+	iLogger.Info(nil, fmt.Sprintf("[IVM] Icode has undeployed - icodeID: [%s] ", id))
 
 	return i.EventService.Publish("icode.deleted", event.ICodeDeleted{ICodeID: id})
 }
@@ -97,7 +97,7 @@ func (i ICodeApi) ExecuteRequestList(RequestList []ivm.Request) []ivm.Result {
 		result, err := i.ExecuteRequest(request)
 
 		if err != nil {
-			logger.Error(nil, fmt.Sprintf("[IVM] Fail to invoke icode - message: [%s] ", err.Error()))
+			iLogger.Error(nil, fmt.Sprintf("[IVM] Fail to invoke icode - message: [%s] ", err.Error()))
 			result = ivm.Result{Err: err.Error()}
 		}
 

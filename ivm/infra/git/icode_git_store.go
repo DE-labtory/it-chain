@@ -22,8 +22,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/ivm"
+	"github.com/it-chain/iLogger"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
@@ -45,7 +45,7 @@ func NewRepositoryService() *RepositoryService {
 }
 
 func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string, password string) (ivm.ICode, error) {
-	logger.Info(nil, fmt.Sprintf("[IVM] Cloning Icode - url: [%s]", repositoryUrl))
+	iLogger.Info(nil, fmt.Sprintf("[IVM] Cloning Icode - url: [%s]", repositoryUrl))
 
 	gitUrl, err := toGitUrl(repositoryUrl, sshPath)
 	if err != nil {
@@ -114,7 +114,7 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 		return nil
 	})
 
-	logger.Info(nil, fmt.Sprintf("[IVM] ICode has successfully cloned - url: [%s], icodeID: [%s], version[%s]", repositoryUrl, id, version))
+	iLogger.Info(nil, fmt.Sprintf("[IVM] ICode has successfully cloned - url: [%s], icodeID: [%s], version[%s]", repositoryUrl, id, version))
 
 	metaData := ivm.NewICode(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash, version)
 	return metaData, nil

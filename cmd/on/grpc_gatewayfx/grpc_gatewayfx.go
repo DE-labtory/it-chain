@@ -20,13 +20,13 @@ import (
 	"context"
 
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/grpc_gateway/api"
 	"github.com/it-chain/engine/grpc_gateway/infra"
 	"github.com/it-chain/engine/grpc_gateway/infra/adapter"
+	"github.com/it-chain/iLogger"
 	"go.uber.org/fx"
 )
 
@@ -64,7 +64,7 @@ func NewConnectionApi(hostService *infra.GrpcHostService, eventService common.Ev
 }
 
 func RegisterHandlers(connectionCommandHandler *adapter.ConnectionCommandHandler, server *rpc.Server) {
-	logger.Infof(nil, "[Main] gRPC-Gateway is starting")
+	iLogger.Infof(nil, "[Main] gRPC-Gateway is starting")
 	if err := server.Register("connection.create", connectionCommandHandler.HandleCreateConnectionCommand); err != nil {
 		panic(err)
 	}

@@ -231,6 +231,14 @@
   version = "v0.1.3"
 
 [[projects]]
+  branch = "master"
+  digest = "1:fc8c6e572c48333301455a5219851b5bf5dd831bf0397b4edfe0c0f34d1a6001"
+  name = "github.com/it-chain/iLogger"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3d4855e59818211a0ec2df9b0e9a242472f5878d"
+
+[[projects]]
   digest = "1:cde7960c5ad197abbf88392e615ce21f54fe884b815ca186efe43a367263fa1e"
   name = "github.com/it-chain/leveldb-wrapper"
   packages = [
@@ -806,6 +814,7 @@
     "github.com/it-chain/bifrost/pb",
     "github.com/it-chain/bifrost/server",
     "github.com/it-chain/heimdall/key",
+    "github.com/it-chain/iLogger",
     "github.com/it-chain/leveldb-wrapper",
     "github.com/it-chain/midgard",
     "github.com/it-chain/sdk",

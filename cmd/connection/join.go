@@ -18,9 +18,9 @@ package connection
 
 import (
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
+	"github.com/it-chain/iLogger"
 	"github.com/urfave/cli"
 )
 
@@ -45,19 +45,19 @@ func join(ip string) error {
 		Address: ip,
 	}
 
-	logger.Infof(nil, "[Cmd] Joining network - Address: [%s]", ip)
+	iLogger.Infof(nil, "[Cmd] Joining network - Address: [%s]", ip)
 	err := client.Call("connection.join", joinNetworkCommand, func(_ struct{}, err rpc.Error) {
 
 		if !err.IsNil() {
-			logger.Fatalf(nil, "[Cmd] Fail to join network - Address: [%s], Err: [%s]", ip, err.Message)
+			iLogger.Fatalf(nil, "[Cmd] Fail to join network - Address: [%s], Err: [%s]", ip, err.Message)
 			return
 		}
 
-		logger.Info(nil, "[Cmd] Successfully request to join network")
+		iLogger.Info(nil, "[Cmd] Successfully request to join network")
 	})
 
 	if err != nil {
-		logger.Fatal(nil, err.Error())
+		iLogger.Fatal(nil, err.Error())
 	}
 
 	return nil

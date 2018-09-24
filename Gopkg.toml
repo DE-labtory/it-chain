@@ -113,3 +113,7 @@ ignored = ["github.com/mock/handler"]
 [[constraint]]
   name = "go.uber.org/fx"
   version = "1.7.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/it-chain/iLogger"

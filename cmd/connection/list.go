@@ -20,9 +20,9 @@ import (
 	"fmt"
 
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
+	"github.com/it-chain/iLogger"
 	"github.com/urfave/cli"
 )
 
@@ -46,7 +46,7 @@ func list() error {
 	err := client.Call("connection.list", getConnectionList, func(getConnectionListCommand command.GetConnectionList, err rpc.Error) {
 
 		if !err.IsNil() {
-			logger.Fatalf(nil, "[Cmd] Fail to get connection list")
+			iLogger.Fatalf(nil, "[Cmd] Fail to get connection list")
 			return
 		}
 
@@ -58,7 +58,7 @@ func list() error {
 	})
 
 	if err != nil {
-		logger.Fatal(nil, err.Error())
+		iLogger.Fatal(nil, err.Error())
 	}
 
 	return nil

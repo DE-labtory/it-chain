@@ -20,7 +20,7 @@ import (
 	"context"
 
 	"github.com/go-kit/kit/endpoint"
-	"github.com/it-chain/engine/common/logger"
+	"github.com/it-chain/iLogger"
 )
 
 type Endpoints struct {
@@ -93,7 +93,7 @@ func makeFindAllMetaEndpoint(i *ICodeQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		metas, err := i.iCodeRepository.FindAllMeta()
 		if err != nil {
-			logger.Error(&logger.Fields{"err_message": err.Error()}, "error while find all meta endpoint")
+			iLogger.Error(&iLogger.Fields{"err_message": err.Error()}, "error while find all meta endpoint")
 			return nil, err
 		}
 
@@ -116,7 +116,7 @@ func makeFindAllConnectionEndpoint(c *ConnectionQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		connections, err := c.GetAllConnectionList()
 		if err != nil {
-			logger.Error(nil, "[Api-gateway] Error while finding all connections")
+			iLogger.Error(nil, "[Api-gateway] Error while finding all connections")
 			return nil, err
 		}
 		return connections, nil
@@ -128,7 +128,7 @@ func makeFindConnectionByIdEndpoint(c *ConnectionQueryApi) endpoint.Endpoint {
 		req := request.(FindConnectionByIdRequest)
 		connections, err := c.GetConnectionByID(req.ConnectionId)
 		if err != nil {
-			logger.Error(nil, "[Api-gateway] Error while finding all connections")
+			iLogger.Error(nil, "[Api-gateway] Error while finding all connections")
 			return nil, err
 		}
 		return connections, nil
