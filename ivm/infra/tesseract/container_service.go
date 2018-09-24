@@ -23,8 +23,8 @@ import (
 
 	"sync"
 
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/ivm"
+	"github.com/it-chain/iLogger"
 	"github.com/it-chain/tesseract"
 	"github.com/it-chain/tesseract/container"
 	"github.com/it-chain/tesseract/pb"
@@ -52,7 +52,7 @@ func NewContainerService() *ContainerService {
 }
 
 func (cs ContainerService) StartContainer(icode ivm.ICode) error {
-	logger.Info(nil, fmt.Sprintf("[IVM] Starting container - icodeID: [%s]", icode.ID))
+	iLogger.Info(nil, fmt.Sprintf("[IVM] Starting container - icodeID: [%s]", icode.ID))
 	cs.Lock()
 	defer cs.Unlock()
 
@@ -84,7 +84,7 @@ func (cs ContainerService) StartContainer(icode ivm.ICode) error {
 }
 
 func (cs ContainerService) ExecuteRequest(request ivm.Request) (ivm.Result, error) {
-	logger.Info(nil, fmt.Sprintf("[IVM] Executing icode - icodeID: [%s]", request.ICodeID))
+	iLogger.Info(nil, fmt.Sprintf("[IVM] Executing icode - icodeID: [%s]", request.ICodeID))
 
 	iCodeInfo, ok := cs.iCodeInfoMap[request.ICodeID]
 	if !ok {
@@ -126,7 +126,7 @@ func (cs ContainerService) ExecuteRequest(request ivm.Request) (ivm.Result, erro
 
 	select {
 	case err := <-errCh:
-		logger.Error(nil, fmt.Sprintf("[IVM] fail executing ivm, id:%s", request.ICodeID))
+		iLogger.Error(nil, fmt.Sprintf("[IVM] fail executing ivm, id:%s", request.ICodeID))
 		return ivm.Result{}, err
 	case result := <-resultCh:
 		return result, nil

@@ -21,8 +21,8 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/grpc_gateway"
+	"github.com/it-chain/iLogger"
 )
 
 type ConnectionApi struct {
@@ -41,11 +41,11 @@ func NewConnectionApi(grpcService grpc_gateway.GrpcService, eventService common.
 
 // create all connections
 func (c ConnectionApi) JoinNetwork(address string) error {
-	logger.Infof(nil, "[gRPC-Gateway] Joining it-chain network - Address: [%s]", address)
+	iLogger.Infof(nil, "[gRPC-Gateway] Joining it-chain network - Address: [%s]", address)
 
 	connection, err := c.Dial(address)
 	if err != nil {
-		logger.Errorf(nil, "[gRPC-Gateway] Fail to join - Err: [%s]", err)
+		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to join - Err: [%s]", err)
 		return err
 	}
 
@@ -57,11 +57,11 @@ func (c ConnectionApi) JoinNetwork(address string) error {
 // create connection only for the address
 func (c ConnectionApi) Dial(address string) (grpc_gateway.Connection, error) {
 
-	logger.Infof(nil, "[gRPC-Gateway] Dialing - Address: [%s]", address)
+	iLogger.Infof(nil, "[gRPC-Gateway] Dialing - Address: [%s]", address)
 
 	connection, err := c.grpcService.Dial(address)
 	if err != nil {
-		logger.Errorf(nil, "[gRPC-Gateway] Fail to dial - Err: [%s]", err)
+		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to dial - Err: [%s]", err)
 		return grpc_gateway.Connection{}, err
 	}
 
@@ -70,7 +70,7 @@ func (c ConnectionApi) Dial(address string) (grpc_gateway.Connection, error) {
 		return connection, err
 	}
 
-	logger.Infof(nil, "[gRPC-Gateway] Connection created - gRPC-Address [%s], ConnectionID [%s]", connection.GrpcGatewayAddress, connection.ConnectionID)
+	iLogger.Infof(nil, "[gRPC-Gateway] Connection created - gRPC-Address [%s], ConnectionID [%s]", connection.GrpcGatewayAddress, connection.ConnectionID)
 
 	return connection, nil
 }
@@ -84,7 +84,7 @@ func createConnectionCreatedEvent(connection grpc_gateway.Connection) event.Conn
 }
 
 func (c ConnectionApi) CloseConnection(connectionID string) error {
-	logger.Infof(nil, "[gRPC-Gateway] Close connection - ConnectionID [%s]", connectionID)
+	iLogger.Infof(nil, "[gRPC-Gateway] Close connection - ConnectionID [%s]", connectionID)
 
 	c.grpcService.CloseConnection(connectionID)
 
@@ -98,18 +98,18 @@ func createConnectionClosedEvent(connectionID string) event.ConnectionClosed {
 }
 
 func (c ConnectionApi) OnConnection(connection grpc_gateway.Connection) {
-	logger.Infof(nil, "[gRPC-Gateway] Connection created - gRPC-Address [%s], ConnectionID [%s]", connection.GrpcGatewayAddress, connection.ConnectionID)
+	iLogger.Infof(nil, "[gRPC-Gateway] Connection created - gRPC-Address [%s], ConnectionID [%s]", connection.GrpcGatewayAddress, connection.ConnectionID)
 
 	if err := c.eventService.Publish("connection.created", createConnectionCreatedEvent(connection)); err != nil {
-		logger.Infof(nil, "[gRPC-Gateway] Fail to publish connection createdEvent - ConnectionID: [%s]", connection.ConnectionID)
+		iLogger.Infof(nil, "[gRPC-Gateway] Fail to publish connection createdEvent - ConnectionID: [%s]", connection.ConnectionID)
 	}
 }
 
 func (c ConnectionApi) OnDisconnection(connection grpc_gateway.Connection) {
-	logger.Infof(nil, "[gRPC-Gateway] Connection closed - ConnectionID [%s]", connection.ConnectionID)
+	iLogger.Infof(nil, "[gRPC-Gateway] Connection closed - ConnectionID [%s]", connection.ConnectionID)
 
 	if err := c.eventService.Publish("connection.closed", createConnectionClosedEvent(connection.ConnectionID)); err != nil {
-		logger.Infof(nil, "[gRPC-Gateway] Fail to publish connection createdEvent - ConnectionID: [%s]", connection.ConnectionID)
+		iLogger.Infof(nil, "[gRPC-Gateway] Fail to publish connection createdEvent - ConnectionID: [%s]", connection.ConnectionID)
 	}
 }
 
@@ -122,7 +122,7 @@ func (c ConnectionApi) HandleRequestPeerList(connectionId string) {
 	connectionList, _ := c.grpcService.GetAllConnections()
 	response, err := json.Marshal(connectionList)
 	if err != nil {
-		logger.Errorf(nil, "[gRPC-Gateway] Fail to handle request peer list - Err: [%s]", err.Error())
+		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to handle request peer list - Err: [%s]", err.Error())
 		return
 	}
 
@@ -131,7 +131,7 @@ func (c ConnectionApi) HandleRequestPeerList(connectionId string) {
 
 // 자기자신 or 연결되어 있는 connection 제외하고 연결!!
 func (c ConnectionApi) DialConnectionList(connectionList []grpc_gateway.Connection) {
-	logger.Infof(nil, "[gRPC-Gateway] Dialing all peers in it-chain network - Total peer: [%d]", len(connectionList))
+	iLogger.Infof(nil, "[gRPC-Gateway] Dialing all peers in it-chain network - Total peer: [%d]", len(connectionList))
 
 	for _, connection := range connectionList {
 

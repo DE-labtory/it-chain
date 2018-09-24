@@ -22,7 +22,7 @@ import (
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/common/logger"
+	"github.com/it-chain/iLogger"
 )
 
 type BlockApi struct {
@@ -70,14 +70,14 @@ func (api BlockApi) ConsentBlock(consensusType string, block blockchain.DefaultB
 		return api.eventService.Publish("block.consent", event)
 
 	default:
-		logger.Error(nil, fmt.Sprintf("[blockchain] undefined consensus type: %v", consensusType))
+		iLogger.Error(nil, fmt.Sprintf("[blockchain] undefined consensus type: %v", consensusType))
 		return ErrUndefinedConsensusType
 	}
 
 }
 
 func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
-	logger.Info(nil, "[Blockchain] Committing genesis block")
+	iLogger.Info(nil, "[Blockchain] Committing genesis block")
 
 	// create
 	GenesisBlock, err := blockchain.CreateGenesisBlock(GenesisConfPath)
@@ -102,7 +102,7 @@ func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
 		return ErrCreateEvent
 	}
 
-	logger.Info(nil, fmt.Sprintf("[Blockchain] Genesis block has Committed - seal: [%x], height: [%d]", GenesisBlock.Seal, GenesisBlock.Height))
+	iLogger.Info(nil, fmt.Sprintf("[Blockchain] Genesis block has Committed - seal: [%x], height: [%d]", GenesisBlock.Seal, GenesisBlock.Height))
 
 	return bApi.eventService.Publish("block.committed", commitEvent)
 }
@@ -112,7 +112,7 @@ set state to 'committed'
 publish block committed event
 */
 func (bApi BlockApi) CommitBlock(block blockchain.DefaultBlock) error {
-	logger.Info(nil, "[Blockchain] Committing proposed block")
+	iLogger.Info(nil, "[Blockchain] Committing proposed block")
 
 	// save(commit)
 	block.SetState(blockchain.Committed)
@@ -130,7 +130,7 @@ func (bApi BlockApi) CommitBlock(block blockchain.DefaultBlock) error {
 		return ErrCreateEvent
 	}
 
-	logger.Info(nil, fmt.Sprintf("[Blockchain] Proposed block has Committed - seal: [%x],  height: [%d]", block.Seal, block.Height))
+	iLogger.Info(nil, fmt.Sprintf("[Blockchain] Proposed block has Committed - seal: [%x],  height: [%d]", block.Seal, block.Height))
 
 	return bApi.eventService.Publish("block.committed", commitEvent)
 }
@@ -143,7 +143,7 @@ func (bApi BlockApi) StageBlock(block blockchain.DefaultBlock) error {
 }
 
 func (api BlockApi) CreateProposedBlock(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error) {
-	logger.Info(nil, "[Blockchain] Create proposed block")
+	iLogger.Info(nil, "[Blockchain] Create proposed block")
 	lastBlock, err := api.blockRepository.FindLast()
 	if err != nil {
 		return blockchain.DefaultBlock{}, ErrGetLastBlock

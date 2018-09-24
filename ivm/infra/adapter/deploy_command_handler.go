@@ -20,8 +20,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/it-chain/iLogger"
+
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/engine/ivm/api"
@@ -44,7 +45,7 @@ func (d *DeployCommandHandler) HandleDeployCommand(deployCommand command.Deploy)
 	icode, err := d.icodeApi.Deploy(deployCommand.ICodeId, savePath, deployCommand.Url, sshPath, deployCommand.Password)
 
 	if err != nil {
-		logger.Error(nil, fmt.Sprintf("[Icode] fail to deploy ivm, url %s", deployCommand.Url))
+		iLogger.Error(nil, fmt.Sprintf("[Icode] fail to deploy ivm, url %s", deployCommand.Url))
 		return ivm.ICode{}, rpc.Error{Message: err.Error()}
 	}
 

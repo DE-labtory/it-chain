@@ -20,6 +20,8 @@ import (
 	"context"
 	"os"
 
+	"github.com/it-chain/iLogger"
+
 	"github.com/it-chain/engine/blockchain/api"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/infra/mem"
@@ -27,7 +29,6 @@ import (
 
 	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
@@ -94,7 +95,7 @@ func CreateGenesisBlock(blockApi *api.BlockApi, config *conf.Configuration) {
 }
 
 func RegisterRpcHandlers(server *rpc.Server, handler *adapter.BlockProposeCommandHandler) {
-	logger.Infof(nil, "[Main] Blockchain is starting")
+	iLogger.Infof(nil, "[Main] Blockchain is starting")
 	if err := server.Register("block.propose", handler.HandleProposeBlockCommand); err != nil {
 		panic(err)
 	}

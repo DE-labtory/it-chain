@@ -19,9 +19,10 @@ package adapter
 import (
 	"errors"
 
+	"github.com/it-chain/iLogger"
+
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/api"
 )
@@ -68,7 +69,7 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc)
 		break
 
 	case "RequestVoteProtocol":
-		logger.Infof(nil, "handling request vote from process: %v", gch.electionService.Election.GetIpAddress())
+		iLogger.Infof(nil, "handling request vote from process: %v", gch.electionService.Election.GetIpAddress())
 		gch.electionService.Vote(command.ConnectionID)
 
 	case "VoteLeaderProtocol":
@@ -99,5 +100,3 @@ func (gch *GrpcCommandHandler) HandleMessageReceive(command command.ReceiveGrpc)
 
 	return nil
 }
-
-//

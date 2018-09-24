@@ -18,10 +18,10 @@ package connection
 
 import (
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/grpc_gateway"
+	"github.com/it-chain/iLogger"
 	"github.com/urfave/cli"
 )
 
@@ -46,19 +46,19 @@ func dial(ip string) error {
 		Address: ip,
 	}
 
-	logger.Infof(nil, "[Cmd] Creating connection - Address: [%s]", ip)
+	iLogger.Infof(nil, "[Cmd] Creating connection - Address: [%s]", ip)
 	err := client.Call("connection.create", createConnectionCommand, func(connection grpc_gateway.Connection, err rpc.Error) {
 
 		if !err.IsNil() {
-			logger.Fatalf(nil, "[Cmd] Fail to create connection - Address: [%s]", ip)
+			iLogger.Fatalf(nil, "[Cmd] Fail to create connection - Address: [%s]", ip)
 			return
 		}
 
-		logger.Infof(nil, "[Cmd] Connection created - gRPC-Address: [%s], Id:[%s]", connection.GrpcGatewayAddress, connection.ConnectionID)
+		iLogger.Infof(nil, "[Cmd] Connection created - gRPC-Address: [%s], Id:[%s]", connection.GrpcGatewayAddress, connection.ConnectionID)
 	})
 
 	if err != nil {
-		logger.Fatal(nil, err.Error())
+		iLogger.Fatal(nil, err.Error())
 	}
 
 	return nil

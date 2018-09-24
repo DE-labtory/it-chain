@@ -21,10 +21,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/it-chain/iLogger"
+
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/conf"
 	"go.uber.org/fx"
@@ -116,7 +117,7 @@ func InitApiGatewayServer(lifecycle fx.Lifecycle, config *conf.Configuration, ha
 
 	lifecycle.Append(fx.Hook{
 		OnStart: func(context context.Context) error {
-			logger.Infof(nil, "[Main] Api-gateway is staring on port:%s", config.ApiGateway.Port)
+			iLogger.Infof(nil, "[Main] Api-gateway is staring on port:%s", config.ApiGateway.Port)
 			go func() {
 				err := http.ListenAndServe(ipAddress, handler)
 				if err != nil {

@@ -26,7 +26,7 @@ import (
 	"github.com/it-chain/engine/cmd/on/grpc_gatewayfx"
 	"github.com/it-chain/engine/cmd/on/ivmfx"
 	"github.com/it-chain/engine/cmd/on/txpoolfx"
-	"github.com/it-chain/engine/common/logger"
+	"github.com/it-chain/iLogger"
 	"github.com/urfave/cli"
 	"go.uber.org/fx"
 )
@@ -51,12 +51,12 @@ func Action(c *cli.Context) error {
 
 func clearFolder() {
 	if err := os.RemoveAll(api_gatewayfx.ApidbPath); err != nil {
-		logger.Panic(&logger.Fields{"err_msg": err.Error()}, "error while clear folder")
+		iLogger.Panic(&iLogger.Fields{"err_msg": err.Error()}, "error while clear folder")
 		panic(err)
 	}
 
 	if err := os.RemoveAll(blockchainfx.BbPath); err != nil {
-		logger.Panic(&logger.Fields{"err_msg": err.Error()}, "error while clear folder")
+		iLogger.Panic(&iLogger.Fields{"err_msg": err.Error()}, "error while clear folder")
 		panic(err)
 	}
 }

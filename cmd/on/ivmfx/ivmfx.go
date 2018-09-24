@@ -19,7 +19,8 @@ package ivmfx
 import (
 	"context"
 
-	"github.com/it-chain/engine/common/logger"
+	"github.com/it-chain/iLogger"
+
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/ivm"
@@ -79,7 +80,7 @@ func RegisterRpcHandlers(
 }
 
 func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, handler *adapter.BlockCommittedEventHandler) {
-	logger.Infof(nil, "[Main] Ivm is starting")
+	iLogger.Infof(nil, "[Main] Ivm is starting")
 	if err := subscriber.SubscribeTopic("block.*", handler); err != nil {
 		panic(err)
 	}

@@ -24,9 +24,9 @@ import (
 	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/bifrost/server"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/grpc_gateway"
 	"github.com/it-chain/heimdall/key"
+	"github.com/it-chain/iLogger"
 )
 
 var ErrConnAlreadyExist = errors.New("connection is already exist")
@@ -140,7 +140,7 @@ func (g *GrpcHostService) onConnection(connection bifrost.Connection) {
 
 func (g *GrpcHostService) startConnectionUntilClose(connection bifrost.Connection) {
 
-	logger.Infof(nil, "[gRPC-Gateway] Handling connection - ConnectionID: [%s]", connection.GetID())
+	iLogger.Infof(nil, "[gRPC-Gateway] Handling connection - ConnectionID: [%s]", connection.GetID())
 	connection.Handle(NewMessageHandler(g.publish))
 
 	if err := connection.Start(); err != nil {
@@ -221,7 +221,7 @@ func (s *GrpcHostService) Listen(ip string) {
 }
 
 func (s *GrpcHostService) onError(err error) {
-	logger.Fatalf(nil, "[gRPC-Gateway] Connection error - [Err]: [%s]", err.Error())
+	iLogger.Fatalf(nil, "[gRPC-Gateway] Connection error - [Err]: [%s]", err.Error())
 }
 
 func (s *GrpcHostService) Stop() {
@@ -330,7 +330,7 @@ func (r MessageHandler) ServeRequest(msg bifrost.Message) {
 	})
 
 	if err != nil {
-		logger.Errorf(nil, "[gRPC-Gateway] Fail to publish message received error - [Err]: [%s]", err.Error())
+		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to publish message received error - [Err]: [%s]", err.Error())
 	}
 }
 

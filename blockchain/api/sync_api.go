@@ -18,7 +18,7 @@ package api
 
 import (
 	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/common/logger"
+	"github.com/it-chain/iLogger"
 )
 
 type SyncApi struct {
@@ -41,25 +41,25 @@ func (sApi SyncApi) Synchronize() error {
 	// get random peer
 	randomPeer, err := sApi.queryService.GetRandomPeer()
 
-	logger.Infof(nil, "[Blockchain] Start to Synchronize - PeerID: [%s]", randomPeer.PeerID)
+	iLogger.Infof(nil, "[Blockchain] Start to Synchronize - PeerID: [%s]", randomPeer.PeerID)
 	if err != nil {
-		logger.Errorf(nil, "[Blockchain] Fail to Synchronize - Err: [%s]", err)
+		iLogger.Errorf(nil, "[Blockchain] Fail to Synchronize - Err: [%s]", err)
 		return err
 	}
 
 	if sApi.isSynced(randomPeer) {
-		logger.Infof(nil, "[Blockchain] Already Synchronized - PeerID: [%s]", randomPeer.PeerID)
+		iLogger.Infof(nil, "[Blockchain] Already Synchronized - PeerID: [%s]", randomPeer.PeerID)
 		return nil
 	}
 
 	// if sync has not done, on sync
 	err = sApi.syncWithPeer(randomPeer)
 	if err != nil {
-		logger.Errorf(nil, "[Blockchain] Fail to Synchronize - Err: [%s]", err)
+		iLogger.Errorf(nil, "[Blockchain] Fail to Synchronize - Err: [%s]", err)
 		return err
 	}
 
-	logger.Infof(nil, "[Blockchain] Synchronized Successfully - PeerID: [%s]", randomPeer.PeerID)
+	iLogger.Infof(nil, "[Blockchain] Synchronized Successfully - PeerID: [%s]", randomPeer.PeerID)
 
 	return nil
 
@@ -143,7 +143,7 @@ func (sApi SyncApi) commitBlock(block blockchain.DefaultBlock) error {
 	// save(commit)
 	err := sApi.blockRepository.Save(block)
 	if err != nil {
-		logger.Errorf(nil, "[Blockchain] Block is not Committed - Err: [%s]", err)
+		iLogger.Errorf(nil, "[Blockchain] Block is not Committed - Err: [%s]", err)
 		return ErrSaveBlock
 	}
 
@@ -153,7 +153,7 @@ func (sApi SyncApi) commitBlock(block blockchain.DefaultBlock) error {
 		return ErrCreateEvent
 	}
 
-	logger.Infof(nil, "[Blockchain] Block has Committed - seal: [%x],  height: [%d]", block.Seal, block.Height)
+	iLogger.Infof(nil, "[Blockchain] Block has Committed - seal: [%x],  height: [%d]", block.Seal, block.Height)
 
 	return sApi.eventService.Publish("block.committed", commitEvent)
 }

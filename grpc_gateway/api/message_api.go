@@ -17,8 +17,8 @@
 package api
 
 import (
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/grpc_gateway"
+	"github.com/it-chain/iLogger"
 )
 
 type MessageApi struct {
@@ -32,6 +32,6 @@ func NewMessageApi(grpcService grpc_gateway.GrpcService) *MessageApi {
 }
 
 func (c MessageApi) DeliverMessage(body []byte, protocol string, ids ...string) {
-	logger.Infof(nil, "[gRPC-gateway] Sending grpc message - protocol: [%s] body: [%s] ids:[%s]", protocol, body, ids)
+	iLogger.Infof(nil, "[gRPC-gateway] Sending grpc message - protocol: [%s] body: [%s] ids:[%s]", protocol, body, ids)
 	c.grpcService.SendMessages(body, protocol, ids...)
 }

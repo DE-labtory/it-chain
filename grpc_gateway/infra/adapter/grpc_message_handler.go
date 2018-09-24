@@ -19,9 +19,9 @@ package adapter
 import (
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/grpc_gateway"
 	"github.com/it-chain/engine/grpc_gateway/api"
+	"github.com/it-chain/iLogger"
 )
 
 type GrpcMessageHandler struct {
@@ -40,7 +40,7 @@ func (g GrpcMessageHandler) HandleMessageReceiveEvent(command command.ReceiveGrp
 	protocol := command.Protocol
 	body := command.Body
 
-	logger.Infof(nil, "[gRPC-Gateway] Received gRPC message - Protocol [%s]", protocol)
+	iLogger.Infof(nil, "[gRPC-Gateway] Received gRPC message - Protocol [%s]", protocol)
 
 	switch protocol {
 	case grpc_gateway.RequestPeerList:
@@ -50,7 +50,7 @@ func (g GrpcMessageHandler) HandleMessageReceiveEvent(command command.ReceiveGrp
 		connectionList := []grpc_gateway.Connection{}
 
 		if err := common.Deserialize(body, &connectionList); err != nil {
-			logger.Errorf(nil, "[gRPC-Gateway] Fail to deserialize grpcMessage - Err: [%s]", err.Error())
+			iLogger.Errorf(nil, "[gRPC-Gateway] Fail to deserialize grpcMessage - Err: [%s]", err.Error())
 			return
 		}
 

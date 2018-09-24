@@ -19,12 +19,12 @@ package test
 import (
 	"github.com/it-chain/avengers/mock"
 	"github.com/it-chain/engine/api_gateway"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/p2p"
 	"github.com/it-chain/engine/p2p/api"
 	"github.com/it-chain/engine/p2p/infra/adapter"
 	"github.com/it-chain/engine/p2p/infra/mem"
 	mock2 "github.com/it-chain/engine/p2p/test/mock"
+	"github.com/it-chain/iLogger"
 )
 
 type ProcessIdentity struct {
@@ -78,7 +78,7 @@ func SetTestEnvironment(processList []ProcessIdentity) map[string]*mock.Process 
 		m[process.Id] = &process
 	}
 
-	logger.Infof(nil, "created process: %v", m)
+	iLogger.Infof(nil, "created process: %v", m)
 	return m
 }
 

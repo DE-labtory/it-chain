@@ -20,10 +20,10 @@ import (
 	"errors"
 
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/ivm"
+	"github.com/it-chain/iLogger"
 	"github.com/urfave/cli"
 )
 
@@ -62,20 +62,20 @@ func query(id string, functionName string, args []string) {
 		Method:   "query",
 	}
 
-	logger.Infof(nil, "[Cmd] Querying icode - icodeID: [%s], func: [%s]", id, functionName)
+	iLogger.Infof(nil, "[Cmd] Querying icode - icodeID: [%s], func: [%s]", id, functionName)
 
 	err := client.Call("ivm.execute", queryCommand, func(result ivm.Result, err rpc.Error) {
 		if !err.IsNil() {
-			logger.Errorf(nil, "[Cmd] Fail to query icode err: [%s]", err.Message)
+			iLogger.Errorf(nil, "[Cmd] Fail to query icode err: [%s]", err.Message)
 			return
 		}
 
 		for key, val := range result.Data {
-			logger.Infof(nil, "[CMD] Querying result - key: [%s], value: [%s]", key, val)
+			iLogger.Infof(nil, "[CMD] Querying result - key: [%s], value: [%s]", key, val)
 		}
 	})
 
 	if err != nil {
-		logger.Fatal(&logger.Fields{"err_msg": err.Error()}, "fatal err in query cmd")
+		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "fatal err in query cmd")
 	}
 }
