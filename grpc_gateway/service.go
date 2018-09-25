@@ -28,7 +28,3 @@ type GrpcService interface {
 	IsConnectionExist(connectionID string) bool
 	GetHostID() string
 }
-
-type PeerService interface {
-	GetAllPeerList(connection Connection) ([]Connection, error)
-}
