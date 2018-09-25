@@ -22,19 +22,27 @@ import (
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/grpc_gateway"
-	"github.com/it-chain/engine/grpc_gateway/api"
 	"github.com/it-chain/iLogger"
 )
 
-type GrpcMessageHandler struct {
-	connectionApi *api.ConnectionApi
-	messageApi    *api.MessageApi
+type GrpcMessageHandlerApi interface {
+	HandleRequestPeerList(connectionID string)
+	DialConnectionList(connectionList []grpc_gateway.Connection)
 }
 
-func NewGrpcMessageHandler(connectionApi *api.ConnectionApi, messageApi *api.MessageApi) *GrpcMessageHandler {
+type GrpcMessageDeliverApi interface {
+	DeliverMessage(body []byte, protocol string, ids ...string) error
+}
+
+type GrpcMessageHandler struct {
+	messageHandlerApi GrpcMessageHandlerApi
+	messageDeliverApi GrpcMessageDeliverApi
+}
+
+func NewGrpcMessageHandler(messageHandlerApi GrpcMessageHandlerApi, messageDeliverApi GrpcMessageDeliverApi) *GrpcMessageHandler {
 	return &GrpcMessageHandler{
-		connectionApi: connectionApi,
-		messageApi:    messageApi,
+		messageHandlerApi: messageHandlerApi,
+		messageDeliverApi: messageDeliverApi,
 	}
 }
 
@@ -47,7 +55,7 @@ func (g GrpcMessageHandler) HandleMessageReceiveCommand(command command.ReceiveG
 
 	switch protocol {
 	case grpc_gateway.RequestPeerList:
-		g.connectionApi.HandleRequestPeerList(command.ConnectionID)
+		g.messageHandlerApi.HandleRequestPeerList(command.ConnectionID)
 
 	case grpc_gateway.ResponsePeerList:
 		connectionList := []grpc_gateway.Connection{}
@@ -57,12 +65,12 @@ func (g GrpcMessageHandler) HandleMessageReceiveCommand(command command.ReceiveG
 			return
 		}
 
-		g.connectionApi.DialConnectionList(connectionList)
+		g.messageHandlerApi.DialConnectionList(connectionList)
 	}
 }
 
 func (g GrpcMessageHandler) HandleMessageDeliverCommand(command command.DeliverGrpc) {
-	if err := g.messageApi.DeliverMessage(command.Body, command.Protocol, command.RecipientList...); err != nil {
+	if err := g.messageDeliverApi.DeliverMessage(command.Body, command.Protocol, command.RecipientList...); err != nil {
 		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to deliver grpc message - Protocol: [%s], RecipientList: [%s], Err: [%s]", command.Protocol, strings.Join(command.RecipientList, ", "), err.Error())
 	}
 }

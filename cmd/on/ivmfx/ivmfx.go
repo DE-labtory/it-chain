@@ -19,8 +19,6 @@ package ivmfx
 import (
 	"context"
 
-	"github.com/it-chain/iLogger"
-
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/ivm"
@@ -28,6 +26,7 @@ import (
 	"github.com/it-chain/engine/ivm/infra/adapter"
 	"github.com/it-chain/engine/ivm/infra/git"
 	"github.com/it-chain/engine/ivm/infra/tesseract"
+	"github.com/it-chain/iLogger"
 	"go.uber.org/fx"
 )
 

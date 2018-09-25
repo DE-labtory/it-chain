@@ -36,7 +36,7 @@ var Module = fx.Options(
 		NewConnectionApi,
 		NewMessageApi,
 		adapter.NewConnectionCommandHandler,
-		adapter.NewGrpcMessageHandler,
+		NewGrpcMessageHandler,
 	),
 	fx.Invoke(
 		RegisterHandlers,
@@ -60,6 +60,10 @@ func NewConnectionApi(hostService *infra.GrpcHostService, eventService common.Ev
 
 func NewMessageApi(hostService *infra.GrpcHostService) *api.MessageApi {
 	return api.NewMessageApi(hostService)
+}
+
+func NewGrpcMessageHandler(connectionApi *api.ConnectionApi, messageApi *api.MessageApi) *adapter.GrpcMessageHandler {
+	return adapter.NewGrpcMessageHandler(connectionApi, messageApi)
 }
 
 func RegisterHandlers(connectionCommandHandler *adapter.ConnectionCommandHandler, server *rpc.Server) {
