@@ -35,7 +35,7 @@ func NewConnectionEventHandler(syncApi SyncApiForSynchronize) *ConnectionEventHa
 	}
 }
 
-func (c *ConnectionEventHandler) HandleConnectionSavedEvent(event event.ConnectionSaved) error {
+func (c *ConnectionEventHandler) HandleConnectionSavedEvent(connectionSavedEvent event.ConnectionSaved) error {
 	err := c.SyncApi.Synchronize()
 	if err != nil {
 		return err

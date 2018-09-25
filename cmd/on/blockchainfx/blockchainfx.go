@@ -50,10 +50,10 @@ var Module = fx.Options(
 		NewBlockProposeHandler,
 	),
 	fx.Invoke(
-		CreateGenesisBlock,
 		RegisterRpcHandlers,
 		RegisterPubsubHandlers,
 		RegisterTearDown,
+		CreateGenesisBlock,
 	),
 )
 
@@ -107,7 +107,6 @@ func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, handler *adapter
 	if err := subscriber.SubscribeTopic("connection.saved", handler); err != nil {
 		panic(err)
 	}
-
 }
 
 func RegisterTearDown(lifecycle fx.Lifecycle) {

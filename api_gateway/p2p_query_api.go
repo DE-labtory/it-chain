@@ -110,5 +110,4 @@ func (peh *P2PEventHandler) HandleLeaderUpdatedEvent(event event.PeerCreated) er
 	peh.peerRepository.SetLeader(leader)
 
 	return nil
-
 }

@@ -137,15 +137,13 @@ func (c ParamBasedRouter) Route(key string, data []byte, structName string) (err
 
 //find type of handler by struct name
 func (c ParamBasedRouter) findTypeOfHandlers(key string, matchingValue string) (reflect.Type, func(param interface{}), error) {
-
 	for k, handlers := range c.handlerMap {
-
 		if k == key+matchingValue {
 			return handlers.Type, handlers.Func, nil
 		}
 	}
 
-	return nil, nil, ErrTypeNotFound
+	return nil, nil, nil
 }
 
 //build empty struct from struct type
