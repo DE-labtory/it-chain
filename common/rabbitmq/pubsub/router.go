@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"sync"
 
 	"github.com/it-chain/engine/common/logger"
 )
@@ -43,6 +44,7 @@ type Handler struct {
 //ParamBasedRouter routes data through the structure and structure name(matching value) of the parameter
 type ParamBasedRouter struct {
 	handlerMap map[string]Handler
+	sync.Mutex
 }
 
 func NewParamBasedRouter() (*ParamBasedRouter, error) {
