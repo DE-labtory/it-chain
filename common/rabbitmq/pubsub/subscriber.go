@@ -19,8 +19,6 @@ package pubsub
 import (
 	"encoding/json"
 
-	"fmt"
-
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq"
 	"github.com/rs/xid"
@@ -34,13 +32,11 @@ type Message struct {
 type TopicSubscriber struct {
 	rabbitmq.Session
 	exchange string
-	router   Router
 }
 
 func NewTopicSubscriber(rabbitmqUrl string, exchange string) *TopicSubscriber {
 
 	session := rabbitmq.CreateSession(rabbitmqUrl)
-
 	err := session.Ch.ExchangeDeclare(
 		exchange, // name
 		"topic",  // type
@@ -55,17 +51,13 @@ func NewTopicSubscriber(rabbitmqUrl string, exchange string) *TopicSubscriber {
 		panic(err.Error())
 	}
 
-	p, _ := NewParamBasedRouter()
-
 	return &TopicSubscriber{
 		Session:  session,
 		exchange: exchange,
-		router:   p,
 	}
 }
 
 func (t *TopicSubscriber) SubscribeTopic(topic string, source interface{}) error {
-
 	q, err := t.Ch.QueueDeclare(
 		xid.New().String(), // name
 		false,              // durable
@@ -101,25 +93,26 @@ func (t *TopicSubscriber) SubscribeTopic(topic string, source interface{}) error
 		return err
 	}
 
-	err = t.router.SetHandler(q.Name, source)
+	p, _ := NewParamBasedRouter()
+	p.SetHandler(q.Name, source)
+
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(q.Name)
-
-	go func() {
+	go func(queueName string, router *ParamBasedRouter) {
 		for delivery := range msgs {
 
 			message := &Message{}
 			data := delivery.Body
+
 			if err := json.Unmarshal(data, message); err != nil {
 				logger.Errorf(nil, "[Common] Fail to unmarshal rabbitmq message - Err: [%s]", err.Error())
 			}
 
-			t.router.Route(q.Name, message.Data, message.MatchingValue) //해당 event를 처리하기 위한 matching value 에는 structName이 들어간다.
+			p.Route(queueName, message.Data, message.MatchingValue) //해당 event를 처리하기 위한 matching value 에는 structName이 들어간다.
 		}
-	}()
+	}(q.Name, p)
 
 	return nil
 }

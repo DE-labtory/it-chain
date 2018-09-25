@@ -58,7 +58,7 @@ func (cr *ConnectionRepository) Save(conn Connection) error {
 
 	cr.ConnectionTable[conn.ConnectionID] = conn
 
-	cr.eventService.Publish("connection.Saved", createConnectionSavedEvent(conn))
+	cr.eventService.Publish("connection.saved", createConnectionSavedEvent(conn))
 
 	return nil
 }
