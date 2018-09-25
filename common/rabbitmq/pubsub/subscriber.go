@@ -18,12 +18,12 @@ package pubsub
 
 import (
 	"encoding/json"
-	"log"
 
-	"regexp"
+	"fmt"
 
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/common/rabbitmq"
-	"github.com/streadway/amqp"
+	"github.com/rs/xid"
 )
 
 type Message struct {
@@ -35,7 +35,6 @@ type TopicSubscriber struct {
 	rabbitmq.Session
 	exchange string
 	router   Router
-	topics   []string
 }
 
 func NewTopicSubscriber(rabbitmqUrl string, exchange string) *TopicSubscriber {
@@ -62,38 +61,31 @@ func NewTopicSubscriber(rabbitmqUrl string, exchange string) *TopicSubscriber {
 		Session:  session,
 		exchange: exchange,
 		router:   p,
-		topics:   make([]string, 0),
 	}
 }
 
 func (t *TopicSubscriber) SubscribeTopic(topic string, source interface{}) error {
 
-	var q amqp.Queue
-	var err error
-	if t.checkRegex(topic) {
-		q, err = t.Ch.QueueDeclare(
-			"",    // name
-			false, // durable
-			true,  // delete when usused
-			false, // exclusive
-			false, // no-wait
-			nil,   // arguments
-		)
+	q, err := t.Ch.QueueDeclare(
+		xid.New().String(), // name
+		false,              // durable
+		true,               // delete when usused
+		false,              // exclusive
+		false,              // no-wait
+		nil,                // arguments
+	)
+	if err != nil {
+		return err
+	}
 
-		if err != nil {
-			return err
-		}
-
-		err = t.Ch.QueueBind(
-			q.Name,     // queue name
-			topic,      // routing key
-			t.exchange, // exchange
-			false,
-			nil)
-
-		if err != nil {
-			return err
-		}
+	err = t.Ch.QueueBind(
+		q.Name,     // queue name
+		topic,      // routing key
+		t.exchange, // exchange
+		false,
+		nil)
+	if err != nil {
+		return err
 	}
 
 	msgs, err := t.Ch.Consume(
@@ -105,52 +97,31 @@ func (t *TopicSubscriber) SubscribeTopic(topic string, source interface{}) error
 		false,  // no wait
 		nil,    // args
 	)
-
 	if err != nil {
 		return err
 	}
 
-	err = t.router.SetHandler(source)
-
+	err = t.router.SetHandler(q.Name, source)
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(q.Name)
 
 	go func() {
 		for delivery := range msgs {
-			data := delivery.Body
 
 			message := &Message{}
-			err := json.Unmarshal(data, message)
-
-			if err != nil {
-				log.Print(err.Error())
+			data := delivery.Body
+			if err := json.Unmarshal(data, message); err != nil {
+				logger.Errorf(nil, "[Common] Fail to unmarshal rabbitmq message - Err: [%s]", err.Error())
 			}
 
-			t.router.Route(message.Data, message.MatchingValue) //해당 event를 처리하기 위한 matching value 에는 structName이 들어간다.
+			t.router.Route(q.Name, message.Data, message.MatchingValue) //해당 event를 처리하기 위한 matching value 에는 structName이 들어간다.
 		}
 	}()
 
 	return nil
-}
-
-func (t *TopicSubscriber) checkRegex(topic string) bool {
-	r, _ := regexp.Compile(topic)
-
-	var index = -1
-	for i, topic := range t.topics {
-		if r.MatchString(topic) {
-			index = i
-		}
-	}
-
-	if index >= 0 {
-		t.topics[index] = topic
-		return false
-	} else {
-		t.topics = append(t.topics, topic)
-		return true
-	}
 }
 
 func (t *TopicSubscriber) Close() {

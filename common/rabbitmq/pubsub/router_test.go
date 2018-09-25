@@ -35,7 +35,9 @@ func TestNewParamBasedRouter(t *testing.T) {
 		assert.Equal(t, command.Name, "jun")
 	}
 
-	err = d.SetHandler(handler)
+	key := "123"
+
+	err = d.SetHandler(key, handler)
 	assert.NoError(t, err)
 
 	cmd := UserNameUpdateCommand{
@@ -47,7 +49,7 @@ func TestNewParamBasedRouter(t *testing.T) {
 
 	fmt.Println(b)
 
-	err = d.Route(b, "UserNameUpdateCommand")
+	err = d.Route(key, b, "UserNameUpdateCommand")
 	assert.NoError(t, err)
 }
 

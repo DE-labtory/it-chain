@@ -19,8 +19,9 @@ package pubsub
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"reflect"
+
+	"github.com/it-chain/engine/common/logger"
 )
 
 var ErrTypeNotFound = errors.New("Type of handler not found")
@@ -29,34 +30,30 @@ var ErrTypeNotFound = errors.New("Type of handler not found")
 type Router interface {
 
 	//route data depends on matching value
-	Route(data []byte, matchingValue string) error
+	Route(key string, data []byte, matchingValue string) error
 
-	SetHandler(handler interface{}) error
+	SetHandler(key string, handler interface{}) error
+}
+
+type Handler struct {
+	Func func(param interface{})
+	Type reflect.Type
 }
 
 //ParamBasedRouter routes data through the structure and structure name(matching value) of the parameter
 type ParamBasedRouter struct {
-	handlerMap map[reflect.Type][]func(param interface{})
+	handlerMap map[string]Handler
 }
 
-func NewParamBasedRouter(handlers ...interface{}) (*ParamBasedRouter, error) {
+func NewParamBasedRouter() (*ParamBasedRouter, error) {
 
-	p := &ParamBasedRouter{
-		handlerMap: make(map[reflect.Type][]func(param interface{})),
-	}
-
-	for _, handler := range handlers {
-		err := p.SetHandler(handler)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return p, nil
+	return &ParamBasedRouter{
+		handlerMap: make(map[string]Handler),
+	}, nil
 }
 
 ////handler should be a struct pointer which has handler method
-func (c *ParamBasedRouter) SetHandler(handler interface{}) error {
+func (c *ParamBasedRouter) SetHandler(key string, handler interface{}) error {
 
 	if reflect.TypeOf(handler).Kind() != reflect.Ptr {
 		return errors.New("handler should be ptr type")
@@ -81,18 +78,9 @@ func (c *ParamBasedRouter) SetHandler(handler interface{}) error {
 		}
 
 		paramType := method.Type.In(1) //returns the type of a function type's i'th input parameter.
-
-		_, ok := c.handlerMap[paramType]
-
-		// 핸들러맵에 이미 동일 파라미터가 등록되 있는 경우 에러 반환
-		if !ok {
-			c.handlerMap[paramType] = make([]func(param interface{}), 0)
-		}
-
 		handler := createEventHandler(method, handler)
-
 		// 핸들러맵에 핸들러 매소드 등록
-		c.handlerMap[paramType] = append(c.handlerMap[paramType], handler)
+		c.handlerMap[key+paramType.Name()] = Handler{Type: paramType, Func: handler}
 	}
 
 	return nil
@@ -109,7 +97,7 @@ func createEventHandler(method reflect.Method, handler interface{}) func(interfa
 	}
 }
 
-func (c ParamBasedRouter) Route(data []byte, structName string) (err error) {
+func (c ParamBasedRouter) Route(key string, data []byte, structName string) (err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -125,10 +113,11 @@ func (c ParamBasedRouter) Route(data []byte, structName string) (err error) {
 		}
 	}()
 
-	paramType, handlers, err := c.findTypeOfHandlers(structName)
+	paramType, handler, err := c.findTypeOfHandlers(key, structName)
 
 	if err != nil {
-		errors.New(fmt.Sprintf("No handler found for struct [%s]", structName))
+		logger.Errorf(nil, "No handler found for struct [%s]", structName)
+		return err
 	}
 
 	v := reflect.New(paramType)
@@ -136,28 +125,23 @@ func (c ParamBasedRouter) Route(data []byte, structName string) (err error) {
 	paramInterface := v.Interface()
 
 	err = json.Unmarshal(data, paramInterface)
-
 	if err != nil {
 		return err
 	}
 
 	paramValue := reflect.ValueOf(paramInterface).Elem().Interface()
-
-	for _, handler := range handlers {
-		handler(paramValue) //execute handler
-	}
+	handler(paramValue)
 
 	return nil
 }
 
 //find type of handler by struct name
-func (c ParamBasedRouter) findTypeOfHandlers(typeName string) (reflect.Type, []func(param interface{}), error) {
+func (c ParamBasedRouter) findTypeOfHandlers(key string, matchingValue string) (reflect.Type, func(param interface{}), error) {
 
-	for paramType, handlers := range c.handlerMap {
-		name := paramType.Name()
+	for k, handlers := range c.handlerMap {
 
-		if name == typeName {
-			return paramType, handlers, nil
+		if k == key+matchingValue {
+			return handlers.Type, handlers.Func, nil
 		}
 	}
 
