@@ -28,13 +28,11 @@ import (
 type ConnectionApi struct {
 	grpcService  grpc_gateway.GrpcService
 	eventService common.EventService
-	peerService  grpc_gateway.PeerService
 }
 
-func NewConnectionApi(grpcService grpc_gateway.GrpcService, eventService common.EventService, peerService grpc_gateway.PeerService) *ConnectionApi {
+func NewConnectionApi(grpcService grpc_gateway.GrpcService, eventService common.EventService) *ConnectionApi {
 	return &ConnectionApi{
 		grpcService:  grpcService,
-		peerService:  peerService,
 		eventService: eventService,
 	}
 }
