@@ -124,11 +124,9 @@ func (bApi BlockApi) CommitBlock(block blockchain.DefaultBlock) error {
 	return bApi.eventService.Publish("block.committed", commitEvent)
 }
 
-func (bApi BlockApi) StageBlock(block blockchain.DefaultBlock) error {
+func (bApi BlockApi) StageBlock(block blockchain.DefaultBlock) {
 	block.SetState(blockchain.Staged)
 	bApi.BlockPool.Add(block)
-
-	return nil
 }
 
 func (api BlockApi) CreateProposedBlock(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error) {
