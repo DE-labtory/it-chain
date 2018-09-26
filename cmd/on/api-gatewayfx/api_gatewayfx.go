@@ -45,6 +45,7 @@ var Module = fx.Options(
 		api_gateway.NewConnectionEventListener,
 		NewICodeQueryApi,
 		NewICodeEventHandler,
+		NewIvmHttpApi,
 		api_gateway.NewConnectionQueryApi,
 		api_gateway.NewApiHandler,
 		http.NewServeMux,
@@ -72,6 +73,10 @@ func NewKitLogger() kitlog.Logger {
 
 func NewICodeQueryApi(repository *api_gateway.LevelDbICodeRepository) *api_gateway.ICodeQueryApi {
 	return api_gateway.NewICodeQueryApi(repository)
+}
+
+func NewIvmHttpApi() *api_gateway.ICodeCommandApi {
+	return api_gateway.NewICodeCommandApi()
 }
 
 func NewICodeEventHandler(repository *api_gateway.LevelDbICodeRepository) *api_gateway.ICodeEventHandler {
