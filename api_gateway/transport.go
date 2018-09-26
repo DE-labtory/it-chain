@@ -35,12 +35,14 @@ var (
 	ErrBadConversion = errors.New("Conversion failed: invalid argument in url endpoint.")
 )
 
-func NewApiHandler(b *BlockQueryApi, i *ICodeQueryApi, p *PeerQueryApi, logger kitlog.Logger) http.Handler {
+func NewApiHandler(bqa *BlockQueryApi, iqa *ICodeQueryApi, iha *ICodeCommandApi, p *PeerQueryApi, logger kitlog.Logger) http.Handler {
 
 	r := mux.NewRouter()
-	be := MakeBlockchainEndpoints(b)
-	ie := MakeIvmEndpoints(i)
+
+	be := MakeBlockchainEndpoints(bqa)
+	ie := MakeIvmEndpoints(iha, iqa)
 	ce := MakePeerEndpoints(p)
+	te := MakeTransactionEndpoints(iha)
 
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorLogger(logger),
@@ -49,7 +51,6 @@ func NewApiHandler(b *BlockQueryApi, i *ICodeQueryApi, p *PeerQueryApi, logger k
 	// GET     /blocks/						retrieves all blocks committed
 	// GET     /blocks?height=:height		retrieves a particular block committed
 	// GET     /blocks/:seal				retrieves a particular block committed
-	// GET     /icodes						about icodes
 
 	r.Methods("GET").Path("/blocks").Handler(kithttp.NewServer(
 		be.FindAllCommittedBlocksEndpoint,
@@ -65,12 +66,36 @@ func NewApiHandler(b *BlockQueryApi, i *ICodeQueryApi, p *PeerQueryApi, logger k
 		opts...,
 	))
 
+	// GET		/icodes																retrieves all icodes deployed
+	// GET		/icodes?amqpUrl=:amqpUrl											retrieves all icodes deployed using particular amqp url not in config
+	// POST		/icodes																deploy icode. about post body information, see decodeDeployIcodeRequest
+	// DELETE	/icodes/{icodeId}													unDeploy icode that match icodeId
+
 	r.Methods("GET").Path("/icodes").Handler(kithttp.NewServer(
-		ie.FindAllMetaEndpoint,
-		decodeFindAllMetaRequest,
+		ie.GetIcodeListEndpoint,
+		decodeGetICodeListRequest,
 		encodeResponse,
-		opts...,
-	))
+		opts...))
+
+	r.Methods("POST").Path("/icodes").Handler(kithttp.NewServer(
+		ie.GetIcodeListEndpoint,
+		decodeDeployIcodeRequest,
+		encodeResponse,
+		opts...))
+
+	r.Methods("DELETE").Path("/icodes/{id}").Handler(kithttp.NewServer(
+		ie.GetIcodeListEndpoint,
+		decodeUnDeployIcodeRequest,
+		encodeResponse,
+		opts...))
+
+	// GET		/transactions			get all uncommitted transactions
+	// POST 	/transactions			create transaction
+	r.Methods("POST").Path("/transactions").Handler(kithttp.NewServer(
+		te.CreateTransactionEndpoint,
+		decodeCreateTransactionRequest,
+		encodeResponse,
+		opts...))
 
 	r.Methods("GET").Path("/peers").Handler(kithttp.NewServer(
 		ce.FindAllPeerEndpoint,
@@ -89,11 +114,26 @@ func NewApiHandler(b *BlockQueryApi, i *ICodeQueryApi, p *PeerQueryApi, logger k
 	return r
 }
 
+/*
+txpool
+*/
 // this return nil because this request body is empty
 func decodeFindAllUncommittedTransactionsRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	return nil, nil
 }
 
+func decodeCreateTransactionRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	body := CreateTransactionRequest{}
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+/*
+block chain
+*/
 func decodeFindAllCommittedBlocksRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	if heightStr := r.URL.Query().Get("height"); heightStr != "" {
 		if heightStr == "-1" {
@@ -107,10 +147,6 @@ func decodeFindAllCommittedBlocksRequest(_ context.Context, r *http.Request) (in
 		return FindCommittedBlockByHeightRequest{Height: height}, nil
 	}
 	// length of query string is zero => means that there are no restful params
-	return nil, nil
-}
-
-func decodeFindAllMetaRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	return nil, nil
 }
 
@@ -132,6 +168,53 @@ func decodeFindCommittedBlockBySealRequest(_ context.Context, r *http.Request) (
 	return FindCommittedBlockBySealRequest{Seal: seal}, nil
 }
 
+/*
+ivm
+*/
+func decodeGetICodeListRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	return r, nil
+}
+
+func decodeDeployIcodeRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	amqpUrl := r.FormValue("amqpUrl")
+	gitUrl := r.FormValue("gitUrl")
+	sshPath := r.FormValue("sshPath")
+	sshPassword := r.FormValue("sshPassword")
+
+	if gitUrl == "" {
+		return nil, ErrBadRouting
+	}
+
+	return DeployIcodeRequest{
+		IvmRequest: IvmRequest{
+			AmqpUrl: amqpUrl,
+		},
+		GitUrl:      gitUrl,
+		SshPath:     sshPath,
+		SshPassWord: sshPassword,
+	}, nil
+}
+
+func decodeUnDeployIcodeRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	amqpUrl := r.FormValue("amqpUrl")
+
+	icodeId, ok := vars["id"]
+	if !ok {
+		return nil, ErrBadRouting
+	}
+
+	return UnDeployIcodeRequest{
+		IvmRequest: IvmRequest{
+			AmqpUrl: amqpUrl,
+		},
+		ICodeId: icodeId,
+	}, nil
+}
+
+/*
+grpc gateway
+*/
 func decodeFindAllConnectionRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	return nil, nil
 }
