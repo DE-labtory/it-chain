@@ -21,14 +21,22 @@ import (
 
 	"github.com/go-kit/kit/endpoint"
 	"github.com/it-chain/iLogger"
+	"github.com/pkg/errors"
 )
 
 type Endpoints struct {
 	FindAllCommittedBlocksEndpoint   endpoint.Endpoint
 	FindCommittedBlockBySealEndpoint endpoint.Endpoint
-	FindAllMetaEndpoint              endpoint.Endpoint
-	FindAllPeerEndpoint              endpoint.Endpoint
-	FindPeerByIdEndpoint             endpoint.Endpoint
+
+	FindAllPeerEndpoint  endpoint.Endpoint
+	FindPeerByIdEndpoint endpoint.Endpoint
+
+	GetIcodeListEndpoint  endpoint.Endpoint
+	DeployIcodeEndpoint   endpoint.Endpoint
+	UnDeployIcodeEndpoint endpoint.Endpoint
+
+	FindAllUncommittedTransactionEndpoint endpoint.Endpoint
+	CreateTransactionEndpoint             endpoint.Endpoint
 }
 
 /*
@@ -42,9 +50,11 @@ func MakeBlockchainEndpoints(b *BlockQueryApi) Endpoints {
 	}
 }
 
-func MakeIvmEndpoints(i *ICodeQueryApi) Endpoints {
+func MakeIvmEndpoints(i *ICodeCommandApi, iqa *ICodeQueryApi) Endpoints {
 	return Endpoints{
-		FindAllMetaEndpoint: makeFindAllMetaEndpoint(i),
+		GetIcodeListEndpoint:  makeFindAllICodeEndpoint(iqa),
+		DeployIcodeEndpoint:   makeDeployIcodeEndpoint(i),
+		UnDeployIcodeEndpoint: makeUnDeployIcodeEndpoint(i),
 	}
 }
 
@@ -52,6 +62,13 @@ func MakePeerEndpoints(p *PeerQueryApi) Endpoints {
 	return Endpoints{
 		FindAllPeerEndpoint:  makeFindAllPeerEndpoint(p),
 		FindPeerByIdEndpoint: makeFindPeerByIdEndpoint(p),
+	}
+}
+
+func MakeTransactionEndpoints(i *ICodeCommandApi) Endpoints {
+	return Endpoints{
+		FindAllUncommittedTransactionEndpoint: makeFindAllUncommittedTransactionEndpoint(),
+		CreateTransactionEndpoint:             makeCreateTransactionEndpoint(i),
 	}
 }
 
@@ -88,30 +105,75 @@ func makeFindCommittedBlockBySealEndpoint(b *BlockQueryApi) endpoint.Endpoint {
 	}
 }
 
-//ivm
-func makeFindAllMetaEndpoint(i *ICodeQueryApi) endpoint.Endpoint {
+//icode
+func makeFindAllICodeEndpoint(i *ICodeQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		metas, err := i.iCodeRepository.FindAllMeta()
+		icodes, err := i.iCodeRepository.FindAllMeta()
 		if err != nil {
-			iLogger.Error(&iLogger.Fields{"err_message": err.Error()}, "error while find all meta endpoint")
+			iLogger.Error(&iLogger.Fields{"err_message": err.Error()}, "error while find all icode endpoint")
 			return nil, err
 		}
-
-		return metas, nil
+		return icodes, nil
 	}
 }
 
-type FindCommittedBlockByHeightRequest struct {
-	Height uint64
+func makeDeployIcodeEndpoint(i *ICodeCommandApi) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(DeployIcodeRequest)
+		icodeId, err := i.deploy(req.AmqpUrl, req.GitUrl, req.SshPath, req.SshPassWord)
+		if err != nil {
+			iLogger.Error(&iLogger.Fields{"err_message": err.Error()}, "error while deploy icode endpoint")
+			return nil, err
+		}
+		return icodeId, nil
+	}
 }
 
-type FindLastCommittedBlockRequest struct {
+func makeUnDeployIcodeEndpoint(i *ICodeCommandApi) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(UnDeployIcodeRequest)
+		err = i.unDeploy(req.AmqpUrl, req.ICodeId)
+		if err != nil {
+			iLogger.Error(&iLogger.Fields{"err_message": err.Error()}, "error while deploy icode endpoint")
+			return nil, err
+		}
+		return nil, nil
+	}
 }
 
-type FindCommittedBlockBySealRequest struct {
-	Seal []byte
+//transaction
+
+//todo impl
+func makeFindAllUncommittedTransactionEndpoint() endpoint.Endpoint {
+	panic("impl plz")
 }
 
+func makeCreateTransactionEndpoint(i *ICodeCommandApi) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(CreateTransactionRequest)
+		switch req.Type {
+		case "invoke":
+			txId, err := i.invoke(req.AmqpUrl, req.ICodeId, req.FuncName, req.Args)
+			if err != nil {
+				iLogger.Error(&iLogger.Fields{"err_message": err.Error()}, "error while invoke icode endpoint")
+				return nil, err
+			}
+			return txId, err
+		case "query":
+			results, err := i.query(req.AmqpUrl, req.ICodeId, req.FuncName, req.Args)
+			if err != nil {
+				iLogger.Error(&iLogger.Fields{"err_message": err.Error()}, "error while query icode endpoint")
+				return nil, err
+			}
+			return results, nil
+		default:
+			iLogger.Error(nil, "error while create transaction endpoint. unknown type err")
+			return nil, errors.New("unknown type err")
+		}
+	}
+}
+
+//grpc gateway
 func makeFindAllPeerEndpoint(p *PeerQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		peers := p.GetAllPeerList()
@@ -133,4 +195,48 @@ func makeFindPeerByIdEndpoint(p *PeerQueryApi) endpoint.Endpoint {
 
 type FindPeerByIdRequest struct {
 	ID string
+}
+
+//request struct
+type IvmRequest struct {
+	AmqpUrl string
+}
+
+// block chain request struct
+type FindCommittedBlockByHeightRequest struct {
+	Height uint64
+}
+
+type FindLastCommittedBlockRequest struct {
+}
+
+type FindCommittedBlockBySealRequest struct {
+	Seal []byte
+}
+
+// ivm request struct
+
+type DeployIcodeRequest struct {
+	IvmRequest
+	GitUrl      string
+	SshPath     string
+	SshPassWord string
+}
+
+type UnDeployIcodeRequest struct {
+	IvmRequest
+	ICodeId string
+}
+
+type CreateTransactionRequest struct {
+	IvmRequest
+	Type     string
+	ICodeId  string
+	FuncName string
+	Args     []string
+}
+
+// grpc request struct
+type FindConnectionByIdRequest struct {
+	ConnectionId string
 }
