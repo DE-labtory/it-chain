@@ -23,18 +23,23 @@ import (
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/engine/consensus/pbft/api"
 )
 
 var DeserializingError = errors.New("Message deserializing is failed.")
 var UndefinedProtocolError = errors.New("Undefined protocol error")
 
-type PbftMsgHandler struct {
-	sApi api.StateApi
+type StateMsgApi interface {
+	HandleProposeMsg(msg pbft.ProposeMsg) error
+	HandlePrevoteMsg(msg pbft.PrevoteMsg) error
+	HandlePreCommitMsg(msg pbft.PreCommitMsg) error
 }
 
-func NewPbftMsgHandler(sApi api.StateApi) PbftMsgHandler {
-	return PbftMsgHandler{
+type PbftMsgHandler struct {
+	sApi StateMsgApi
+}
+
+func NewPbftMsgHandler(sApi StateMsgApi) *PbftMsgHandler {
+	return &PbftMsgHandler{
 		sApi: sApi,
 	}
 }

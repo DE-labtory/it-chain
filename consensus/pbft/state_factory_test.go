@@ -75,10 +75,9 @@ func TestConstructConsensus(t *testing.T) {
 	}
 
 	// when
-	c, err := pbft.BuildState(msg)
+	c := pbft.BuildState(msg)
 
 	// then
-	assert.NoError(t, err)
 	assert.Equal(t, "consensusID", c.StateID.ID)
 	assert.Equal(t, pbft.IDLE_STAGE, c.CurrentStage)
 	assert.Equal(t, 2, len(c.Representatives))
