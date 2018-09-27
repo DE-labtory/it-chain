@@ -266,7 +266,7 @@ func setUpApiCondition(peerNum int, isNormalBlock bool,
 		})
 	}
 	prevoteMsgPool := pbft.NewPrevoteMsgPool()
-	for i := 0; i < 5; i++ {
+	for i := 0; i < peerNum; i++ {
 		senderStr := "sender"
 		senderStr += string(i)
 		prevoteMsgPool.Save(&pbft.PrevoteMsg{
@@ -277,7 +277,7 @@ func setUpApiCondition(peerNum int, isNormalBlock bool,
 	}
 
 	precommitMsgPool := pbft.NewPreCommitMsgPool()
-	for i := 0; i < 5; i++ {
+	for i := 0; i < peerNum; i++ {
 		senderStr := "sender"
 		senderStr += string(i)
 		precommitMsgPool.Save(&pbft.PreCommitMsg{
