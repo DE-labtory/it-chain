@@ -49,7 +49,7 @@ func createPeerListFromNetworkJoinedEvent(networkJoindEvent event.NetworkJoined)
 
 	for _, c := range networkJoindEvent.Connections {
 		peerList = append(peerList, blockchain.Peer{
-			PeerID:            c.ConnectionID,
+			Id:                c.ConnectionID,
 			ApiGatewayAddress: c.ApiGatewayAddress,
 		})
 	}

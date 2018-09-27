@@ -54,15 +54,15 @@ func TestQuerySerivce_GetRandomPeer(t *testing.T) {
 
 	peerList := []blockchain.Peer{
 		{
-			PeerID:            "connection1",
+			Id:                "connection1",
 			ApiGatewayAddress: "address1",
 		},
 		{
-			PeerID:            "connection2",
+			Id:                "connection2",
 			ApiGatewayAddress: "address2",
 		},
 		{
-			PeerID:            "connection3",
+			Id:                "connection3",
 			ApiGatewayAddress: "address3",
 		},
 	}
