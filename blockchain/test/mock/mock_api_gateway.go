@@ -18,15 +18,15 @@ package mock
 
 import "github.com/it-chain/engine/api_gateway"
 
-type ConnectionQueryApi struct {
-	GetAllConnectionListFunc  func() ([]api_gateway.Connection, error)
-	GetConnectionByIDByIdFunc func(connectionId string) (api_gateway.Connection, error)
+type PeerQueryApi struct {
+	GetAllPeerListFunc  func() []api_gateway.Peer
+	GetPeerByIDByIdFunc func(peerId string) (api_gateway.Peer, error)
 }
 
-func (q ConnectionQueryApi) GetAllConnectionList() ([]api_gateway.Connection, error) {
-	return q.GetAllConnectionListFunc()
+func (q PeerQueryApi) GetAllPeerList() []api_gateway.Peer {
+	return q.GetAllPeerListFunc()
 }
 
-func (q ConnectionQueryApi) GetConnectionByID(connectionId string) (api_gateway.Connection, error) {
-	return q.GetConnectionByIDByIdFunc(connectionId)
+func (q PeerQueryApi) GetPeerByID(connectionId string) (api_gateway.Peer, error) {
+	return q.GetPeerByIDByIdFunc(connectionId)
 }

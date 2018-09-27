@@ -31,6 +31,7 @@ var ErrNoMatchingPeerId = errors.New("no matching peer id")
 type Peer struct {
 	IpAddress string
 	PeerId    PeerId
+	Role      string
 }
 
 // PeerId 선언
