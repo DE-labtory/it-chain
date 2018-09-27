@@ -25,8 +25,3 @@ type QueryService interface {
 type EventService interface {
 	Publish(topic string, event interface{}) error
 }
-
-// TODO: should be implemented in infrastructure layer
-type ConsensusService interface {
-	ConsentBlock(block DefaultBlock) error
-}
