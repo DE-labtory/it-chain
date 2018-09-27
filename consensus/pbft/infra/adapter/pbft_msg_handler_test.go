@@ -116,11 +116,8 @@ func TestPbftMsgHandler_HandleGrpcMsgCommand(t *testing.T) {
 	}
 }
 
-func newMockStateApiForPbftMsgHandler(t *testing.T) *mock.StateApi {
-	mockApi := mock.StateApi{}
-	mockApi.StartConsensusFunc = func(proposedBlock pbft.ProposedBlock) error {
-		return nil
-	}
+func newMockStateApiForPbftMsgHandler(t *testing.T) adapter.StateMsgApi {
+	mockApi := &mock.StateApi{}
 	mockApi.HandleProposeMsgFunc = func(msg pbft.ProposeMsg) error {
 		if msg.SenderID == "sender1" {
 			assert.NotNil(t, msg.Representative)
@@ -146,7 +143,7 @@ func newMockStateApiForPbftMsgHandler(t *testing.T) *mock.StateApi {
 		return errors.New("HandlePreCommitMsg error")
 	}
 
-	return &mockApi
+	return mockApi
 }
 
 func makeMockProposeMsg() pbft.ProposeMsg {

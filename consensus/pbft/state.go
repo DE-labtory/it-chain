@@ -307,7 +307,7 @@ func (s *State) CheckPrevoteCondition() bool {
 	commitMsgNum := len(s.PrevoteMsgPool.Get())
 	satisfyNum := representativeNum / 3
 
-	if commitMsgNum > (satisfyNum + 1) {
+	if commitMsgNum >= (satisfyNum + 1) {
 		return true
 	}
 	return false
@@ -317,7 +317,7 @@ func (s *State) CheckPreCommitCondition() bool {
 	commitMsgNum := len(s.PreCommitMsgPool.Get())
 	satisfyNum := representativeNum / 3
 
-	if commitMsgNum > (satisfyNum + 1) {
+	if commitMsgNum >= (satisfyNum + 1) {
 		return true
 	}
 	return false

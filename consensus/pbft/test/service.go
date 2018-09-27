@@ -58,6 +58,7 @@ func SetTestEnvironment(processList []string) struct {
 
 		electionApi := api.NewElectionApi(electionService, parliamentRepository, eventService)
 		leaderApi := api.NewParliamentApi(id, parliamentRepository, eventService)
+
 		stateApi := api.NewStateApi(id, propagateService, eventService, parliamentRepository, stateRepository)
 
 		grpcCommandHandler := adapter.NewElectionCommandHandler(leaderApi, electionApi)
