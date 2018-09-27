@@ -36,7 +36,7 @@ var errorBlock = pbft.ProposedBlock{
 	Body: nil,
 }
 
-func TestConsensusApi_StartConsensus_State(t *testing.T) {
+func TestStateApi_StartConsensus_State(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
@@ -69,12 +69,10 @@ func TestConsensusApi_StartConsensus_State(t *testing.T) {
 	}
 }
 
-func TestConsensusApi_HandleProposeMsg_State(t *testing.T) {
+func TestStateApi_HandleProposeMsg_CheckState(t *testing.T) {
 
 	var validLeaderProposeMsg = pbft.ProposeMsg{
-		StateID: pbft.StateID{
-			ID: "state1",
-		},
+		StateID:        pbft.StateID{ID: "state1"},
 		SenderID:       "user0",
 		Representative: nil,
 		ProposedBlock: pbft.ProposedBlock{
@@ -109,10 +107,11 @@ func TestConsensusApi_HandleProposeMsg_State(t *testing.T) {
 		assert.EqualValues(t, test.err, cApi.HandleProposeMsg(test.input.proposeMsg))
 		loadedState, _ := cApi.repo.Load()
 		assert.Equal(t, string(test.stage), string(loadedState.CurrentStage))
+		assert.Equal(t, "state1", loadedState.StateID.ID)
 	}
 }
 
-func TestConsensusApi_HandlePrevoteMsg_State(t *testing.T) {
+func TestStateApi_HandlePrevoteMsg_CheckState(t *testing.T) {
 
 	var validPrevoteMsg = pbft.PrevoteMsg{
 		StateID:   pbft.StateID{"state"},
@@ -146,9 +145,10 @@ func TestConsensusApi_HandlePrevoteMsg_State(t *testing.T) {
 		assert.EqualValues(t, test.err, cApi.HandlePrevoteMsg(test.input.prevoteMsg))
 		loadedState, _ := cApi.repo.Load()
 		assert.Equal(t, string(test.stage), string(loadedState.CurrentStage))
+		assert.Equal(t, 6, len(loadedState.PrevoteMsgPool.Get()))
 	}
 }
-func TestConsensusApi_RepositoryClone(t *testing.T) {
+func TestStateApi_RepositoryClone(t *testing.T) {
 	// stateApi1 에는 setUpApiCondition에 의해 repo가 set된 상황
 	stateApi1 := setUpApiCondition(5, true, false, false)
 	// stateApi2 에는 stateApi1의 Repo가 주입된 상황
@@ -174,8 +174,90 @@ func TestConsensusApi_RepositoryClone(t *testing.T) {
 
 }
 
+func TestStateApi_Reflect_TemporaryPrevoteMsgPool(t *testing.T) {
+
+	reps := make([]pbft.Representative, 0)
+	for i := 0; i < 5; i++ {
+		reps = append(reps, pbft.Representative{
+			ID: "user",
+		})
+	}
+	var tempProposeMsg = pbft.ProposeMsg{
+		StateID:        pbft.StateID{"state1"},
+		SenderID:       "Leader",
+		Representative: reps,
+		ProposedBlock:  pbft.ProposedBlock{},
+	}
+
+	var tempPrevoteMsg = pbft.PrevoteMsg{
+		StateID:   pbft.StateID{"state1"},
+		SenderID:  "user1",
+		BlockHash: []byte{1, 2, 3, 5},
+	}
+
+	var tempPrevoteMsg2 = pbft.PrevoteMsg{
+		StateID:   pbft.StateID{"state1"},
+		SenderID:  "user2",
+		BlockHash: []byte{1, 2, 3, 5},
+	}
+
+	//When Propose Msg를 받지못해 Repo에 State가 없음 then sApi의 tempPool이 저장 후 State가 생겼을 때 추가
+	stateApi := setUpApiCondition(4, true, false, false)
+	stateApi.repo.Remove()
+
+	stateApi.HandlePrevoteMsg(tempPrevoteMsg)
+
+	assert.Equal(t, 1, len(stateApi.tempPrevoteMsgPool.Get()))
+
+	stateApi.HandleProposeMsg(tempProposeMsg)
+	stateApi.HandlePrevoteMsg(tempPrevoteMsg2)
+
+	state, _ := stateApi.repo.Load()
+	assert.Equal(t, 2, len(state.PrevoteMsgPool.Get()))
+
+}
+
+func TestStateApi_Reflect_TemporaryPreCommitMsgPool(t *testing.T) {
+
+	reps := make([]pbft.Representative, 0)
+	for i := 0; i < 5; i++ {
+		reps = append(reps, pbft.Representative{
+			ID: "user",
+		})
+	}
+	var tempProposeMsg = pbft.ProposeMsg{
+		StateID:        pbft.StateID{"state1"},
+		SenderID:       "Leader",
+		Representative: reps,
+		ProposedBlock:  pbft.ProposedBlock{},
+	}
+
+	var tempPreCommitMsg = pbft.PreCommitMsg{
+		StateID:  pbft.StateID{"state1"},
+		SenderID: "user1",
+	}
+
+	var tempPreCommitMsg2 = pbft.PreCommitMsg{
+		StateID:  pbft.StateID{"state1"},
+		SenderID: "user2",
+	}
+
+	//When Propose Msg를 받지못해 Repo에 State가 없음 then sApi의 tempPool이 저장 후 State가 생겼을 때 추가
+	stateApi := setUpApiCondition(5, true, false, false)
+	stateApi.repo.Remove()
+
+	stateApi.HandlePreCommitMsg(tempPreCommitMsg)
+	assert.Equal(t, 1, len(stateApi.tempPreCommitMsgPool.Get()))
+
+	stateApi.HandleProposeMsg(tempProposeMsg)
+	stateApi.HandlePreCommitMsg(tempPreCommitMsg2)
+	state, _ := stateApi.repo.Load()
+	assert.Equal(t, 2, len(state.PreCommitMsgPool.Get()))
+
+}
+
 func setUpApiCondition(peerNum int, isNormalBlock bool,
-	isPrepareConditionSatisfied bool, isCommitConditionSatisfied bool) *StateApiImpl {
+	isPrepareConditionSatisfied bool, isCommitConditionSatisfied bool) *StateApi {
 
 	reps := make([]pbft.Representative, 0)
 	for i := 0; i < 6; i++ {
@@ -256,5 +338,5 @@ func setUpApiCondition(peerNum int, isNormalBlock bool,
 	}
 	cApi := NewStateApi("my", propagateService, eventService, parliamentRepository, repo)
 
-	return cApi
+	return &cApi
 }

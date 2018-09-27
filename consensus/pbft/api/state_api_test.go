@@ -28,8 +28,8 @@ import (
 	"github.com/it-chain/engine/consensus/pbft/infra/mem"
 	test2 "github.com/it-chain/engine/consensus/pbft/test"
 	"github.com/it-chain/engine/consensus/pbft/test/mock"
-	"github.com/stretchr/testify/assert"
 	"github.com/it-chain/iLogger"
+	"github.com/stretchr/testify/assert"
 )
 
 var normalBlock = pbft.ProposedBlock{
@@ -111,7 +111,7 @@ func TestStateApiImpl_StartConsensus(t *testing.T) {
 			p.SetLeader("1")
 			pRepo.Save(p)
 		}
-		stateApi1 := env.ProcessMap["1"].Services["StateApiImpl"].(*api.StateApiImpl)
+		stateApi1 := env.ProcessMap["1"].Services["StateApiImpl"].(*api.StateApi)
 		stateRepo1 := env.ProcessMap["1"].Services["StateRepository"].(*mem.StateRepository)
 		state1, _ := stateRepo1.Load()
 		stateRepo2 := env.ProcessMap["2"].Services["StateRepository"].(*mem.StateRepository)
@@ -123,16 +123,14 @@ func TestStateApiImpl_StartConsensus(t *testing.T) {
 		stateRepo4 := env.ProcessMap["4"].Services["StateRepository"].(*mem.StateRepository)
 		state4, _ := stateRepo4.Load()
 
-
-
 		stateApi1.StartConsensus(pbft.ProposedBlock{Seal: []byte{'s', 'd', 'f'}, Body: []byte{'2', '3', '3'}})
 
 		time.Sleep(5 * time.Second)
 
-		iLogger.Infof(nil,"SEAL", state1.Block.Seal)
-		assert.Equal(t,state1.Block.Seal,state2.Block.Seal)
-		assert.Equal(t,state2.Block.Seal,state3.Block.Seal)
-		assert.Equal(t,state3.Block.Seal,state4.Block.Seal)
+		iLogger.Infof(nil, "SEAL", state1.Block.Seal)
+		assert.Equal(t, state1.Block.Seal, state2.Block.Seal)
+		assert.Equal(t, state2.Block.Seal, state3.Block.Seal)
+		assert.Equal(t, state3.Block.Seal, state4.Block.Seal)
 
 	}
 }
@@ -311,8 +309,7 @@ func TestConsensusApi_HandlePreCommitMsg(t *testing.T) {
 	}
 }
 
-func setUpApiCondition(peerNum int, isRepoFull bool, isNormalBlock bool) *api.StateApiImpl {
-
+func setUpApiCondition(peerNum int, isRepoFull bool, isNormalBlock bool) *api.StateApi {
 	reps := make([]pbft.Representative, 0)
 	for i := 0; i < 6; i++ {
 		reps = append(reps, pbft.Representative{
@@ -381,5 +378,5 @@ func setUpApiCondition(peerNum int, isRepoFull bool, isNormalBlock bool) *api.St
 	}
 
 	cApi := api.NewStateApi("my", propagateService, eventService, parliamentRepository, repo)
-	return cApi
+	return &cApi
 }
