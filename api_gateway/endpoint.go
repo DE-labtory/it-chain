@@ -27,8 +27,10 @@ import (
 type Endpoints struct {
 	FindAllCommittedBlocksEndpoint   endpoint.Endpoint
 	FindCommittedBlockBySealEndpoint endpoint.Endpoint
-	FindAllConnectionEndpoint        endpoint.Endpoint
-	FindConnectionByIdEndpoint       endpoint.Endpoint
+
+	FindAllConnectionEndpoint  endpoint.Endpoint
+	FindConnectionByIdEndpoint endpoint.Endpoint
+	CreateConnectionEndpoint   endpoint.Endpoint
 
 	GetIcodeListEndpoint  endpoint.Endpoint
 	DeployIcodeEndpoint   endpoint.Endpoint
@@ -49,7 +51,7 @@ func MakeBlockchainEndpoints(b *BlockQueryApi) Endpoints {
 	}
 }
 
-func MakeIvmEndpoints(i *ICodeCommandApi, iqa *ICodeQueryApi) Endpoints {
+func MakeIcodeEndpoints(i *ICodeCommandApi, iqa *ICodeQueryApi) Endpoints {
 	return Endpoints{
 		GetIcodeListEndpoint:  makeFindAllICodeEndpoint(iqa),
 		DeployIcodeEndpoint:   makeDeployIcodeEndpoint(i),
@@ -57,13 +59,13 @@ func MakeIvmEndpoints(i *ICodeCommandApi, iqa *ICodeQueryApi) Endpoints {
 	}
 }
 
-func MakeConnectionEndpoints(c *ConnectionQueryApi) Endpoints {
+func MakeConnectionEndpoints(cqa *ConnectionQueryApi, cca *ConnectionCommandApi) Endpoints {
 	return Endpoints{
-		FindAllConnectionEndpoint:  makeFindAllConnectionEndpoint(c),
-		FindConnectionByIdEndpoint: makeFindConnectionByIdEndpoint(c),
+		FindAllConnectionEndpoint:  makeFindAllConnectionEndpoint(cqa),
+		FindConnectionByIdEndpoint: makeFindConnectionByIdEndpoint(cqa),
+		CreateConnectionEndpoint:   makeCreateConnectionEndpoint(cca),
 	}
 }
-
 func MakeTransactionEndpoints(i *ICodeCommandApi) Endpoints {
 	return Endpoints{
 		FindAllUncommittedTransactionEndpoint: makeFindAllUncommittedTransactionEndpoint(),
@@ -178,7 +180,7 @@ func makeFindAllConnectionEndpoint(c *ConnectionQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		connections, err := c.GetAllConnectionList()
 		if err != nil {
-			iLogger.Error(nil, "[Api-gateway] Error while finding all connections")
+			iLogger.Error(nil, "[Api-gateway] Error while finding all connections,"+err.Error())
 			return nil, err
 		}
 		return connections, nil
@@ -194,6 +196,45 @@ func makeFindConnectionByIdEndpoint(c *ConnectionQueryApi) endpoint.Endpoint {
 			return nil, err
 		}
 		return connections, nil
+	}
+}
+
+func makeCreateConnectionEndpoint(cca *ConnectionCommandApi) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(CreateConnectionRequest)
+		switch req.Type {
+		case "dial":
+			grpcGatewayAddress, connectionID, err := cca.dial(req.Address)
+
+			if err != nil {
+				iLogger.Errorf(nil, "[api-gateway] Error while dial to [%s], err : %s", req.Address, err.Error())
+				return nil, err
+			}
+
+			type responseData struct {
+				grpcGatewayAddress string
+				connectionId       string
+			}
+
+			return responseData{
+				grpcGatewayAddress: grpcGatewayAddress,
+				connectionId:       connectionID,
+			}, nil
+
+		case "join":
+			err := cca.join(req.Address)
+
+			if err != nil {
+				iLogger.Errorf(nil, "[api-gateway] Error while dial to [%s], err : %s", req.Address, err.Error())
+				return nil, err
+			}
+
+			return req.Address, nil
+
+		default:
+			iLogger.Error(nil, "error while create connection endpoint. unknown type err")
+			return nil, errors.New("unknown type err")
+		}
 	}
 }
 
@@ -239,4 +280,9 @@ type CreateTransactionRequest struct {
 // grpc request struct
 type FindConnectionByIdRequest struct {
 	ConnectionId string
+}
+
+type CreateConnectionRequest struct {
+	Type    string // dial or join
+	Address string
 }

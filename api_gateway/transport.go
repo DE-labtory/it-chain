@@ -35,13 +35,13 @@ var (
 	ErrBadConversion = errors.New("Conversion failed: invalid argument in url endpoint.")
 )
 
-func NewApiHandler(bqa *BlockQueryApi, iqa *ICodeQueryApi, iha *ICodeCommandApi, cqa *ConnectionQueryApi, logger kitlog.Logger) http.Handler {
+func NewApiHandler(bqa *BlockQueryApi, iqa *ICodeQueryApi, iha *ICodeCommandApi, cqa *ConnectionQueryApi, cca *ConnectionCommandApi, logger kitlog.Logger) http.Handler {
 
 	r := mux.NewRouter()
 
 	be := MakeBlockchainEndpoints(bqa)
-	ie := MakeIvmEndpoints(iha, iqa)
-	ce := MakeConnectionEndpoints(cqa)
+	ie := MakeIcodeEndpoints(iha, iqa)
+	ce := MakeConnectionEndpoints(cqa, cca)
 	te := MakeTransactionEndpoints(iha)
 
 	opts := []kithttp.ServerOption{
@@ -78,13 +78,13 @@ func NewApiHandler(bqa *BlockQueryApi, iqa *ICodeQueryApi, iha *ICodeCommandApi,
 		opts...))
 
 	r.Methods("POST").Path("/icodes").Handler(kithttp.NewServer(
-		ie.GetIcodeListEndpoint,
+		ie.DeployIcodeEndpoint,
 		decodeDeployIcodeRequest,
 		encodeResponse,
 		opts...))
 
 	r.Methods("DELETE").Path("/icodes/{id}").Handler(kithttp.NewServer(
-		ie.GetIcodeListEndpoint,
+		ie.UnDeployIcodeEndpoint,
 		decodeUnDeployIcodeRequest,
 		encodeResponse,
 		opts...))
@@ -98,7 +98,8 @@ func NewApiHandler(bqa *BlockQueryApi, iqa *ICodeQueryApi, iha *ICodeCommandApi,
 		opts...))
 
 	// GET		/connections			retrieves all connections
-	// GET		/connection/{id}		retrieves connection that match id
+	// GET		/connections/{id}		retrieves connection that match id
+	// POST		/connections			dial or join network to address. about post body information, see decodeCreateConnectionRequest
 	r.Methods("GET").Path("/connections").Handler(kithttp.NewServer(
 		ce.FindAllConnectionEndpoint,
 		decodeFindAllConnectionRequest,
@@ -112,6 +113,12 @@ func NewApiHandler(bqa *BlockQueryApi, iqa *ICodeQueryApi, iha *ICodeCommandApi,
 		encodeResponse,
 		opts...,
 	))
+
+	r.Methods("POST").Path("/connections").Handler(kithttp.NewServer(
+		ce.CreateConnectionEndpoint,
+		decodeCreateConnectionRequest,
+		encodeResponse,
+		opts...))
 
 	return r
 }
@@ -178,23 +185,17 @@ func decodeGetICodeListRequest(_ context.Context, r *http.Request) (interface{},
 }
 
 func decodeDeployIcodeRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	amqpUrl := r.FormValue("amqpUrl")
-	gitUrl := r.FormValue("gitUrl")
-	sshPath := r.FormValue("sshPath")
-	sshPassword := r.FormValue("sshPassword")
-
-	if gitUrl == "" {
-		return nil, ErrBadRouting
+	body := DeployIcodeRequest{}
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		return nil, err
 	}
 
-	return DeployIcodeRequest{
-		IvmRequest: IvmRequest{
-			AmqpUrl: amqpUrl,
-		},
-		GitUrl:      gitUrl,
-		SshPath:     sshPath,
-		SshPassWord: sshPassword,
-	}, nil
+	if body.GitUrl == "" {
+		return nil, ErrBadConversion
+	}
+
+	return body, nil
 }
 
 func decodeUnDeployIcodeRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -203,7 +204,7 @@ func decodeUnDeployIcodeRequest(_ context.Context, r *http.Request) (interface{}
 
 	icodeId, ok := vars["id"]
 	if !ok {
-		return nil, ErrBadRouting
+		return nil, ErrBadConversion
 	}
 
 	return UnDeployIcodeRequest{
@@ -230,6 +231,21 @@ func decodeFindConnectionByIdRequest(_ context.Context, r *http.Request) (interf
 	}
 
 	return FindConnectionByIdRequest{ConnectionId: connectionId}, nil
+}
+
+func decodeCreateConnectionRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	body := CreateConnectionRequest{}
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		return nil, err
+	}
+
+	if body.Address == "" || (body.Type != "dial" && body.Type != "join") {
+		return nil, ErrBadConversion
+	}
+
+	return body, nil
+
 }
 
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
