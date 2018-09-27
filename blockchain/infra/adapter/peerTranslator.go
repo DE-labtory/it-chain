@@ -23,7 +23,8 @@ import (
 
 func toPeerFromConnection(peer api_gateway.Peer) blockchain.Peer {
 	return blockchain.Peer{
-		PeerID:            peer.ID,
+
+		Id:                peer.ID,
 		ApiGatewayAddress: peer.ApiGatewayAddress,
 	}
 }

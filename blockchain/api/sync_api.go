@@ -55,8 +55,10 @@ func (sApi SyncApi) Synchronize(peer blockchain.Peer) error {
 		sApi.syncStateRepository.Set(syncState)
 	}()
 
+	iLogger.Infof(nil, "[Blockchain] Start to Synchronize - Id: [%s]", peer.Id)
+
 	if sApi.isSynced(peer) {
-		iLogger.Infof(nil, "[Blockchain] Already Synchronized - PeerID: [%s]", peer.PeerID)
+		iLogger.Infof(nil, "[Blockchain] Already Synchronized - Id: [%s]", peer.Id)
 		return nil
 	}
 
@@ -67,8 +69,13 @@ func (sApi SyncApi) Synchronize(peer blockchain.Peer) error {
 		return err
 	}
 
-	iLogger.Infof(nil, "[Blockchain] Synchronized Successfully - PeerID: [%s]", peer.PeerID)
-	return sApi.CommitStagedBlocks()
+	if err = sApi.CommitStagedBlocks(); err != nil {
+		return err
+	}
+
+	iLogger.Infof(nil, "[Blockchain] Synchronized Successfully - PeerID: [%s]", peer.Id)
+
+	return nil
 }
 
 func (sApi SyncApi) isSynced(peer blockchain.Peer) bool {
