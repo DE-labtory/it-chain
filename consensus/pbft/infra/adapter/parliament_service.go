@@ -25,14 +25,14 @@ import (
 
 type ParliamentService struct {
 	Parliament   *pbft.Parliament
-	peerQueryApi api_gateway.PeerQueryApi
+	peerQueryApi *api_gateway.PeerQueryApi
 	mux          sync.Mutex
 }
 
-func NewParliamentService(parliament *pbft.Parliament, api api_gateway.PeerQueryApi) *ParliamentService {
+func NewParliamentService(parliament *pbft.Parliament, peerQueryApi *api_gateway.PeerQueryApi) *ParliamentService {
 	return &ParliamentService{
 		Parliament:   parliament,
-		peerQueryApi: api,
+		peerQueryApi: peerQueryApi,
 		mux:          sync.Mutex{},
 	}
 }
@@ -44,20 +44,16 @@ func (ps *ParliamentService) RequestLeader() (pbft.MemberID, error) {
 		return "", err
 	}
 
-	return pbft.MemberID(l.GetID()), nil
+	return pbft.MemberID(l.ID), nil
 }
 
 func (ps *ParliamentService) RequestPeerList() ([]pbft.MemberID, error) {
-	pl, err := ps.peerQueryApi.GetPeerList()
 
-	if err != nil {
-		return nil, err
-	}
-
+	pl := ps.peerQueryApi.GetAllPeerList()
 	peerList := make([]pbft.MemberID, 0)
 
 	for _, p := range pl {
-		peerList = append(peerList, pbft.MemberID(p.GetID()))
+		peerList = append(peerList, pbft.MemberID(p.ID))
 	}
 
 	return peerList, nil
@@ -86,17 +82,13 @@ func (p *ParliamentService) Build() error {
 	defer p.mux.Unlock()
 
 	// get peer table from peer query api
-	pt, err := p.peerQueryApi.GetPeerTable()
-
-	if err != nil {
-		return err
-	}
+	peerList := p.peerQueryApi.GetAllPeerList()
 
 	// extract representatives from peer table
-	for _, peer := range pt {
+	for _, peer := range peerList {
 		p.Parliament.RepresentativeTable[peer.ID] = &pbft.Representative{
 			ID:        peer.ID,
-			IpAddress: peer.IpAddress,
+			IpAddress: peer.GrpcGatewayAddress,
 		}
 	}
 

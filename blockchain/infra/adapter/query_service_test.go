@@ -50,7 +50,7 @@ func TestQuerySerivce_GetRandomPeer(t *testing.T) {
 		return _5thBlock, nil
 	}
 
-	connectionQueryApi := mock.ConnectionQueryApi{}
+	peerQueryApi := mock.PeerQueryApi{}
 
 	peerList := []blockchain.Peer{
 		{
@@ -67,26 +67,26 @@ func TestQuerySerivce_GetRandomPeer(t *testing.T) {
 		},
 	}
 
-	connectionList := []api_gateway.Connection{
+	connectionList := []api_gateway.Peer{
 		{
-			ConnectionID:      "connection1",
+			ID:                "connection1",
 			ApiGatewayAddress: "address1",
 		},
 		{
-			ConnectionID:      "connection2",
+			ID:                "connection2",
 			ApiGatewayAddress: "address2",
 		},
 		{
-			ConnectionID:      "connection3",
+			ID:                "connection3",
 			ApiGatewayAddress: "address3",
 		},
 	}
 
-	connectionQueryApi.GetAllConnectionListFunc = func() ([]api_gateway.Connection, error) {
-		return connectionList, nil
+	peerQueryApi.GetAllPeerListFunc = func() []api_gateway.Peer {
+		return connectionList
 	}
 
-	queryService := adapter.NewQueryService(blockAdapter, connectionQueryApi)
+	queryService := adapter.NewQueryService(blockAdapter, peerQueryApi)
 
 	//when
 	randomPeer, err := queryService.GetRandomPeer()

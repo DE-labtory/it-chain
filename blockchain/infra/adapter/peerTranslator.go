@@ -21,9 +21,9 @@ import (
 	"github.com/it-chain/engine/blockchain"
 )
 
-func toPeerFromConnection(connection api_gateway.Connection) blockchain.Peer {
+func toPeerFromConnection(peer api_gateway.Peer) blockchain.Peer {
 	return blockchain.Peer{
-		PeerID:            connection.ConnectionID,
-		ApiGatewayAddress: connection.ApiGatewayAddress,
+		PeerID:            peer.ID,
+		ApiGatewayAddress: peer.ApiGatewayAddress,
 	}
 }

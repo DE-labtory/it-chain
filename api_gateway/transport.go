@@ -35,13 +35,13 @@ var (
 	ErrBadConversion = errors.New("Conversion failed: invalid argument in url endpoint.")
 )
 
-func NewApiHandler(bqa *BlockQueryApi, iqa *ICodeQueryApi, cqa *ConnectionQueryApi, logger kitlog.Logger) http.Handler {
+func NewApiHandler(b *BlockQueryApi, i *ICodeQueryApi, p *PeerQueryApi, logger kitlog.Logger) http.Handler {
 
 	r := mux.NewRouter()
 
-	be := MakeBlockchainEndpoints(bqa)
-	ie := MakeIvmEndpoints(iqa)
-	ce := MakeConnectionEndpoints(cqa)
+	be := MakeBlockchainEndpoints(b)
+	ie := MakeIvmEndpoints(i)
+	ce := MakePeerEndpoints(p)
 
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorLogger(logger),
@@ -73,15 +73,15 @@ func NewApiHandler(bqa *BlockQueryApi, iqa *ICodeQueryApi, cqa *ConnectionQueryA
 		opts...,
 	))
 
-	r.Methods("GET").Path("/connections").Handler(kithttp.NewServer(
-		ce.FindAllConnectionEndpoint,
+	r.Methods("GET").Path("/peers").Handler(kithttp.NewServer(
+		ce.FindAllPeerEndpoint,
 		decodeFindAllConnectionRequest,
 		encodeResponse,
 		opts...,
 	))
 
-	r.Methods("GET").Path("/connections/{id}").Handler(kithttp.NewServer(
-		ce.FindConnectionByIdEndpoint,
+	r.Methods("GET").Path("/peers/{id}").Handler(kithttp.NewServer(
+		ce.FindPeerByIdEndpoint,
 		decodeFindConnectionByIdRequest,
 		encodeResponse,
 		opts...,
@@ -140,12 +140,12 @@ func decodeFindAllConnectionRequest(_ context.Context, r *http.Request) (interfa
 func decodeFindConnectionByIdRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 
-	connectionId, ok := vars["id"]
+	peerId, ok := vars["id"]
 	if !ok {
 		return nil, ErrBadRouting
 	}
 
-	return FindConnectionByIdRequest{ConnectionId: connectionId}, nil
+	return FindPeerByIdRequest{ID: peerId}, nil
 }
 
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {

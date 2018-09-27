@@ -25,9 +25,9 @@ import (
 	"github.com/it-chain/engine/blockchain"
 )
 
-type ConnectionQueryApi interface {
-	GetAllConnectionList() ([]api_gateway.Connection, error)
-	GetConnectionByID(connectionId string) (api_gateway.Connection, error)
+type PeerQueryApi interface {
+	GetAllPeerList() []api_gateway.Peer
+	GetPeerByID(connectionId string) (api_gateway.Peer, error)
 }
 
 type BlockAdapter interface {
@@ -36,32 +36,28 @@ type BlockAdapter interface {
 }
 
 type QuerySerivce struct {
-	blockAdapter       BlockAdapter
-	connectionQueryApi ConnectionQueryApi
+	blockAdapter BlockAdapter
+	peerQueryApi PeerQueryApi
 }
 
-func NewQueryService(blockAdapter BlockAdapter, connectionQueryApi ConnectionQueryApi) *QuerySerivce {
+func NewQueryService(blockAdapter BlockAdapter, peerQueryApi PeerQueryApi) *QuerySerivce {
 	return &QuerySerivce{
-		blockAdapter:       blockAdapter,
-		connectionQueryApi: connectionQueryApi,
+		blockAdapter: blockAdapter,
+		peerQueryApi: peerQueryApi,
 	}
 }
 
 func (s QuerySerivce) GetRandomPeer() (blockchain.Peer, error) {
 
-	connectionList, err := s.connectionQueryApi.GetAllConnectionList()
-	if err != nil {
-		return blockchain.Peer{}, err
-	}
-
-	if len(connectionList) == 0 {
+	peerList := s.peerQueryApi.GetAllPeerList()
+	if len(peerList) == 0 {
 		return blockchain.Peer{}, nil
 	}
 
 	randSource := rand.NewSource(time.Now().UnixNano())
 	randInstance := rand.New(randSource)
-	randomIndex := randInstance.Intn(len(connectionList))
-	randomPeer := toPeerFromConnection(connectionList[randomIndex])
+	randomIndex := randInstance.Intn(len(peerList))
+	randomPeer := toPeerFromConnection(peerList[randomIndex])
 
 	return randomPeer, nil
 }
