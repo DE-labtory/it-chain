@@ -21,5 +21,4 @@ type PeerQueryService interface {
 	GetPeerList() ([]Peer, error)
 	GetLeader() (Leader, error)
 	FindPeerById(peerId PeerId) (Peer, error)
-	FindPeerByAddress(ipAddress string) (Peer, error)
 }

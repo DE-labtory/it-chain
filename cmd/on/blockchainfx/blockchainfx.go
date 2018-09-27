@@ -61,8 +61,8 @@ func NewBlockAdapter() *adapter.HttpBlockAdapter {
 	return adapter.NewHttpBlockAdapter()
 }
 
-func NewQueryService(blockAdapter *adapter.HttpBlockAdapter, connectionQueryApi *api_gateway.ConnectionQueryApi) *adapter.QuerySerivce {
-	return adapter.NewQueryService(blockAdapter, connectionQueryApi)
+func NewQueryService(blockAdapter *adapter.HttpBlockAdapter, peerQueryApi *api_gateway.PeerQueryApi) *adapter.QuerySerivce {
+	return adapter.NewQueryService(blockAdapter, peerQueryApi)
 }
 
 func NewBlockRepository() (*repo.BlockRepository, error) {
