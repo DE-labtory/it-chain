@@ -25,6 +25,7 @@ type ParliamentMessage struct {
 }
 
 type RequestVoteMessage struct {
+	Term int
 }
 
 type VoteMessage struct {

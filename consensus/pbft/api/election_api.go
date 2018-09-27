@@ -47,14 +47,8 @@ func NewElectionApi(electionService *pbft.ElectionService, parliamentService pbf
 
 func (ea *ElectionApi) Vote(connectionId string) error {
 
+	ea.ElectionService.IncreaseTerm()
 	representative := ea.parliamentService.GetRepresentativeById(connectionId)
-
-	candidate := ea.ElectionService.GetCandidate()
-
-	if candidate.ID != "" {
-		iLogger.Info(nil, "[consensus] peer has already received request vote message")
-		return nil
-	}
 
 	ea.ElectionService.SetCandidate(representative)
 
@@ -187,7 +181,9 @@ func (e *ElectionApi) ElectLeaderWithRaft() {
 func (es *ElectionApi) RequestVote(connectionIds []string) error {
 	// 1. create request vote message
 	// 2. send message
-	requestVoteMessage := pbft.RequestVoteMessage{}
+	requestVoteMessage := pbft.RequestVoteMessage{
+		Term: es.ElectionService.GetTerm(),
+	}
 
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("RequestVoteProtocol", requestVoteMessage)
 
