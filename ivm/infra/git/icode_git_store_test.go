@@ -40,19 +40,16 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 
 	//given
 	tests := map[string]struct {
-		ID          string
 		InputGitURL string
 		OutputMeta  ivm.ICode
 		OutputErr   error
 	}{
 		"success": {
-			ID:          "1",
 			InputGitURL: "github.com/junbeomlee/test_icode",
 			OutputMeta:  ivm.ICode{RepositoryName: "test_icode", GitUrl: "github.com/junbeomlee/test_icode", Path: baseTempPath + "/" + "test_icode", Version: "1.0"},
 			OutputErr:   nil,
 		},
 		"fail": {
-			ID:          "2",
 			InputGitURL: "github.com/nonono",
 			OutputMeta:  ivm.ICode{},
 			OutputErr:   errors.New("repository not found"),
@@ -63,7 +60,7 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 
 	for _, test := range tests {
 		//when
-		meta, err := icodeApi.Clone(test.ID, baseTempPath, test.InputGitURL, sshPath, "")
+		meta, err := icodeApi.Clone(baseTempPath, test.InputGitURL, sshPath, "")
 
 		if err == nil {
 			// ivm ID 는 랜덤이기때문에 실데이터에서 주입
@@ -89,21 +86,18 @@ func TestICodeGitStoreApi_CloneWithPassword(t *testing.T) {
 
 	//given
 	tests := map[string]struct {
-		ID          string
 		InputGitURL string
 		InputPwd    string
 		OutputMeta  ivm.ICode
 		OutputErr   error
 	}{
 		"success": {
-			ID:          "1",
 			InputGitURL: "github.com/nesticat/test_icode",
 			InputPwd:    "pwdtest",
 			OutputMeta:  ivm.ICode{RepositoryName: "test_icode", GitUrl: "github.com/nesticat/test_icode", Path: baseTempPath + "/" + "test_icode", Version: "1.0"},
 			OutputErr:   nil,
 		},
 		"fail": {
-			ID:          "1",
 			InputGitURL: "github.com/nesticat/test_icode",
 			InputPwd:    "wrongpassword",
 			OutputMeta:  ivm.ICode{},
@@ -115,7 +109,7 @@ func TestICodeGitStoreApi_CloneWithPassword(t *testing.T) {
 
 	for _, test := range tests {
 		//when
-		meta, err := icodeApi.Clone(test.ID, baseTempPath, test.InputGitURL, sshPathWithPassword, test.InputPwd)
+		meta, err := icodeApi.Clone(baseTempPath, test.InputGitURL, sshPathWithPassword, test.InputPwd)
 
 		if err == nil {
 			// ivm ID 는 랜덤이기때문에 실데이터에서 주입
@@ -137,19 +131,16 @@ func TestICodeGitStoreApi_CloneWithoutSsh(t *testing.T) {
 
 	//given
 	tests := map[string]struct {
-		ID          string
 		InputGitURL string
 		OutputMeta  ivm.ICode
 		OutputErr   error
 	}{
 		"success": {
-			ID:          "1",
 			InputGitURL: "github.com/junbeomlee/test_icode",
 			OutputMeta:  ivm.ICode{RepositoryName: "test_icode", GitUrl: "github.com/junbeomlee/test_icode", Path: baseTempPath + "/" + "test_icode", Version: "1.0"},
 			OutputErr:   nil,
 		},
 		"fail": {
-			ID:          "2",
 			InputGitURL: "github.com/nonono",
 			OutputMeta:  ivm.ICode{},
 			OutputErr:   errors.New("repository not found"),
@@ -160,7 +151,7 @@ func TestICodeGitStoreApi_CloneWithoutSsh(t *testing.T) {
 
 	for _, test := range tests {
 		//when
-		meta, err := icodeApi.Clone(test.ID, baseTempPath, test.InputGitURL, "", "")
+		meta, err := icodeApi.Clone(baseTempPath, test.InputGitURL, "", "")
 
 		if err == nil {
 			// ivm ID 는 랜덤이기때문에 실데이터에서 주입

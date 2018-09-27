@@ -44,7 +44,7 @@ func NewRepositoryService() *RepositoryService {
 	return &RepositoryService{}
 }
 
-func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryUrl string, sshPath string, password string) (ivm.ICode, error) {
+func (gApi *RepositoryService) Clone(baseSavePath string, repositoryUrl string, sshPath string, password string) (ivm.ICode, error) {
 	iLogger.Info(nil, fmt.Sprintf("[IVM] Cloning Icode - url: [%s]", repositoryUrl))
 
 	gitUrl, err := toGitUrl(repositoryUrl, sshPath)
@@ -113,6 +113,8 @@ func (gApi *RepositoryService) Clone(id string, baseSavePath string, repositoryU
 		}
 		return nil
 	})
+
+	id := name + "_" + lastHeadCommit.Hash.String()
 
 	iLogger.Info(nil, fmt.Sprintf("[IVM] ICode has successfully cloned - url: [%s], icodeID: [%s], version[%s]", repositoryUrl, id, version))
 
