@@ -25,7 +25,6 @@ import (
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
-	"github.com/it-chain/engine/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -107,7 +106,7 @@ func TestPbftMsgHandler_HandleGrpcMsgCommand(t *testing.T) {
 		},
 	}
 
-	p := adapter.NewPbftMsgHandler(newMockStateApiForPbftMsgHandler(t))
+	p := adapter.NewPbftMsgHandler(*newMockStateApiForPbftMsgHandler(t))
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
@@ -116,12 +115,9 @@ func TestPbftMsgHandler_HandleGrpcMsgCommand(t *testing.T) {
 	}
 }
 
-func newMockStateApiForPbftMsgHandler(t *testing.T) *mock.StateApi {
-	mockApi := mock.StateApi{}
-	mockApi.StartConsensusFunc = func(proposedBlock pbft.ProposedBlock) error {
-		return nil
-	}
-	mockApi.HandleProposeMsgFunc = func(msg pbft.ProposeMsg) error {
+func newMockStateApiForPbftMsgHandler(t *testing.T) *adapter.StateMsgApi {
+	mockApi := adapter.StateMsgApi{}
+	mockApi.HandleProposeMsg = func(msg pbft.ProposeMsg) error {
 		if msg.SenderID == "sender1" {
 			assert.NotNil(t, msg.Representative)
 			assert.NotNil(t, msg.ProposedBlock)
@@ -130,7 +126,7 @@ func newMockStateApiForPbftMsgHandler(t *testing.T) *mock.StateApi {
 
 		return errors.New("HandleProposeMsg error")
 	}
-	mockApi.HandlePrevoteMsgFunc = func(msg pbft.PrevoteMsg) error {
+	mockApi.HandlePrevoteMsg = func(msg pbft.PrevoteMsg) error {
 		if msg.SenderID == "sender2" {
 			assert.NotNil(t, msg.BlockHash)
 			return nil
@@ -138,7 +134,7 @@ func newMockStateApiForPbftMsgHandler(t *testing.T) *mock.StateApi {
 
 		return errors.New("HandlePrevoteMsg error")
 	}
-	mockApi.HandlePreCommitMsgFunc = func(msg pbft.PreCommitMsg) error {
+	mockApi.HandlePreCommitMsg = func(msg pbft.PreCommitMsg) error {
 		if msg.SenderID == "sender3" {
 			return nil
 		}

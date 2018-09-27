@@ -21,17 +21,20 @@ import (
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/pkg/errors"
 )
 
 var BlockSealIsNilError = errors.New("Block seal in command is nil!")
 
-type StartConsensusCommandHandler struct {
-	sApi api.StateApi
+type StateStartApi struct {
+	StartConsensus func(proposedBlock pbft.ProposedBlock) error
 }
 
-func NewStartConsensusCommandHandler(sApi api.StateApi) *StartConsensusCommandHandler {
+type StartConsensusCommandHandler struct {
+	sApi StateStartApi
+}
+
+func NewStartConsensusCommandHandler(sApi StateStartApi) *StartConsensusCommandHandler {
 	return &StartConsensusCommandHandler{
 		sApi: sApi,
 	}
