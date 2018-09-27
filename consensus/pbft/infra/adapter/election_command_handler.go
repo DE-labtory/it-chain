@@ -52,6 +52,16 @@ func (gch *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveG
 	case "RequestVoteProtocol":
 		logger.Infof(nil, "[consensus] handling request vote from process: %v", gch.electionApi.GetIpAddress())
 
+		message := &pbft.RequestVoteMessage{}
+		deserializeErr := common.Deserialize(command.Body, message)
+		if deserializeErr != nil {
+			return deserializeErr
+		}
+
+		if message.Term < gch.electionApi.ElectionService.GetTerm() {
+			return nil
+		}
+
 		err := gch.electionApi.Vote(command.ConnectionID)
 
 		if err != nil {

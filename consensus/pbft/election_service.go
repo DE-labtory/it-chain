@@ -29,6 +29,7 @@ type ElectionService struct {
 	state     ElectionState
 	voteCount int
 	mux       sync.Mutex
+	term      int
 }
 
 func NewElectionService(ipAddress string, leftTime int, state ElectionState, voteCount int) *ElectionService {
@@ -42,6 +43,7 @@ func NewElectionService(ipAddress string, leftTime int, state ElectionState, vot
 		state:     state,
 		voteCount: voteCount,
 		mux:       sync.Mutex{},
+		term:      0,
 	}
 }
 
@@ -146,4 +148,17 @@ func (e *ElectionService) GetCandidate() *Representative {
 
 func (e *ElectionService) GetIpAddress() string {
 	return e.ipAddress
+}
+
+func (e *ElectionService) IncreaseTerm() error {
+	e.mux.Lock()
+	defer e.mux.Unlock()
+
+	e.term = e.term + 1
+
+	return nil
+}
+
+func (e *ElectionService) GetTerm() int {
+	return e.term
 }
