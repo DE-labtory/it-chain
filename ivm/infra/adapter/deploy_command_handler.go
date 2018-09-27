@@ -42,7 +42,7 @@ func (d *DeployCommandHandler) HandleDeployCommand(deployCommand command.Deploy)
 	sshPath := deployCommand.SshPath
 	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/.tmp/"
 
-	icode, err := d.icodeApi.Deploy(deployCommand.ICodeId, savePath, deployCommand.Url, sshPath, deployCommand.Password)
+	icode, err := d.icodeApi.Deploy(savePath, deployCommand.Url, sshPath, deployCommand.Password)
 
 	if err != nil {
 		iLogger.Error(nil, fmt.Sprintf("[Icode] fail to deploy ivm, url %s", deployCommand.Url))

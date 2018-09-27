@@ -40,11 +40,11 @@ func NewICodeApi(containerService ivm.ContainerService, gitService ivm.GitServic
 	}
 }
 
-func (i ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath string, password string) (ivm.ICode, error) {
+func (i ICodeApi) Deploy(baseSaveUrl string, gitUrl string, sshPath string, password string) (ivm.ICode, error) {
 	iLogger.Info(nil, fmt.Sprintf("[IVM] Deploying icode - url: [%s]", gitUrl))
 
 	// clone icode. in clone function, metaCreatedEvent will publish
-	icode, err := i.GitService.Clone(id, baseSaveUrl, gitUrl, sshPath, password)
+	icode, err := i.GitService.Clone(baseSaveUrl, gitUrl, sshPath, password)
 
 	if err != nil {
 		return ivm.ICode{}, err
@@ -59,7 +59,7 @@ func (i ICodeApi) Deploy(id string, baseSaveUrl string, gitUrl string, sshPath s
 		return ivm.ICode{}, nil
 	}
 
-	iLogger.Info(nil, fmt.Sprintf("[IVM] ICode has deployed - icodeID: [%s]", id))
+	iLogger.Info(nil, fmt.Sprintf("[IVM] ICode has deployed - icodeID: [%s]", icode.ID))
 	return icode, nil
 }
 

@@ -53,7 +53,6 @@ func (i *ICodeCommandApi) deploy(amqpUrl string, gitUrl string, sshPath string, 
 	}
 
 	deployCommand := command.Deploy{
-		ICodeId:  xid.New().String(),
 		Url:      gitUrl,
 		SshPath:  absPath,
 		Password: sshPassword,

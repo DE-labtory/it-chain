@@ -26,7 +26,6 @@ import (
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/iLogger"
-	"github.com/rs/xid"
 	"github.com/urfave/cli"
 )
 
@@ -59,7 +58,6 @@ func deploy(gitUrl string, sshPath string, password string) {
 	}
 
 	deployCommand := command.Deploy{
-		ICodeId:  xid.New().String(),
 		Url:      gitUrl,
 		SshPath:  absPath,
 		Password: password,

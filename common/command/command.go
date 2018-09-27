@@ -82,7 +82,6 @@ type ExecuteICode struct {
 }
 
 type Deploy struct {
-	ICodeId  string
 	Url      string
 	SshPath  string
 	Password string
