@@ -37,15 +37,6 @@ func NewICodeCommandApi() *ICodeCommandApi {
 	return &ICodeCommandApi{}
 }
 
-type icode struct {
-	ID             string
-	RepositoryName string
-	GitUrl         string
-	Path           string
-	CommitHash     string
-	Version        string
-}
-
 func (i *ICodeCommandApi) deploy(amqpUrl string, gitUrl string, sshPath string, sshPassword string) (string, error) {
 	if amqpUrl == "" {
 		config := conf.GetConfiguration()
