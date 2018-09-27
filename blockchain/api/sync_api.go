@@ -193,6 +193,8 @@ func (sApi *SyncApi) CommitStagedBlocks() error {
 				return err
 			}
 
+			sApi.blockPool.Delete(height)
+
 			raiseHeight(&targetHeight)
 		}
 	}
