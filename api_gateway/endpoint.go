@@ -28,8 +28,9 @@ type Endpoints struct {
 	FindAllCommittedBlocksEndpoint   endpoint.Endpoint
 	FindCommittedBlockBySealEndpoint endpoint.Endpoint
 
-	FindAllPeerEndpoint  endpoint.Endpoint
-	FindPeerByIdEndpoint endpoint.Endpoint
+	FindAllPeerEndpoint      endpoint.Endpoint
+	FindPeerByIdEndpoint     endpoint.Endpoint
+	CreateConnectionEndpoint endpoint.Endpoint
 
 	GetIcodeListEndpoint  endpoint.Endpoint
 	DeployIcodeEndpoint   endpoint.Endpoint
@@ -50,7 +51,7 @@ func MakeBlockchainEndpoints(b *BlockQueryApi) Endpoints {
 	}
 }
 
-func MakeIvmEndpoints(i *ICodeCommandApi, iqa *ICodeQueryApi) Endpoints {
+func MakeIcodeEndpoints(i *ICodeCommandApi, iqa *ICodeQueryApi) Endpoints {
 	return Endpoints{
 		GetIcodeListEndpoint:  makeFindAllICodeEndpoint(iqa),
 		DeployIcodeEndpoint:   makeDeployIcodeEndpoint(i),
@@ -58,13 +59,13 @@ func MakeIvmEndpoints(i *ICodeCommandApi, iqa *ICodeQueryApi) Endpoints {
 	}
 }
 
-func MakePeerEndpoints(p *PeerQueryApi) Endpoints {
+func MakePeerEndpoints(p *PeerQueryApi, cca *ConnectionCommandApi) Endpoints {
 	return Endpoints{
-		FindAllPeerEndpoint:  makeFindAllPeerEndpoint(p),
-		FindPeerByIdEndpoint: makeFindPeerByIdEndpoint(p),
+		FindAllPeerEndpoint:      makeFindAllPeerEndpoint(p),
+		FindPeerByIdEndpoint:     makeFindPeerByIdEndpoint(p),
+		CreateConnectionEndpoint: makeCreateConnectionEndpoint(cca),
 	}
 }
-
 func MakeTransactionEndpoints(i *ICodeCommandApi) Endpoints {
 	return Endpoints{
 		FindAllUncommittedTransactionEndpoint: makeFindAllUncommittedTransactionEndpoint(),
@@ -197,6 +198,45 @@ type FindPeerByIdRequest struct {
 	ID string
 }
 
+func makeCreateConnectionEndpoint(cca *ConnectionCommandApi) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(CreateConnectionRequest)
+		switch req.Type {
+		case "dial":
+			grpcGatewayAddress, connectionID, err := cca.dial(req.Address)
+
+			if err != nil {
+				iLogger.Errorf(nil, "[api-gateway] Error while dial to [%s], err : %s", req.Address, err.Error())
+				return nil, err
+			}
+
+			type responseData struct {
+				grpcGatewayAddress string
+				connectionId       string
+			}
+
+			return responseData{
+				grpcGatewayAddress: grpcGatewayAddress,
+				connectionId:       connectionID,
+			}, nil
+
+		case "join":
+			err := cca.join(req.Address)
+
+			if err != nil {
+				iLogger.Errorf(nil, "[api-gateway] Error while dial to [%s], err : %s", req.Address, err.Error())
+				return nil, err
+			}
+
+			return req.Address, nil
+
+		default:
+			iLogger.Error(nil, "error while create connection endpoint. unknown type err")
+			return nil, errors.New("unknown type err")
+		}
+	}
+}
+
 //request struct
 type IvmRequest struct {
 	AmqpUrl string
@@ -239,4 +279,9 @@ type CreateTransactionRequest struct {
 // grpc request struct
 type FindConnectionByIdRequest struct {
 	ConnectionId string
+}
+
+type CreateConnectionRequest struct {
+	Type    string // dial or join
+	Address string
 }
