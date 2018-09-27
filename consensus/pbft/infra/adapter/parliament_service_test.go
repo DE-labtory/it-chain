@@ -22,21 +22,18 @@ import (
 	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
-	"github.com/it-chain/engine/p2p"
-	"github.com/it-chain/engine/p2p/infra/mem"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestParliamentService_RequestLeader(t *testing.T) {
 	// given (case 1 : no leader)
-	peerRepository := mem.NewPeerReopository()
+	peerRepository := api_gateway.NewPeerRepository()
 
-	peerRepository.Save(p2p.Peer{
-		IpAddress: "1.1.1.1",
-		PeerId:    p2p.PeerId{"p1"},
+	peerRepository.Save(api_gateway.Peer{
+		GrpcGatewayAddress: "1.1.1.1",
+		ID:                 "p1",
 	})
 	parliament := pbft.NewParliament()
-
 	ps := adapter.NewParliamentService(parliament, api_gateway.NewPeerQueryApi(peerRepository))
 
 	// when
@@ -46,37 +43,34 @@ func TestParliamentService_RequestLeader(t *testing.T) {
 	assert.Equal(t, "", l.ToString())
 
 	// given (case 2 : good case)
-	peerRepository.SetLeader(p2p.Leader{
-		LeaderId: p2p.LeaderId{Id: "leader"},
-	})
+	peerRepository.SetLeader("p1")
 
 	// when
 	l, err := ps.RequestLeader()
 
 	// then
-	assert.Equal(t, "leader", l.ToString())
+	assert.Equal(t, "p1", l.ToString())
 	assert.Nil(t, err)
 }
 
 func TestParliamentService_RequestPeerList(t *testing.T) {
 	// given
-	peerRepository := mem.NewPeerReopository()
+	peerRepository := api_gateway.NewPeerRepository()
 
-	p1 := p2p.Peer{
-		IpAddress: "1.1.1.1",
-		PeerId:    p2p.PeerId{"p1"},
+	p1 := api_gateway.Peer{
+		GrpcGatewayAddress: "1.1.1.1",
+		ID:                 "p1",
 	}
 
-	p2 := p2p.Peer{
-		IpAddress: "2.2.2.2",
-		PeerId:    p2p.PeerId{"p2"},
+	p2 := api_gateway.Peer{
+		GrpcGatewayAddress: "2.2.2.2",
+		ID:                 "p2",
 	}
 
 	peerRepository.Save(p1)
 	peerRepository.Save(p2)
 
 	parliament := pbft.NewParliament()
-
 	ps := adapter.NewParliamentService(parliament, api_gateway.NewPeerQueryApi(peerRepository))
 
 	// when
@@ -89,7 +83,7 @@ func TestParliamentService_RequestPeerList(t *testing.T) {
 
 func TestParliamentService_IsNeedConsensus(t *testing.T) {
 	// given (case 1 : no member)
-	peerRepository := mem.NewPeerReopository()
+	peerRepository := api_gateway.NewPeerRepository()
 	parliament := pbft.NewParliament()
 	ps := adapter.NewParliamentService(parliament, api_gateway.NewPeerQueryApi(peerRepository))
 
@@ -100,19 +94,19 @@ func TestParliamentService_IsNeedConsensus(t *testing.T) {
 	assert.Equal(t, false, flag)
 
 	// given (case 2 : less than 4 members)
-	p1 := p2p.Peer{
-		IpAddress: "1.1.1.1",
-		PeerId:    p2p.PeerId{"p1"},
+	p1 := api_gateway.Peer{
+		GrpcGatewayAddress: "1.1.1.1",
+		ID:                 "p1",
 	}
 
-	p2 := p2p.Peer{
-		IpAddress: "2.2.2.2",
-		PeerId:    p2p.PeerId{"p2"},
+	p2 := api_gateway.Peer{
+		GrpcGatewayAddress: "2.2.2.2",
+		ID:                 "p2",
 	}
 
-	p3 := p2p.Peer{
-		IpAddress: "3.3.3.3",
-		PeerId:    p2p.PeerId{"p3"},
+	p3 := api_gateway.Peer{
+		GrpcGatewayAddress: "3.3.3.3",
+		ID:                 "p3",
 	}
 
 	peerRepository.Save(p1)
@@ -126,9 +120,9 @@ func TestParliamentService_IsNeedConsensus(t *testing.T) {
 	assert.Equal(t, false, flag)
 
 	// given (case 3 : equal or moro than 4 members)
-	p4 := p2p.Peer{
-		IpAddress: "4.4.4.4",
-		PeerId:    p2p.PeerId{"p4"},
+	p4 := api_gateway.Peer{
+		GrpcGatewayAddress: "4.4.4.4",
+		ID:                 "p4",
 	}
 
 	peerRepository.Save(p4)
@@ -212,24 +206,19 @@ func TestNewParliamentService(t *testing.T) {
 
 func SetParliamentService() *adapter.ParliamentService {
 	parliament := pbft.NewParliament()
-	repository := mem.NewPeerReopository()
-	repository.Save(p2p.Peer{
-		IpAddress: "1",
-		PeerId: p2p.PeerId{
-			Id: "1",
-		},
+	repository := api_gateway.NewPeerRepository()
+
+	repository.Save(api_gateway.Peer{
+		GrpcGatewayAddress: "1",
+		ID:                 "1",
 	})
-	repository.Save(p2p.Peer{
-		IpAddress: "2",
-		PeerId: p2p.PeerId{
-			Id: "2",
-		},
+	repository.Save(api_gateway.Peer{
+		GrpcGatewayAddress: "2",
+		ID:                 "2",
 	})
-	repository.Save(p2p.Peer{
-		IpAddress: "3",
-		PeerId: p2p.PeerId{
-			Id: "3",
-		},
+	repository.Save(api_gateway.Peer{
+		GrpcGatewayAddress: "3",
+		ID:                 "3",
 	})
 	api := api_gateway.NewPeerQueryApi(repository)
 	p := adapter.NewParliamentService(parliament, api)

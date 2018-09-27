@@ -27,8 +27,8 @@ type Endpoints struct {
 	FindAllCommittedBlocksEndpoint   endpoint.Endpoint
 	FindCommittedBlockBySealEndpoint endpoint.Endpoint
 	FindAllMetaEndpoint              endpoint.Endpoint
-	FindAllConnectionEndpoint        endpoint.Endpoint
-	FindConnectionByIdEndpoint       endpoint.Endpoint
+	FindAllPeerEndpoint              endpoint.Endpoint
+	FindPeerByIdEndpoint             endpoint.Endpoint
 }
 
 /*
@@ -48,10 +48,10 @@ func MakeIvmEndpoints(i *ICodeQueryApi) Endpoints {
 	}
 }
 
-func MakeConnectionEndpoints(c *ConnectionQueryApi) Endpoints {
+func MakePeerEndpoints(p *PeerQueryApi) Endpoints {
 	return Endpoints{
-		FindAllConnectionEndpoint:  makeFindAllConnectionEndpoint(c),
-		FindConnectionByIdEndpoint: makeFindConnectionByIdEndpoint(c),
+		FindAllPeerEndpoint:  makeFindAllPeerEndpoint(p),
+		FindPeerByIdEndpoint: makeFindPeerByIdEndpoint(p),
 	}
 }
 
@@ -112,29 +112,25 @@ type FindCommittedBlockBySealRequest struct {
 	Seal []byte
 }
 
-func makeFindAllConnectionEndpoint(c *ConnectionQueryApi) endpoint.Endpoint {
+func makeFindAllPeerEndpoint(p *PeerQueryApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		connections, err := c.GetAllConnectionList()
+		peers := p.GetAllPeerList()
+		return peers, nil
+	}
+}
+
+func makeFindPeerByIdEndpoint(p *PeerQueryApi) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(FindPeerByIdRequest)
+		peer, err := p.GetPeerByID(req.ID)
 		if err != nil {
 			iLogger.Error(nil, "[Api-gateway] Error while finding all connections")
 			return nil, err
 		}
-		return connections, nil
+		return peer, nil
 	}
 }
 
-func makeFindConnectionByIdEndpoint(c *ConnectionQueryApi) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(FindConnectionByIdRequest)
-		connections, err := c.GetConnectionByID(req.ConnectionId)
-		if err != nil {
-			iLogger.Error(nil, "[Api-gateway] Error while finding all connections")
-			return nil, err
-		}
-		return connections, nil
-	}
-}
-
-type FindConnectionByIdRequest struct {
-	ConnectionId string
+type FindPeerByIdRequest struct {
+	ID string
 }

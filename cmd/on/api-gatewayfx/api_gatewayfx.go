@@ -25,7 +25,6 @@ import (
 
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/it-chain/engine/api_gateway"
-	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/conf"
 	"go.uber.org/fx"
@@ -39,13 +38,13 @@ var Module = fx.Options(
 		NewKitLogger,
 		NewBlockRepository,
 		NewICodeRepository,
-		NewConnectionRepository,
+		NewPeerRepository,
 		NewBlockQueryApi,
 		NewBlockEventListener,
 		api_gateway.NewConnectionEventListener,
 		NewICodeQueryApi,
 		NewICodeEventHandler,
-		api_gateway.NewConnectionQueryApi,
+		api_gateway.NewPeerQueryApi,
 		api_gateway.NewApiHandler,
 		http.NewServeMux,
 	),
@@ -91,19 +90,21 @@ func NewICodeRepository() *api_gateway.LevelDbICodeRepository {
 	return api_gateway.NewLevelDbMetaRepository(icodeDB)
 }
 
-func NewConnectionRepository(eventService common.EventService) *api_gateway.ConnectionRepository {
-	return api_gateway.NewConnectionRepository(eventService)
+func NewPeerRepository() *api_gateway.PeerRepository {
+	return api_gateway.NewPeerRepository()
 }
 
-func RegisterEvent(subscriber *pubsub.TopicSubscriber, blockEventListener *api_gateway.BlockEventListener, icodeEventListener *api_gateway.ICodeEventHandler, connectionEventListener *api_gateway.ConnectionEventListener) {
+func RegisterEvent(subscriber *pubsub.TopicSubscriber, blockEventListener *api_gateway.BlockEventListener, icodeEventListener *api_gateway.ICodeEventHandler, connectionEventListener *api_gateway.ConnectionEventListener, leaderUpdateEventlistener *api_gateway.LeaderUpdateEventListener) {
 	if err := subscriber.SubscribeTopic("block.*", blockEventListener); err != nil {
 		panic(err)
 	}
 	if err := subscriber.SubscribeTopic("icode.*", icodeEventListener); err != nil {
 		panic(err)
 	}
-
 	if err := subscriber.SubscribeTopic("connection.*", connectionEventListener); err != nil {
+		panic(err)
+	}
+	if err := subscriber.SubscribeTopic("leader.updated", leaderUpdateEventlistener); err != nil {
 		panic(err)
 	}
 }
