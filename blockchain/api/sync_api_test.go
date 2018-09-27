@@ -17,8 +17,9 @@ package api_test
 
 import (
 	"os"
-	"sync"
 	"testing"
+
+	"sync"
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/api"
@@ -31,112 +32,42 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSyncApi_Synchronize(t *testing.T) {
+var block1 = mock.GetNewBlock([]byte("block1"), 0)
+var block2 = mock.GetNewBlock(block1.Seal, 1)
+var block3 = mock.GetNewBlock(block2.Seal, 2)
+var block4 = mock.GetNewBlock(block3.Seal, 3)
+var block5 = mock.GetNewBlock(block4.Seal, 4)
+var block6 = mock.GetNewBlock(block5.Seal, 5)
+var block7 = mock.GetNewBlock(block6.Seal, 6)
 
-	//given
-	block1 := mock.GetNewBlock([]byte("block1"), 0)
-	block2 := mock.GetNewBlock(block1.Seal, 1)
-	block3 := mock.GetNewBlock(block2.Seal, 2)
+var peerForSync = blockchain.Peer{
+	PeerID:            "PeerID",
+	ApiGatewayAddress: "PeerIP",
+}
 
-	errGetRandomPeer := errors.New("GetRandomPeer")
+var peerBlockchain = []*blockchain.DefaultBlock{
+	block1,
+	block2,
+	block3,
+}
 
-	tests := map[string]struct {
-		blockchain       []*blockchain.DefaultBlock
-		peer             blockchain.Peer
-		dbPath           string
-		ErrGetRandomPeer error
-		ErrSyncWithPeer  error
-		output           struct {
-			syncProgressing bool
-			synced          bool
-		}
-		err error
-	}{
-		"not synced": {
-			blockchain: []*blockchain.DefaultBlock{
-				block1,
-			},
-			peer: blockchain.Peer{
-				ApiGatewayAddress: "PeerIP",
-			},
-			dbPath:           "./.db1",
-			ErrGetRandomPeer: nil,
-			ErrSyncWithPeer:  nil,
-			output: struct {
-				syncProgressing bool
-				synced          bool
-			}{
-				syncProgressing: false,
-				synced:          true,
-			},
-			err: nil,
-		},
+func getQueryService(targetPeer blockchain.Peer) mock.QueryService {
+	queryService := mock.QueryService{}
 
-		"synced": {
-			blockchain: []*blockchain.DefaultBlock{
-				block1,
-				block2,
-				block3,
-			},
-			peer: blockchain.Peer{
-				ApiGatewayAddress: "PeerIP",
-			},
-			dbPath:           "./.db2",
-			ErrGetRandomPeer: nil,
-			ErrSyncWithPeer:  nil,
-			output: struct {
-				syncProgressing bool
-				synced          bool
-			}{
-				syncProgressing: false,
-				synced:          true,
-			},
-			err: nil,
-		},
-
-		"No Peer In Network(it is the first peer)": {
-			blockchain:       []*blockchain.DefaultBlock{},
-			peer:             blockchain.Peer{},
-			dbPath:           "./.db3",
-			ErrGetRandomPeer: nil,
-			ErrSyncWithPeer:  nil,
-			output: struct {
-				syncProgressing bool
-				synced          bool
-			}{
-				syncProgressing: false,
-				synced:          true,
-			},
-			err: nil,
-		},
-
-		"When error occured in GetRandomPeer": {
-			blockchain: []*blockchain.DefaultBlock{
-				block1,
-				block2,
-				block3,
-			},
-			dbPath:           "./.db4",
-			ErrGetRandomPeer: errGetRandomPeer,
-			ErrSyncWithPeer:  nil,
-			output: struct {
-				syncProgressing bool
-				synced          bool
-			}{
-				syncProgressing: false,
-				synced:          false,
-			},
-			err: errGetRandomPeer,
-		},
+	queryService.GetRandomPeerFunc = func() (blockchain.Peer, error) {
+		return targetPeer, nil
+	}
+	queryService.GetBlockByHeightFromPeerFunc = func(height blockchain.BlockHeight, peer blockchain.Peer) (blockchain.DefaultBlock, error) {
+		return *peerBlockchain[height], nil
+	}
+	queryService.GetLastBlockFromPeerFunc = func(peer blockchain.Peer) (blockchain.DefaultBlock, error) {
+		return *block3, nil
 	}
 
-	PeerBlockchain := []*blockchain.DefaultBlock{
-		block1,
-		block2,
-		block3,
-	}
+	return queryService
+}
 
-	//set subscriber
+func TestSyncApi_Synchronize_NotSynced_BlockPool_Has_Shorter_Heights(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
@@ -153,118 +84,454 @@ func TestSyncApi_Synchronize(t *testing.T) {
 
 	publisherID := "junksound"
 
-	eventService := common.NewEventService("", "Event")
-
-	for testName, test := range tests {
-		t.Logf("Running test case %s", testName)
-
-		dbPath := test.dbPath
-
-		br, err := repo.NewBlockRepository(dbPath)
-		assert.Equal(t, nil, err)
-
-		defer func() {
-			br.Close()
-			os.RemoveAll(dbPath)
-		}()
-
-		ssr := mem.NewSyncStateRepository()
-
-		queryService := mock.QueryService{}
-
-		queryService.GetRandomPeerFunc = func() (blockchain.Peer, error) {
-			return test.peer, test.ErrGetRandomPeer
-		}
-
-		queryService.GetBlockByHeightFromPeerFunc = func(height blockchain.BlockHeight, peer blockchain.Peer) (blockchain.DefaultBlock, error) {
-			return *PeerBlockchain[height], nil
-		}
-
-		queryService.GetLastBlockFromPeerFunc = func(peer blockchain.Peer) (blockchain.DefaultBlock, error) {
-			return *block3, nil
-		}
-
-		for _, block := range test.blockchain {
-			br.AddBlock(block)
-		}
-
-		blockPool := mem.NewBlockPool()
-
-		sApi, err := api.NewSyncApi(publisherID, br, ssr, eventService, queryService, blockPool)
-
-		assert.NoError(t, err)
-
-		//when
-
-		err = sApi.Synchronize()
-		assert.Equal(t, err, test.err)
-
-		lastBlock, err := br.FindLast()
-		assert.NoError(t, err)
-
-		syncState := ssr.Get()
-
-		assert.Equal(t, syncState.SyncProgressing, test.output.syncProgressing)
-
-		if testName == "No Peer In Network(it is the first peer)" {
-
-			assert.Equal(t, uint64(0), lastBlock.Height)
-
-			continue
-		}
-
-		assert.Equal(t, PeerBlockchain[2].Height, lastBlock.Height)
-
-	}
-
-	wg.Wait()
-
-}
-
-func TestSyncApi_CommitStagedBlocks_Add_Blocks_To_Repository(t *testing.T) {
-	//given
-	block1 := mock.GetNewBlock([]byte("genesis"), 0)
-	block2 := mock.GetNewBlock(block1.Seal, 1)
-	block3 := mock.GetNewBlock(block2.Seal, 2)
-	block4 := mock.GetNewBlock(block3.Seal, 3)
-	block5 := mock.GetNewBlock(block4.Seal, 4)
-
-	//given
-	publisherId := "zf"
-
-	dbPath := "./.test"
-	blockRepository, err := repo.NewBlockRepository(dbPath)
-	assert.NoError(t, err)
+	dbPath := "./.db"
+	br, err := repo.NewBlockRepository(dbPath)
+	assert.Equal(t, nil, err)
 
 	defer func() {
-		blockRepository.Close()
+		br.Close()
 		os.RemoveAll(dbPath)
 	}()
 
-	blockRepository.Save(*block1)
-	blockRepository.Save(*block2)
-	blockRepository.Save(*block3)
+	ssr := mem.NewSyncStateRepository()
 
 	eventService := common.NewEventService("", "Event")
-	queryService := mock.QueryService{}
 
-	//given
+	queryService := getQueryService(peerForSync)
+
 	blockPool := mem.NewBlockPool()
-	blockPool.Add(*block4)
-	blockPool.Add(*block5)
+
+	// when
+	br.AddBlock(block1)
+	blockPool.Add(*block1)
+	blockPool.Add(*block2)
+
+	sApi, err := api.NewSyncApi(publisherID, br, ssr, eventService, queryService, blockPool)
+	assert.NoError(t, err)
+
+	//when
+	err = sApi.Synchronize()
+	assert.NoError(t, err)
+
+	lastBlock, err := br.FindLast()
+	assert.NoError(t, err)
+
+	syncState := ssr.Get()
+	assert.Equal(t, false, syncState.SyncProgressing)
+
+	assert.Equal(t, uint64(2), lastBlock.Height)
+	assert.Equal(t, 0, blockPool.Size())
+	wg.Wait()
+}
+
+func TestSyncApi_Synchronize_NotSynced_BlockPool_Has_Target_Heights_ThreeBlocks(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(5)
+
+	subscriber := pubsub.NewTopicSubscriber("", "Event")
+	defer subscriber.Close()
+
+	commitEventhandler := &mock.CommitEventHandler{}
+	commitEventhandler.HandleFunc = func(event event.BlockCommitted) {
+		assert.Equal(t, blockchain.Committed, event.State)
+		wg.Done()
+	}
+
+	subscriber.SubscribeTopic("block.*", commitEventhandler)
+
+	publisherID := "junksound"
+
+	dbPath := "./.db"
+	br, err := repo.NewBlockRepository(dbPath)
+	assert.Equal(t, nil, err)
+
+	defer func() {
+		br.Close()
+		os.RemoveAll(dbPath)
+	}()
 
 	ssr := mem.NewSyncStateRepository()
 
-	syncApi, err := api.NewSyncApi(publisherId, blockRepository, ssr, eventService, queryService, blockPool)
-	assert.NoError(t, err)
+	eventService := common.NewEventService("", "Event")
+
+	queryService := getQueryService(peerForSync)
+
+	blockPool := mem.NewBlockPool()
 
 	// when
-	syncApi.CommitStagedBlocks()
+	br.AddBlock(block1)
+	blockPool.Add(*block4)
+	blockPool.Add(*block5)
+	blockPool.Add(*block6)
 
-	// then
-	block, err := blockRepository.FindLast()
+	sApi, err := api.NewSyncApi(publisherID, br, ssr, eventService, queryService, blockPool)
 	assert.NoError(t, err)
-	assert.Equal(t, block.GetHeight(), (*block5).GetHeight())
+
+	//when
+	err = sApi.Synchronize()
+	assert.NoError(t, err)
+
+	lastBlock, err := br.FindLast()
+	assert.NoError(t, err)
+
+	syncState := ssr.Get()
+	assert.Equal(t, false, syncState.SyncProgressing)
+
+	assert.Equal(t, uint64(5), lastBlock.Height)
+	assert.Equal(t, 0, blockPool.Size())
+	wg.Wait()
+}
+
+func TestSyncApi_Synchronize_NotSynced_BlockPool_Has_Target_Heights_TwoBlocks_OneLeftInPool(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(4)
+
+	subscriber := pubsub.NewTopicSubscriber("", "Event")
+	defer subscriber.Close()
+
+	commitEventhandler := &mock.CommitEventHandler{}
+	commitEventhandler.HandleFunc = func(event event.BlockCommitted) {
+		assert.Equal(t, blockchain.Committed, event.State)
+		wg.Done()
+	}
+
+	subscriber.SubscribeTopic("block.*", commitEventhandler)
+
+	publisherID := "junksound"
+
+	dbPath := "./.db"
+	br, err := repo.NewBlockRepository(dbPath)
+	assert.Equal(t, nil, err)
+
+	defer func() {
+		br.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	ssr := mem.NewSyncStateRepository()
+
+	eventService := common.NewEventService("", "Event")
+
+	queryService := getQueryService(peerForSync)
+
+	blockPool := mem.NewBlockPool()
+
+	// when
+	br.AddBlock(block1)
+	blockPool.Add(*block4)
+	blockPool.Add(*block5)
+	blockPool.Add(*block7)
+
+	sApi, err := api.NewSyncApi(publisherID, br, ssr, eventService, queryService, blockPool)
+	assert.NoError(t, err)
+
+	//when
+	err = sApi.Synchronize()
+	assert.NoError(t, err)
+
+	lastBlock, err := br.FindLast()
+	assert.NoError(t, err)
+
+	syncState := ssr.Get()
+	assert.Equal(t, false, syncState.SyncProgressing)
+
+	assert.Equal(t, uint64(4), lastBlock.Height)
+	assert.Equal(t, 1, blockPool.Size())
+	wg.Wait()
+}
+
+func TestSyncApi_Synchronize_NotSynced_BlockPool_Has_Higher_Heights(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	subscriber := pubsub.NewTopicSubscriber("", "Event")
+	defer subscriber.Close()
+
+	commitEventhandler := &mock.CommitEventHandler{}
+	commitEventhandler.HandleFunc = func(event event.BlockCommitted) {
+		assert.Equal(t, blockchain.Committed, event.State)
+		wg.Done()
+	}
+
+	subscriber.SubscribeTopic("block.*", commitEventhandler)
+
+	publisherID := "junksound"
+
+	dbPath := "./.db"
+	br, err := repo.NewBlockRepository(dbPath)
+	assert.Equal(t, nil, err)
+
+	defer func() {
+		br.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	ssr := mem.NewSyncStateRepository()
+
+	eventService := common.NewEventService("", "Event")
+
+	queryService := getQueryService(peerForSync)
+
+	blockPool := mem.NewBlockPool()
+
+	// when
+	br.AddBlock(block1)
+	blockPool.Add(*block6)
+	blockPool.Add(*block7)
+
+	sApi, err := api.NewSyncApi(publisherID, br, ssr, eventService, queryService, blockPool)
+	assert.NoError(t, err)
+
+	//when
+	err = sApi.Synchronize()
+	assert.NoError(t, err)
+
+	lastBlock, err := br.FindLast()
+	assert.NoError(t, err)
+
+	syncState := ssr.Get()
+	assert.Equal(t, false, syncState.SyncProgressing)
+
+	assert.Equal(t, uint64(2), lastBlock.Height)
+	assert.Equal(t, 2, blockPool.Size())
+	wg.Wait()
+}
+
+func TestSyncApi_Synchronize_NotSynced_BlockPool_Has_Shorter_Target_Higher_Heights(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(3)
+
+	subscriber := pubsub.NewTopicSubscriber("", "Event")
+	defer subscriber.Close()
+
+	commitEventhandler := &mock.CommitEventHandler{}
+	commitEventhandler.HandleFunc = func(event event.BlockCommitted) {
+		assert.Equal(t, blockchain.Committed, event.State)
+		wg.Done()
+	}
+
+	subscriber.SubscribeTopic("block.*", commitEventhandler)
+
+	publisherID := "junksound"
+
+	dbPath := "./.db"
+	br, err := repo.NewBlockRepository(dbPath)
+	assert.Equal(t, nil, err)
+
+	defer func() {
+		br.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	ssr := mem.NewSyncStateRepository()
+
+	eventService := common.NewEventService("", "Event")
+
+	queryService := getQueryService(peerForSync)
+
+	blockPool := mem.NewBlockPool()
+
+	// when
+	br.AddBlock(block1)
+	blockPool.Add(*block1)
+	blockPool.Add(*block2)
+	blockPool.Add(*block4)
+	blockPool.Add(*block6)
+	blockPool.Add(*block7)
+
+	sApi, err := api.NewSyncApi(publisherID, br, ssr, eventService, queryService, blockPool)
+	assert.NoError(t, err)
+
+	//when
+	err = sApi.Synchronize()
+	assert.NoError(t, err)
+
+	lastBlock, err := br.FindLast()
+	assert.NoError(t, err)
+
+	syncState := ssr.Get()
+	assert.Equal(t, false, syncState.SyncProgressing)
+
+	assert.Equal(t, uint64(3), lastBlock.Height)
+	assert.Equal(t, 2, blockPool.Size())
+	wg.Wait()
+}
+
+func TestSyncApi_Synchronize_Synced_BlockPool_Has_NoTarget_Heights(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(0)
+
+	subscriber := pubsub.NewTopicSubscriber("", "Event")
+	defer subscriber.Close()
+
+	commitEventhandler := &mock.CommitEventHandler{}
+	commitEventhandler.HandleFunc = func(event event.BlockCommitted) {
+		assert.Equal(t, blockchain.Committed, event.State)
+		wg.Done()
+	}
+
+	subscriber.SubscribeTopic("block.*", commitEventhandler)
+
+	publisherID := "junksound"
+
+	dbPath := "./.db"
+	br, err := repo.NewBlockRepository(dbPath)
+	assert.Equal(t, nil, err)
+
+	defer func() {
+		br.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	ssr := mem.NewSyncStateRepository()
+
+	eventService := common.NewEventService("", "Event")
+
+	queryService := getQueryService(peerForSync)
+
+	blockPool := mem.NewBlockPool()
+
+	// when
+	br.AddBlock(block1)
+	br.AddBlock(block2)
+	br.AddBlock(block3)
+	blockPool.Add(*block1)
+	blockPool.Add(*block2)
+
+	sApi, err := api.NewSyncApi(publisherID, br, ssr, eventService, queryService, blockPool)
+	assert.NoError(t, err)
+
+	//when
+	err = sApi.Synchronize()
+	assert.NoError(t, err)
+
+	lastBlock, err := br.FindLast()
+	assert.NoError(t, err)
+
+	syncState := ssr.Get()
+	assert.Equal(t, false, syncState.SyncProgressing)
+
+	assert.Equal(t, uint64(2), lastBlock.Height)
+	assert.Equal(t, 2, blockPool.Size())
+	wg.Wait()
+}
+
+func TestSyncApi_Synchronize_Synced_BlockPool_Has_Target_Heights(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(0)
+
+	subscriber := pubsub.NewTopicSubscriber("", "Event")
+	defer subscriber.Close()
+
+	commitEventhandler := &mock.CommitEventHandler{}
+	commitEventhandler.HandleFunc = func(event event.BlockCommitted) {
+		assert.Equal(t, blockchain.Committed, event.State)
+		wg.Done()
+	}
+
+	subscriber.SubscribeTopic("block.*", commitEventhandler)
+
+	publisherID := "junksound"
+
+	dbPath := "./.db"
+	br, err := repo.NewBlockRepository(dbPath)
+	assert.Equal(t, nil, err)
+
+	defer func() {
+		br.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	ssr := mem.NewSyncStateRepository()
+
+	eventService := common.NewEventService("", "Event")
+
+	queryService := getQueryService(peerForSync)
+
+	blockPool := mem.NewBlockPool()
+
+	// when
+	br.AddBlock(block1)
+	br.AddBlock(block2)
+	br.AddBlock(block3)
+	blockPool.Add(*block4)
+	blockPool.Add(*block5)
+
+	sApi, err := api.NewSyncApi(publisherID, br, ssr, eventService, queryService, blockPool)
+	assert.NoError(t, err)
+
+	//when
+	err = sApi.Synchronize()
+	assert.NoError(t, err)
+
+	lastBlock, err := br.FindLast()
+	assert.NoError(t, err)
+
+	syncState := ssr.Get()
+	assert.Equal(t, false, syncState.SyncProgressing)
+
+	assert.Equal(t, uint64(2), lastBlock.Height)
+	assert.Equal(t, 2, blockPool.Size())
+	wg.Wait()
+}
+
+func TestSyncApi_Synchronize_When_NoPeer_In_Network(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(0)
+
+	subscriber := pubsub.NewTopicSubscriber("", "Event")
+	defer subscriber.Close()
+
+	commitEventhandler := &mock.CommitEventHandler{}
+	commitEventhandler.HandleFunc = func(event event.BlockCommitted) {
+		assert.Equal(t, blockchain.Committed, event.State)
+		wg.Done()
+	}
+
+	subscriber.SubscribeTopic("block.*", commitEventhandler)
+
+	publisherID := "junksound"
+
+	dbPath := "./.db"
+	br, err := repo.NewBlockRepository(dbPath)
+	assert.Equal(t, nil, err)
+
+	defer func() {
+		br.Close()
+		os.RemoveAll(dbPath)
+	}()
+
+	ssr := mem.NewSyncStateRepository()
+
+	eventService := common.NewEventService("", "Event")
+
+	queryService := getQueryService(blockchain.Peer{})
+
+	blockPool := mem.NewBlockPool()
+
+	// when
+	br.AddBlock(block1)
+	br.AddBlock(block2)
+	br.AddBlock(block3)
+	blockPool.Add(*block4)
+	blockPool.Add(*block5)
+
+	sApi, err := api.NewSyncApi(publisherID, br, ssr, eventService, queryService, blockPool)
+	assert.NoError(t, err)
+
+	//when
+	err = sApi.Synchronize()
+	assert.NoError(t, err)
+
+	lastBlock, err := br.FindLast()
+	assert.NoError(t, err)
+
+	syncState := ssr.Get()
+	assert.Equal(t, false, syncState.SyncProgressing)
+
+	assert.Equal(t, uint64(2), lastBlock.Height)
+	assert.Equal(t, 2, blockPool.Size())
+	wg.Wait()
 }
 
 func TestSyncApi_CommitStagedBlocks_Drop_Blocks_From_BlockPool(t *testing.T) {
