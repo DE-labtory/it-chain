@@ -22,11 +22,11 @@ func TestState_CheckPrevoteCondition_Satisfy(t *testing.T) {
 	assert.Equal(t, true, satisfyPrevoteConditionState.CheckPrevoteCondition())
 }
 
-// When Representative Number : 6, prevoteMsg Number : 3 -> then false
+// When Representative Number : 6, prevoteMsg Number : 2 -> then false
 func TestState_CheckPrevoteCondition_UnSatisfy(t *testing.T) {
 	unSatisfyPrevoteConditionState := setUpState()
 	prevoteMsgs := make([]PrevoteMsg, 0)
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 2; i++ {
 		prevoteMsgs = append(prevoteMsgs, PrevoteMsg{
 			StateID:  StateID{"state1"},
 			SenderID: "user1",
@@ -53,12 +53,12 @@ func TestState_CheckPreCommitCondition_Satisfy(t *testing.T) {
 	assert.Equal(t, true, satisfyPrecommitConditionState.CheckPreCommitCondition())
 }
 
-// When Representative Number : 6, prevoteCommitMsg Number : 3 -> then false
+// When Representative Number : 6, prevoteCommitMsg Number : 2 -> then false
 func TestState_CheckPreCommitCondition_UnSatisfy(t *testing.T) {
 
 	unSatisfyPrecommitConditionState := setUpState()
 	precommitMsgs := make([]PreCommitMsg, 0)
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 2; i++ {
 		precommitMsgs = append(precommitMsgs, PreCommitMsg{
 			StateID:  StateID{"state1"},
 			SenderID: "user1",

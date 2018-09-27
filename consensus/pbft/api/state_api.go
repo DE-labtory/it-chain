@@ -21,6 +21,7 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus/pbft"
 )
 
@@ -72,8 +73,9 @@ func (cApi *StateApiImpl) StartConsensus(proposedBlock pbft.ProposedBlock) error
 	if err := cApi.propagateService.BroadcastProposeMsg(*createdProposeMsg, createdState.Representatives); err != nil {
 		return err
 	}
-
+	logger.Infof(nil, "[PBFT] Leader broadcast ProposeMsg")
 	createdState.Start()
+	logger.Infof(nil, "[PBFT] Change stage to propose")
 	if err := cApi.repo.Save(*createdState); err != nil {
 		return err
 	}
@@ -101,7 +103,9 @@ func (cApi *StateApiImpl) HandleProposeMsg(msg pbft.ProposeMsg) error {
 	if err := cApi.propagateService.BroadcastPrevoteMsg(*prevoteMsg, builtState.Representatives); err != nil {
 		return err
 	}
+	logger.Infof(nil, "[PBFT] Leader broadcast ProposeMsg")
 	builtState.ToPrevoteStage()
+	logger.Infof(nil, "[PBFT] Change stage to Prevote")
 
 	if err := cApi.repo.Save(*builtState); err != nil {
 		return err
@@ -125,11 +129,17 @@ func (cApi *StateApiImpl) HandlePrevoteMsg(msg pbft.PrevoteMsg) error {
 		return nil
 	}
 
+	if loadedState.CurrentStage != pbft.PREVOTE_STAGE {
+		return nil
+	}
+
 	newCommitMsg := pbft.NewPreCommitMsg(&loadedState, cApi.publisherID)
 	if err := cApi.propagateService.BroadcastPreCommitMsg(*newCommitMsg, loadedState.Representatives); err != nil {
 		return err
 	}
+	logger.Infof(nil, "[PBFT] Leader broadcast PreCommitMsg")
 	loadedState.ToPreCommitStage()
+	logger.Infof(nil, "[PBFT] Change stage to PreCommitStage")
 
 	if err := cApi.repo.Save(loadedState); err != nil {
 		return err
@@ -158,6 +168,7 @@ func (cApi *StateApiImpl) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 		return err
 	}
 	cApi.repo.Remove()
+	logger.Infof(nil, "[PBFT] Consensus is finished.")
 
 	return nil
 }

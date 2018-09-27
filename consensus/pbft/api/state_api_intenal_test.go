@@ -133,6 +133,7 @@ func TestConsensusApi_HandlePrevoteMsg_State(t *testing.T) {
 	}
 
 }
+
 func TestConsensusApi_RepositoryClone(t *testing.T) {
 	// stateApi1 에는 setUpApiCondition에 의해 repo가 set된 상황
 	stateApi1 := setUpApiCondition(false, 5, true, false, false)
@@ -233,7 +234,7 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isNormalBlock bool,
 			StateID:          pbft.StateID{"state"},
 			Representatives:  reps,
 			Block:            normalBlock,
-			CurrentStage:     pbft.IDLE_STAGE,
+			CurrentStage:     pbft.PREVOTE_STAGE,
 			PrevoteMsgPool:   prevoteMsgPool,
 			PreCommitMsgPool: pbft.PreCommitMsgPool{},
 		}
