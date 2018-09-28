@@ -28,24 +28,40 @@ var ErrEmptyLeaderId = errors.New("empty leader id proposed")
 var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 var ErrNoMatchingPeerWithIpAddress = errors.New("no matching peer with ip address")
 
-type LeaderApi struct {
+type ParliamentApi struct {
 	parliamentRepository pbft.ParliamentRepository
 	eventService         common.EventService
 }
 
-func NewLeaderApi(parliamentRepository pbft.ParliamentRepository, eventService common.EventService) *LeaderApi {
+func NewParliamentApi(parliamentRepository pbft.ParliamentRepository, eventService common.EventService) *ParliamentApi {
 
-	return &LeaderApi{
+	return &ParliamentApi{
 		parliamentRepository: parliamentRepository,
 		eventService:         eventService,
 	}
 }
 
-func (l *LeaderApi) UpdateLeader(nodeId string) error {
+func (p *ParliamentApi) AddRepresentative(representativeId string) {
+	parliament := p.parliamentRepository.Load()
+	parliament.AddRepresentative(pbft.Representative{
+		ID: representativeId,
+	})
+
+	p.parliamentRepository.Save(parliament)
+}
+
+func (p *ParliamentApi) RemoveRepresentative(representativeId string) {
+	parliament := p.parliamentRepository.Load()
+	parliament.RemoveRepresentative(representativeId)
+
+	p.parliamentRepository.Save(parliament)
+}
+
+func (p *ParliamentApi) UpdateLeader(nodeId string) error {
 	//1. loop peer list and find specific address
 	//2. update specific peer as leader
 
-	parliament := l.parliamentRepository.Load()
+	parliament := p.parliamentRepository.Load()
 	representative, err := parliament.FindRepresentativeByID(nodeId)
 	if err != nil {
 		return ErrNoMatchingPeerWithIpAddress
@@ -55,12 +71,10 @@ func (l *LeaderApi) UpdateLeader(nodeId string) error {
 		return err
 	}
 
-	return l.eventService.Publish("leader.updated", event.LeaderUpdated{
-		LeaderId: representative.ID,
-	})
+	return p.eventService.Publish("leader.updated", event.LeaderUpdated{LeaderId: representative.ID})
 }
 
-func (l *LeaderApi) GetLeader() pbft.Leader {
-	parliament := l.parliamentRepository.Load()
+func (p *ParliamentApi) GetLeader() pbft.Leader {
+	parliament := p.parliamentRepository.Load()
 	return parliament.GetLeader()
 }

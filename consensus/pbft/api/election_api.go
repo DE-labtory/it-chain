@@ -19,6 +19,10 @@ package api
 import (
 	"time"
 
+	"fmt"
+
+	"strings"
+
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/consensus/pbft"
@@ -73,19 +77,18 @@ func (e *ElectionApi) broadcastLeader(rep pbft.Representative) error {
 	updateLeaderMessage := pbft.UpdateLeaderMessage{
 		Representative: rep,
 	}
-	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
+	grpcDeliverCommand, err := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
+	if err != nil {
+		iLogger.Infof(nil, "[Consensus] Err %s", err.Error())
+		return err
+	}
 
 	parliament := e.parliamentRepository.Load()
 	for _, r := range parliament.GetRepresentatives() {
 		grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, r.ID)
 	}
 
-	if err := e.eventService.Publish("message.deliver", grpcDeliverCommand); err != nil {
-		iLogger.Infof(nil, "[Consensus] Fail to publish update leader message")
-		return err
-	}
-
-	return nil
+	return e.eventService.Publish("message.deliver", grpcDeliverCommand)
 }
 
 //broadcast leader when voted fully
@@ -129,13 +132,15 @@ func (e *ElectionApi) ElectLeaderWithRaft() {
 		e.ElectionService.SetState(pbft.TICKING)
 		e.ElectionService.InitLeftTime()
 
-		timeout := time.After(time.Duration(e.ElectionService.GetLeftTime()) * time.Millisecond)
+		fmt.Println(e.ElectionService.GetLeftTime())
+
+		timeout := time.Tick(time.Duration(e.ElectionService.GetLeftTime()) * time.Millisecond)
 		tick := time.Tick(1 * time.Millisecond)
 		end := true
 		for end {
 			select {
-
 			case <-timeout:
+				fmt.Println("start raft")
 				if e.ElectionService.GetState() == pbft.TICKING {
 
 					e.ElectionService.SetState(pbft.CANDIDATE)
@@ -144,26 +149,25 @@ func (e *ElectionApi) ElectLeaderWithRaft() {
 					for _, r := range parliament.GetRepresentatives() {
 						connectionIds = append(connectionIds, r.ID)
 					}
-
 					e.RequestVote(connectionIds)
-
 				} else if e.ElectionService.GetState() == pbft.CANDIDATE {
 					//reset time and state chane candidate -> ticking when timed in candidate state
 					e.ElectionService.ResetLeftTime()
 					e.ElectionService.SetState(pbft.TICKING)
 				}
-
 			case <-tick:
 				// count down left time while ticking
 				e.ElectionService.CountDownLeftTimeBy(1)
-			case <-time.After(5 * time.Second):
+			case <-time.After(120 * time.Second):
 				end = false
+				fmt.Println("end raft")
 			}
 		}
 	}()
 }
 
-func (e *ElectionApi) RequestVote(connectionIds []string) error {
+func (e *ElectionApi) RequestVote(peerIds []string) error {
+	iLogger.Infof(nil, "[PBFT] Request Vote - Peers:[%s]", strings.Join(peerIds, ", "))
 	// 1. create request vote message
 	// 2. send message
 	requestVoteMessage := pbft.RequestVoteMessage{
@@ -171,7 +175,7 @@ func (e *ElectionApi) RequestVote(connectionIds []string) error {
 	}
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("RequestVoteProtocol", requestVoteMessage)
 
-	for _, connectionId := range connectionIds {
+	for _, connectionId := range peerIds {
 		grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
 	}
 

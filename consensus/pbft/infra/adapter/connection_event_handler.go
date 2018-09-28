@@ -21,16 +21,23 @@ import (
 	"github.com/it-chain/engine/consensus/pbft/api"
 )
 
-type ConnectionCreatedEventHandler struct {
-	electionApi *api.ElectionApi
+type ConnectionEventHandler struct {
+	electionApi   *api.ElectionApi
+	parliamentApi *api.ParliamentApi
 }
 
-func NewConnectionCreatedEventHandler(electionApi *api.ElectionApi) *ConnectionCreatedEventHandler {
-	return &ConnectionCreatedEventHandler{
-		electionApi: electionApi,
+func NewConnectionEventHandler(electionApi *api.ElectionApi, parliamentApi *api.ParliamentApi) *ConnectionEventHandler {
+	return &ConnectionEventHandler{
+		electionApi:   electionApi,
+		parliamentApi: parliamentApi,
 	}
 }
 
-func (c *ConnectionCreatedEventHandler) HandleConnectionCreatedEvent(event event.ConnectionCreated) {
+func (c *ConnectionEventHandler) HandleConnectionCreatedEvent(event event.ConnectionCreated) {
+	c.parliamentApi.AddRepresentative(event.ConnectionID)
 	c.electionApi.ElectLeaderWithRaft()
+}
+
+func (c *ConnectionEventHandler) HandleConnectionClosedEvent(event event.ConnectionCreated) {
+	c.parliamentApi.RemoveRepresentative(event.ConnectionID)
 }

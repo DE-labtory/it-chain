@@ -32,14 +32,14 @@ var ErrPeerDeliver = errors.New("peer deliver failed")
 var ErrUnmarshal = errors.New("error during unmarshal")
 
 type ElectionCommandHandler struct {
-	leaderApi   *api.LeaderApi
-	electionApi *api.ElectionApi
+	parliamentApi *api.ParliamentApi
+	electionApi   *api.ElectionApi
 }
 
-func NewElectionCommandHandler(leaderApi *api.LeaderApi, electionApi *api.ElectionApi) *ElectionCommandHandler {
+func NewElectionCommandHandler(parliamentApi *api.ParliamentApi, electionApi *api.ElectionApi) *ElectionCommandHandler {
 	return &ElectionCommandHandler{
-		leaderApi:   leaderApi,
-		electionApi: electionApi,
+		parliamentApi: parliamentApi,
+		electionApi:   electionApi,
 	}
 }
 
@@ -60,7 +60,6 @@ func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrp
 		}
 
 		err := e.electionApi.Vote(command.ConnectionID)
-
 		if err != nil {
 			return err
 		}
@@ -80,7 +79,7 @@ func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrp
 			iLogger.Errorf(nil, "Err %s", err.Error())
 		}
 
-		if err := e.leaderApi.UpdateLeader(toBeLeader.Representative.ID); err != nil {
+		if err := e.parliamentApi.UpdateLeader(toBeLeader.Representative.ID); err != nil {
 			iLogger.Errorf(nil, "Err %s", err.Error())
 		}
 	}
