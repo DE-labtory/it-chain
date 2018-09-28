@@ -17,8 +17,6 @@
 package api
 
 import (
-	"math/rand"
-	"sync"
 	"time"
 
 	"github.com/it-chain/engine/common"
@@ -29,54 +27,60 @@ import (
 )
 
 type ElectionApi struct {
-	ElectionService   *pbft.ElectionService
-	parliamentService pbft.ParliamentService
-	eventService      common.EventService
-	mux               sync.Mutex
+	ElectionService      *pbft.ElectionService
+	parliamentRepository pbft.ParliamentRepository
+	eventService         common.EventService
 }
 
-func NewElectionApi(electionService *pbft.ElectionService, parliamentService pbft.ParliamentService, eventService common.EventService) *ElectionApi {
+func NewElectionApi(electionService *pbft.ElectionService, parliamentRepository pbft.ParliamentRepository, eventService common.EventService) *ElectionApi {
 
 	return &ElectionApi{
-		mux:               sync.Mutex{},
-		ElectionService:   electionService,
-		parliamentService: parliamentService,
-		eventService:      eventService,
+		ElectionService:      electionService,
+		parliamentRepository: parliamentRepository,
+		eventService:         eventService,
 	}
 }
 
-func (ea *ElectionApi) Vote(connectionId string) error {
+func (e *ElectionApi) Vote(connectionId string) error {
 
-	ea.ElectionService.IncreaseTerm()
-	representative := ea.parliamentService.GetRepresentativeById(connectionId)
-	ea.ElectionService.SetCandidate(representative)
-	ea.ElectionService.ResetLeftTime()
+	e.ElectionService.IncreaseTerm()
+	candidate := e.ElectionService.GetCandidate()
+	if candidate.ID != "" {
+		iLogger.Info(nil, "[PBFT] peer has already received request vote message")
+		return nil
+	}
+
+	parliament := e.parliamentRepository.Load()
+
+	representative, err := parliament.FindRepresentativeByID(connectionId)
+	if err != nil {
+		return err
+	}
+
+	e.ElectionService.SetCandidate(representative)
+	e.ElectionService.ResetLeftTime()
 
 	voteLeaderMessage := pbft.VoteMessage{}
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("VoteLeaderProtocol", voteLeaderMessage)
 	grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
-
-	ea.eventService.Publish("message.deliver", grpcDeliverCommand)
-
-	return nil
+	return e.eventService.Publish("message.deliver", grpcDeliverCommand)
 }
 
 // broadcast leader to other peers
-func (es *ElectionApi) broadcastLeader(rep pbft.Representative) error {
+func (e *ElectionApi) broadcastLeader(rep pbft.Representative) error {
 	iLogger.Info(nil, "[Consensus] Broadcast leader")
 
 	updateLeaderMessage := pbft.UpdateLeaderMessage{
 		Representative: rep,
 	}
-
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
 
-	table := es.parliamentService.GetRepresentativeTable()
-	for _, r := range table {
+	parliament := e.parliamentRepository.Load()
+	for _, r := range parliament.GetRepresentatives() {
 		grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, r.ID)
 	}
 
-	if err := es.eventService.Publish("message.deliver", grpcDeliverCommand); err != nil {
+	if err := e.eventService.Publish("message.deliver", grpcDeliverCommand); err != nil {
 		iLogger.Infof(nil, "[Consensus] Fail to publish update leader message")
 		return err
 	}
@@ -85,19 +89,19 @@ func (es *ElectionApi) broadcastLeader(rep pbft.Representative) error {
 }
 
 //broadcast leader when voted fully
-func (es *ElectionApi) DecideToBeLeader() error {
-	if es.ElectionService.GetState() != pbft.CANDIDATE {
+func (e *ElectionApi) DecideToBeLeader() error {
+	if e.ElectionService.GetState() != pbft.CANDIDATE {
 		return nil
 	}
 
-	es.ElectionService.CountUpVoteCount()
+	e.ElectionService.CountUpVoteCount()
 
-	if es.isFullyVoted() {
+	if e.isFullyVoted() {
 		representative := pbft.Representative{
-			ID: es.ElectionService.NodeId,
+			ID: e.ElectionService.NodeId,
 		}
 
-		if err := es.broadcastLeader(representative); err != nil {
+		if err := e.broadcastLeader(representative); err != nil {
 			return err
 		}
 	}
@@ -105,11 +109,13 @@ func (es *ElectionApi) DecideToBeLeader() error {
 	return nil
 }
 
-func (ea *ElectionApi) isFullyVoted() bool {
-	numOfPeers := len(ea.parliamentService.GetParliament().RepresentativeTable)
-	if ea.ElectionService.GetVoteCount() == numOfPeers-1 {
+func (e *ElectionApi) isFullyVoted() bool {
+	parliament := e.parliamentRepository.Load()
+	numOfPeers := len(parliament.Representatives)
+	if e.ElectionService.GetVoteCount() == numOfPeers-1 {
 		return true
 	}
+
 	return false
 }
 
@@ -133,10 +139,9 @@ func (e *ElectionApi) ElectLeaderWithRaft() {
 				if e.ElectionService.GetState() == pbft.TICKING {
 
 					e.ElectionService.SetState(pbft.CANDIDATE)
-
 					connectionIds := make([]string, 0)
-					repTable := e.parliamentService.GetRepresentativeTable()
-					for _, r := range repTable {
+					parliament := e.parliamentRepository.Load()
+					for _, r := range parliament.GetRepresentatives() {
 						connectionIds = append(connectionIds, r.ID)
 					}
 
@@ -173,20 +178,20 @@ func (e *ElectionApi) RequestVote(connectionIds []string) error {
 	return e.eventService.Publish("message.deliver", grpcDeliverCommand)
 }
 
-func (ea *ElectionApi) GetCandidate() *pbft.Representative {
-	return ea.ElectionService.GetCandidate()
+func (e *ElectionApi) GetCandidate() pbft.Representative {
+	return e.ElectionService.GetCandidate()
 }
 
-func (ea *ElectionApi) GetState() pbft.ElectionState {
-	return ea.ElectionService.GetState()
+func (e *ElectionApi) GetState() pbft.ElectionState {
+	return e.ElectionService.GetState()
 }
 
-func (ea *ElectionApi) SetState(state pbft.ElectionState) {
-	ea.ElectionService.SetState(state)
+func (e *ElectionApi) SetState(state pbft.ElectionState) {
+	e.ElectionService.SetState(state)
 }
 
-func (ea *ElectionApi) GetVoteCount() int {
-	return ea.ElectionService.GetVoteCount()
+func (e *ElectionApi) GetVoteCount() int {
+	return e.ElectionService.GetVoteCount()
 }
 
 func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
@@ -203,11 +208,4 @@ func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.Delive
 		Body:          data,
 		Protocol:      protocol,
 	}, err
-}
-
-func GenRandomInRange(min, max int) int {
-
-	rand.Seed(time.Now().UnixNano())
-
-	return rand.Intn(max-min) + min
 }

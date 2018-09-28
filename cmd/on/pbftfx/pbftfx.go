@@ -17,22 +17,21 @@
 package pbftfx
 
 import (
-	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
+	"github.com/it-chain/engine/consensus/pbft/infra/mem"
 	"github.com/it-chain/iLogger"
 	"go.uber.org/fx"
 )
 
 var Module = fx.Options(
 	fx.Provide(
-		pbft.NewParliament,
+		NewParliamentRepository,
 		NewElectionService,
-		NewParliamentService,
 		NewElectionApi,
 		NewLeaderApi,
 		adapter.NewElectionCommandHandler,
@@ -48,16 +47,17 @@ func NewElectionService(config *conf.Configuration) *pbft.ElectionService {
 	return pbft.NewElectionService(NodeId, 30, pbft.CANDIDATE, 0)
 }
 
-func NewParliamentService(parliament *pbft.Parliament, peerQueryApi *api_gateway.PeerQueryApi) *adapter.ParliamentService {
-	return adapter.NewParliamentService(parliament, peerQueryApi)
+func NewParliamentRepository() *mem.ParliamentRepository {
+	//pbft.NewParliament()
+	return mem.NewParliamentRepository()
 }
 
-func NewElectionApi(electionService *pbft.ElectionService, parliamentService *adapter.ParliamentService, eventService common.EventService) *api.ElectionApi {
-	return api.NewElectionApi(electionService, parliamentService, eventService)
+func NewElectionApi(electionService *pbft.ElectionService, parliamentRepository *mem.ParliamentRepository, eventService common.EventService) *api.ElectionApi {
+	return api.NewElectionApi(electionService, parliamentRepository, eventService)
 }
 
-func NewLeaderApi(parliamentService *adapter.ParliamentService, eventService common.EventService) *api.LeaderApi {
-	return api.NewLeaderApi(parliamentService, eventService)
+func NewLeaderApi(parliamentRepository *mem.ParliamentRepository, eventService common.EventService) *api.LeaderApi {
+	return api.NewLeaderApi(parliamentRepository, eventService)
 }
 
 func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, electionCommandHandler *adapter.ElectionCommandHandler, connectionCreatedEventHandler *adapter.ConnectionCreatedEventHandler) {
