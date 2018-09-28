@@ -45,6 +45,8 @@ var Module = fx.Options(
 		api_gateway.NewConnectionEventListener,
 		NewICodeQueryApi,
 		NewICodeEventHandler,
+		api_gateway.NewICodeCommandApi,
+		api_gateway.NewConnectionCommandApi,
 		api_gateway.NewConnectionQueryApi,
 		api_gateway.NewApiHandler,
 		http.NewServeMux,
