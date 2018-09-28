@@ -53,7 +53,7 @@ func SetTestEnvironment(processList []string) struct {
 		parliamentRepository.Save(parliament)
 		eventService := mock.NewEventService(id, networkManager.Publish)
 		electionApi := api.NewElectionApi(electionService, parliamentRepository, eventService)
-		leaderApi := api.NewLeaderApi(parliamentRepository, eventService)
+		leaderApi := api.NewParliamentApi(parliamentRepository, eventService)
 		grpcCommandHandler := adapter.NewElectionCommandHandler(leaderApi, electionApi)
 
 		// register handler to process

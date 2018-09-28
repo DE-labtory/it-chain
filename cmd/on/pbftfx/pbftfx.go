@@ -33,9 +33,9 @@ var Module = fx.Options(
 		NewParliamentRepository,
 		NewElectionService,
 		NewElectionApi,
-		NewLeaderApi,
+		NewParliamentApi,
 		adapter.NewElectionCommandHandler,
-		adapter.NewConnectionCreatedEventHandler,
+		adapter.NewConnectionEventHandler,
 	),
 	fx.Invoke(
 		RegisterPubsubHandlers,
@@ -44,30 +44,33 @@ var Module = fx.Options(
 
 func NewElectionService(config *conf.Configuration) *pbft.ElectionService {
 	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
-	return pbft.NewElectionService(NodeId, 30, pbft.CANDIDATE, 0)
+	return pbft.NewElectionService(NodeId, 30, pbft.TICKING, 0)
 }
 
-func NewParliamentRepository() *mem.ParliamentRepository {
-	//pbft.NewParliament()
-	return mem.NewParliamentRepository()
+func NewParliamentRepository(config *conf.Configuration) *mem.ParliamentRepository {
+
+	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
+	parliament := pbft.NewParliament()
+	parliament.AddRepresentative(pbft.NewRepresentative(NodeId))
+	return mem.NewParliamentRepositoryWithParliament(parliament)
 }
 
 func NewElectionApi(electionService *pbft.ElectionService, parliamentRepository *mem.ParliamentRepository, eventService common.EventService) *api.ElectionApi {
 	return api.NewElectionApi(electionService, parliamentRepository, eventService)
 }
 
-func NewLeaderApi(parliamentRepository *mem.ParliamentRepository, eventService common.EventService) *api.LeaderApi {
-	return api.NewLeaderApi(parliamentRepository, eventService)
+func NewParliamentApi(parliamentRepository *mem.ParliamentRepository, eventService common.EventService) *api.ParliamentApi {
+	return api.NewParliamentApi(parliamentRepository, eventService)
 }
 
-func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, electionCommandHandler *adapter.ElectionCommandHandler, connectionCreatedEventHandler *adapter.ConnectionCreatedEventHandler) {
+func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, electionCommandHandler *adapter.ElectionCommandHandler, connectionEventHandler *adapter.ConnectionEventHandler) {
 	iLogger.Infof(nil, "[Main] Consensus is starting")
 
-	if err := subscriber.SubscribeTopic("message.*", electionCommandHandler); err != nil {
+	if err := subscriber.SubscribeTopic("message.receive", electionCommandHandler); err != nil {
 		panic(err)
 	}
 
-	if err := subscriber.SubscribeTopic("connection.created", connectionCreatedEventHandler); err != nil {
+	if err := subscriber.SubscribeTopic("connection.created", connectionEventHandler); err != nil {
 		panic(err)
 	}
 }

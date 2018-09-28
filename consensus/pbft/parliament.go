@@ -85,6 +85,10 @@ func (p Parliament) GetLeader() Leader {
 	return p.Leader
 }
 
+func (p *Parliament) RemoveRepresentative(representativeId string) {
+	delete(p.Representatives, representativeId)
+}
+
 type ParliamentRepository interface {
 	Save(parliament Parliament)
 	Load() Parliament
