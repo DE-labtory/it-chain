@@ -30,7 +30,7 @@ import (
 func QueryCmd() cli.Command {
 	return cli.Command{
 		Name:  "query",
-		Usage: "it-chain ivm query [icode id] [function name] [...args]",
+		Usage: "it-chain ivm query [icode-id] [functioniname] [...args]",
 		Action: func(c *cli.Context) error {
 			if c.NArg() < 2 {
 				return errors.New("not enough args")

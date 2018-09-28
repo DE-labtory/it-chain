@@ -28,7 +28,7 @@ import (
 func UnDeployCmd() cli.Command {
 	return cli.Command{
 		Name:  "undeploy",
-		Usage: "it-chain ivm undeploy [icode id] ",
+		Usage: "it-chain ivm undeploy [icode-id] ",
 		Action: func(c *cli.Context) error {
 
 			icodeId := c.Args().Get(0)

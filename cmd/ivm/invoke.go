@@ -31,7 +31,7 @@ import (
 func InvokeCmd() cli.Command {
 	return cli.Command{
 		Name:  "invoke",
-		Usage: "it-chain ivm invoke [icode id] [function name] [...args]",
+		Usage: "it-chain ivm invoke [icode-id] [function-name] [...args]",
 		Action: func(c *cli.Context) error {
 			if c.NArg() < 2 {
 				return errors.New("not enough args")
