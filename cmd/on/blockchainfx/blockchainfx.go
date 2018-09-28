@@ -70,14 +70,15 @@ func NewBlockRepository() (*repo.BlockRepository, error) {
 	return repo.NewBlockRepository(BbPath)
 }
 
-func NewBlockApi(blockRepository *repo.BlockRepository, blockPool *mem.BlockPool, service common.EventService) (*api.BlockApi, error) {
+func NewBlockApi(config *conf.Configuration, blockRepository *repo.BlockRepository, blockPool *mem.BlockPool, service common.EventService) (*api.BlockApi, error) {
 
-	return api.NewBlockApi(publisherID, blockRepository, service, blockPool)
+	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
+	return api.NewBlockApi(NodeId, blockRepository, service, blockPool)
 }
 
 func NewSyncApi(blockRepository *repo.BlockRepository, eventService common.EventService, queryService *adapter.QuerySerivce, blockPool *mem.BlockPool) (*api.SyncApi, error) {
 
-	api, err := api.NewSyncApi(publisherID, blockRepository, eventService, queryService, blockPool)
+	api, err := api.NewSyncApi(blockRepository, eventService, queryService, blockPool)
 	return &api, err
 }
 
