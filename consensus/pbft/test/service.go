@@ -57,11 +57,12 @@ func SetTestEnvironment(processList []string) struct {
 		propagateService := pbft.NewPropagateService(eventService)
 
 		electionApi := api.NewElectionApi(electionService, parliamentRepository, eventService)
-		leaderApi := api.NewParliamentApi(parliamentRepository, eventService)
+		leaderApi := api.NewParliamentApi("", parliamentRepository, eventService)
+		stateMsgAPi := adapter.StateMsgApi{}
 		stateApi := api.NewStateApi(id, propagateService, eventService, parliamentRepository, stateRepository)
 
 		grpcCommandHandler := adapter.NewElectionCommandHandler(leaderApi, electionApi)
-		pbftHandler := adapter.NewPbftMsgHandler(stateApi)
+		pbftHandler := adapter.NewPbftMsgHandler(stateMsgAPi)
 
 		// register handler to process
 		process.RegisterHandler(grpcCommandHandler.HandleMessageReceive)

@@ -54,6 +54,7 @@ func (sApi *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 
 	parliament := sApi.parliamentRepository.Load()
 	if !parliament.IsNeedConsensus() {
+
 		return ConsensusCreateError
 	}
 
@@ -113,8 +114,9 @@ func (sApi *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) (returnErr error) {
 		return err
 	}
 
-	for i := 0; i < len(sApi.tempPrevoteMsgPool.Get()); i++ {
-		loadedState.PrevoteMsgPool.Save(&sApi.tempPrevoteMsgPool.Get()[i])
+	tempPrevoteMsgPool := sApi.tempPrevoteMsgPool.Get()
+	for i := 0; i < len(tempPrevoteMsgPool); i++ {
+		loadedState.PrevoteMsgPool.Save(&tempPrevoteMsgPool[i])
 	}
 	sApi.tempPrevoteMsgPool.RemoveAllMsgs()
 
@@ -128,17 +130,15 @@ func (sApi *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) (returnErr error) {
 		}
 	}()
 
-	if !loadedState.CheckPrevoteCondition() {
-		return returnErr
+	if loadedState.CheckPrevoteCondition() {
+		newCommitMsg := pbft.NewPreCommitMsg(&loadedState, sApi.publisherID)
+		if err := sApi.propagateService.BroadcastPreCommitMsg(*newCommitMsg, loadedState.Representatives); err != nil {
+			return err
+		}
+		logger.Infof(nil, "[PBFT] Leader broadcast PreCommitMsg")
+		loadedState.ToPreCommitStage()
+		logger.Infof(nil, "[PBFT] Change stage to PreCommitStage")
 	}
-
-	newCommitMsg := pbft.NewPreCommitMsg(&loadedState, sApi.publisherID)
-	if err := sApi.propagateService.BroadcastPreCommitMsg(*newCommitMsg, loadedState.Representatives); err != nil {
-		return err
-	}
-	logger.Infof(nil, "[PBFT] Leader broadcast PreCommitMsg")
-	loadedState.ToPreCommitStage()
-	logger.Infof(nil, "[PBFT] Change stage to PreCommitStage")
 
 	return returnErr
 }
@@ -151,8 +151,9 @@ func (sApi *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 		return err
 	}
 
-	for i := 0; i < len(sApi.tempPreCommitMsgPool.Get()); i++ {
-		loadedState.PreCommitMsgPool.Save(&sApi.tempPreCommitMsgPool.Get()[i])
+	tempPreCommitMsgPool := sApi.tempPreCommitMsgPool.Get()
+	for i := 0; i < len(tempPreCommitMsgPool); i++ {
+		loadedState.PreCommitMsgPool.Save(&tempPreCommitMsgPool[i])
 	}
 	sApi.tempPreCommitMsgPool.RemoveAllMsgs()
 
@@ -160,18 +161,14 @@ func (sApi *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 		return err
 	}
 
-	if !loadedState.CheckPreCommitCondition() {
-		if err := sApi.repo.Save(loadedState); err != nil {
+	if loadedState.CheckPreCommitCondition() {
+		//TODO ConsensusFinished Parameter 추가
+		if err := sApi.eventService.Publish("block.confirm", event.ConsensusFinished{}); err != nil {
 			return err
 		}
-		return nil
+		sApi.repo.Remove()
+		logger.Infof(nil, "[PBFT] Consensus is finished.")
 	}
-	//TODO ConsensusFinished 인자 추가
-	if err := sApi.eventService.Publish("block.confirm", event.ConsensusFinished{}); err != nil {
-		return err
-	}
-	sApi.repo.Remove()
-	logger.Infof(nil, "[PBFT] Consensus is finished.")
 
 	return nil
 }
