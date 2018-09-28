@@ -20,7 +20,7 @@ import "github.com/urfave/cli"
 
 var icodeCmd = cli.Command{
 	Name:        "ivm",
-	Aliases:     []string{"p"},
+	Aliases:     []string{"i"},
 	Usage:       "options for ivm",
 	Subcommands: []cli.Command{},
 }
