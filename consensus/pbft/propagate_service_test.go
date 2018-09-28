@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package adapter_test
+package pbft_test
 
 import (
 	"errors"
 	"testing"
 
 	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
+	"github.com/it-chain/engine/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -82,14 +82,15 @@ func TestPropagateService_BroadcastProposeMsg(t *testing.T) {
 		},
 	}
 
-	publish := func(topic string, data interface{}) (e error) {
+	mockEventService := mock.EventService{}
+	mockEventService.PublishFunc = func(topic string, event interface{}) error {
 		assert.Equal(t, "message.deliver", topic)
 
 		return nil
 	}
 
 	representatives := make([]*pbft.Representative, 0)
-	propagateService := adapter.NewPropagateService(publish)
+	propagateService := pbft.NewPropagateService(mockEventService)
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
@@ -145,14 +146,15 @@ func TestPropagateService_BroadcastPrevoteMsg(t *testing.T) {
 		},
 	}
 
-	publish := func(topic string, data interface{}) (e error) {
+	mockEventService := mock.EventService{}
+	mockEventService.PublishFunc = func(topic string, event interface{}) error {
 		assert.Equal(t, "message.deliver", topic)
 
 		return nil
 	}
 
 	representatives := make([]*pbft.Representative, 0)
-	propagateService := adapter.NewPropagateService(publish)
+	propagateService := pbft.NewPropagateService(mockEventService)
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
@@ -194,14 +196,15 @@ func TestPropagateService_BroadcastPreCommitMsg(t *testing.T) {
 		},
 	}
 
-	publish := func(topic string, data interface{}) (e error) {
+	mockEventService := mock.EventService{}
+	mockEventService.PublishFunc = func(topic string, event interface{}) error {
 		assert.Equal(t, "message.deliver", topic)
 
 		return nil
 	}
 
 	representatives := make([]*pbft.Representative, 0)
-	propagateService := adapter.NewPropagateService(publish)
+	propagateService := pbft.NewPropagateService(mockEventService)
 
 	for testName, test := range tests {
 		t.Logf("running test case [%s]", testName)
