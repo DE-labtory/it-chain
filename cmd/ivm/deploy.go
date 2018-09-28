@@ -33,7 +33,7 @@ import (
 func DeployCmd() cli.Command {
 	return cli.Command{
 		Name:  "deploy",
-		Usage: "it-chain ivm deploy [icode git url] [ssh path] [password]",
+		Usage: "it-chain ivm deploy [icode-git-url] [ssh-path] [password]",
 		Action: func(c *cli.Context) error {
 
 			gitUrl := c.Args().Get(0)
