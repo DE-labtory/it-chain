@@ -166,17 +166,17 @@ func (p *PeerRepository) GetLeader() (Peer, error) {
 	return Peer{}, ErrLeaderDoesNotExists
 }
 
-type ConnectionEventListener struct {
+type ConnectionEventHandler struct {
 	peerRepository *PeerRepository
 }
 
-func NewConnectionEventListener(peerRepository *PeerRepository) *ConnectionEventListener {
-	return &ConnectionEventListener{
+func NewConnectionEventListener(peerRepository *PeerRepository) *ConnectionEventHandler {
+	return &ConnectionEventHandler{
 		peerRepository: peerRepository,
 	}
 }
 
-func (c *ConnectionEventListener) HandleConnectionCreatedEvent(event event.ConnectionCreated) {
+func (c *ConnectionEventHandler) HandleConnectionCreatedEvent(event event.ConnectionCreated) {
 
 	peer := Peer{
 		ID:                 event.ConnectionID,
@@ -190,7 +190,7 @@ func (c *ConnectionEventListener) HandleConnectionCreatedEvent(event event.Conne
 	}
 }
 
-func (c *ConnectionEventListener) HandleConnectionClosedEvent(event event.ConnectionClosed) {
+func (c *ConnectionEventHandler) HandleConnectionClosedEvent(event event.ConnectionClosed) {
 	c.peerRepository.Remove(event.ConnectionID)
 }
 
