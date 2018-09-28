@@ -17,16 +17,15 @@
 package api_gateway
 
 import (
-	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/yggdrasill"
-
 	"errors"
 	"sync"
 
 	"time"
 
+	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/leveldb-wrapper"
+	"github.com/it-chain/yggdrasill"
 )
 
 var ErrGetCommittedBlock = errors.New("Error in getting commited block")

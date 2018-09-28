@@ -17,11 +17,8 @@
 package api
 
 import (
-	"time"
-
-	"fmt"
-
 	"strings"
+	"time"
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
@@ -74,6 +71,7 @@ func (e *ElectionApi) broadcastLeader(rep pbft.Representative) error {
 	}
 	grpcDeliverCommand, err := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
 	if err != nil {
+		iLogger.Infof(nil, "[Consensus] Err %s", err.Error())
 		return err
 	}
 
@@ -122,32 +120,24 @@ func (e *ElectionApi) isFullyVoted() bool {
 //4. Send message having 'RequestVoteProtocol' to other node
 func (e *ElectionApi) ElectLeaderWithRaft() {
 
-	go func() {
-		e.ElectionService.SetState(pbft.TICKING)
-		e.ElectionService.InitLeftTime()
-
-		fmt.Println(e.ElectionService.GetLeftTime())
-
-		tick := time.Tick(1 * time.Millisecond)
-		end := true
-		for end {
-			select {
-
-			case <-tick:
-				// count down left time while ticking
-				e.ElectionService.CountDownLeftTimeBy(1)
-				if e.ElectionService.GetLeftTime() == 0 {
-					e.HandleRaftTimeout()
-				}
-			case <-time.After(4 * time.Second):
-				end = false
-				fmt.Println("end raft")
+	e.ElectionService.SetState(pbft.TICKING)
+	e.ElectionService.InitLeftTime()
+	tick := time.Tick(1 * time.Millisecond)
+	for {
+		select {
+		case <-tick:
+			e.ElectionService.CountDownLeftTimeBy(1)
+			if e.ElectionService.GetLeftTime() == 0 {
+				e.HandleRaftTimeout()
 			}
+		case <-time.After(10 * time.Second):
+			iLogger.Fatalf(nil, "namoon....")
+			return
 		}
-	}()
+	}
 }
+
 func (e *ElectionApi) HandleRaftTimeout() error {
-	fmt.Println("start raft")
 	if e.ElectionService.GetState() == pbft.TICKING {
 
 		e.ElectionService.SetState(pbft.CANDIDATE)
@@ -165,6 +155,7 @@ func (e *ElectionApi) HandleRaftTimeout() error {
 	return nil
 }
 func (e *ElectionApi) RequestVote(peerIds []string) error {
+
 	iLogger.Infof(nil, "[PBFT] Request Vote - Peers:[%s]", strings.Join(peerIds, ", "))
 	// 1. create request vote message
 	// 2. send message
@@ -176,7 +167,6 @@ func (e *ElectionApi) RequestVote(peerIds []string) error {
 	for _, connectionId := range peerIds {
 		grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
 	}
-
 	return e.eventService.Publish("message.deliver", grpcDeliverCommand)
 }
 
