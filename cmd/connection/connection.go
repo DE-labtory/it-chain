@@ -20,7 +20,7 @@ import "github.com/urfave/cli"
 
 var connectionCmd = cli.Command{
 	Name:        "connection",
-	Aliases:     []string{"p"},
+	Aliases:     []string{"c"},
 	Usage:       "options for connection",
 	Subcommands: []cli.Command{},
 }
