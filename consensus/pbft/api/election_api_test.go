@@ -188,10 +188,10 @@ func TestElectionApi_ElectLeaderWithRaft(t *testing.T) {
 
 		time.Sleep(5 * time.Second)
 
-		leader1 := env.ProcessMap["1"].Services["LeaderApi"].(*api.LeaderApi).GetLeader()
-		leader2 := env.ProcessMap["2"].Services["LeaderApi"].(*api.LeaderApi).GetLeader()
-		leader3 := env.ProcessMap["3"].Services["LeaderApi"].(*api.LeaderApi).GetLeader()
-		leader4 := env.ProcessMap["4"].Services["LeaderApi"].(*api.LeaderApi).GetLeader()
+		leader1 := env.ProcessMap["1"].Services["ParliamentApi"].(*api.ParliamentApi).GetLeader()
+		leader2 := env.ProcessMap["2"].Services["ParliamentApi"].(*api.ParliamentApi).GetLeader()
+		leader3 := env.ProcessMap["3"].Services["ParliamentApi"].(*api.ParliamentApi).GetLeader()
+		leader4 := env.ProcessMap["4"].Services["ParliamentApi"].(*api.ParliamentApi).GetLeader()
 
 		t.Logf("leader1: %v", leader1)
 		t.Logf("leader2: %v", leader2)
