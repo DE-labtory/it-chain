@@ -143,6 +143,5 @@ func (p *ParliamentService) FindRepresentativeByIpAddress(ipAddress string) *pbf
 		}
 
 	}
-
 	return nil
 }

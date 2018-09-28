@@ -22,8 +22,15 @@ import (
 	"github.com/it-chain/engine/common/logger"
 )
 
+const (
+	CANDIDATE ElectionState = "CANDIDATE"
+	TICKING   ElectionState = "TICKING"
+)
+
+type ElectionState string
+
 type ElectionService struct {
-	ipAddress string
+	NodeId    string
 	candidate *Representative // candidate peer to be leader later
 	leftTime  int             //left time in millisecond
 	state     ElectionState
@@ -32,10 +39,10 @@ type ElectionService struct {
 	term      int
 }
 
-func NewElectionService(ipAddress string, leftTime int, state ElectionState, voteCount int) *ElectionService {
+func NewElectionService(id string, leftTime int, state ElectionState, voteCount int) *ElectionService {
 
 	return &ElectionService{
-		ipAddress: ipAddress,
+		NodeId: id,
 		candidate: &Representative{
 			ID: "",
 		},
@@ -142,12 +149,7 @@ func (e *ElectionService) SetCandidate(representative *Representative) {
 }
 
 func (e *ElectionService) GetCandidate() *Representative {
-
 	return e.candidate
-}
-
-func (e *ElectionService) GetIpAddress() string {
-	return e.ipAddress
 }
 
 func (e *ElectionService) IncreaseTerm() error {
