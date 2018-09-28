@@ -23,8 +23,6 @@ import (
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
-	"github.com/it-chain/engine/p2p"
-	"github.com/it-chain/engine/p2p/infra/mem"
 )
 
 // 프로세스 아이디와 동일한 값의 ip를 가지는 프로세스들을 만들어낸다.
@@ -45,13 +43,11 @@ func SetTestEnvironment(processList []string) struct {
 		// setup process
 		process := mock.NewProcess(id)
 		electionService := pbft.NewElectionService(id, 30, pbft.TICKING, 0)
-		repository := mem.NewPeerReopository()
+		repository := api_gateway.NewPeerRepository()
 		for _, pid := range processList {
-			repository.Save(p2p.Peer{
-				PeerId: p2p.PeerId{
-					Id: pid,
-				},
-				IpAddress: pid,
+			repository.Save(api_gateway.Peer{
+				ID:                 pid,
+				GrpcGatewayAddress: pid,
 			})
 		}
 

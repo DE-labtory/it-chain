@@ -54,11 +54,6 @@ func TestElectionService_GetCandidate(t *testing.T) {
 	assert.Equal(t, e.GetCandidate().ID, "1")
 }
 
-func TestElectionService_GetIpAddress(t *testing.T) {
-	e := SetElectionService()
-	assert.Equal(t, e.GetIpAddress(), "1")
-}
-
 func TestElectionService_GetLeftTime(t *testing.T) {
 	e := SetElectionService()
 	assert.Equal(t, e.GetLeftTime(), 30)

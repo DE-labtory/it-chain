@@ -38,7 +38,6 @@ var (
 func NewApiHandler(b *BlockQueryApi, i *ICodeQueryApi, p *PeerQueryApi, logger kitlog.Logger) http.Handler {
 
 	r := mux.NewRouter()
-
 	be := MakeBlockchainEndpoints(b)
 	ie := MakeIvmEndpoints(i)
 	ce := MakePeerEndpoints(p)
