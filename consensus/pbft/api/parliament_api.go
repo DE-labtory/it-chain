@@ -22,6 +22,7 @@ import (
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/iLogger"
 )
 
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
@@ -63,6 +64,7 @@ func (p *ParliamentApi) UpdateLeader(nodeId string) error {
 
 	parliament := p.parliamentRepository.Load()
 	representative, err := parliament.FindRepresentativeByID(nodeId)
+	iLogger.Infof(nil, "[PBFT] found representative to be leader id: %s", representative.ID)
 	if err != nil {
 		return ErrNoMatchingPeerWithIpAddress
 	}
@@ -70,6 +72,8 @@ func (p *ParliamentApi) UpdateLeader(nodeId string) error {
 	if err := parliament.SetLeader(representative.ID); err != nil {
 		return err
 	}
+
+	p.parliamentRepository.Save(parliament)
 
 	return p.eventService.Publish("leader.updated", event.LeaderUpdated{LeaderId: representative.ID})
 }
