@@ -75,13 +75,15 @@ func NewSyncStateRepository() *mem.SyncStateRepository {
 	return mem.NewSyncStateRepository()
 }
 
-func NewBlockApi(blockRepository *repo.BlockRepository, blockPool *mem.BlockPool, service common.EventService) (*api.BlockApi, error) {
+func NewBlockApi(config *conf.Configuration, blockRepository *repo.BlockRepository, blockPool *mem.BlockPool, service common.EventService) (*api.BlockApi, error) {
 
-	return api.NewBlockApi(publisherID, blockRepository, service, blockPool)
+	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
+	return api.NewBlockApi(NodeId, blockRepository, service, blockPool)
 }
 
-func NewSyncApi(blockRepository *repo.BlockRepository, syncStateRepository *mem.SyncStateRepository, eventService common.EventService, queryService *adapter.QuerySerivce, blockPool *mem.BlockPool) (*api.SyncApi, error) {
-	api, err := api.NewSyncApi(publisherID, blockRepository, syncStateRepository, eventService, queryService, blockPool)
+func NewSyncApi(config *conf.Configuration, blockRepository *repo.BlockRepository, syncStateRepository *mem.SyncStateRepository, eventService common.EventService, queryService *adapter.QuerySerivce, blockPool *mem.BlockPool) (*api.SyncApi, error) {
+	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
+	api, err := api.NewSyncApi(NodeId, blockRepository, syncStateRepository, eventService, queryService, blockPool)
 	return &api, err
 }
 
