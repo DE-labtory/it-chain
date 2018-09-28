@@ -26,8 +26,6 @@ import (
 	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
 	test2 "github.com/it-chain/engine/consensus/pbft/test"
-	"github.com/it-chain/engine/p2p"
-	"github.com/it-chain/engine/p2p/infra/mem"
 	"github.com/it-chain/engine/p2p/test/mock"
 	"github.com/stretchr/testify/assert"
 )
@@ -226,12 +224,6 @@ func TestElectionApi_GetCandidate(t *testing.T) {
 	assert.Equal(t, api.GetCandidate().ID, "1")
 }
 
-func TestElectionApi_GetIpAddress(t *testing.T) {
-	api := setElectionApi()
-
-	assert.Equal(t, api.GetIpAddress(), "1")
-}
-
 func TestElectionApi_GetState(t *testing.T) {
 	api := setElectionApi()
 
@@ -247,25 +239,20 @@ func TestElectionApi_GetVoteCount(t *testing.T) {
 func setElectionApi() *api.ElectionApi {
 	electionService := pbft.NewElectionService("1", 30, pbft.CANDIDATE, 0)
 	parliament := pbft.NewParliament()
-	repository := mem.NewPeerReopository()
-	repository.Save(p2p.Peer{
-		IpAddress: "1",
-		PeerId: p2p.PeerId{
-			Id: "1",
-		},
+	repository := api_gateway.NewPeerRepository()
+	repository.Save(api_gateway.Peer{
+		ID:                 "1",
+		GrpcGatewayAddress: "1",
 	})
-	repository.Save(p2p.Peer{
-		IpAddress: "2",
-		PeerId: p2p.PeerId{
-			Id: "2",
-		},
+	repository.Save(api_gateway.Peer{
+		ID:                 "2",
+		GrpcGatewayAddress: "2",
 	})
-	repository.Save(p2p.Peer{
-		IpAddress: "3",
-		PeerId: p2p.PeerId{
-			Id: "3",
-		},
+	repository.Save(api_gateway.Peer{
+		ID:                 "3",
+		GrpcGatewayAddress: "3",
 	})
+
 	peerQueryApi := api_gateway.NewPeerQueryApi(repository)
 	parliamentService := adapter.NewParliamentService(parliament, peerQueryApi)
 	eventService := &mock.MockEventService{}

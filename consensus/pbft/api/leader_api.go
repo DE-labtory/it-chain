@@ -41,25 +41,21 @@ func NewLeaderApi(ps pbft.ParliamentService, eventService common.EventService) *
 	}
 }
 
-func (la *LeaderApi) UpdateLeaderWithAddress(ipAddress string) error {
+func (la *LeaderApi) UpdateLeader(nodeId string) error {
 	//1. loop peer list and find specific address
 	//2. update specific peer as leader
-	rep := la.parliamentService.FindRepresentativeByIpAddress(ipAddress)
-
+	rep := la.parliamentService.GetRepresentativeById(nodeId)
 	if rep == nil {
 		return ErrNoMatchingPeerWithIpAddress
 	}
 
 	la.parliamentService.SetLeader(&pbft.Representative{
-		ID:        rep.ID,
-		IpAddress: ipAddress,
+		ID: rep.ID,
 	})
 
-	event := event.LeaderUpdated{
+	return la.eventService.Publish("leader.updated", event.LeaderUpdated{
 		LeaderId: rep.ID,
-	}
-
-	return la.eventService.Publish("leader.updated", event)
+	})
 
 }
 

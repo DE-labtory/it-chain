@@ -22,16 +22,14 @@ import (
 )
 
 type SyncApi struct {
-	publisherId     string
 	blockRepository blockchain.BlockRepository
 	eventService    blockchain.EventService
 	queryService    blockchain.QueryService
 	blockPool       blockchain.BlockPool
 }
 
-func NewSyncApi(publisherId string, blockRepository blockchain.BlockRepository, eventService blockchain.EventService, queryService blockchain.QueryService, blockPool blockchain.BlockPool) (SyncApi, error) {
+func NewSyncApi(blockRepository blockchain.BlockRepository, eventService blockchain.EventService, queryService blockchain.QueryService, blockPool blockchain.BlockPool) (SyncApi, error) {
 	return SyncApi{
-		publisherId:     publisherId,
 		blockRepository: blockRepository,
 		eventService:    eventService,
 		queryService:    queryService,

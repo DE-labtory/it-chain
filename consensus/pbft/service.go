@@ -40,7 +40,6 @@ type ParliamentService interface {
 	GetRepresentativeTable() map[string]*Representative
 	GetParliament() *Parliament
 	GetLeader() *Leader
-	FindRepresentativeByIpAddress(ipAddress string) *Representative
 }
 
 // 연결된 peer 중에서 consensus 에 참여할 representative 들을 선출
