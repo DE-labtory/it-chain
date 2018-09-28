@@ -72,9 +72,7 @@ func (p *ParliamentApi) UpdateLeader(nodeId string) error {
 	if err := parliament.SetLeader(representative.ID); err != nil {
 		return err
 	}
-
 	p.parliamentRepository.Save(parliament)
-
 	return p.eventService.Publish("leader.updated", event.LeaderUpdated{LeaderId: representative.ID})
 }
 

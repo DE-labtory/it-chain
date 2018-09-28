@@ -35,7 +35,7 @@ func NewConnectionEventHandler(electionApi *api.ElectionApi, parliamentApi *api.
 
 func (c *ConnectionEventHandler) HandleConnectionCreatedEvent(event event.ConnectionCreated) {
 	c.parliamentApi.AddRepresentative(event.ConnectionID)
-	c.electionApi.ElectLeaderWithRaft()
+	go c.electionApi.ElectLeaderWithRaft()
 }
 
 func (c *ConnectionEventHandler) HandleConnectionClosedEvent(event event.ConnectionCreated) {
