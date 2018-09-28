@@ -42,6 +42,7 @@ var Module = fx.Options(
 		NewBlockQueryApi,
 		NewBlockEventListener,
 		api_gateway.NewConnectionEventListener,
+		api_gateway.NewLeaderUpdateEventListener,
 		NewICodeQueryApi,
 		NewICodeEventHandler,
 		api_gateway.NewPeerQueryApi,
@@ -94,14 +95,14 @@ func NewPeerRepository() *api_gateway.PeerRepository {
 	return api_gateway.NewPeerRepository()
 }
 
-func RegisterEvent(subscriber *pubsub.TopicSubscriber, blockEventListener *api_gateway.BlockEventListener, icodeEventListener *api_gateway.ICodeEventHandler, connectionEventListener *api_gateway.ConnectionEventListener, leaderUpdateEventlistener *api_gateway.LeaderUpdateEventListener) {
+func RegisterEvent(subscriber *pubsub.TopicSubscriber, blockEventListener *api_gateway.BlockEventListener, icodeEventListener *api_gateway.ICodeEventHandler, connectionEventhandler *api_gateway.ConnectionEventHandler, leaderUpdateEventlistener *api_gateway.LeaderUpdateEventListener) {
 	if err := subscriber.SubscribeTopic("block.*", blockEventListener); err != nil {
 		panic(err)
 	}
 	if err := subscriber.SubscribeTopic("icode.*", icodeEventListener); err != nil {
 		panic(err)
 	}
-	if err := subscriber.SubscribeTopic("connection.*", connectionEventListener); err != nil {
+	if err := subscriber.SubscribeTopic("connection.*", connectionEventhandler); err != nil {
 		panic(err)
 	}
 	if err := subscriber.SubscribeTopic("leader.updated", leaderUpdateEventlistener); err != nil {
