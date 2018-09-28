@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 It-chain
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package api
 
 import (
@@ -57,10 +73,15 @@ func TestConsensusApi_StartConsensus_State(t *testing.T) {
 func TestConsensusApi_HandleProposeMsg_State(t *testing.T) {
 
 	var validLeaderProposeMsg = pbft.ProposeMsg{
-		StateID:        pbft.StateID{},
+		StateID: pbft.StateID{
+			ID: "state1",
+		},
 		SenderID:       "Leader",
 		Representative: nil,
-		ProposedBlock:  pbft.ProposedBlock{},
+		ProposedBlock: pbft.ProposedBlock{
+			Seal: make([]byte, 0),
+			Body: make([]byte, 0),
+		},
 	}
 
 	tests := map[string]struct {
@@ -137,7 +158,7 @@ func TestConsensusApi_RepositoryClone(t *testing.T) {
 	// stateApi1 에는 setUpApiCondition에 의해 repo가 set된 상황
 	stateApi1 := setUpApiCondition(false, 5, true, false, false)
 	// stateApi2 에는 stateApi1의 Repo가 주입된 상황
-	stateApi2 := NewStateApi("publish2", nil, nil, nil, stateApi1.repo)
+	stateApi2 := NewStateApi("publish2", pbft.PropagateService{}, nil, nil, stateApi1.repo)
 
 	stateApi1.repo.Remove()
 	_, err := stateApi2.repo.Load()
@@ -189,16 +210,12 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isNormalBlock bool,
 		})
 	}
 
-	propagateService := &mock.PropagateService{}
-	propagateService.BroadcastProposeMsgFunc = func(msg pbft.ProposeMsg, representatives []*pbft.Representative) error {
+	mockEventService := mock.EventService{}
+	mockEventService.PublishFunc = func(topic string, event interface{}) error {
 		return nil
 	}
-	propagateService.BroadcastPrevoteMsgFunc = func(msg pbft.PrevoteMsg, representatives []*pbft.Representative) error {
-		return nil
-	}
-	propagateService.BroadcastPreCommitMsgFunc = func(msg pbft.PreCommitMsg, representatives []*pbft.Representative) error {
-		return nil
-	}
+
+	propagateService := pbft.NewPropagateService(mockEventService)
 
 	parliamentService := &mock.ParliamentService{}
 	parliamentService.RequestPeerListFunc = func() ([]pbft.MemberID, error) {

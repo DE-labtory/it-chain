@@ -24,12 +24,6 @@ import (
 
 var ErrNoParliamentMember = errors.New("No parliament member.")
 
-type PropagateService interface {
-	BroadcastProposeMsg(msg ProposeMsg, representatives []*Representative) error
-	BroadcastPrevoteMsg(msg PrevoteMsg, representatives []*Representative) error
-	BroadcastPreCommitMsg(msg PreCommitMsg, representatives []*Representative) error
-}
-
 type ParliamentService interface {
 	RequestLeader() (MemberID, error)
 	RequestPeerList() ([]MemberID, error)

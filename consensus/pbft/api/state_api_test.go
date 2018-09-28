@@ -87,13 +87,20 @@ func TestConsensusApi_StartConsensus(t *testing.T) {
 func TestConsensusApi_HandleProposeMsg(t *testing.T) {
 
 	var validLeaderProposeMsg = pbft.ProposeMsg{
-		StateID:        pbft.StateID{},
+		StateID: pbft.StateID{
+			ID: "state1",
+		},
 		SenderID:       "Leader",
 		Representative: nil,
-		ProposedBlock:  pbft.ProposedBlock{},
+		ProposedBlock: pbft.ProposedBlock{
+			Seal: make([]byte, 0),
+			Body: make([]byte, 0),
+		},
 	}
 	var invalidLeaderProposeMsg = pbft.ProposeMsg{
-		StateID:        pbft.StateID{},
+		StateID: pbft.StateID{
+			ID: "state1",
+		},
 		SenderID:       "NoLeader",
 		Representative: nil,
 		ProposedBlock:  pbft.ProposedBlock{},
@@ -282,16 +289,12 @@ func setUpApiCondition(isNeedConsensus bool, peerNum int, isRepoFull bool, isNor
 		})
 	}
 
-	propagateService := &mock.PropagateService{}
-	propagateService.BroadcastProposeMsgFunc = func(msg pbft.ProposeMsg, representatives []*pbft.Representative) error {
+	mockEventService := mock.EventService{}
+	mockEventService.PublishFunc = func(topic string, event interface{}) error {
 		return nil
 	}
-	propagateService.BroadcastPrevoteMsgFunc = func(msg pbft.PrevoteMsg, representatives []*pbft.Representative) error {
-		return nil
-	}
-	propagateService.BroadcastPreCommitMsgFunc = func(msg pbft.PreCommitMsg, representatives []*pbft.Representative) error {
-		return nil
-	}
+
+	propagateService := pbft.NewPropagateService(mockEventService)
 
 	parliamentService := &mock.ParliamentService{}
 	parliamentService.RequestPeerListFunc = func() ([]pbft.MemberID, error) {
