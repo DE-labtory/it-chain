@@ -83,5 +83,6 @@ func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrp
 			iLogger.Errorf(nil, "Err %s", err.Error())
 		}
 	}
+
 	return nil
 }

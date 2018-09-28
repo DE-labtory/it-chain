@@ -16,7 +16,11 @@
 
 package pbft
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/it-chain/iLogger"
+)
 
 var ErrRepresentativeDoesNotExist = errors.New("Representative does not exist")
 var ErrRepresentativeAlreadyExist = errors.New("Representative already exist")
@@ -71,6 +75,8 @@ func (p *Parliament) SetLeader(representativeId string) error {
 	p.Leader = Leader{
 		LeaderId: representativeId,
 	}
+
+	iLogger.Infof(nil, "[PBFT] set leader with id: %s", p.GetLeader().LeaderId)
 	return nil
 }
 
