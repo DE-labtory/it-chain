@@ -155,7 +155,7 @@ func makeMockProposeMsg() pbft.ProposeMsg {
 			ID: "state1",
 		},
 		SenderID:       "sender1",
-		Representative: make([]*pbft.Representative, 0),
+		Representative: make([]pbft.Representative, 0),
 		ProposedBlock: pbft.ProposedBlock{
 			Seal: []byte{'s', 'e', 'a', 'l'},
 			Body: []byte{'b', 'o', 'd', 'y'},

@@ -21,10 +21,9 @@ import (
 
 	"time"
 
-	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
-	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
+	"github.com/it-chain/engine/consensus/pbft/infra/mem"
 	test2 "github.com/it-chain/engine/consensus/pbft/test"
 	"github.com/it-chain/engine/p2p/test/mock"
 	"github.com/stretchr/testify/assert"
@@ -217,7 +216,7 @@ func TestGenRandomInRange(t *testing.T) {
 
 func TestElectionApi_GetCandidate(t *testing.T) {
 	api := setElectionApi()
-	api.ElectionService.SetCandidate(&pbft.Representative{
+	api.ElectionService.SetCandidate(pbft.Representative{
 		ID: "1",
 	})
 
@@ -237,26 +236,17 @@ func TestElectionApi_GetVoteCount(t *testing.T) {
 }
 
 func setElectionApi() *api.ElectionApi {
+
 	electionService := pbft.NewElectionService("1", 30, pbft.CANDIDATE, 0)
 	parliament := pbft.NewParliament()
-	repository := api_gateway.NewPeerRepository()
-	repository.Save(api_gateway.Peer{
-		ID:                 "1",
-		GrpcGatewayAddress: "1",
-	})
-	repository.Save(api_gateway.Peer{
-		ID:                 "2",
-		GrpcGatewayAddress: "2",
-	})
-	repository.Save(api_gateway.Peer{
-		ID:                 "3",
-		GrpcGatewayAddress: "3",
-	})
+	parliamentRepository := mem.NewParliamentRepository()
 
-	peerQueryApi := api_gateway.NewPeerQueryApi(repository)
-	parliamentService := adapter.NewParliamentService(parliament, peerQueryApi)
+	parliament.AddRepresentative(pbft.NewRepresentative("1"))
+	parliament.AddRepresentative(pbft.NewRepresentative("2"))
+	parliament.AddRepresentative(pbft.NewRepresentative("3"))
+	parliamentRepository.Save(parliament)
+
 	eventService := &mock.MockEventService{}
-	api := api.NewElectionApi(electionService, parliamentService, eventService)
-
+	api := api.NewElectionApi(electionService, parliamentRepository, eventService)
 	return api
 }

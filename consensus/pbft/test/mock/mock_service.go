@@ -42,19 +42,19 @@ func (m ConfirmService) ConfirmBlock(block pbft.ProposedBlock) error {
 }
 
 type PropagateService struct {
-	BroadcastPrevoteMsgFunc   func(msg pbft.PrevoteMsg, representatives []*pbft.Representative) error
-	BroadcastProposeMsgFunc   func(msg pbft.ProposeMsg, representatives []*pbft.Representative) error
-	BroadcastPreCommitMsgFunc func(msg pbft.PreCommitMsg, representatives []*pbft.Representative) error
+	BroadcastPrevoteMsgFunc   func(msg pbft.PrevoteMsg, representatives []pbft.Representative) error
+	BroadcastProposeMsgFunc   func(msg pbft.ProposeMsg, representatives []pbft.Representative) error
+	BroadcastPreCommitMsgFunc func(msg pbft.PreCommitMsg, representatives []pbft.Representative) error
 }
 
-func (m PropagateService) BroadcastPrevoteMsg(msg pbft.PrevoteMsg, representatives []*pbft.Representative) error {
+func (m PropagateService) BroadcastPrevoteMsg(msg pbft.PrevoteMsg, representatives []pbft.Representative) error {
 	return m.BroadcastPrevoteMsgFunc(msg, representatives)
 }
 
-func (m PropagateService) BroadcastProposeMsg(msg pbft.ProposeMsg, representatives []*pbft.Representative) error {
+func (m PropagateService) BroadcastProposeMsg(msg pbft.ProposeMsg, representatives []pbft.Representative) error {
 	return m.BroadcastProposeMsgFunc(msg, representatives)
 }
-func (m PropagateService) BroadcastPreCommitMsg(msg pbft.PreCommitMsg, representatives []*pbft.Representative) error {
+func (m PropagateService) BroadcastPreCommitMsg(msg pbft.PreCommitMsg, representatives []pbft.Representative) error {
 	return m.BroadcastPreCommitMsgFunc(msg, representatives)
 }
 

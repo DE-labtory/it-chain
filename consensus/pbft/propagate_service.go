@@ -39,7 +39,8 @@ func NewPropagateService(eventService common.EventService) PropagateService {
 	}
 }
 
-func (ps PropagateService) BroadcastProposeMsg(msg ProposeMsg, representatives []*Representative) error {
+func (ps PropagateService) BroadcastProposeMsg(msg ProposeMsg, representatives []Representative) error {
+
 	if msg.StateID.ID == "" {
 		return ErrStateIdEmpty
 	}
@@ -61,7 +62,7 @@ func (ps PropagateService) BroadcastProposeMsg(msg ProposeMsg, representatives [
 	return nil
 }
 
-func (ps PropagateService) BroadcastPrevoteMsg(msg PrevoteMsg, representatives []*Representative) error {
+func (ps PropagateService) BroadcastPrevoteMsg(msg PrevoteMsg, representatives []Representative) error {
 	if msg.StateID.ID == "" {
 		return ErrStateIdEmpty
 	}
@@ -83,7 +84,7 @@ func (ps PropagateService) BroadcastPrevoteMsg(msg PrevoteMsg, representatives [
 	return nil
 }
 
-func (ps PropagateService) BroadcastPreCommitMsg(msg PreCommitMsg, representatives []*Representative) error {
+func (ps PropagateService) BroadcastPreCommitMsg(msg PreCommitMsg, representatives []Representative) error {
 	if msg.StateID.ID == "" {
 		return ErrStateIdEmpty
 	}
@@ -101,7 +102,7 @@ func (ps PropagateService) BroadcastPreCommitMsg(msg PreCommitMsg, representativ
 	return nil
 }
 
-func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string, representatives []*Representative) error {
+func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string, representatives []Representative) error {
 	if SerializedMsg == nil {
 		return ErrEmptyMsg
 	}

@@ -39,7 +39,7 @@ func TestPropagateService_BroadcastProposeMsg(t *testing.T) {
 				msg: pbft.ProposeMsg{
 					StateID:        pbft.StateID{"c1"},
 					SenderID:       "s1",
-					Representative: make([]*pbft.Representative, 0),
+					Representative: make([]pbft.Representative, 0),
 					ProposedBlock: pbft.ProposedBlock{
 						Seal: make([]byte, 0),
 						Body: make([]byte, 0),
@@ -55,7 +55,7 @@ func TestPropagateService_BroadcastProposeMsg(t *testing.T) {
 				msg: pbft.ProposeMsg{
 					StateID:        pbft.StateID{""},
 					SenderID:       "s1",
-					Representative: make([]*pbft.Representative, 0),
+					Representative: make([]pbft.Representative, 0),
 					ProposedBlock: pbft.ProposedBlock{
 						Seal: make([]byte, 0),
 						Body: make([]byte, 0),
@@ -71,7 +71,7 @@ func TestPropagateService_BroadcastProposeMsg(t *testing.T) {
 				msg: pbft.ProposeMsg{
 					StateID:        pbft.StateID{"c1"},
 					SenderID:       "s1",
-					Representative: make([]*pbft.Representative, 0),
+					Representative: make([]pbft.Representative, 0),
 					ProposedBlock: pbft.ProposedBlock{
 						Seal: make([]byte, 0),
 						Body: nil,
@@ -89,7 +89,7 @@ func TestPropagateService_BroadcastProposeMsg(t *testing.T) {
 		return nil
 	}
 
-	representatives := make([]*pbft.Representative, 0)
+	representatives := make([]pbft.Representative, 0)
 	propagateService := pbft.NewPropagateService(mockEventService)
 
 	for testName, test := range tests {
@@ -153,7 +153,7 @@ func TestPropagateService_BroadcastPrevoteMsg(t *testing.T) {
 		return nil
 	}
 
-	representatives := make([]*pbft.Representative, 0)
+	representatives := make([]pbft.Representative, 0)
 	propagateService := pbft.NewPropagateService(mockEventService)
 
 	for testName, test := range tests {
@@ -203,7 +203,7 @@ func TestPropagateService_BroadcastPreCommitMsg(t *testing.T) {
 		return nil
 	}
 
-	representatives := make([]*pbft.Representative, 0)
+	representatives := make([]pbft.Representative, 0)
 	propagateService := pbft.NewPropagateService(mockEventService)
 
 	for testName, test := range tests {
