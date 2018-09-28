@@ -45,23 +45,23 @@ func (cca *ConnectionCommandApi) dial(address string) (string, string, error) {
 	var callBackGrpcGatewayAddress string
 	var callBackConnectionId string
 
-	iLogger.Infof(nil, "[api_gateway] Creating connection - Address: [%s]", address)
+	iLogger.Infof(nil, "[Api_gateway] Creating connection - Address: [%s]", address)
 	err := client.Call("connection.create", createConnectionCommand, func(connection grpc_gateway.Connection, err rpc.Error) {
 
 		if !err.IsNil() {
-			iLogger.Fatalf(nil, "[api_gateway] Fail to create connection - Address: [%s]", address)
+			iLogger.Fatalf(nil, "[Api_gateway] Fail to create connection - Address: [%s]", address)
 			callBackErr = errors.New(err.Message)
 			return
 		}
 
-		iLogger.Infof(nil, "[api_gateway] Connection created - gRPC-Address: [%s], Id:[%s]", connection.GrpcGatewayAddress, connection.ConnectionID)
+		iLogger.Infof(nil, "[Api_gateway] Connection created - gRPC-Address: [%s], Id:[%s]", connection.GrpcGatewayAddress, connection.ConnectionID)
 		callBackGrpcGatewayAddress = connection.GrpcGatewayAddress
 		callBackConnectionId = connection.ConnectionID
 		callBackErr = nil
 	})
 
 	if err != nil {
-		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[api_gateway] fatal err in dial cmd")
+		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in dial cmd")
 		return "", "", err
 	}
 
@@ -82,21 +82,21 @@ func (cca *ConnectionCommandApi) join(address string) error {
 
 	var callBackErr error
 
-	iLogger.Infof(nil, "[api_gateway] Joining network - Address: [%s]", address)
+	iLogger.Infof(nil, "[Api_gateway] Joining network - Address: [%s]", address)
 	err := client.Call("connection.join", joinNetworkCommand, func(_ struct{}, err rpc.Error) {
 
 		if !err.IsNil() {
-			iLogger.Fatalf(nil, "[api_gateway] Fail to join network - Address: [%s], Err: [%s]", address, err.Message)
+			iLogger.Fatalf(nil, "[Api_gateway] Fail to join network - Address: [%s], Err: [%s]", address, err.Message)
 			callBackErr = errors.New(err.Message)
 			return
 		}
 
 		callBackErr = nil
-		iLogger.Info(nil, "[api_gateway] Successfully request to join network")
+		iLogger.Info(nil, "[Api_gateway] Successfully request to join network")
 	})
 
 	if err != nil {
-		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[api_gateway] fatal err in join cmd")
+		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in join cmd")
 		return err
 	}
 

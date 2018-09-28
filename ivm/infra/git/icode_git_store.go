@@ -22,6 +22,8 @@ import (
 	"os"
 	"strings"
 
+	"io/ioutil"
+
 	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/iLogger"
 	"gopkg.in/src-d/go-git.v4"
@@ -43,13 +45,20 @@ type RepositoryService struct {
 func NewRepositoryService() *RepositoryService {
 	return &RepositoryService{}
 }
-
-func (gApi *RepositoryService) Clone(baseSavePath string, repositoryUrl string, sshPath string, password string) (ivm.ICode, error) {
+func (gApi *RepositoryService) CloneFromRawSsh(baseSavePath string, repositoryUrl string, rawSsh []byte, password string) (ivm.ICode, error) {
 	iLogger.Info(nil, fmt.Sprintf("[IVM] Cloning Icode - url: [%s]", repositoryUrl))
 
-	gitUrl, err := toGitUrl(repositoryUrl, sshPath)
-	if err != nil {
-		return ivm.ICode{}, err
+	var gitUrl string
+	var girUrlErr error
+
+	if len(rawSsh) == 0 {
+		gitUrl, girUrlErr = toGitUrl(repositoryUrl, "https")
+	} else {
+		gitUrl, girUrlErr = toGitUrl(repositoryUrl, "git")
+	}
+
+	if girUrlErr != nil {
+		return ivm.ICode{}, girUrlErr
 	}
 
 	name := getNameFromGitUrl(gitUrl)
@@ -72,13 +81,13 @@ func (gApi *RepositoryService) Clone(baseSavePath string, repositoryUrl string, 
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 	}
 
-	if sshPath != "" {
-		sshAuth, err := ssh.NewPublicKeysFromFile("git", sshPath, password)
+	if len(rawSsh) != 0 {
+		sshAuth, err := ssh.NewPublicKeys("git", rawSsh, password)
 		if err != nil {
 			return ivm.ICode{}, err
 		}
-
 		cloneOptions.Auth = sshAuth
+
 	}
 
 	r, err := git.PlainClone(baseSavePath+"/"+name, false, cloneOptions)
@@ -122,9 +131,23 @@ func (gApi *RepositoryService) Clone(baseSavePath string, repositoryUrl string, 
 	return metaData, nil
 }
 
+func (gApi *RepositoryService) Clone(baseSavePath string, repositoryUrl string, sshPath string, password string) (ivm.ICode, error) {
+
+	if sshPath == "" {
+		return gApi.CloneFromRawSsh(baseSavePath, repositoryUrl, make([]byte, 0), password)
+	}
+
+	bytes, err := ioutil.ReadFile(sshPath)
+	if err != nil {
+		return ivm.ICode{}, err
+	}
+
+	return gApi.CloneFromRawSsh(baseSavePath, repositoryUrl, bytes, password)
+}
+
 // transfer github.com/it-chain/engine to
 // is ssh (git@github.com:it-chain/engine.git) or is not ssh (https://github.com/it-chain/engine.git)
-func toGitUrl(repositoryUrl string, sshAuth string) (string, error) {
+func toGitUrl(repositoryUrl string, protocolType string) (string, error) {
 	const postfix = ".git"
 
 	var gitUrlsort string
@@ -136,14 +159,14 @@ func toGitUrl(repositoryUrl string, sshAuth string) (string, error) {
 		return "", ErrUnsupportedUrl
 	}
 
-	var prefix string
-	if sshAuth != "" {
-		prefix = "git@" + gitUrlsort + ":"
-	} else {
-		prefix = "https://" + gitUrlsort + "/"
+	switch protocolType {
+	case "git":
+		return "git@" + gitUrlsort + ":" + after(repositoryUrl, gitUrlsort+"/") + postfix, nil
+	case "https":
+		return "https://" + gitUrlsort + "/" + after(repositoryUrl, gitUrlsort+"/") + postfix, nil
+	default:
+		return "", errors.New("unsupported type")
 	}
-
-	return prefix + after(repositoryUrl, gitUrlsort+"/") + postfix, nil
 }
 
 func after(value string, a string) string {

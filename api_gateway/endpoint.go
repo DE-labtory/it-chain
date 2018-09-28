@@ -121,7 +121,7 @@ func makeFindAllICodeEndpoint(i *ICodeQueryApi) endpoint.Endpoint {
 func makeDeployIcodeEndpoint(i *ICodeCommandApi) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(DeployIcodeRequest)
-		icodeId, err := i.deploy(req.AmqpUrl, req.GitUrl, req.SshPath, req.SshPassWord)
+		icodeId, err := i.deploy(req.AmqpUrl, req.GitUrl, req.SshRaw, req.SshPassWord)
 		if err != nil {
 			iLogger.Error(&iLogger.Fields{"err_message": err.Error()}, "error while deploy icode endpoint")
 			return nil, err
@@ -146,7 +146,9 @@ func makeUnDeployIcodeEndpoint(i *ICodeCommandApi) endpoint.Endpoint {
 
 //todo impl
 func makeFindAllUncommittedTransactionEndpoint() endpoint.Endpoint {
-	panic("impl plz")
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		return nil, nil
+	}
 }
 
 func makeCreateTransactionEndpoint(i *ICodeCommandApi) endpoint.Endpoint {
@@ -259,7 +261,7 @@ type FindCommittedBlockBySealRequest struct {
 type DeployIcodeRequest struct {
 	IvmRequest
 	GitUrl      string
-	SshPath     string
+	SshRaw      string
 	SshPassWord string
 }
 

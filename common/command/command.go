@@ -84,6 +84,7 @@ type ExecuteICode struct {
 type Deploy struct {
 	Url      string
 	SshPath  string
+	SshRaw   []byte
 	Password string
 }
 type UnDeploy struct {
