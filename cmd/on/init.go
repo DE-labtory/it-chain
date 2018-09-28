@@ -67,10 +67,10 @@ func start() error {
 	app := fx.New(
 		commonfx.Module,
 		api_gatewayfx.Module,
+		grpc_gatewayfx.Module,
 		ivmfx.Module,
 		txpoolfx.Module,
 		blockchainfx.Module,
-		grpc_gatewayfx.Module,
 		pbftfx.Module,
 		fx.NopLogger,
 	)

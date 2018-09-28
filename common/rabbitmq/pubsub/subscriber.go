@@ -58,6 +58,7 @@ func NewTopicSubscriber(rabbitmqUrl string, exchange string) *TopicSubscriber {
 }
 
 func (t *TopicSubscriber) SubscribeTopic(topic string, source interface{}) error {
+
 	q, err := t.Ch.QueueDeclare(
 		xid.New().String(), // name
 		false,              // durable
@@ -93,16 +94,16 @@ func (t *TopicSubscriber) SubscribeTopic(topic string, source interface{}) error
 		return err
 	}
 
-	p, _ := NewParamBasedRouter()
-	p.SetHandler(q.Name, source)
-
 	if err != nil {
 		return err
 	}
 
-	go func(queueName string, router *ParamBasedRouter) {
-		for delivery := range msgs {
+	go func(queueName string) {
 
+		p, _ := NewParamBasedRouter()
+		p.SetHandler(q.Name, source)
+
+		for delivery := range msgs {
 			message := &Message{}
 			data := delivery.Body
 
@@ -110,9 +111,11 @@ func (t *TopicSubscriber) SubscribeTopic(topic string, source interface{}) error
 				logger.Errorf(nil, "[Common] Fail to unmarshal rabbitmq message - Err: [%s]", err.Error())
 			}
 
-			p.Route(queueName, message.Data, message.MatchingValue) //해당 event를 처리하기 위한 matching value 에는 structName이 들어간다.
+			if err := p.Route(queueName, message.Data, message.MatchingValue); err != nil {
+				logger.Errorf(nil, "[Common] Fail to route rabbitmq message - Err: [%s]", err.Error())
+			} //해당 event를 처리하기 위한 matching value 에는 structName이 들어간다.
 		}
-	}(q.Name, p)
+	}(q.Name)
 
 	return nil
 }
