@@ -78,13 +78,13 @@ func NewApiHandler(bqa *BlockQueryApi, iqa *ICodeQueryApi, iha *ICodeCommandApi,
 		opts...))
 
 	r.Methods("POST").Path("/icodes").Handler(kithttp.NewServer(
-		ie.GetIcodeListEndpoint,
+		ie.DeployIcodeEndpoint,
 		decodeDeployIcodeRequest,
 		encodeResponse,
 		opts...))
 
 	r.Methods("DELETE").Path("/icodes/{id}").Handler(kithttp.NewServer(
-		ie.GetIcodeListEndpoint,
+		ie.UnDeployIcodeEndpoint,
 		decodeUnDeployIcodeRequest,
 		encodeResponse,
 		opts...))
@@ -97,6 +97,9 @@ func NewApiHandler(bqa *BlockQueryApi, iqa *ICodeQueryApi, iha *ICodeCommandApi,
 		encodeResponse,
 		opts...))
 
+	// GET		/peers			retrieves all peers
+	// GET		/peers/{id}		retrieves peers that match id
+	// POST		/peers			dial or join network to address. about post body information, see decodeCreateConnectionRequest
 	r.Methods("GET").Path("/peers").Handler(kithttp.NewServer(
 		ce.FindAllPeerEndpoint,
 		decodeFindAllConnectionRequest,
@@ -111,7 +114,7 @@ func NewApiHandler(bqa *BlockQueryApi, iqa *ICodeQueryApi, iha *ICodeCommandApi,
 		opts...,
 	))
 
-	r.Methods("POST").Path("/connections").Handler(kithttp.NewServer(
+	r.Methods("POST").Path("/peers").Handler(kithttp.NewServer(
 		ce.CreateConnectionEndpoint,
 		decodeCreateConnectionRequest,
 		encodeResponse,

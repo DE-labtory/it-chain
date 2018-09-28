@@ -39,15 +39,30 @@ func NewDeployCommandHandler(icodeApi api.ICodeApi) *DeployCommandHandler {
 }
 
 func (d *DeployCommandHandler) HandleDeployCommand(deployCommand command.Deploy) (ivm.ICode, rpc.Error) {
-	sshPath := deployCommand.SshPath
 	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/.tmp/"
 
-	icode, err := d.icodeApi.Deploy(savePath, deployCommand.Url, sshPath, deployCommand.Password)
+	if deployCommand.SshPath != "" {
+		icode, err := d.icodeApi.Deploy(savePath, deployCommand.Url, deployCommand.SshPath, deployCommand.Password)
+		if err != nil {
+			iLogger.Error(nil, fmt.Sprintf("[Icode] fail to deploy ivm, url %s", deployCommand.Url))
+			return ivm.ICode{}, rpc.Error{Message: err.Error()}
+		}
 
-	if err != nil {
-		iLogger.Error(nil, fmt.Sprintf("[Icode] fail to deploy ivm, url %s", deployCommand.Url))
-		return ivm.ICode{}, rpc.Error{Message: err.Error()}
+		return icode, rpc.Error{}
+	} else if len(deployCommand.SshRaw) != 0 {
+		icode, err := d.icodeApi.DeployFromRawSsh(savePath, deployCommand.Url, deployCommand.SshRaw, deployCommand.Password)
+		if err != nil {
+			iLogger.Error(nil, fmt.Sprintf("[Icode] fail to deploy ivm, url %s", deployCommand.Url))
+			return ivm.ICode{}, rpc.Error{Message: err.Error()}
+		}
+		return icode, rpc.Error{}
+	} else {
+		icode, err := d.icodeApi.Deploy(savePath, deployCommand.Url, "", deployCommand.Password)
+		if err != nil {
+			iLogger.Error(nil, fmt.Sprintf("[Icode] fail to deploy ivm, url %s", deployCommand.Url))
+			return ivm.ICode{}, rpc.Error{Message: err.Error()}
+		}
+		return icode, rpc.Error{}
 	}
 
-	return icode, rpc.Error{}
 }

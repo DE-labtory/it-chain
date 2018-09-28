@@ -26,6 +26,7 @@ type ContainerService interface {
 type GitService interface {
 	//clone code from deploy info
 	Clone(baseSavePath string, repositoryUrl string, sshPath string, password string) (ICode, error)
+	CloneFromRawSsh(baseSavePath string, repositoryUrl string, rawSsh []byte, password string) (ICode, error)
 }
 
 type EventService interface {

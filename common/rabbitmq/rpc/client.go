@@ -108,7 +108,7 @@ func (c Client) Call(queue string, params interface{}, callback interface{}) err
 		return err
 	}
 
-	timeout := time.After(time.Second * 60)
+	timeout := time.After(time.Second * 180)
 
 	select {
 	case d := <-msgs:

@@ -19,7 +19,6 @@ package api_gateway
 import (
 	"log"
 
-	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
@@ -37,7 +36,7 @@ func NewICodeCommandApi() *ICodeCommandApi {
 	return &ICodeCommandApi{}
 }
 
-func (i *ICodeCommandApi) deploy(amqpUrl string, gitUrl string, sshPath string, sshPassword string) (string, error) {
+func (i *ICodeCommandApi) deploy(amqpUrl string, gitUrl string, rawSsh string, sshPassword string) (string, error) {
 	if amqpUrl == "" {
 		config := conf.GetConfiguration()
 		amqpUrl = config.Engine.Amqp
@@ -47,38 +46,33 @@ func (i *ICodeCommandApi) deploy(amqpUrl string, gitUrl string, sshPath string, 
 
 	defer client.Close()
 
-	absPath, err := common.RelativeToAbsolutePath(sshPath)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
 	deployCommand := command.Deploy{
 		Url:      gitUrl,
-		SshPath:  absPath,
+		SshRaw:   []byte(rawSsh),
 		Password: sshPassword,
 	}
 
-	iLogger.Infof(nil, "[api_gateway] deploying icode...")
-	iLogger.Infof(nil, "[api_gateway] This may take a few minutes")
+	iLogger.Infof(nil, "[Api_gateway] deploying icode...")
+	iLogger.Infof(nil, "[Api_gateway] This may take a few minutes")
 
 	var callBackIcodeId ivm.ID
 	var callBackErr error
 
-	err = client.Call("ivm.deploy", deployCommand, func(icode ivm.ICode, err rpc.Error) {
+	err := client.Call("ivm.deploy", deployCommand, func(icode ivm.ICode, err rpc.Error) {
 
 		if !err.IsNil() {
-			iLogger.Infof(nil, "[api_gateway] fail to deploy icode err: [%s]", err.Message)
+			iLogger.Infof(nil, "[Api_gateway] fail to deploy icode err: [%s]", err.Message)
 			callBackErr = errors.New(err.Message)
 			return
 		}
 
-		iLogger.Infof(nil, "[api_gateway] icode has deployed - icodeID: [%s]", icode.ID)
+		iLogger.Infof(nil, "[Api_gateway] icode has deployed - icodeID: [%s]", icode.ID)
 		callBackErr = nil
 		callBackIcodeId = icode.ID
 	})
 
 	if err != nil {
-		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[api_gateway] fatal err in deploy cmd")
+		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in deploy cmd")
 		return "", err
 	}
 
@@ -108,17 +102,17 @@ func (i *ICodeCommandApi) unDeploy(amqpUrl string, icodeId string) error {
 	err := client.Call("ivm.undeploy", undeployCommand, func(empty struct{}, err rpc.Error) {
 
 		if !err.IsNil() {
-			log.Printf("[api_gateway] fail to undeploy icode err: [%s]", err.Message)
+			log.Printf("[Api_gateway] fail to undeploy icode err: [%s]", err.Message)
 			callBackErr = errors.New(err.Message)
 			return
 		}
 
-		log.Printf("[api_gateway] [%s] icode has undeployed", icodeId)
+		log.Printf("[Api_gateway] [%s] icode has undeployed", icodeId)
 		callBackErr = nil
 	})
 
 	if err != nil {
-		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[api_gateway] fatal err in unDeploy cmd")
+		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in unDeploy cmd")
 		return err
 	}
 
@@ -148,7 +142,7 @@ func (i *ICodeCommandApi) invoke(amqpUrl string, id string, functionName string,
 		Function:      functionName,
 	}
 
-	iLogger.Infof(nil, "[api_gateway] Invoke icode - icodeID: [%s]", id)
+	iLogger.Infof(nil, "[Api_gateway] Invoke icode - icodeID: [%s]", id)
 
 	var callBackTransactionId txpool.TransactionId
 	var callBackErr error
@@ -156,19 +150,19 @@ func (i *ICodeCommandApi) invoke(amqpUrl string, id string, functionName string,
 	err := client.Call("transaction.create", invokeCommand, func(transaction txpool.Transaction, err rpc.Error) {
 
 		if !err.IsNil() {
-			iLogger.Errorf(nil, "[api_gateway] Fail to invoke icode err: [%s]", err.Message)
+			iLogger.Errorf(nil, "[Api_gateway] Fail to invoke icode err: [%s]", err.Message)
 			callBackErr = errors.New(err.Message)
 			return
 		}
 
-		iLogger.Infof(nil, "[api_gateway] Transactions are created - ID: [%s]", transaction.ID)
+		iLogger.Infof(nil, "[Api_gateway] Transactions are created - ID: [%s]", transaction.ID)
 		callBackErr = nil
 		callBackTransactionId = transaction.ID
 
 	})
 
 	if err != nil {
-		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[api_gateway] fatal err in invoke cmd")
+		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in invoke cmd")
 		return "", err
 	}
 
@@ -196,20 +190,20 @@ func (i *ICodeCommandApi) query(amqpUrl string, id string, functionName string, 
 		Method:   "query",
 	}
 
-	iLogger.Infof(nil, "[api_gateway] Querying icode - icodeID: [%s], func: [%s]", id, functionName)
+	iLogger.Infof(nil, "[Api_gateway] Querying icode - icodeID: [%s], func: [%s]", id, functionName)
 
 	var callBackResult map[string]string
 	var callBackErr error
 
 	err := client.Call("ivm.execute", queryCommand, func(result ivm.Result, err rpc.Error) {
 		if !err.IsNil() {
-			iLogger.Errorf(nil, "[api_gateway] Fail to query icode err: [%s]", err.Message)
+			iLogger.Errorf(nil, "[Api_gateway] Fail to query icode err: [%s]", err.Message)
 			callBackErr = errors.New(err.Message)
 			return
 		}
 
 		for key, val := range result.Data {
-			iLogger.Infof(nil, "[api_gateway] Querying result - key: [%s], value: [%s]", key, val)
+			iLogger.Infof(nil, "[Api_gateway] Querying result - key: [%s], value: [%s]", key, val)
 		}
 
 		callBackResult = result.Data
@@ -220,7 +214,7 @@ func (i *ICodeCommandApi) query(amqpUrl string, id string, functionName string, 
 	})
 
 	if err != nil {
-		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[api_gateway] fatal err in query cmd")
+		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in query cmd")
 		return nil, err
 	}
 

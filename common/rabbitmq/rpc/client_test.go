@@ -83,7 +83,7 @@ func TestClient_InfiniteCall(t *testing.T) {
 		assert.Equal(t, sample.ID, "123")
 		assert.Equal(t, sample.TxData.ID, "1234")
 
-		time.Sleep(time.Second * 70)
+		time.Sleep(time.Second * 190)
 
 		return Sample{ID: "1234"}, rpc.Error{}
 	})
