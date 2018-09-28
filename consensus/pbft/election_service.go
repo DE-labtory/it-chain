@@ -31,8 +31,8 @@ type ElectionState string
 
 type ElectionService struct {
 	NodeId    string
-	candidate *Representative // candidate peer to be leader later
-	leftTime  int             //left time in millisecond
+	candidate Representative // candidate peer to be leader later
+	leftTime  int            //left time in millisecond
 	state     ElectionState
 	voteCount int
 	mux       sync.Mutex
@@ -43,7 +43,7 @@ func NewElectionService(id string, leftTime int, state ElectionState, voteCount 
 
 	return &ElectionService{
 		NodeId: id,
-		candidate: &Representative{
+		candidate: Representative{
 			ID: "",
 		},
 		leftTime:  leftTime,
@@ -144,11 +144,11 @@ func (e *ElectionService) CountUpVoteCount() {
 	e.voteCount = e.voteCount + 1
 }
 
-func (e *ElectionService) SetCandidate(representative *Representative) {
+func (e *ElectionService) SetCandidate(representative Representative) {
 	e.candidate = representative
 }
 
-func (e *ElectionService) GetCandidate() *Representative {
+func (e *ElectionService) GetCandidate() Representative {
 	return e.candidate
 }
 

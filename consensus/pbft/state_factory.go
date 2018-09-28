@@ -21,7 +21,7 @@ import (
 )
 
 // leader
-func NewState(parliament []MemberID, block ProposedBlock) (*State, error) {
+func NewState(parliament []Representative, block ProposedBlock) (*State, error) {
 	representatives, err := Elect(parliament)
 	if err != nil {
 		return &State{}, err

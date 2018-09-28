@@ -73,7 +73,7 @@ func (m MemberID) ToString() string {
 type ProposeMsg struct {
 	StateID        StateID
 	SenderID       string
-	Representative []*Representative
+	Representative []Representative
 	ProposedBlock  ProposedBlock
 }
 
@@ -244,7 +244,7 @@ func NewStateID(id string) StateID {
 
 type State struct {
 	StateID          StateID
-	Representatives  []*Representative
+	Representatives  []Representative
 	Block            ProposedBlock
 	CurrentStage     Stage
 	PrevoteMsgPool   PrevoteMsgPool

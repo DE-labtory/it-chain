@@ -25,9 +25,13 @@ import (
 
 func TestCreateConsensus(t *testing.T) {
 	// given
-	p := make([]pbft.MemberID, 0)
-	l := pbft.MemberID("leader")
-	m := pbft.MemberID("member")
+	p := make([]pbft.Representative, 0)
+	l := pbft.Representative{
+		ID: "leader",
+	}
+	m := pbft.Representative{
+		ID: "member",
+	}
 	b := pbft.ProposedBlock{
 		Seal: make([]byte, 0),
 		Body: make([]byte, 0),
@@ -57,7 +61,7 @@ func TestConstructConsensus(t *testing.T) {
 	l := pbft.NewRepresentative("leader")
 	m := pbft.NewRepresentative("member")
 
-	r := make([]*pbft.Representative, 0)
+	r := make([]pbft.Representative, 0)
 	r = append(r, l, m)
 
 	msg := pbft.ProposeMsg{

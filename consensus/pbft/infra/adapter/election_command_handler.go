@@ -49,8 +49,6 @@ func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrp
 	switch command.Protocol {
 
 	case "RequestVoteProtocol":
-		iLogger.Infof(nil, "[consensus] handling request vote from process: %v", gch.electionApi.GetIpAddress())
-
 		message := &pbft.RequestVoteMessage{}
 		deserializeErr := common.Deserialize(command.Body, message)
 		if deserializeErr != nil {

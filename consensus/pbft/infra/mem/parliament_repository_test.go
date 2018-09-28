@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-package pbft
+package mem_test
 
 import (
-	"errors"
-	"math/rand"
-	"time"
+	"testing"
+
+	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/engine/consensus/pbft/infra/mem"
+	"github.com/magiconair/properties/assert"
 )
 
-var ErrNoParliamentMember = errors.New("No parliament member.")
+func TestParliamentRepository_Load_Save(t *testing.T) {
+	p := mem.NewParliamentRepository()
+	p.Save(pbft.Parliament{
+		Leader: pbft.Leader{LeaderId: "123"},
+	})
 
-// 연결된 peer 중에서 consensus 에 참여할 representative 들을 선출
-func Elect(parliament []Representative) ([]Representative, error) {
-	if len(parliament) == 0 {
-		return []Representative{}, ErrNoParliamentMember
-	}
-	return parliament, nil
-}
+	parliament := p.Load()
 
-func GenRandomInRange(min, max int) int {
-
-	rand.Seed(time.Now().UnixNano())
-	return rand.Intn(max-min) + min
+	assert.Equal(t, parliament.Leader, pbft.Leader{LeaderId: "123"})
 }

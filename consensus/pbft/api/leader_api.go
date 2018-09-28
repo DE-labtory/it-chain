@@ -29,40 +29,38 @@ var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 var ErrNoMatchingPeerWithIpAddress = errors.New("no matching peer with ip address")
 
 type LeaderApi struct {
-	parliamentService pbft.ParliamentService
-	eventService      common.EventService
+	parliamentRepository pbft.ParliamentRepository
+	eventService         common.EventService
 }
 
-func NewLeaderApi(ps pbft.ParliamentService, eventService common.EventService) *LeaderApi {
+func NewLeaderApi(parliamentRepository pbft.ParliamentRepository, eventService common.EventService) *LeaderApi {
 
 	return &LeaderApi{
-		parliamentService: ps,
-		eventService:      eventService,
+		parliamentRepository: parliamentRepository,
+		eventService:         eventService,
 	}
 }
 
-func (la *LeaderApi) UpdateLeader(nodeId string) error {
+func (l *LeaderApi) UpdateLeader(nodeId string) error {
 	//1. loop peer list and find specific address
 	//2. update specific peer as leader
-	rep := la.parliamentService.GetRepresentativeById(nodeId)
-	if rep == nil {
+
+	parliament := l.parliamentRepository.Load()
+	representative, err := parliament.FindRepresentativeByID(nodeId)
+	if err != nil {
 		return ErrNoMatchingPeerWithIpAddress
 	}
 
-	la.parliamentService.SetLeader(&pbft.Representative{
-		ID: rep.ID,
-	})
+	if err := parliament.SetLeader(representative.ID); err != nil {
+		return err
+	}
 
-	return la.eventService.Publish("leader.updated", event.LeaderUpdated{
-		LeaderId: rep.ID,
+	return l.eventService.Publish("leader.updated", event.LeaderUpdated{
+		LeaderId: representative.ID,
 	})
-
 }
 
-func (la *LeaderApi) GetParliament() *pbft.Parliament {
-	return la.parliamentService.GetParliament()
-}
-
-func (la *LeaderApi) GetLeader() *pbft.Leader {
-	return la.parliamentService.GetLeader()
+func (l *LeaderApi) GetLeader() pbft.Leader {
+	parliament := l.parliamentRepository.Load()
+	return parliament.GetLeader()
 }

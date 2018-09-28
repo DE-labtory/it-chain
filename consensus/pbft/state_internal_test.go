@@ -71,9 +71,9 @@ func TestState_CheckPreCommitCondition_UnSatisfy(t *testing.T) {
 
 func setUpState() State {
 	//when representatives consist 6 member
-	reps := make([]*Representative, 0)
+	reps := make([]Representative, 0)
 	for i := 0; i < 6; i++ {
-		reps = append(reps, &Representative{
+		reps = append(reps, Representative{
 			ID: "user",
 		})
 	}

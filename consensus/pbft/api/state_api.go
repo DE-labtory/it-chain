@@ -32,38 +32,34 @@ type StateApi interface {
 }
 
 type StateApiImpl struct {
-	publisherID       string
-	propagateService  pbft.PropagateService
-	eventService      common.EventService
-	parliamentService pbft.ParliamentService
-	repo              pbft.StateRepository
+	publisherID          string
+	propagateService     pbft.PropagateService
+	eventService         common.EventService
+	parliamentRepository pbft.ParliamentRepository
+	repo                 pbft.StateRepository
 }
 
 var ConsensusCreateError = errors.New("Consensus can't be created")
 
 func NewStateApi(publisherID string, propagateService pbft.PropagateService,
-	eventService common.EventService, parliamentService pbft.ParliamentService, repo pbft.StateRepository) StateApiImpl {
+	eventService common.EventService, parliamentRepository pbft.ParliamentRepository, repo pbft.StateRepository) StateApiImpl {
 	return StateApiImpl{
-		publisherID:       publisherID,
-		propagateService:  propagateService,
-		eventService:      eventService,
-		parliamentService: parliamentService,
-		repo:              repo,
+		publisherID:          publisherID,
+		propagateService:     propagateService,
+		eventService:         eventService,
+		parliamentRepository: parliamentRepository,
+		repo:                 repo,
 	}
 }
 
 func (cApi *StateApiImpl) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 
-	peerList, err := cApi.parliamentService.RequestPeerList()
-	if err != nil {
-		return err
-	}
-
-	if !cApi.parliamentService.IsNeedConsensus() {
+	parliament := cApi.parliamentRepository.Load()
+	if !parliament.IsNeedConsensus() {
 		return ConsensusCreateError
 	}
 
-	createdState, err := pbft.NewState(peerList, proposedBlock)
+	createdState, err := pbft.NewState(parliament.GetRepresentatives(), proposedBlock)
 	if err != nil {
 		return err
 	}
@@ -83,12 +79,10 @@ func (cApi *StateApiImpl) StartConsensus(proposedBlock pbft.ProposedBlock) error
 
 func (cApi *StateApiImpl) HandleProposeMsg(msg pbft.ProposeMsg) error {
 
-	lid, err := cApi.parliamentService.RequestLeader()
-	if err != nil {
-		return err
-	}
+	parliament := cApi.parliamentRepository.Load()
 
-	if lid.ToString() != msg.SenderID {
+	lid := parliament.GetLeader()
+	if lid.GetID() != msg.SenderID {
 		return pbft.InvalidLeaderIdError
 	}
 
