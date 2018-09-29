@@ -74,6 +74,7 @@ func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrp
 			return nil
 		}
 
+		e.electionApi.EndRaft()
 		toBeLeader := &pbft.UpdateLeaderMessage{}
 		if err := common.Deserialize(command.Body, toBeLeader); err != nil {
 			iLogger.Errorf(nil, "Err %s", err.Error())
