@@ -55,17 +55,19 @@ func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrp
 			return deserializeErr
 		}
 
-		if message.Term < e.electionApi.ElectionService.GetTerm() {
-			iLogger.Errorf(nil, "Term low")
+		if e.electionApi.ElectionService.Voted {
+			iLogger.Info(nil, "already voted!")
 			return nil
 		}
 
 		err := e.electionApi.Vote(command.ConnectionID)
+
 		if err != nil {
 			return err
 		}
 
 	case "VoteLeaderProtocol":
+		iLogger.Infof(nil, "[PBFT] Receive VoteLeaderProtocol")
 		if err := e.electionApi.DecideToBeLeader(); err != nil {
 			iLogger.Errorf(nil, "Err %s", err.Error())
 		}
