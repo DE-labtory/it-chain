@@ -51,18 +51,29 @@ func SetTestEnvironment(processList []string) struct {
 		}
 
 		parliamentRepository.Save(parliament)
+		stateRepository := mem.NewStateRepository()
+
 		eventService := mock.NewEventService(id, networkManager.Publish)
+		propagateService := pbft.NewPropagateService(eventService)
+
 		electionApi := api.NewElectionApi(electionService, parliamentRepository, eventService)
 		leaderApi := api.NewParliamentApi(parliamentRepository, eventService)
+		stateApi := api.NewStateApi(id, propagateService, eventService, parliamentRepository, stateRepository)
+
 		grpcCommandHandler := adapter.NewElectionCommandHandler(leaderApi, electionApi)
+		pbftHandler := adapter.NewPbftMsgHandler(stateApi)
 
 		// register handler to process
 		process.RegisterHandler(grpcCommandHandler.HandleMessageReceive)
+		process.RegisterHandler(pbftHandler.HandleGrpcMsgCommand)
 
 		// register module to process
 		process.Register(electionApi)
 		process.Register(leaderApi)
 		process.Register(electionService)
+		process.Register(stateApi)
+		process.Register(parliamentRepository)
+		process.Register(stateRepository)
 
 		// add process to network manager
 		networkManager.AddProcess(process)

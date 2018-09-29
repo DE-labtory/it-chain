@@ -49,13 +49,7 @@ func (ps PropagateService) BroadcastProposeMsg(msg ProposeMsg, representatives [
 		return ErrEmptyBlock
 	}
 
-	SerializedMsg, err := common.Serialize(msg)
-
-	if err != nil {
-		return err
-	}
-
-	if err = ps.broadcastMsg(SerializedMsg, "ProposeMsgProtocol", representatives); err != nil {
+	if err := ps.broadcastMsg(msg, "ProposeMsgProtocol", representatives); err != nil {
 		return err
 	}
 
@@ -71,13 +65,7 @@ func (ps PropagateService) BroadcastPrevoteMsg(msg PrevoteMsg, representatives [
 		return ErrEmptyBlockHash
 	}
 
-	SerializedMsg, err := common.Serialize(msg)
-
-	if err != nil {
-		return err
-	}
-
-	if err = ps.broadcastMsg(SerializedMsg, "PrevoteMsgProtocol", representatives); err != nil {
+	if err := ps.broadcastMsg(msg, "PrevoteMsgProtocol", representatives); err != nil {
 		return err
 	}
 
@@ -89,25 +77,16 @@ func (ps PropagateService) BroadcastPreCommitMsg(msg PreCommitMsg, representativ
 		return ErrStateIdEmpty
 	}
 
-	SerializedMsg, err := common.Serialize(msg)
-
-	if err != nil {
-		return err
-	}
-
-	if err = ps.broadcastMsg(SerializedMsg, "PreCommitMsgProtocol", representatives); err != nil {
+	if err := ps.broadcastMsg(msg, "PreCommitMsgProtocol", representatives); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string, representatives []Representative) error {
-	if SerializedMsg == nil {
-		return ErrEmptyMsg
-	}
+func (ps PropagateService) broadcastMsg(msg interface{}, protocol string, representatives []Representative) error {
 
-	grpcCommand, err := createDeliverGrpcCommand(protocol, SerializedMsg)
+	grpcCommand, err := createDeliverGrpcCommand(protocol, msg)
 
 	if err != nil {
 		return err

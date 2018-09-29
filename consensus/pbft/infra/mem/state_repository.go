@@ -26,8 +26,8 @@ type StateRepository struct {
 	sync.RWMutex
 }
 
-func NewStateRepository() StateRepository {
-	return StateRepository{
+func NewStateRepository() *StateRepository {
+	return &StateRepository{
 		state:   pbft.State{},
 		RWMutex: sync.RWMutex{},
 	}
