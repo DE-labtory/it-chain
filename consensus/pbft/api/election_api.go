@@ -47,12 +47,11 @@ func NewElectionApi(electionService *pbft.ElectionService, parliamentRepository 
 
 func (e *ElectionApi) Vote(connectionId string) error {
 
-	e.ElectionService.IncreaseTerm()
-
 	parliament := e.parliamentRepository.Load()
 
 	representative, err := parliament.FindRepresentativeByID(connectionId)
 	if err != nil {
+		iLogger.Infof(nil, "[PBFT] Representative who has Id: %s is not found", connectionId)
 		return err
 	}
 
@@ -62,6 +61,10 @@ func (e *ElectionApi) Vote(connectionId string) error {
 	voteLeaderMessage := pbft.VoteMessage{}
 	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("VoteLeaderProtocol", voteLeaderMessage)
 	grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
+
+	iLogger.Infof(nil, "[PBFT] Vote to %s", connectionId)
+	e.ElectionService.SetVoted(true)
+
 	return e.eventService.Publish("message.deliver", grpcDeliverCommand)
 }
 
@@ -169,6 +172,7 @@ func (e *ElectionApi) HandleRaftTimeout() error {
 		e.ElectionService.ResetLeftTime()
 		e.ElectionService.SetState(pbft.TICKING)
 	}
+
 	return nil
 }
 func (e *ElectionApi) RequestVote(peerIds []string) error {
