@@ -156,6 +156,8 @@ func (m *MockEventService) Publish(topic string, event interface{}) error {
 	return m.PublishFunc(topic, event)
 }
 
+func (m *MockEventService) Close(){}
+
 type MockClient struct {
 	CallFunc func(queue string, params interface{}, callback interface{}) error
 }
