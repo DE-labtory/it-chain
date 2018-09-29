@@ -64,7 +64,7 @@ func NewEventService(config *conf.Configuration) common.EventService {
 	return common.NewEventService(config.Engine.Amqp, "Event")
 }
 
-func RegisterTearDown(lifecycle fx.Lifecycle, rpcServer *rpc.Server, subscriber *pubsub.TopicSubscriber) {
+func RegisterTearDown(lifecycle fx.Lifecycle, rpcServer *rpc.Server, subscriber *pubsub.TopicSubscriber, eventService common.EventService) {
 	lifecycle.Append(fx.Hook{
 		OnStart: func(context context.Context) error {
 			return nil
@@ -72,6 +72,7 @@ func RegisterTearDown(lifecycle fx.Lifecycle, rpcServer *rpc.Server, subscriber 
 		OnStop: func(context context.Context) error {
 			subscriber.Close()
 			rpcServer.Close()
+			eventService.Close()
 			return nil
 		},
 	})

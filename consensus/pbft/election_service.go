@@ -76,7 +76,7 @@ func (e *ElectionService) InitLeftTime() {
 	e.mux.Lock()
 	defer e.mux.Unlock()
 
-	e.leftTime = GenRandomInRange(150, 500)
+	e.leftTime = GenRandomInRange(150, 300)
 }
 
 func (e *ElectionService) ResetLeftTime() {
@@ -84,11 +84,14 @@ func (e *ElectionService) ResetLeftTime() {
 	e.mux.Lock()
 	defer e.mux.Unlock()
 
-	e.leftTime = GenRandomInRange(100, 110)
+	e.leftTime = GenRandomInRange(290, 300)
 }
 
 //count down left time by tick millisecond  until 0
 func (e *ElectionService) CountDownLeftTimeBy(tick int) {
+
+	e.mux.Lock()
+	defer e.mux.Unlock()
 
 	if e.leftTime == 0 {
 		return
@@ -116,6 +119,9 @@ func (e *ElectionService) GetState() ElectionState {
 }
 
 func (e *ElectionService) GetLeftTime() int {
+
+	e.mux.Lock()
+	defer e.mux.Unlock()
 
 	return e.leftTime
 }
@@ -145,10 +151,16 @@ func (e *ElectionService) CountUpVoteCount() {
 }
 
 func (e *ElectionService) SetCandidate(representative Representative) {
+	e.mux.Lock()
+	defer e.mux.Unlock()
+
 	e.candidate = representative
 }
 
 func (e *ElectionService) GetCandidate() Representative {
+	e.mux.Lock()
+	defer e.mux.Unlock()
+
 	return e.candidate
 }
 
@@ -162,5 +174,8 @@ func (e *ElectionService) IncreaseTerm() error {
 }
 
 func (e *ElectionService) GetTerm() int {
+	e.mux.Lock()
+	defer e.mux.Unlock()
+
 	return e.term
 }
