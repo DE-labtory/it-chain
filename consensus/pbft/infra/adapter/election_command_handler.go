@@ -44,7 +44,6 @@ func NewElectionCommandHandler(parliamentApi *api.ParliamentApi, electionApi *ap
 }
 
 func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrpc) error {
-	iLogger.Infof(nil, "[PBFT] Received gRPC message - Protocol [%s]", command.Protocol)
 
 	switch command.Protocol {
 

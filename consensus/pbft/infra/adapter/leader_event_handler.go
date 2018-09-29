@@ -19,12 +19,20 @@ package adapter
 import (
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/consensus/pbft/api"
+	"github.com/it-chain/iLogger"
 )
 
 type LeaderEventHandler struct {
 	electionApi *api.ElectionApi
 }
 
+func NewLeaderEventHandler(electionApi *api.ElectionApi) *LeaderEventHandler {
+	return &LeaderEventHandler{
+		electionApi: electionApi,
+	}
+}
+
 func (l *LeaderEventHandler) HandlerLeaderDeletedEvent(_ event.LeaderDeleted) {
+	iLogger.Infof(nil, "[PBFT] Leader Deleted, Start Elect Leader With RAFT")
 	go l.electionApi.ElectLeaderWithRaft()
 }

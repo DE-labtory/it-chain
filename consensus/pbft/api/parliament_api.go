@@ -54,6 +54,8 @@ func (p *ParliamentApi) AddRepresentative(representativeId string) {
 }
 
 func (p *ParliamentApi) RemoveRepresentative(representativeId string) {
+	iLogger.Infof(nil, "[PBFT] Remove Representative ID: %s", representativeId)
+
 	parliament := p.parliamentRepository.Load()
 
 	if parliament.GetLeader().GetID() == representativeId {

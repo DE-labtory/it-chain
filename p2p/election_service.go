@@ -122,61 +122,6 @@ func (es *ElectionService) DecideToBeLeader() error {
 	return nil
 }
 
-func (es *ElectionService) ElectLeaderWithRaft() {
-
-	//1. Start random timeout
-	//2. timed out! alter state to 'candidate'
-	//3. while ticking, count down leader repo left time
-	//4. Send message having 'RequestVoteProtocol' to other node
-	go func() {
-		es.Election.state = TICKING
-
-		es.Election.leftTime = GenRandomInRange(150, 300)
-
-		timeout := time.After(time.Duration(es.Election.leftTime) * time.Millisecond)
-		tick := time.Tick(1 * time.Millisecond)
-		end := true
-		for end {
-			select {
-
-			case <-timeout:
-				iLogger.Info(nil, "timed out!")
-				// when timed out
-				// 1. if state is ticking, be candidate and request vote
-				// 2. if state is candidate, reset state and left time
-				if es.Election.GetState() == TICKING {
-					iLogger.Infof(nil, "candidate process: %v", es.Election.candidate)
-					es.Election.SetState(CANDIDATE)
-
-					pLTable, _ := es.peerQueryService.GetPLTable()
-
-					peerList := pLTable.PeerTable
-
-					connectionIds := make([]string, 0)
-
-					for _, peer := range peerList {
-						connectionIds = append(connectionIds, peer.PeerId.Id)
-					}
-
-					es.RequestVote(connectionIds)
-
-				} else if es.Election.GetState() == CANDIDATE {
-					//reset time and state chane candidate -> ticking when timed in candidate state
-					es.Election.ResetLeftTime()
-					es.Election.SetState(TICKING)
-				}
-
-			case <-tick:
-				// count down left time while ticking
-				es.Election.CountDownLeftTimeBy(1)
-			case <-time.After(5 * time.Second):
-				end = false
-			}
-
-		}
-	}()
-}
-
 func (es *ElectionService) RequestVote(connectionIds []string) error {
 
 	// 0. be candidate
