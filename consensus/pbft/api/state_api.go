@@ -38,8 +38,8 @@ type StateApi struct {
 var ConsensusCreateError = errors.New("Consensus can't be created")
 
 func NewStateApi(publisherID string, propagateService pbft.PropagateService,
-	eventService common.EventService, parliamentRepository pbft.ParliamentRepository, repo pbft.StateRepository) StateApi {
-	return StateApi{
+	eventService common.EventService, parliamentRepository pbft.ParliamentRepository, repo pbft.StateRepository) *StateApi {
+	return &StateApi{
 		publisherID:          publisherID,
 		propagateService:     propagateService,
 		eventService:         eventService,
@@ -86,10 +86,7 @@ func (sApi *StateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
 		return pbft.InvalidLeaderIdError
 	}
 
-	builtState, err := pbft.BuildState(msg)
-	if err != nil {
-		return err
-	}
+	builtState := pbft.BuildState(msg)
 
 	prevoteMsg := pbft.NewPrevoteMsg(builtState, sApi.publisherID)
 	if err := sApi.propagateService.BroadcastPrevoteMsg(*prevoteMsg, builtState.Representatives); err != nil {
@@ -168,6 +165,10 @@ func (sApi *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 		}
 		sApi.repo.Remove()
 		logger.Infof(nil, "[PBFT] Consensus is finished.")
+	}
+
+	if err := sApi.repo.Save(loadedState); err != nil {
+		return err
 	}
 
 	return nil

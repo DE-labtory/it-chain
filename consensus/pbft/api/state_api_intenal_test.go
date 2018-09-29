@@ -184,9 +184,9 @@ func TestStateApi_Reflect_TemporaryPrevoteMsgPool(t *testing.T) {
 	}
 	var tempProposeMsg = pbft.ProposeMsg{
 		StateID:        pbft.StateID{"state1"},
-		SenderID:       "Leader",
+		SenderID:       "user0",
 		Representative: reps,
-		ProposedBlock:  pbft.ProposedBlock{},
+		ProposedBlock:  normalBlock,
 	}
 
 	var tempPrevoteMsg = pbft.PrevoteMsg{
@@ -227,9 +227,9 @@ func TestStateApi_Reflect_TemporaryPreCommitMsgPool(t *testing.T) {
 	}
 	var tempProposeMsg = pbft.ProposeMsg{
 		StateID:        pbft.StateID{"state1"},
-		SenderID:       "Leader",
+		SenderID:       "user0",
 		Representative: reps,
-		ProposedBlock:  pbft.ProposedBlock{},
+		ProposedBlock:  normalBlock,
 	}
 
 	var tempPreCommitMsg = pbft.PreCommitMsg{
@@ -243,7 +243,7 @@ func TestStateApi_Reflect_TemporaryPreCommitMsgPool(t *testing.T) {
 	}
 
 	//When Propose Msg를 받지못해 Repo에 State가 없음 then sApi의 tempPool이 저장 후 State가 생겼을 때 추가
-	stateApi := setUpApiCondition(5, true, false, false)
+	stateApi := setUpApiCondition(4, true, false, false)
 	stateApi.repo.Remove()
 
 	stateApi.HandlePreCommitMsg(tempPreCommitMsg)
@@ -338,5 +338,5 @@ func setUpApiCondition(peerNum int, isNormalBlock bool,
 	}
 	cApi := NewStateApi("my", propagateService, eventService, parliamentRepository, repo)
 
-	return &cApi
+	return cApi
 }

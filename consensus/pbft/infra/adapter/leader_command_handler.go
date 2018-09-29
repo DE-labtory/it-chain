@@ -19,8 +19,8 @@ package adapter
 import (
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/engine/consensus/pbft/api"
 )
 
 type LeaderCommandHandler struct {

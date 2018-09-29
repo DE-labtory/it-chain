@@ -42,7 +42,7 @@ var errorBlock = pbft.ProposedBlock{
 	Body: nil,
 }
 
-func TestConsensusApi_StartConsensus(t *testing.T) {
+func TestStateApi_StartConsensus(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
@@ -86,7 +86,7 @@ func TestConsensusApi_StartConsensus(t *testing.T) {
 	}
 }
 
-func TestStateApiImpl_StartConsensus(t *testing.T) {
+func TestStateApi_StartConsensus_NodeTest(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
 			processList []string
@@ -111,7 +111,7 @@ func TestStateApiImpl_StartConsensus(t *testing.T) {
 			p.SetLeader("1")
 			pRepo.Save(p)
 		}
-		stateApi1 := env.ProcessMap["1"].Services["StateApiImpl"].(*api.StateApi)
+		stateApi1 := env.ProcessMap["1"].Services["StateApi"].(*api.StateApi)
 		stateRepo1 := env.ProcessMap["1"].Services["StateRepository"].(*mem.StateRepository)
 		state1, _ := stateRepo1.Load()
 		stateRepo2 := env.ProcessMap["2"].Services["StateRepository"].(*mem.StateRepository)
@@ -135,7 +135,7 @@ func TestStateApiImpl_StartConsensus(t *testing.T) {
 	}
 }
 
-func TestConsensusApi_HandleProposeMsg(t *testing.T) {
+func TestStateApi_HandleProposeMsg(t *testing.T) {
 
 	var validLeaderProposeMsg = pbft.ProposeMsg{
 		StateID: pbft.StateID{
@@ -198,7 +198,7 @@ func TestConsensusApi_HandleProposeMsg(t *testing.T) {
 	}
 }
 
-func TestConsensusApi_HandlePrevoteMsg(t *testing.T) {
+func TestStateApi_HandlePrevoteMsg(t *testing.T) {
 
 	var validPrevoteMsg = pbft.PrevoteMsg{
 		StateID:   pbft.StateID{"state"},
@@ -253,7 +253,7 @@ func TestConsensusApi_HandlePrevoteMsg(t *testing.T) {
 
 }
 
-func TestConsensusApi_HandlePreCommitMsg(t *testing.T) {
+func TestStateApi_HandlePreCommitMsg(t *testing.T) {
 
 	var validCommitMsg = pbft.PreCommitMsg{
 		StateID:  pbft.StateID{"state"},
@@ -378,5 +378,5 @@ func setUpApiCondition(peerNum int, isRepoFull bool, isNormalBlock bool) *api.St
 	}
 
 	cApi := api.NewStateApi("my", propagateService, eventService, parliamentRepository, repo)
-	return &cApi
+	return cApi
 }
