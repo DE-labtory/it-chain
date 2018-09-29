@@ -39,7 +39,7 @@ func NewPbftMsgHandler(sApi api.StateApi) PbftMsgHandler {
 	}
 }
 
-func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) {
+func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) error {
 	protocol := command.Protocol
 	body := command.Body
 
@@ -79,4 +79,5 @@ func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) {
 	default:
 		logger.Errorf(nil, "[PBFT] %s", UndefinedProtocolError.Error())
 	}
+	return nil
 }
