@@ -96,7 +96,6 @@ func (e *ElectionApi) DecideToBeLeader() error {
 	e.ElectionService.CountUpVoteCount()
 
 	if e.isFullyVoted() {
-
 		iLogger.Infof(nil, "[PBFT] Leader has fully voted")
 
 		e.EndRaft()
@@ -157,7 +156,6 @@ func (e *ElectionApi) EndRaft() {
 
 func (e *ElectionApi) HandleRaftTimeout() error {
 	if e.ElectionService.GetState() == pbft.TICKING {
-
 		e.ElectionService.SetState(pbft.CANDIDATE)
 		connectionIds := make([]string, 0)
 		parliament := e.parliamentRepository.Load()
