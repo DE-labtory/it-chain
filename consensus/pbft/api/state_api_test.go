@@ -21,11 +21,15 @@ import (
 
 	"strconv"
 
+	"time"
+
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/engine/consensus/pbft/infra/mem"
+	test2 "github.com/it-chain/engine/consensus/pbft/test"
 	"github.com/it-chain/engine/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
+	"github.com/it-chain/iLogger"
 )
 
 var normalBlock = pbft.ProposedBlock{
@@ -78,6 +82,57 @@ func TestConsensusApi_StartConsensus(t *testing.T) {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.peerNum, test.input.isRepoFull, true)
 		assert.EqualValues(t, test.err, cApi.StartConsensus(test.input.block))
+
+	}
+}
+
+func TestStateApiImpl_StartConsensus(t *testing.T) {
+	tests := map[string]struct {
+		input struct {
+			processList []string
+		}
+	}{
+		"8 node test": {
+			input: struct{ processList []string }{
+				processList: []string{"1", "2", "3", "4"},
+			},
+		},
+	}
+
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+
+		env := test2.SetTestEnvironment(test.input.processList)
+
+		for _, p := range env.ProcessMap {
+			process := *p
+			pRepo := process.Services["ParliamentRepository"].(*mem.ParliamentRepository)
+			p := pRepo.Load()
+			p.SetLeader("1")
+			pRepo.Save(p)
+		}
+		stateApi1 := env.ProcessMap["1"].Services["StateApiImpl"].(*api.StateApiImpl)
+		stateRepo1 := env.ProcessMap["1"].Services["StateRepository"].(*mem.StateRepository)
+		state1, _ := stateRepo1.Load()
+		stateRepo2 := env.ProcessMap["2"].Services["StateRepository"].(*mem.StateRepository)
+		state2, _ := stateRepo2.Load()
+
+		stateRepo3 := env.ProcessMap["3"].Services["StateRepository"].(*mem.StateRepository)
+		state3, _ := stateRepo3.Load()
+
+		stateRepo4 := env.ProcessMap["4"].Services["StateRepository"].(*mem.StateRepository)
+		state4, _ := stateRepo4.Load()
+
+
+
+		stateApi1.StartConsensus(pbft.ProposedBlock{Seal: []byte{'s', 'd', 'f'}, Body: []byte{'2', '3', '3'}})
+
+		time.Sleep(5 * time.Second)
+
+		iLogger.Infof(nil,"SEAL", state1.Block.Seal)
+		assert.Equal(t,state1.Block.Seal,state2.Block.Seal)
+		assert.Equal(t,state2.Block.Seal,state3.Block.Seal)
+		assert.Equal(t,state3.Block.Seal,state4.Block.Seal)
 
 	}
 }
@@ -256,7 +311,7 @@ func TestConsensusApi_HandlePreCommitMsg(t *testing.T) {
 	}
 }
 
-func setUpApiCondition(peerNum int, isRepoFull bool, isNormalBlock bool) api.StateApiImpl {
+func setUpApiCondition(peerNum int, isRepoFull bool, isNormalBlock bool) *api.StateApiImpl {
 
 	reps := make([]pbft.Representative, 0)
 	for i := 0; i < 6; i++ {
@@ -325,6 +380,6 @@ func setUpApiCondition(peerNum int, isRepoFull bool, isNormalBlock bool) api.Sta
 		repo.Save(savedConsensus)
 	}
 
-	cApi := api.NewStateApi("my", propagateService, eventService, parliamentRepository, &repo)
+	cApi := api.NewStateApi("my", propagateService, eventService, parliamentRepository, repo)
 	return cApi
 }
