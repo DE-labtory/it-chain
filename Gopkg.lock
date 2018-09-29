@@ -168,8 +168,8 @@
 [[projects]]
   name = "github.com/it-chain/avengers"
   packages = ["mock"]
-  revision = "d82700a16bb6a34c15bb551e6b6729ff0ab717f3"
-  version = "v0.3.1"
+  revision = "4bd80604a16e09a77caf3d8e5529ce949cfe978a"
+  version = "v0.4.0"
 
 [[projects]]
   name = "github.com/it-chain/bifrost"
@@ -665,6 +665,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4b9e412f1503f3f2b77f8c0b55b48106315b33bfd4f8336941292474e79086e8"
+  inputs-digest = "574c15aa78b93dc486adbe7ca130aebc99903d967c99578de10f0826e3458689"
   solver-name = "gps-cdcl"
   solver-version = 1
