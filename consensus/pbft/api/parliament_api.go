@@ -30,13 +30,15 @@ var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 var ErrNoMatchingPeerWithIpAddress = errors.New("no matching peer with ip address")
 
 type ParliamentApi struct {
+	nodeId               string
 	parliamentRepository pbft.ParliamentRepository
 	eventService         common.EventService
 }
 
-func NewParliamentApi(parliamentRepository pbft.ParliamentRepository, eventService common.EventService) *ParliamentApi {
+func NewParliamentApi(nodeId string, parliamentRepository pbft.ParliamentRepository, eventService common.EventService) *ParliamentApi {
 
 	return &ParliamentApi{
+		nodeId:               nodeId,
 		parliamentRepository: parliamentRepository,
 		eventService:         eventService,
 	}
@@ -53,6 +55,11 @@ func (p *ParliamentApi) AddRepresentative(representativeId string) {
 
 func (p *ParliamentApi) RemoveRepresentative(representativeId string) {
 	parliament := p.parliamentRepository.Load()
+
+	if parliament.GetLeader().GetID() == representativeId {
+		parliament.RemoveLeader()
+		defer p.eventService.Publish("leader.deleted", event.LeaderDeleted{})
+	}
 	parliament.RemoveRepresentative(representativeId)
 
 	p.parliamentRepository.Save(parliament)
@@ -79,4 +86,31 @@ func (p *ParliamentApi) UpdateLeader(nodeId string) error {
 func (p *ParliamentApi) GetLeader() pbft.Leader {
 	parliament := p.parliamentRepository.Load()
 	return parliament.GetLeader()
+}
+
+func (p *ParliamentApi) RequestLeader(connectionId string) {
+
+	parliament := p.parliamentRepository.Load()
+	leader := parliament.GetLeader()
+	if leader.LeaderId != "" {
+		return
+	}
+
+	msg, _ := CreateGrpcDeliverCommand("RequestLeaderProtocol", &pbft.RequestLeaderMessage{})
+	msg.RecipientList = append(msg.RecipientList, connectionId)
+
+	p.eventService.Publish("message.deliver", msg)
+}
+
+func (p *ParliamentApi) DeliverLeader(connectionId string) {
+	parliament := p.parliamentRepository.Load()
+	leader := parliament.GetLeader()
+	if leader.LeaderId == "" {
+		p.UpdateLeader(p.nodeId)
+	}
+
+	msg, _ := CreateGrpcDeliverCommand("LeaderDeliveryProtocol", &pbft.LeaderDeliveryMessage{Leader: leader})
+	msg.RecipientList = append(msg.RecipientList, connectionId)
+
+	p.eventService.Publish("message.deliver", msg)
 }

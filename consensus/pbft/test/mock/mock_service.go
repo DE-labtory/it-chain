@@ -33,7 +33,7 @@ func (m EventService) ConfirmBlock(block pbft.ProposedBlock) error {
 	return m.ConfirmBlockFunc(block)
 }
 
-func (m EventService) Close(){}
+func (m EventService) Close() {}
 
 type ConfirmService struct {
 	ConfirmBlockFunc func(block pbft.ProposedBlock) error
