@@ -22,6 +22,7 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/iLogger"
 	"github.com/rs/xid"
@@ -31,6 +32,7 @@ type ElectionApi struct {
 	ElectionService      *pbft.ElectionService
 	parliamentRepository pbft.ParliamentRepository
 	eventService         common.EventService
+	quit                 chan struct{}
 }
 
 func NewElectionApi(electionService *pbft.ElectionService, parliamentRepository pbft.ParliamentRepository, eventService common.EventService) *ElectionApi {
@@ -39,6 +41,7 @@ func NewElectionApi(electionService *pbft.ElectionService, parliamentRepository 
 		ElectionService:      electionService,
 		parliamentRepository: parliamentRepository,
 		eventService:         eventService,
+		quit:                 make(chan struct{}, 1),
 	}
 }
 
@@ -85,6 +88,7 @@ func (e *ElectionApi) broadcastLeader(rep pbft.Representative) error {
 
 //broadcast leader when voted fully
 func (e *ElectionApi) DecideToBeLeader() error {
+	iLogger.Infof(nil, "[PBFT] Receive vote")
 	if e.ElectionService.GetState() != pbft.CANDIDATE {
 		return nil
 	}
@@ -92,10 +96,15 @@ func (e *ElectionApi) DecideToBeLeader() error {
 	e.ElectionService.CountUpVoteCount()
 
 	if e.isFullyVoted() {
+
+		iLogger.Infof(nil, "[PBFT] Leader has fully voted")
+
+		e.EndRaft()
 		representative := pbft.Representative{
 			ID: e.ElectionService.NodeId,
 		}
 
+		e.eventService.Publish("leader.updated", e.ElectionService.NodeId)
 		if err := e.broadcastLeader(representative); err != nil {
 			return err
 		}
@@ -123,6 +132,8 @@ func (e *ElectionApi) ElectLeaderWithRaft() {
 	e.ElectionService.SetState(pbft.TICKING)
 	e.ElectionService.InitLeftTime()
 	tick := time.Tick(1 * time.Millisecond)
+	timeout := time.After(time.Second * 10)
+
 	for {
 		select {
 		case <-tick:
@@ -130,11 +141,18 @@ func (e *ElectionApi) ElectLeaderWithRaft() {
 			if e.ElectionService.GetLeftTime() == 0 {
 				e.HandleRaftTimeout()
 			}
-		case <-time.After(10 * time.Second):
-			iLogger.Fatalf(nil, "namoon....")
+		case <-e.quit:
+			logger.Infof(nil, "[PBFT] Raft has end")
+			return
+		case <-timeout:
+			logger.Errorf(nil, "[PBFT] Raft Time out")
 			return
 		}
 	}
+}
+
+func (e *ElectionApi) EndRaft() {
+	e.quit <- struct{}{}
 }
 
 func (e *ElectionApi) HandleRaftTimeout() error {
@@ -147,6 +165,7 @@ func (e *ElectionApi) HandleRaftTimeout() error {
 			connectionIds = append(connectionIds, r.ID)
 		}
 		e.RequestVote(connectionIds)
+
 	} else if e.ElectionService.GetState() == pbft.CANDIDATE {
 		//reset time and state chane candidate -> ticking when timed in candidate state
 		e.ElectionService.ResetLeftTime()

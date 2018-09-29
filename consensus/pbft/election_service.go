@@ -76,7 +76,7 @@ func (e *ElectionService) InitLeftTime() {
 	e.mux.Lock()
 	defer e.mux.Unlock()
 
-	e.leftTime = GenRandomInRange(150, 300)
+	e.leftTime = GenRandomInRange(150, 500)
 }
 
 func (e *ElectionService) ResetLeftTime() {
@@ -84,7 +84,7 @@ func (e *ElectionService) ResetLeftTime() {
 	e.mux.Lock()
 	defer e.mux.Unlock()
 
-	e.leftTime = GenRandomInRange(290, 300)
+	e.leftTime = GenRandomInRange(100, 110)
 }
 
 //count down left time by tick millisecond  until 0
