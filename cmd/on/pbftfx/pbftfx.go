@@ -36,6 +36,7 @@ var Module = fx.Options(
 		NewParliamentApi,
 		adapter.NewElectionCommandHandler,
 		adapter.NewConnectionEventHandler,
+		adapter.NewLeaderCommandHandler,
 	),
 	fx.Invoke(
 		RegisterPubsubHandlers,
@@ -52,6 +53,11 @@ func NewParliamentRepository(config *conf.Configuration) *mem.ParliamentReposito
 	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
 	parliament := pbft.NewParliament()
 	parliament.AddRepresentative(pbft.NewRepresentative(NodeId))
+
+	if config.Engine.BootstrapNodeAddress == ""{
+		parliament.SetLeader(NodeId)
+	}
+
 	return mem.NewParliamentRepositoryWithParliament(parliament)
 }
 
@@ -59,11 +65,13 @@ func NewElectionApi(electionService *pbft.ElectionService, parliamentRepository 
 	return api.NewElectionApi(electionService, parliamentRepository, eventService)
 }
 
-func NewParliamentApi(parliamentRepository *mem.ParliamentRepository, eventService common.EventService) *api.ParliamentApi {
-	return api.NewParliamentApi(parliamentRepository, eventService)
+func NewParliamentApi(config *conf.Configuration, parliamentRepository *mem.ParliamentRepository, eventService common.EventService) *api.ParliamentApi {
+	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
+
+	return api.NewParliamentApi(NodeId, parliamentRepository, eventService)
 }
 
-func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, electionCommandHandler *adapter.ElectionCommandHandler, connectionEventHandler *adapter.ConnectionEventHandler) {
+func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, electionCommandHandler *adapter.ElectionCommandHandler, connectionEventHandler *adapter.ConnectionEventHandler, leaderCommandHandler *adapter.LeaderCommandHandler) {
 	iLogger.Infof(nil, "[Main] Consensus is starting")
 
 	if err := subscriber.SubscribeTopic("message.receive", electionCommandHandler); err != nil {
@@ -71,6 +79,10 @@ func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, electionCommandH
 	}
 
 	if err := subscriber.SubscribeTopic("connection.created", connectionEventHandler); err != nil {
+		panic(err)
+	}
+
+	if err := subscriber.SubscribeTopic("message.receive", leaderCommandHandler); err != nil {
 		panic(err)
 	}
 }
