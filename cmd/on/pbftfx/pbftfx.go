@@ -37,6 +37,7 @@ var Module = fx.Options(
 		adapter.NewElectionCommandHandler,
 		adapter.NewConnectionEventHandler,
 		adapter.NewLeaderCommandHandler,
+		adapter.NewLeaderEventHandler,
 	),
 	fx.Invoke(
 		RegisterPubsubHandlers,
@@ -71,7 +72,7 @@ func NewParliamentApi(config *conf.Configuration, parliamentRepository *mem.Parl
 	return api.NewParliamentApi(NodeId, parliamentRepository, eventService)
 }
 
-func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, electionCommandHandler *adapter.ElectionCommandHandler, connectionEventHandler *adapter.ConnectionEventHandler, leaderCommandHandler *adapter.LeaderCommandHandler) {
+func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, electionCommandHandler *adapter.ElectionCommandHandler, connectionEventHandler *adapter.ConnectionEventHandler, leaderCommandHandler *adapter.LeaderCommandHandler, leaderEventHandler *adapter.LeaderEventHandler) {
 	iLogger.Infof(nil, "[Main] Consensus is starting")
 
 	if err := subscriber.SubscribeTopic("message.receive", electionCommandHandler); err != nil {
@@ -83,6 +84,14 @@ func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, electionCommandH
 	}
 
 	if err := subscriber.SubscribeTopic("message.receive", leaderCommandHandler); err != nil {
+		panic(err)
+	}
+
+	if err := subscriber.SubscribeTopic("leader.deleted", leaderEventHandler); err != nil {
+		panic(err)
+	}
+
+	if err := subscriber.SubscribeTopic("connection.closed", connectionEventHandler); err != nil {
 		panic(err)
 	}
 }

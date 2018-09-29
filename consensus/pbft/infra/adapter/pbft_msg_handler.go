@@ -43,7 +43,6 @@ func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) error
 	protocol := command.Protocol
 	body := command.Body
 
-	logger.Infof(nil, "[PBFT] Receive GRPC msg - Protocol: [%s]", protocol)
 	switch protocol {
 
 	case "ProposeMsgProtocol":

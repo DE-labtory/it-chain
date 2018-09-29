@@ -41,5 +41,6 @@ func (c *ConnectionEventHandler) HandleConnectionCreatedEvent(event event.Connec
 }
 
 func (c *ConnectionEventHandler) HandleConnectionClosedEvent(event event.ConnectionClosed) {
+
 	c.parliamentApi.RemoveRepresentative(event.ConnectionID)
 }

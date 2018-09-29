@@ -91,7 +91,6 @@ func (e *ElectionApi) broadcastLeader(rep pbft.Representative) error {
 
 //broadcast leader when voted fully
 func (e *ElectionApi) DecideToBeLeader() error {
-	iLogger.Infof(nil, "[PBFT] Receive vote")
 	if e.ElectionService.GetState() != pbft.CANDIDATE {
 		return nil
 	}
@@ -105,6 +104,10 @@ func (e *ElectionApi) DecideToBeLeader() error {
 		representative := pbft.Representative{
 			ID: e.ElectionService.NodeId,
 		}
+
+		parliament := e.parliamentRepository.Load()
+		parliament.SetLeader(e.ElectionService.NodeId)
+		e.parliamentRepository.Save(parliament)
 
 		e.eventService.Publish("leader.updated", e.ElectionService.NodeId)
 		if err := e.broadcastLeader(representative); err != nil {
@@ -160,10 +163,14 @@ func (e *ElectionApi) EndRaft() {
 func (e *ElectionApi) HandleRaftTimeout() error {
 	if e.ElectionService.GetState() == pbft.TICKING {
 		e.ElectionService.SetState(pbft.CANDIDATE)
+		e.ElectionService.ResetLeftTime()
 		connectionIds := make([]string, 0)
 		parliament := e.parliamentRepository.Load()
 		for _, r := range parliament.GetRepresentatives() {
-			connectionIds = append(connectionIds, r.ID)
+			if r.ID != e.ElectionService.NodeId {
+				connectionIds = append(connectionIds, r.ID)
+
+			}
 		}
 		e.RequestVote(connectionIds)
 
