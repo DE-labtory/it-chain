@@ -42,8 +42,8 @@ type StateApiImpl struct {
 var ConsensusCreateError = errors.New("Consensus can't be created")
 
 func NewStateApi(publisherID string, propagateService pbft.PropagateService,
-	eventService common.EventService, parliamentRepository pbft.ParliamentRepository, repo pbft.StateRepository) StateApiImpl {
-	return StateApiImpl{
+	eventService common.EventService, parliamentRepository pbft.ParliamentRepository, repo pbft.StateRepository) *StateApiImpl {
+	return &StateApiImpl{
 		publisherID:          publisherID,
 		propagateService:     propagateService,
 		eventService:         eventService,

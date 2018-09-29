@@ -175,7 +175,7 @@ func TestConsensusApi_RepositoryClone(t *testing.T) {
 }
 
 func setUpApiCondition(peerNum int, isNormalBlock bool,
-	isPrepareConditionSatisfied bool, isCommitConditionSatisfied bool) StateApiImpl {
+	isPrepareConditionSatisfied bool, isCommitConditionSatisfied bool) *StateApiImpl {
 
 	reps := make([]pbft.Representative, 0)
 	for i := 0; i < 6; i++ {
@@ -254,7 +254,7 @@ func setUpApiCondition(peerNum int, isNormalBlock bool,
 		}
 		repo.Save(savedConsensus)
 	}
-	cApi := NewStateApi("my", propagateService, eventService, parliamentRepository, &repo)
+	cApi := NewStateApi("my", propagateService, eventService, parliamentRepository, repo)
 
 	return cApi
 }
