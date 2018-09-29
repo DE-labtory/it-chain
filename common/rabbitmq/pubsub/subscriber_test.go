@@ -24,8 +24,6 @@ import (
 
 	"sync"
 
-	"fmt"
-
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/midgard"
 	"github.com/streadway/amqp"
@@ -35,61 +33,26 @@ import (
 func TestTopicSubscriber_SubscribeTopic(t *testing.T) {
 
 	var wg sync.WaitGroup
-	wg.Add(8)
+	wg.Add(2)
 
 	subscriber := pubsub.NewTopicSubscriber("", "Event")
 	defer subscriber.Close()
 
-	handler1 := &MockHandler{}
-	handler1.HandleNameUpdateCommandFunc = func(event UserNameUpdateEvent) {
-		fmt.Println("1")
+	handler := &MockHandler{}
+	handler.HandleNameUpdateCommandFunc = func(event UserNameUpdateEvent) {
 		assert.Equal(t, event.Name, "Jun")
 		wg.Done()
 	}
 
-	handler1.HandleFunc = func(command UserAddCommand) {
-		fmt.Println("2")
+	handler.HandleFunc = func(command UserAddCommand) {
 		assert.Equal(t, command.Age, 123)
 		wg.Done()
 	}
 
-	handler2 := &MockHandler{}
-	handler2.HandleNameUpdateCommandFunc = func(event UserNameUpdateEvent) {
-		fmt.Println("1")
-		assert.Equal(t, event.Name, "Jun")
-		wg.Done()
-	}
-
-	handler2.HandleFunc = func(command UserAddCommand) {
-		fmt.Println("2")
-		assert.Equal(t, command.Age, 123)
-		wg.Done()
-	}
-
-	handler3 := &MockHandler{}
-	handler3.HandleNameUpdateCommandFunc = func(event UserNameUpdateEvent) {
-		assert.Equal(t, event.Name, "Jun")
-		wg.Done()
-	}
-
-	handler3.HandleFunc = func(command UserAddCommand) {
-		assert.Equal(t, command.Age, 123)
-		wg.Done()
-	}
-
-	subscriber.SubscribeTopic("test.*", handler1)
-	subscriber.SubscribeTopic("test.*", handler2)
-	//subscriber.SubscribeTopic("test.*", handler3)
+	subscriber.SubscribeTopic("test.*", handler)
 
 	publish(t, "Event", "test.created", UserNameUpdateEvent{Name: "Jun"})
 	publish(t, "Event", "test.created", UserAddCommand{Age: 123})
-	publish(t, "Event", "test.created", UserNameUpdateEvent{Name: "Jun"})
-	publish(t, "Event", "test.created", UserNameUpdateEvent{Name: "Jun"})
-	publish(t, "Event", "test.created", UserNameUpdateEvent{Name: "Jun"})
-	publish(t, "Event", "test.created", UserNameUpdateEvent{Name: "Jun"})
-	publish(t, "Event", "test.created", UserNameUpdateEvent{Name: "Jun"})
-	publish(t, "Event", "test.created", UserNameUpdateEvent{Name: "Jun"})
-	publish(t, "Event", "test.created", UserNameUpdateEvent{Name: "Jun"})
 
 	wg.Wait()
 }

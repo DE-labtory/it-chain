@@ -20,6 +20,10 @@ import (
 	"errors"
 	"reflect"
 
+	"bytes"
+	"runtime"
+	"strconv"
+
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 )
 
@@ -27,6 +31,9 @@ var ErrEventType = errors.New("Error type of event is not struct")
 
 type EventService interface {
 	Publish(topic string, event interface{}) error
+}
+
+type PublishMessage struct {
 }
 
 type EventServiceImpl struct {
@@ -50,6 +57,15 @@ func (s *EventServiceImpl) Publish(topic string, event interface{}) error {
 	}
 
 	return nil
+}
+
+func getGID() uint64 {
+	b := make([]byte, 64)
+	b = b[:runtime.Stack(b, false)]
+	b = bytes.TrimPrefix(b, []byte("goroutine "))
+	b = b[:bytes.IndexByte(b, ' ')]
+	n, _ := strconv.ParseUint(string(b), 10, 64)
+	return n
 }
 
 func eventIsStruct(event interface{}) bool {

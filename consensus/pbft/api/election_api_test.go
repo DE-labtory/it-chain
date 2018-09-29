@@ -183,7 +183,7 @@ func TestElectionApi_ElectLeaderWithRaft(t *testing.T) {
 		for _, p := range env.ProcessMap {
 			process := *p
 			electionApi := process.Services["ElectionApi"].(*api.ElectionApi)
-			electionApi.ElectLeaderWithRaft()
+			go electionApi.ElectLeaderWithRaft()
 		}
 
 		time.Sleep(5 * time.Second)
