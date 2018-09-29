@@ -56,6 +56,7 @@ func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrp
 		}
 
 		if message.Term < e.electionApi.ElectionService.GetTerm() {
+			iLogger.Errorf(nil, "Term low")
 			return nil
 		}
 
