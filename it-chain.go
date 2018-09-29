@@ -21,6 +21,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/it-chain/iLogger"
+
 	"github.com/it-chain/engine/cmd/connection"
 	"github.com/it-chain/engine/cmd/ivm"
 	"github.com/it-chain/engine/cmd/on"
@@ -47,6 +49,10 @@ func main() {
 			Value: "",
 			Usage: "name for config",
 		},
+		cli.BoolFlag{
+			Name:  "debug",
+			Usage: "set debug mode",
+		},
 	}
 	app.Commands = []cli.Command{}
 	app.Commands = append(app.Commands, ivm.IcodeCmd())
@@ -59,6 +65,11 @@ func main() {
 			}
 			conf.SetConfigPath(absPath)
 		}
+
+		if c.Bool("debug") {
+			iLogger.SetToDebug()
+		}
+
 		return nil
 	}
 	app.Action = on.Action

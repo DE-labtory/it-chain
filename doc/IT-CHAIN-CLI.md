@@ -13,7 +13,7 @@ USAGE:
 ## GLOBAL OPTIONS
 - --config value : explicit set config file 
 ```
-[root@it-chain engine]# it-chain ./conf/config.yaml
+[root@it-chain engine]# it-chain --config explicit_config_file.yaml
 
         ___  _________               ________  ___  ___  ________  ___  ________
         |\  \|\___   ___\            |\   ____\|\  \|\  \|\   __  \|\  \|\   ___  \
@@ -24,6 +24,13 @@ USAGE:
             \|__|    \|__|               \|_______|\|__|\|__|\|__|\|__|\|__|\|__| \|__|
 ...
 ```
+
+- --debug : set debug mode
+```
+[root@it-chain engine]# it-chain --debug
+DEBU[2018-09-29T20:53:28+09:00] You can see debug log because you called global options debug.
+```
+
 - --help, -h : show help
 ```
 [root@it-chain engine]# it-chain -h
@@ -46,6 +53,7 @@ COMMANDS:
 
 GLOBAL OPTIONS:
    --config value  name for config
+   --debug         set debug mode
    --help, -h      show help
    --version, -v   print the version
 ```
