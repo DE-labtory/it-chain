@@ -147,7 +147,6 @@ type LeaderDelivered struct {
 }
 
 type LeaderDeleted struct {
-	LeaderId string
 }
 
 //Connection

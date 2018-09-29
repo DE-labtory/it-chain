@@ -91,6 +91,10 @@ func (p Parliament) GetLeader() Leader {
 	return p.Leader
 }
 
+func (p *Parliament) RemoveLeader() {
+	p.Leader = Leader{LeaderId: ""}
+}
+
 func (p *Parliament) RemoveRepresentative(representativeId string) {
 	delete(p.Representatives, representativeId)
 }

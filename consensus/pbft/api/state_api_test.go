@@ -28,8 +28,8 @@ import (
 	"github.com/it-chain/engine/consensus/pbft/infra/mem"
 	test2 "github.com/it-chain/engine/consensus/pbft/test"
 	"github.com/it-chain/engine/consensus/pbft/test/mock"
-	"github.com/stretchr/testify/assert"
 	"github.com/it-chain/iLogger"
+	"github.com/stretchr/testify/assert"
 )
 
 var normalBlock = pbft.ProposedBlock{
@@ -123,16 +123,14 @@ func TestStateApiImpl_StartConsensus(t *testing.T) {
 		stateRepo4 := env.ProcessMap["4"].Services["StateRepository"].(*mem.StateRepository)
 		state4, _ := stateRepo4.Load()
 
-
-
 		stateApi1.StartConsensus(pbft.ProposedBlock{Seal: []byte{'s', 'd', 'f'}, Body: []byte{'2', '3', '3'}})
 
 		time.Sleep(5 * time.Second)
 
-		iLogger.Infof(nil,"SEAL", state1.Block.Seal)
-		assert.Equal(t,state1.Block.Seal,state2.Block.Seal)
-		assert.Equal(t,state2.Block.Seal,state3.Block.Seal)
-		assert.Equal(t,state3.Block.Seal,state4.Block.Seal)
+		iLogger.Infof(nil, "SEAL", state1.Block.Seal)
+		assert.Equal(t, state1.Block.Seal, state2.Block.Seal)
+		assert.Equal(t, state2.Block.Seal, state3.Block.Seal)
+		assert.Equal(t, state3.Block.Seal, state4.Block.Seal)
 
 	}
 }
