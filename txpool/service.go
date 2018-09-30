@@ -16,23 +16,8 @@
 
 package txpool
 
-import "github.com/it-chain/engine/p2p"
-
 type TxpoolQueryService interface {
 	FindUncommittedTransactions() ([]Transaction, error)
-}
-
-type PeerQueryService interface {
-	GetPeerList() ([]p2p.Peer, error)
-	GetLeader() (p2p.Leader, error)
-}
-
-type TransferService interface {
-	SendTransactionsToLeader(transactions []Transaction, leader Leader) error
-}
-
-type BlockProposalService interface {
-	ProposeBlock() error
 }
 
 func filter(vs []Transaction, f func(Transaction) bool) []Transaction {
@@ -43,4 +28,16 @@ func filter(vs []Transaction, f func(Transaction) bool) []Transaction {
 		}
 	}
 	return vsf
+}
+
+func IsLeader(nodeId string, leader Leader) bool {
+	if nodeId != leader.Id {
+		return false
+	}
+
+	return true
+}
+
+type EventService interface {
+	Publish(topic string, event interface{}) error
 }

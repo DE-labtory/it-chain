@@ -19,7 +19,6 @@ package adapter
 import (
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
 )
 
 type BlockProposeApi interface {
@@ -39,9 +38,10 @@ func NewBlockProposeCommandHandler(blockApi BlockProposeApi, engineMode string) 
 	}
 }
 
-func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.ProposeBlock) (struct{}, rpc.Error) {
+func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.ProposeBlock) error {
+
 	if err := validateCommand(command); err != nil {
-		return struct{}{}, rpc.Error{Message: err.Error()}
+		return err
 	}
 
 	txList := command.TxList
@@ -49,14 +49,14 @@ func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.P
 
 	proposedBlock, err := h.blockApi.CreateProposedBlock(defaultTxList)
 	if err != nil {
-		return struct{}{}, rpc.Error{Message: err.Error()}
+		return err
 	}
 
 	if err := h.blockApi.ConsentBlock(h.engineMode, proposedBlock); err != nil {
-		return struct{}{}, rpc.Error{Message: err.Error()}
+		return err
 	}
 
-	return struct{}{}, rpc.Error{}
+	return nil
 }
 
 func validateCommand(command command.ProposeBlock) error {
