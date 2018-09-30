@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-package txpool
+package adapter
 
-//Aggregate root must implement aggregate interface
-type Leader struct {
-	Id string
+import (
+	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/txpool"
+)
+
+type LeaderEventHandler struct {
+	leaderRepository txpool.LeaderRepository
 }
 
-type LeaderRepository interface {
-	Set(leader Leader)
-	Get() Leader
+func (l LeaderEventHandler) HandleLeaderUpdatedEvent(event event.LeaderUpdated) error {
+	Leader := txpool.Leader{
+		Id: event.LeaderId,
+	}
+
+	l.leaderRepository.Set(Leader)
+
+	return nil
+
 }

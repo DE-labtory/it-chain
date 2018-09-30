@@ -14,14 +14,36 @@
  * limitations under the License.
  */
 
-package txpool
+package mem
 
-//Aggregate root must implement aggregate interface
-type Leader struct {
-	Id string
+import (
+	"sync"
+
+	"github.com/it-chain/engine/txpool"
+)
+
+type LeaderRepository struct {
+	Leader txpool.Leader
+	sync.RWMutex
 }
 
-type LeaderRepository interface {
-	Set(leader Leader)
-	Get() Leader
+func NewLeaderRepository() *LeaderRepository {
+	return &LeaderRepository{
+		Leader:  txpool.Leader{},
+		RWMutex: sync.RWMutex{},
+	}
+}
+
+func (m *LeaderRepository) Set(leader txpool.Leader) {
+	m.Lock()
+	defer m.Unlock()
+
+	m.Leader = leader
+}
+
+func (m *LeaderRepository) Get() txpool.Leader {
+	m.Lock()
+	defer m.Unlock()
+
+	return m.Leader
 }
