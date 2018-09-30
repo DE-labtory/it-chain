@@ -31,7 +31,7 @@ type StateApi struct {
 	propagateService     pbft.PropagateService
 	eventService         common.EventService
 	parliamentRepository pbft.ParliamentRepository
-	repo                 pbft.StateRepository
+	stateRepository      pbft.StateRepository
 	tempPrevoteMsgPool   pbft.PrevoteMsgPool
 	tempPreCommitMsgPool pbft.PreCommitMsgPool
 }
@@ -45,7 +45,7 @@ func NewStateApi(publisherID string, propagateService pbft.PropagateService,
 		propagateService:     propagateService,
 		eventService:         eventService,
 		parliamentRepository: parliamentRepository,
-		repo:                 repo,
+		stateRepository:      repo,
 		tempPrevoteMsgPool:   pbft.NewPrevoteMsgPool(),
 		tempPreCommitMsgPool: pbft.NewPreCommitMsgPool(),
 	}
@@ -82,7 +82,7 @@ func (sApi *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 	logger.Infof(nil, "[PBFT] Leader broadcast ProposeMsg")
 	createdState.Start()
 	logger.Infof(nil, "[PBFT] Change stage to propose")
-	if err := sApi.repo.Save(*createdState); err != nil {
+	if err := sApi.stateRepository.Save(*createdState); err != nil {
 		return err
 	}
 
@@ -114,7 +114,7 @@ func (sApi *StateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
 	builtState.ToPrevoteStage()
 	logger.Infof(nil, "[PBFT] Change stage to Prevote")
 
-	if err := sApi.repo.Save(*builtState); err != nil {
+	if err := sApi.stateRepository.Save(*builtState); err != nil {
 		return err
 	}
 
@@ -123,7 +123,7 @@ func (sApi *StateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
 
 func (sApi *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) (returnErr error) {
 
-	loadedState, err := sApi.repo.Load()
+	loadedState, err := sApi.stateRepository.Load()
 	if err != nil {
 		sApi.tempPrevoteMsgPool.Save(&msg)
 		return err
@@ -147,7 +147,7 @@ func (sApi *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) (returnErr error) {
 	}
 
 	defer func() {
-		if err := sApi.repo.Save(loadedState); err != nil {
+		if err := sApi.stateRepository.Save(loadedState); err != nil {
 			returnErr = err
 		}
 	}()
@@ -169,7 +169,7 @@ func (sApi *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) (returnErr error) {
 
 func (sApi *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 
-	loadedState, err := sApi.repo.Load()
+	loadedState, err := sApi.stateRepository.Load()
 	if err != nil {
 		sApi.tempPreCommitMsgPool.Save(&msg)
 		return err
@@ -192,11 +192,11 @@ func (sApi *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 		}); err != nil {
 			return err
 		}
-		sApi.repo.Remove()
+		sApi.stateRepository.Remove()
 		logger.Infof(nil, "[PBFT] Consensus is finished.")
 	}
 
-	if err := sApi.repo.Save(loadedState); err != nil {
+	if err := sApi.stateRepository.Save(loadedState); err != nil {
 		return err
 	}
 
