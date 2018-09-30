@@ -28,14 +28,8 @@ import (
 // consensus가 끝났다는 event
 // true면 블록 저장, false면 블록 저장 안함
 type ConsensusFinished struct {
-	Seal      []byte
-	PrevSeal  []byte
-	Height    uint64
-	TxList    []Tx
-	TxSeal    [][]byte
-	Timestamp time.Time
-	Creator   string
-	State     string
+	Seal []byte
+	Body []byte
 }
 
 /*
