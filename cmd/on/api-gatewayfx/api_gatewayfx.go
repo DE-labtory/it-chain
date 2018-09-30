@@ -25,6 +25,7 @@ import (
 
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/it-chain/engine/api_gateway"
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/conf"
 	"go.uber.org/fx"
@@ -91,8 +92,25 @@ func NewICodeRepository() *api_gateway.LevelDbICodeRepository {
 	return api_gateway.NewLevelDbMetaRepository(icodeDB)
 }
 
-func NewPeerRepository() *api_gateway.PeerRepository {
-	return api_gateway.NewPeerRepository()
+func NewPeerRepository(config *conf.Configuration) *api_gateway.PeerRepository {
+
+	var role api_gateway.Role
+	if config.Engine.BootstrapNodeAddress == "" {
+		role = api_gateway.Leader
+	} else {
+		role = api_gateway.Member
+	}
+
+	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
+	peerRepository := api_gateway.NewPeerRepository()
+	peerRepository.Save(api_gateway.Peer{
+		ID:                 NodeId,
+		Role:               role,
+		GrpcGatewayAddress: config.GrpcGateway.Address + ":" + config.GrpcGateway.Port,
+		ApiGatewayAddress:  config.ApiGateway.Address + ":" + config.ApiGateway.Port,
+	})
+
+	return peerRepository
 }
 
 func RegisterEvent(subscriber *pubsub.TopicSubscriber, blockEventListener *api_gateway.BlockEventListener, icodeEventListener *api_gateway.ICodeEventHandler, connectionEventhandler *api_gateway.ConnectionEventHandler, leaderUpdateEventlistener *api_gateway.LeaderUpdateEventListener) {

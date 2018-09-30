@@ -177,7 +177,6 @@ func NewConnectionEventListener(peerRepository *PeerRepository) *ConnectionEvent
 }
 
 func (c *ConnectionEventHandler) HandleConnectionCreatedEvent(event event.ConnectionCreated) {
-
 	peer := Peer{
 		ID:                 event.ConnectionID,
 		GrpcGatewayAddress: event.GrpcGatewayAddress,

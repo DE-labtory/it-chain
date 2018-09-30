@@ -22,6 +22,7 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/iLogger"
@@ -109,7 +110,10 @@ func (e *ElectionApi) DecideToBeLeader() error {
 		parliament.SetLeader(e.ElectionService.NodeId)
 		e.parliamentRepository.Save(parliament)
 
-		e.eventService.Publish("leader.updated", e.ElectionService.NodeId)
+		e.eventService.Publish("leader.updated", event.LeaderUpdated{
+			LeaderId: e.ElectionService.NodeId,
+		})
+
 		if err := e.broadcastLeader(representative); err != nil {
 			return err
 		}
@@ -173,7 +177,6 @@ func (e *ElectionApi) HandleRaftTimeout() error {
 			}
 		}
 		e.RequestVote(connectionIds)
-
 	} else if e.ElectionService.GetState() == pbft.CANDIDATE {
 		//reset time and state chane candidate -> ticking when timed in candidate state
 		e.ElectionService.ResetLeftTime()
