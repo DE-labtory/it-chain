@@ -16,6 +16,8 @@
 
 package txpool
 
+const SendTransactionsToLeader = "SendTransactionsToLeaderProtocol"
+
 type TxpoolQueryService interface {
 	FindUncommittedTransactions() ([]Transaction, error)
 }

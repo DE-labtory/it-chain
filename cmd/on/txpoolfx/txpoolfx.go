@@ -20,8 +20,11 @@ import (
 	"context"
 	"time"
 
+	"fmt"
+
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/batch"
+	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/txpool"
@@ -39,11 +42,14 @@ var Module = fx.Options(
 		NewBlockProposalService,
 		NewTransferService,
 		NewTxpoolApi,
+		NewGrpcMessageHandler,
+		NewLeaderEventHandler,
 		adapter.NewTxCommandHandler,
 	),
 	fx.Invoke(
 		RunBatcher,
 		RegisterRpcHandlers,
+		RegisterPubsubHandlers,
 	),
 )
 
@@ -60,6 +66,14 @@ func NewTxpoolApi(config *conf.Configuration, transactionRepository *mem.Transac
 	return api.NewTransactionApi(NodeId, transactionRepository, leaderRepository, transferService, blockProposalService)
 }
 
+func NewLeaderEventHandler(leaderRepository *mem.LeaderRepository) *adapter.LeaderEventHandler {
+	return adapter.NewLeaderEventHandler(leaderRepository)
+}
+
+func NewGrpcMessageHandler(txPoolApi *api.TransactionApi) *adapter.GrpcMessageHandler {
+	return adapter.NewGrpcMessageHandler(txPoolApi)
+}
+
 func RunBatcher(lifecycle fx.Lifecycle, txPoolApi *api.TransactionApi, config *conf.Configuration) {
 
 	var proposeBlockQuit chan struct{}
@@ -71,6 +85,7 @@ func RunBatcher(lifecycle fx.Lifecycle, txPoolApi *api.TransactionApi, config *c
 			}, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
 
 			sendTransactionQuit = batch.GetTimeOutBatcherInstance().Run(func() error {
+				fmt.Println("kkkk")
 				return txPoolApi.SendLeaderTransaction(config.Engine.Mode)
 			}, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
 			return nil
@@ -88,4 +103,12 @@ func RegisterRpcHandlers(server *rpc.Server, handler *adapter.TxCommandHandler) 
 	if err := server.Register("transaction.create", handler.HandleTxCreateCommand); err != nil {
 		panic(err)
 	}
+}
+
+func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, handler *adapter.LeaderEventHandler) {
+
+	if err := subscriber.SubscribeTopic("leader.updated", handler); err != nil {
+		panic(err)
+	}
+
 }

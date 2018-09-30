@@ -17,6 +17,8 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/iLogger"
 )
@@ -53,6 +55,18 @@ func (t TransactionApi) CreateTransaction(txData txpool.TxData) (txpool.Transact
 	return transaction, err
 }
 
+func (t TransactionApi) SaveTransactions(transactions []txpool.Transaction) error {
+
+	for _, tx := range transactions {
+
+		if err := t.transactionRepository.Save(tx); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (t TransactionApi) DeleteTransaction(id txpool.TransactionId) {
 
 	t.transactionRepository.Remove(id)
@@ -82,6 +96,7 @@ func (t TransactionApi) SendLeaderTransaction(engineMode string) error {
 	switch engineMode {
 
 	case "pbft":
+		fmt.Println("tttt")
 		if t.isLeader() {
 			return nil
 		}

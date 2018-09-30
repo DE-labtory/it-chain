@@ -25,6 +25,13 @@ type LeaderEventHandler struct {
 	leaderRepository txpool.LeaderRepository
 }
 
+func NewLeaderEventHandler(leaderRepository txpool.LeaderRepository) *LeaderEventHandler {
+	return &LeaderEventHandler{
+		leaderRepository: leaderRepository,
+	}
+
+}
+
 func (l LeaderEventHandler) HandleLeaderUpdatedEvent(event event.LeaderUpdated) error {
 	Leader := txpool.Leader{
 		Id: event.LeaderId,
