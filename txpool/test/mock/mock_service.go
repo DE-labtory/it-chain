@@ -14,32 +14,12 @@
  * limitations under the License.
  */
 
-package txpool
+package mock
 
-const SendTransactionsToLeader = "SendTransactionsToLeaderProtocol"
-
-type TxpoolQueryService interface {
-	FindUncommittedTransactions() ([]Transaction, error)
+type EventService struct {
+	PublishFunc func(topic string, event interface{}) error
 }
 
-func filter(vs []Transaction, f func(Transaction) bool) []Transaction {
-	vsf := make([]Transaction, 0)
-	for _, v := range vs {
-		if f(v) {
-			vsf = append(vsf, v)
-		}
-	}
-	return vsf
-}
-
-func IsLeader(nodeId string, leader Leader) bool {
-	if nodeId != leader.Id {
-		return false
-	}
-
-	return true
-}
-
-type EventService interface {
-	Publish(topic string, event interface{}) error
+func (s EventService) Publish(topic string, event interface{}) error {
+	return s.PublishFunc(topic, event)
 }

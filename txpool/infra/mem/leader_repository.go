@@ -14,32 +14,36 @@
  * limitations under the License.
  */
 
-package txpool
+package mem
 
-const SendTransactionsToLeader = "SendTransactionsToLeaderProtocol"
+import (
+	"sync"
 
-type TxpoolQueryService interface {
-	FindUncommittedTransactions() ([]Transaction, error)
+	"github.com/it-chain/engine/txpool"
+)
+
+type LeaderRepository struct {
+	Leader txpool.Leader
+	sync.RWMutex
 }
 
-func filter(vs []Transaction, f func(Transaction) bool) []Transaction {
-	vsf := make([]Transaction, 0)
-	for _, v := range vs {
-		if f(v) {
-			vsf = append(vsf, v)
-		}
+func NewLeaderRepository() *LeaderRepository {
+	return &LeaderRepository{
+		Leader:  txpool.Leader{},
+		RWMutex: sync.RWMutex{},
 	}
-	return vsf
 }
 
-func IsLeader(nodeId string, leader Leader) bool {
-	if nodeId != leader.Id {
-		return false
-	}
+func (m *LeaderRepository) Set(leader txpool.Leader) {
+	m.Lock()
+	defer m.Unlock()
 
-	return true
+	m.Leader = leader
 }
 
-type EventService interface {
-	Publish(topic string, event interface{}) error
+func (m *LeaderRepository) Get() txpool.Leader {
+	m.Lock()
+	defer m.Unlock()
+
+	return m.Leader
 }

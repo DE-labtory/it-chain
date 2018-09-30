@@ -38,7 +38,7 @@ type TransactionRepository struct {
 	sync.RWMutex
 }
 
-func (m TransactionRepository) Save(transaction txpool.Transaction) error {
+func (m *TransactionRepository) Save(transaction txpool.Transaction) error {
 
 	m.Lock()
 	defer m.Unlock()
@@ -54,11 +54,11 @@ func (m TransactionRepository) Save(transaction txpool.Transaction) error {
 	return nil
 }
 
-func (m TransactionRepository) Remove(id txpool.TransactionId) {
+func (m *TransactionRepository) Remove(id txpool.TransactionId) {
 	delete(m.TxMap, id)
 }
 
-func (m TransactionRepository) FindById(id txpool.TransactionId) (txpool.Transaction, error) {
+func (m *TransactionRepository) FindById(id txpool.TransactionId) (txpool.Transaction, error) {
 
 	t, ok := m.TxMap[id]
 
@@ -69,7 +69,7 @@ func (m TransactionRepository) FindById(id txpool.TransactionId) (txpool.Transac
 	return txpool.Transaction{}, ErrTransactionDoesNotExist
 }
 
-func (m TransactionRepository) FindAll() ([]txpool.Transaction, error) {
+func (m *TransactionRepository) FindAll() ([]txpool.Transaction, error) {
 
 	s := make([]txpool.Transaction, 0)
 

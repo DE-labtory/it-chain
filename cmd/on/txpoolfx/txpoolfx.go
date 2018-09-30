@@ -21,11 +21,13 @@ import (
 	"time"
 
 	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/batch"
+	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
+	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/engine/txpool/api"
 	"github.com/it-chain/engine/txpool/infra/adapter"
-	"github.com/it-chain/engine/txpool/infra/batch"
 	"github.com/it-chain/engine/txpool/infra/mem"
 	"github.com/it-chain/iLogger"
 	"go.uber.org/fx"
@@ -34,34 +36,71 @@ import (
 var Module = fx.Options(
 	fx.Provide(
 		mem.NewTransactionRepository,
+		NewLeaderRepository,
 		NewBlockProposalService,
+		NewTransferService,
 		NewTxpoolApi,
+		NewGrpcMessageHandler,
+		NewLeaderEventHandler,
 		adapter.NewTxCommandHandler,
 	),
 	fx.Invoke(
 		RunBatcher,
 		RegisterRpcHandlers,
+		RegisterPubsubHandlers,
 	),
 )
 
-func NewBlockProposalService(repository *mem.TransactionRepository, client *rpc.Client, config *conf.Configuration) *adapter.BlockProposalService {
-	return adapter.NewBlockProposalService(client, repository, config.Engine.Mode)
-}
-
-func NewTxpoolApi(config *conf.Configuration, repository *mem.TransactionRepository) *api.TransactionApi {
+func NewLeaderRepository(config *conf.Configuration) *mem.LeaderRepository {
 	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
-	return api.NewTransactionApi(NodeId, repository)
+	repo := mem.NewLeaderRepository()
+	if config.Engine.BootstrapNodeAddress == "" {
+		repo.Set(txpool.Leader{NodeId})
+	}
+
+	return repo
 }
 
-func RunBatcher(lifecycle fx.Lifecycle, blockProposalService *adapter.BlockProposalService, config *conf.Configuration) {
-	var q chan struct{}
+func NewBlockProposalService(repository *mem.TransactionRepository, eventService common.EventService) *txpool.BlockProposalService {
+	return txpool.NewBlockProposalService(repository, eventService)
+}
+
+func NewTransferService(transactionRepository *mem.TransactionRepository, leaderRepository *mem.LeaderRepository, eventService common.EventService) *txpool.TransferService {
+	return txpool.NewTransferService(transactionRepository, leaderRepository, eventService)
+}
+
+func NewTxpoolApi(config *conf.Configuration, transactionRepository *mem.TransactionRepository, leaderRepository *mem.LeaderRepository, transferService *txpool.TransferService, blockProposalService *txpool.BlockProposalService) *api.TransactionApi {
+	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
+	return api.NewTransactionApi(NodeId, transactionRepository, leaderRepository, transferService, blockProposalService)
+}
+
+func NewLeaderEventHandler(leaderRepository *mem.LeaderRepository) *adapter.LeaderEventHandler {
+
+	return adapter.NewLeaderEventHandler(leaderRepository)
+}
+
+func NewGrpcMessageHandler(txPoolApi *api.TransactionApi) *adapter.GrpcMessageHandler {
+	return adapter.NewGrpcMessageHandler(txPoolApi)
+}
+
+func RunBatcher(lifecycle fx.Lifecycle, txPoolApi *api.TransactionApi, config *conf.Configuration) {
+
+	var proposeBlockQuit chan struct{}
+	var sendTransactionQuit chan struct{}
 	lifecycle.Append(fx.Hook{
 		OnStart: func(context context.Context) error {
-			q = batch.GetTimeOutBatcherInstance().Run(blockProposalService.ProposeBlock, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
+			proposeBlockQuit = batch.GetTimeOutBatcherInstance().Run(func() error {
+				return txPoolApi.ProposeBlock(config.Engine.Mode)
+			}, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
+
+			sendTransactionQuit = batch.GetTimeOutBatcherInstance().Run(func() error {
+				return txPoolApi.SendLeaderTransaction(config.Engine.Mode)
+			}, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
 			return nil
 		},
 		OnStop: func(context context.Context) error {
-			q <- struct{}{}
+			proposeBlockQuit <- struct{}{}
+			sendTransactionQuit <- struct{}{}
 			return nil
 		},
 	})
@@ -72,4 +111,16 @@ func RegisterRpcHandlers(server *rpc.Server, handler *adapter.TxCommandHandler) 
 	if err := server.Register("transaction.create", handler.HandleTxCreateCommand); err != nil {
 		panic(err)
 	}
+}
+
+func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, leaderEventHandler *adapter.LeaderEventHandler, grpcMessageHandler *adapter.GrpcMessageHandler) {
+
+	if err := subscriber.SubscribeTopic("leader.updated", leaderEventHandler); err != nil {
+		panic(err)
+	}
+
+	if err := subscriber.SubscribeTopic("message.receive", grpcMessageHandler); err != nil {
+		panic(err)
+	}
+
 }

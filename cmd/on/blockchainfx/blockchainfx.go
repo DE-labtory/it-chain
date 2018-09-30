@@ -20,8 +20,6 @@ import (
 	"context"
 	"os"
 
-	"github.com/it-chain/iLogger"
-
 	"github.com/it-chain/engine/blockchain/api"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/infra/mem"
@@ -30,8 +28,8 @@ import (
 	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
+	"github.com/it-chain/iLogger"
 	"go.uber.org/fx"
 )
 
@@ -51,7 +49,6 @@ var Module = fx.Options(
 		NewBlockProposeHandler,
 	),
 	fx.Invoke(
-		RegisterRpcHandlers,
 		RegisterPubsubHandlers,
 		RegisterTearDown,
 		CreateGenesisBlock,
@@ -101,18 +98,17 @@ func CreateGenesisBlock(blockApi *api.BlockApi, config *conf.Configuration) {
 	}
 }
 
-func RegisterRpcHandlers(server *rpc.Server, handler *adapter.BlockProposeCommandHandler) {
+func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, networkEventHandler *adapter.NetworkEventHandler, blockCommandHandler *adapter.BlockProposeCommandHandler) {
 	iLogger.Infof(nil, "[Main] Blockchain is starting")
-	if err := server.Register("block.propose", handler.HandleProposeBlockCommand); err != nil {
+
+	if err := subscriber.SubscribeTopic("network.joined", networkEventHandler); err != nil {
 		panic(err)
 	}
-}
 
-func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, handler *adapter.NetworkEventHandler) {
-
-	if err := subscriber.SubscribeTopic("network.joined", handler); err != nil {
+	if err := subscriber.SubscribeTopic("block.propose", blockCommandHandler); err != nil {
 		panic(err)
 	}
+
 }
 
 func RegisterTearDown(lifecycle fx.Lifecycle) {

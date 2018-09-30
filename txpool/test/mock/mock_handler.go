@@ -14,32 +14,24 @@
  * limitations under the License.
  */
 
-package txpool
+package mock
 
-const SendTransactionsToLeader = "SendTransactionsToLeaderProtocol"
+import (
+	"github.com/it-chain/engine/common/command"
+)
 
-type TxpoolQueryService interface {
-	FindUncommittedTransactions() ([]Transaction, error)
+type ProposeEventHandler struct {
+	HandleFunc func(command command.ProposeBlock)
 }
 
-func filter(vs []Transaction, f func(Transaction) bool) []Transaction {
-	vsf := make([]Transaction, 0)
-	for _, v := range vs {
-		if f(v) {
-			vsf = append(vsf, v)
-		}
-	}
-	return vsf
+func (h *ProposeEventHandler) Handle(command command.ProposeBlock) {
+	h.HandleFunc(command)
 }
 
-func IsLeader(nodeId string, leader Leader) bool {
-	if nodeId != leader.Id {
-		return false
-	}
-
-	return true
+type SendTransactionCommandHandler struct {
+	HandleFunc func(command command.DeliverGrpc)
 }
 
-type EventService interface {
-	Publish(topic string, event interface{}) error
+func (h *SendTransactionCommandHandler) Handle(command command.DeliverGrpc) {
+	h.HandleFunc(command)
 }

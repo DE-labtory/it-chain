@@ -14,32 +14,31 @@
  * limitations under the License.
  */
 
-package txpool
+package adapter
 
-const SendTransactionsToLeader = "SendTransactionsToLeaderProtocol"
+import (
+	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/txpool"
+)
 
-type TxpoolQueryService interface {
-	FindUncommittedTransactions() ([]Transaction, error)
+type LeaderEventHandler struct {
+	leaderRepository txpool.LeaderRepository
 }
 
-func filter(vs []Transaction, f func(Transaction) bool) []Transaction {
-	vsf := make([]Transaction, 0)
-	for _, v := range vs {
-		if f(v) {
-			vsf = append(vsf, v)
-		}
-	}
-	return vsf
-}
-
-func IsLeader(nodeId string, leader Leader) bool {
-	if nodeId != leader.Id {
-		return false
+func NewLeaderEventHandler(leaderRepository txpool.LeaderRepository) *LeaderEventHandler {
+	return &LeaderEventHandler{
+		leaderRepository: leaderRepository,
 	}
 
-	return true
 }
 
-type EventService interface {
-	Publish(topic string, event interface{}) error
+func (l LeaderEventHandler) HandleLeaderUpdatedEvent(event event.LeaderUpdated) error {
+	Leader := txpool.Leader{
+		Id: event.LeaderId,
+	}
+
+	l.leaderRepository.Set(Leader)
+
+	return nil
+
 }
