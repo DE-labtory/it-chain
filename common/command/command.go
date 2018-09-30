@@ -29,8 +29,14 @@ import (
 
 // Blockchain이 consensus를 요청하는 command
 type StartConsensus struct {
-	Seal   []byte
-	TxList []Tx
+	Seal      []byte
+	PrevSeal  []byte
+	Height    uint64
+	TxList    []Tx
+	TxSeal    [][]byte
+	Timestamp time.Time
+	Creator   string
+	State     string
 }
 
 /*

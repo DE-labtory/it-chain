@@ -40,11 +40,8 @@ func NewStartConsensusCommandHandler(sApi StateStartApi) *StartConsensusCommandH
 	}
 }
 
-func (r StartConsensusCommandHandler) HandleStartConsensusCommand(startConsensusCommand command.StartConsensus) (bool, rpc.Error) {
-	seal := startConsensusCommand.Seal
-	txList := startConsensusCommand.TxList
-
-	proposedBlock, err := extractProposedBlock(seal, txList)
+func (r StartConsensusCommandHandler) HandleStartConsensusCommand(startCommand command.StartConsensus) (bool, rpc.Error) {
+	proposedBlock, err := extractProposedBlock(startCommand)
 	if err != nil {
 		return false, rpc.Error{Message: err.Error()}
 	}
@@ -56,18 +53,18 @@ func (r StartConsensusCommandHandler) HandleStartConsensusCommand(startConsensus
 	return true, rpc.Error{}
 }
 
-func extractProposedBlock(Seal []byte, TxList []command.Tx) (pbft.ProposedBlock, error) {
-	if Seal == nil {
+func extractProposedBlock(startCommand command.StartConsensus) (pbft.ProposedBlock, error) {
+	if startCommand.Seal == nil {
 		return pbft.ProposedBlock{}, BlockSealIsNilError
 	}
 
-	body, err := common.Serialize(TxList)
+	body, err := common.Serialize(startCommand)
 	if err != nil {
 		return pbft.ProposedBlock{}, err
 	}
 
 	return pbft.ProposedBlock{
-		Seal: Seal,
+		Seal: startCommand.Seal,
 		Body: body,
 	}, nil
 }

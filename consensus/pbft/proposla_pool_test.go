@@ -14,23 +14,30 @@
  * limitations under the License.
  */
 
-package adapter
+package pbft_test
 
 import (
 	"testing"
 
 	"time"
 
-	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestStartConsensusCommandHandler_extractProposedBlock(t *testing.T) {
+func TestNewProposalPool(t *testing.T) {
+	proposalPool := pbft.NewProposalPool()
+
+	assert.NotNil(t, proposalPool)
+}
+
+func TestProposalPool_Pop(t *testing.T) {
 	// given
-	expectedSeal := []byte{'s', 'e', 'a', 'l'}
+	proposalPool := pbft.NewProposalPool()
+
 	expectedCommand := command.StartConsensus{
-		Seal:      expectedSeal,
+		Seal:      []byte{'s', 'e', 'a', 'l'},
 		PrevSeal:  []byte{'p', 'r', 'e', 'v'},
 		Height:    0,
 		TxList:    make([]command.Tx, 0),
@@ -40,24 +47,11 @@ func TestStartConsensusCommandHandler_extractProposedBlock(t *testing.T) {
 		State:     "state",
 	}
 
-	// when
-	testBlock, err := extractProposedBlock(expectedCommand)
-	assert.NoError(t, err)
-
-	expectedBody, err := common.Serialize(expectedCommand)
-	assert.NoError(t, err)
-
-	// then
-	assert.Equal(t, expectedSeal, testBlock.Seal)
-	assert.Equal(t, expectedBody, testBlock.Body)
-
-	// given
-	expectedSeal = nil
-	expectedCommand.Seal = expectedSeal
+	proposalPool.Save(expectedCommand)
 
 	// when
-	testBlock, err = extractProposedBlock(expectedCommand)
+	testProposal := proposalPool.Pop()
 
 	// then
-	assert.Equal(t, BlockSealIsNilError, err)
+	assert.Equal(t, expectedCommand.Seal, testProposal.Seal)
 }
