@@ -18,9 +18,9 @@ package adapter
 
 import (
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
+	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/iLogger"
 	"github.com/pkg/errors"
 )
 
@@ -40,23 +40,24 @@ func NewStartConsensusCommandHandler(sApi StateStartApi) *StartConsensusCommandH
 	}
 }
 
-func (r StartConsensusCommandHandler) HandleStartConsensusCommand(startConsensusCommand command.StartConsensus) (bool, rpc.Error) {
-	seal := startConsensusCommand.Seal
-	txList := startConsensusCommand.TxList
+func (r StartConsensusCommandHandler) HandleStartConsensusCommand(created event.BlockCreated) {
+
+	seal := created.Seal
+	txList := created.TxList
 
 	proposedBlock, err := extractProposedBlock(seal, txList)
 	if err != nil {
-		return false, rpc.Error{Message: err.Error()}
+		iLogger.Errorf(nil, "[PBFT] Extracting event is failed! - %s", err.Error())
+		return
 	}
 
 	if err = r.sApi.StartConsensus(proposedBlock); err != nil {
-		return false, rpc.Error{Message: err.Error()}
+		iLogger.Errorf(nil, "[PBFT] Starting consensus is failed! - %s", err.Error())
+		return
 	}
-
-	return true, rpc.Error{}
 }
 
-func extractProposedBlock(Seal []byte, TxList []command.Tx) (pbft.ProposedBlock, error) {
+func extractProposedBlock(Seal []byte, TxList []event.Tx) (pbft.ProposedBlock, error) {
 	if Seal == nil {
 		return pbft.ProposedBlock{}, BlockSealIsNilError
 	}
