@@ -26,7 +26,7 @@ type BlockApi struct {
 	CheckAndSaveBlockFromPoolFunc func(height blockchain.BlockHeight) error
 	CommitGenesisBlockFunc        func(GenesisConfPath string) error
 	CommitBlockFunc               func(block blockchain.DefaultBlock) error
-	StageBlockFunc                func(block blockchain.DefaultBlock) error
+	StageBlockFunc                func(block blockchain.DefaultBlock)
 	CreateProposedBlockFunc       func(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error)
 }
 
@@ -46,8 +46,9 @@ func (api BlockApi) CommitBlock(block blockchain.DefaultBlock) error {
 	return api.CommitBlockFunc(block)
 }
 
-func (api BlockApi) StageBlock(block blockchain.DefaultBlock) error {
-	return api.StageBlockFunc(block)
+func (api BlockApi) StageBlock(block blockchain.DefaultBlock) {
+	api.StageBlockFunc(block)
+	return
 }
 
 func (api BlockApi) CreateProposedBlock(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error) {
