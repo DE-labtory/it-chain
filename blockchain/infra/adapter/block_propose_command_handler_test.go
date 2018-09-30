@@ -19,14 +19,13 @@ package adapter_test
 import (
 	"testing"
 
+	"os"
+	"sync"
+
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
-
-	"os"
-	"sync"
 
 	"time"
 
@@ -82,17 +81,17 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_Solo(t *testing.T)
 	commandHandler := adapter.NewBlockProposeCommandHandler(bApi, "solo")
 
 	//when
-	_, errRPC := commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: nil})
+	err = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: nil})
 	//then
-	assert.Equal(t, errRPC, rpc.Error{Message: adapter.ErrCommandTransactions.Error()})
+	assert.Error(t, err)
 
 	//when
-	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: make([]command.Tx, 0)})
+	err = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: make([]command.Tx, 0)})
 	//then
-	assert.Equal(t, errRPC, rpc.Error{Message: adapter.ErrCommandTransactions.Error()})
+	assert.Error(t, err)
 
 	//when
-	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
+	err = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
 		TxList: []command.Tx{
 			{
 				ID:        "tx01",
@@ -108,10 +107,10 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_Solo(t *testing.T)
 	})
 
 	//then
-	assert.Equal(t, errRPC, rpc.Error{})
+	assert.NoError(t, err)
 
 	//when
-	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
+	err = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
 		TxList: []command.Tx{
 			{
 				ID:        "tx01",
@@ -138,7 +137,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_Solo(t *testing.T)
 	})
 
 	//then
-	assert.Equal(t, errRPC, rpc.Error{})
+	assert.NoError(t, err)
 
 	wg.Wait()
 }
@@ -181,7 +180,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_OneTransactio
 	commandHandler := adapter.NewBlockProposeCommandHandler(api, "pbft")
 
 	//when
-	_, errRPC := commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
+	err = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
 		TxList: []command.Tx{
 			{
 				ID:        "tx01",
@@ -196,7 +195,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_OneTransactio
 		},
 	})
 	//then
-	assert.Equal(t, errRPC, rpc.Error{})
+	assert.NoError(t, err)
 
 	wg.Wait()
 }
@@ -239,7 +238,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_TwoTransactio
 	commandHandler := adapter.NewBlockProposeCommandHandler(api, "pbft")
 
 	//when
-	_, errRPC := commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
+	err = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
 		TxList: []command.Tx{
 			{
 				ID:        "tx01",
@@ -264,7 +263,7 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_TwoTransactio
 		},
 	})
 	//then
-	assert.Equal(t, errRPC, rpc.Error{})
+	assert.NoError(t, err)
 
 	wg.Wait()
 }
@@ -294,18 +293,18 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_ExceptionCase
 	commandHandler := adapter.NewBlockProposeCommandHandler(api, "pbft")
 
 	//when
-	_, errRPC := commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: nil})
+	err = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: nil})
 	//then
-	assert.Equal(t, errRPC, rpc.Error{Message: adapter.ErrCommandTransactions.Error()})
+	assert.Error(t, err)
 
 	//when
-	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: make([]command.Tx, 0)})
+	err = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{TxList: make([]command.Tx, 0)})
 	//then
-	assert.Equal(t, errRPC, rpc.Error{Message: adapter.ErrCommandTransactions.Error()})
+	assert.Error(t, err)
 
 	//when
 	//when
-	_, errRPC = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
+	err = commandHandler.HandleProposeBlockCommand(command.ProposeBlock{
 		TxList: []command.Tx{
 			{
 				ID:        "tx01",
@@ -320,6 +319,6 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_ExceptionCase
 		},
 	})
 	//then
-	assert.Equal(t, errRPC, rpc.Error{})
+	assert.NoError(t, err)
 
 }

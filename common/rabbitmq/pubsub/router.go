@@ -21,8 +21,6 @@ import (
 	"errors"
 	"reflect"
 	"sync"
-
-	"github.com/it-chain/engine/common/logger"
 )
 
 var ErrTypeNotFound = errors.New("Type of handler not found")
@@ -103,9 +101,9 @@ func createEventHandler(method reflect.Method, handler interface{}) func(interfa
 func (c ParamBasedRouter) Route(key string, data []byte, structName string) (err error) {
 	paramType, handler, err := c.findTypeOfHandlers(key, structName)
 
-	if err != nil {
-		logger.Errorf(nil, "No handler found for struct [%s]", structName)
-		return err
+	if paramType == nil {
+		//logger.Errorf(nil, "No handler found for struct [%s]", structName)
+		return nil
 	}
 
 	v := reflect.New(paramType)
