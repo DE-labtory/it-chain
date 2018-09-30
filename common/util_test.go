@@ -162,3 +162,9 @@ func TestCheckRegex(t *testing.T) {
 	}
 	fmt.Println(r.MatchString("block.created"))
 }
+
+func TestFindEarliestString(t *testing.T) {
+	larger := common.FindEarliestString([]string{"a", "b", "c"})
+
+	assert.Equal(t, "a", larger)
+}
