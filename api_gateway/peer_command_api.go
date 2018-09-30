@@ -49,7 +49,7 @@ func (cca *ConnectionCommandApi) dial(address string) (string, string, error) {
 	err := client.Call("connection.create", createConnectionCommand, func(connection grpc_gateway.Connection, err rpc.Error) {
 
 		if !err.IsNil() {
-			iLogger.Fatalf(nil, "[Api_gateway] Fail to create connection - Address: [%s]", address)
+			iLogger.Errorf(nil, "[Api_gateway] Fail to create connection - Address: [%s]", address)
 			callBackErr = errors.New(err.Message)
 			return
 		}
@@ -61,7 +61,7 @@ func (cca *ConnectionCommandApi) dial(address string) (string, string, error) {
 	})
 
 	if err != nil {
-		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in dial cmd")
+		iLogger.Error(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in dial cmd")
 		return "", "", err
 	}
 
@@ -86,7 +86,7 @@ func (cca *ConnectionCommandApi) join(address string) error {
 	err := client.Call("connection.join", joinNetworkCommand, func(_ struct{}, err rpc.Error) {
 
 		if !err.IsNil() {
-			iLogger.Fatalf(nil, "[Api_gateway] Fail to join network - Address: [%s], Err: [%s]", address, err.Message)
+			iLogger.Errorf(nil, "[Api_gateway] Fail to join network - Address: [%s], Err: [%s]", address, err.Message)
 			callBackErr = errors.New(err.Message)
 			return
 		}
@@ -96,7 +96,7 @@ func (cca *ConnectionCommandApi) join(address string) error {
 	})
 
 	if err != nil {
-		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in join cmd")
+		iLogger.Error(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in join cmd")
 		return err
 	}
 
