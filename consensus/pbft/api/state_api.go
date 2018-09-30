@@ -196,5 +196,9 @@ func (sApi *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 		logger.Infof(nil, "[PBFT] Consensus is finished.")
 	}
 
+	if err := sApi.repo.Save(loadedState); err != nil {
+		return err
+	}
+
 	return nil
 }
