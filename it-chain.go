@@ -32,7 +32,6 @@ import (
 )
 
 func main() {
-
 	app := cli.NewApp()
 	app.Name = "it-chain"
 	app.Version = "0.1.1"
@@ -69,7 +68,6 @@ func main() {
 		if c.Bool("debug") {
 			iLogger.SetToDebug()
 		}
-
 		return nil
 	}
 	app.Action = on.Action

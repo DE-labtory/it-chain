@@ -127,11 +127,10 @@ func TestStateApiImpl_StartConsensus(t *testing.T) {
 
 		time.Sleep(5 * time.Second)
 
-		iLogger.Infof(nil, "SEAL", state1.Block.Seal)
+		iLogger.Infof(nil, "SEAL: [%s]", state1.Block.Seal)
 		assert.Equal(t, state1.Block.Seal, state2.Block.Seal)
 		assert.Equal(t, state2.Block.Seal, state3.Block.Seal)
 		assert.Equal(t, state3.Block.Seal, state4.Block.Seal)
-
 	}
 }
 

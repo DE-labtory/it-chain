@@ -25,7 +25,7 @@ import (
 	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/engine/consensus/pbft/infra/mem"
 	test2 "github.com/it-chain/engine/consensus/pbft/test"
-	"github.com/it-chain/engine/p2p/test/mock"
+	"github.com/it-chain/engine/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -246,7 +246,7 @@ func setElectionApi() *api.ElectionApi {
 	parliament.AddRepresentative(pbft.NewRepresentative("3"))
 	parliamentRepository.Save(parliament)
 
-	eventService := &mock.MockEventService{}
+	eventService := &mock.EventService{}
 	api := api.NewElectionApi(electionService, parliamentRepository, eventService)
 	return api
 }
