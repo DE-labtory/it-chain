@@ -16,15 +16,12 @@
 
 package txpool
 
-type LeaderId struct {
+//Aggregate root must implement aggregate interface
+type Leader struct {
 	Id string
 }
 
-func (lid LeaderId) ToString() string {
-	return string(lid.Id)
-}
-
-//Aggregate root must implement aggregate interface
-type Leader struct {
-	LeaderId LeaderId
+type LeaderRepository interface {
+	Set(leader Leader)
+	Get() Leader
 }
