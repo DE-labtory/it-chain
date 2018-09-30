@@ -46,7 +46,7 @@ var Module = fx.Options(
 
 func NewElectionService(config *conf.Configuration) *pbft.ElectionService {
 	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
-	return pbft.NewElectionService(NodeId, 30, pbft.TICKING, 0)
+	return pbft.NewElectionService(NodeId, 30, pbft.NORMAL, 0)
 }
 
 func NewParliamentRepository(config *conf.Configuration) *mem.ParliamentRepository {
