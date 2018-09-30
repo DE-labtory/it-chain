@@ -186,16 +186,14 @@ func (sApi *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 	}
 
 	if loadedState.CheckPreCommitCondition() {
-		//TODO ConsensusFinished Parameter 추가
-		if err := sApi.eventService.Publish("block.confirm", event.ConsensusFinished{}); err != nil {
+		if err := sApi.eventService.Publish("block.confirm", event.ConsensusFinished{
+			Seal: loadedState.Block.Seal,
+			Body: loadedState.Block.Body,
+		}); err != nil {
 			return err
 		}
 		sApi.repo.Remove()
 		logger.Infof(nil, "[PBFT] Consensus is finished.")
-	}
-
-	if err := sApi.repo.Save(loadedState); err != nil {
-		return err
 	}
 
 	return nil
