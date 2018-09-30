@@ -16,11 +16,6 @@
 
 package test
 
-import (
-	"github.com/it-chain/engine/p2p"
-	"github.com/it-chain/engine/p2p/infra/mem"
-)
-
 type ProcessIdentity struct {
 	Id        string
 	IpAddress string
@@ -75,12 +70,3 @@ type ProcessIdentity struct {
 //	logger.Infof(nil, "created process: %v", m)
 //	return m
 //}
-
-func savePeerList(peerRepository mem.PeerRepository, processList []ProcessIdentity) {
-	for _, identity := range processList {
-		peerRepository.Save(p2p.Peer{
-			IpAddress: identity.IpAddress,
-			PeerId:    p2p.PeerId{Id: identity.Id},
-		})
-	}
-}

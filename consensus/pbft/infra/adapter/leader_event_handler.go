@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package mock
+package adapter
 
-import "github.com/it-chain/engine/api_gateway"
+import (
+	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/consensus/pbft/api"
+)
 
-type PeerQueryApi struct {
-	GetAllPeerListFunc  func() []api_gateway.Peer
-	GetPeerByIDByIdFunc func(peerId string) (api_gateway.Peer, error)
+type LeaderEventHandler struct {
+	electionApi *api.ElectionApi
 }
 
-func (q PeerQueryApi) GetAllPeerList() []api_gateway.Peer {
-	return q.GetAllPeerListFunc()
-}
-
-func (q PeerQueryApi) GetPeerByID(connectionId string) (api_gateway.Peer, error) {
-	return q.GetPeerByIDByIdFunc(connectionId)
+func (l *LeaderEventHandler) HandlerLeaderDeletedEvent(_ event.LeaderDeleted) {
+	go l.electionApi.ElectLeaderWithRaft()
 }

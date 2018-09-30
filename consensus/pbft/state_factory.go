@@ -21,7 +21,7 @@ import (
 )
 
 // leader
-func NewState(parliament []MemberID, block ProposedBlock) (*State, error) {
+func NewState(parliament []Representative, block ProposedBlock) (*State, error) {
 	representatives, err := Elect(parliament)
 	if err != nil {
 		return &State{}, err
@@ -40,7 +40,7 @@ func NewState(parliament []MemberID, block ProposedBlock) (*State, error) {
 }
 
 // member
-func BuildState(msg ProposeMsg) (*State, error) {
+func BuildState(msg ProposeMsg) *State {
 	newState := &State{
 		StateID:          msg.StateID,
 		Representatives:  msg.Representative,
@@ -50,5 +50,5 @@ func BuildState(msg ProposeMsg) (*State, error) {
 		PreCommitMsgPool: NewPreCommitMsgPool(),
 	}
 
-	return newState, nil
+	return newState
 }

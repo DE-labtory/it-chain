@@ -49,14 +49,9 @@ func TestElectionService_CountUpVoteCount(t *testing.T) {
 
 func TestElectionService_GetCandidate(t *testing.T) {
 	e := SetElectionService()
-	e.SetCandidate(&pbft.Representative{ID: "1"})
+	e.SetCandidate(pbft.Representative{ID: "1"})
 
 	assert.Equal(t, e.GetCandidate().ID, "1")
-}
-
-func TestElectionService_GetIpAddress(t *testing.T) {
-	e := SetElectionService()
-	assert.Equal(t, e.GetIpAddress(), "1")
 }
 
 func TestElectionService_GetLeftTime(t *testing.T) {
@@ -95,7 +90,7 @@ func TestElectionService_ResetVoteCount(t *testing.T) {
 func TestElectionService_SetCandidate(t *testing.T) {
 	e := SetElectionService()
 
-	r := &pbft.Representative{
+	r := pbft.Representative{
 		ID: "1",
 	}
 	e.SetCandidate(r)

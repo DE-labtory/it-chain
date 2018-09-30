@@ -25,6 +25,7 @@ import (
 	"github.com/it-chain/engine/cmd/on/commonfx"
 	"github.com/it-chain/engine/cmd/on/grpc_gatewayfx"
 	"github.com/it-chain/engine/cmd/on/ivmfx"
+	"github.com/it-chain/engine/cmd/on/pbftfx"
 	"github.com/it-chain/engine/cmd/on/txpoolfx"
 	"github.com/it-chain/iLogger"
 	"github.com/urfave/cli"
@@ -66,10 +67,11 @@ func start() error {
 	app := fx.New(
 		commonfx.Module,
 		api_gatewayfx.Module,
+		grpc_gatewayfx.Module,
 		ivmfx.Module,
 		txpoolfx.Module,
 		blockchainfx.Module,
-		grpc_gatewayfx.Module,
+		pbftfx.Module,
 		fx.NopLogger,
 	)
 	app.Run()

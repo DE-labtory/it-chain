@@ -17,22 +17,19 @@
 package txpoolfx
 
 import (
+	"context"
 	"time"
 
-	"github.com/it-chain/iLogger"
-
-	"context"
-
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/txpool/api"
 	"github.com/it-chain/engine/txpool/infra/adapter"
 	"github.com/it-chain/engine/txpool/infra/batch"
 	"github.com/it-chain/engine/txpool/infra/mem"
+	"github.com/it-chain/iLogger"
 	"go.uber.org/fx"
 )
-
-const tempPeerID = "1"
 
 var Module = fx.Options(
 	fx.Provide(
@@ -51,12 +48,12 @@ func NewBlockProposalService(repository *mem.TransactionRepository, client *rpc.
 	return adapter.NewBlockProposalService(client, repository, config.Engine.Mode)
 }
 
-func NewTxpoolApi(repository *mem.TransactionRepository) *api.TransactionApi {
-	return api.NewTransactionApi(tempPeerID, repository)
+func NewTxpoolApi(config *conf.Configuration, repository *mem.TransactionRepository) *api.TransactionApi {
+	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
+	return api.NewTransactionApi(NodeId, repository)
 }
 
 func RunBatcher(lifecycle fx.Lifecycle, blockProposalService *adapter.BlockProposalService, config *conf.Configuration) {
-
 	var q chan struct{}
 	lifecycle.Append(fx.Hook{
 		OnStart: func(context context.Context) error {

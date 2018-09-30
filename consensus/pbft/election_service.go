@@ -22,23 +22,32 @@ import (
 	"github.com/it-chain/engine/common/logger"
 )
 
+const (
+	CANDIDATE ElectionState = "CANDIDATE"
+	TICKING   ElectionState = "TICKING"
+)
+
+type ElectionState string
+
 type ElectionService struct {
-	ipAddress string
-	candidate *Representative // candidate peer to be leader later
-	leftTime  int             //left time in millisecond
+	NodeId    string
+	candidate Representative // candidate peer to be leader later
+	leftTime  int            //left time in millisecond
 	state     ElectionState
+	Voted     bool
 	voteCount int
 	mux       sync.Mutex
 	term      int
 }
 
-func NewElectionService(ipAddress string, leftTime int, state ElectionState, voteCount int) *ElectionService {
+func NewElectionService(id string, leftTime int, state ElectionState, voteCount int) *ElectionService {
 
 	return &ElectionService{
-		ipAddress: ipAddress,
-		candidate: &Representative{
+		NodeId: id,
+		candidate: Representative{
 			ID: "",
 		},
+		Voted:     false,
 		leftTime:  leftTime,
 		state:     state,
 		voteCount: voteCount,
@@ -77,11 +86,16 @@ func (e *ElectionService) ResetLeftTime() {
 	e.mux.Lock()
 	defer e.mux.Unlock()
 
-	e.leftTime = GenRandomInRange(290, 300)
+	e.Voted = false
+
+	e.leftTime = GenRandomInRange(150, 300)
 }
 
 //count down left time by tick millisecond  until 0
 func (e *ElectionService) CountDownLeftTimeBy(tick int) {
+
+	e.mux.Lock()
+	defer e.mux.Unlock()
 
 	if e.leftTime == 0 {
 		return
@@ -110,6 +124,9 @@ func (e *ElectionService) GetState() ElectionState {
 
 func (e *ElectionService) GetLeftTime() int {
 
+	e.mux.Lock()
+	defer e.mux.Unlock()
+
 	return e.leftTime
 }
 
@@ -137,17 +154,18 @@ func (e *ElectionService) CountUpVoteCount() {
 	e.voteCount = e.voteCount + 1
 }
 
-func (e *ElectionService) SetCandidate(representative *Representative) {
+func (e *ElectionService) SetCandidate(representative Representative) {
+	e.mux.Lock()
+	defer e.mux.Unlock()
+
 	e.candidate = representative
 }
 
-func (e *ElectionService) GetCandidate() *Representative {
+func (e *ElectionService) GetCandidate() Representative {
+	e.mux.Lock()
+	defer e.mux.Unlock()
 
 	return e.candidate
-}
-
-func (e *ElectionService) GetIpAddress() string {
-	return e.ipAddress
 }
 
 func (e *ElectionService) IncreaseTerm() error {
@@ -160,5 +178,15 @@ func (e *ElectionService) IncreaseTerm() error {
 }
 
 func (e *ElectionService) GetTerm() int {
+	e.mux.Lock()
+	defer e.mux.Unlock()
+
 	return e.term
+}
+
+func (e *ElectionService) SetVoted(index bool) {
+	e.mux.Lock()
+	defer e.mux.Unlock()
+
+	e.Voted = index
 }

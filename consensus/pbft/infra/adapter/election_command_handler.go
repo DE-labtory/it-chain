@@ -21,9 +21,9 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
+	"github.com/it-chain/iLogger"
 )
 
 var ErrLeaderInfoDeliver = errors.New("leader info deliver failed")
@@ -32,79 +32,61 @@ var ErrPeerDeliver = errors.New("peer deliver failed")
 var ErrUnmarshal = errors.New("error during unmarshal")
 
 type ElectionCommandHandler struct {
-	leaderApi   *api.LeaderApi
-	electionApi api.ElectionApi
+	parliamentApi *api.ParliamentApi
+	electionApi   *api.ElectionApi
 }
 
-func NewElectionCommandHandler(
-	leaderApi *api.LeaderApi,
-	electionApi *api.ElectionApi) *ElectionCommandHandler {
+func NewElectionCommandHandler(parliamentApi *api.ParliamentApi, electionApi *api.ElectionApi) *ElectionCommandHandler {
 	return &ElectionCommandHandler{
-		leaderApi:   leaderApi,
-		electionApi: *electionApi,
+		parliamentApi: parliamentApi,
+		electionApi:   electionApi,
 	}
 }
 
-func (gch *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrpc) error {
+func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrpc) error {
+	iLogger.Infof(nil, "[PBFT] Received gRPC message - Protocol [%s]", command.Protocol)
 
 	switch command.Protocol {
 
 	case "RequestVoteProtocol":
-		logger.Infof(nil, "[consensus] handling request vote from process: %v", gch.electionApi.GetIpAddress())
-
 		message := &pbft.RequestVoteMessage{}
 		deserializeErr := common.Deserialize(command.Body, message)
 		if deserializeErr != nil {
 			return deserializeErr
 		}
 
-		if message.Term < gch.electionApi.ElectionService.GetTerm() {
+		if e.electionApi.ElectionService.Voted {
+			iLogger.Info(nil, "already voted!")
 			return nil
 		}
 
-		err := gch.electionApi.Vote(command.ConnectionID)
+		err := e.electionApi.Vote(command.ConnectionID)
 
 		if err != nil {
 			return err
 		}
 
 	case "VoteLeaderProtocol":
-		logger.Infof(nil, "[consensus] voted from process: %v", command.ConnectionID)
-
-		//	1. if candidate, reset left time
-		//	2. count up
-		//	3. if counted is same with num of peer-1 set leader and publish
-
-		logger.Infof(nil, "[consensus] received VoteLeaderProtocol command:", command)
-
-		err := gch.electionApi.DecideToBeLeader()
-
-		if err != nil {
-			return err
+		iLogger.Infof(nil, "[PBFT] Receive VoteLeaderProtocol")
+		if err := e.electionApi.DecideToBeLeader(); err != nil {
+			iLogger.Errorf(nil, "Err %s", err.Error())
 		}
 
 	case "UpdateLeaderProtocol":
-		// if received leader is not what i voted for, return nil
-		if gch.electionApi.GetCandidate().ID != command.ConnectionID {
+		if e.electionApi.GetCandidate().ID != command.ConnectionID {
 			return nil
 		}
 
+		e.electionApi.EndRaft()
 		toBeLeader := &pbft.UpdateLeaderMessage{}
-		err := common.Deserialize(command.Body, toBeLeader)
-
-		logger.Infof(nil, "[consensus] update leader with", toBeLeader.Representative)
-		if err != nil {
-			return err
+		if err := common.Deserialize(command.Body, toBeLeader); err != nil {
+			iLogger.Errorf(nil, "Err %s", err.Error())
 		}
 
-		err2 := gch.leaderApi.UpdateLeaderWithAddress(toBeLeader.Representative.IpAddress)
-
-		if err2 != nil {
-			return err2
+		if err := e.parliamentApi.UpdateLeader(toBeLeader.Representative.ID); err != nil {
+			iLogger.Errorf(nil, "Err %s", err.Error())
 		}
 	}
 
 	return nil
 }
-
-//

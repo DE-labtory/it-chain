@@ -24,50 +24,16 @@ import (
 
 var ErrNoParliamentMember = errors.New("No parliament member.")
 
-type PropagateService interface {
-	BroadcastProposeMsg(msg ProposeMsg, representatives []*Representative) error
-	BroadcastPrevoteMsg(msg PrevoteMsg, representatives []*Representative) error
-	BroadcastPreCommitMsg(msg PreCommitMsg, representatives []*Representative) error
-}
-
-type ParliamentService interface {
-	RequestLeader() (MemberID, error)
-	RequestPeerList() ([]MemberID, error)
-	IsNeedConsensus() bool
-	Build() error
-	SetLeader(representative *Representative) error
-	GetRepresentativeById(id string) *Representative
-	GetRepresentativeTable() map[string]*Representative
-	GetParliament() *Parliament
-	GetLeader() *Leader
-	FindRepresentativeByIpAddress(ipAddress string) *Representative
-}
-
 // 연결된 peer 중에서 consensus 에 참여할 representative 들을 선출
-func Elect(parliament []MemberID) ([]*Representative, error) {
-	representatives := make([]*Representative, 0)
-
+func Elect(parliament []Representative) ([]Representative, error) {
 	if len(parliament) == 0 {
-		return []*Representative{}, ErrNoParliamentMember
+		return []Representative{}, ErrNoParliamentMember
 	}
-
-	for _, peerId := range parliament {
-		representatives = append(representatives, NewRepresentative(peerId.ToString()))
-	}
-
-	return representatives, nil
-}
-
-type PeerQueryApi interface {
-	GetPeerTable() (map[string]struct {
-		ID        string
-		IpAddress string
-	}, error)
+	return parliament, nil
 }
 
 func GenRandomInRange(min, max int) int {
 
 	rand.Seed(time.Now().UnixNano())
-
 	return rand.Intn(max-min) + min
 }

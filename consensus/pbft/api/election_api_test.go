@@ -21,13 +21,10 @@ import (
 
 	"time"
 
-	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
-	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
+	"github.com/it-chain/engine/consensus/pbft/infra/mem"
 	test2 "github.com/it-chain/engine/consensus/pbft/test"
-	"github.com/it-chain/engine/p2p"
-	"github.com/it-chain/engine/p2p/infra/mem"
 	"github.com/it-chain/engine/p2p/test/mock"
 	"github.com/stretchr/testify/assert"
 )
@@ -186,15 +183,15 @@ func TestElectionApi_ElectLeaderWithRaft(t *testing.T) {
 		for _, p := range env.ProcessMap {
 			process := *p
 			electionApi := process.Services["ElectionApi"].(*api.ElectionApi)
-			electionApi.ElectLeaderWithRaft()
+			go electionApi.ElectLeaderWithRaft()
 		}
 
 		time.Sleep(5 * time.Second)
 
-		leader1 := env.ProcessMap["1"].Services["LeaderApi"].(*api.LeaderApi).GetLeader()
-		leader2 := env.ProcessMap["2"].Services["LeaderApi"].(*api.LeaderApi).GetLeader()
-		leader3 := env.ProcessMap["3"].Services["LeaderApi"].(*api.LeaderApi).GetLeader()
-		leader4 := env.ProcessMap["4"].Services["LeaderApi"].(*api.LeaderApi).GetLeader()
+		leader1 := env.ProcessMap["1"].Services["ParliamentApi"].(*api.ParliamentApi).GetLeader()
+		leader2 := env.ProcessMap["2"].Services["ParliamentApi"].(*api.ParliamentApi).GetLeader()
+		leader3 := env.ProcessMap["3"].Services["ParliamentApi"].(*api.ParliamentApi).GetLeader()
+		leader4 := env.ProcessMap["4"].Services["ParliamentApi"].(*api.ParliamentApi).GetLeader()
 
 		t.Logf("leader1: %v", leader1)
 		t.Logf("leader2: %v", leader2)
@@ -219,17 +216,11 @@ func TestGenRandomInRange(t *testing.T) {
 
 func TestElectionApi_GetCandidate(t *testing.T) {
 	api := setElectionApi()
-	api.ElectionService.SetCandidate(&pbft.Representative{
+	api.ElectionService.SetCandidate(pbft.Representative{
 		ID: "1",
 	})
 
 	assert.Equal(t, api.GetCandidate().ID, "1")
-}
-
-func TestElectionApi_GetIpAddress(t *testing.T) {
-	api := setElectionApi()
-
-	assert.Equal(t, api.GetIpAddress(), "1")
 }
 
 func TestElectionApi_GetState(t *testing.T) {
@@ -245,31 +236,17 @@ func TestElectionApi_GetVoteCount(t *testing.T) {
 }
 
 func setElectionApi() *api.ElectionApi {
+
 	electionService := pbft.NewElectionService("1", 30, pbft.CANDIDATE, 0)
 	parliament := pbft.NewParliament()
-	repository := mem.NewPeerReopository()
-	repository.Save(p2p.Peer{
-		IpAddress: "1",
-		PeerId: p2p.PeerId{
-			Id: "1",
-		},
-	})
-	repository.Save(p2p.Peer{
-		IpAddress: "2",
-		PeerId: p2p.PeerId{
-			Id: "2",
-		},
-	})
-	repository.Save(p2p.Peer{
-		IpAddress: "3",
-		PeerId: p2p.PeerId{
-			Id: "3",
-		},
-	})
-	peerQueryApi := api_gateway.NewPeerQueryApi(repository)
-	parliamentService := adapter.NewParliamentService(parliament, peerQueryApi)
-	eventService := &mock.MockEventService{}
-	api := api.NewElectionApi(electionService, parliamentService, eventService)
+	parliamentRepository := mem.NewParliamentRepository()
 
+	parliament.AddRepresentative(pbft.NewRepresentative("1"))
+	parliament.AddRepresentative(pbft.NewRepresentative("2"))
+	parliament.AddRepresentative(pbft.NewRepresentative("3"))
+	parliamentRepository.Save(parliament)
+
+	eventService := &mock.MockEventService{}
+	api := api.NewElectionApi(electionService, parliamentRepository, eventService)
 	return api
 }

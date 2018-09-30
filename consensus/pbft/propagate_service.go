@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package adapter
+package pbft
 
 import (
 	"errors"
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/rs/xid"
 )
 
@@ -30,19 +29,18 @@ var ErrEmptyBlock = errors.New("Block is empty")
 var ErrEmptyBlockHash = errors.New("Block hash is empty")
 var ErrEmptyMsg = errors.New("Message is empty")
 
-type Publish func(topic string, data interface{}) (err error)
-
 type PropagateService struct {
-	publish Publish
+	eventService common.EventService
 }
 
-func NewPropagateService(publish Publish) PropagateService {
+func NewPropagateService(eventService common.EventService) PropagateService {
 	return PropagateService{
-		publish: publish,
+		eventService: eventService,
 	}
 }
 
-func (ps PropagateService) BroadcastProposeMsg(msg pbft.ProposeMsg, representatives []*pbft.Representative) error {
+func (ps PropagateService) BroadcastProposeMsg(msg ProposeMsg, representatives []Representative) error {
+
 	if msg.StateID.ID == "" {
 		return ErrStateIdEmpty
 	}
@@ -51,20 +49,14 @@ func (ps PropagateService) BroadcastProposeMsg(msg pbft.ProposeMsg, representati
 		return ErrEmptyBlock
 	}
 
-	SerializedMsg, err := common.Serialize(msg)
-
-	if err != nil {
-		return err
-	}
-
-	if err = ps.broadcastMsg(SerializedMsg, "ProposeMsgProtocol", representatives); err != nil {
+	if err := ps.broadcastMsg(msg, "ProposeMsgProtocol", representatives); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (ps PropagateService) BroadcastPrevoteMsg(msg pbft.PrevoteMsg, representatives []*pbft.Representative) error {
+func (ps PropagateService) BroadcastPrevoteMsg(msg PrevoteMsg, representatives []Representative) error {
 	if msg.StateID.ID == "" {
 		return ErrStateIdEmpty
 	}
@@ -73,53 +65,38 @@ func (ps PropagateService) BroadcastPrevoteMsg(msg pbft.PrevoteMsg, representati
 		return ErrEmptyBlockHash
 	}
 
-	SerializedMsg, err := common.Serialize(msg)
-
-	if err != nil {
-		return err
-	}
-
-	if err = ps.broadcastMsg(SerializedMsg, "PrevoteMsgProtocol", representatives); err != nil {
+	if err := ps.broadcastMsg(msg, "PrevoteMsgProtocol", representatives); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (ps PropagateService) BroadcastPreCommitMsg(msg pbft.PreCommitMsg, representatives []*pbft.Representative) error {
+func (ps PropagateService) BroadcastPreCommitMsg(msg PreCommitMsg, representatives []Representative) error {
 	if msg.StateID.ID == "" {
 		return ErrStateIdEmpty
 	}
 
-	SerializedMsg, err := common.Serialize(msg)
-
-	if err != nil {
-		return err
-	}
-
-	if err = ps.broadcastMsg(SerializedMsg, "PreCommitMsgProtocol", representatives); err != nil {
+	if err := ps.broadcastMsg(msg, "PreCommitMsgProtocol", representatives); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (ps PropagateService) broadcastMsg(SerializedMsg []byte, protocol string, representatives []*pbft.Representative) error {
-	if SerializedMsg == nil {
-		return ErrEmptyMsg
-	}
+func (ps PropagateService) broadcastMsg(msg interface{}, protocol string, representatives []Representative) error {
 
-	command, err := createDeliverGrpcCommand(protocol, SerializedMsg)
+	grpcCommand, err := createDeliverGrpcCommand(protocol, msg)
 
 	if err != nil {
 		return err
 	}
 
 	for _, r := range representatives {
-		command.RecipientList = append(command.RecipientList, r.GetID())
+		grpcCommand.RecipientList = append(grpcCommand.RecipientList, r.GetID())
 	}
 
-	return ps.publish("message.deliver", command)
+	return ps.eventService.Publish("message.deliver", grpcCommand)
 }
 
 func createDeliverGrpcCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {

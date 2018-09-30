@@ -29,6 +29,13 @@ import (
 var DeserializingError = errors.New("Message deserializing is failed.")
 var UndefinedProtocolError = errors.New("Undefined protocol error")
 
+/*
+type StateMsgApi struct {
+	HandleProposeMsg   func(msg pbft.ProposeMsg) error
+	HandlePrevoteMsg   func(msg pbft.PrevoteMsg) error
+	HandlePreCommitMsg func(msg pbft.PreCommitMsg) error
+}*/
+
 type PbftMsgHandler struct {
 	sApi api.StateApi
 }
@@ -39,7 +46,7 @@ func NewPbftMsgHandler(sApi api.StateApi) PbftMsgHandler {
 	}
 }
 
-func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) {
+func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) error {
 	protocol := command.Protocol
 	body := command.Body
 
@@ -79,4 +86,5 @@ func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) {
 	default:
 		logger.Errorf(nil, "[PBFT] %s", UndefinedProtocolError.Error())
 	}
+	return nil
 }

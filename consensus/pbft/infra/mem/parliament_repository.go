@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package mem
 
 import (
@@ -21,39 +22,37 @@ import (
 	"github.com/it-chain/engine/consensus/pbft"
 )
 
-type StateRepository struct {
-	state pbft.State
+type ParliamentRepository struct {
+	parliament pbft.Parliament
 	sync.RWMutex
 }
 
-func NewStateRepository() *StateRepository {
-	return &StateRepository{
-		state:   pbft.State{},
-		RWMutex: sync.RWMutex{},
+func NewParliamentRepositoryWithParliament(parliament pbft.Parliament) *ParliamentRepository {
+	return &ParliamentRepository{
+		parliament: parliament,
+		RWMutex:    sync.RWMutex{},
 	}
 }
 
-func (repo *StateRepository) Save(state pbft.State) error {
-
-	repo.Lock()
-	defer repo.Unlock()
-	id := repo.state.StateID.ID
-	if id == state.StateID.ID || id == "" {
-		repo.state = state
-		return nil
+func NewParliamentRepository() *ParliamentRepository {
+	return &ParliamentRepository{
+		parliament: pbft.NewParliament(),
+		RWMutex:    sync.RWMutex{},
 	}
-	return pbft.ErrInvalidSave
 }
 
-func (repo *StateRepository) Load() (pbft.State, error) {
+func (p *ParliamentRepository) Save(parliament pbft.Parliament) {
 
-	if repo.state.StateID.ID == "" {
-		return repo.state, pbft.ErrEmptyRepo
-	}
+	p.Lock()
+	defer p.Unlock()
 
-	return repo.state, nil
+	p.parliament = parliament
 }
 
-func (repo *StateRepository) Remove() {
-	repo.state = pbft.State{}
+func (p *ParliamentRepository) Load() pbft.Parliament {
+
+	p.Lock()
+	defer p.Unlock()
+
+	return p.parliament
 }

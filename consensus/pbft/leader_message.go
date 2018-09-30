@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package mock
+package pbft
 
-import "github.com/it-chain/engine/api_gateway"
 
-type PeerQueryApi struct {
-	GetAllPeerListFunc  func() []api_gateway.Peer
-	GetPeerByIDByIdFunc func(peerId string) (api_gateway.Peer, error)
+type LeaderDeliveryMessage struct {
+	Leader Leader
 }
 
-func (q PeerQueryApi) GetAllPeerList() []api_gateway.Peer {
-	return q.GetAllPeerListFunc()
-}
-
-func (q PeerQueryApi) GetPeerByID(connectionId string) (api_gateway.Peer, error) {
-	return q.GetPeerByIDByIdFunc(connectionId)
+type RequestLeaderMessage struct {
 }

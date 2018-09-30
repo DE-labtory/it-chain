@@ -17,8 +17,11 @@
 package common
 
 import (
+	"bytes"
 	"errors"
 	"reflect"
+	"runtime"
+	"strconv"
 
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 )
@@ -27,15 +30,20 @@ var ErrEventType = errors.New("Error type of event is not struct")
 
 type EventService interface {
 	Publish(topic string, event interface{}) error
+	Close()
 }
 
 type EventServiceImpl struct {
-	topicPublisher *pubsub.TopicPublisher
+	mqUrl      string
+	exchange   string
+	channelMap map[uint64]worker
 }
 
 func NewEventService(mqUrl string, exchange string) *EventServiceImpl {
 	return &EventServiceImpl{
-		topicPublisher: pubsub.NewTopicPublisher(mqUrl, exchange),
+		mqUrl:      mqUrl,
+		exchange:   exchange,
+		channelMap: make(map[uint64]worker),
 	}
 }
 
@@ -44,14 +52,72 @@ func (s *EventServiceImpl) Publish(topic string, event interface{}) error {
 		return ErrEventType
 	}
 
-	err := s.topicPublisher.Publish(topic, event)
-	if err != nil {
-		return err
+	w, ok := s.channelMap[getGID()]
+	if !ok {
+		worker := NewWorker(make(chan message, 1), pubsub.NewTopicPublisher(s.mqUrl, s.exchange))
+		s.channelMap[getGID()] = worker
+		go worker.work()
+		worker.message <- message{
+			event: event,
+			topic: topic,
+		}
+
+		return nil
+	}
+
+	w.message <- message{
+		event: event,
+		topic: topic,
 	}
 
 	return nil
 }
 
+func (s *EventServiceImpl) Close() {
+	for _, w := range s.channelMap {
+		w.quit <- struct{}{}
+	}
+}
+
+func getGID() uint64 {
+	b := make([]byte, 64)
+	b = b[:runtime.Stack(b, false)]
+	b = bytes.TrimPrefix(b, []byte("goroutine "))
+	b = b[:bytes.IndexByte(b, ' ')]
+	n, _ := strconv.ParseUint(string(b), 10, 64)
+	return n
+}
+
 func eventIsStruct(event interface{}) bool {
 	return reflect.TypeOf(event).Kind() == reflect.Struct
+}
+
+type worker struct {
+	quit           chan struct{}
+	message        chan message
+	topicPublisher *pubsub.TopicPublisher
+}
+
+type message struct {
+	topic string
+	event interface{}
+}
+
+func NewWorker(chMessage chan message, topicPublisher *pubsub.TopicPublisher) worker {
+	return worker{
+		quit:           make(chan struct{}),
+		message:        chMessage,
+		topicPublisher: topicPublisher,
+	}
+}
+
+func (w *worker) work() {
+	for {
+		select {
+		case m := <-w.message:
+			w.topicPublisher.Publish(m.topic, m.event)
+		case <-w.quit:
+			return
+		}
+	}
 }

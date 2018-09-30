@@ -23,9 +23,7 @@ import (
 
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
-	"github.com/it-chain/engine/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -63,21 +61,12 @@ func TestStartConsensusCommandHandler_HandleStartConsensusCommand(t *testing.T) 
 	assert.Equal(t, consensusStartError.Error(), testErr.Message)
 }
 
-func newMockStateApi(err error) api.StateApi {
-	mockStateApi := mock.StateApi{}
+func newMockStateApi(err error) adapter.StateStartApi {
+	mockStateApi := adapter.StateStartApi{}
 
-	mockStateApi.StartConsensusFunc = func(proposedBlock pbft.ProposedBlock) error {
+	mockStateApi.StartConsensus = func(proposedBlock pbft.ProposedBlock) error {
 		return err
 	}
-	mockStateApi.HandleProposeMsgFunc = func(msg pbft.ProposeMsg) error {
-		return nil
-	}
-	mockStateApi.HandlePrevoteMsgFunc = func(msg pbft.PrevoteMsg) error {
-		return nil
-	}
-	mockStateApi.HandlePreCommitMsgFunc = func(msg pbft.PreCommitMsg) error {
-		return nil
-	}
 
-	return &mockStateApi
+	return mockStateApi
 }

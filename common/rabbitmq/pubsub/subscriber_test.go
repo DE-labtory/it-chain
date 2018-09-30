@@ -53,6 +53,8 @@ func TestTopicSubscriber_SubscribeTopic(t *testing.T) {
 
 	publish(t, "Event", "test.created", UserNameUpdateEvent{Name: "Jun"})
 	publish(t, "Event", "test.created", UserAddCommand{Age: 123})
+
+	wg.Wait()
 }
 
 type UserNameUpdateEvent struct {

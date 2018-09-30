@@ -18,13 +18,11 @@ package test
 
 import (
 	"github.com/it-chain/avengers/mock"
-	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
-	"github.com/it-chain/engine/p2p"
-	"github.com/it-chain/engine/p2p/infra/mem"
+	"github.com/it-chain/engine/consensus/pbft/infra/mem"
 )
 
 // 프로세스 아이디와 동일한 값의 ip를 가지는 프로세스들을 만들어낸다.
@@ -45,32 +43,38 @@ func SetTestEnvironment(processList []string) struct {
 		// setup process
 		process := mock.NewProcess(id)
 		electionService := pbft.NewElectionService(id, 30, pbft.TICKING, 0)
-		repository := mem.NewPeerReopository()
+		parliamentRepository := mem.NewParliamentRepository()
+		parliament := pbft.NewParliament()
+
 		for _, pid := range processList {
-			repository.Save(p2p.Peer{
-				PeerId: p2p.PeerId{
-					Id: pid,
-				},
-				IpAddress: pid,
-			})
+			parliament.AddRepresentative(pbft.NewRepresentative(pid))
 		}
 
-		peerQueryApi := api_gateway.NewPeerQueryApi(repository)
-		parliament := pbft.NewParliament()
-		parliamentService := adapter.NewParliamentService(parliament, peerQueryApi)
-		parliamentService.Build()
+		parliamentRepository.Save(parliament)
+		stateRepository := mem.NewStateRepository()
+
 		eventService := mock.NewEventService(id, networkManager.Publish)
-		electionApi := api.NewElectionApi(electionService, parliamentService, eventService)
-		leaderApi := api.NewLeaderApi(parliamentService, eventService)
+		propagateService := pbft.NewPropagateService(eventService)
+
+		electionApi := api.NewElectionApi(electionService, parliamentRepository, eventService)
+		leaderApi := api.NewParliamentApi(id, parliamentRepository, eventService)
+
+		stateApi := api.NewStateApi(id, propagateService, eventService, parliamentRepository, stateRepository)
+
 		grpcCommandHandler := adapter.NewElectionCommandHandler(leaderApi, electionApi)
+		pbftHandler := adapter.NewPbftMsgHandler(*stateApi)
 
 		// register handler to process
 		process.RegisterHandler(grpcCommandHandler.HandleMessageReceive)
+		process.RegisterHandler(pbftHandler.HandleGrpcMsgCommand)
 
 		// register module to process
 		process.Register(electionApi)
 		process.Register(leaderApi)
 		process.Register(electionService)
+		process.Register(stateApi)
+		process.Register(parliamentRepository)
+		process.Register(stateRepository)
 
 		// add process to network manager
 		networkManager.AddProcess(process)

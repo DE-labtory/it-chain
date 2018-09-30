@@ -21,143 +21,155 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus/pbft"
 )
 
-type StateApi interface {
-	StartConsensus(block pbft.ProposedBlock) error
-	HandleProposeMsg(msg pbft.ProposeMsg) error
-	HandlePrevoteMsg(msg pbft.PrevoteMsg) error
-	HandlePreCommitMsg(msg pbft.PreCommitMsg) error
-}
-
-type StateApiImpl struct {
-	publisherID       string
-	propagateService  pbft.PropagateService
-	eventService      common.EventService
-	parliamentService pbft.ParliamentService
-	repo              pbft.StateRepository
+type StateApi struct {
+	publisherID          string
+	propagateService     pbft.PropagateService
+	eventService         common.EventService
+	parliamentRepository pbft.ParliamentRepository
+	repo                 pbft.StateRepository
+	tempPrevoteMsgPool   pbft.PrevoteMsgPool
+	tempPreCommitMsgPool pbft.PreCommitMsgPool
 }
 
 var ConsensusCreateError = errors.New("Consensus can't be created")
 
 func NewStateApi(publisherID string, propagateService pbft.PropagateService,
-	eventService common.EventService, parliamentService pbft.ParliamentService, repo pbft.StateRepository) StateApiImpl {
-	return StateApiImpl{
-		publisherID:       publisherID,
-		propagateService:  propagateService,
-		eventService:      eventService,
-		parliamentService: parliamentService,
-		repo:              repo,
+	eventService common.EventService, parliamentRepository pbft.ParliamentRepository, repo pbft.StateRepository) *StateApi {
+	return &StateApi{
+		publisherID:          publisherID,
+		propagateService:     propagateService,
+		eventService:         eventService,
+		parliamentRepository: parliamentRepository,
+		repo:                 repo,
+		tempPrevoteMsgPool:   pbft.NewPrevoteMsgPool(),
+		tempPreCommitMsgPool: pbft.NewPreCommitMsgPool(),
 	}
 }
 
-func (cApi *StateApiImpl) StartConsensus(proposedBlock pbft.ProposedBlock) error {
+func (sApi *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 
-	peerList, err := cApi.parliamentService.RequestPeerList()
-	if err != nil {
-		return err
-	}
+	parliament := sApi.parliamentRepository.Load()
+	if !parliament.IsNeedConsensus() {
 
-	if !cApi.parliamentService.IsNeedConsensus() {
 		return ConsensusCreateError
 	}
 
-	createdState, err := pbft.NewState(peerList, proposedBlock)
+	createdState, err := pbft.NewState(parliament.GetRepresentatives(), proposedBlock)
 	if err != nil {
 		return err
 	}
 
-	createdProposeMsg := pbft.NewProposeMsg(createdState, cApi.publisherID)
-	if err := cApi.propagateService.BroadcastProposeMsg(*createdProposeMsg, createdState.Representatives); err != nil {
+	createdProposeMsg := pbft.NewProposeMsg(createdState, sApi.publisherID)
+	if err := sApi.propagateService.BroadcastProposeMsg(*createdProposeMsg, createdState.Representatives); err != nil {
 		return err
 	}
-
+	logger.Infof(nil, "[PBFT] Leader broadcast ProposeMsg")
 	createdState.Start()
-	if err := cApi.repo.Save(*createdState); err != nil {
+	logger.Infof(nil, "[PBFT] Change stage to propose")
+	if err := sApi.repo.Save(*createdState); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (cApi *StateApiImpl) HandleProposeMsg(msg pbft.ProposeMsg) error {
+func (sApi *StateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
 
-	lid, err := cApi.parliamentService.RequestLeader()
-	if err != nil {
-		return err
-	}
+	parliament := sApi.parliamentRepository.Load()
 
-	if lid.ToString() != msg.SenderID {
+	lid := parliament.GetLeader()
+	if lid.GetID() != msg.SenderID {
 		return pbft.InvalidLeaderIdError
 	}
 
-	builtState, err := pbft.BuildState(msg)
-	if err != nil {
-		return err
-	}
+	builtState := pbft.BuildState(msg)
 
-	prevoteMsg := pbft.NewPrevoteMsg(builtState, cApi.publisherID)
-	if err := cApi.propagateService.BroadcastPrevoteMsg(*prevoteMsg, builtState.Representatives); err != nil {
+	prevoteMsg := pbft.NewPrevoteMsg(builtState, sApi.publisherID)
+	if err := sApi.propagateService.BroadcastPrevoteMsg(*prevoteMsg, builtState.Representatives); err != nil {
 		return err
 	}
+	logger.Infof(nil, "[PBFT] Leader broadcast ProposeMsg")
 	builtState.ToPrevoteStage()
+	logger.Infof(nil, "[PBFT] Change stage to Prevote")
 
-	if err := cApi.repo.Save(*builtState); err != nil {
+	if err := sApi.repo.Save(*builtState); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (cApi *StateApiImpl) HandlePrevoteMsg(msg pbft.PrevoteMsg) error {
+func (sApi *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) (returnErr error) {
 
-	loadedState, err := cApi.repo.Load()
+	loadedState, err := sApi.repo.Load()
 	if err != nil {
+		sApi.tempPrevoteMsgPool.Save(&msg)
 		return err
 	}
+
+	tempPrevoteMsgPool := sApi.tempPrevoteMsgPool.Get()
+	for i := 0; i < len(tempPrevoteMsgPool); i++ {
+		loadedState.PrevoteMsgPool.Save(&tempPrevoteMsgPool[i])
+	}
+	sApi.tempPrevoteMsgPool.RemoveAllMsgs()
 
 	if err := loadedState.SavePrevoteMsg(&msg); err != nil {
 		return err
 	}
 
-	if !loadedState.CheckPrevoteCondition() {
-		return nil
+	defer func() {
+		if err := sApi.repo.Save(loadedState); err != nil {
+			returnErr = err
+		}
+	}()
+
+	if loadedState.CheckPrevoteCondition() {
+		newCommitMsg := pbft.NewPreCommitMsg(&loadedState, sApi.publisherID)
+		if err := sApi.propagateService.BroadcastPreCommitMsg(*newCommitMsg, loadedState.Representatives); err != nil {
+			return err
+		}
+		logger.Infof(nil, "[PBFT] Leader broadcast PreCommitMsg")
+		loadedState.ToPreCommitStage()
+		logger.Infof(nil, "[PBFT] Change stage to PreCommitStage")
 	}
 
-	newCommitMsg := pbft.NewPreCommitMsg(&loadedState, cApi.publisherID)
-	if err := cApi.propagateService.BroadcastPreCommitMsg(*newCommitMsg, loadedState.Representatives); err != nil {
-		return err
-	}
-	loadedState.ToPreCommitStage()
-
-	if err := cApi.repo.Save(loadedState); err != nil {
-		return err
-	}
-
-	return nil
+	return returnErr
 }
 
-func (cApi *StateApiImpl) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
+func (sApi *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 
-	loadedState, err := cApi.repo.Load()
+	loadedState, err := sApi.repo.Load()
 	if err != nil {
+		sApi.tempPreCommitMsgPool.Save(&msg)
 		return err
 	}
+
+	tempPreCommitMsgPool := sApi.tempPreCommitMsgPool.Get()
+	for i := 0; i < len(tempPreCommitMsgPool); i++ {
+		loadedState.PreCommitMsgPool.Save(&tempPreCommitMsgPool[i])
+	}
+	sApi.tempPreCommitMsgPool.RemoveAllMsgs()
 
 	if err := loadedState.SavePreCommitMsg(&msg); err != nil {
 		return err
 	}
 
-	if !loadedState.CheckPreCommitCondition() {
-		return nil
+	if loadedState.CheckPreCommitCondition() {
+		//TODO ConsensusFinished Parameter 추가
+		if err := sApi.eventService.Publish("block.confirm", event.ConsensusFinished{}); err != nil {
+			return err
+		}
+		sApi.repo.Remove()
+		logger.Infof(nil, "[PBFT] Consensus is finished.")
 	}
 
-	//TODO ConsensusFinished 인자 추가
-	if err := cApi.eventService.Publish("block.confirm", event.ConsensusFinished{}); err != nil {
+	if err := sApi.repo.Save(loadedState); err != nil {
 		return err
 	}
-	cApi.repo.Remove()
 
 	return nil
 }

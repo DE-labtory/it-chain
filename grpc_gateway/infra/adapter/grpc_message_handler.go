@@ -70,6 +70,8 @@ func (g GrpcMessageHandler) HandleMessageReceiveCommand(command command.ReceiveG
 }
 
 func (g GrpcMessageHandler) HandleMessageDeliverCommand(command command.DeliverGrpc) {
+	iLogger.Infof(nil, "[gRPC-Gateway] Received gRPC message deliver")
+
 	if err := g.messageDeliverApi.DeliverMessage(command.Body, command.Protocol, command.RecipientList...); err != nil {
 		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to deliver grpc message - Protocol: [%s], RecipientList: [%s], Err: [%s]", command.Protocol, strings.Join(command.RecipientList, ", "), err.Error())
 	}

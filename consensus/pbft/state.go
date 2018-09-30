@@ -73,7 +73,7 @@ func (m MemberID) ToString() string {
 type ProposeMsg struct {
 	StateID        StateID
 	SenderID       string
-	Representative []*Representative
+	Representative []Representative
 	ProposedBlock  ProposedBlock
 }
 
@@ -244,7 +244,7 @@ func NewStateID(id string) StateID {
 
 type State struct {
 	StateID          StateID
-	Representatives  []*Representative
+	Representatives  []Representative
 	Block            ProposedBlock
 	CurrentStage     Stage
 	PrevoteMsgPool   PrevoteMsgPool
@@ -307,7 +307,7 @@ func (s *State) CheckPrevoteCondition() bool {
 	commitMsgNum := len(s.PrevoteMsgPool.Get())
 	satisfyNum := representativeNum / 3
 
-	if commitMsgNum > (satisfyNum + 1) {
+	if commitMsgNum >= (satisfyNum + 1) {
 		return true
 	}
 	return false
@@ -317,7 +317,7 @@ func (s *State) CheckPreCommitCondition() bool {
 	commitMsgNum := len(s.PreCommitMsgPool.Get())
 	satisfyNum := representativeNum / 3
 
-	if commitMsgNum > (satisfyNum + 1) {
+	if commitMsgNum >= (satisfyNum + 1) {
 		return true
 	}
 	return false

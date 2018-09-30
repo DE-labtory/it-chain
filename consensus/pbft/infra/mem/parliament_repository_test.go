@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package mock
+package mem_test
 
-import "github.com/it-chain/engine/api_gateway"
+import (
+	"testing"
 
-type PeerQueryApi struct {
-	GetAllPeerListFunc  func() []api_gateway.Peer
-	GetPeerByIDByIdFunc func(peerId string) (api_gateway.Peer, error)
-}
+	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/engine/consensus/pbft/infra/mem"
+	"github.com/magiconair/properties/assert"
+)
 
-func (q PeerQueryApi) GetAllPeerList() []api_gateway.Peer {
-	return q.GetAllPeerListFunc()
-}
+func TestParliamentRepository_Load_Save(t *testing.T) {
+	p := mem.NewParliamentRepository()
+	p.Save(pbft.Parliament{
+		Leader: pbft.Leader{LeaderId: "123"},
+	})
 
-func (q PeerQueryApi) GetPeerByID(connectionId string) (api_gateway.Peer, error) {
-	return q.GetPeerByIDByIdFunc(connectionId)
+	parliament := p.Load()
+
+	assert.Equal(t, parliament.Leader, pbft.Leader{LeaderId: "123"})
 }
