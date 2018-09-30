@@ -33,8 +33,8 @@ type PropagateService struct {
 	eventService common.EventService
 }
 
-func NewPropagateService(eventService common.EventService) PropagateService {
-	return PropagateService{
+func NewPropagateService(eventService common.EventService) *PropagateService {
+	return &PropagateService{
 		eventService: eventService,
 	}
 }

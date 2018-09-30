@@ -28,7 +28,7 @@ import (
 
 type StateApi struct {
 	publisherID          string
-	propagateService     pbft.PropagateService
+	propagateService     *pbft.PropagateService
 	eventService         common.EventService
 	parliamentRepository pbft.ParliamentRepository
 	repo                 pbft.StateRepository
@@ -38,7 +38,7 @@ type StateApi struct {
 
 var ConsensusCreateError = errors.New("Consensus can't be created")
 
-func NewStateApi(publisherID string, propagateService pbft.PropagateService,
+func NewStateApi(publisherID string, propagateService *pbft.PropagateService,
 	eventService common.EventService, parliamentRepository pbft.ParliamentRepository, repo pbft.StateRepository) *StateApi {
 	return &StateApi{
 		publisherID:          publisherID,
@@ -194,6 +194,7 @@ func (sApi *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 		}
 		sApi.repo.Remove()
 		logger.Infof(nil, "[PBFT] Consensus is finished.")
+		return nil
 	}
 
 	if err := sApi.repo.Save(loadedState); err != nil {
