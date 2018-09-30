@@ -20,17 +20,17 @@ import (
 	"testing"
 
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/engine/common/event"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestStartConsensusCommandHandler_extractProposedBlock(t *testing.T) {
 	// given
 	expectedSeal := []byte{'s', 'e', 'a', 'l'}
-	expectedTxList := []command.Tx{}
+	expectedTxList := []event.Tx{}
 
 	for i := 0; i < 5; i++ {
-		expectedTxList = append(expectedTxList, command.Tx{
+		expectedTxList = append(expectedTxList, event.Tx{
 			ID: string(i),
 		})
 	}
