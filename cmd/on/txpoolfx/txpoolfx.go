@@ -22,7 +22,6 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/batch"
-	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/txpool"
@@ -36,7 +35,9 @@ import (
 var Module = fx.Options(
 	fx.Provide(
 		mem.NewTransactionRepository,
+		mem.NewLeaderRepository,
 		NewBlockProposalService,
+		NewTransferService,
 		NewTxpoolApi,
 		adapter.NewTxCommandHandler,
 	),
@@ -46,24 +47,37 @@ var Module = fx.Options(
 	),
 )
 
-func NewBlockProposalService(repository *mem.TransactionRepository, client *rpc.Client, config *conf.Configuration, peerQueryService txpool.PeerQueryService, peer command.MyPeer) *adapter.BlockProposalService {
-	return adapter.NewBlockProposalService(client, repository, config.Engine.Mode, peerQueryService, peer)
+func NewBlockProposalService(repository *mem.TransactionRepository, eventService common.EventService) *txpool.BlockProposalService {
+	return txpool.NewBlockProposalService(repository, eventService)
 }
 
-func NewTxpoolApi(config *conf.Configuration, repository *mem.TransactionRepository) *api.TransactionApi {
+func NewTransferService(transactionRepository *mem.TransactionRepository, leaderRepository *mem.LeaderRepository, eventService common.EventService) *txpool.TransferService {
+	return txpool.NewTransferService(transactionRepository, leaderRepository, eventService)
+}
+
+func NewTxpoolApi(config *conf.Configuration, transactionRepository *mem.TransactionRepository, leaderRepository *mem.LeaderRepository, transferService *txpool.TransferService, blockProposalService *txpool.BlockProposalService) *api.TransactionApi {
 	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
-	return api.NewTransactionApi(NodeId, repository)
+	return api.NewTransactionApi(NodeId, transactionRepository, leaderRepository, transferService, blockProposalService)
 }
 
-func RunBatcher(lifecycle fx.Lifecycle, blockProposalService *adapter.BlockProposalService, config *conf.Configuration) {
-	var q chan struct{}
+func RunBatcher(lifecycle fx.Lifecycle, txPoolApi *api.TransactionApi, config *conf.Configuration) {
+
+	var proposeBlockQuit chan struct{}
+	var sendTransactionQuit chan struct{}
 	lifecycle.Append(fx.Hook{
 		OnStart: func(context context.Context) error {
-			q = batch.GetTimeOutBatcherInstance().Run(blockProposalService.ProposeBlock, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
+			proposeBlockQuit = batch.GetTimeOutBatcherInstance().Run(func() error {
+				return txPoolApi.ProposeBlock(config.Engine.Mode)
+			}, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
+
+			sendTransactionQuit = batch.GetTimeOutBatcherInstance().Run(func() error {
+				return txPoolApi.SendLeaderTransaction(config.Engine.Mode)
+			}, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
 			return nil
 		},
 		OnStop: func(context context.Context) error {
-			q <- struct{}{}
+			proposeBlockQuit <- struct{}{}
+			sendTransactionQuit <- struct{}{}
 			return nil
 		},
 	})
