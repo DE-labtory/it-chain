@@ -140,6 +140,7 @@ func (e *ElectionApi) ElectLeaderWithRaft() {
 
 	e.ElectionService.SetState(pbft.TICKING)
 	e.ElectionService.InitLeftTime()
+
 	tick := time.Tick(1 * time.Millisecond)
 	timeout := time.After(time.Second * 10)
 
@@ -161,6 +162,7 @@ func (e *ElectionApi) ElectLeaderWithRaft() {
 }
 
 func (e *ElectionApi) EndRaft() {
+	e.ElectionService.SetState(pbft.NORMAL)
 	e.quit <- struct{}{}
 }
 
@@ -185,6 +187,7 @@ func (e *ElectionApi) HandleRaftTimeout() error {
 
 	return nil
 }
+
 func (e *ElectionApi) RequestVote(peerIds []string) error {
 
 	iLogger.Infof(nil, "[PBFT] Request Vote - Peers:[%s]", strings.Join(peerIds, ", "))
@@ -215,6 +218,22 @@ func (e *ElectionApi) SetState(state pbft.ElectionState) {
 
 func (e *ElectionApi) GetVoteCount() int {
 	return e.ElectionService.GetVoteCount()
+}
+
+func (e *ElectionApi) GetParliament() pbft.Parliament {
+	parliament := e.parliamentRepository.Load()
+
+	return parliament
+}
+
+func (e *ElectionApi) SetLeader(representativeId string) {
+	parliament := e.parliamentRepository.Load()
+	parliament.SetLeader(representativeId)
+	e.parliamentRepository.Save(parliament)
+
+	e.eventService.Publish("leader.updated", event.LeaderUpdated{
+		LeaderId: representativeId,
+	})
 }
 
 func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {

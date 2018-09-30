@@ -54,6 +54,11 @@ func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrp
 			return deserializeErr
 		}
 
+		if e.electionApi.ElectionService.GetState() == "NORMAL" {
+			iLogger.Infof(nil, "[PBFT] Elect Leader With RAFT is not in progress, Do Not Receive Request Vote")
+			return nil
+		}
+
 		if e.electionApi.ElectionService.Voted {
 			iLogger.Info(nil, "already voted!")
 			return nil
@@ -67,6 +72,12 @@ func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrp
 
 	case "VoteLeaderProtocol":
 		iLogger.Infof(nil, "[PBFT] Receive VoteLeaderProtocol")
+
+		if e.electionApi.ElectionService.GetState() == "NORMAL" {
+			iLogger.Infof(nil, "[PBFT] Elect Leader With RAFT is not in progress, Do Not Receive Vote")
+			return nil
+		}
+
 		if err := e.electionApi.DecideToBeLeader(); err != nil {
 			iLogger.Errorf(nil, "Err %s", err.Error())
 		}

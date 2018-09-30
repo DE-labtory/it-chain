@@ -25,6 +25,7 @@ import (
 const (
 	CANDIDATE ElectionState = "CANDIDATE"
 	TICKING   ElectionState = "TICKING"
+	NORMAL    ElectionState = "NORMAL"
 )
 
 type ElectionState string

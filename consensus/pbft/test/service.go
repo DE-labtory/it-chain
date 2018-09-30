@@ -42,7 +42,7 @@ func SetTestEnvironment(processList []string) struct {
 
 		// setup process
 		process := mock.NewProcess(id)
-		electionService := pbft.NewElectionService(id, 30, pbft.TICKING, 0)
+		electionService := pbft.NewElectionService(id, 30, pbft.NORMAL, 0)
 		parliamentRepository := mem.NewParliamentRepository()
 		parliament := pbft.NewParliament()
 

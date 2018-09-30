@@ -146,6 +146,8 @@ func TestElectionApi_RequestVote(t *testing.T) {
 		env := test2.SetTestEnvironment(test.input.processList)
 
 		electionApi := (env.ProcessMap["1"].Services["ElectionApi"]).(*api.ElectionApi)
+		electionAp2 := (env.ProcessMap["2"].Services["ElectionApi"]).(*api.ElectionApi)
+		electionAp2.ElectionService.SetState(pbft.TICKING)
 
 		t.Logf("electionService of 1: %v", env.ProcessMap["1"].Services["ElectionApi"])
 		t.Logf("electionService of 2: %v", env.ProcessMap["2"].Services["ElectionApi"])
@@ -226,7 +228,7 @@ func TestElectionApi_GetCandidate(t *testing.T) {
 func TestElectionApi_GetState(t *testing.T) {
 	api := setElectionApi()
 
-	assert.Equal(t, api.GetState(), pbft.CANDIDATE)
+	assert.Equal(t, api.GetState(), pbft.NORMAL)
 }
 
 func TestElectionApi_GetVoteCount(t *testing.T) {
@@ -237,7 +239,7 @@ func TestElectionApi_GetVoteCount(t *testing.T) {
 
 func setElectionApi() *api.ElectionApi {
 
-	electionService := pbft.NewElectionService("1", 30, pbft.CANDIDATE, 0)
+	electionService := pbft.NewElectionService("1", 30, pbft.NORMAL, 0)
 	parliament := pbft.NewParliament()
 	parliamentRepository := mem.NewParliamentRepository()
 
