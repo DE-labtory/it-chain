@@ -111,44 +111,6 @@ func TestStateApi_HandleProposeMsg_CheckState(t *testing.T) {
 	}
 }
 
-func TestStateApi_HandlePrevoteMsg_CheckState(t *testing.T) {
-
-	var validPrevoteMsg = pbft.PrevoteMsg{
-		StateID:   pbft.StateID{"state"},
-		SenderID:  "user1",
-		BlockHash: []byte{1, 2, 3, 5},
-	}
-
-	tests := map[string]struct {
-		input struct {
-			prevoteMsg pbft.PrevoteMsg
-			peerNum    int
-			isRepoFull bool
-		}
-		err   error
-		stage pbft.Stage
-	}{
-		"case 1 PrepareMsg의 Cid와 repo의 Cid가 같고, repo에 consensus가 저장된경우 (Normal Case)": {
-			input: struct {
-				prevoteMsg pbft.PrevoteMsg
-				peerNum    int
-				isRepoFull bool
-			}{validPrevoteMsg, 5, true},
-			err:   nil,
-			stage: pbft.PRECOMMIT_STAGE,
-		},
-	}
-
-	for testName, test := range tests {
-		t.Logf("running test case %s ", testName)
-		cApi := setUpApiCondition(test.input.peerNum, true, true, false)
-		assert.EqualValues(t, test.err, cApi.HandlePrevoteMsg(test.input.prevoteMsg))
-		loadedState, _ := cApi.repo.Load()
-		assert.Equal(t, string(test.stage), string(loadedState.CurrentStage))
-		assert.Equal(t, 6, len(loadedState.PrevoteMsgPool.Get()))
-	}
-}
-
 func TestStateApi_RepositoryClone(t *testing.T) {
 	// stateApi1 에는 setUpApiCondition에 의해 repo가 set된 상황
 	stateApi1 := setUpApiCondition(5, true, false, false)
