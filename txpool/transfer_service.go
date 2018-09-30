@@ -14,41 +14,33 @@
  * limitations under the License.
  */
 
-package adapter
+package txpool
 
 import (
-	"errors"
-
 	"sync"
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/txpool"
+	"github.com/it-chain/iLogger"
 	"github.com/rs/xid"
 )
-
-var ErrTxEmpty = errors.New("Empty transaction list proposed")
 
 type Publisher func(topic string, data interface{}) (err error) //해당 publish함수는 midgard 에서 의존성 주입을 받기 위해 interface로 작성한다.
 //모든 의존성 주입은 컴포넌트.go 에서 이루어짐
 
 type TransferService struct {
-	publisher        Publisher // midgard.client
-	engineMode       string
-	peerQueryService txpool.PeerQueryService
-	txpoolRepository txpool.TransactionRepository
+	txpoolRepository TransactionRepository
+	leaderRepository LeaderRepository
+	eventService     EventService
 	sync.RWMutex
-	peer command.MyPeer // myself
 }
 
-func NewTransferService(publisher Publisher, txpoolRepository txpool.TransactionRepository, engineMode string, peerQueryService txpool.PeerQueryService, peer command.MyPeer) *TransferService {
+func NewTransferService(txpoolRepository TransactionRepository, leaderRepository LeaderRepository, eventService EventService) *TransferService {
 	return &TransferService{
-		publisher:        publisher,
-		engineMode:       engineMode,
-		RWMutex:          sync.RWMutex{},
 		txpoolRepository: txpoolRepository,
-		peerQueryService: peerQueryService,
-		peer:             peer,
+		leaderRepository: leaderRepository,
+		eventService:     eventService,
+		RWMutex:          sync.RWMutex{},
 	}
 }
 
@@ -58,33 +50,31 @@ func (ts TransferService) SendLeaderTransactions() error {
 	defer ts.Unlock()
 
 	transactions, err := ts.txpoolRepository.FindAll()
-
 	if err != nil {
 		return err
 	}
 
 	if len(transactions) == 0 {
-		return ErrTxEmpty
+		return nil
 	}
 
-	leader, err := ts.peerQueryService.GetLeader()
+	leader := ts.leaderRepository.Get()
+
+	deliverCommand, err := createGrpcDeliverCommand("SendLeaderTransactionsProtocol", transactions)
 	if err != nil {
 		return err
 	}
 
-	myself := ts.peer
+	deliverCommand.RecipientList = append(deliverCommand.RecipientList, leader.Id)
 
-	if ts.engineMode == "pbft" && leader.GetID() != myself.PeerId {
-		deliverCommand, err := createGrpcDeliverCommand("SendLeaderTransactionsProtocol", transactions)
-
-		if err != nil {
-			return err
-		}
-
-		deliverCommand.RecipientList = append(deliverCommand.RecipientList, leader.LeaderId.ToString())
-
-		return ts.publisher("message.deliver", deliverCommand)
+	err = ts.eventService.Publish("message.deliver", deliverCommand)
+	if err != nil {
+		return err
 	}
+
+	ts.clearTransactions(transactions)
+
+	iLogger.Info(nil, "[Txpool] Transaction Has Been Sent To Leader")
 
 	return nil
 }
@@ -103,4 +93,10 @@ func createGrpcDeliverCommand(protocol string, body interface{}) (command.Delive
 		Body:          data,
 		Protocol:      protocol,
 	}, err
+}
+
+func (ts TransferService) clearTransactions(transactions []Transaction) {
+	for _, tx := range transactions {
+		ts.txpoolRepository.Remove(tx.ID)
+	}
 }
