@@ -17,7 +17,6 @@
 package blockchain
 
 type QueryService interface {
-	GetRandomPeer() (Peer, error)
 	GetLastBlockFromPeer(peer Peer) (DefaultBlock, error)
 	GetBlockByHeightFromPeer(height BlockHeight, peer Peer) (DefaultBlock, error)
 }

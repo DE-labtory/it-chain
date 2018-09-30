@@ -15,31 +15,3 @@
  */
 
 package adapter
-
-import (
-	"github.com/it-chain/engine/common/event"
-)
-
-type SyncApiForSynchronize interface {
-	Synchronize() error
-}
-
-type ConnectionEventHandler struct {
-	SyncApi SyncApiForSynchronize
-}
-
-func NewConnectionEventHandler(syncApi SyncApiForSynchronize) *ConnectionEventHandler {
-
-	return &ConnectionEventHandler{
-		SyncApi: syncApi,
-	}
-}
-
-func (c *ConnectionEventHandler) HandleConnectionSavedEvent(connectionSavedEvent event.ConnectionSaved) error {
-	err := c.SyncApi.Synchronize()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}

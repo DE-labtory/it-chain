@@ -167,3 +167,8 @@ type ConnectionSaved struct {
 type ConnectionClosed struct {
 	ConnectionID string
 }
+
+// network
+type NetworkJoined struct {
+	Connections []ConnectionCreated
+}
