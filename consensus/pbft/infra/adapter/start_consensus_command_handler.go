@@ -44,10 +44,8 @@ func NewStartConsensusCommandHandler(sApi *api.StateApi) *StartConsensusCommandH
 func (r StartConsensusCommandHandler) HandleStartConsensusCommand(created event.BlockCreated) {
 
 	iLogger.Info(nil, "[PBFT] Start PBFT")
-	seal := created.Seal
-	txList := created.TxList
 
-	proposedBlock, err := extractProposedBlock(seal, txList)
+	proposedBlock, err := extractProposedBlock(created)
 	if err != nil {
 		iLogger.Errorf(nil, "[PBFT] Extracting event is failed! - %s", err.Error())
 		return
@@ -59,18 +57,18 @@ func (r StartConsensusCommandHandler) HandleStartConsensusCommand(created event.
 	}
 }
 
-func extractProposedBlock(Seal []byte, TxList []event.Tx) (pbft.ProposedBlock, error) {
-	if Seal == nil {
+func extractProposedBlock(created event.BlockCreated) (pbft.ProposedBlock, error) {
+	if created.Seal == nil {
 		return pbft.ProposedBlock{}, BlockSealIsNilError
 	}
 
-	body, err := common.Serialize(TxList)
+	body, err := common.Serialize(created)
 	if err != nil {
 		return pbft.ProposedBlock{}, err
 	}
 
 	return pbft.ProposedBlock{
-		Seal: Seal,
+		Seal: created.Seal,
 		Body: body,
 	}, nil
 }

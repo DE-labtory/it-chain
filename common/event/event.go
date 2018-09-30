@@ -75,7 +75,6 @@ type BlockStaged struct {
 
 //event when block is created in event store
 type BlockCreated struct {
-	BlockId   string
 	Seal      []byte
 	PrevSeal  []byte
 	Height    uint64
