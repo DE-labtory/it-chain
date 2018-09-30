@@ -17,29 +17,34 @@
 package api
 
 import (
-	"log"
-
 	"github.com/it-chain/engine/txpool"
+	"github.com/it-chain/iLogger"
 )
 
 type TransactionApi struct {
-	publisherId           string
+	nodeId                string
 	transactionRepository txpool.TransactionRepository
+	leaderRepository      txpool.LeaderRepository
+	transferService       *txpool.TransferService
+	blockProposalService  *txpool.BlockProposalService
 }
 
-func NewTransactionApi(publisherId string, transactionRepository txpool.TransactionRepository) *TransactionApi {
+func NewTransactionApi(nodeId string, transactionRepository txpool.TransactionRepository, leaderRepository txpool.LeaderRepository, transferService *txpool.TransferService, blockProposalService *txpool.BlockProposalService) *TransactionApi {
 	return &TransactionApi{
-		publisherId:           publisherId,
+		nodeId:                nodeId,
 		transactionRepository: transactionRepository,
+		leaderRepository:      leaderRepository,
+		transferService:       transferService,
+		blockProposalService:  blockProposalService,
 	}
 }
 
 func (t TransactionApi) CreateTransaction(txData txpool.TxData) (txpool.Transaction, error) {
 
-	transaction, err := txpool.CreateTransaction(t.publisherId, txData)
+	transaction, err := txpool.CreateTransaction(t.nodeId, txData)
 
 	if err != nil {
-		log.Printf("fail to transaction: [%v]", err)
+		iLogger.Errorf(nil, "[Txpool] Fail to create transaction - Err: [%s]", err)
 		return txpool.Transaction{}, err
 	}
 
@@ -51,4 +56,60 @@ func (t TransactionApi) CreateTransaction(txData txpool.TxData) (txpool.Transact
 func (t TransactionApi) DeleteTransaction(id txpool.TransactionId) {
 
 	t.transactionRepository.Remove(id)
+}
+
+func (t TransactionApi) ProposeBlock(engineMode string) error {
+
+	switch engineMode {
+
+	case "solo":
+		return t.blockProposalService.ProposeBlock()
+
+	case "pbft":
+		if t.isLeader() {
+			return t.blockProposalService.ProposeBlock()
+		}
+
+		return nil
+
+	default:
+		return nil
+	}
+}
+
+func (t TransactionApi) SendLeaderTransaction(engineMode string) error {
+
+	switch engineMode {
+
+	case "pbft":
+		if t.isLeader() {
+			return nil
+		}
+
+		if !t.isLeaderExistent() {
+			return nil
+		}
+
+		return t.transferService.SendLeaderTransactions()
+
+	default:
+		return nil
+	}
+}
+
+func (t TransactionApi) isLeader() bool {
+
+	leader := t.leaderRepository.Get()
+
+	return txpool.IsLeader(t.nodeId, leader)
+}
+
+func (t TransactionApi) isLeaderExistent() bool {
+	leader := t.leaderRepository.Get()
+
+	if leader.Id == "" {
+		return false
+	}
+
+	return true
 }
