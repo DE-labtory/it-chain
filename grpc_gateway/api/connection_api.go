@@ -48,7 +48,6 @@ func (c ConnectionApi) JoinNetwork(address string) error {
 	}
 
 	c.grpcService.SendMessages([]byte(""), grpc_gateway.RequestPeerList, connection.ConnectionID)
-
 	return nil
 }
 
@@ -131,19 +130,43 @@ func (c ConnectionApi) HandleRequestPeerList(connectionId string) {
 // 자기자신 or 연결되어 있는 connection 제외하고 연결!!
 func (c ConnectionApi) DialConnectionList(connectionList []grpc_gateway.Connection) {
 	iLogger.Infof(nil, "[gRPC-Gateway] Dialing all peers in it-chain network - Total peer: [%d]", len(connectionList))
-
 	for _, connection := range connectionList {
-
 		//remove already connected connection
 		if c.grpcService.IsConnectionExist(connection.ConnectionID) {
 			continue
 		}
-
 		//자기 자신
 		if c.grpcService.GetHostID() == connection.ConnectionID {
 			continue
 		}
+		_, err := c.Dial(connection.GrpcGatewayAddress)
+		if err != nil {
+			return
+		}
+	}
 
-		c.Dial(connection.GrpcGatewayAddress)
+	connections, err := c.GetAllConnections()
+	if err != nil {
+		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to get connections - Err: [%s]", err.Error())
+		return
+	}
+
+	if err := c.eventService.Publish("network.joined", createNetworkjoinedEvent(connections)); err != nil {
+		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to publish network joined event - Err: [%s]", err.Error())
+	}
+}
+
+func createNetworkjoinedEvent(connectionList []grpc_gateway.Connection) event.NetworkJoined {
+	connectionCreatedEvents := make([]event.ConnectionCreated, 0)
+	for _, c := range connectionList {
+		connectionCreatedEvents = append(connectionCreatedEvents, event.ConnectionCreated{
+			ConnectionID:       c.ConnectionID,
+			ApiGatewayAddress:  c.ApiGatewayAddress,
+			GrpcGatewayAddress: c.GrpcGatewayAddress,
+		})
+	}
+
+	return event.NetworkJoined{
+		Connections: connectionCreatedEvents,
 	}
 }

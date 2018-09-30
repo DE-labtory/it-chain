@@ -91,8 +91,8 @@ func NewBlockProposeHandler(blockApi *api.BlockApi, config *conf.Configuration) 
 	return adapter.NewBlockProposeCommandHandler(blockApi, config.Engine.Mode)
 }
 
-func NewConnectionEventHandler(syncApi *api.SyncApi) *adapter.ConnectionEventHandler {
-	return adapter.NewConnectionEventHandler(syncApi)
+func NewConnectionEventHandler(syncApi *api.SyncApi) *adapter.NetworkEventHandler {
+	return adapter.NewNetworkEventHandler(syncApi)
 }
 
 func CreateGenesisBlock(blockApi *api.BlockApi, config *conf.Configuration) {
@@ -108,9 +108,9 @@ func RegisterRpcHandlers(server *rpc.Server, handler *adapter.BlockProposeComman
 	}
 }
 
-func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, handler *adapter.ConnectionEventHandler) {
+func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, handler *adapter.NetworkEventHandler) {
 
-	if err := subscriber.SubscribeTopic("connection.saved", handler); err != nil {
+	if err := subscriber.SubscribeTopic("network.joined", handler); err != nil {
 		panic(err)
 	}
 }

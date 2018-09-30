@@ -16,8 +16,12 @@
 package api
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/iLogger"
+	"github.com/pkg/errors"
 )
 
 type SyncApi struct {
@@ -40,7 +44,7 @@ func NewSyncApi(publisherId string, blockRepository blockchain.BlockRepository, 
 	}, nil
 }
 
-func (sApi SyncApi) Synchronize() error {
+func (sApi SyncApi) Synchronize(peer blockchain.Peer) error {
 	syncState := sApi.syncStateRepository.Get()
 
 	syncState.Start()
@@ -51,28 +55,19 @@ func (sApi SyncApi) Synchronize() error {
 		sApi.syncStateRepository.Set(syncState)
 	}()
 
-	// get random peer
-	randomPeer, err := sApi.queryService.GetRandomPeer()
-
-	iLogger.Infof(nil, "[Blockchain] Start to Synchronize - PeerID: [%s]", randomPeer.PeerID)
-	if err != nil {
-		iLogger.Errorf(nil, "[Blockchain] Fail to Synchronize - Err: [%s]", err)
-		return err
-	}
-
-	if sApi.isSynced(randomPeer) {
-		iLogger.Infof(nil, "[Blockchain] Already Synchronized - PeerID: [%s]", randomPeer.PeerID)
+	if sApi.isSynced(peer) {
+		iLogger.Infof(nil, "[Blockchain] Already Synchronized - PeerID: [%s]", peer.PeerID)
 		return nil
 	}
 
 	// if sync has not done, on sync
-	err = sApi.syncWithPeer(randomPeer)
+	err := sApi.syncWithPeer(peer)
 	if err != nil {
 		iLogger.Errorf(nil, "[Blockchain] Fail to Synchronize - Err: [%s]", err)
 		return err
 	}
 
-	iLogger.Infof(nil, "[Blockchain] Synchronized Successfully - PeerID: [%s]", randomPeer.PeerID)
+	iLogger.Infof(nil, "[Blockchain] Synchronized Successfully - PeerID: [%s]", peer.PeerID)
 	return sApi.CommitStagedBlocks()
 }
 
@@ -108,7 +103,6 @@ func (sApi SyncApi) syncWithPeer(peer blockchain.Peer) error {
 	}
 
 	standardHeight := standardBlock.GetHeight()
-
 	lastBlock, err := sApi.blockRepository.FindLast()
 
 	if err != nil {
@@ -179,7 +173,6 @@ func (sApi *SyncApi) CommitStagedBlocks() error {
 
 	for _, h := range sApi.blockPool.GetSortedKeys() {
 		height := blockchain.BlockHeight(h)
-
 		switch {
 		case height > targetHeight:
 			return nil
@@ -194,10 +187,31 @@ func (sApi *SyncApi) CommitStagedBlocks() error {
 			}
 
 			sApi.blockPool.Delete(height)
-
 			raiseHeight(&targetHeight)
 		}
 	}
 
 	return nil
+}
+
+func (sApi *SyncApi) HandleNetworkJoined(peerList []blockchain.Peer) error {
+	peer, err := getRandomPeer(peerList)
+	if err != nil {
+		return err
+	}
+
+	return sApi.Synchronize(peer)
+}
+
+func getRandomPeer(peerList []blockchain.Peer) (blockchain.Peer, error) {
+	if len(peerList) == 0 {
+		return blockchain.Peer{}, errors.New("No peer")
+	}
+
+	randSource := rand.NewSource(time.Now().UnixNano())
+	randInstance := rand.New(randSource)
+	randomIndex := randInstance.Intn(len(peerList))
+	randomPeer := peerList[randomIndex]
+
+	return randomPeer, nil
 }
