@@ -1,0 +1,24 @@
+engine:
+  logpath: log/it-chain.log
+  keypath: .it-chain/
+  mode: pbft
+  amqp: amqp://guest:guest@localhost:5672/
+  bootstrapnodeaddress:
+txpool:
+  timeoutms: 1000
+  maxtransactionbyte: 1024
+consensus:
+  batchtime: 3
+  maxtransactions: 100
+blockchain:
+  genesisconfpath: ./Genesis.conf
+peer:
+  leaderelection: RAFT
+icode:
+  repositorypath: empty
+grpcgateway:
+  address: 127.0.0.1
+  port: "5000"
+apigateway:
+  address: 127.0.0.1
+  port: "4000"
