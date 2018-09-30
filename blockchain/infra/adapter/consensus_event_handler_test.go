@@ -21,9 +21,12 @@ import (
 
 	"github.com/it-chain/engine/blockchain/infra/mem"
 
+	"time"
+
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/test/mock"
+	"github.com/it-chain/engine/common"
 	event2 "github.com/it-chain/engine/common/event"
 	"github.com/magiconair/properties/assert"
 )
@@ -40,36 +43,56 @@ func TestNewConsensusEventHandler(t *testing.T) {
 
 func TestConsensusEventHandler_HandleConsensusFinishedEvent(t *testing.T) {
 
+	block1 := blockchain.DefaultBlock{
+		Seal:      []byte{'s', 'e', 'a', 'l'},
+		PrevSeal:  []byte{},
+		Height:    0,
+		TxList:    []*blockchain.DefaultTransaction{},
+		TxSeal:    nil,
+		Timestamp: time.Time{},
+		Creator:   "",
+		State:     "",
+	}
+
+	body1, _ := common.Serialize(block1)
+
+	block2 := blockchain.DefaultBlock{
+		Seal:      nil,
+		PrevSeal:  []byte{},
+		Height:    0,
+		TxList:    []*blockchain.DefaultTransaction{},
+		TxSeal:    nil,
+		Timestamp: time.Time{},
+		Creator:   "",
+		State:     "",
+	}
+
+	body2, _ := common.Serialize(block2)
+
 	event1 := event2.ConsensusFinished{
-		PrevSeal: []byte{},
-		Height:   12,
-		TxList: []event2.Tx{event2.Tx{
-			ID: "1",
-		}},
-		Creator: "",
+		Seal: []byte{'s', 'e', 'a', 'l'},
+		Body: body1,
 	}
 
 	event2 := event2.ConsensusFinished{
-		PrevSeal: []byte{},
-		Height:   12,
-		TxList:   []event2.Tx{},
-		Creator:  "",
+		Seal: nil,
+		Body: body2,
 	}
 
 	syncStateRepository := mem.NewSyncStateRepository()
 	consensusEventHandler := SetConsensusEventHandler(syncStateRepository)
 
 	//	when
-	consensusEventHandler.HandleConsensusFinishedEvent(event1)
+	err1 := consensusEventHandler.HandleConsensusFinishedEvent(event1)
 
 	//then
-	assert.Equal(t, consensusEventHandler.HandleConsensusFinishedEvent(event1), nil)
+	assert.Equal(t, err1, nil)
 
 	//	when
-	consensusEventHandler.HandleConsensusFinishedEvent(event2)
+	err2 := consensusEventHandler.HandleConsensusFinishedEvent(event2)
 
 	//	then
-	assert.Equal(t, consensusEventHandler.HandleConsensusFinishedEvent(event2), adapter.ErrBlockNil)
+	assert.Equal(t, err2, adapter.ErrBlockSealNil)
 
 }
 
