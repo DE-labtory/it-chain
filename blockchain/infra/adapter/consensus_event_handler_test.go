@@ -101,8 +101,8 @@ func SetConsensusEventHandler(state blockchain.SyncStateRepository) *adapter.Con
 	blockApi.CommitBlockFunc = func(block blockchain.DefaultBlock) error {
 		return nil
 	}
-	blockApi.StageBlockFunc = func(block blockchain.DefaultBlock) error {
-		return nil
+	blockApi.StageBlockFunc = func(block blockchain.DefaultBlock) {
+		return
 	}
 
 	return &adapter.ConsensusEventHandler{

@@ -47,6 +47,7 @@ var Module = fx.Options(
 		NewSyncApi,
 		NewConnectionEventHandler,
 		NewBlockProposeHandler,
+		NewConsensusEventHandler,
 	),
 	fx.Invoke(
 		RegisterPubsubHandlers,
@@ -92,13 +93,18 @@ func NewConnectionEventHandler(syncApi *api.SyncApi) *adapter.NetworkEventHandle
 	return adapter.NewNetworkEventHandler(syncApi)
 }
 
+func NewConsensusEventHandler(syncStateRepository *mem.SyncStateRepository, blockApi *api.BlockApi) *adapter.ConsensusEventHandler {
+	return adapter.NewConsensusEventHandler(syncStateRepository, blockApi)
+
+}
+
 func CreateGenesisBlock(blockApi *api.BlockApi, config *conf.Configuration) {
 	if err := blockApi.CommitGenesisBlock(config.Blockchain.GenesisConfPath); err != nil {
 		panic(err)
 	}
 }
 
-func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, networkEventHandler *adapter.NetworkEventHandler, blockCommandHandler *adapter.BlockProposeCommandHandler) {
+func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, networkEventHandler *adapter.NetworkEventHandler, blockCommandHandler *adapter.BlockProposeCommandHandler, consensusEventHandler *adapter.ConsensusEventHandler) {
 	iLogger.Infof(nil, "[Main] Blockchain is starting")
 
 	if err := subscriber.SubscribeTopic("network.joined", networkEventHandler); err != nil {
@@ -106,6 +112,10 @@ func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, networkEventHand
 	}
 
 	if err := subscriber.SubscribeTopic("block.propose", blockCommandHandler); err != nil {
+		panic(err)
+	}
+
+	if err := subscriber.SubscribeTopic("block.confirm", consensusEventHandler); err != nil {
 		panic(err)
 	}
 

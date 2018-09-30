@@ -25,7 +25,7 @@ import (
 
 type BlockApiForCommitAndStage interface {
 	CommitBlock(block blockchain.DefaultBlock) error
-	StageBlock(block blockchain.DefaultBlock) error
+	StageBlock(block blockchain.DefaultBlock)
 }
 
 type ConsensusEventHandler struct {
@@ -58,7 +58,9 @@ func (c *ConsensusEventHandler) HandleConsensusFinishedEvent(event event.Consens
 	if syncState.SyncProgressing {
 		c.BlockApi.StageBlock(*receivedBlock)
 	} else {
-		c.BlockApi.CommitBlock(*receivedBlock)
+		if err := c.BlockApi.CommitBlock(*receivedBlock); err != nil {
+			return err
+		}
 	}
 
 	return nil
