@@ -17,26 +17,21 @@
 package mock
 
 import (
-	"github.com/it-chain/engine/p2p"
+	"github.com/it-chain/engine/common/command"
 )
 
-type PeerQueryService struct {
-	GetPeerListFunc func() ([]p2p.Peer, error)
-	GetLeaderFunc   func() (p2p.Leader, error)
+type ProposeEventHandler struct {
+	HandleFunc func(command command.ProposeBlock)
 }
 
-func (m PeerQueryService) GetPeerList() ([]p2p.Peer, error) {
-	return m.GetPeerListFunc()
+func (h *ProposeEventHandler) Handle(command command.ProposeBlock) {
+	h.HandleFunc(command)
 }
 
-func (m PeerQueryService) GetLeader() (p2p.Leader, error) {
-	return m.GetLeaderFunc()
+type SendTransactionCommandHandler struct {
+	HandleFunc func(command command.DeliverGrpc)
 }
 
-type EventService struct {
-	PublishFunc func(topic string, event interface{}) error
-}
-
-func (s EventService) Publish(topic string, event interface{}) error {
-	return s.PublishFunc(topic, event)
+func (h *SendTransactionCommandHandler) Handle(command command.DeliverGrpc) {
+	h.HandleFunc(command)
 }
