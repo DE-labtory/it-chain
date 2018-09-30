@@ -18,11 +18,11 @@ package api_gateway
 
 import (
 	"errors"
-	"log"
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/ivm"
+	"github.com/it-chain/iLogger"
 	"github.com/it-chain/leveldb-wrapper"
 )
 
@@ -160,7 +160,7 @@ func (i ICodeEventHandler) HandleMetaCreatedEvent(icodeCreatedEvent event.ICodeC
 	err := i.iCodeRepository.Save(icode)
 
 	if err != nil {
-		log.Fatal(err.Error())
+		iLogger.Error(nil, err.Error())
 	}
 }
 
@@ -169,6 +169,6 @@ func (i ICodeEventHandler) HandleMetaDeletedEvent(iCodeDeleted event.ICodeDelete
 	err := i.iCodeRepository.Remove(iCodeDeleted.ICodeID)
 
 	if err != nil {
-		log.Fatal(err.Error())
+		iLogger.Error(nil, err.Error())
 	}
 }

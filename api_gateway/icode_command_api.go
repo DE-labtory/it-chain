@@ -72,7 +72,7 @@ func (i *ICodeCommandApi) deploy(amqpUrl string, gitUrl string, rawSsh string, s
 	})
 
 	if err != nil {
-		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in deploy cmd")
+		iLogger.Error(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in deploy cmd")
 		return "", err
 	}
 
@@ -112,7 +112,7 @@ func (i *ICodeCommandApi) unDeploy(amqpUrl string, icodeId string) error {
 	})
 
 	if err != nil {
-		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in unDeploy cmd")
+		iLogger.Error(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in unDeploy cmd")
 		return err
 	}
 
@@ -162,7 +162,7 @@ func (i *ICodeCommandApi) invoke(amqpUrl string, id string, functionName string,
 	})
 
 	if err != nil {
-		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in invoke cmd")
+		iLogger.Error(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in invoke cmd")
 		return "", err
 	}
 
@@ -214,7 +214,7 @@ func (i *ICodeCommandApi) query(amqpUrl string, id string, functionName string, 
 	})
 
 	if err != nil {
-		iLogger.Fatal(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in query cmd")
+		iLogger.Error(&iLogger.Fields{"err_msg": err.Error()}, "[Api_gateway] fatal err in query cmd")
 		return nil, err
 	}
 
