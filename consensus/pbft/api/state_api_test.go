@@ -131,7 +131,6 @@ func TestStateApi_StartConsensus_NodeTest(t *testing.T) {
 		assert.Equal(t, state1.Block.Seal, state2.Block.Seal)
 		assert.Equal(t, state2.Block.Seal, state3.Block.Seal)
 		assert.Equal(t, state3.Block.Seal, state4.Block.Seal)
-
 	}
 }
 

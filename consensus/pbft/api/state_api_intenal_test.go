@@ -148,6 +148,7 @@ func TestStateApi_HandlePrevoteMsg_CheckState(t *testing.T) {
 		assert.Equal(t, 6, len(loadedState.PrevoteMsgPool.Get()))
 	}
 }
+
 func TestStateApi_RepositoryClone(t *testing.T) {
 	// stateApi1 에는 setUpApiCondition에 의해 repo가 set된 상황
 	stateApi1 := setUpApiCondition(5, true, false, false)

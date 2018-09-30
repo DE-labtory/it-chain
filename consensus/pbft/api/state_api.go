@@ -23,6 +23,7 @@ import (
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/iLogger"
 )
 
 type StateApi struct {
@@ -64,7 +65,18 @@ func (sApi *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 	}
 
 	createdProposeMsg := pbft.NewProposeMsg(createdState, sApi.publisherID)
-	if err := sApi.propagateService.BroadcastProposeMsg(*createdProposeMsg, createdState.Representatives); err != nil {
+
+	receipients := make([]pbft.Representative, 0)
+
+	for _, rep := range createdState.Representatives {
+		if rep.ID != sApi.publisherID {
+			receipients = append(receipients, rep)
+		}
+	}
+
+	iLogger.Infof(nil, "[PBFT] Broadcast ProposeMsg to %v", receipients)
+
+	if err := sApi.propagateService.BroadcastProposeMsg(*createdProposeMsg, receipients); err != nil {
 		return err
 	}
 	logger.Infof(nil, "[PBFT] Leader broadcast ProposeMsg")
@@ -88,11 +100,17 @@ func (sApi *StateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
 
 	builtState := pbft.BuildState(msg)
 
+	receipients := make([]pbft.Representative, 0)
+	for _, rep := range builtState.Representatives {
+		if rep.ID != sApi.publisherID {
+			receipients = append(receipients, rep)
+		}
+	}
+
 	prevoteMsg := pbft.NewPrevoteMsg(builtState, sApi.publisherID)
-	if err := sApi.propagateService.BroadcastPrevoteMsg(*prevoteMsg, builtState.Representatives); err != nil {
+	if err := sApi.propagateService.BroadcastPrevoteMsg(*prevoteMsg, receipients); err != nil {
 		return err
 	}
-	logger.Infof(nil, "[PBFT] Leader broadcast ProposeMsg")
 	builtState.ToPrevoteStage()
 	logger.Infof(nil, "[PBFT] Change stage to Prevote")
 
@@ -109,6 +127,13 @@ func (sApi *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) (returnErr error) {
 	if err != nil {
 		sApi.tempPrevoteMsgPool.Save(&msg)
 		return err
+	}
+
+	receipients := make([]pbft.Representative, 0)
+	for _, rep := range loadedState.Representatives {
+		if rep.ID != sApi.publisherID {
+			receipients = append(receipients, rep)
+		}
 	}
 
 	tempPrevoteMsgPool := sApi.tempPrevoteMsgPool.Get()
@@ -128,13 +153,15 @@ func (sApi *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) (returnErr error) {
 	}()
 
 	if loadedState.CheckPrevoteCondition() {
-		newCommitMsg := pbft.NewPreCommitMsg(&loadedState, sApi.publisherID)
-		if err := sApi.propagateService.BroadcastPreCommitMsg(*newCommitMsg, loadedState.Representatives); err != nil {
-			return err
+		if loadedState.CurrentStage == pbft.PREVOTE_STAGE {
+			newCommitMsg := pbft.NewPreCommitMsg(&loadedState, sApi.publisherID)
+			if err := sApi.propagateService.BroadcastPreCommitMsg(*newCommitMsg, receipients); err != nil {
+				return err
+			}
+			logger.Infof(nil, "[PBFT] Leader broadcast PreCommitMsg")
+			loadedState.ToPreCommitStage()
+			logger.Infof(nil, "[PBFT] Change stage to PreCommitStage")
 		}
-		logger.Infof(nil, "[PBFT] Leader broadcast PreCommitMsg")
-		loadedState.ToPreCommitStage()
-		logger.Infof(nil, "[PBFT] Change stage to PreCommitStage")
 	}
 
 	return returnErr
