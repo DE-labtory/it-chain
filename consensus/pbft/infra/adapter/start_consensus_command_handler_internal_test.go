@@ -19,6 +19,8 @@ package adapter
 import (
 	"testing"
 
+	"time"
+
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/stretchr/testify/assert"
@@ -27,19 +29,22 @@ import (
 func TestStartConsensusCommandHandler_extractProposedBlock(t *testing.T) {
 	// given
 	expectedSeal := []byte{'s', 'e', 'a', 'l'}
-	expectedTxList := []command.Tx{}
-
-	for i := 0; i < 5; i++ {
-		expectedTxList = append(expectedTxList, command.Tx{
-			ID: string(i),
-		})
+	expectedCommand := command.StartConsensus{
+		Seal:      expectedSeal,
+		PrevSeal:  []byte{'p', 'r', 'e', 'v'},
+		Height:    0,
+		TxList:    make([]command.Tx, 0),
+		TxSeal:    make([][]byte, 0),
+		Timestamp: time.Time{},
+		Creator:   "creator",
+		State:     "state",
 	}
 
 	// when
-	testBlock, err := extractProposedBlock(expectedSeal, expectedTxList)
+	testBlock, err := extractProposedBlock(expectedCommand)
 	assert.NoError(t, err)
 
-	expectedBody, err := common.Serialize(expectedTxList)
+	expectedBody, err := common.Serialize(expectedCommand)
 	assert.NoError(t, err)
 
 	// then
@@ -48,9 +53,10 @@ func TestStartConsensusCommandHandler_extractProposedBlock(t *testing.T) {
 
 	// given
 	expectedSeal = nil
+	expectedCommand.Seal = expectedSeal
 
 	// when
-	testBlock, err = extractProposedBlock(expectedSeal, expectedTxList)
+	testBlock, err = extractProposedBlock(expectedCommand)
 
 	// then
 	assert.Equal(t, BlockSealIsNilError, err)
