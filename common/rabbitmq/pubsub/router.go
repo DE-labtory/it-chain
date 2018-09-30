@@ -83,6 +83,7 @@ func (c *ParamBasedRouter) SetHandler(key string, handler interface{}) error {
 		handler := createEventHandler(method, handler)
 		// 핸들러맵에 핸들러 매소드 등록
 		c.handlerMap[key+paramType.Name()] = Handler{Type: paramType, Func: handler}
+
 	}
 
 	return nil
@@ -100,21 +101,6 @@ func createEventHandler(method reflect.Method, handler interface{}) func(interfa
 }
 
 func (c ParamBasedRouter) Route(key string, data []byte, structName string) (err error) {
-
-	defer func() {
-		if r := recover(); r != nil {
-			// find out exactly what the error was and set err
-			switch x := r.(type) {
-			case string:
-				err = errors.New(x)
-			case error:
-				err = x
-			default:
-				err = errors.New("Unknown panic")
-			}
-		}
-	}()
-
 	paramType, handler, err := c.findTypeOfHandlers(key, structName)
 
 	if err != nil {
