@@ -1,7 +1,7 @@
 engine:
   logpath: log/it-chain.log
   keypath: .it-chain/
-  mode: solo
+  mode: pbft
   amqp: amqp://guest:guest@localhost:5672/
   bootstrapnodeaddress: 127.0.0.1:5555
 txpool:
@@ -17,8 +17,8 @@ peer:
 icode:
   repositorypath: empty
 grpcgateway:
-  address: 0.0.0.0
+  address: 127.0.0.1
   port: "5000"
 apigateway:
-  address: 0.0.0.0
+  address: 127.0.0.1
   port: "4000"
