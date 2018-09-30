@@ -163,3 +163,14 @@ func RelativeToAbsolutePath(rpath string) (string, error) {
 	return absolutePath, nil
 
 }
+
+func FindEarliestString(list []string) string {
+	largerOne := list[0]
+	for _, v := range list {
+		if strings.Compare(largerOne, v) > 0 {
+			largerOne = v
+		}
+	}
+
+	return largerOne
+}
