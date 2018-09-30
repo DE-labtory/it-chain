@@ -23,6 +23,7 @@ import (
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/iLogger"
 )
 
 var DeserializingError = errors.New("Message deserializing is failed.")
@@ -48,6 +49,7 @@ func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) error
 	protocol := command.Protocol
 	body := command.Body
 
+	iLogger.Infof(nil, "[PBFT] Received protocol - Protocol: [%s]", protocol)
 	switch protocol {
 
 	case "ProposeMsgProtocol":

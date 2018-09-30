@@ -31,13 +31,18 @@ import (
 var Module = fx.Options(
 	fx.Provide(
 		NewParliamentRepository,
+		mem.NewStateRepository,
 		NewElectionService,
+		NewPropagateService,
 		NewElectionApi,
 		NewParliamentApi,
+		NewStateApi,
 		adapter.NewElectionCommandHandler,
 		adapter.NewConnectionEventHandler,
 		adapter.NewLeaderCommandHandler,
 		adapter.NewLeaderEventHandler,
+		NewStartConsensusCommandHandler,
+		NewPbftMsgHandler,
 	),
 	fx.Invoke(
 		RegisterPubsubHandlers,
@@ -62,6 +67,16 @@ func NewParliamentRepository(config *conf.Configuration) *mem.ParliamentReposito
 	return mem.NewParliamentRepositoryWithParliament(parliament)
 }
 
+func NewPropagateService(service common.EventService) *pbft.PropagateService {
+	return pbft.NewPropagateService(service)
+}
+
+func NewStateApi(config *conf.Configuration, propagateService *pbft.PropagateService, service common.EventService, paliamentrepository *mem.ParliamentRepository, stateRepository *mem.StateRepository) *api.StateApi {
+	PublisherId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
+
+	return api.NewStateApi(PublisherId, propagateService, service, paliamentrepository, stateRepository)
+}
+
 func NewElectionApi(electionService *pbft.ElectionService, parliamentRepository *mem.ParliamentRepository, eventService common.EventService) *api.ElectionApi {
 	return api.NewElectionApi(electionService, parliamentRepository, eventService)
 }
@@ -72,14 +87,22 @@ func NewParliamentApi(config *conf.Configuration, parliamentRepository *mem.Parl
 	return api.NewParliamentApi(NodeId, parliamentRepository, eventService)
 }
 
-func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, electionCommandHandler *adapter.ElectionCommandHandler, connectionEventHandler *adapter.ConnectionEventHandler, leaderCommandHandler *adapter.LeaderCommandHandler, leaderEventHandler *adapter.LeaderEventHandler) {
+func NewStartConsensusCommandHandler(stateApi *api.StateApi) *adapter.StartConsensusCommandHandler {
+	return adapter.NewStartConsensusCommandHandler(stateApi)
+}
+
+func NewPbftMsgHandler(stateApi *api.StateApi) *adapter.PbftMsgHandler {
+	return adapter.NewPbftMsgHandler(stateApi)
+}
+
+func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, pbftMsgHandler *adapter.PbftMsgHandler, electionCommandHandler *adapter.ElectionCommandHandler, connectionEventHandler *adapter.ConnectionEventHandler, leaderCommandHandler *adapter.LeaderCommandHandler, leaderEventHandler *adapter.LeaderEventHandler, startConsensusHandler *adapter.StartConsensusCommandHandler) {
 	iLogger.Infof(nil, "[Main] Consensus is starting")
 
 	if err := subscriber.SubscribeTopic("message.receive", electionCommandHandler); err != nil {
 		panic(err)
 	}
 
-	if err := subscriber.SubscribeTopic("connection.created", connectionEventHandler); err != nil {
+	if err := subscriber.SubscribeTopic("connection.*", connectionEventHandler); err != nil {
 		panic(err)
 	}
 
@@ -91,7 +114,11 @@ func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, electionCommandH
 		panic(err)
 	}
 
-	if err := subscriber.SubscribeTopic("connection.closed", connectionEventHandler); err != nil {
+	if err := subscriber.SubscribeTopic("block.consent", startConsensusHandler); err != nil {
+		panic(err)
+	}
+
+	if err := subscriber.SubscribeTopic("message.receive", pbftMsgHandler); err != nil {
 		panic(err)
 	}
 }

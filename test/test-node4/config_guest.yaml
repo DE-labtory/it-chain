@@ -1,7 +1,7 @@
 engine:
   logpath: log-guest3/it-chain.log
   keypath: .it-chain/
-  mode: solo
+  mode: pbft
   amqp: amqp://guest4:guest4@localhost:5672//guest4
   bootstrapnodeaddress: 127.0.0.1:5555
 txpool:

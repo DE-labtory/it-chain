@@ -20,6 +20,7 @@ import (
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/iLogger"
 	"github.com/pkg/errors"
 )
@@ -31,10 +32,10 @@ type StateStartApi struct {
 }
 
 type StartConsensusCommandHandler struct {
-	sApi StateStartApi
+	sApi *api.StateApi
 }
 
-func NewStartConsensusCommandHandler(sApi StateStartApi) *StartConsensusCommandHandler {
+func NewStartConsensusCommandHandler(sApi *api.StateApi) *StartConsensusCommandHandler {
 	return &StartConsensusCommandHandler{
 		sApi: sApi,
 	}
@@ -42,6 +43,7 @@ func NewStartConsensusCommandHandler(sApi StateStartApi) *StartConsensusCommandH
 
 func (r StartConsensusCommandHandler) HandleStartConsensusCommand(created event.BlockCreated) {
 
+	iLogger.Info(nil, "[PBFT] Start PBFT")
 	seal := created.Seal
 	txList := created.TxList
 
