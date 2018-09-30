@@ -44,12 +44,12 @@ func main() {
 	}
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:  "config",
+			Name:  "config, c",
 			Value: "",
 			Usage: "name for config",
 		},
 		cli.BoolFlag{
-			Name:  "debug",
+			Name:  "debug, d",
 			Usage: "set debug mode",
 		},
 	}
