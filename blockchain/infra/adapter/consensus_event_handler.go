@@ -18,7 +18,9 @@ package adapter
 
 import (
 	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/common/logger"
 )
 
 type BlockApiForCommitAndStage interface {
@@ -47,8 +49,8 @@ if block sync is not on progress, commit block
 func (c *ConsensusEventHandler) HandleConsensusFinishedEvent(event event.ConsensusFinished) error {
 	receivedBlock := extractBlockFromEvent(event)
 
-	if len(event.TxList) == 0 {
-		return ErrBlockNil
+	if receivedBlock.Seal == nil {
+		return ErrBlockSealNil
 	}
 
 	syncState := c.SyncStateRepository.Get()
@@ -63,12 +65,11 @@ func (c *ConsensusEventHandler) HandleConsensusFinishedEvent(event event.Consens
 }
 
 func extractBlockFromEvent(event event.ConsensusFinished) *blockchain.DefaultBlock {
-	txList := blockchain.ConvertToTransactionList(event.TxList)
+	block := &blockchain.DefaultBlock{}
 
-	return &blockchain.DefaultBlock{
-		PrevSeal: event.PrevSeal,
-		Height:   event.Height,
-		TxList:   txList,
-		Creator:  event.Creator,
+	if err := common.Deserialize(event.Body, block); err != nil {
+		logger.Error(nil, "[Blockchain] Deserialize error")
 	}
+
+	return block
 }
