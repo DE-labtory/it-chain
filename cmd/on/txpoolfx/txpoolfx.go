@@ -20,8 +20,6 @@ import (
 	"context"
 	"time"
 
-	"fmt"
-
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/batch"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
@@ -38,7 +36,7 @@ import (
 var Module = fx.Options(
 	fx.Provide(
 		mem.NewTransactionRepository,
-		mem.NewLeaderRepository,
+		NewLeaderRepository,
 		NewBlockProposalService,
 		NewTransferService,
 		NewTxpoolApi,
@@ -52,6 +50,16 @@ var Module = fx.Options(
 		RegisterPubsubHandlers,
 	),
 )
+
+func NewLeaderRepository(config *conf.Configuration) *mem.LeaderRepository {
+	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
+	repo := mem.NewLeaderRepository()
+	if config.Engine.BootstrapNodeAddress == "" {
+		repo.Set(txpool.Leader{NodeId})
+	}
+
+	return repo
+}
 
 func NewBlockProposalService(repository *mem.TransactionRepository, eventService common.EventService) *txpool.BlockProposalService {
 	return txpool.NewBlockProposalService(repository, eventService)
@@ -67,6 +75,7 @@ func NewTxpoolApi(config *conf.Configuration, transactionRepository *mem.Transac
 }
 
 func NewLeaderEventHandler(leaderRepository *mem.LeaderRepository) *adapter.LeaderEventHandler {
+
 	return adapter.NewLeaderEventHandler(leaderRepository)
 }
 
@@ -85,7 +94,6 @@ func RunBatcher(lifecycle fx.Lifecycle, txPoolApi *api.TransactionApi, config *c
 			}, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
 
 			sendTransactionQuit = batch.GetTimeOutBatcherInstance().Run(func() error {
-				fmt.Println("kkkk")
 				return txPoolApi.SendLeaderTransaction(config.Engine.Mode)
 			}, (time.Duration(config.Txpool.TimeoutMs) * time.Millisecond))
 			return nil
@@ -105,9 +113,13 @@ func RegisterRpcHandlers(server *rpc.Server, handler *adapter.TxCommandHandler) 
 	}
 }
 
-func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, handler *adapter.LeaderEventHandler) {
+func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, leaderEventHandler *adapter.LeaderEventHandler, grpcMessageHandler *adapter.GrpcMessageHandler) {
 
-	if err := subscriber.SubscribeTopic("leader.updated", handler); err != nil {
+	if err := subscriber.SubscribeTopic("leader.updated", leaderEventHandler); err != nil {
+		panic(err)
+	}
+
+	if err := subscriber.SubscribeTopic("message.receive", grpcMessageHandler); err != nil {
 		panic(err)
 	}
 

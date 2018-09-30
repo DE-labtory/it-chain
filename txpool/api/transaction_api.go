@@ -17,8 +17,6 @@
 package api
 
 import (
-	"fmt"
-
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/iLogger"
 )
@@ -96,7 +94,6 @@ func (t TransactionApi) SendLeaderTransaction(engineMode string) error {
 	switch engineMode {
 
 	case "pbft":
-		fmt.Println("tttt")
 		if t.isLeader() {
 			return nil
 		}

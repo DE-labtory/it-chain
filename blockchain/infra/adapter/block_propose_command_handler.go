@@ -19,6 +19,7 @@ package adapter
 import (
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/command"
+	"github.com/it-chain/iLogger"
 )
 
 type BlockProposeApi interface {
@@ -39,6 +40,8 @@ func NewBlockProposeCommandHandler(blockApi BlockProposeApi, engineMode string) 
 }
 
 func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.ProposeBlock) error {
+
+	iLogger.Info(nil, "[Blockchain] Handle proposedBlock command")
 
 	if err := validateCommand(command); err != nil {
 		return err

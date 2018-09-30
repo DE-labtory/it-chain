@@ -19,8 +19,6 @@ package txpool
 import (
 	"sync"
 
-	"fmt"
-
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/iLogger"
@@ -47,8 +45,6 @@ func NewTransferService(txpoolRepository TransactionRepository, leaderRepository
 }
 
 func (ts TransferService) SendLeaderTransactions() error {
-
-	fmt.Println("kkkkk")
 
 	ts.Lock()
 	defer ts.Unlock()

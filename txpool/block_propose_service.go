@@ -46,6 +46,8 @@ func (b BlockProposalService) ProposeBlock() error {
 
 	// todo transaction size, number of tx
 	transactions, err := b.txpoolRepository.FindAll()
+
+	iLogger.Debugf(nil, "[Txpool] transaction number - tx: [%d]", len(transactions))
 	if err != nil {
 		return err
 	}

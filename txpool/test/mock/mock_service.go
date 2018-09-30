@@ -16,23 +16,6 @@
 
 package mock
 
-import (
-	"github.com/it-chain/engine/p2p"
-)
-
-type PeerQueryService struct {
-	GetPeerListFunc func() ([]p2p.Peer, error)
-	GetLeaderFunc   func() (p2p.Leader, error)
-}
-
-func (m PeerQueryService) GetPeerList() ([]p2p.Peer, error) {
-	return m.GetPeerListFunc()
-}
-
-func (m PeerQueryService) GetLeader() (p2p.Leader, error) {
-	return m.GetLeaderFunc()
-}
-
 type EventService struct {
 	PublishFunc func(topic string, event interface{}) error
 }

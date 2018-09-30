@@ -45,21 +45,31 @@ func (bApi BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) er
 	return nil
 }
 
-func (api BlockApi) ConsentBlock(consensusType string, block blockchain.DefaultBlock) error {
+func (api BlockApi) ConsentBlock(engineMode string, block blockchain.DefaultBlock) error {
 
-	switch consensusType {
+	iLogger.Info(nil, "[Blockchain] ConsentBlock")
+
+	switch engineMode {
 	case "solo":
+		iLogger.Info(nil, "[Blockchain] ConsentBlock solo")
 		return api.CommitBlock(block)
 
 	case "pbft":
+
+		iLogger.Info(nil, "[Blockchain] ConsentBlock pbft")
 		event, err := createBlockCreatedEvent(block)
 		if err != nil {
 			return err
 		}
-		return api.eventService.Publish("block.consent", event)
+
+		if err := api.eventService.Publish("block.consent", event); err != nil {
+			return err
+		}
+
+		return nil
 
 	default:
-		iLogger.Error(nil, fmt.Sprintf("[blockchain] undefined consensus type: %v", consensusType))
+		iLogger.Error(nil, fmt.Sprintf("[Blockchain] Undefined mode - engine mode:[%s]", engineMode))
 		return ErrUndefinedConsensusType
 	}
 

@@ -17,8 +17,6 @@
 package adapter
 
 import (
-	"fmt"
-
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/txpool"
@@ -41,11 +39,9 @@ func NewGrpcMessageHandler(transactionApi transactionApiForSave) *GrpcMessageHan
 
 func (g GrpcMessageHandler) HandleMessageReceiveCommand(command command.ReceiveGrpc) {
 
-	fmt.Println("handleMessageReevei")
+	iLogger.Info(nil, "HandleMessageReceiveCommand")
 	protocol := command.Protocol
 	body := command.Body
-
-	iLogger.Infof(nil, "[Txpool] Received gRPC message - Protocol [%s]", protocol)
 
 	switch protocol {
 	case txpool.SendTransactionsToLeader:

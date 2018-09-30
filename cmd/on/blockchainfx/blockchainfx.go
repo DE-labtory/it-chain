@@ -98,10 +98,14 @@ func CreateGenesisBlock(blockApi *api.BlockApi, config *conf.Configuration) {
 	}
 }
 
-func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, networkEventHandler *adapter.NetworkEventHandler, connectionEventHandler *adapter.ConnectionEventHandler, blockCommandHandler *adapter.BlockProposeCommandHandler) {
+func RegisterPubsubHandlers(subscriber *pubsub.TopicSubscriber, networkEventHandler *adapter.NetworkEventHandler, blockCommandHandler *adapter.BlockProposeCommandHandler) {
 	iLogger.Infof(nil, "[Main] Blockchain is starting")
 
-	if err := subscriber.SubscribeTopic("connection.saved", connectionEventHandler); err != nil {
+	if err := subscriber.SubscribeTopic("network.joined", networkEventHandler); err != nil {
+		panic(err)
+	}
+
+	if err := subscriber.SubscribeTopic("block.propose", blockCommandHandler); err != nil {
 		panic(err)
 	}
 
