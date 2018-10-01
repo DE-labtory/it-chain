@@ -273,19 +273,18 @@
   version = "v0.1.1"
 
 [[projects]]
-  digest = "1:ffa6f03421fd9bd6d73724a2cbf2830ad575698fcce3d79cef35f16f35a9417c"
+  digest = "1:f2808edcdfcc8267f85f41b046fb44711c3e52dad67b53f0ef241791f8d004a1"
   name = "github.com/it-chain/tesseract"
   packages = [
     ".",
     "container",
     "docker",
-    "logger",
     "pb",
     "rpc",
   ]
   pruneopts = "UT"
-  revision = "820add69878ba6f0a896dffe8fc751eb2169ac4d"
-  version = "v0.3.0"
+  revision = "1903a75ae117a05f0ae2fd586c4d993a0f7e1dd7"
+  version = "v0.3.1"
 
 [[projects]]
   digest = "1:92a0759cdad65d0ede663774eb9a25c2397c849c618e4f28e3fba09670ccd69e"
