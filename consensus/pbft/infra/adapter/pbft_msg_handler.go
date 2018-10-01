@@ -27,7 +27,7 @@ import (
 )
 
 var DeserializingError = errors.New("Message deserializing is failed.")
-var UndefinedProtocolError = errors.New("Undefined protocol error")
+var UndefinedProtocolError = errors.New("Received Undefined protocol message")
 
 type StateMsgApi interface {
 	HandleProposeMsg(msg pbft.ProposeMsg) error
@@ -83,7 +83,7 @@ func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) error
 		}
 
 	default:
-		logger.Errorf(nil, "[PBFT] %s", UndefinedProtocolError.Error())
+		iLogger.Debugf(nil, "[PBFT} %s - Protocol: [%s]", UndefinedProtocolError.Error(), protocol)
 	}
 	return nil
 }

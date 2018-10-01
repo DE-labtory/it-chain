@@ -126,7 +126,8 @@ func (sApi *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) (returnErr error) {
 	loadedState, err := sApi.repo.Load()
 	if err != nil {
 		sApi.tempPrevoteMsgPool.Save(&msg)
-		return err
+		iLogger.Debug(nil, "[PBFT] State repository is empty when handling PreVote message")
+		return nil
 	}
 
 	receipients := make([]pbft.Representative, 0)
@@ -172,7 +173,8 @@ func (sApi *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 	loadedState, err := sApi.repo.Load()
 	if err != nil {
 		sApi.tempPreCommitMsgPool.Save(&msg)
-		return err
+		iLogger.Debug(nil, "[PBFT] State repository is empty when handling PreCommit message")
+		return nil
 	}
 
 	tempPreCommitMsgPool := sApi.tempPreCommitMsgPool.Get()
