@@ -18,7 +18,7 @@ package adapter
 
 import (
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/iLogger"
@@ -41,11 +41,11 @@ func NewStartConsensusCommandHandler(sApi *api.StateApi) *StartConsensusCommandH
 	}
 }
 
-func (r StartConsensusCommandHandler) HandleStartConsensusCommand(created event.BlockCreated) {
+func (r StartConsensusCommandHandler) HandleStartConsensusCommand(command command.StartConsensus) {
 
 	iLogger.Info(nil, "[PBFT] Start PBFT")
 
-	proposedBlock, err := extractProposedBlock(created)
+	proposedBlock, err := extractProposedBlock(command)
 	if err != nil {
 		iLogger.Errorf(nil, "[PBFT] Extracting event is failed! - %s", err.Error())
 		return
@@ -57,18 +57,18 @@ func (r StartConsensusCommandHandler) HandleStartConsensusCommand(created event.
 	}
 }
 
-func extractProposedBlock(created event.BlockCreated) (pbft.ProposedBlock, error) {
-	if created.Seal == nil {
+func extractProposedBlock(command command.StartConsensus) (pbft.ProposedBlock, error) {
+	if command.Seal == nil {
 		return pbft.ProposedBlock{}, BlockSealIsNilError
 	}
 
-	body, err := common.Serialize(created)
+	body, err := common.Serialize(command)
 	if err != nil {
 		return pbft.ProposedBlock{}, err
 	}
 
 	return pbft.ProposedBlock{
-		Seal: created.Seal,
+		Seal: command.Seal,
 		Body: body,
 	}, nil
 }

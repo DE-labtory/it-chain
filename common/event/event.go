@@ -73,18 +73,6 @@ type BlockStaged struct {
 	State   string
 }
 
-//event when block is created in event store
-type BlockCreated struct {
-	Seal      []byte
-	PrevSeal  []byte
-	Height    uint64
-	TxList    []Tx
-	TxSeal    [][]byte
-	Timestamp time.Time
-	Creator   string
-	State     string
-}
-
 type Tx struct {
 	ID        string
 	ICodeID   string
