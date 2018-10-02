@@ -40,7 +40,7 @@ func NewNetworkEventHandler(syncApi SynchronizeApi) *NetworkEventHandler {
 func (n *NetworkEventHandler) HandleNetworkJoinedEvent(networkJoindEvent event.NetworkJoined) {
 	iLogger.Infof(nil, "[Blockchain] Network Joined")
 	if err := n.SyncApi.HandleNetworkJoined(createPeerListFromNetworkJoinedEvent(networkJoindEvent)); err != nil {
-		iLogger.Errorf(nil, "[Blockchain] Fail to handle networkJoinedEvent - Err: [%s]", err.Error())
+		iLogger.Errorf(nil, "[Blockchain] Fail to handle network joined event - Err: [%s]", err.Error())
 	}
 }
 

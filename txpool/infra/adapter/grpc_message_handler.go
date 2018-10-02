@@ -39,17 +39,21 @@ func NewGrpcMessageHandler(transactionApi transactionApiForSave) *GrpcMessageHan
 
 func (g GrpcMessageHandler) HandleMessageReceiveCommand(command command.ReceiveGrpc) {
 
-	iLogger.Info(nil, "HandleMessageReceiveCommand")
+	iLogger.Debug(nil, "[Txpool] Received grpc command")
+
 	protocol := command.Protocol
 	body := command.Body
 
 	switch protocol {
 	case txpool.SendTransactionsToLeader:
+
 		transactionList := []txpool.Transaction{}
 
 		if err := common.Deserialize(body, &transactionList); err != nil {
 			iLogger.Errorf(nil, "[Txpool] Fail to deserialize grpcMessage - Err: [%s]", err.Error())
 		}
+
+		iLogger.Infof(nil, "[Txpool] Leader received transactions - Length: [%d]", len(transactionList))
 
 		g.transactionApi.SaveTransactions(transactionList)
 

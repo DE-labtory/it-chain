@@ -21,4 +21,4 @@ import "errors"
 var ErrSaveBlock = errors.New("Error in saving block")
 var ErrCreateEvent = errors.New("Error in creating event")
 var ErrGetLastBlock = errors.New("Error in getting last block")
-var ErrUndefinedConsensusType = errors.New("Error in consensus type")
+var ErrUndefinedEngineMode = errors.New("Error in consensus type")
