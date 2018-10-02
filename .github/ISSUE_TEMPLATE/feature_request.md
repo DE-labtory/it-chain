@@ -10,9 +10,6 @@ write here
 **Assignee**
 write here
 
-**Problem or Necessity**
-write here
-
 **Detail**
 write here
 
