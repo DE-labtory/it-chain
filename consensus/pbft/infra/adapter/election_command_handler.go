@@ -60,7 +60,7 @@ func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrp
 		}
 
 		if e.electionApi.ElectionService.Voted {
-			iLogger.Info(nil, "already voted!")
+			iLogger.Info(nil, "[PBFT] Already voted!")
 			return nil
 		}
 
@@ -79,7 +79,7 @@ func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrp
 		}
 
 		if err := e.electionApi.DecideToBeLeader(); err != nil {
-			iLogger.Errorf(nil, "Err %s", err.Error())
+			iLogger.Errorf(nil, "[PBFT] Cannot decide to be leader - Error: [%s]", err.Error())
 		}
 
 	case "UpdateLeaderProtocol":
@@ -90,11 +90,11 @@ func (e *ElectionCommandHandler) HandleMessageReceive(command command.ReceiveGrp
 		e.electionApi.EndRaft()
 		toBeLeader := &pbft.UpdateLeaderMessage{}
 		if err := common.Deserialize(command.Body, toBeLeader); err != nil {
-			iLogger.Errorf(nil, "Err %s", err.Error())
+			iLogger.Errorf(nil, "[PBFT] Cannot deserialize update leader msg - Error: [%s]", err.Error())
 		}
 
 		if err := e.parliamentApi.UpdateLeader(toBeLeader.Representative.ID); err != nil {
-			iLogger.Errorf(nil, "Err %s", err.Error())
+			iLogger.Errorf(nil, "[PBFT] Cannot update leader - Error: [%s]", err.Error())
 		}
 	}
 

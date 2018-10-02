@@ -19,6 +19,7 @@ package adapter
 import (
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/consensus/pbft/api"
+	"github.com/it-chain/iLogger"
 )
 
 type ConnectionEventHandler struct {
@@ -37,6 +38,7 @@ func NewConnectionEventHandler(electionApi *api.ElectionApi, parliamentApi *api.
 func (c *ConnectionEventHandler) HandleConnectionCreatedEvent(event event.ConnectionCreated) {
 
 	c.parliamentApi.AddRepresentative(event.ConnectionID)
+	iLogger.Debugf(nil, "[PBFT] Added new representative - ConnectionID : [%s]", event.ConnectionID)
 	c.parliamentApi.RequestLeader(event.ConnectionID)
 }
 

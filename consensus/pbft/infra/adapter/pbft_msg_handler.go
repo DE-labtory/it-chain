@@ -21,7 +21,6 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/iLogger"
 )
@@ -49,41 +48,47 @@ func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) error
 	protocol := command.Protocol
 	body := command.Body
 
-	iLogger.Infof(nil, "[PBFT] Received protocol - Protocol: [%s]", protocol)
 	switch protocol {
 
 	case "ProposeMsgProtocol":
+		iLogger.Infof(nil, "[PBFT] Received protocol - Protocol: [%s]", protocol)
+
 		msg := pbft.ProposeMsg{}
 		if err := common.Deserialize(body, &msg); err != nil {
-			logger.Errorf(nil, "[PBFT] %s", DeserializingError.Error())
+			iLogger.Errorf(nil, "[PBFT] %s", DeserializingError.Error())
 		}
 
 		if err := p.sApi.HandleProposeMsg(msg); err != nil {
-			logger.Errorf(nil, "[PBFT] %s", err.Error())
+			iLogger.Errorf(nil, "[PBFT] %s", err.Error())
 		}
 
 	case "PrevoteMsgProtocol":
+		iLogger.Infof(nil, "[PBFT] Received protocol - Protocol: [%s]", protocol)
+
 		msg := pbft.PrevoteMsg{}
 		if err := common.Deserialize(body, &msg); err != nil {
-			logger.Errorf(nil, "[PBFT] %s", DeserializingError.Error())
+			iLogger.Errorf(nil, "[PBFT] %s", DeserializingError.Error())
 		}
 
 		if err := p.sApi.HandlePrevoteMsg(msg); err != nil {
-			logger.Errorf(nil, "[PBFT] %s", err.Error())
+			iLogger.Errorf(nil, "[PBFT] %s", err.Error())
 		}
 
 	case "PreCommitMsgProtocol":
+		iLogger.Infof(nil, "[PBFT] Received protocol - Protocol: [%s]", protocol)
+
 		msg := pbft.PreCommitMsg{}
 		if err := common.Deserialize(body, &msg); err != nil {
-			logger.Errorf(nil, "[PBFT] %s", DeserializingError.Error())
+			iLogger.Errorf(nil, "[PBFT] %s", DeserializingError.Error())
 		}
 
 		if err := p.sApi.HandlePreCommitMsg(msg); err != nil {
-			logger.Errorf(nil, "[PBFT] %s", err.Error())
+			iLogger.Errorf(nil, "[PBFT] %s", err.Error())
 		}
 
 	default:
 		iLogger.Debugf(nil, "[PBFT} %s - Protocol: [%s]", UndefinedProtocolError.Error(), protocol)
 	}
+
 	return nil
 }
