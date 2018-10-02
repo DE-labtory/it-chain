@@ -47,12 +47,12 @@ func (r StartConsensusCommandHandler) HandleStartConsensusCommand(command comman
 
 	proposedBlock, err := extractProposedBlock(command)
 	if err != nil {
-		iLogger.Errorf(nil, "[PBFT] Extracting event is failed! - %s", err.Error())
+		iLogger.Errorf(nil, "[PBFT] Extracting event is failed! - Err:[%s]", err.Error())
 		return
 	}
 
 	if err = r.sApi.StartConsensus(proposedBlock); err != nil {
-		iLogger.Errorf(nil, "[PBFT] Starting consensus is failed! - %s", err.Error())
+		iLogger.Errorf(nil, "[PBFT] Starting consensus is failed! - Err:[%s]", err.Error())
 		return
 	}
 }

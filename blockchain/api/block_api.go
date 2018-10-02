@@ -48,16 +48,16 @@ func (bApi BlockApi) CheckAndSaveBlockFromPool(height blockchain.BlockHeight) er
 
 func (api BlockApi) ConsentBlock(engineMode string, block blockchain.DefaultBlock) error {
 
-	iLogger.Info(nil, "[Blockchain] ConsentBlock")
+	iLogger.Debug(nil, "[Blockchain] ConsentBlock")
 
 	switch engineMode {
 	case "solo":
-		iLogger.Info(nil, "[Blockchain] ConsentBlock solo")
+		iLogger.Debug(nil, "[Blockchain] ConsentBlock - solo mode")
 		return api.CommitBlock(block)
 
 	case "pbft":
+		iLogger.Debug(nil, "[Blockchain] ConsentBlock - pbft mode")
 
-		iLogger.Info(nil, "[Blockchain] ConsentBlock pbft")
 		startConsensusCmd, err := createStartConsensusCommand(block)
 		if err != nil {
 			return err
@@ -67,17 +67,20 @@ func (api BlockApi) ConsentBlock(engineMode string, block blockchain.DefaultBloc
 			return err
 		}
 
+		iLogger.Infof(nil, "[Blockchain] Start to consent block - Seal: [%x],  Height: [%d]", block.Seal, block.Height)
+
 		return nil
 
 	default:
-		iLogger.Error(nil, fmt.Sprintf("[Blockchain] Undefined mode - engine mode:[%s]", engineMode))
-		return ErrUndefinedConsensusType
+		iLogger.Errorf(nil, "[Blockchain] Undefined mode - Engine mode: [%s]", engineMode)
+
+		return ErrUndefinedEngineMode
 	}
 
 }
 
 func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
-	iLogger.Info(nil, "[Blockchain] Committing genesis block")
+	iLogger.Debug(nil, "[Blockchain] Committing genesis block")
 
 	// create
 	GenesisBlock, err := blockchain.CreateGenesisBlock(GenesisConfPath)
@@ -102,7 +105,7 @@ func (bApi BlockApi) CommitGenesisBlock(GenesisConfPath string) error {
 		return ErrCreateEvent
 	}
 
-	iLogger.Info(nil, fmt.Sprintf("[Blockchain] Genesis block has Committed - seal: [%x], height: [%d]", GenesisBlock.Seal, GenesisBlock.Height))
+	iLogger.Info(nil, fmt.Sprintf("[Blockchain] Genesis block has committed - Seal: [%x], Height: [%d]", GenesisBlock.Seal, GenesisBlock.Height))
 
 	return bApi.eventService.Publish("block.committed", commitEvent)
 }
@@ -112,7 +115,7 @@ set state to 'committed'
 publish block committed event
 */
 func (bApi BlockApi) CommitBlock(block blockchain.DefaultBlock) error {
-	iLogger.Info(nil, "[Blockchain] Committing proposed block")
+	iLogger.Debug(nil, "[Blockchain] Committing block")
 
 	// save(commit)
 	block.SetState(blockchain.Committed)
@@ -130,7 +133,7 @@ func (bApi BlockApi) CommitBlock(block blockchain.DefaultBlock) error {
 		return ErrCreateEvent
 	}
 
-	iLogger.Info(nil, fmt.Sprintf("[Blockchain] Proposed block has Committed - seal: [%x],  height: [%d]", block.Seal, block.Height))
+	iLogger.Info(nil, fmt.Sprintf("[Blockchain] Block has been committed - Seal: [%x],  Height: [%d]", block.Seal, block.Height))
 
 	return bApi.eventService.Publish("block.committed", commitEvent)
 }
@@ -141,7 +144,9 @@ func (bApi BlockApi) StageBlock(block blockchain.DefaultBlock) {
 }
 
 func (api BlockApi) CreateProposedBlock(txList []*blockchain.DefaultTransaction) (blockchain.DefaultBlock, error) {
-	iLogger.Info(nil, "[Blockchain] Create proposed block")
+
+	iLogger.Debug(nil, "[Blockchain] Create proposed block")
+
 	lastBlock, err := api.blockRepository.FindLast()
 	if err != nil {
 		return blockchain.DefaultBlock{}, ErrGetLastBlock
@@ -155,6 +160,8 @@ func (api BlockApi) CreateProposedBlock(txList []*blockchain.DefaultTransaction)
 	if err != nil {
 		return blockchain.DefaultBlock{}, err
 	}
+
+	iLogger.Info(nil, fmt.Sprintf("[Blockchain] Proposed block has been created - Seal: [%x],  Height: [%d]", block.Seal, block.Height))
 
 	return block, nil
 }

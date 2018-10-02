@@ -55,17 +55,17 @@ func (sApi SyncApi) Synchronize(peer blockchain.Peer) error {
 		sApi.syncStateRepository.Set(syncState)
 	}()
 
-	iLogger.Infof(nil, "[Blockchain] Start to Synchronize - Id: [%s]", peer.Id)
+	iLogger.Infof(nil, "[Blockchain] Start to synchronize - Peer: [%s]", peer.Id)
 
 	if sApi.isSynced(peer) {
-		iLogger.Infof(nil, "[Blockchain] Already Synchronized - Id: [%s]", peer.Id)
+		iLogger.Infof(nil, "[Blockchain] Already synchronized - Peer: [%s]", peer.Id)
 		return nil
 	}
 
 	// if sync has not done, on sync
 	err := sApi.syncWithPeer(peer)
 	if err != nil {
-		iLogger.Errorf(nil, "[Blockchain] Fail to Synchronize - Err: [%s]", err)
+		iLogger.Errorf(nil, "[Blockchain] Fail to synchronize - Err: [%s]", err)
 		return err
 	}
 
@@ -73,7 +73,7 @@ func (sApi SyncApi) Synchronize(peer blockchain.Peer) error {
 		return err
 	}
 
-	iLogger.Infof(nil, "[Blockchain] Synchronized Successfully - PeerID: [%s]", peer.Id)
+	iLogger.Infof(nil, "[Blockchain] Synchronized Successfully - Peer: [%s]", peer.Id)
 
 	return nil
 }
@@ -155,7 +155,7 @@ func (sApi SyncApi) commitBlock(block blockchain.DefaultBlock) error {
 	// save(commit)
 	err := sApi.blockRepository.Save(block)
 	if err != nil {
-		iLogger.Errorf(nil, "[Blockchain] Block is not Committed - Err: [%s]", err)
+		iLogger.Errorf(nil, "[Blockchain] Block is not committed - Err: [%s]", err)
 		return ErrSaveBlock
 	}
 
@@ -165,7 +165,7 @@ func (sApi SyncApi) commitBlock(block blockchain.DefaultBlock) error {
 		return ErrCreateEvent
 	}
 
-	iLogger.Infof(nil, "[Blockchain] Block has Committed - seal: [%x],  height: [%d]", block.Seal, block.Height)
+	iLogger.Infof(nil, "[Blockchain] Block has committed - Seal: [%x],  Height: [%d]", block.Seal, block.Height)
 
 	return sApi.eventService.Publish("block.committed", commitEvent)
 }

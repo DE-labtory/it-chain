@@ -41,7 +41,7 @@ func NewBlockProposeCommandHandler(blockApi BlockProposeApi, engineMode string) 
 
 func (h *BlockProposeCommandHandler) HandleProposeBlockCommand(command command.ProposeBlock) error {
 
-	iLogger.Info(nil, "[Blockchain] Handle proposedBlock command")
+	iLogger.Debug(nil, "[Blockchain] Received proposed block command from txpool component")
 
 	if err := validateCommand(command); err != nil {
 		return err
