@@ -18,6 +18,7 @@ package mock
 
 import (
 	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/event"
 )
 
@@ -63,12 +64,12 @@ func (ba MockSyncBlockApi) SyncedCheck(block blockchain.Block) error {
 	return ba.SyncedCheckFunc(block)
 }
 
-type CreateEventHandler struct {
-	HandleFunc func(event event.BlockCreated)
+type StartConsensusCommandHandler struct {
+	HandleFunc func(command command.StartConsensus)
 }
 
-func (h *CreateEventHandler) Handle(event event.BlockCreated) {
-	h.HandleFunc(event)
+func (h *StartConsensusCommandHandler) Handle(command command.StartConsensus) {
+	h.HandleFunc(command)
 }
 
 type CommitEventHandler struct {

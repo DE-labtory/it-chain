@@ -21,6 +21,7 @@ import (
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/mem"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/iLogger"
 )
@@ -57,12 +58,12 @@ func (api BlockApi) ConsentBlock(engineMode string, block blockchain.DefaultBloc
 	case "pbft":
 
 		iLogger.Info(nil, "[Blockchain] ConsentBlock pbft")
-		event, err := createBlockCreatedEvent(block)
+		startConsensusCmd, err := createStartConsensusCommand(block)
 		if err != nil {
 			return err
 		}
 
-		if err := api.eventService.Publish("block.consent", event); err != nil {
+		if err := api.eventService.Publish("block.consent", startConsensusCmd); err != nil {
 			return err
 		}
 
@@ -174,11 +175,10 @@ func createBlockCommittedEvent(block blockchain.DefaultBlock) (event.BlockCommit
 	}, nil
 }
 
-func createBlockCreatedEvent(block blockchain.DefaultBlock) (event.BlockCreated, error) {
+func createStartConsensusCommand(block blockchain.DefaultBlock) (command.StartConsensus, error) {
+	txList := blockchain.ConvToCommandTxList(block.TxList)
 
-	txList := blockchain.ConvBackFromTransactionList(block.TxList)
-
-	return event.BlockCreated{
+	return command.StartConsensus{
 		Seal:      block.GetSeal(),
 		PrevSeal:  block.GetPrevSeal(),
 		Height:    block.GetHeight(),
@@ -188,4 +188,5 @@ func createBlockCreatedEvent(block blockchain.DefaultBlock) (event.BlockCreated,
 		Creator:   block.GetCreator(),
 		State:     block.GetState(),
 	}, nil
+
 }

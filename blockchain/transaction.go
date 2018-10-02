@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/event"
 	ygg "github.com/it-chain/yggdrasill/common"
 )
@@ -128,6 +129,30 @@ func convertToTransaction(tx event.Tx) *DefaultTransaction {
 		Function:  tx.Function,
 		Args:      tx.Args,
 		Signature: tx.Signature,
+	}
+}
+
+func ConvToCommandTxList(defaultTxList []*DefaultTransaction) []command.Tx {
+	txList := make([]command.Tx, 0)
+
+	for _, defaultTx := range defaultTxList {
+		tx := convToCommandTx(defaultTx)
+		txList = append(txList, tx)
+	}
+
+	return txList
+}
+
+func convToCommandTx(defaultTx *DefaultTransaction) command.Tx {
+	return command.Tx{
+		ID:        defaultTx.ID,
+		ICodeID:   defaultTx.ICodeID,
+		PeerID:    defaultTx.PeerID,
+		TimeStamp: defaultTx.Timestamp,
+		Jsonrpc:   defaultTx.Jsonrpc,
+		Function:  defaultTx.Function,
+		Args:      defaultTx.Args,
+		Signature: defaultTx.Signature,
 	}
 }
 

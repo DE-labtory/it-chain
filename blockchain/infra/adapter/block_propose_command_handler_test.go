@@ -149,10 +149,10 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_OneTransactio
 	subscriber := pubsub.NewTopicSubscriber("", "Event")
 	defer subscriber.Close()
 
-	handler := &mock.CreateEventHandler{}
-	handler.HandleFunc = func(event event.BlockCreated) {
-		assert.Equal(t, "tx01", event.TxList[0].ID)
-		assert.Equal(t, blockchain.Created, event.State)
+	handler := &mock.StartConsensusCommandHandler{}
+	handler.HandleFunc = func(command command.StartConsensus) {
+		assert.Equal(t, "tx01", command.TxList[0].ID)
+		assert.Equal(t, blockchain.Created, command.State)
 		wg.Done()
 	}
 
@@ -207,10 +207,10 @@ func TestBlockProposeCommandHandler_HandleProposeBlockCommand_PBFT_TwoTransactio
 	subscriber := pubsub.NewTopicSubscriber("", "Event")
 	defer subscriber.Close()
 
-	handler := &mock.CreateEventHandler{}
-	handler.HandleFunc = func(event event.BlockCreated) {
-		assert.Equal(t, "tx01", event.TxList[0].ID)
-		assert.Equal(t, blockchain.Created, event.State)
+	handler := &mock.StartConsensusCommandHandler{}
+	handler.HandleFunc = func(command command.StartConsensus) {
+		assert.Equal(t, "tx01", command.TxList[0].ID)
+		assert.Equal(t, blockchain.Created, command.State)
 		wg.Done()
 	}
 
