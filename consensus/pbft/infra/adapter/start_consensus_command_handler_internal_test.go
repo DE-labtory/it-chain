@@ -22,18 +22,18 @@ import (
 	"time"
 
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/event"
+	"github.com/it-chain/engine/common/command"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestStartConsensusCommandHandler_extractProposedBlock(t *testing.T) {
 	// given
 	expectedSeal := []byte{'s', 'e', 'a', 'l'}
-	expectedCommand := event.BlockCreated{
+	expectedCommand := command.StartConsensus{
 		Seal:      expectedSeal,
 		PrevSeal:  []byte{'p', 'r', 'e', 'v'},
 		Height:    0,
-		TxList:    make([]event.Tx, 0),
+		TxList:    make([]command.Tx, 0),
 		TxSeal:    make([][]byte, 0),
 		Timestamp: time.Time{},
 		Creator:   "creator",
