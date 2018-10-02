@@ -74,14 +74,14 @@ func (sApi *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 		}
 	}
 
-	iLogger.Infof(nil, "[PBFT] Broadcast ProposeMsg to %v", receipients)
-
+	iLogger.Infof(nil, "[PBFT] Leader broadcasts ProposeMsg to %v", receipients)
 	if err := sApi.propagateService.BroadcastProposeMsg(*createdProposeMsg, receipients); err != nil {
 		return err
 	}
-	logger.Infof(nil, "[PBFT] Leader broadcast ProposeMsg")
+
 	createdState.Start()
-	logger.Infof(nil, "[PBFT] Change stage to propose")
+	iLogger.Infof(nil, "[PBFT] Consensus starts - Stage: [%s]", createdState.CurrentStage)
+
 	if err := sApi.repo.Save(*createdState); err != nil {
 		return err
 	}
@@ -107,12 +107,14 @@ func (sApi *StateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
 		}
 	}
 
+	iLogger.Debugf(nil, "[PBFT] Representative broadcasts PreVoteMsg to %v", receipients)
 	prevoteMsg := pbft.NewPrevoteMsg(builtState, sApi.publisherID)
 	if err := sApi.propagateService.BroadcastPrevoteMsg(*prevoteMsg, receipients); err != nil {
 		return err
 	}
+
 	builtState.ToPrevoteStage()
-	logger.Infof(nil, "[PBFT] Change stage to Prevote")
+	logger.Infof(nil, "[PBFT] Prevoted - Stage: [%s]", builtState.CurrentStage)
 
 	if err := sApi.repo.Save(*builtState); err != nil {
 		return err
@@ -126,7 +128,7 @@ func (sApi *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) (returnErr error) {
 	loadedState, err := sApi.repo.Load()
 	if err != nil {
 		sApi.tempPrevoteMsgPool.Save(&msg)
-		iLogger.Debug(nil, "[PBFT] State repository is empty when handling PreVote message")
+		iLogger.Debugf(nil, "[PBFT] %s while handling PreVote message", err)
 		return nil
 	}
 
@@ -155,13 +157,14 @@ func (sApi *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) (returnErr error) {
 
 	if loadedState.CheckPrevoteCondition() {
 		if loadedState.CurrentStage == pbft.PREVOTE_STAGE {
+			iLogger.Infof(nil, "[PBFT] Representative broadcasts PreCommitMsg to %v", receipients)
 			newCommitMsg := pbft.NewPreCommitMsg(&loadedState, sApi.publisherID)
 			if err := sApi.propagateService.BroadcastPreCommitMsg(*newCommitMsg, receipients); err != nil {
 				return err
 			}
-			logger.Infof(nil, "[PBFT] Leader broadcast PreCommitMsg")
+
 			loadedState.ToPreCommitStage()
-			logger.Infof(nil, "[PBFT] Change stage to PreCommitStage")
+			iLogger.Infof(nil, "[PBFT] PreCommitted - Stage: [%s]", loadedState.CurrentStage)
 		}
 	}
 
@@ -188,12 +191,16 @@ func (sApi *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 	}
 
 	if loadedState.CheckPreCommitCondition() {
-		if err := sApi.eventService.Publish("block.confirm", event.ConsensusFinished{
+		e := event.ConsensusFinished{
 			Seal: loadedState.Block.Seal,
 			Body: loadedState.Block.Body,
-		}); err != nil {
+		}
+
+		if err := sApi.eventService.Publish("block.confirm", e); err != nil {
 			return err
 		}
+		iLogger.Debug(nil, "[PBFT] Published block confirm event")
+
 		sApi.repo.Remove()
 		logger.Infof(nil, "[PBFT] Consensus is finished.")
 		return nil

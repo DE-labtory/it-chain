@@ -54,7 +54,7 @@ func (p *ParliamentApi) AddRepresentative(representativeId string) {
 }
 
 func (p *ParliamentApi) RemoveRepresentative(representativeId string) {
-	iLogger.Infof(nil, "[PBFT] Remove Representative ID: %s", representativeId)
+	iLogger.Infof(nil, "[PBFT] Remove Representative - ID: [%s]", representativeId)
 
 	parliament := p.parliamentRepository.Load()
 
@@ -73,7 +73,7 @@ func (p *ParliamentApi) UpdateLeader(nodeId string) error {
 
 	parliament := p.parliamentRepository.Load()
 	representative, err := parliament.FindRepresentativeByID(nodeId)
-	iLogger.Infof(nil, "[PBFT] found representative to be leader id: %s", representative.ID)
+	iLogger.Infof(nil, "[PBFT] found representative to be leader - ID: [%s]", representative.ID)
 	if err != nil {
 		return ErrNoMatchingPeerWithIpAddress
 	}

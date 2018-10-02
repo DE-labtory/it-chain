@@ -76,7 +76,7 @@ func (p *Parliament) SetLeader(representativeId string) error {
 		LeaderId: representativeId,
 	}
 
-	iLogger.Infof(nil, "[PBFT] set leader with id: %s", p.GetLeader().LeaderId)
+	iLogger.Infof(nil, "[PBFT] Set leader with id: %s", p.GetLeader().LeaderId)
 	return nil
 }
 

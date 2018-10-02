@@ -23,7 +23,6 @@ import (
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/iLogger"
 	"github.com/rs/xid"
@@ -52,7 +51,7 @@ func (e *ElectionApi) Vote(connectionId string) error {
 
 	representative, err := parliament.FindRepresentativeByID(connectionId)
 	if err != nil {
-		iLogger.Infof(nil, "[PBFT] Representative who has Id: %s is not found", connectionId)
+		iLogger.Errorf(nil, "[PBFT] Representative who has (Id: %s) is not found", connectionId)
 		return err
 	}
 
@@ -71,14 +70,14 @@ func (e *ElectionApi) Vote(connectionId string) error {
 
 // broadcast leader to other peers
 func (e *ElectionApi) broadcastLeader(rep pbft.Representative) error {
-	iLogger.Infof(nil, "[PBFT] Broadcast leader id: %s", rep.ID)
+	iLogger.Infof(nil, "[PBFT] Broadcast leader - ID: [%s]", rep.ID)
 
 	updateLeaderMessage := pbft.UpdateLeaderMessage{
 		Representative: rep,
 	}
 	grpcDeliverCommand, err := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
 	if err != nil {
-		iLogger.Infof(nil, "[Consensus] Err %s", err.Error())
+		iLogger.Errorf(nil, "[PBFT] Cannot create grpc command - Error: [%s]", err.Error())
 		return err
 	}
 
@@ -152,10 +151,10 @@ func (e *ElectionApi) ElectLeaderWithRaft() {
 				e.HandleRaftTimeout()
 			}
 		case <-e.quit:
-			logger.Infof(nil, "[PBFT] Raft has end")
+			iLogger.Infof(nil, "[PBFT] Raft has end")
 			return
 		case <-timeout:
-			logger.Errorf(nil, "[PBFT] Raft Time out")
+			iLogger.Errorf(nil, "[PBFT] Raft Time out")
 			return
 		}
 	}
