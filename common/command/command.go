@@ -54,7 +54,7 @@ type JoinNetwork struct {
 
 //Connection close command
 type CloseConnection struct {
-	Address string
+	ConnectionID string
 }
 
 type GetConnectionList struct {

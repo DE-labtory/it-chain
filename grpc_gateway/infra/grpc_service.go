@@ -169,16 +169,20 @@ func (g *GrpcHostService) CloseAllConnections() error {
 	return nil
 }
 
-func (g *GrpcHostService) CloseConnection(connID string) {
+func (g *GrpcHostService) CloseConnection(connID string) error {
 
 	connection := g.connStore.Find(connID)
 
+	err := errors.New("invalid nodeID")
+
 	if connection == nil {
-		return
+		return err
 	}
 
 	connection.Close()
 	g.connStore.Delete(connection.GetID())
+
+	return nil
 }
 
 func (g *GrpcHostService) SendMessages(message []byte, protocol string, connIDs ...string) error {
@@ -207,10 +211,10 @@ func (g *GrpcHostService) IsConnectionExist(connectionID string) bool {
 	return true
 }
 
-func (g GrpcHostService) buildDialOption(address string) (string, client.ClientOpts, client.GrpcOpts, map[string]string) {
+func (g GrpcHostService) buildDialOption(ConnectionID string) (string, client.ClientOpts, client.GrpcOpts, map[string]string) {
 
 	clientOpt := client.ClientOpts{
-		Ip:     address,
+		Ip:     ConnectionID,
 		PriKey: g.priKey,
 		PubKey: g.pubKey,
 	}
@@ -220,7 +224,7 @@ func (g GrpcHostService) buildDialOption(address string) (string, client.ClientO
 		Creds:      nil,
 	}
 
-	return address, clientOpt, grpcOpt, g.metaData
+	return ConnectionID, clientOpt, grpcOpt, g.metaData
 }
 
 func (s *GrpcHostService) Listen(ip string) {

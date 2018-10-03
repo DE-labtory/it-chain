@@ -29,6 +29,7 @@ func Cmd() cli.Command {
 	connectionCmd.Subcommands = append(connectionCmd.Subcommands, Dial())
 	connectionCmd.Subcommands = append(connectionCmd.Subcommands, List())
 	connectionCmd.Subcommands = append(connectionCmd.Subcommands, Join())
+	connectionCmd.Subcommands = append(connectionCmd.Subcommands, Disconnect())
 
 	return connectionCmd
 }

@@ -21,7 +21,7 @@ const ResponsePeerList = "ResponsePeerList"
 
 type GrpcService interface {
 	Dial(address string) (Connection, error)
-	CloseConnection(connID string)
+	CloseConnection(connID string) error
 	SendMessages(message []byte, protocol string, connIDs ...string) error
 	GetAllConnections() ([]Connection, error)
 	CloseAllConnections() error
