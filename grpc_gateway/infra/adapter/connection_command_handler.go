@@ -47,9 +47,9 @@ func (d *ConnectionCommandHandler) HandleCreateConnectionCommand(createConnectio
 
 func (d *ConnectionCommandHandler) HandleCloseConnectionCommand(closeConnectionCommand command.CloseConnection) (struct{}, rpc.Error) {
 
-	err := d.connectionApi.CloseConnection(closeConnectionCommand.Address)
+	err := d.connectionApi.CloseConnection(closeConnectionCommand.ConnectionID)
 	if err != nil {
-		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to close - Url [%s], Err: [%s]", closeConnectionCommand.Address, err.Error())
+		iLogger.Errorf(nil, "[gRPC-Gateway] Fail to close - Url [%s], Err: [%s]", closeConnectionCommand.ConnectionID, err.Error())
 		return struct{}{}, rpc.Error{Message: err.Error()}
 	}
 

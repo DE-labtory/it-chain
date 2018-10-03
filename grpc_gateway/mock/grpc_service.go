@@ -20,7 +20,7 @@ import "github.com/it-chain/engine/grpc_gateway"
 
 type GrpcService struct {
 	DialFunc                func(address string) (grpc_gateway.Connection, error)
-	CloseConnectionFunc     func(connID string)
+	CloseConnectionFunc     func(connID string) error
 	SendMessagesFunc        func(message []byte, protocol string, connIDs ...string) error
 	GetAllConnectionsFunc   func() ([]grpc_gateway.Connection, error)
 	CloseAllConnectionsFunc func() error
@@ -32,8 +32,8 @@ func (g GrpcService) Dial(address string) (grpc_gateway.Connection, error) {
 	return g.DialFunc(address)
 }
 
-func (g GrpcService) CloseConnection(connID string) {
-	g.CloseConnectionFunc(connID)
+func (g GrpcService) CloseConnection(connID string) error {
+	return g.CloseConnectionFunc(connID)
 }
 
 func (g GrpcService) SendMessages(message []byte, protocol string, connIDs ...string) error {

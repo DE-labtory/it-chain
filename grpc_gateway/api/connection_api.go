@@ -81,9 +81,12 @@ func createConnectionCreatedEvent(connection grpc_gateway.Connection) event.Conn
 }
 
 func (c ConnectionApi) CloseConnection(connectionID string) error {
-	iLogger.Infof(nil, "[gRPC-Gateway] Close connection - ConnectionID [%s]", connectionID)
+	iLogger.Infof(nil, "[gRPC-Gateway] Disconnect connection - ConnectionID [%s]", connectionID)
 
-	c.grpcService.CloseConnection(connectionID)
+	err := c.grpcService.CloseConnection(connectionID)
+	if err != nil {
+		return err
+	}
 
 	return c.eventService.Publish("connection.closed", createConnectionClosedEvent(connectionID))
 }
