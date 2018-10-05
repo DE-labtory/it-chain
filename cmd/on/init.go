@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/it-chain/engine/conf"
+
 	"github.com/it-chain/engine/cmd/on/api-gatewayfx"
 	"github.com/it-chain/engine/cmd/on/blockchainfx"
 	"github.com/it-chain/engine/cmd/on/commonfx"
@@ -51,6 +53,7 @@ func Action(c *cli.Context) error {
 }
 
 func clearFolder() {
+
 	if err := os.RemoveAll(api_gatewayfx.ApidbPath); err != nil {
 		iLogger.Panic(&iLogger.Fields{"err_msg": err.Error()}, "error while clear folder")
 		panic(err)
@@ -60,6 +63,11 @@ func clearFolder() {
 		iLogger.Panic(&iLogger.Fields{"err_msg": err.Error()}, "error while clear folder")
 		panic(err)
 	}
+	if err := os.RemoveAll(conf.GetConfiguration().Engine.TmpPath); err != nil {
+		iLogger.Panic(&iLogger.Fields{"err_msg": err.Error()}, "error while clear folder")
+		panic(err)
+	}
+	//RemoveDirectoryFiles()
 }
 
 func start() error {
