@@ -255,6 +255,18 @@ func (s *State) GetID() string {
 	return s.StateID.ID
 }
 
+func (s *State) GetReceipients(publisherID string) []Representative {
+	receipients := make([]Representative, 0)
+
+	for _, rep := range s.Representatives {
+		if rep.ID != publisherID {
+			receipients = append(receipients, rep)
+		}
+	}
+	return receipients
+
+}
+
 func (s *State) Start() {
 	s.CurrentStage = PROPOSE_STAGE
 }
