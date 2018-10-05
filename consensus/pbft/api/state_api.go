@@ -66,13 +66,7 @@ func (sApi *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 
 	createdProposeMsg := pbft.NewProposeMsg(createdState, sApi.publisherID)
 
-	receipients := make([]pbft.Representative, 0)
-
-	for _, rep := range createdState.Representatives {
-		if rep.ID != sApi.publisherID {
-			receipients = append(receipients, rep)
-		}
-	}
+	receipients := createdState.GetReceipients(sApi.publisherID)
 
 	iLogger.Infof(nil, "[PBFT] Leader broadcasts ProposeMsg to %v", receipients)
 	if err := sApi.propagateService.BroadcastProposeMsg(*createdProposeMsg, receipients); err != nil {
@@ -100,12 +94,7 @@ func (sApi *StateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
 
 	builtState := pbft.BuildState(msg)
 
-	receipients := make([]pbft.Representative, 0)
-	for _, rep := range builtState.Representatives {
-		if rep.ID != sApi.publisherID {
-			receipients = append(receipients, rep)
-		}
-	}
+	receipients := builtState.GetReceipients(sApi.publisherID)
 
 	iLogger.Debugf(nil, "[PBFT] Representative broadcasts PreVoteMsg to %v", receipients)
 	prevoteMsg := pbft.NewPrevoteMsg(builtState, sApi.publisherID)
@@ -132,12 +121,7 @@ func (sApi *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) (returnErr error) {
 		return err
 	}
 
-	receipients := make([]pbft.Representative, 0)
-	for _, rep := range loadedState.Representatives {
-		if rep.ID != sApi.publisherID {
-			receipients = append(receipients, rep)
-		}
-	}
+	receipients := loadedState.GetReceipients(sApi.publisherID)
 
 	tempPrevoteMsgPool := sApi.tempPrevoteMsgPool.Get()
 	for i := 0; i < len(tempPrevoteMsgPool); i++ {
