@@ -20,17 +20,45 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
+	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/iLogger"
-	"gopkg.in/src-d/go-git.v4"
+	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
 var ErrUnsupportedUrl = errors.New("unsupported url [format: github.com/xxx/yyyy], currently github and gitlab url is supported")
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+const (
+	letterIdxBits = 6                    // 6 bits to represent a letter index
+	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
+)
+
+var src = rand.NewSource(time.Now().UnixNano())
+
+func RandStringBytesMaskImprSrc(n int) string {
+	b := make([]byte, n)
+	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
+	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
+		if remain == 0 {
+			cache, remain = src.Int63(), letterIdxMax
+		}
+		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
+			b[i] = letterBytes[idx]
+			i--
+		}
+		cache >>= letterIdxBits
+		remain--
+	}
+
+	return string(b)
+}
 
 const (
 	github         = "github.com"
@@ -44,8 +72,11 @@ type RepositoryService struct {
 func NewRepositoryService() *RepositoryService {
 	return &RepositoryService{}
 }
+
 func (gApi *RepositoryService) CloneFromRawSsh(baseSavePath string, repositoryUrl string, rawSsh []byte, password string) (ivm.ICode, error) {
-	iLogger.Info(nil, fmt.Sprintf("[IVM] Cloning Icode - url: [%s]", repositoryUrl))
+	var randomString string = RandStringBytesMaskImprSrc(40)
+
+	iLogger.Infof(nil, "[IVM] Cloning Icode - url: [%s]", repositoryUrl)
 
 	var gitUrl string
 	var girUrlErr error
@@ -61,18 +92,8 @@ func (gApi *RepositoryService) CloneFromRawSsh(baseSavePath string, repositoryUr
 	}
 
 	name := getNameFromGitUrl(gitUrl)
-
 	if name == "" {
 		return ivm.ICode{}, errors.New(fmt.Sprintf("Invalid url name [%s]", repositoryUrl))
-	}
-
-	//check file already exist
-	if _, err := os.Stat(baseSavePath + "/" + name); err == nil {
-		// if iCode already exist, remove that
-		err = os.RemoveAll(baseSavePath + "/" + name)
-		if err != nil {
-			return ivm.ICode{}, err
-		}
 	}
 
 	cloneOptions := &git.CloneOptions{
@@ -89,8 +110,7 @@ func (gApi *RepositoryService) CloneFromRawSsh(baseSavePath string, repositoryUr
 
 	}
 
-	r, err := git.PlainClone(baseSavePath+"/"+name, false, cloneOptions)
-
+	r, err := git.PlainClone(baseSavePath+"/"+name+"_"+randomString, false, cloneOptions)
 	if err != nil {
 		return ivm.ICode{}, err
 	}
@@ -122,11 +142,13 @@ func (gApi *RepositoryService) CloneFromRawSsh(baseSavePath string, repositoryUr
 		return nil
 	})
 
-	id := name + "_" + lastHeadCommit.Hash.String()
+	id := name + "_" + lastHeadCommit.Hash.String() + randomString
+
+	//check file already exist
 
 	iLogger.Info(nil, fmt.Sprintf("[IVM] ICode has successfully cloned - url: [%s], icodeID: [%s], version[%s]", repositoryUrl, id, version))
 
-	metaData := ivm.NewICode(id, name, repositoryUrl, baseSavePath+"/"+name, commitHash, version)
+	metaData := ivm.NewICode(id, name, repositoryUrl, baseSavePath+"/"+name+"_"+randomString, commitHash, version)
 	return metaData, nil
 }
 
