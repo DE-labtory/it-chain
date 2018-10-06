@@ -62,7 +62,7 @@ func TestStateApi_StartConsensus_State(t *testing.T) {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.peerNum, test.input.isRepoFull, true, pbft.IDLE_STAGE)
 		cApi.StartConsensus(test.input.block)
-		loadedState, _ := cApi.repo.Load()
+		loadedState, _ := cApi.stateRepository.Load()
 		assert.Equal(t, string(test.stage), string(loadedState.CurrentStage))
 	}
 }
@@ -103,7 +103,7 @@ func TestStateApi_HandleProposeMsg_CheckState(t *testing.T) {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.peerNum, false, false, pbft.IDLE_STAGE)
 		assert.EqualValues(t, test.err, cApi.HandleProposeMsg(test.input.proposeMsg))
-		loadedState, _ := cApi.repo.Load()
+		loadedState, _ := cApi.stateRepository.Load()
 		assert.Equal(t, string(test.stage), string(loadedState.CurrentStage))
 	}
 }
@@ -112,10 +112,10 @@ func TestStateApi_RepositoryClone(t *testing.T) {
 	// stateApi1 에는 setUpApiCondition에 의해 repo가 set된 상황
 	stateApi1 := setUpApiCondition(5, true, false, pbft.IDLE_STAGE)
 	// stateApi2 에는 stateApi1의 Repo가 주입된 상황
-	stateApi2 := NewStateApi("publish2", &pbft.PropagateService{}, nil, nil, stateApi1.repo)
+	stateApi2 := NewStateApi("publish2", &pbft.PropagateService{}, nil, nil, stateApi1.stateRepository)
 
-	stateApi1.repo.Remove()
-	_, err := stateApi2.repo.Load()
+	stateApi1.stateRepository.Remove()
+	_, err := stateApi2.stateRepository.Load()
 
 	assert.Equal(t, pbft.ErrEmptyRepo, err)
 
@@ -127,8 +127,8 @@ func TestStateApi_RepositoryClone(t *testing.T) {
 		PrevoteMsgPool:   pbft.PrevoteMsgPool{},
 		PreCommitMsgPool: pbft.PreCommitMsgPool{},
 	}
-	stateApi1.repo.Save(newState)
-	_, err2 := stateApi2.repo.Load()
+	stateApi1.stateRepository.Save(newState)
+	_, err2 := stateApi2.stateRepository.Load()
 
 	assert.Equal(t, nil, err2)
 
@@ -163,7 +163,7 @@ func TestStateApi_Reflect_TemporaryPrevoteMsgPool(t *testing.T) {
 
 	//When Propose Msg를 받지못해 Repo에 State가 없음 then sApi의 tempPool이 저장 후 State가 생겼을 때 추가
 	stateApi := setUpApiCondition(4, true, false, pbft.IDLE_STAGE)
-	stateApi.repo.Remove()
+	stateApi.stateRepository.Remove()
 
 	stateApi.HandlePrevoteMsg(tempPrevoteMsg)
 
@@ -172,7 +172,7 @@ func TestStateApi_Reflect_TemporaryPrevoteMsgPool(t *testing.T) {
 	stateApi.HandleProposeMsg(tempProposeMsg)
 	stateApi.HandlePrevoteMsg(tempPrevoteMsg2)
 
-	state, _ := stateApi.repo.Load()
+	state, _ := stateApi.stateRepository.Load()
 	assert.Equal(t, 2, len(state.PrevoteMsgPool.Get()))
 
 }
@@ -204,14 +204,14 @@ func TestStateApi_Reflect_TemporaryPreCommitMsgPool(t *testing.T) {
 
 	//When Propose Msg를 받지못해 Repo에 State가 없음 then sApi의 tempPool이 저장 후 State가 생겼을 때 추가
 	stateApi := setUpApiCondition(6, true, false, pbft.IDLE_STAGE)
-	stateApi.repo.Remove()
+	stateApi.stateRepository.Remove()
 
 	stateApi.HandlePreCommitMsg(tempPreCommitMsg)
 	assert.Equal(t, 1, len(stateApi.tempPreCommitMsgPool.Get()))
 
 	stateApi.HandleProposeMsg(tempProposeMsg)
 	stateApi.HandlePreCommitMsg(tempPreCommitMsg2)
-	state, _ := stateApi.repo.Load()
+	state, _ := stateApi.stateRepository.Load()
 	assert.Equal(t, 2, len(state.PreCommitMsgPool.Get()))
 
 }
