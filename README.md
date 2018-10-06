@@ -3,6 +3,11 @@
 
 <p align="center"><img src="./doc/images/logo.png" width="250px" height="250px"></p>
 
+## it-chain simulate video
+[![it-chain](http://img.youtube.com/vi/ivVhqk2er14/0.jpg)](https://www.youtube.com/watch?v=ivVhqk2er14 "it-chain")
+
+click image to watch video
+
 ## An Ongoing Event
 - 2018 Contributon: https://www.kosshackathon.kr/
   - it-chain: https://www.kosshackathon.kr/project
