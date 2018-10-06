@@ -20,9 +20,7 @@ import (
 	"sync"
 
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/iLogger"
-	"github.com/rs/xid"
 )
 
 type Publisher func(topic string, data interface{}) (err error) //해당 publish함수는 midgard 에서 의존성 주입을 받기 위해 interface로 작성한다.
@@ -60,7 +58,7 @@ func (ts TransferService) SendLeaderTransactions() error {
 
 	leader := ts.leaderRepository.Get()
 
-	deliverCommand, err := createGrpcDeliverCommand(SendTransactionsToLeader, transactions)
+	deliverCommand, err := common.CreateGrpcDeliverCommand(SendTransactionsToLeader, transactions)
 	if err != nil {
 		return err
 	}
@@ -77,22 +75,6 @@ func (ts TransferService) SendLeaderTransactions() error {
 	iLogger.Info(nil, "[Txpool] Transaction Has Been Sent To Leader")
 
 	return nil
-}
-
-func createGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
-
-	data, err := common.Serialize(body)
-
-	if err != nil {
-		return command.DeliverGrpc{}, err
-	}
-
-	return command.DeliverGrpc{
-		MessageId:     xid.New().String(),
-		RecipientList: make([]string, 0),
-		Body:          data,
-		Protocol:      protocol,
-	}, err
 }
 
 func (ts TransferService) clearTransactions(transactions []Transaction) {
