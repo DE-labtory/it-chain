@@ -51,11 +51,10 @@ func NewStateApi(publisherID string, propagateService *pbft.PropagateService,
 	}
 }
 
-func (sApi *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
+func (s *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 
-	parliament := sApi.parliamentRepository.Load()
+	parliament := s.parliamentRepository.Load()
 	if !parliament.IsNeedConsensus() {
-
 		return ConsensusCreateError
 	}
 
@@ -64,135 +63,162 @@ func (sApi *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 		return err
 	}
 
-	createdProposeMsg := pbft.NewProposeMsg(createdState, sApi.publisherID)
+	createdProposeMsg := pbft.NewProposeMsg(createdState, s.publisherID)
 
-	receipients := createdState.GetReceipients(sApi.publisherID)
+	receipients := createdState.GetReceipients(s.publisherID)
 
 	iLogger.Infof(nil, "[PBFT] Leader broadcasts ProposeMsg to %v", receipients)
-	if err := sApi.propagateService.BroadcastProposeMsg(*createdProposeMsg, receipients); err != nil {
+	if err := s.propagateService.BroadcastProposeMsg(*createdProposeMsg, receipients); err != nil {
 		return err
 	}
 
 	createdState.Start()
 	iLogger.Infof(nil, "[PBFT] Consensus starts - Stage: [%s]", createdState.CurrentStage)
 
-	if err := sApi.stateRepository.Save(*createdState); err != nil {
+	if err := s.stateRepository.Save(*createdState); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (sApi *StateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
+func (s *StateApi) AcceptProposal(proposal pbft.ProposeMsg) (returnErr error) {
 
-	parliament := sApi.parliamentRepository.Load()
+	parliament := s.parliamentRepository.Load()
 
 	lid := parliament.GetLeader()
-	if lid.GetID() != msg.SenderID {
+	if lid.GetID() != proposal.SenderID {
 		return pbft.InvalidLeaderIdError
 	}
 
-	builtState := pbft.BuildState(msg)
+	builtState := pbft.BuildState(proposal)
 
-	receipients := builtState.GetReceipients(sApi.publisherID)
+	receipients := builtState.GetReceipients(s.publisherID)
 
 	iLogger.Debugf(nil, "[PBFT] Representative broadcasts PreVoteMsg to %v", receipients)
-	prevoteMsg := pbft.NewPrevoteMsg(builtState, sApi.publisherID)
-	if err := sApi.propagateService.BroadcastPrevoteMsg(*prevoteMsg, receipients); err != nil {
+	prevoteMsg := pbft.NewPrevoteMsg(builtState, s.publisherID)
+	if err := s.propagateService.BroadcastPrevoteMsg(*prevoteMsg, receipients); err != nil {
 		return err
 	}
 
 	builtState.ToPrevoteStage()
 	logger.Infof(nil, "[PBFT] Prevoted - Stage: [%s]", builtState.CurrentStage)
 
-	if err := sApi.stateRepository.Save(*builtState); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (sApi *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) (returnErr error) {
-
-	loadedState, err := sApi.stateRepository.Load()
-	if err != nil {
-		sApi.tempPrevoteMsgPool.Save(&msg)
-		iLogger.Debugf(nil, "[PBFT] %s while handling PreVote message", err)
-		return err
-	}
-
-	receipients := loadedState.GetReceipients(sApi.publisherID)
-
-	tempPrevoteMsgPool := sApi.tempPrevoteMsgPool.Get()
-	for i := 0; i < len(tempPrevoteMsgPool); i++ {
-		loadedState.PrevoteMsgPool.Save(&tempPrevoteMsgPool[i])
-	}
-	sApi.tempPrevoteMsgPool.RemoveAllMsgs()
-
-	if err := loadedState.SavePrevoteMsg(&msg); err != nil {
-		return err
-	}
-
 	defer func() {
-		if err := sApi.stateRepository.Save(loadedState); err != nil {
+		if err := s.stateRepository.Save(*builtState); err != nil {
 			returnErr = err
 		}
 	}()
 
-	if loadedState.CheckPrevoteCondition() {
-		if loadedState.CurrentStage == pbft.PREVOTE_STAGE {
-			iLogger.Infof(nil, "[PBFT] Representative broadcasts PreCommitMsg to %v", receipients)
-			newCommitMsg := pbft.NewPreCommitMsg(&loadedState, sApi.publisherID)
-			if err := sApi.propagateService.BroadcastPreCommitMsg(*newCommitMsg, receipients); err != nil {
-				return err
-			}
+	return returnErr
+}
 
-			loadedState.ToPreCommitStage()
-			iLogger.Infof(nil, "[PBFT] PreCommitted - Stage: [%s]", loadedState.CurrentStage)
+func (s *StateApi) ReceivePrevote(msg pbft.PrevoteMsg) (returnErr error) {
+
+	s.tempPrevoteMsgPool.Save(&msg)
+
+	loadedState, err := s.stateRepository.Load()
+	if err != nil {
+		iLogger.Infof(nil, "[PBFT] Cannot receive Prevote message - Error: [%s]", err)
+		return nil
+	}
+
+	// todo : refact to new function (UpdateMsgPool)
+	for _, poolMsg := range s.tempPrevoteMsgPool.Get() {
+		if err := loadedState.PrevoteMsgPool.Save(&poolMsg); err != nil {
+			iLogger.Errorf(nil, "[PBFT] Saving prevote msg is failed - Error: [%s]", err)
 		}
 	}
+	s.tempPrevoteMsgPool.RemoveAllMsgs()
+
+	loadedState = s.checkPrevote(loadedState)
+	loadedState = s.checkPreCommit(loadedState)
+
+	defer func() {
+		if loadedState.StateID.ID == "" {
+			returnErr = err
+		} else {
+			if err := s.stateRepository.Save(loadedState); err != nil {
+				returnErr = err
+			}
+		}
+	}()
 
 	return returnErr
 }
 
-func (sApi *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
+func (s *StateApi) ReceivePreCommit(msg pbft.PreCommitMsg) error {
 
-	loadedState, err := sApi.stateRepository.Load()
+	s.tempPreCommitMsgPool.Save(&msg)
+
+	loadedState, err := s.stateRepository.Load()
 	if err != nil {
-		sApi.tempPreCommitMsgPool.Save(&msg)
-		iLogger.Debug(nil, "[PBFT] State repository is empty when handling PreCommit message")
-		return err
-	}
-
-	tempPreCommitMsgPool := sApi.tempPreCommitMsgPool.Get()
-	for i := 0; i < len(tempPreCommitMsgPool); i++ {
-		loadedState.PreCommitMsgPool.Save(&tempPreCommitMsgPool[i])
-	}
-	sApi.tempPreCommitMsgPool.RemoveAllMsgs()
-
-	if err := loadedState.SavePreCommitMsg(&msg); err != nil {
-		return err
-	}
-
-	if loadedState.CheckPreCommitCondition() {
-		e := event.ConsensusFinished{
-			Seal: loadedState.Block.Seal,
-			Body: loadedState.Block.Body,
-		}
-
-		if err := sApi.eventService.Publish("block.confirm", e); err != nil {
-			return err
-		}
-		iLogger.Debug(nil, "[PBFT] Published block confirm event")
-
-		sApi.stateRepository.Remove()
-		logger.Infof(nil, "[PBFT] Consensus is finished.")
+		iLogger.Infof(nil, "[PBFT] Cannot receive PreCommit message - Error: [%s]", err)
 		return nil
 	}
 
-	if err := sApi.stateRepository.Save(loadedState); err != nil {
+	// todo : refact to new function (UpdateMsgPool)
+	for _, poolMsg := range s.tempPreCommitMsgPool.Get() {
+		if err := loadedState.SavePreCommitMsg(&poolMsg); err != nil {
+			iLogger.Errorf(nil, "[PBFT] Saving precommit msg is failed - Error: [%s]", err)
+		}
+	}
+	s.tempPreCommitMsgPool.RemoveAllMsgs()
+
+	loadedState = s.checkPreCommit(loadedState)
+
+	if loadedState.StateID.ID == "" {
+		s.stateRepository.Remove()
+		logger.Infof(nil, "[PBFT] Consensus is finished.")
+
+		return nil
+	}
+
+	if s.stateRepository.Save(loadedState); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (s *StateApi) checkPrevote(state pbft.State) pbft.State {
+
+	if state.CurrentStage != pbft.PREVOTE_STAGE {
+		iLogger.Debugf(nil, "[PBFT] Already prevoted!")
+		return state
+	}
+
+	receipients := state.GetReceipients(s.publisherID)
+
+	if state.CheckPrevoteCondition() {
+		commitMsg := pbft.NewPreCommitMsg(&state, s.publisherID)
+		if err := s.propagateService.BroadcastPreCommitMsg(*commitMsg, receipients); err != nil {
+			iLogger.Errorf(nil, "[PBFT] Broadcating precommit is failed - Error: [%s]", err)
+		}
+
+		state.ToPreCommitStage()
+		iLogger.Infof(nil, "[PBFT] PreCommitted - Stage: [%s]", state.CurrentStage)
+	}
+
+	return state
+}
+
+func (s *StateApi) checkPreCommit(state pbft.State) pbft.State {
+
+	if state.CheckPreCommitCondition() {
+		e := event.ConsensusFinished{
+			Seal: state.Block.Seal,
+			Body: state.Block.Body,
+		}
+
+		if err := s.eventService.Publish("block.confirm", e); err != nil {
+			iLogger.Errorf(nil, "[PBFT] Publishing block confirm event is failed - Error: [%s]", err)
+			return state
+		}
+		iLogger.Debug(nil, "[PBFT] Published block confirm event")
+
+		return pbft.State{}
+	}
+
+	return state
 }
