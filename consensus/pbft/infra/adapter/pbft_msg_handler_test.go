@@ -117,7 +117,7 @@ func TestPbftMsgHandler_HandleGrpcMsgCommand(t *testing.T) {
 
 func newMockStateApiForPbftMsgHandler(t *testing.T) adapter.StateMsgApi {
 	mockApi := &mock.StateApi{}
-	mockApi.HandleProposeMsgFunc = func(msg pbft.ProposeMsg) error {
+	mockApi.AcceptProposalFunc = func(msg pbft.ProposeMsg) error {
 		if msg.SenderID == "sender1" {
 			assert.NotNil(t, msg.Representative)
 			assert.NotNil(t, msg.ProposedBlock)
@@ -126,7 +126,7 @@ func newMockStateApiForPbftMsgHandler(t *testing.T) adapter.StateMsgApi {
 
 		return errors.New("AcceptProposal error")
 	}
-	mockApi.HandlePrevoteMsgFunc = func(msg pbft.PrevoteMsg) error {
+	mockApi.ReceivePrevoteFunc = func(msg pbft.PrevoteMsg) error {
 		if msg.SenderID == "sender2" {
 			assert.NotNil(t, msg.BlockHash)
 			return nil
@@ -134,7 +134,7 @@ func newMockStateApiForPbftMsgHandler(t *testing.T) adapter.StateMsgApi {
 
 		return errors.New("ReceivePrevote error")
 	}
-	mockApi.HandlePreCommitMsgFunc = func(msg pbft.PreCommitMsg) error {
+	mockApi.ReceivePreCommitFunc = func(msg pbft.PreCommitMsg) error {
 		if msg.SenderID == "sender3" {
 			return nil
 		}

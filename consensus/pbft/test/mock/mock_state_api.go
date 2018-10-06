@@ -21,26 +21,26 @@ import (
 )
 
 type StateApi struct {
-	StartConsensusFunc     func(proposedBlock pbft.ProposedBlock) error
-	HandleProposeMsgFunc   func(msg pbft.ProposeMsg) error
-	HandlePrevoteMsgFunc   func(msg pbft.PrevoteMsg) error
-	HandlePreCommitMsgFunc func(msg pbft.PreCommitMsg) error
+	StartConsensusFunc   func(proposedBlock pbft.ProposedBlock) error
+	AcceptProposalFunc   func(msg pbft.ProposeMsg) error
+	ReceivePrevoteFunc   func(msg pbft.PrevoteMsg) error
+	ReceivePreCommitFunc func(msg pbft.PreCommitMsg) error
 }
 
 func (mca *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 	return mca.StartConsensusFunc(proposedBlock)
 }
 
-func (mca *StateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
-	return mca.HandleProposeMsgFunc(msg)
+func (mca *StateApi) AcceptProposal(msg pbft.ProposeMsg) error {
+	return mca.AcceptProposalFunc(msg)
 }
 
-func (mca *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) error {
+func (mca *StateApi) ReceivePrevote(msg pbft.PrevoteMsg) error {
 
-	return mca.HandlePrevoteMsgFunc(msg)
+	return mca.ReceivePrevoteFunc(msg)
 }
 
-func (mca *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
+func (mca *StateApi) ReceivePreCommit(msg pbft.PreCommitMsg) error {
 
-	return mca.HandlePreCommitMsgFunc(msg)
+	return mca.ReceivePreCommitFunc(msg)
 }
