@@ -21,6 +21,9 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+
+	"github.com/it-chain/engine/common"
+
 	"fmt"
 	"io"
 	"math/big"
@@ -30,6 +33,10 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/it-chain/engine/common/command"
+
+	"github.com/rs/xid"
 )
 
 func CreateDirIfMissing(dirPath string) error {
@@ -173,4 +180,20 @@ func FindEarliestString(list []string) string {
 	}
 
 	return largerOne
+}
+
+func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
+
+	data, err := common.Serialize(body)
+
+	if err != nil {
+		return command.DeliverGrpc{}, err
+	}
+
+	return command.DeliverGrpc{
+		MessageId:     xid.New().String(),
+		RecipientList: make([]string, 0),
+		Body:          data,
+		Protocol:      protocol,
+	}, err
 }

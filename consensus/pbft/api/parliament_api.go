@@ -98,7 +98,7 @@ func (p *ParliamentApi) RequestLeader(connectionId string) {
 		return
 	}
 
-	msg, _ := CreateGrpcDeliverCommand("RequestLeaderProtocol", &pbft.RequestLeaderMessage{})
+	msg, _ := common.CreateGrpcDeliverCommand("RequestLeaderProtocol", &pbft.RequestLeaderMessage{})
 	msg.RecipientList = append(msg.RecipientList, connectionId)
 
 	p.eventService.Publish("message.deliver", msg)
@@ -111,7 +111,7 @@ func (p *ParliamentApi) DeliverLeader(connectionId string) {
 		p.UpdateLeader(p.nodeId)
 	}
 
-	msg, _ := CreateGrpcDeliverCommand("LeaderDeliveryProtocol", &pbft.LeaderDeliveryMessage{Leader: leader})
+	msg, _ := common.CreateGrpcDeliverCommand("LeaderDeliveryProtocol", &pbft.LeaderDeliveryMessage{Leader: leader})
 	msg.RecipientList = append(msg.RecipientList, connectionId)
 
 	p.eventService.Publish("message.deliver", msg)
