@@ -124,7 +124,7 @@ func newMockStateApiForPbftMsgHandler(t *testing.T) adapter.StateMsgApi {
 			return nil
 		}
 
-		return errors.New("HandleProposeMsg error")
+		return errors.New("AcceptProposal error")
 	}
 	mockApi.HandlePrevoteMsgFunc = func(msg pbft.PrevoteMsg) error {
 		if msg.SenderID == "sender2" {
@@ -132,14 +132,14 @@ func newMockStateApiForPbftMsgHandler(t *testing.T) adapter.StateMsgApi {
 			return nil
 		}
 
-		return errors.New("HandlePrevoteMsg error")
+		return errors.New("ReceivePrevote error")
 	}
 	mockApi.HandlePreCommitMsgFunc = func(msg pbft.PreCommitMsg) error {
 		if msg.SenderID == "sender3" {
 			return nil
 		}
 
-		return errors.New("HandlePreCommitMsg error")
+		return errors.New("ReceivePreCommit error")
 	}
 
 	return mockApi

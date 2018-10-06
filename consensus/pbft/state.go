@@ -32,9 +32,9 @@ const (
 )
 
 var ErrDecodingEmptyBlock = errors.New("Empty Block decoding failed")
-var ErrPrevoteMsgNil = errors.New("Prevote msg is nil")
+var ErrPrevoteMsgNil = errors.New("ReceivePrevote msg is nil")
 var ErrBlockHashNil = errors.New("Block hash is nil")
-var ErrPreCommitMsgNil = errors.New("PreCommit msg is nil")
+var ErrPreCommitMsgNil = errors.New("ReceivePreCommit msg is nil")
 var ErrStateIdNotSame = errors.New("State ID is not same")
 
 type ProposedBlock struct {
