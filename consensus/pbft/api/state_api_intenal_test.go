@@ -102,7 +102,7 @@ func TestStateApi_HandleProposeMsg_CheckState(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.peerNum, false, false, pbft.IDLE_STAGE)
-		assert.EqualValues(t, test.err, cApi.HandleProposeMsg(test.input.proposeMsg))
+		assert.EqualValues(t, test.err, cApi.AcceptProposal(test.input.proposeMsg))
 		loadedState, _ := cApi.stateRepository.Load()
 		assert.Equal(t, string(test.stage), string(loadedState.CurrentStage))
 	}
@@ -165,12 +165,12 @@ func TestStateApi_Reflect_TemporaryPrevoteMsgPool(t *testing.T) {
 	stateApi := setUpApiCondition(4, true, false, pbft.IDLE_STAGE)
 	stateApi.stateRepository.Remove()
 
-	stateApi.HandlePrevoteMsg(tempPrevoteMsg)
+	stateApi.ReceivePrevote(tempPrevoteMsg)
 
 	assert.Equal(t, 1, len(stateApi.tempPrevoteMsgPool.Get()))
 
-	stateApi.HandleProposeMsg(tempProposeMsg)
-	stateApi.HandlePrevoteMsg(tempPrevoteMsg2)
+	stateApi.AcceptProposal(tempProposeMsg)
+	stateApi.ReceivePrevote(tempPrevoteMsg2)
 
 	state, _ := stateApi.stateRepository.Load()
 	assert.Equal(t, 2, len(state.PrevoteMsgPool.Get()))
@@ -206,13 +206,23 @@ func TestStateApi_Reflect_TemporaryPreCommitMsgPool(t *testing.T) {
 	stateApi := setUpApiCondition(6, true, false, pbft.IDLE_STAGE)
 	stateApi.stateRepository.Remove()
 
-	stateApi.HandlePreCommitMsg(tempPreCommitMsg)
+	stateApi.ReceivePreCommit(tempPreCommitMsg)
 	assert.Equal(t, 1, len(stateApi.tempPreCommitMsgPool.Get()))
 
-	stateApi.HandleProposeMsg(tempProposeMsg)
-	stateApi.HandlePreCommitMsg(tempPreCommitMsg2)
+	stateApi.AcceptProposal(tempProposeMsg)
+	stateApi.ReceivePreCommit(tempPreCommitMsg2)
 	state, _ := stateApi.stateRepository.Load()
 	assert.Equal(t, 2, len(state.PreCommitMsgPool.Get()))
+
+}
+
+// todo
+func TestStateApi_checkPrevote(t *testing.T) {
+
+}
+
+// todo
+func TestStateApi_checkPreCommit(t *testing.T) {
 
 }
 

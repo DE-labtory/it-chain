@@ -29,9 +29,9 @@ var DeserializingError = errors.New("Message deserializing is failed.")
 var UndefinedProtocolError = errors.New("Received Undefined protocol message")
 
 type StateMsgApi interface {
-	HandleProposeMsg(msg pbft.ProposeMsg) error
-	HandlePrevoteMsg(msg pbft.PrevoteMsg) error
-	HandlePreCommitMsg(msg pbft.PreCommitMsg) error
+	AcceptProposal(msg pbft.ProposeMsg) error
+	ReceivePrevote(msg pbft.PrevoteMsg) error
+	ReceivePreCommit(msg pbft.PreCommitMsg) error
 }
 
 type PbftMsgHandler struct {
@@ -58,7 +58,7 @@ func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) error
 			iLogger.Errorf(nil, "[PBFT] %s", DeserializingError.Error())
 		}
 
-		if err := p.sApi.HandleProposeMsg(msg); err != nil {
+		if err := p.sApi.AcceptProposal(msg); err != nil {
 			iLogger.Errorf(nil, "[PBFT] %s", err.Error())
 		}
 
@@ -70,7 +70,7 @@ func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) error
 			iLogger.Errorf(nil, "[PBFT] %s", DeserializingError.Error())
 		}
 
-		if err := p.sApi.HandlePrevoteMsg(msg); err != nil {
+		if err := p.sApi.ReceivePrevote(msg); err != nil {
 			iLogger.Errorf(nil, "[PBFT] %s", err.Error())
 		}
 
@@ -82,7 +82,7 @@ func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) error
 			iLogger.Errorf(nil, "[PBFT] %s", DeserializingError.Error())
 		}
 
-		if err := p.sApi.HandlePreCommitMsg(msg); err != nil {
+		if err := p.sApi.ReceivePreCommit(msg); err != nil {
 			iLogger.Errorf(nil, "[PBFT] %s", err.Error())
 		}
 

@@ -194,7 +194,7 @@ func TestStateApi_HandleProposeMsg(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.peerNum, test.input.isRepoFull, true, pbft.PROPOSE_STAGE)
-		assert.EqualValues(t, test.err, cApi.HandleProposeMsg(test.input.proposeMsg))
+		assert.EqualValues(t, test.err, cApi.AcceptProposal(test.input.proposeMsg))
 
 	}
 }
@@ -249,7 +249,7 @@ func TestStateApi_HandlePrevoteMsg(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.peerNum, test.input.isRepoFull, true, pbft.IDLE_STAGE)
-		assert.EqualValues(t, test.err, cApi.HandlePrevoteMsg(test.input.prevoteMsg))
+		assert.EqualValues(t, test.err, cApi.ReceivePrevote(test.input.prevoteMsg))
 	}
 
 }
@@ -306,7 +306,7 @@ func TestStateApi_HandlePreCommitMsg(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.peerNum, test.input.isRepoFull, test.input.isNormalBlock, pbft.PREVOTE_STAGE)
-		assert.EqualValues(t, test.err, cApi.HandlePreCommitMsg(test.input.commitMsg))
+		assert.EqualValues(t, test.err, cApi.ReceivePreCommit(test.input.commitMsg))
 	}
 }
 
