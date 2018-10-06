@@ -131,7 +131,7 @@ func (e *ElectionApi) isFullyVoted() bool {
 
 //1. Start random timeout
 //2. timed out! alter state to 'candidate'
-//3. while ticking, count down leader repo left time
+//3. while ticking, count down leader stateRepository left time
 //4. Send message having 'RequestVoteProtocol' to other node
 func (e *ElectionApi) ElectLeaderWithRaft() {
 	parliament := e.parliamentRepository.Load()
