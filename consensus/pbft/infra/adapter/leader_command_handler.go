@@ -20,14 +20,18 @@ import (
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/engine/consensus/pbft/api"
 )
 
-type LeaderCommandHandler struct {
-	parliamentApi *api.ParliamentApi
+type LeaderDeliveryParliamentApi interface {
+	DeliverLeader(connectionId string)
+	UpdateLeader(nodeId string) error
 }
 
-func NewLeaderCommandHandler(parliamentApi *api.ParliamentApi) *LeaderCommandHandler {
+type LeaderCommandHandler struct {
+	parliamentApi LeaderDeliveryParliamentApi
+}
+
+func NewLeaderCommandHandler(parliamentApi LeaderDeliveryParliamentApi) *LeaderCommandHandler {
 	return &LeaderCommandHandler{
 		parliamentApi: parliamentApi,
 	}
