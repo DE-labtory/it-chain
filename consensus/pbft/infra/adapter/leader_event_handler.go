@@ -17,7 +17,6 @@
 package adapter
 
 import (
-	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/iLogger"
@@ -35,18 +34,6 @@ func NewLeaderEventHandler(electionApi *api.ElectionApi) *LeaderEventHandler {
 
 func (l *LeaderEventHandler) HandlerLeaderDeletedEvent(_ event.LeaderDeleted) {
 	iLogger.Infof(nil, "[PBFT] Leader Deleted, Start Elect Leader With RAFT")
-
-	representatives := l.electionApi.GetParliament().GetRepresentatives()
-
-	ids := make([]string, 0)
-	for _, rep := range representatives {
-		ids = append(ids, rep.ID)
-	}
-
-	if len(representatives) < 3 {
-		l.electionApi.SetLeader(common.FindEarliestString(ids))
-		return
-	}
 
 	go l.electionApi.ElectLeaderWithRaft()
 }

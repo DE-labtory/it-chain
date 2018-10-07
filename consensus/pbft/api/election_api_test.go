@@ -237,6 +237,14 @@ func TestElectionApi_GetVoteCount(t *testing.T) {
 	assert.Equal(t, api.GetVoteCount(), 0)
 }
 
+func TestElectionApi_IsElectionNeed(t *testing.T) {
+
+}
+
+func TestElectionApi_ElectLeaderWithLargestRepresentativeId(t *testing.T) {
+
+}
+
 func setElectionApi() *api.ElectionApi {
 
 	electionService := pbft.NewElectionService("1", 30, pbft.NORMAL, 0)

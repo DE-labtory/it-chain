@@ -136,6 +136,11 @@ func (e *ElectionApi) isFullyVoted() bool {
 //3. while ticking, count down leader repo left time
 //4. Send message having 'RequestVoteProtocol' to other node
 func (e *ElectionApi) ElectLeaderWithRaft() {
+	parliament := e.parliamentRepository.Load()
+	if !parliament.IsNeedConsensus() {
+		e.ElectLeaderWithLargestRepresentativeId()
+		return
+	}
 
 	e.ElectionService.SetState(pbft.TICKING)
 	e.ElectionService.InitLeftTime()
@@ -158,6 +163,19 @@ func (e *ElectionApi) ElectLeaderWithRaft() {
 			return
 		}
 	}
+}
+
+func (e *ElectionApi) ElectLeaderWithLargestRepresentativeId() {
+	representatives := e.parliamentRepository.Load().GetRepresentatives()
+
+	// TODO: This logic needs to hide into domain
+	ids := make([]string, 0)
+	for _, rep := range representatives {
+		ids = append(ids, rep.ID)
+	}
+
+	largestId := common.FindEarliestString(ids)
+	e.SetLeader(largestId)
 }
 
 func (e *ElectionApi) EndRaft() {
