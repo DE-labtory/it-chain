@@ -17,6 +17,7 @@
 package pbft_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/it-chain/engine/consensus/pbft"
@@ -158,6 +159,43 @@ func TestPreCommitMsgPool_RemoveAllMsgs(t *testing.T) {
 	assert.Equal(t, 0, len(cPool.Get()))
 }
 
+func TestState_GetReceipients(t *testing.T) {
+	// given
+	initRepresentatives := make([]pbft.Representative, 0)
+
+	for i := 0; i < 3; i++ {
+		initRepresentatives = append(initRepresentatives, pbft.NewRepresentative(fmt.Sprint("s", i)))
+	}
+
+	c := pbft.State{
+		StateID:         pbft.NewStateID("c1"),
+		Representatives: initRepresentatives,
+		Block: pbft.ProposedBlock{
+			Seal: make([]byte, 0),
+		},
+		CurrentStage:     pbft.IDLE_STAGE,
+		PrevoteMsgPool:   pbft.NewPrevoteMsgPool(),
+		PreCommitMsgPool: pbft.NewPreCommitMsgPool(),
+	}
+
+	// case 1 : publisher is not in Representatives
+	receipients := c.GetReceipients("s4")
+
+	// then
+	assert.Equal(t, c.Representatives, receipients)
+
+	// case 2 : publisher is in Representatives
+	receipients = c.GetReceipients("s2")
+
+	correctReceipients := make([]pbft.Representative, 0)
+	for i := 0; i < 2; i++ {
+		correctReceipients = append(correctReceipients, pbft.NewRepresentative(fmt.Sprint("s", i)))
+	}
+
+	// then
+	assert.Equal(t, correctReceipients, receipients)
+
+}
 func TestState_SavePrevoteMsg(t *testing.T) {
 	// given
 	c := pbft.State{
