@@ -19,13 +19,13 @@ It-chain이 이루고자 하는 것은 단순히 하나의 프로젝트에 그�
 ## 3. 시스템 구성 및 아키텍처
 
 ### It-chain Network 아키텍처
-![it-chain network 이미지](https://github.com/it-chain/engine/blob/develop/doc/images/it-chain-network.png)
+![it-chain network 이미지](https://raw.githubusercontent.com/it-chain/engine/develop/doc/images/it-chain-network.png)
 
 It-chain은 CA(Certificate Authority)를 기반으로한 프라이빗(Private) 블록체인(Blockchain)이다. It-chain 네트워크는 리더(Leader)와 일반 노드로 구성되며, 각 노드들은 네트워크에 참여한 모든 노드들과 gRPC로 연결되어 있다. 이 때 리더 노드는 블록 생성과 합의 알고리즘의 시작을 담당하며 주기적으로 교체된다. 나머지 일반 노드들은 리더가 생성한 블록을 검증 및 합의 하며, 클라이언트 어플리케이션(Client Application)으로 부터 전달받은 트랜잭션(Transaction)에 서명(Sign)하여 리더에게 전달한다. 클라이언트 어플리케이션(Client Application)은 It-chain 네트워크 중 임의의 노드에게 요청할 수 있다.
 
 ### It-chain Node아키텍처
 
-![it-chain node 아키텍쳐 이미지](https://github.com/it-chain/engine/blob/develop/doc/images/it-chain-node-architecrue.png)
+![it-chain node 아키텍쳐 이미지](https://github.com/it-chain/engine/blob/develop/doc/images/it-chain-node-architecture.png?raw=true)
 
 It-chain 노드 수준 아키텍처 모델은 위 그림과 같다. it-chain  은 6개의 독립적으로 동작하는 핵심 컴포넌트(Component)들로 구성되어 있으며, 각각은 AMQP(Asynchronous Message Queue Protocol)를 통해 커뮤니케이션한다. AMQP는 이벤트 버스 커넥터(Event Bus Connector)이며, 게이트웨이로 들어온 외부 메세지(Message)에 맞춰 내부 핵심 컴포넌트들을 위한 이벤트(Event)를 생성하여 배포한다. 각 핵심 컴포넌트들은 자신들이 이미 등록한 이벤트를 받아서 동작한다. AMQP의 구체적인 구현체는 RabbitMQ  를 사용한다.
 
@@ -45,7 +45,7 @@ it-chain  의 각 컴포넌트는 동작에 필요한 데이터를 직접 갖고
 
 ### Consensus
 
-![Consensus이미지](https://github.com/it-chain/engine/blob/develop/doc/images/pbtf.png)
+![Consensus이미지](https://raw.githubusercontent.com/it-chain/engine/develop/doc/images/pbft.png)
 
 컨센서스 컴포넌트(Consesus Component)는  블록체인 컴포넌트(Blockchain Component)  에서 생성된 블록(Block)에 대해, P2P 네트워크의 구성원들이 블록의 저장 순서에 대해 합의하는 역할을 수행한다. It-chain 에서 이러한 합의 과정은 PBFT 합의 알고리즘을 통해 구현되며, PBFT의 리더는 RAFT 리더 선출 알고리즘을 통해 선출된다.
 
@@ -55,13 +55,13 @@ it-chain  의 각 컴포넌트는 동작에 필요한 데이터를 직접 갖고
 
 gRPC-Gateway는 it-chain 네트워크에 참여하는 노드 사이의 통신을 담당한다. gRPC-Gateway는 gRPC Bi-stream을 통해 네트워크의 모든 노드와 커넥션(Connection)을 유지하며, 커넥션(Connection)을 관리한다.
 
-![gRPC-Gateway 이미지](https://github.com/it-chain/engine/blob/develop/doc/images/grpc-gateway.png)
+![gRPC-Gateway 이미지](https://raw.githubusercontent.com/it-chain/engine/develop/doc/images/grpc-gateway.png)
 
 gRPC-Gateway는 같은 노드의 다른 Component와 AMQP(Async Message Queue Protocol)를 사용하여 통신하며, 커넥션(Connection) 관련 기능을 처리하는 Connection API와 다른 노드에게 메세지(Message) 전송요청을 처리하는 Message API가 요청을 받아 처리한다. Connection API와 Message API 모두 gRPC Host service를 사용하여 노드와의 커넥션(Connection)을 관리, 노드에게 메세지(Message)전송 기능을 수행한다.
 
 ### API-Gateway
 
-![API-Gateway 이미지](https://github.com/it-chain/engine/blob/develop/doc/images/api-gateway.png)
+![API-Gateway 이미지](https://raw.githubusercontent.com/it-chain/engine/develop/doc/images/api-gateway.png)
 
 API-Gateway는 클라이언트(Client)로부터의 HTTP 요청을 처리한다. 클라이언트(Client)의 요청은 크게 데이터 변경(Create, Update, Delete)과 조회(Query)로 나뉘어 진다. Query API Handler는 조회(Query)요청을 받아 리포지토리(Repository)로 부터 블록(Block), 트랜잭션(Transaction), ICode, 커넥션(Connection)을 조회하는 기능을 수행한다. API Handler는 데이터 변경요청을 받아 해당 컴포넌트에게 트랜잭션 전송(Transaction Submit), ICode 디플로이(ICode Deploy)같은 요청을 AMQP로 전달한다.
 
@@ -69,15 +69,15 @@ AMQP Handler는 다른 컴포넌트들로 부터 블록(Block), 커넥션(Connec
 
 ### Blockchain
 
-![Blockchain 이미지](https://github.com/it-chain/engine/blob/develop/doc/images/blockchain.png)
+![Blockchain 이미지](https://raw.githubusercontent.com/it-chain/engine/develop/doc/images/blockchain.png)
 
 블록체인 컴포넌트(Blockchain Component)는 블록의 생성, 저장, 블록체인 동기화 등의 기능을 수행한다. AMQP를 통해 여러 컴포넌트와 협업하며 기능을 수행하는데, 개략적으로 트랜잭션 풀 컴포넌트(TxPool Component)로부터 받은 트랜잭션(Transaction)을 활용하여 블록을 생성하고, 합의를 위해 블록을 컨센서스 컴포넌트(Consensus Component)에 전달한다. 이후 컨센서스 컴포넌트(Consensus Component)로부터 합의를 마친 블록을 전달받아, 검증 과정을 거친 후 저장한다.
 
-![Blockchain 이미지2](https://github.com/it-chain/engine/blob/develop/doc/images/blockchain2.png)
+![Blockchain 이미지2](https://raw.githubusercontent.com/it-chain/engine/develop/doc/images/blockchain2.png)
 
 자신이 리더 노드일 경우, 트랜잭션 풀 컴포넌트(TxPool Component)로부터 요청을 받아 블록을 생성하고, 컨센서스 컴포넌트(Consensus Component)에 블록의 합의를 요청한다. 컨센서스 컴포넌트(Consensus Component)에서 합의를 완료하면, 네트워크 내 모든 노드는 해당 블록을 블록체인에 저장한다.
 
-![Blockchain 이미지3](https://github.com/it-chain/engine/blob/develop/doc/images/blockchain3.png)
+![Blockchain 이미지3](https://raw.githubusercontent.com/it-chain/engine/develop/doc/images/blockchain3.png)
 
 블록체인 동기화는 네트워크 내 모든 노드의 블록체인을 동일하게 하기 위한 과정으로, 새로운 노드가 네트워크에 참여할 시 다른 노드와의 블록체인 동기화를 진행한다.
 
@@ -85,14 +85,14 @@ AMQP Handler는 다른 컴포넌트들로 부터 블록(Block), 커넥션(Connec
 
 vm 컴포넌트 (ICode Virtual Machine Component) 는 it-chain의 스마트 컨트랙트인 ICode를 실행시키고 관리하는 컴포넌트이다. ICode Container Service를 이용하여 ICode들을 각각의 독립된 도커(Docker)환경에서 관리하고, Git Service를 통해서 ICode를 GitHub, GitLab으로부터 디플로이(Deploy)한다. 디플로이(Deploy)는 Git SSH 프로토콜과 HTTPS 를 지원한다. Git SSH프로토콜을 이용하여 디플로이(Deploy)할때는 선택적으로 SSH 키(Key)를 이용할 수 있다.
 
-![Ivm 이미지](https://github.com/it-chain/engine/blob/develop/doc/images/ivm.png)
+![Ivm 이미지](https://raw.githubusercontent.com/it-chain/engine/develop/doc/images/ivm.png)
 
 각각의 ICode는 디플로이(Deploy) 할 때 해당 ICode의 Git URL과 헤드(Head)의 커밋 해시(commit hash)를 이용하여 ICode 아이디를 부여한다. 따라서 어느 노드에서 실행시켜도 같은 버전 ICode를 디플로이(Deploy) 한다면 같은 ICode 아이디를 갖게된다.  
 IVM은 블록체인 컴포넌트(Blockchain Component)의 블록 커밋(Block Committed) 이벤트를 받으면 해당 블록 내 트랜잭션(Transaction)들의 ICode를 실행시킨다. 또한 상태 쿼리(State Query) 요청에 의해 현재 상태(State)의 값을 조회하기 위해 ICode를 실행 시킨다.
 
 ### Txpool
 
-![Txpool 이미지](https://github.com/it-chain/engine/blob/develop/doc/images/txpool.png)
+![Txpool 이미지](https://raw.githubusercontent.com/it-chain/engine/develop/doc/images/txpool.png)
 
 Txpool은 제출(Submitted)된 트랜잭션(Transaction)을 검증하고, 자신이 리더 노드일 경우 블록체인 컴포넌트(Blockchain Component)에게 블록 생성 요청을, 일반 노드일 경우 리더 노드에게 트랜잭션(Transaction)을 전달해주는 기능을 수행한다. API-Gateway로 제출(Submitted)된 트랜잭션(Transaction)은 AMQP로 Txpool에 전달되고, Transaction API에 의해 검증 후, Transaction pool에 저장된다. Txpool에는 2개의 배치 스레드(Batch Thread)가 실행되고 있는데, 각각은 Transaction pool에서 트랜잭션(Transaction)을 가져와 리더 노드에게 전송 혹은 블록 생성 요청을 한다.
 

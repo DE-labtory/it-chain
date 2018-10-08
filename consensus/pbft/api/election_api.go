@@ -21,11 +21,9 @@ import (
 	"time"
 
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/iLogger"
-	"github.com/rs/xid"
 )
 
 type ElectionApi struct {

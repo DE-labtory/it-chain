@@ -22,8 +22,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/it-chain/engine/common"
-
 	"fmt"
 	"io"
 	"math/big"
@@ -184,7 +182,7 @@ func FindEarliestString(list []string) string {
 
 func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
 
-	data, err := common.Serialize(body)
+	data, err := Serialize(body)
 
 	if err != nil {
 		return command.DeliverGrpc{}, err
