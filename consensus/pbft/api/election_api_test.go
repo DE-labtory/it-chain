@@ -211,9 +211,11 @@ func TestGenRandomInRange(t *testing.T) {
 	v2 := pbft.GenRandomInRange(0, 10)
 	v3 := pbft.GenRandomInRange(0, 10)
 
-	t.Logf("%v", v1)
-	t.Logf("%v", v2)
-	t.Logf("%v", v3)
+	nums := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+
+	assert.Contains(t, nums, v1)
+	assert.Contains(t, nums, v2)
+	assert.Contains(t, nums, v3)
 }
 
 func TestElectionApi_GetCandidate(t *testing.T) {

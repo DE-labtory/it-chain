@@ -55,6 +55,7 @@ func TestLeader_GetID(t *testing.T) {
 
 	// 3. get leader id
 	ourLeader := new_p.GetLeader()
+	ourLeader.LeaderId = "hero"
 	leaderId := ourLeader.GetID()
 	assert.Equal(t, leaderId, "hero")
 }
