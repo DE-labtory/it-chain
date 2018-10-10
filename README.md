@@ -20,13 +20,14 @@ The it-chain is an easily modifiable block chain that can fit into any domain. T
 
 **The development is not completed yet. The beta version will be released in August.**
 
-## Logical Architecture of `it-chain`
+## Architecture of `it-chain`
 ![](./doc/images/it-chain-logical-view-architecture-r5.png)
 
 The `it-chain` is implemented as six independently operating core components(txpool, Consensus, Blockchain, Peer, Authentication, iCode), each communicating via the Asynchronous Message Queue Protocol (AMQP). AMQP is an event bus connector that generates and distributes events for internal core components according to external messages coming into the gateway, and each core component receives and operates events that it has already registered.
 
 A more detailed explanation is given below.
-[LOGICAL ARCHITECTURE KR](doc/LOGICAL-ARCHITECTURE-KR.md)
+ - [ARCHITECTURE KR](./ARCHITECTURE-KR.md)
+ - English version will be updated soon
 
 
 
