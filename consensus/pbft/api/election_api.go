@@ -21,11 +21,9 @@ import (
 	"time"
 
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/iLogger"
-	"github.com/rs/xid"
 )
 
 type ElectionApi struct {
@@ -59,7 +57,7 @@ func (e *ElectionApi) Vote(connectionId string) error {
 	e.ElectionService.ResetLeftTime()
 
 	voteLeaderMessage := pbft.VoteMessage{}
-	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("VoteLeaderProtocol", voteLeaderMessage)
+	grpcDeliverCommand, _ := common.CreateGrpcDeliverCommand("VoteLeaderProtocol", voteLeaderMessage)
 	grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
 
 	iLogger.Infof(nil, "[PBFT] Vote to %s", connectionId)
@@ -75,7 +73,7 @@ func (e *ElectionApi) broadcastLeader(rep pbft.Representative) error {
 	updateLeaderMessage := pbft.UpdateLeaderMessage{
 		Representative: rep,
 	}
-	grpcDeliverCommand, err := CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
+	grpcDeliverCommand, err := common.CreateGrpcDeliverCommand("UpdateLeaderProtocol", updateLeaderMessage)
 	if err != nil {
 		iLogger.Errorf(nil, "[PBFT] Cannot create grpc command - Error: [%s]", err.Error())
 		return err
@@ -136,6 +134,11 @@ func (e *ElectionApi) isFullyVoted() bool {
 //3. while ticking, count down leader repo left time
 //4. Send message having 'RequestVoteProtocol' to other node
 func (e *ElectionApi) ElectLeaderWithRaft() {
+	parliament := e.parliamentRepository.Load()
+	if !parliament.IsNeedConsensus() {
+		e.ElectLeaderWithLargestRepresentativeId()
+		return
+	}
 
 	e.ElectionService.SetState(pbft.TICKING)
 	e.ElectionService.InitLeftTime()
@@ -158,6 +161,19 @@ func (e *ElectionApi) ElectLeaderWithRaft() {
 			return
 		}
 	}
+}
+
+func (e *ElectionApi) ElectLeaderWithLargestRepresentativeId() {
+	representatives := e.parliamentRepository.Load().GetRepresentatives()
+
+	// TODO: This logic needs to hide into domain
+	ids := make([]string, 0)
+	for _, rep := range representatives {
+		ids = append(ids, rep.ID)
+	}
+
+	largestId := common.FindEarliestString(ids)
+	e.SetLeader(largestId)
 }
 
 func (e *ElectionApi) EndRaft() {
@@ -195,7 +211,7 @@ func (e *ElectionApi) RequestVote(peerIds []string) error {
 	requestVoteMessage := pbft.RequestVoteMessage{
 		Term: e.ElectionService.GetTerm(),
 	}
-	grpcDeliverCommand, _ := CreateGrpcDeliverCommand("RequestVoteProtocol", requestVoteMessage)
+	grpcDeliverCommand, _ := common.CreateGrpcDeliverCommand("RequestVoteProtocol", requestVoteMessage)
 
 	for _, connectionId := range peerIds {
 		grpcDeliverCommand.RecipientList = append(grpcDeliverCommand.RecipientList, connectionId)
@@ -233,20 +249,4 @@ func (e *ElectionApi) SetLeader(representativeId string) {
 	e.eventService.Publish("leader.updated", event.LeaderUpdated{
 		LeaderId: representativeId,
 	})
-}
-
-func CreateGrpcDeliverCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
-
-	data, err := common.Serialize(body)
-
-	if err != nil {
-		return command.DeliverGrpc{}, err
-	}
-
-	return command.DeliverGrpc{
-		MessageId:     xid.New().String(),
-		RecipientList: make([]string, 0),
-		Body:          data,
-		Protocol:      protocol,
-	}, err
 }

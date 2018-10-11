@@ -16,24 +16,46 @@
 
 package pbft
 
-import "testing"
+import (
+	"testing"
 
-//todo:
+	"github.com/stretchr/testify/assert"
+)
+
 func TestNewParliament(t *testing.T) {
 
+	new_p := NewParliament()
+	new_r := make(map[string]Representative)
+	assert.Equal(t, new_p.Leader, Leader{})
+	assert.Equal(t, new_p.Representatives, new_r)
 }
 
-//todo:
 func TestNewRepresentative(t *testing.T) {
 
+	new_r := NewRepresentative("hero")
+	assert.Equal(t, new_r.ID, "hero")
+
 }
 
-//todo:
 func TestRepresentative_GetID(t *testing.T) {
 
+	new_r := NewRepresentative("hero")
+	myid := new_r.GetID()
+	assert.Equal(t, myid, "hero")
+
 }
 
-//todo:
 func TestLeader_GetID(t *testing.T) {
 
+	// 1.make parliament
+	new_p := NewParliament()
+
+	// 2. set leader
+	new_p.SetLeader("hero")
+
+	// 3. get leader id
+	ourLeader := new_p.GetLeader()
+	ourLeader.LeaderId = "hero"
+	leaderId := ourLeader.GetID()
+	assert.Equal(t, leaderId, "hero")
 }
