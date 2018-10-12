@@ -16,6 +16,8 @@
 
 package ivm
 
+import "time"
+
 type ContainerService interface {
 	StartContainer(icode ICode) error
 	StopContainer(id ID) error
@@ -31,4 +33,40 @@ type GitService interface {
 
 type EventService interface {
 	Publish(topic string, event interface{}) error
+}
+
+// State DB
+type StateRepository interface {
+	//Update state DB
+	Apply(writeList []Write)
+
+	//Get state value
+	Get(value []byte) ([]byte, error)
+}
+
+type Write struct {
+	Key    []byte
+	Value  []byte
+	Delete bool
+}
+
+type TransactionWriteList struct {
+	Id        string
+	WriteList []Write
+	Time      time.Time
+}
+
+type StateService struct {
+	stateRepository StateRepository
+}
+
+func (s StateService) Apply(transactionWriteList []TransactionWriteList) {
+
+	for _, transactionWrite := range transactionWriteList {
+		s.stateRepository.Apply(transactionWrite.WriteList)
+	}
+}
+
+func (s StateService) Get(key []byte) ([]byte, error) {
+	return s.stateRepository.Get(key)
 }
