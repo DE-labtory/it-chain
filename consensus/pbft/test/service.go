@@ -17,12 +17,12 @@
 package test
 
 import (
-	"github.com/it-chain/engine/common/logger"
-	"github.com/it-chain/engine/common/mock"
+	"github.com/it-chain/avengers/mock"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
 	"github.com/it-chain/engine/consensus/pbft/infra/mem"
+	"github.com/it-chain/sdk/logger"
 )
 
 // 프로세스 아이디와 동일한 값의 ip를 가지는 프로세스들을 만들어낸다.

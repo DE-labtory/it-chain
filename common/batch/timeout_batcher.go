@@ -20,7 +20,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/it-chain/engine/common/logger"
+	"github.com/it-chain/sdk/logger"
 )
 
 var instance *TimeoutBatcher

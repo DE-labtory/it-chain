@@ -19,7 +19,7 @@ package pbft
 import (
 	"sync"
 
-	"github.com/it-chain/engine/common/logger"
+	"github.com/it-chain/sdk/logger"
 )
 
 const (

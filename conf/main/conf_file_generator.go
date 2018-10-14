@@ -25,7 +25,7 @@ import (
 
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/conf/model"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type test struct {

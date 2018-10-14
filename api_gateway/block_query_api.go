@@ -23,7 +23,7 @@ import (
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/leveldb-wrapper"
+	leveldbwrapper "github.com/it-chain/leveldb-wrapper"
 	"github.com/it-chain/yggdrasill"
 )
 
