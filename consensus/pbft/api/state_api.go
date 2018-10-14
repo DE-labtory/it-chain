@@ -21,9 +21,9 @@ import (
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/common/logger"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/iLogger"
+	"github.com/it-chain/sdk/logger"
 )
 
 type StateApi struct {

@@ -20,8 +20,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/it-chain/engine/conf"
-
 	"github.com/it-chain/engine/cmd/on/api-gatewayfx"
 	"github.com/it-chain/engine/cmd/on/blockchainfx"
 	"github.com/it-chain/engine/cmd/on/commonfx"
@@ -29,6 +27,7 @@ import (
 	"github.com/it-chain/engine/cmd/on/ivmfx"
 	"github.com/it-chain/engine/cmd/on/pbftfx"
 	"github.com/it-chain/engine/cmd/on/txpoolfx"
+	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/iLogger"
 	"github.com/urfave/cli"
 	"go.uber.org/fx"

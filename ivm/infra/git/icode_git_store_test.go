@@ -66,6 +66,8 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 			// commit hash 는 repo 상황에따라 바뀌기 때문에 주입
 			test.OutputMeta.ID = meta.ID
 			test.OutputMeta.CommitHash = meta.CommitHash
+			test.OutputMeta.Path = meta.Path
+
 		}
 
 		//then
@@ -115,6 +117,7 @@ func TestICodeGitStoreApi_CloneWithPassword(t *testing.T) {
 			// commit hash 는 repo 상황에따라 바뀌기 때문에 주입
 			test.OutputMeta.ID = meta.ID
 			test.OutputMeta.CommitHash = meta.CommitHash
+			test.OutputMeta.Path = meta.Path
 		}
 
 		//then
@@ -157,6 +160,8 @@ func TestICodeGitStoreApi_CloneWithoutSsh(t *testing.T) {
 			// commit hash 는 repo 상황에따라 바뀌기 때문에 주입
 			test.OutputMeta.ID = meta.ID
 			test.OutputMeta.CommitHash = meta.CommitHash
+			test.OutputMeta.Path = meta.Path
+
 		}
 
 		//then
@@ -201,6 +206,8 @@ func TestRepositoryService_CloneFromRawSsh(t *testing.T) {
 			// commit hash 는 repo 상황에따라 바뀌기 때문에 주입
 			test.OutputMeta.ID = meta.ID
 			test.OutputMeta.CommitHash = meta.CommitHash
+			test.OutputMeta.Path = meta.Path
+
 		}
 
 		//then
