@@ -20,6 +20,7 @@ package model
 type EngineConfiguration struct {
 	LogPath              string
 	KeyPath              string
+	TmpPath              string
 	Mode                 string
 	Amqp                 string
 	BootstrapNodeAddress string
