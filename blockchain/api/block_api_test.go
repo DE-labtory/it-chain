@@ -17,11 +17,10 @@
 package api_test
 
 import (
-	"testing"
-
 	"io/ioutil"
 	"os"
 	"sync"
+	"testing"
 	"time"
 
 	"github.com/it-chain/engine/blockchain"

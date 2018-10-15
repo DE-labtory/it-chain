@@ -18,9 +18,8 @@ package adapter_test
 
 import (
 	"errors"
-	"testing"
-
 	"os"
+	"testing"
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"

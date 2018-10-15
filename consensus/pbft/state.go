@@ -17,10 +17,9 @@
 package pbft
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-
-	"encoding/json"
 )
 
 type Stage string

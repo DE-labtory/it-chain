@@ -19,7 +19,6 @@ package api_gateway
 import (
 	"errors"
 	"sync"
-
 	"time"
 
 	"github.com/it-chain/engine/blockchain"

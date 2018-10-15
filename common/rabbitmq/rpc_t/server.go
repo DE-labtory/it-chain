@@ -17,9 +17,8 @@
 package rpc_t
 
 import (
-	"log"
-
 	"encoding/json"
+	"log"
 
 	"github.com/it-chain/engine/common/rabbitmq"
 	"github.com/streadway/amqp"

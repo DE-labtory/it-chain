@@ -17,12 +17,10 @@
 package batch_test
 
 import (
+	"fmt"
+	"sync"
 	"testing"
 	"time"
-
-	"sync"
-
-	"fmt"
 
 	"github.com/it-chain/engine/txpool/infra/batch"
 )

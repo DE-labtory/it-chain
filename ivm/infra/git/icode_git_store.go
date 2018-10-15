@@ -19,10 +19,9 @@ package git
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
-
-	"io/ioutil"
 
 	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/iLogger"

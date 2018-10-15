@@ -18,7 +18,6 @@ package blockchain_test
 
 import (
 	"testing"
-
 	"time"
 
 	"github.com/it-chain/engine/blockchain"

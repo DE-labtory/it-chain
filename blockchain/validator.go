@@ -19,7 +19,6 @@ package blockchain
 import (
 	"bytes"
 	"errors"
-
 	"time"
 
 	"github.com/it-chain/yggdrasill/common"

@@ -17,12 +17,11 @@
 package git_test
 
 import (
+	"encoding/hex"
 	"errors"
+	"fmt"
 	"os"
 	"testing"
-
-	"encoding/hex"
-	"fmt"
 
 	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/engine/ivm/infra/git"

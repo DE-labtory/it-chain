@@ -18,10 +18,8 @@ package adapter
 
 import (
 	"encoding/json"
-
-	"strconv"
-
 	"errors"
+	"strconv"
 
 	"github.com/go-resty/resty"
 	"github.com/it-chain/engine/blockchain"

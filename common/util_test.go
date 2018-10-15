@@ -17,20 +17,17 @@
 package common_test
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/user"
 	"path"
 	"path/filepath"
+	"regexp"
 	"testing"
 	"time"
 
 	"github.com/it-chain/engine/common"
-
-	"regexp"
-
-	"fmt"
-
 	"github.com/stretchr/testify/assert"
 )
 

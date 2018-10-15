@@ -17,13 +17,11 @@
 package api_test
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
-	"testing"
-
 	"os"
-
-	"encoding/hex"
+	"testing"
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/ivm"

@@ -17,12 +17,10 @@
 package batch
 
 import (
+	"fmt"
+	"sync"
 	"testing"
 	"time"
-
-	"sync"
-
-	"fmt"
 )
 
 //todo return error 했을 경우 test할 방법이 없음

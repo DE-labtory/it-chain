@@ -17,11 +17,10 @@
 package blockchain
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"os"
 	"time"
-
-	"encoding/json"
 )
 
 func CreateGenesisBlock(genesisconfFilePath string) (DefaultBlock, error) {

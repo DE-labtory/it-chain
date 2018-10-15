@@ -17,11 +17,9 @@
 package logger_test
 
 import (
-	"testing"
-
-	"path/filepath"
-
 	"os"
+	"path/filepath"
+	"testing"
 
 	"github.com/it-chain/engine/common/logger"
 	"github.com/stretchr/testify/assert"

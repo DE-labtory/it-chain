@@ -17,11 +17,10 @@
 package blockchain_test
 
 import (
-	"testing"
-
 	"io/ioutil"
 	"log"
 	"os"
+	"testing"
 	"time"
 
 	"github.com/it-chain/engine/blockchain"

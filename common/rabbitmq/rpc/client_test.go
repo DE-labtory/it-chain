@@ -18,10 +18,9 @@ package rpc_test
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 	"time"
-
-	"sync"
 
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/midgard"

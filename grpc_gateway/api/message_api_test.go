@@ -17,9 +17,8 @@
 package api_test
 
 import (
-	"testing"
-
 	"sync"
+	"testing"
 
 	"github.com/it-chain/engine/grpc_gateway/api"
 	"github.com/it-chain/engine/grpc_gateway/mock"

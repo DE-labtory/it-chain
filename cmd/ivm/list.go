@@ -17,9 +17,8 @@
 package ivm
 
 import (
-	"log"
-
 	"fmt"
+	"log"
 
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"

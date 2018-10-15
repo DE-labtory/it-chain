@@ -17,12 +17,10 @@
 package pubsub_test
 
 import (
-	"testing"
-
 	"encoding/json"
 	"reflect"
-
 	"sync"
+	"testing"
 
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/midgard"

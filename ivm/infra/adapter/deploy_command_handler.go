@@ -20,12 +20,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/it-chain/iLogger"
-
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/engine/ivm/api"
+	"github.com/it-chain/iLogger"
 )
 
 type DeployCommandHandler struct {

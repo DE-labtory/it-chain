@@ -18,13 +18,11 @@ package adapter_test
 
 import (
 	"testing"
-
-	"github.com/it-chain/engine/blockchain/infra/mem"
-
 	"time"
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
+	"github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/common"
 	event2 "github.com/it-chain/engine/common/event"

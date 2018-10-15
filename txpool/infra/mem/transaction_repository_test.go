@@ -17,9 +17,8 @@
 package mem_test
 
 import (
-	"testing"
-
 	"strconv"
+	"testing"
 
 	"github.com/it-chain/engine/txpool"
 	"github.com/it-chain/engine/txpool/infra/mem"
