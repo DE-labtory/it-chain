@@ -39,7 +39,7 @@ var Module = fx.Options(
 		NewStateApi,
 		adapter.NewElectionCommandHandler,
 		adapter.NewConnectionEventHandler,
-		adapter.NewLeaderCommandHandler,
+		NewNewLeaderCommandHandler,
 		adapter.NewLeaderEventHandler,
 		NewStartConsensusCommandHandler,
 		NewPbftMsgHandler,
@@ -83,8 +83,11 @@ func NewElectionApi(electionService *pbft.ElectionService, parliamentRepository 
 
 func NewParliamentApi(config *conf.Configuration, parliamentRepository *mem.ParliamentRepository, eventService common.EventService) *api.ParliamentApi {
 	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
-
 	return api.NewParliamentApi(NodeId, parliamentRepository, eventService)
+}
+
+func NewNewLeaderCommandHandler(parliamentApi *api.ParliamentApi) *adapter.LeaderCommandHandler {
+	return adapter.NewLeaderCommandHandler(parliamentApi)
 }
 
 func NewStartConsensusCommandHandler(stateApi *api.StateApi) *adapter.StartConsensusCommandHandler {
