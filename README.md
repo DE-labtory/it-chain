@@ -27,7 +27,7 @@ The `it-chain` is implemented as six independently operating core components(txp
 
 A more detailed explanation is given below.
  - [ARCHITECTURE KR](./ARCHITECTURE-KR.md)
- - English version will be updated soon
+ - [ARCHITECTURE EN](./ARCHITECTURE-EN.md)
 
 
 
