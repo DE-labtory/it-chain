@@ -17,9 +17,8 @@
 package batch
 
 import (
-	"time"
-
 	"sync"
+	"time"
 
 	"github.com/it-chain/iLogger"
 )

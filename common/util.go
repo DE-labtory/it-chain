@@ -21,7 +21,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-
 	"fmt"
 	"io"
 	"math/big"
@@ -33,7 +32,6 @@ import (
 	"strings"
 
 	"github.com/it-chain/engine/common/command"
-
 	"github.com/rs/xid"
 )
 

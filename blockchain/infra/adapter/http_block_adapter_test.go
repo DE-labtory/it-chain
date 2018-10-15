@@ -17,14 +17,11 @@
 package adapter_test
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 	"testing"
-
 	"time"
-
-	"log"
-
-	"encoding/json"
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/infra/adapter"

@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
 	"sync"
 
 	"github.com/it-chain/engine/ivm"

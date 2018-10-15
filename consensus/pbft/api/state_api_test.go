@@ -17,10 +17,8 @@
 package api_test
 
 import (
-	"testing"
-
 	"strconv"
-
+	"testing"
 	"time"
 
 	"github.com/it-chain/engine/consensus/pbft"

@@ -18,7 +18,6 @@ package adapter
 
 import (
 	"math/rand"
-
 	"time"
 
 	"github.com/it-chain/engine/api_gateway"

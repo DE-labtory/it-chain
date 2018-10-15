@@ -20,12 +20,11 @@ import (
 	"context"
 	"os"
 
+	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/blockchain/api"
 	"github.com/it-chain/engine/blockchain/infra/adapter"
 	"github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/blockchain/infra/repo"
-
-	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/conf"

@@ -17,12 +17,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
-
-	"flag"
 
 	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/conf/model"

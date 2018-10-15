@@ -17,14 +17,12 @@
 package blockchain
 
 import (
+	"bytes"
 	"encoding/json"
+	"reflect"
 	"time"
 
-	"bytes"
-
 	ygg "github.com/it-chain/yggdrasill/common"
-
-	"reflect"
 )
 
 type Block = ygg.Block

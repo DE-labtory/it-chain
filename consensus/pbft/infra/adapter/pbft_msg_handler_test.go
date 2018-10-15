@@ -17,9 +17,8 @@
 package adapter_test
 
 import (
-	"testing"
-
 	"errors"
+	"testing"
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"

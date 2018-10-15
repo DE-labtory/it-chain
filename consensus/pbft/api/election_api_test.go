@@ -18,7 +18,6 @@ package api_test
 
 import (
 	"testing"
-
 	"time"
 
 	"github.com/it-chain/engine/consensus/pbft"

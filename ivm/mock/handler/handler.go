@@ -18,11 +18,10 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
-
-	"encoding/json"
 
 	"github.com/it-chain/sdk"
 	"github.com/it-chain/sdk/logger"

@@ -17,9 +17,8 @@
 package api_test
 
 import (
-	"testing"
-
 	"sync"
+	"testing"
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/command"

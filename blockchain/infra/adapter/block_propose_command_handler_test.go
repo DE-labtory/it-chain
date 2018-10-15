@@ -17,22 +17,19 @@
 package adapter_test
 
 import (
-	"testing"
-
 	"os"
 	"sync"
-
-	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/blockchain/infra/adapter"
-	"github.com/it-chain/engine/blockchain/infra/mem"
-	"github.com/it-chain/engine/common/command"
-
+	"testing"
 	"time"
 
+	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/blockchain/api"
+	"github.com/it-chain/engine/blockchain/infra/adapter"
+	"github.com/it-chain/engine/blockchain/infra/mem"
 	"github.com/it-chain/engine/blockchain/infra/repo"
 	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/stretchr/testify/assert"

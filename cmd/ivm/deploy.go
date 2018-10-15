@@ -20,7 +20,6 @@ import (
 	"log"
 
 	"github.com/it-chain/engine/common"
-
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
 	"github.com/it-chain/engine/conf"

@@ -17,13 +17,10 @@
 package logger
 
 import (
-	"os"
-
 	"fmt"
-
-	"runtime"
-
+	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/sirupsen/logrus"
 )
