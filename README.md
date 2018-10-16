@@ -34,7 +34,8 @@ A more detailed explanation is given below.
 ## Tutorial
 
 How to install it-chain and run simple icode(smartContract) can be found in the tutorial docs.<br>
-[TUTORIAL](doc/TUTORIAL.md)
+ - [INC_INTEGER_TUTORIAL](doc/TUTORIAL.md)
+ - [BANK_TUTORIAL](doc/IVM-SAMPLE-BANK.md)
 
 ## Requirements
 
