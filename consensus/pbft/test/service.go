@@ -17,7 +17,7 @@
 package test
 
 import (
-	"github.com/it-chain/avengers/mock"
+	"github.com/it-chain/engine/common/mock"
 	"github.com/it-chain/engine/consensus/pbft"
 	"github.com/it-chain/engine/consensus/pbft/api"
 	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
