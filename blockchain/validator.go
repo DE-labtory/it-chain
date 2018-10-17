@@ -21,6 +21,8 @@ import (
 	"errors"
 	"time"
 
+	"crypto/sha256"
+
 	"github.com/it-chain/yggdrasill/common"
 )
 
@@ -34,14 +36,62 @@ type Validator = common.Validator
 // DefaultValidator 객체는 Validator interface를 구현한 객체.
 type DefaultValidator struct{}
 
+type Tree struct {
+	Root       *Leaf
+	txSealRoot []byte
+	PrimeLeafs []*Leaf
+}
+
+type Leaf struct {
+	Parent       *Leaf
+	Left         *Leaf
+	Right        *Leaf
+	isPrime      bool
+	isDuplicated bool
+	TxSeal       []byte
+	Transaction  Transaction
+}
+
+func (t *DefaultValidator) ValidateTree(tree *Tree) (bool, error) {
+	calculatedMerkleRoot, err := validateLeaf(tree.Root)
+	if err != nil {
+		return false, err
+	}
+
+	if bytes.Compare(tree.txSealRoot, calculatedMerkleRoot) == 0 {
+		return true, nil
+	}
+	return false, nil
+}
+
+func validateLeaf(leaf *Leaf) ([]byte, error) {
+
+	if leaf.isPrime {
+		return leaf.Transaction.CalculateSeal()
+	}
+
+	rightHash, err := validateLeaf(leaf.Right)
+	if err != nil {
+		return nil, err
+	}
+
+	leftHash, err := validateLeaf(leaf.Left)
+	if err != nil {
+		return nil, err
+	}
+
+	return calculateIntermediateLeafHash(leftHash, rightHash), nil
+
+}
+
 // ValidateSeal 함수는 원래 Seal 값과 주어진 Seal 값(comparisonSeal)을 비교하여, 올바른지 검증한다.
 func (t *DefaultValidator) ValidateSeal(seal []byte, comparisonBlock Block) (bool, error) {
 
-	comparisonSeal, error := t.BuildSeal(comparisonBlock.GetTimestamp(), comparisonBlock.GetPrevSeal(), comparisonBlock.GetTxSeal(), comparisonBlock.GetCreator())
-
-	if error != nil {
-		return false, error
+	comparisonSeal, err := t.BuildSeal(comparisonBlock.GetTimestamp(), comparisonBlock.GetPrevSeal(), comparisonBlock.GetTxSeal(), comparisonBlock.GetCreator())
+	if err != nil {
+		return false, err
 	}
+
 	return bytes.Compare(seal, comparisonSeal) == 0, nil
 }
 
@@ -55,6 +105,7 @@ func (t *DefaultValidator) ValidateTxSeal(txSeal [][]byte, txList []Transaction)
 		leftIndex, rightIndex := (i+1)*2-1, (i+1)*2
 		if rightIndex >= len(txSeal) {
 			// Check Leaf Node
+
 			calculatedHash, error := txList[leafNodeIndex].CalculateSeal()
 			if error != nil {
 				return false, ErrHashCalculationFailed
@@ -67,7 +118,7 @@ func (t *DefaultValidator) ValidateTxSeal(txSeal [][]byte, txList []Transaction)
 		} else {
 			// Check Intermediate Node
 			leftNode, rightNode := txSeal[leftIndex], txSeal[rightIndex]
-			calculatedHash := calculateIntermediateNodeHash(leftNode, rightNode)
+			calculatedHash := calculateIntermediateLeafHash(leftNode, rightNode)
 			if bytes.Compare(n, calculatedHash) != 0 {
 				return false, nil
 			}
@@ -110,9 +161,9 @@ func (t *DefaultValidator) ValidateTransaction(txSeal [][]byte, transaction Tran
 
 		var parentHash []byte
 		if isLeft {
-			parentHash = calculateIntermediateNodeHash(txSeal[index], txSeal[siblingIndex])
+			parentHash = calculateIntermediateLeafHash(txSeal[index], txSeal[siblingIndex])
 		} else {
-			parentHash = calculateIntermediateNodeHash(txSeal[siblingIndex], txSeal[index])
+			parentHash = calculateIntermediateLeafHash(txSeal[siblingIndex], txSeal[index])
 		}
 
 		if bytes.Compare(parentHash, txSeal[parentIndex]) != 0 {
@@ -136,17 +187,106 @@ func (t *DefaultValidator) BuildSeal(timeStamp time.Time, prevSeal []byte, txSea
 	if prevSeal == nil || txSeal == nil || creator == "" {
 		return nil, ErrInsufficientFields
 	}
-	var rootHash []byte
+	var rootTxSeal []byte
 	if len(txSeal) == 0 {
-		rootHash = make([]byte, 0)
+		rootTxSeal = make([]byte, 0)
 	} else {
-		rootHash = txSeal[0]
+		rootTxSeal = txSeal[0]
 	}
-	combined := append(prevSeal, rootHash...)
+	combined := append(prevSeal, rootTxSeal...)
 	combined = append(combined, timestamp...)
 
 	seal := calculateHash(combined)
 	return seal, nil
+}
+
+func (t *DefaultValidator) BuildTree(txList []Transaction) (*Tree, error) {
+
+	root, primeLeafs, err := buildMerkleTree(txList)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Tree{
+		Root:       root,
+		txSealRoot: root.TxSeal,
+		PrimeLeafs: primeLeafs,
+	}, nil
+}
+
+//ToDo: legacy code 중 buildTree를 지우면, buildTree로 네이밍 변환
+func buildMerkleTree(txList []Transaction) (*Leaf, []*Leaf, error) {
+	if len(txList) == 0 {
+		return nil, nil, ErrEmptyTxList
+	}
+
+	primeLeafs := []*Leaf{}
+	for _, tx := range txList {
+		txSeal, err := tx.CalculateSeal()
+		if err != nil {
+			return nil, nil, err
+		}
+
+		primeLeafs = append(primeLeafs, &Leaf{
+			TxSeal:      txSeal,
+			Transaction: tx,
+			isPrime:     true,
+		})
+	}
+
+	if len(primeLeafs)%2 == 1 {
+		duplicatedNode := &Leaf{
+			TxSeal:       primeLeafs[len(primeLeafs)-1].TxSeal,
+			Transaction:  primeLeafs[len(primeLeafs)-1].Transaction,
+			isPrime:      true,
+			isDuplicated: true,
+		}
+		primeLeafs = append(primeLeafs, duplicatedNode)
+	}
+
+	root, err := buildRoot(primeLeafs)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return root, primeLeafs, nil
+
+}
+
+func buildRoot(leafList []*Leaf) (*Leaf, error) {
+	return buildIntermediate(leafList)
+}
+
+func buildIntermediate(leafList []*Leaf) (*Leaf, error) {
+
+	intermediateLeafList := []*Leaf{}
+	for i := 0; i < len(leafList); i += 2 {
+		h := sha256.New()
+		left, right := i, i+1
+
+		if i+1 == len(leafList) {
+			right = i
+		}
+
+		joinedSeal := append(leafList[left].TxSeal, leafList[right].TxSeal...)
+		if _, err := h.Write(joinedSeal); err != nil {
+			return nil, err
+		}
+
+		newLeaf := &Leaf{
+			Left:   leafList[left],
+			Right:  leafList[right],
+			TxSeal: h.Sum(nil),
+		}
+		intermediateLeafList = append(intermediateLeafList, newLeaf)
+		leafList[left].Parent = newLeaf
+		leafList[right].Parent = newLeaf
+		if len(leafList) == 2 {
+			rootLeaf := newLeaf
+			return rootLeaf, nil
+		}
+	}
+	return buildIntermediate(intermediateLeafList)
 }
 
 // BuildTxSeal 함수는 Transaction 배열을 받아서 TxSeal을 생성하여 반환한다.
@@ -158,9 +298,9 @@ func (t *DefaultValidator) BuildTxSeal(txList []Transaction) ([][]byte, error) {
 	leafNodeList := make([][]byte, 0)
 
 	for _, tx := range txList {
-		leafNode, error := tx.CalculateSeal()
-		if error != nil {
-			return nil, error
+		leafNode, err := tx.CalculateSeal()
+		if err != nil {
+			return nil, err
 		}
 
 		leafNodeList = append(leafNodeList, leafNode)
@@ -171,9 +311,9 @@ func (t *DefaultValidator) BuildTxSeal(txList []Transaction) ([][]byte, error) {
 		leafNodeList = append(leafNodeList, leafNodeList[len(leafNodeList)-1])
 	}
 
-	tree, error := buildTree(leafNodeList, leafNodeList)
-	if error != nil {
-		return nil, error
+	tree, err := buildTree(leafNodeList, leafNodeList)
+	if err != nil {
+		return nil, err
 	}
 
 	// DefaultValidator 는 Merkle Tree의 루트노드(tree[0])를 Proof로 간주함
@@ -186,7 +326,7 @@ func buildTree(nodeList [][]byte, fullNodeList [][]byte) ([][]byte, error) {
 		leftIndex, rightIndex := i, i+1
 		leftNode, rightNode := nodeList[leftIndex], nodeList[rightIndex]
 
-		intermediateNode := calculateIntermediateNodeHash(leftNode, rightNode)
+		intermediateNode := calculateIntermediateLeafHash(leftNode, rightNode)
 
 		intermediateNodeList = append(intermediateNodeList, intermediateNode)
 
@@ -200,7 +340,7 @@ func buildTree(nodeList [][]byte, fullNodeList [][]byte) ([][]byte, error) {
 	return buildTree(intermediateNodeList, newFullNodeList)
 }
 
-func calculateIntermediateNodeHash(leftHash []byte, rightHash []byte) []byte {
+func calculateIntermediateLeafHash(leftHash []byte, rightHash []byte) []byte {
 	combinedHash := append(leftHash, rightHash...)
 
 	return calculateHash(combinedHash)
