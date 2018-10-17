@@ -43,6 +43,7 @@ type Configuration struct {
 	Icode       model.ICodeConfiguration
 	GrpcGateway model.GrpcGatewayConfiguration
 	ApiGateway  model.ApiGatewayConfiguration
+	Docker      model.DockerConfiguration
 }
 
 // EngineConfiguration Mode용

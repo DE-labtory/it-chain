@@ -59,6 +59,7 @@ func main() {
 		Icode:       model.NewIcodeConfiguration(),
 		GrpcGateway: model.NewGrpcGatewayConfiguration(),
 		ApiGateway:  model.NewApiGatewayConfiguration(),
+		Docker:      model.NewDockerConfiguration(),
 	}
 
 	output, _ := yaml.Marshal(&confInfo)
