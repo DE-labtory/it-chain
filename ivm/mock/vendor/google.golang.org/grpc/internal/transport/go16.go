@@ -24,10 +24,9 @@ import (
 	"net"
 	"net/http"
 
+	"golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	"golang.org/x/net/context"
 )
 
 // dialContext connects to the address on the named network.
