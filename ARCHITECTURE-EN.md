@@ -2,13 +2,14 @@
 
 ## 1.  Development Background and Purpose
 
+
 Existing blockchain are so large and complex that they have high entry barriers to use in non-IT small and medium communities such small merchant associations. In addition, conventional blockchain such as etherium, bitcoin, and hyperledger fabric and sawtooth are difficult to modify to suit their purposes.
 
 When someone wants to learn more deeply about the blockchain, there is a lot of data related to the general blockchain theory, but there is little data and open source about how to actually implement the block chain using that theory. 
 
 To solve these problems, `the project aims to create a lightweight customized blockchain(It-chain)` that can be flexibly modified by small and medium-sized communities to suit their purposes. The It-chain is a blockchain with an easy-to-modify structure, so that people using it-chain can easily modify it according to their needs. In addition, the it-chain is an open-source solution to many problems, such as the PBFT agreement algorithm and the RAFT reader selection algorithm, which are widely known to people through the general theory of block chaining. I would like to present one of them.
 
- It also enables people to understand, not only through code implementation, but also through in-depth documentation. A detailed description of each component is provided in the document and the figure. Because it covers not only the principles of operation but also the various definitions for architecture and development, we can lower the entry barriers of developers who are willing to contribute to open source.
+It also enables people to understand, not only through code implementation, but also through in-depth documentation. A detailed description of each component is provided in the document and the figure. Because it covers not only the principles of operation but also the various definitions for architecture and development, we can lower the entry barriers of developers who are willing to contribute to open source.
 
 </br>
 

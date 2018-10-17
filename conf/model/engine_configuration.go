@@ -30,7 +30,7 @@ func NewEngineConfiguration() EngineConfiguration {
 		LogPath:              "log/it-chain.log",
 		KeyPath:              ".it-chain/",
 		Mode:                 "solo",
-		BootstrapNodeAddress: "127.0.0.1:5555",
+		BootstrapNodeAddress: "",
 		Amqp:                 "amqp://guest:guest@localhost:5672/",
 	}
 }

@@ -24,6 +24,6 @@ type GrpcGatewayConfiguration struct {
 func NewGrpcGatewayConfiguration() GrpcGatewayConfiguration {
 	return GrpcGatewayConfiguration{
 		Address: "127.0.0.1",
-		Port:    "13579",
+		Port:    "4000",
 	}
 }
