@@ -13,7 +13,6 @@ import (
 	"io"
 
 	"github.com/golang/snappy"
-
 	"github.com/syndtr/goleveldb/leveldb/comparer"
 	"github.com/syndtr/goleveldb/leveldb/filter"
 	"github.com/syndtr/goleveldb/leveldb/opt"

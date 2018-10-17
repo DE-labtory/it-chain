@@ -17,10 +17,12 @@
 package blockchain_test
 
 import (
+	"math/rand"
 	"testing"
 	"time"
 
 	"github.com/it-chain/engine/blockchain"
+	"github.com/rs/xid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -103,5 +105,38 @@ func TestDefaultValidator_BuildAndValidateTxSeal(t *testing.T) {
 	//then
 	assert.NoError(t, err)
 	assert.Equal(t, true, result2)
+
+}
+
+func TestDefaultValidator_BuildTreeAndValidate(t *testing.T) {
+	validator := blockchain.DefaultValidator{}
+
+	randSource := rand.NewSource(time.Now().UnixNano())
+	randInstance := rand.New(randSource)
+	randomTxListLength := randInstance.Intn(100)
+
+	TxList := []*blockchain.DefaultTransaction{}
+
+	for i := 0; i <= randomTxListLength; i++ {
+		Tx := &blockchain.DefaultTransaction{
+			ID:        xid.New().String(),
+			ICodeID:   xid.New().String(),
+			PeerID:    xid.New().String(),
+			Timestamp: time.Now().Round(0),
+			Jsonrpc:   xid.New().String(),
+			Function:  xid.New().String(),
+			Args:      nil,
+			Signature: []byte(xid.New().String()),
+		}
+
+		TxList = append(TxList, Tx)
+	}
+
+	tree, err := validator.BuildTree(convertTxType(TxList))
+	assert.NoError(t, err)
+
+	isValidated, err := validator.ValidateTree(tree)
+	assert.NoError(t, err)
+	assert.Equal(t, true, isValidated)
 
 }
