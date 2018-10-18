@@ -20,8 +20,6 @@ import (
 	"errors"
 
 	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
-	"github.com/rs/xid"
 )
 
 var ErrStateIdEmpty = errors.New("State ID is empty")
@@ -86,7 +84,7 @@ func (ps PropagateService) BroadcastPreCommitMsg(msg PreCommitMsg, representativ
 
 func (ps PropagateService) broadcastMsg(msg interface{}, protocol string, representatives []Representative) error {
 
-	grpcCommand, err := createDeliverGrpcCommand(protocol, msg)
+	grpcCommand, err := common.CreateGrpcDeliverCommand(protocol, msg)
 
 	if err != nil {
 		return err
@@ -97,19 +95,4 @@ func (ps PropagateService) broadcastMsg(msg interface{}, protocol string, repres
 	}
 
 	return ps.eventService.Publish("message.deliver", grpcCommand)
-}
-
-func createDeliverGrpcCommand(protocol string, body interface{}) (command.DeliverGrpc, error) {
-	data, err := common.Serialize(body)
-
-	if err != nil {
-		return command.DeliverGrpc{}, err
-	}
-
-	return command.DeliverGrpc{
-		MessageId:     xid.New().String(),
-		RecipientList: make([]string, 0),
-		Body:          data,
-		Protocol:      protocol,
-	}, nil
 }
