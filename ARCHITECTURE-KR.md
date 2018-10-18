@@ -111,7 +111,7 @@ Block)의 값을 세팅할 수 있다. 설정값을 맞춰주지 않으면 네�
 한다고 볼 수 있다. 세팅된 값들을 암호화하여 블록 해시(Block Hash)값을 만들어주면, 제네시스 블록(Genesis Block) 생성이 완료된다. 제네시스 블록(Genesis Block)은 생성된 이후 합의를 거치지 않고
 바로 저장된다.
 
-![Create-GenesisBlock](./doc/images/Create GenesisBlock.png)
+![Create-GenesisBlock](./doc/images/Create_GenesisBlock.png)
 
 한편, 제네시스 블록(Genesis Block)이 아닌 블록(Block)을 생성하는 시점은 TxPool 컴포넌트로부터 블록
 생성 요청을 받았을 때이고, 리더 노드만이 블록(Block)을 생성한다. 즉, 클라이언트(Client)가 it-chain
@@ -124,7 +124,7 @@ Block)의 값을 세팅할 수 있다. 설정값을 맞춰주지 않으면 네�
 암호화하여 블록 해시(Block Hash)값을 만들어주면, 블록(Block) 생성이 완료된다. 블록(Block)은 생성된
 이후 다른 노드들과의 합의를 위해 컨센서스 컴포넌트(Consensus Component)로 전달된다.
 
-![Create-ProposedBlock](./doc/images/Create ProposedBlock.png)
+![Create-ProposedBlock](./doc/images/Create_ProposedBlock.png)
 
 ### 블록(데이터) 저장
 
@@ -157,7 +157,7 @@ It-chain은 블록을 저장하기 위해 구글의 오픈소스 키 벨류 데�
 암호화되어있는 지 확인한다. 트랜잭션들의 해시 값을 새로 만들고, 저장되어 있는 해시 값과 비교한다.
 일련의 검증 과정 후 블록을 DB에 저장하게 된다.
 
-![Process-Of-Saving-Block](./doc/images/Process Of Saving Block.png)
+![Process-Of-Saving-Block](./doc/images/Process_Of_Saving_Block.png)
 
 ### 블록 합의
 
@@ -238,7 +238,7 @@ Synchronize의 과정은 먼저 네트워크 내 임의의 노드의 블록체�
 필요한 지 점검한다. Synchronize가 필요하다면, 특정 노드가 보유하지 않은 모든 블록을 임의의
 노드로부터 받아와 순서대로 블록체인에 저장하여, 동일한 블록체인을 구축한다.
 
-![Process-Of-Synchronizing](./doc/images/Process Of Synchronizing.png)
+![Process-Of-Synchronizing](./doc/images/Process_Of_Synchronizing.png)
 
 Synchronize의 과정 중에 새롭게 합의된 블록이 생성되는 예외적인 상황이 발생할 수 있는데 It-chain은
 이런 예외 상황을 블록 풀(Block Pool)이란 구조를 통해서 해결하였다. Synchronize 중에 리더 노드로부터
