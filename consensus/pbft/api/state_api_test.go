@@ -194,7 +194,7 @@ func TestStateApi_HandleProposeMsg(t *testing.T) {
 	for testName, test := range tests {
 		t.Logf("running test case %s ", testName)
 		cApi := setUpApiCondition(test.input.peerNum, test.input.isRepoFull, true, pbft.PROPOSE_STAGE)
-		assert.EqualValues(t, test.err, cApi.HandleProposeMsg(test.input.proposeMsg))
+		assert.EqualValues(t, test.err, cApi.HandleProposeMsg())
 
 	}
 }

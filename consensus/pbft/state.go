@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"sync"
 )
 
 type Stage string
@@ -36,6 +38,7 @@ var ErrPrevoteMsgNil = errors.New("Prevote msg is nil")
 var ErrBlockHashNil = errors.New("Block hash is nil")
 var ErrPreCommitMsgNil = errors.New("PreCommit msg is nil")
 var ErrStateIdNotSame = errors.New("State ID is not same")
+var ErrNoMsgInQueue = errors.New("No message in propose message queue")
 
 type ProposedBlock struct {
 	Seal []byte
@@ -242,8 +245,10 @@ func NewStateID(id string) StateID {
 }
 
 type State struct {
+	mux              sync.RWMutex
 	StateID          StateID
 	Representatives  []Representative
+	ProposeMsgQue    []ProposeMsg
 	Block            ProposedBlock
 	CurrentStage     Stage
 	PrevoteMsgPool   PrevoteMsgPool
@@ -313,6 +318,7 @@ func (s *State) SavePreCommitMsg(precommitMsg *PreCommitMsg) error {
 
 	return s.PreCommitMsgPool.Save(precommitMsg)
 }
+
 func (s *State) CheckPrevoteCondition() bool {
 	representativeNum := len(s.Representatives)
 	commitMsgNum := len(s.PrevoteMsgPool.Get())
@@ -323,6 +329,7 @@ func (s *State) CheckPrevoteCondition() bool {
 	}
 	return false
 }
+
 func (s *State) CheckPreCommitCondition() bool {
 	representativeNum := len(s.Representatives)
 	commitMsgNum := len(s.PreCommitMsgPool.Get())
@@ -332,6 +339,31 @@ func (s *State) CheckPreCommitCondition() bool {
 		return true
 	}
 	return false
+}
+
+func (s *State) PopFromQue() (error, ProposeMsg) {
+
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	if len(s.ProposeMsgQue) == 0 {
+		s.ProposeMsgQue = make([]ProposeMsg, 0)
+		return ErrNoMsgInQueue, ProposeMsg{}
+	}
+
+	msg := s.ProposeMsgQue[0]
+
+	s.ProposeMsgQue = s.ProposeMsgQue[1 : len(s.ProposeMsgQue)-1]
+
+	return nil, msg
+}
+
+// Add ProposeMsg to queue
+func (s *State) AddToQue(msg ProposeMsg) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	s.ProposeMsgQue = append(s.ProposeMsgQue, msg)
 }
 
 type StateRepository interface {

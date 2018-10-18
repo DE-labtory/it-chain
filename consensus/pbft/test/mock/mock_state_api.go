@@ -21,18 +21,27 @@ import (
 )
 
 type StateApi struct {
+	AddMsgToQueFunc        func(msg pbft.ProposeMsg) error
+	PopMsgFromQueFunc      func() (error, pbft.ProposeMsg)
 	StartConsensusFunc     func(proposedBlock pbft.ProposedBlock) error
-	HandleProposeMsgFunc   func(msg pbft.ProposeMsg) error
+	HandleProposeMsgFunc   func() error
 	HandlePrevoteMsgFunc   func(msg pbft.PrevoteMsg) error
 	HandlePreCommitMsgFunc func(msg pbft.PreCommitMsg) error
 }
 
+func (mca *StateApi) AddMsgToQue(msg pbft.ProposeMsg) error {
+	return mca.AddMsgToQueFunc(msg)
+}
+
+func (mca *StateApi) PopMsgFromQue() (error, pbft.ProposeMsg) {
+	return mca.PopMsgFromQueFunc()
+}
 func (mca *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 	return mca.StartConsensusFunc(proposedBlock)
 }
 
-func (mca *StateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
-	return mca.HandleProposeMsgFunc(msg)
+func (mca *StateApi) HandleProposeMsg() error {
+	return mca.HandleProposeMsgFunc()
 }
 
 func (mca *StateApi) HandlePrevoteMsg(msg pbft.PrevoteMsg) error {

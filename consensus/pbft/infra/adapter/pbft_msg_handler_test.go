@@ -117,7 +117,7 @@ func TestPbftMsgHandler_HandleGrpcMsgCommand(t *testing.T) {
 
 func newMockStateApiForPbftMsgHandler(t *testing.T) adapter.StateMsgApi {
 	mockApi := &mock.StateApi{}
-	mockApi.HandleProposeMsgFunc = func(msg pbft.ProposeMsg) error {
+	mockApi.HandleProposeMsgFunc = func() error {
 		if msg.SenderID == "sender1" {
 			assert.NotNil(t, msg.Representative)
 			assert.NotNil(t, msg.ProposedBlock)

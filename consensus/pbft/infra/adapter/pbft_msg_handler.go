@@ -29,7 +29,9 @@ var DeserializingError = errors.New("Message deserializing is failed.")
 var UndefinedProtocolError = errors.New("Received Undefined protocol message")
 
 type StateMsgApi interface {
-	HandleProposeMsg(msg pbft.ProposeMsg) error
+	AddMsgToQue(msg pbft.ProposeMsg) error
+	PopMsgFromQue() (error, pbft.ProposeMsg)
+	HandleProposeMsg() error
 	HandlePrevoteMsg(msg pbft.PrevoteMsg) error
 	HandlePreCommitMsg(msg pbft.PreCommitMsg) error
 }
@@ -58,7 +60,10 @@ func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) error
 			iLogger.Errorf(nil, "[PBFT] %s", DeserializingError.Error())
 		}
 
-		if err := p.sApi.HandleProposeMsg(msg); err != nil {
+		// Add msg to Queue
+		p.sApi.AddMsgToQue(msg)
+
+		if err := p.sApi.HandleProposeMsg(); err != nil {
 			iLogger.Errorf(nil, "[PBFT] %s", err.Error())
 		}
 

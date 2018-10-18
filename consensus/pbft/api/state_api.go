@@ -34,6 +34,7 @@ type StateApi struct {
 	repo                 pbft.StateRepository
 	tempPrevoteMsgPool   pbft.PrevoteMsgPool
 	tempPreCommitMsgPool pbft.PreCommitMsgPool
+	state                *pbft.State
 }
 
 var ConsensusCreateError = errors.New("Consensus can't be created")
@@ -64,6 +65,8 @@ func (sApi *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 		return err
 	}
 
+	sApi.state = createdState
+
 	createdProposeMsg := pbft.NewProposeMsg(createdState, sApi.publisherID)
 
 	receipients := createdState.GetReceipients(sApi.publisherID)
@@ -83,7 +86,29 @@ func (sApi *StateApi) StartConsensus(proposedBlock pbft.ProposedBlock) error {
 	return nil
 }
 
-func (sApi *StateApi) HandleProposeMsg(msg pbft.ProposeMsg) error {
+func (sApi *StateApi) AddMsgToQue(msg pbft.ProposeMsg) error {
+
+	sApi.state.AddToQue(msg)
+	return nil
+}
+
+func (sApi *StateApi) PopMsgFromQue() (error, pbft.ProposeMsg) {
+	err, msg := sApi.state.PopFromQue()
+
+	if err != nil {
+		return err, pbft.ProposeMsg{}
+	}
+
+	return nil, msg
+}
+
+func (sApi *StateApi) HandleProposeMsg() error {
+
+	err, msg := sApi.PopMsgFromQue()
+
+	if err != nil {
+		return err
+	}
 
 	parliament := sApi.parliamentRepository.Load()
 
@@ -193,6 +218,8 @@ func (sApi *StateApi) HandlePreCommitMsg(msg pbft.PreCommitMsg) error {
 	if err := sApi.repo.Save(loadedState); err != nil {
 		return err
 	}
+
+	sApi.HandleProposeMsg()
 
 	return nil
 }
