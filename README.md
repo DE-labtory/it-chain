@@ -58,6 +58,9 @@ Slack URL : https://it-chain-opensource.slack.com/
 
 It-Chain Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the [LICENSE](LICENSE) file.
 
+Open source license in use [LICENSES](LibraryList)
+
+
 ## Designed by
 @Hyemin choi<br>
 @Jieun Oh<br>
