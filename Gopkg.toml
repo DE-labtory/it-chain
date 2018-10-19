@@ -113,4 +113,3 @@ ignored = ["github.com/mock/handler"]
 [[constraint]]
   branch = "master"
   name = "github.com/it-chain/iLogger"
-
