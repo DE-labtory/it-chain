@@ -107,17 +107,9 @@ ignored = ["github.com/mock/handler"]
   unused-packages = true
 
 [[constraint]]
-  name = "go.uber.org/dig"
-  version = "1.4.0"
-
-[[constraint]]
   name = "go.uber.org/fx"
   version = "1.7.0"
 
 [[constraint]]
   branch = "master"
   name = "github.com/it-chain/iLogger"
-
-[[constraint]]
-  name = "github.com/it-chain/avengers"
-  version = "0.4.0"
