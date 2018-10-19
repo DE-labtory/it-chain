@@ -24,9 +24,13 @@ before_install:
 - go get golang.org/x/tools/cmd/goimports
 - go get golang.org/x/tools/cmd/cover
 - go get github.com/mattn/goveralls
+- go get -u github.com/ipfs/ipfs-update
 
 install:
 - dep ensure
+- ipfs-update install latest
+- ipfs-update init
+- ipfs daemon &
 
 env:
   global:
