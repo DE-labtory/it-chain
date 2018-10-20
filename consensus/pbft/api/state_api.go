@@ -115,7 +115,9 @@ func (s *StateApi) AcceptProposal(proposal pbft.ProposeMsg) (returnErr error) {
 
 func (s *StateApi) ReceivePrevote(msg pbft.PrevoteMsg) (returnErr error) {
 
-	s.tempPrevoteMsgPool.Save(&msg)
+	if err := s.tempPrevoteMsgPool.Save(&msg); err != nil {
+		return err
+	}
 
 	loadedState, err := s.stateRepository.Load()
 	if err != nil {
@@ -149,7 +151,9 @@ func (s *StateApi) ReceivePrevote(msg pbft.PrevoteMsg) (returnErr error) {
 
 func (s *StateApi) ReceivePreCommit(msg pbft.PreCommitMsg) error {
 
-	s.tempPreCommitMsgPool.Save(&msg)
+	if err := s.tempPreCommitMsgPool.Save(&msg); err != nil {
+		return err
+	}
 
 	loadedState, err := s.stateRepository.Load()
 	if err != nil {
@@ -204,6 +208,11 @@ func (s *StateApi) checkPrevote(state pbft.State) pbft.State {
 }
 
 func (s *StateApi) checkPreCommit(state pbft.State) pbft.State {
+
+	if state.CurrentStage != pbft.PRECOMMIT_STAGE {
+		iLogger.Debugf(nil, "[PBFT] Not Complete Prevote")
+		return state
+	}
 
 	if state.CheckPreCommitCondition() {
 		e := event.ConsensusFinished{
