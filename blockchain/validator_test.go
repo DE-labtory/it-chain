@@ -17,7 +17,6 @@
 package blockchain_test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -120,8 +119,6 @@ func TestDefaultValidator_BuildTreeAndValidate(t *testing.T) {
 
 	tree, err := validator.BuildTree(convertTxType(TxList))
 	assert.NoError(t, err)
-	fmt.Println("tree.root")
-	fmt.Println(tree.Root.TxSeal)
 
 	isValidated, err := validator.ValidateTree(tree)
 	assert.NoError(t, err)

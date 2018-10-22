@@ -31,19 +31,17 @@ func CreateGenesisBlock(genesisconfFilePath string) (DefaultBlock, error) {
 
 	//set basic
 	err := setBlockWithConfig(genesisconfFilePath, GenesisBlock)
-
 	if err != nil {
 		return DefaultBlock{}, ErrSetConfig
 	}
 
 	//build
-	Seal, err := validator.BuildSeal(GenesisBlock.Timestamp, GenesisBlock.PrevSeal, GenesisBlock.Tree.txSealRoot, GenesisBlock.Creator)
-
+	Seal, err := validator.BuildSeal(GenesisBlock.Timestamp, GenesisBlock.PrevSeal, GenesisBlock.GetTxSealRoot(), GenesisBlock.Creator)
 	if err != nil {
 		return DefaultBlock{}, ErrBuildingSeal
 	}
 
-	//set seal
+	//set
 	GenesisBlock.SetSeal(Seal)
 
 	return *GenesisBlock, nil
@@ -53,14 +51,13 @@ func setBlockWithConfig(filePath string, block *DefaultBlock) error {
 
 	// load
 	jsonFile, err := os.Open(filePath)
-	defer jsonFile.Close()
-
 	if err != nil {
 		return err
 	}
 
-	byteValue, err := ioutil.ReadAll(jsonFile)
+	defer jsonFile.Close()
 
+	byteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
 		return err
 	}
@@ -76,9 +73,12 @@ func setBlockWithConfig(filePath string, block *DefaultBlock) error {
 	const longForm = "Jan 1, 2006 at 0:00am (MST)"
 
 	timeStamp, err := time.Parse(longForm, GenesisConfig.TimeStamp)
-
 	if err != nil {
 		return err
+	}
+
+	tree := &Tree{
+		txSealRoot: []byte("genesis"),
 	}
 
 	block.SetPrevSeal(make([]byte, 0))
@@ -87,8 +87,7 @@ func setBlockWithConfig(filePath string, block *DefaultBlock) error {
 	//ToDo: 지우기
 	block.SetTxSeal(make([][]byte, 0))
 
-	//ToDo: &Tree{}가 최선인가... : txList가 없어도, build tree 해주고 그 tree를 넣어줘야 함.
-	block.SetTree(&Tree{})
+	block.SetTree(tree)
 	block.SetTimestamp(timeStamp)
 	block.SetCreator(GenesisConfig.Creator)
 	block.SetState(Created)
@@ -116,16 +115,17 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransa
 		ProposedBlock.PutTx(tx)
 	}
 
-	txSeal, err := validator.BuildTxSeal(ConvertTxType(txList))
-
 	tree, err := validator.BuildTree(ConvertTxType(txList))
+	if err != nil {
+		return DefaultBlock{}, ErrBuildingTree
+	}
 
+	txSeal, err := validator.BuildTxSeal(ConvertTxType(txList))
 	if err != nil {
 		return DefaultBlock{}, ErrBuildingTxSeal
 	}
 
 	Seal, err := validator.BuildSeal(TimeStamp, prevSeal, tree.txSealRoot, Creator)
-
 	if err != nil {
 		return DefaultBlock{}, ErrBuildingSeal
 	}

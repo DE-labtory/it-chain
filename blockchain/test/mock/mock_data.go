@@ -98,6 +98,9 @@ func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
 	txSeal, _ := validator.BuildTxSeal(ConvertTxListType(txList))
 	block.SetTxSeal(txSeal)
 
+	tree, _ := validator.BuildTree(ConvertTxListType(txList))
+	block.SetTree(tree)
+
 	seal, _ := validator.BuildSeal(block.GetTimestamp(), block.GetPrevSeal(), block.GetTxSealRoot(), block.GetCreator())
 	block.SetSeal(seal)
 

@@ -18,7 +18,6 @@ package blockchain_test
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"testing"
 	"time"
@@ -30,9 +29,10 @@ import (
 func TestCreateGenesisBlock(t *testing.T) {
 
 	//given
-
 	const longForm = "Jan 1, 2006 at 0:00am (MST)"
 	timeStamp, _ := time.Parse(longForm, "Jan 1, 2018 at 0:00am (KST)")
+	tree := &blockchain.Tree{}
+	tree.SetTxSealRoot([]byte("genesis"))
 
 	tests := map[string]struct {
 		input struct {
@@ -53,6 +53,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 				PrevSeal:  make([]byte, 0),
 				Height:    uint64(0),
 				TxList:    make([]*blockchain.DefaultTransaction, 0),
+				Tree:      tree,
 				TxSeal:    make([][]byte, 0),
 				Timestamp: timeStamp,
 				Creator:   "junksound",
@@ -89,10 +90,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 								}`)
 
 	err := ioutil.WriteFile(GenesisFilePath, GenesisBlockConfigJson, 0644)
-
-	if err != nil {
-		log.Println(err.Error())
-	}
+	assert.NoError(t, err)
 
 	for testName, test := range tests {
 		t.Logf("Running test case %s", testName)
@@ -115,6 +113,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 		assert.Equal(t, test.output.GetTimestamp().String()[:19], GenesisBlock.GetTimestamp().String()[:19])
 		assert.Equal(t, test.output.GetCreator(), GenesisBlock.GetCreator())
 		assert.Equal(t, test.output.GetState(), GenesisBlock.GetState())
+		assert.Equal(t, test.output.Tree, GenesisBlock.Tree)
 	}
 
 }
@@ -199,7 +198,7 @@ func TestCreateProposedBlock(t *testing.T) {
 
 			output: blockchain.DefaultBlock{},
 
-			err: blockchain.ErrBuildingTxSeal,
+			err: blockchain.ErrBuildingTree,
 		},
 
 		"fail case2: without prevseal or creator": {

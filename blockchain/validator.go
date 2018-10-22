@@ -41,6 +41,10 @@ type Tree struct {
 	PrimeLeafs []*Leaf
 }
 
+func (t *Tree) SetTxSealRoot(txSealRoot []byte) {
+	t.txSealRoot = txSealRoot
+}
+
 type Leaf struct {
 	Parent       *Leaf
 	Left         *Leaf
@@ -215,10 +219,7 @@ func (t *DefaultValidator) BuildTree(txList []Transaction) (*Tree, error) {
 //ToDo: legacy code 중 buildTree를 지우면, buildTree로 네이밍 변환
 func buildMerkleTree(txList []Transaction) (*Leaf, []*Leaf, error) {
 	if len(txList) == 0 {
-		return &Leaf{
-			//ToDo: string을 byte로 바꾸는 방법 제대로 하기.
-			TxSeal: []byte("genesis"),
-		}, nil, nil
+		return nil, nil, ErrEmptyTxList
 	}
 
 	primeLeafs := []*Leaf{}
