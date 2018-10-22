@@ -86,7 +86,9 @@ func validateLeaf(leaf *Leaf) ([]byte, error) {
 // ValidateSeal 함수는 원래 Seal 값과 주어진 Seal 값(comparisonSeal)을 비교하여, 올바른지 검증한다.
 func (t *DefaultValidator) ValidateSeal(seal []byte, comparisonBlock Block) (bool, error) {
 
-	comparisonSeal, err := t.BuildSeal(comparisonBlock.GetTimestamp(), comparisonBlock.GetPrevSeal(), comparisonBlock.GetTxSeal(), comparisonBlock.GetCreator())
+	txSealRoot := comparisonBlock.GetTxSealRoot()
+
+	comparisonSeal, err := t.BuildSeal(comparisonBlock.GetTimestamp(), comparisonBlock.GetPrevSeal(), txSealRoot, comparisonBlock.GetCreator())
 	if err != nil {
 		return false, err
 	}
@@ -177,22 +179,19 @@ func (t *DefaultValidator) ValidateTransaction(txSeal [][]byte, transaction Tran
 
 // BuildSeal 함수는 block 객체를 받아서 Seal 값을 만들고, Seal 값을 반환한다.
 // 인풋 파라미터의 block에 자동으로 할당해주지는 않는다.
-func (t *DefaultValidator) BuildSeal(timeStamp time.Time, prevSeal []byte, txSeal [][]byte, creator string) ([]byte, error) {
+func (t *DefaultValidator) BuildSeal(timeStamp time.Time, prevSeal []byte, txSealRoot []byte, creator string) ([]byte, error) {
 	timestamp, err := timeStamp.MarshalText()
 	if err != nil {
 		return nil, err
 	}
 
-	if prevSeal == nil || txSeal == nil || creator == "" {
+	//ToDo: tree == nil 수정.
+	if prevSeal == nil || txSealRoot == nil || creator == "" {
 		return nil, ErrInsufficientFields
 	}
-	var rootTxSeal []byte
-	if len(txSeal) == 0 {
-		rootTxSeal = make([]byte, 0)
-	} else {
-		rootTxSeal = txSeal[0]
-	}
-	combined := append(prevSeal, rootTxSeal...)
+
+	//ToDo: txSealRoot가 없을 때 에러 처리.
+	combined := append(prevSeal, txSealRoot...)
 	combined = append(combined, timestamp...)
 
 	seal := calculateHash(combined)
@@ -216,7 +215,10 @@ func (t *DefaultValidator) BuildTree(txList []Transaction) (*Tree, error) {
 //ToDo: legacy code 중 buildTree를 지우면, buildTree로 네이밍 변환
 func buildMerkleTree(txList []Transaction) (*Leaf, []*Leaf, error) {
 	if len(txList) == 0 {
-		return nil, nil, ErrEmptyTxList
+		return &Leaf{
+			//ToDo: string을 byte로 바꾸는 방법 제대로 하기.
+			TxSeal: []byte("genesis"),
+		}, nil, nil
 	}
 
 	primeLeafs := []*Leaf{}
@@ -281,8 +283,8 @@ func buildIntermediate(leafList []*Leaf) (*Leaf, error) {
 		leafList[left].Parent = newLeaf
 		leafList[right].Parent = newLeaf
 		if len(leafList) == 2 {
-			rootLeaf := newLeaf
-			return rootLeaf, nil
+			root := newLeaf
+			return root, nil
 		}
 	}
 	return buildIntermediate(intermediateLeafList)

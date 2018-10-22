@@ -42,6 +42,7 @@ type DefaultBlock struct {
 	PrevSeal  []byte
 	Height    uint64
 	TxList    []*DefaultTransaction
+	Tree      *Tree
 	TxSeal    [][]byte
 	Timestamp time.Time
 	Creator   string
@@ -78,6 +79,10 @@ func (block *DefaultBlock) SetTxSeal(txSeal [][]byte) {
 	block.TxSeal = txSeal
 }
 
+func (block *DefaultBlock) SetTree(tree *Tree) {
+	block.Tree = tree
+}
+
 func (block *DefaultBlock) SetCreator(creator string) {
 	block.Creator = creator
 }
@@ -110,6 +115,10 @@ func (block *DefaultBlock) GetTxList() []Transaction {
 	return txList
 }
 
+func (block *DefaultBlock) GetTree() *Tree {
+	return block.Tree
+}
+
 func (block *DefaultBlock) GetTxSeal() [][]byte {
 	return block.TxSeal
 }
@@ -124,6 +133,10 @@ func (block *DefaultBlock) GetTimestamp() time.Time {
 
 func (block *DefaultBlock) GetState() BlockState {
 	return block.State
+}
+
+func (block *DefaultBlock) GetTxSealRoot() []byte {
+	return block.Tree.txSealRoot
 }
 
 // TODO: Write test case

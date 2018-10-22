@@ -37,7 +37,7 @@ func CreateGenesisBlock(genesisconfFilePath string) (DefaultBlock, error) {
 	}
 
 	//build
-	Seal, err := validator.BuildSeal(GenesisBlock.Timestamp, GenesisBlock.PrevSeal, GenesisBlock.TxSeal, GenesisBlock.Creator)
+	Seal, err := validator.BuildSeal(GenesisBlock.Timestamp, GenesisBlock.PrevSeal, GenesisBlock.Tree.txSealRoot, GenesisBlock.Creator)
 
 	if err != nil {
 		return DefaultBlock{}, ErrBuildingSeal
@@ -83,7 +83,12 @@ func setBlockWithConfig(filePath string, block *DefaultBlock) error {
 
 	block.SetPrevSeal(make([]byte, 0))
 	block.SetHeight(uint64(GenesisConfig.Height))
+
+	//ToDo: 지우기
 	block.SetTxSeal(make([][]byte, 0))
+
+	//ToDo: &Tree{}가 최선인가... : txList가 없어도, build tree 해주고 그 tree를 넣어줘야 함.
+	block.SetTree(&Tree{})
 	block.SetTimestamp(timeStamp)
 	block.SetCreator(GenesisConfig.Creator)
 	block.SetState(Created)
@@ -113,11 +118,13 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransa
 
 	txSeal, err := validator.BuildTxSeal(ConvertTxType(txList))
 
+	tree, err := validator.BuildTree(ConvertTxType(txList))
+
 	if err != nil {
 		return DefaultBlock{}, ErrBuildingTxSeal
 	}
 
-	Seal, err := validator.BuildSeal(TimeStamp, prevSeal, txSeal, Creator)
+	Seal, err := validator.BuildSeal(TimeStamp, prevSeal, tree.txSealRoot, Creator)
 
 	if err != nil {
 		return DefaultBlock{}, ErrBuildingSeal
@@ -128,6 +135,7 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransa
 	ProposedBlock.SetPrevSeal(prevSeal)
 	ProposedBlock.SetHeight(height)
 	ProposedBlock.SetTxSeal(txSeal)
+	ProposedBlock.SetTree(tree)
 	ProposedBlock.SetTimestamp(TimeStamp)
 	ProposedBlock.SetCreator(Creator)
 	ProposedBlock.SetState(Created)

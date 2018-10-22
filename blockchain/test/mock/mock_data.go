@@ -17,11 +17,13 @@
 package mock
 
 import (
+	"math/rand"
 	"time"
 
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/yggdrasill/common"
+	"github.com/rs/xid"
 )
 
 func GetTxResults() []command.TxResult {
@@ -96,10 +98,35 @@ func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
 	txSeal, _ := validator.BuildTxSeal(ConvertTxListType(txList))
 	block.SetTxSeal(txSeal)
 
-	seal, _ := validator.BuildSeal(block.GetTimestamp(), block.GetPrevSeal(), block.GetTxSeal(), block.GetCreator())
+	seal, _ := validator.BuildSeal(block.GetTimestamp(), block.GetPrevSeal(), block.GetTxSealRoot(), block.GetCreator())
 	block.SetSeal(seal)
 
 	return block
+}
+
+func GetRandomTxList() []*blockchain.DefaultTransaction {
+	randSource := rand.NewSource(time.Now().UnixNano())
+	randInstance := rand.New(randSource)
+	randomTxListLength := randInstance.Intn(100)
+
+	TxList := []*blockchain.DefaultTransaction{}
+
+	for i := 0; i <= randomTxListLength; i++ {
+		Tx := &blockchain.DefaultTransaction{
+			ID:        xid.New().String(),
+			ICodeID:   xid.New().String(),
+			PeerID:    xid.New().String(),
+			Timestamp: time.Now().Round(0),
+			Jsonrpc:   xid.New().String(),
+			Function:  xid.New().String(),
+			Args:      nil,
+			Signature: []byte(xid.New().String()),
+		}
+
+		TxList = append(TxList, Tx)
+	}
+
+	return TxList
 }
 
 func GetTxList(testingTime time.Time) []*blockchain.DefaultTransaction {
