@@ -17,12 +17,12 @@
 package blockchain_test
 
 import (
-	"math/rand"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/it-chain/engine/blockchain"
-	"github.com/rs/xid"
+	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,21 +32,25 @@ func TestDefaultValidator_BuildAndValidateSeal(t *testing.T) {
 	validator := blockchain.DefaultValidator{}
 	TimeStamp := time.Now().Round(0)
 	PrevSeal := []byte("PrevSeal")
-	TxSeal := make([][]byte, 0)
+	TxList := mock.GetRandomTxList()
 	Creator := "Creator"
+	Tree, err := validator.BuildTree(convertTxType(TxList))
+
+	assert.NoError(t, err)
 
 	//when
 
-	Seal, err := validator.BuildSeal(TimeStamp, PrevSeal, TxSeal, Creator)
+	Seal, err := validator.BuildSeal(TimeStamp, PrevSeal, Tree.Root.TxSeal, Creator)
 
 	//then
 	assert.NoError(t, err)
 
+	//given
 	block := blockchain.DefaultBlock{
 		Seal:      Seal,
 		Timestamp: TimeStamp,
+		Tree:      Tree,
 		PrevSeal:  PrevSeal,
-		TxSeal:    TxSeal,
 		Creator:   Creator,
 	}
 
@@ -55,6 +59,7 @@ func TestDefaultValidator_BuildAndValidateSeal(t *testing.T) {
 
 	//then
 	assert.Equal(t, true, result)
+	assert.NoError(t, err)
 
 }
 
@@ -111,29 +116,12 @@ func TestDefaultValidator_BuildAndValidateTxSeal(t *testing.T) {
 func TestDefaultValidator_BuildTreeAndValidate(t *testing.T) {
 	validator := blockchain.DefaultValidator{}
 
-	randSource := rand.NewSource(time.Now().UnixNano())
-	randInstance := rand.New(randSource)
-	randomTxListLength := randInstance.Intn(100)
-
-	TxList := []*blockchain.DefaultTransaction{}
-
-	for i := 0; i <= randomTxListLength; i++ {
-		Tx := &blockchain.DefaultTransaction{
-			ID:        xid.New().String(),
-			ICodeID:   xid.New().String(),
-			PeerID:    xid.New().String(),
-			Timestamp: time.Now().Round(0),
-			Jsonrpc:   xid.New().String(),
-			Function:  xid.New().String(),
-			Args:      nil,
-			Signature: []byte(xid.New().String()),
-		}
-
-		TxList = append(TxList, Tx)
-	}
+	TxList := mock.GetRandomTxList()
 
 	tree, err := validator.BuildTree(convertTxType(TxList))
 	assert.NoError(t, err)
+	fmt.Println("tree.root")
+	fmt.Println(tree.Root.TxSeal)
 
 	isValidated, err := validator.ValidateTree(tree)
 	assert.NoError(t, err)
