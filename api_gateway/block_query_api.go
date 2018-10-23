@@ -18,13 +18,14 @@ package api_gateway
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
 	leveldbwrapper "github.com/it-chain/leveldb-wrapper"
-	"github.com/it-chain/yggdrasill"
 )
 
 var ErrGetCommittedBlock = errors.New("Error in getting commited block")
@@ -37,6 +38,13 @@ var ErrFailRemoveBlock = errors.New("Error failed removing block")
 var ErrIdEmpty = errors.New("Error that seal is empty string")
 var ErrEmptyBlock = errors.New("Error empty block when getting block")
 
+const (
+	blockSealDB   = "block_seal"
+	blockHeightDB = "block_height"
+	utilDB        = "util"
+	lastBlockKey  = "last_block"
+)
+
 type BlockQueryApi struct {
 	blockRepository BlockRepository
 }
@@ -47,142 +55,163 @@ func NewBlockQueryApi(blockRepo BlockRepository) *BlockQueryApi {
 	}
 }
 
-func (q BlockQueryApi) GetLastCommittedBlock() (blockchain.DefaultBlock, error) {
+func (q BlockQueryApi) GetLastCommittedBlock() (BlockForQuery, error) {
 	return q.blockRepository.FindLastBlock()
 }
 
-func (q BlockQueryApi) GetCommittedBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error) {
+func (q BlockQueryApi) GetCommittedBlockByHeight(height blockchain.BlockHeight) (BlockForQuery, error) {
 	return q.blockRepository.FindBlockByHeight(height)
 }
 
-func (q BlockQueryApi) GetCommittedBlockBySeal(seal []byte) (blockchain.DefaultBlock, error) {
+func (q BlockQueryApi) GetCommittedBlockBySeal(seal []byte) (BlockForQuery, error) {
 	return q.blockRepository.FindBlockBySeal(seal)
 }
 
 type BlockRepository interface {
-	Save(block blockchain.DefaultBlock) error
-	FindLastBlock() (blockchain.DefaultBlock, error)
-	FindBlockByHeight(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)
-	FindBlockBySeal(seal []byte) (blockchain.DefaultBlock, error)
-	FindAllBlock() ([]blockchain.DefaultBlock, error)
+	Save(block BlockForQuery) error
+	FindLastBlock() (BlockForQuery, error)
+	FindBlockByHeight(height uint64) (BlockForQuery, error)
+	FindBlockBySeal(seal []byte) (BlockForQuery, error)
+	FindAllBlock() ([]BlockForQuery, error)
 	Close()
 }
 
 type BlockRepositoryImpl struct {
-	mux *sync.RWMutex
-	yggdrasill.BlockStorageManager
+	mux        *sync.RWMutex
+	DBProvider *DBProvider
 }
 
-func NewBlockRepositoryImpl(dbPath string) (*BlockRepositoryImpl, error) {
-	validator := new(blockchain.DefaultValidator)
+func NewBlockRepositoryImpl(dbPath string) *BlockRepositoryImpl {
+
 	db := leveldbwrapper.CreateNewDB(dbPath)
-	opts := map[string]interface{}{}
-
-	blockStorage, err := yggdrasill.NewBlockStorage(db, validator, opts)
-	if err != nil {
-		return nil, ErrNewBlockStorage
-	}
-
+	dbProvider := CreateNewDBProvider(db)
 	return &BlockRepositoryImpl{
-		mux:                 &sync.RWMutex{},
-		BlockStorageManager: blockStorage,
-	}, nil
+		mux:        &sync.RWMutex{},
+		DBProvider: dbProvider,
+	}
 }
 
-func (r *BlockRepositoryImpl) Save(block blockchain.DefaultBlock) error {
+func (r *BlockRepositoryImpl) Save(block BlockForQuery) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	err := r.BlockStorageManager.AddBlock(&block)
+	if block.Seal == nil {
+		return ErrEmptyBlock
+	}
+
+	b, err := common.Serialize(block)
 	if err != nil {
-		return ErrAddCommittingBlock
+		return err
+	}
+
+	utilDB := r.DBProvider.GetDBHandle(utilDB)
+	blockSealDB := r.DBProvider.GetDBHandle(blockSealDB)
+	blockHeightDB := r.DBProvider.GetDBHandle(blockHeightDB)
+
+	if err = blockSealDB.Put(block.Seal, b, true); err != nil {
+		return err
+	}
+
+	if err = blockHeightDB.Put([]byte(fmt.Sprint(block.Height)), b, true); err != nil {
+		return err
+	}
+
+	if err = utilDB.Put([]byte(lastBlockKey), b, true); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (r *BlockRepositoryImpl) FindLastBlock() (blockchain.DefaultBlock, error) {
+func (r *BlockRepositoryImpl) FindLastBlock() (BlockForQuery, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	block := &blockchain.DefaultBlock{}
+	utilDB := r.DBProvider.GetDBHandle(utilDB)
 
-	err := r.BlockStorageManager.GetLastBlock(block)
+	b, err := utilDB.Get([]byte(lastBlockKey))
 	if err != nil {
-		return blockchain.DefaultBlock{}, ErrGetCommittedBlock
+		return BlockForQuery{}, err
+	}
+
+	if b == nil {
+		return BlockForQuery{}, errors.New("Repository Is Empty")
+	}
+
+	block := &BlockForQuery{}
+
+	if err = common.Deserialize(b, block); err != nil {
+		return BlockForQuery{}, err
 	}
 
 	return *block, nil
 }
-func (r *BlockRepositoryImpl) FindBlockByHeight(height uint64) (blockchain.DefaultBlock, error) {
+func (r *BlockRepositoryImpl) FindBlockByHeight(height uint64) (BlockForQuery, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	block := &blockchain.DefaultBlock{}
+	blockHeightDB := r.DBProvider.GetDBHandle(blockHeightDB)
 
-	err := r.BlockStorageManager.GetBlockByHeight(block, height)
+	b, err := blockHeightDB.Get([]byte(fmt.Sprint(height)))
 	if err != nil {
-		return blockchain.DefaultBlock{}, ErrGetCommittedBlock
+		return BlockForQuery{}, err
+	}
+
+	block := &BlockForQuery{}
+
+	if err = common.Deserialize(b, block); err != nil {
+		return BlockForQuery{}, err
 	}
 
 	return *block, nil
 }
 
-func (r *BlockRepositoryImpl) FindBlockBySeal(seal []byte) (blockchain.DefaultBlock, error) {
+func (r *BlockRepositoryImpl) FindBlockBySeal(seal []byte) (BlockForQuery, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	block := &blockchain.DefaultBlock{}
+	blockSealDB := r.DBProvider.GetDBHandle(blockSealDB)
 
-	err := r.BlockStorageManager.GetBlockBySeal(block, seal)
+	b, err := blockSealDB.Get(seal)
 	if err != nil {
-		return blockchain.DefaultBlock{}, ErrGetCommittedBlock
+		return BlockForQuery{}, err
+	}
+
+	block := &BlockForQuery{}
+
+	if err = common.Deserialize(b, block); err != nil {
+		return BlockForQuery{}, err
 	}
 
 	return *block, nil
+
 }
 
-func (r *BlockRepositoryImpl) FindAllBlock() ([]blockchain.DefaultBlock, error) {
+func (r *BlockRepositoryImpl) FindAllBlock() ([]BlockForQuery, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	blocks := []blockchain.DefaultBlock{}
+	blockHeightDB := r.DBProvider.GetDBHandle(blockHeightDB)
 
-	// set
-	lastBlock := &blockchain.DefaultBlock{}
+	iter := blockHeightDB.GetIteratorWithPrefix()
 
-	err := r.BlockStorageManager.GetLastBlock(lastBlock)
+	blocks := []BlockForQuery{}
 
-	if err != nil {
-		return nil, err
-	}
-
-	// check empty
-	if lastBlock.IsEmpty() {
-		return blocks, nil
-	}
-
-	lastHeight := lastBlock.GetHeight()
-
-	// get blocks
-	for i := uint64(0); i <= lastHeight; i++ {
-
-		block := &blockchain.DefaultBlock{}
-
-		err := r.BlockStorageManager.GetBlockByHeight(block, i)
-
+	for iter.Next() {
+		val := iter.Value()
+		block := &BlockForQuery{}
+		err := common.Deserialize(val, block)
 		if err != nil {
 			return nil, err
 		}
-
-		if block.IsEmpty() {
-			return nil, ErrEmptyBlock
-		}
-
 		blocks = append(blocks, *block)
 	}
 
 	return blocks, nil
+}
+
+func (r *BlockRepositoryImpl) Close() {
+	r.DBProvider.Close()
 }
 
 type BlockEventListener struct {
@@ -201,15 +230,13 @@ func (l BlockEventListener) HandleBlockCommittedEvent(event event.BlockCommitted
 		return ErrIdEmpty
 	}
 
-	block, err := createDefaultBlock(
+	block, err := createBlockForQuery(
 		event.Seal,
 		event.PrevSeal,
 		event.Height,
 		event.TxList,
-		event.TxSeal,
 		event.Timestamp,
 		event.Creator,
-		event.State,
 	)
 	if err != nil {
 		return err
@@ -221,6 +248,22 @@ func (l BlockEventListener) HandleBlockCommittedEvent(event event.BlockCommitted
 	}
 
 	return nil
+}
+
+func createBlockForQuery(Seal []byte, PrevSeal []byte, Height uint64, TxList []event.Tx, Timestamp time.Time, Creator string) (BlockForQuery, error) {
+	txList, err := deserializeTxListType(TxList)
+	if err != nil {
+		return BlockForQuery{}, err
+	}
+
+	return BlockForQuery{
+		Seal:      Seal,
+		PrevSeal:  PrevSeal,
+		Height:    Height,
+		TxList:    txList,
+		Timestamp: Timestamp,
+		Creator:   Creator,
+	}, nil
 }
 
 func createDefaultBlock(Seal []byte, PrevSeal []byte, Height uint64, TxList []event.Tx, TxSeal [][]byte, Timestamp time.Time, Creator string, State string) (blockchain.DefaultBlock, error) {
@@ -265,4 +308,13 @@ func deserializeTxType(tx event.Tx) (*blockchain.DefaultTransaction, error) {
 		Args:      tx.Args,
 		Signature: tx.Signature,
 	}, nil
+}
+
+type BlockForQuery struct {
+	Seal      []byte
+	PrevSeal  []byte
+	Height    uint64
+	TxList    []*blockchain.DefaultTransaction
+	Timestamp time.Time
+	Creator   string
 }

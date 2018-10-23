@@ -30,10 +30,7 @@ import (
 func TestBlockQueryApi_FindLastCommitedBlock(t *testing.T) {
 	dbPath := "./.db"
 
-	// when
-	cbr, err := api_gateway.NewBlockRepositoryImpl(dbPath)
-	// then
-	assert.Equal(t, nil, err)
+	cbr := api_gateway.NewBlockRepositoryImpl(dbPath)
 
 	defer func() {
 		cbr.Close()
@@ -42,13 +39,13 @@ func TestBlockQueryApi_FindLastCommitedBlock(t *testing.T) {
 
 	// when
 	block1 := mock.GetNewBlock([]byte("genesis"), 0)
-	err = cbr.AddBlock(block1)
+	err := cbr.Save(block1)
 	// then
 	assert.NoError(t, err)
 
 	// when
-	block2 := mock.GetNewBlock(block1.GetSeal(), 1)
-	err = cbr.AddBlock(block2)
+	block2 := mock.GetNewBlock(block1.Seal, 1)
+	err = cbr.Save(block2)
 	// then
 	assert.NoError(t, err)
 
@@ -58,18 +55,15 @@ func TestBlockQueryApi_FindLastCommitedBlock(t *testing.T) {
 	block3, err := blockQueryApi.GetLastCommittedBlock()
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, block2.GetSeal(), block3.GetSeal())
-	assert.Equal(t, block2.GetHeight(), block3.GetHeight())
-	assert.Equal(t, block2.GetPrevSeal(), block3.GetPrevSeal())
+	assert.Equal(t, block2.Seal, block3.Seal)
+	assert.Equal(t, block2.Height, block3.Height)
+	assert.Equal(t, block2.PrevSeal, block3.PrevSeal)
 }
 
 func TestBlockQueryApi_FindCommitedBlockByHeight(t *testing.T) {
 	dbPath := "./.db"
 
-	// when
-	cbr, err := api_gateway.NewBlockRepositoryImpl(dbPath)
-	// then
-	assert.Equal(t, nil, err)
+	cbr := api_gateway.NewBlockRepositoryImpl(dbPath)
 
 	defer func() {
 		cbr.Close()
@@ -78,13 +72,13 @@ func TestBlockQueryApi_FindCommitedBlockByHeight(t *testing.T) {
 
 	// when
 	block1 := mock.GetNewBlock([]byte("genesis"), 0)
-	err = cbr.AddBlock(block1)
+	err := cbr.Save(block1)
 	// then
 	assert.NoError(t, err)
 
 	// when
-	block2 := mock.GetNewBlock(block1.GetSeal(), 1)
-	err = cbr.AddBlock(block2)
+	block2 := mock.GetNewBlock(block1.Seal, 1)
+	err = cbr.Save(block2)
 	// then
 	assert.NoError(t, err)
 
@@ -94,19 +88,15 @@ func TestBlockQueryApi_FindCommitedBlockByHeight(t *testing.T) {
 	block3, err := blockQueryApi.GetCommittedBlockByHeight(blockchain.BlockHeight(1))
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, block2.GetSeal(), block3.GetSeal())
-	assert.Equal(t, block2.GetHeight(), block3.GetHeight())
-	assert.Equal(t, block2.GetPrevSeal(), block3.GetPrevSeal())
+	assert.Equal(t, block2.Seal, block3.Seal)
+	assert.Equal(t, block2.Height, block3.Height)
+	assert.Equal(t, block2.PrevSeal, block3.PrevSeal)
 }
 
 func TestCommitedBlockRepositoryImpl(t *testing.T) {
 	dbPath := "./.db"
 
-	// when
-	cbr, err := api_gateway.NewBlockRepositoryImpl(dbPath)
-
-	// then
-	assert.Equal(t, nil, err)
+	cbr := api_gateway.NewBlockRepositoryImpl(dbPath)
 
 	defer func() {
 		cbr.Close()
@@ -115,13 +105,13 @@ func TestCommitedBlockRepositoryImpl(t *testing.T) {
 
 	// when
 	block1 := mock.GetNewBlock([]byte("genesis"), 0)
-	err = cbr.AddBlock(block1)
+	err := cbr.Save(block1)
 	// then
 	assert.NoError(t, err)
 
 	// when
-	block2 := mock.GetNewBlock(block1.GetSeal(), 1)
-	err = cbr.AddBlock(block2)
+	block2 := mock.GetNewBlock(block1.Seal, 1)
+	err = cbr.Save(block2)
 	// then
 	assert.NoError(t, err)
 
@@ -131,9 +121,9 @@ func TestCommitedBlockRepositoryImpl(t *testing.T) {
 	block3, err := blockQueryApi.GetLastCommittedBlock()
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, block2.GetSeal(), block3.GetSeal())
-	assert.Equal(t, block2.GetHeight(), block3.GetHeight())
-	assert.Equal(t, block2.GetPrevSeal(), block3.GetPrevSeal())
+	assert.Equal(t, block2.Seal, block3.Seal)
+	assert.Equal(t, block2.Height, block3.Height)
+	assert.Equal(t, block2.PrevSeal, block3.PrevSeal)
 
 	// when
 	AllBlock, err4 := cbr.FindAllBlock()
@@ -147,10 +137,7 @@ func TestCommitedBlockRepositoryImpl(t *testing.T) {
 func TestBlockEventListener_HandleBlockCommitedEvent(t *testing.T) {
 	dbPath := "./.db"
 
-	// when
-	cbr, err := api_gateway.NewBlockRepositoryImpl(dbPath)
-	// then
-	assert.Equal(t, nil, err)
+	cbr := api_gateway.NewBlockRepositoryImpl(dbPath)
 
 	defer func() {
 		cbr.Close()
@@ -159,14 +146,14 @@ func TestBlockEventListener_HandleBlockCommitedEvent(t *testing.T) {
 
 	// when
 	block1 := mock.GetNewBlock([]byte("genesis"), 0)
-	err = cbr.AddBlock(block1)
+	err := cbr.Save(block1)
 	// then
 	assert.NoError(t, err)
 
 	eh := api_gateway.NewBlockEventListener(cbr)
 
 	// when
-	block2 := mock.GetNewBlock(block1.GetSeal(), 1)
+	block2 := mock.GetNewBlock(block1.Seal, 1)
 	// when
 	txList, _ := convertToTxList(block2.TxList)
 
@@ -175,7 +162,6 @@ func TestBlockEventListener_HandleBlockCommitedEvent(t *testing.T) {
 		PrevSeal:  block2.PrevSeal,
 		Height:    block2.Height,
 		TxList:    txList,
-		TxSeal:    block2.TxSeal,
 		Timestamp: block2.Timestamp,
 		Creator:   block2.Creator,
 		State:     blockchain.Committed,
@@ -189,8 +175,7 @@ func TestBlockEventListener_HandleBlockCommitedEvent(t *testing.T) {
 	block3, err2 := cbr.FindBlockByHeight(1)
 	// then
 	assert.NoError(t, err2)
-	assert.Equal(t, block3.Seal, block2.GetSeal())
-	assert.Equal(t, blockchain.Committed, block3.State)
+	assert.Equal(t, block3.Seal, block2.Seal)
 }
 
 func convertToTxList(txlist []*blockchain.DefaultTransaction) ([]event.Tx, error) {

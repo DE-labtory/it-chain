@@ -127,7 +127,7 @@ func TestDefaultBlock_IsReadyToPublish(t *testing.T) {
 func TestSerializeAndDeserialize(t *testing.T) {
 
 	//given
-	block := *mock.GetNewBlock([]byte("genesis"), 0)
+	block := mock.GetNewBlock([]byte("genesis"), 0)
 
 	////when
 	serializedBlock, err := block.Serialize()
@@ -136,7 +136,7 @@ func TestSerializeAndDeserialize(t *testing.T) {
 	assert.NoError(t, err)
 
 	//given
-	deserializedBlock := blockchain.DefaultBlock{}
+	deserializedBlock := &blockchain.DefaultBlock{}
 
 	//when
 	err = deserializedBlock.Deserialize(serializedBlock)

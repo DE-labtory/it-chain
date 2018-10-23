@@ -52,8 +52,8 @@ func (t *Tree) GetTxSealRoot() []byte {
 type Leaf struct {
 	Left         *Leaf
 	Right        *Leaf
-	isPrime      bool
-	isDuplicated bool
+	IsPrime      bool
+	IsDuplicated bool
 	TxSeal       []byte
 	Transaction  *DefaultTransaction
 }
@@ -72,7 +72,7 @@ func (t *DefaultValidator) ValidateTree(tree *Tree) (bool, error) {
 
 func validateLeaf(leaf *Leaf) ([]byte, error) {
 
-	if leaf.isPrime {
+	if leaf.IsPrime {
 		return leaf.Transaction.CalculateSeal()
 	}
 
@@ -235,7 +235,7 @@ func buildMerkleTree(txList []*DefaultTransaction) (*Leaf, []*Leaf, error) {
 		primeLeafs = append(primeLeafs, &Leaf{
 			TxSeal:      txSeal,
 			Transaction: tx,
-			isPrime:     true,
+			IsPrime:     true,
 		})
 	}
 
@@ -243,8 +243,8 @@ func buildMerkleTree(txList []*DefaultTransaction) (*Leaf, []*Leaf, error) {
 		duplicatedNode := &Leaf{
 			TxSeal:       primeLeafs[len(primeLeafs)-1].TxSeal,
 			Transaction:  primeLeafs[len(primeLeafs)-1].Transaction,
-			isPrime:      true,
-			isDuplicated: true,
+			IsPrime:      true,
+			IsDuplicated: true,
 		}
 		primeLeafs = append(primeLeafs, duplicatedNode)
 	}

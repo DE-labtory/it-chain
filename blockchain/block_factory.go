@@ -120,11 +120,6 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransa
 		return DefaultBlock{}, err
 	}
 
-	txSeal, err := validator.BuildTxSeal(ConvertTxType(txList))
-	if err != nil {
-		return DefaultBlock{}, ErrBuildingTxSeal
-	}
-
 	Seal, err := validator.BuildSeal(TimeStamp, prevSeal, tree.TxSealRoot, Creator)
 	if err != nil {
 		return DefaultBlock{}, ErrBuildingSeal
@@ -134,7 +129,6 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransa
 	ProposedBlock.SetSeal(Seal)
 	ProposedBlock.SetPrevSeal(prevSeal)
 	ProposedBlock.SetHeight(height)
-	ProposedBlock.SetTxSeal(txSeal)
 	ProposedBlock.SetTree(tree)
 	ProposedBlock.SetTimestamp(TimeStamp)
 	ProposedBlock.SetCreator(Creator)

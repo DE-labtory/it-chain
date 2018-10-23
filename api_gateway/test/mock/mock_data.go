@@ -4,24 +4,23 @@ import (
 	"log"
 	"time"
 
+	"github.com/it-chain/engine/api_gateway"
 	"github.com/it-chain/engine/blockchain"
 	"github.com/it-chain/engine/common/event"
 	"github.com/it-chain/yggdrasill/common"
 )
 
-func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
+func GetNewBlock(prevSeal []byte, height uint64) api_gateway.BlockForQuery {
 	validator := &blockchain.DefaultValidator{}
 	testingTime := time.Now().Round(0)
 	blockCreator := "testUser"
 	txList := GetTxList(testingTime)
-	block := &blockchain.DefaultBlock{}
-	block.SetPrevSeal(prevSeal)
-	block.SetHeight(height)
-	block.SetCreator(blockCreator)
-	block.SetTimestamp(testingTime)
-	for _, tx := range txList {
-		block.PutTx(tx)
-	}
+	block := api_gateway.BlockForQuery{}
+	block.PrevSeal = prevSeal
+	block.Height = height
+	block.Creator = blockCreator
+	block.Timestamp = testingTime
+	block.TxList = txList
 
 	tree, err := validator.BuildTree(txList)
 	if err != nil {
@@ -29,13 +28,9 @@ func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
 		log.Println(err)
 	}
 
-	block.SetTree(tree)
+	seal, _ := validator.BuildSeal(block.Timestamp, block.PrevSeal, tree.TxSealRoot, block.Creator)
 
-	txSeal, _ := validator.BuildTxSeal(ConvertTxListType(txList))
-	block.SetTxSeal(txSeal)
-
-	seal, _ := validator.BuildSeal(block.GetTimestamp(), block.GetPrevSeal(), block.GetTxSealRoot(), block.GetCreator())
-	block.SetSeal(seal)
+	block.Seal = seal
 
 	return block
 }

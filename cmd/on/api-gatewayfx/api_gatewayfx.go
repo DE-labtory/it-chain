@@ -58,7 +58,7 @@ var Module = fx.Options(
 	),
 )
 
-func NewBlockRepository() (*api_gateway.BlockRepositoryImpl, error) {
+func NewBlockRepository() *api_gateway.BlockRepositoryImpl {
 	blockchainDB := ApidbPath + "/block"
 	return api_gateway.NewBlockRepositoryImpl(blockchainDB)
 }
