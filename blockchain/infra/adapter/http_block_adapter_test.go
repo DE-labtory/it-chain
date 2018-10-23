@@ -35,14 +35,14 @@ func TestHttpBlockAdapter_GetLastBlock(t *testing.T) {
 		Height: 10,
 	}
 
-	go createServer(lastBlock, "8080")
+	go createServer(lastBlock, "8086")
 
 	time.Sleep(3 * time.Second)
 
 	hAdapter := adapter.HttpBlockAdapter{}
 
 	peer := blockchain.Peer{
-		ApiGatewayAddress: "127.0.0.1:8080",
+		ApiGatewayAddress: "127.0.0.1:8086",
 	}
 
 	retrievedBlock, err := hAdapter.GetLastBlockFromPeer(peer)
