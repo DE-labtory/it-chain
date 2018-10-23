@@ -136,7 +136,7 @@ func (block *DefaultBlock) GetState() BlockState {
 }
 
 func (block *DefaultBlock) GetTxSealRoot() []byte {
-	return block.Tree.txSealRoot
+	return block.Tree.TxSealRoot
 }
 
 // TODO: Write test case

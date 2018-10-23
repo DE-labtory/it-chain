@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -126,11 +127,9 @@ func TestDefaultBlock_IsReadyToPublish(t *testing.T) {
 func TestSerializeAndDeserialize(t *testing.T) {
 
 	//given
-	block := blockchain.DefaultBlock{
-		Seal: []byte("Seal"),
-	}
+	block := *mock.GetNewBlock([]byte("genesis"), 0)
 
-	//when
+	////when
 	serializedBlock, err := block.Serialize()
 
 	//then

@@ -198,7 +198,7 @@ func TestCreateProposedBlock(t *testing.T) {
 
 			output: blockchain.DefaultBlock{},
 
-			err: blockchain.ErrBuildingTree,
+			err: blockchain.ErrEmptyTxList,
 		},
 
 		"fail case2: without prevseal or creator": {

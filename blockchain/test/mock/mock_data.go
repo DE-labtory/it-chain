@@ -17,6 +17,7 @@
 package mock
 
 import (
+	"log"
 	"math/rand"
 	"time"
 
@@ -84,7 +85,7 @@ func GetStagedBlockWithId(blockId string) blockchain.DefaultBlock {
 
 func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
 	validator := &blockchain.DefaultValidator{}
-	testingTime := time.Now()
+	testingTime := time.Now().Round(0)
 	blockCreator := "testUser"
 	txList := GetTxList(testingTime)
 	block := &blockchain.DefaultBlock{}
@@ -95,11 +96,17 @@ func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
 	for _, tx := range txList {
 		block.PutTx(tx)
 	}
+
+	tree, err := validator.BuildTree(txList)
+	if err != nil {
+		//ToDo: 좀 더 나은처리가 있을 지.
+		log.Println(err)
+	}
+
+	block.SetTree(tree)
+
 	txSeal, _ := validator.BuildTxSeal(ConvertTxListType(txList))
 	block.SetTxSeal(txSeal)
-
-	tree, _ := validator.BuildTree(ConvertTxListType(txList))
-	block.SetTree(tree)
 
 	seal, _ := validator.BuildSeal(block.GetTimestamp(), block.GetPrevSeal(), block.GetTxSealRoot(), block.GetCreator())
 	block.SetSeal(seal)

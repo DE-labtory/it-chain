@@ -33,7 +33,7 @@ func TestDefaultValidator_BuildAndValidateSeal(t *testing.T) {
 	PrevSeal := []byte("PrevSeal")
 	TxList := mock.GetRandomTxList()
 	Creator := "Creator"
-	Tree, err := validator.BuildTree(convertTxType(TxList))
+	Tree, err := validator.BuildTree(TxList)
 
 	assert.NoError(t, err)
 
@@ -117,7 +117,7 @@ func TestDefaultValidator_BuildTreeAndValidate(t *testing.T) {
 
 	TxList := mock.GetRandomTxList()
 
-	tree, err := validator.BuildTree(convertTxType(TxList))
+	tree, err := validator.BuildTree(TxList)
 	assert.NoError(t, err)
 
 	isValidated, err := validator.ValidateTree(tree)

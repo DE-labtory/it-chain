@@ -37,22 +37,25 @@ type DefaultValidator struct{}
 
 type Tree struct {
 	Root       *Leaf
-	txSealRoot []byte
+	TxSealRoot []byte
 	PrimeLeafs []*Leaf
 }
 
 func (t *Tree) SetTxSealRoot(txSealRoot []byte) {
-	t.txSealRoot = txSealRoot
+	t.TxSealRoot = txSealRoot
+}
+
+func (t *Tree) GetTxSealRoot() []byte {
+	return t.TxSealRoot
 }
 
 type Leaf struct {
-	Parent       *Leaf
 	Left         *Leaf
 	Right        *Leaf
 	isPrime      bool
 	isDuplicated bool
 	TxSeal       []byte
-	Transaction  Transaction
+	Transaction  *DefaultTransaction
 }
 
 func (t *DefaultValidator) ValidateTree(tree *Tree) (bool, error) {
@@ -61,7 +64,7 @@ func (t *DefaultValidator) ValidateTree(tree *Tree) (bool, error) {
 		return false, err
 	}
 
-	if bytes.Compare(tree.txSealRoot, calculatedMerkleRoot) == 0 {
+	if bytes.Compare(tree.TxSealRoot, calculatedMerkleRoot) == 0 {
 		return true, nil
 	}
 	return false, nil
@@ -202,7 +205,7 @@ func (t *DefaultValidator) BuildSeal(timeStamp time.Time, prevSeal []byte, txSea
 	return seal, nil
 }
 
-func (t *DefaultValidator) BuildTree(txList []Transaction) (*Tree, error) {
+func (t *DefaultValidator) BuildTree(txList []*DefaultTransaction) (*Tree, error) {
 
 	root, primeLeafs, err := buildMerkleTree(txList)
 	if err != nil {
@@ -211,13 +214,13 @@ func (t *DefaultValidator) BuildTree(txList []Transaction) (*Tree, error) {
 
 	return &Tree{
 		Root:       root,
-		txSealRoot: root.TxSeal,
+		TxSealRoot: root.TxSeal,
 		PrimeLeafs: primeLeafs,
 	}, nil
 }
 
 //ToDo: legacy code 중 buildTree를 지우면, buildTree로 네이밍 변환
-func buildMerkleTree(txList []Transaction) (*Leaf, []*Leaf, error) {
+func buildMerkleTree(txList []*DefaultTransaction) (*Leaf, []*Leaf, error) {
 	if len(txList) == 0 {
 		return nil, nil, ErrEmptyTxList
 	}
@@ -281,8 +284,8 @@ func buildIntermediate(leafList []*Leaf) (*Leaf, error) {
 			TxSeal: h.Sum(nil),
 		}
 		intermediateLeafList = append(intermediateLeafList, newLeaf)
-		leafList[left].Parent = newLeaf
-		leafList[right].Parent = newLeaf
+		//leafList[left].Parent = newLeaf
+		//leafList[right].Parent = newLeaf
 		if len(leafList) == 2 {
 			root := newLeaf
 			return root, nil
