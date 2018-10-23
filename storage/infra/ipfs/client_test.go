@@ -18,6 +18,7 @@ package ipfs_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/it-chain/engine/storage/infra/ipfs"
@@ -41,6 +42,7 @@ func TestClient_DownLoad(t *testing.T) {
 	assert.NoError(t, err)
 
 	b, err := client.DownLoadFile(fileID.ID)
+	defer os.RemoveAll(ipfs.TMP_FOLDER)
 	assert.NoError(t, err)
 	assert.Equal(t, data, b)
 }

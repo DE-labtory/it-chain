@@ -29,7 +29,7 @@ before_install:
 install:
 - dep ensure
 - ipfs-update install latest
-- ipfs-update init
+- ipfs init
 - ipfs daemon &
 
 env:
