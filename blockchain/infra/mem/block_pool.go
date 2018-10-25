@@ -72,5 +72,8 @@ func (b *BlockPool) GetSortedKeys() []blockchain.BlockHeight {
 }
 
 func (b *BlockPool) Size() int {
+	b.mux.Lock()
+	defer b.mux.Unlock()
+
 	return len(b.blockMap)
 }

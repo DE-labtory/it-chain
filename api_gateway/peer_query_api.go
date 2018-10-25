@@ -116,6 +116,9 @@ func (p *PeerRepository) Remove(ID string) {
 }
 
 func (p *PeerRepository) FindById(ID string) (Peer, error) {
+	p.Lock()
+	defer p.Unlock()
+
 	peer, ok := p.peers[ID]
 	if !ok {
 		return Peer{}, ErrPeerDoesNotExists
@@ -125,6 +128,9 @@ func (p *PeerRepository) FindById(ID string) (Peer, error) {
 }
 
 func (p *PeerRepository) FindAll() []Peer {
+	p.Lock()
+	defer p.Unlock()
+
 	peerList := make([]Peer, 0)
 
 	for _, peer := range p.peers {
