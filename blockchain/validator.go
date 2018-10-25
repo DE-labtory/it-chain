@@ -35,53 +35,30 @@ type Validator = common.Validator
 // DefaultValidator 객체는 Validator interface를 구현한 객체.
 type DefaultValidator struct{}
 
-type Tree struct {
-	Root       *Leaf
-	TxSealRoot []byte
-	PrimeLeafs []*Leaf
-}
-
-func (t *Tree) SetTxSealRoot(txSealRoot []byte) {
-	t.TxSealRoot = txSealRoot
-}
-
-func (t *Tree) GetTxSealRoot() []byte {
-	return t.TxSealRoot
-}
-
-type Leaf struct {
-	Left         *Leaf
-	Right        *Leaf
-	IsPrime      bool
-	IsDuplicated bool
-	TxSeal       []byte
-	Transaction  *DefaultTransaction
-}
-
-func (t *DefaultValidator) ValidateTree(tree *Tree) (bool, error) {
-	calculatedMerkleRoot, err := validateLeaf(tree.Root)
+func (t *DefaultValidator) ValidateTree(tree Tree) (bool, error) {
+	calculatedMerkleRoot, err := validateLeaf(tree.GetRoot())
 	if err != nil {
 		return false, err
 	}
 
-	if bytes.Compare(tree.TxSealRoot, calculatedMerkleRoot) == 0 {
+	if bytes.Compare(tree.GetTxSealRoot(), calculatedMerkleRoot) == 0 {
 		return true, nil
 	}
 	return false, nil
 }
 
-func validateLeaf(leaf *Leaf) ([]byte, error) {
+func validateLeaf(node Node) ([]byte, error) {
 
-	if leaf.IsPrime {
-		return leaf.Transaction.CalculateSeal()
+	if node.IsLeafNode() {
+		return node.GetTransaction().CalculateSeal()
 	}
 
-	rightHash, err := validateLeaf(leaf.Right)
+	rightHash, err := validateLeaf(node.GetRight())
 	if err != nil {
 		return nil, err
 	}
 
-	leftHash, err := validateLeaf(leaf.Left)
+	leftHash, err := validateLeaf(node.GetLeft())
 	if err != nil {
 		return nil, err
 	}
@@ -205,14 +182,14 @@ func (t *DefaultValidator) BuildSeal(timeStamp time.Time, prevSeal []byte, txSea
 	return seal, nil
 }
 
-func (t *DefaultValidator) BuildTree(txList []*DefaultTransaction) (*Tree, error) {
+func (t *DefaultValidator) BuildTree(txList []Transaction) (Tree, error) {
 
-	root, primeLeafs, err := buildMerkleTree(txList)
+	root, primeLeafs, err := buildMerkleTree(GetBackTxType(txList))
 	if err != nil {
 		return nil, err
 	}
 
-	return &Tree{
+	return &DefaultTree{
 		Root:       root,
 		TxSealRoot: root.TxSeal,
 		PrimeLeafs: primeLeafs,
@@ -220,73 +197,72 @@ func (t *DefaultValidator) BuildTree(txList []*DefaultTransaction) (*Tree, error
 }
 
 //ToDo: legacy code 중 buildTree를 지우면, buildTree로 네이밍 변환
-func buildMerkleTree(txList []*DefaultTransaction) (*Leaf, []*Leaf, error) {
+func buildMerkleTree(txList []*DefaultTransaction) (*DefaultNode, []*DefaultNode, error) {
 	if len(txList) == 0 {
 		return nil, nil, ErrEmptyTxList
 	}
 
-	primeLeafs := []*Leaf{}
+	Leafs := []*DefaultNode{}
 	for _, tx := range txList {
 		txSeal, err := tx.CalculateSeal()
 		if err != nil {
 			return nil, nil, err
 		}
 
-		primeLeafs = append(primeLeafs, &Leaf{
+		Leafs = append(Leafs, &DefaultNode{
 			TxSeal:      txSeal,
 			Transaction: tx,
-			IsPrime:     true,
+			IsLeaf:      true,
 		})
 	}
 
-	if len(primeLeafs)%2 == 1 {
-		duplicatedNode := &Leaf{
-			TxSeal:       primeLeafs[len(primeLeafs)-1].TxSeal,
-			Transaction:  primeLeafs[len(primeLeafs)-1].Transaction,
-			IsPrime:      true,
+	if len(Leafs)%2 == 1 {
+		duplicatedNode := &DefaultNode{
+			TxSeal:       Leafs[len(Leafs)-1].TxSeal,
+			Transaction:  Leafs[len(Leafs)-1].Transaction,
+			IsLeaf:       true,
 			IsDuplicated: true,
 		}
-		primeLeafs = append(primeLeafs, duplicatedNode)
+		Leafs = append(Leafs, duplicatedNode)
 	}
 
-	root, err := buildRoot(primeLeafs)
+	root, err := buildRoot(Leafs)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return root, primeLeafs, nil
+	return root, Leafs, nil
 
 }
 
-func buildRoot(leafList []*Leaf) (*Leaf, error) {
-	return buildIntermediate(leafList)
+func buildRoot(nodeList []*DefaultNode) (*DefaultNode, error) {
+	return buildIntermediate(nodeList)
 }
 
-func buildIntermediate(leafList []*Leaf) (*Leaf, error) {
+func buildIntermediate(nodeList []*DefaultNode) (*DefaultNode, error) {
 
-	intermediateLeafList := []*Leaf{}
-	for i := 0; i < len(leafList); i += 2 {
+	intermediateLeafList := []*DefaultNode{}
+	for i := 0; i < len(nodeList); i += 2 {
 		h := sha256.New()
 		left, right := i, i+1
 
-		if i+1 == len(leafList) {
+		if i+1 == len(nodeList) {
 			right = i
 		}
 
-		joinedSeal := append(leafList[left].TxSeal, leafList[right].TxSeal...)
+		joinedSeal := append(nodeList[left].TxSeal, nodeList[right].TxSeal...)
 		if _, err := h.Write(joinedSeal); err != nil {
 			return nil, err
 		}
 
-		newLeaf := &Leaf{
-			Left:   leafList[left],
-			Right:  leafList[right],
+		newLeaf := &DefaultNode{
+			Left:   nodeList[left],
+			Right:  nodeList[right],
 			TxSeal: h.Sum(nil),
 		}
 		intermediateLeafList = append(intermediateLeafList, newLeaf)
-		//leafList[left].Parent = newLeaf
-		//leafList[right].Parent = newLeaf
-		if len(leafList) == 2 {
+
+		if len(nodeList) == 2 {
 			root := newLeaf
 			return root, nil
 		}

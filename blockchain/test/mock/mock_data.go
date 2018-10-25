@@ -97,7 +97,7 @@ func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {
 		block.PutTx(tx)
 	}
 
-	tree, err := validator.BuildTree(txList)
+	tree, err := validator.BuildTree(ConvertTxListType(txList))
 	if err != nil {
 		//ToDo: 좀 더 나은처리가 있을 지.
 		log.Println(err)

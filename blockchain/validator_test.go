@@ -33,13 +33,13 @@ func TestDefaultValidator_BuildAndValidateSeal(t *testing.T) {
 	PrevSeal := []byte("PrevSeal")
 	TxList := mock.GetRandomTxList()
 	Creator := "Creator"
-	Tree, err := validator.BuildTree(TxList)
+	Tree, err := validator.BuildTree(convertTxType(TxList))
 
 	assert.NoError(t, err)
 
 	//when
 
-	Seal, err := validator.BuildSeal(TimeStamp, PrevSeal, Tree.Root.TxSeal, Creator)
+	Seal, err := validator.BuildSeal(TimeStamp, PrevSeal, Tree.GetTxSealRoot(), Creator)
 
 	//then
 	assert.NoError(t, err)
@@ -48,7 +48,7 @@ func TestDefaultValidator_BuildAndValidateSeal(t *testing.T) {
 	block := blockchain.DefaultBlock{
 		Seal:      Seal,
 		Timestamp: TimeStamp,
-		Tree:      Tree,
+		Tree:      blockchain.ConvTreeType(Tree),
 		PrevSeal:  PrevSeal,
 		Creator:   Creator,
 	}
@@ -117,7 +117,7 @@ func TestDefaultValidator_BuildTreeAndValidate(t *testing.T) {
 
 	TxList := mock.GetRandomTxList()
 
-	tree, err := validator.BuildTree(TxList)
+	tree, err := validator.BuildTree(convertTxType(TxList))
 	assert.NoError(t, err)
 
 	isValidated, err := validator.ValidateTree(tree)

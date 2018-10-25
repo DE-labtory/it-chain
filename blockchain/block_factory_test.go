@@ -31,7 +31,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 	//given
 	const longForm = "Jan 1, 2006 at 0:00am (MST)"
 	timeStamp, _ := time.Parse(longForm, "Jan 1, 2018 at 0:00am (KST)")
-	tree := &blockchain.Tree{}
+	tree := &blockchain.DefaultTree{}
 	tree.SetTxSealRoot([]byte("genesis"))
 
 	tests := map[string]struct {

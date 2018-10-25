@@ -77,7 +77,7 @@ func setBlockWithConfig(filePath string, block *DefaultBlock) error {
 		return err
 	}
 
-	tree := &Tree{
+	tree := &DefaultTree{
 		TxSealRoot: []byte("genesis"),
 	}
 
@@ -115,12 +115,12 @@ func CreateProposedBlock(prevSeal []byte, height uint64, txList []*DefaultTransa
 		ProposedBlock.PutTx(tx)
 	}
 
-	tree, err := validator.BuildTree(txList)
+	tree, err := validator.BuildTree(ConvertTxType(txList))
 	if err != nil {
 		return DefaultBlock{}, err
 	}
 
-	Seal, err := validator.BuildSeal(TimeStamp, prevSeal, tree.TxSealRoot, Creator)
+	Seal, err := validator.BuildSeal(TimeStamp, prevSeal, tree.GetTxSealRoot(), Creator)
 	if err != nil {
 		return DefaultBlock{}, ErrBuildingSeal
 	}
