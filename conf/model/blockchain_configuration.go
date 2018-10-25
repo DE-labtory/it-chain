@@ -16,12 +16,14 @@
 
 package model
 
+import "os"
+
 type BlockChainConfiguration struct {
 	GenesisConfPath string
 }
 
 func NewBlockChainConfiguration() BlockChainConfiguration {
 	return BlockChainConfiguration{
-		GenesisConfPath: "./Genesis.conf",
+		GenesisConfPath: os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/Genesis.conf",
 	}
 }

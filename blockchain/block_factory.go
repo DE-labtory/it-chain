@@ -18,6 +18,7 @@ package blockchain
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
@@ -52,6 +53,8 @@ func setBlockWithConfig(filePath string, block *DefaultBlock) error {
 	// load
 	jsonFile, err := os.Open(filePath)
 	if err != nil {
+		fmt.Println("kkkkk")
+		fmt.Println(err)
 		return err
 	}
 
@@ -78,6 +81,14 @@ func setBlockWithConfig(filePath string, block *DefaultBlock) error {
 	}
 
 	tree := &DefaultTree{
+		Root: &DefaultNode{
+			Left:         nil,
+			Right:        nil,
+			IsLeaf:       true,
+			IsDuplicated: false,
+			TxSeal:       nil,
+			Transaction:  nil,
+		},
 		TxSealRoot: []byte("genesis"),
 	}
 
