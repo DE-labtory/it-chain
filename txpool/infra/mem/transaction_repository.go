@@ -55,11 +55,16 @@ func (m *TransactionRepository) Save(transaction txpool.Transaction) error {
 }
 
 func (m *TransactionRepository) Remove(id txpool.TransactionId) {
+	m.Lock()
+	defer m.Unlock()
+	
 	delete(m.TxMap, id)
 }
 
 func (m *TransactionRepository) FindById(id txpool.TransactionId) (txpool.Transaction, error) {
-
+	m.Lock()
+	defer m.Unlock()
+	
 	t, ok := m.TxMap[id]
 
 	if ok {
@@ -70,6 +75,8 @@ func (m *TransactionRepository) FindById(id txpool.TransactionId) (txpool.Transa
 }
 
 func (m *TransactionRepository) FindAll() ([]txpool.Transaction, error) {
+	m.Lock()
+	defer m.Unlock()
 
 	s := make([]txpool.Transaction, 0)
 
