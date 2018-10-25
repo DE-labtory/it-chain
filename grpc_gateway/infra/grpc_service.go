@@ -259,6 +259,20 @@ func NewMemConnectionStore() MemConnectionStore {
 }
 
 func (connStore MemConnectionStore) Exist(connID bifrost.ConnID) bool {
+	connStore.Lock()
+	defer connStore.Unlock()
+
+	_, ok := connStore.connMap[connID]
+
+	//exist
+	if ok {
+		return true
+	}
+
+	return false
+}
+
+func (connStore MemConnectionStore) exist(connID bifrost.ConnID) bool {
 
 	_, ok := connStore.connMap[connID]
 
@@ -277,7 +291,7 @@ func (connStore MemConnectionStore) Add(conn bifrost.Connection) error {
 
 	connID := conn.GetID()
 
-	if connStore.Exist(connID) {
+	if connStore.exist(connID) {
 		return ErrConnAlreadyExist
 	}
 
@@ -291,7 +305,7 @@ func (connStore MemConnectionStore) Delete(connID bifrost.ConnID) {
 	connStore.Lock()
 	defer connStore.Unlock()
 
-	if connStore.Exist(connID) {
+	if connStore.exist(connID) {
 		delete(connStore.connMap, connID)
 	}
 }

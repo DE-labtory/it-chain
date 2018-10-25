@@ -18,6 +18,7 @@ package api_gateway
 
 import (
 	"errors"
+	"sync"
 
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/common/event"
@@ -47,6 +48,7 @@ type ICodeRepository interface {
 
 type LevelDbICodeRepository struct {
 	leveldb *leveldbwrapper.DB
+	sync.Mutex
 }
 
 func NewLevelDbMetaRepository(path string) *LevelDbICodeRepository {
@@ -57,23 +59,37 @@ func NewLevelDbMetaRepository(path string) *LevelDbICodeRepository {
 	}
 }
 
-func (l *LevelDbICodeRepository) FindAllMeta() ([]ivm.ICode, error) {
+func (l *LevelDbICodeRepository) findAllMeta() ([]ivm.ICode, error) {
+
 	iter := l.leveldb.GetIteratorWithPrefix([]byte(""))
 	metaList := []ivm.ICode{}
+
 	for iter.Next() {
 		val := iter.Value()
 		icode := &ivm.ICode{}
+
 		err := common.Deserialize(val, icode)
 		if err != nil {
 			return nil, err
 		}
+
 		metaList = append(metaList, *icode)
 	}
 	return metaList, nil
 }
 
+func (l *LevelDbICodeRepository) FindAllMeta() ([]ivm.ICode, error) {
+	l.Lock()
+	defer l.Unlock()
+
+	return l.findAllMeta()
+}
+
 func (l *LevelDbICodeRepository) FindMetaByUrl(url string) (ivm.ICode, error) {
-	allMetaList, err := l.FindAllMeta()
+	l.Lock()
+	defer l.Unlock()
+
+	allMetaList, err := l.findAllMeta()
 	if err != nil {
 		return ivm.ICode{}, err
 	}
@@ -88,6 +104,8 @@ func (l *LevelDbICodeRepository) FindMetaByUrl(url string) (ivm.ICode, error) {
 }
 
 func (l *LevelDbICodeRepository) FindMetaById(id ivm.ID) (ivm.ICode, error) {
+	l.Lock()
+	defer l.Unlock()
 
 	metaByte, err := l.leveldb.Get([]byte(id))
 	if err != nil {
@@ -110,6 +128,8 @@ func (l *LevelDbICodeRepository) FindMetaById(id ivm.ID) (ivm.ICode, error) {
 }
 
 func (l *LevelDbICodeRepository) Save(icode ivm.ICode) error {
+	l.Lock()
+	defer l.Unlock()
 
 	if icode.ID == "" {
 		return errors.New("icode is empty")
@@ -129,6 +149,9 @@ func (l *LevelDbICodeRepository) Save(icode ivm.ICode) error {
 }
 
 func (l *LevelDbICodeRepository) Remove(id ivm.ID) error {
+	l.Lock()
+	defer l.Unlock()
+
 	return l.leveldb.Delete([]byte(id), true)
 }
 
