@@ -83,10 +83,6 @@ func setBlockWithConfig(filePath string, block *DefaultBlock) error {
 
 	block.SetPrevSeal(make([]byte, 0))
 	block.SetHeight(uint64(GenesisConfig.Height))
-
-	//ToDo: 지우기
-	block.SetTxSeal(make([][]byte, 0))
-
 	block.SetTree(tree)
 	block.SetTimestamp(timeStamp)
 	block.SetCreator(GenesisConfig.Creator)

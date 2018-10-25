@@ -80,6 +80,7 @@ func (t *DefaultValidator) ValidateSeal(seal []byte, comparisonBlock Block) (boo
 	return bytes.Compare(seal, comparisonSeal) == 0, nil
 }
 
+//TODO: Tree 구조가 안정되면 지우기
 // ValidateTxSeal 함수는 주어진 Transaction 리스트에 따라 주어진 transaction Seal을 검증함.
 func (t *DefaultValidator) ValidateTxSeal(txSeal [][]byte, txList []Transaction) (bool, error) {
 	leafNodeIndex := 0
@@ -270,6 +271,7 @@ func buildIntermediate(nodeList []*DefaultNode) (*DefaultNode, error) {
 	return buildIntermediate(intermediateLeafList)
 }
 
+//ToDo: Tree 구조가 안정되면 지우기
 // BuildTxSeal 함수는 Transaction 배열을 받아서 TxSeal을 생성하여 반환한다.
 func (t *DefaultValidator) BuildTxSeal(txList []Transaction) ([][]byte, error) {
 	if len(txList) == 0 {

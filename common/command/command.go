@@ -33,7 +33,6 @@ type StartConsensus struct {
 	PrevSeal  []byte
 	Height    uint64
 	TxList    []Tx
-	TxSeal    [][]byte
 	Timestamp time.Time
 	Creator   string
 	State     string
@@ -120,7 +119,6 @@ type ExecuteBlock struct {
 	PrevSeal  []byte
 	Height    uint64
 	TxList    []Tx
-	TxSeal    [][]byte
 	Timestamp time.Time
 	Creator   string
 	State     string

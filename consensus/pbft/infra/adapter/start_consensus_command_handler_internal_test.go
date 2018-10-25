@@ -33,7 +33,6 @@ func TestStartConsensusCommandHandler_extractProposedBlock(t *testing.T) {
 		PrevSeal:  []byte{'p', 'r', 'e', 'v'},
 		Height:    0,
 		TxList:    make([]command.Tx, 0),
-		TxSeal:    make([][]byte, 0),
 		Timestamp: time.Time{},
 		Creator:   "creator",
 		State:     "state",

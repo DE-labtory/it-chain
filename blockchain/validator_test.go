@@ -62,56 +62,6 @@ func TestDefaultValidator_BuildAndValidateSeal(t *testing.T) {
 
 }
 
-func TestDefaultValidator_BuildAndValidateTxSeal(t *testing.T) {
-	//given
-	validator := blockchain.DefaultValidator{}
-	TxList := []*blockchain.DefaultTransaction{
-		{
-			ID:        "tx01",
-			ICodeID:   "Icode01",
-			PeerID:    "Peer01",
-			Timestamp: time.Now().Round(0),
-			Jsonrpc:   "jsonrpc01",
-			Function:  "function01",
-			Args:      nil,
-			Signature: []byte("Signature"),
-		},
-		{
-			ID:        "tx02",
-			ICodeID:   "Icode02",
-			PeerID:    "Peer02",
-			Timestamp: time.Now().Round(0),
-			Jsonrpc:   "jsonrpc02",
-			Function:  "function02",
-			Args:      nil,
-			Signature: []byte("Signature"),
-		},
-	}
-
-	ConvertedTxList := blockchain.ConvertTxType(TxList)
-
-	//when
-	txSeal, err := validator.BuildTxSeal(ConvertedTxList)
-
-	//then
-	assert.NoError(t, err)
-
-	//when
-	result1, err := validator.ValidateTxSeal(txSeal, ConvertedTxList)
-
-	//then
-	assert.NoError(t, err)
-	assert.Equal(t, true, result1)
-
-	//when
-	result2, err := validator.ValidateTransaction(txSeal, TxList[0])
-
-	//then
-	assert.NoError(t, err)
-	assert.Equal(t, true, result2)
-
-}
-
 func TestDefaultValidator_BuildTreeAndValidate(t *testing.T) {
 	validator := blockchain.DefaultValidator{}
 

@@ -85,7 +85,6 @@ func TestBlockApi_CommitProposedBlock(t *testing.T) {
 				Signature: []byte("Signature"),
 			},
 		},
-		TxSeal:    nil,
 		Timestamp: time.Time{},
 		Creator:   "",
 		State:     "",

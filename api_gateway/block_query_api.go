@@ -276,7 +276,6 @@ func createDefaultBlock(Seal []byte, PrevSeal []byte, Height uint64, TxList []ev
 		PrevSeal:  PrevSeal,
 		Height:    Height,
 		TxList:    txList,
-		TxSeal:    TxSeal,
 		Timestamp: Timestamp,
 		Creator:   Creator,
 		State:     State,

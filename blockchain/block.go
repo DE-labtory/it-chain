@@ -43,7 +43,6 @@ type DefaultBlock struct {
 	Height    uint64
 	TxList    []*DefaultTransaction
 	Tree      *DefaultTree
-	TxSeal    [][]byte
 	Timestamp time.Time
 	Creator   string
 	State     BlockState
@@ -73,10 +72,6 @@ func (block *DefaultBlock) PutTx(transaction Transaction) error {
 	}
 
 	return ErrTransactionType
-}
-
-func (block *DefaultBlock) SetTxSeal(txSeal [][]byte) {
-	block.TxSeal = txSeal
 }
 
 func (block *DefaultBlock) SetTree(tree Tree) {
@@ -119,10 +114,6 @@ func (block *DefaultBlock) GetTree() Tree {
 	return block.Tree
 }
 
-func (block *DefaultBlock) GetTxSeal() [][]byte {
-	return block.TxSeal
-}
-
 func (block *DefaultBlock) GetCreator() string {
 	return block.Creator
 }
@@ -139,7 +130,6 @@ func (block *DefaultBlock) GetTxSealRoot() []byte {
 	return block.Tree.GetTxSealRoot()
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) Serialize() ([]byte, error) {
 	data, err := json.Marshal(block)
 	if err != nil {
@@ -148,7 +138,6 @@ func (block *DefaultBlock) Serialize() ([]byte, error) {
 	return data, nil
 }
 
-// TODO: Write test case
 func (block *DefaultBlock) Deserialize(serializedBlock []byte) error {
 	if len(serializedBlock) == 0 {
 		return ErrDecodingEmptyBlock

@@ -56,7 +56,6 @@ func TestDefaultBlock_BasicFunctions(t *testing.T) {
 	}
 
 	Block := blockchain.DefaultBlock{}
-	validator := blockchain.DefaultValidator{}
 
 	//when
 	for _, tx := range TxList {
@@ -65,10 +64,6 @@ func TestDefaultBlock_BasicFunctions(t *testing.T) {
 
 	convertedTxList := convertTxType(TxList)
 
-	txSeal, err := validator.BuildTxSeal(convertedTxList)
-	assert.NoError(t, err)
-
-	Block.SetTxSeal(txSeal)
 	Block.SetCreator(Creator)
 	Block.SetTimestamp(TimeStamp)
 	Block.SetState(State)
@@ -79,7 +74,6 @@ func TestDefaultBlock_BasicFunctions(t *testing.T) {
 
 	//then
 	assert.Equal(t, convertedTxList, Block.GetTxList())
-	assert.Equal(t, txSeal, Block.GetTxSeal())
 	assert.Equal(t, Creator, Block.GetCreator())
 	assert.Equal(t, TimeStamp, Block.GetTimestamp())
 	assert.Equal(t, State, Block.GetState())

@@ -54,7 +54,6 @@ func TestCreateGenesisBlock(t *testing.T) {
 				Height:    uint64(0),
 				TxList:    make([]*blockchain.DefaultTransaction, 0),
 				Tree:      tree,
-				TxSeal:    make([][]byte, 0),
 				Timestamp: timeStamp,
 				Creator:   "junksound",
 				State:     blockchain.Created,
@@ -109,7 +108,6 @@ func TestCreateGenesisBlock(t *testing.T) {
 		assert.Equal(t, test.output.GetPrevSeal(), GenesisBlock.GetPrevSeal())
 		assert.Equal(t, test.output.GetHeight(), GenesisBlock.GetHeight())
 		assert.Equal(t, test.output.GetTxList(), GenesisBlock.GetTxList())
-		assert.Equal(t, test.output.GetTxSeal(), GenesisBlock.GetTxSeal())
 		assert.Equal(t, test.output.GetTimestamp().String()[:19], GenesisBlock.GetTimestamp().String()[:19])
 		assert.Equal(t, test.output.GetCreator(), GenesisBlock.GetCreator())
 		assert.Equal(t, test.output.GetState(), GenesisBlock.GetState())

@@ -18,14 +18,11 @@ package adapter
 
 import (
 	"encoding/json"
-	"errors"
 	"strconv"
 
 	"github.com/go-resty/resty"
 	"github.com/it-chain/engine/blockchain"
 )
-
-var ErrGetBlockFromPeer = errors.New("Error when getting block from other peer")
 
 type HttpBlockAdapter struct {
 }
