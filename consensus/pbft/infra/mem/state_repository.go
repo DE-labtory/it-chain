@@ -46,6 +46,9 @@ func (repo *StateRepository) Save(state pbft.State) error {
 }
 
 func (repo *StateRepository) Load() (pbft.State, error) {
+	
+	repo.Lock()
+	defer repo.Unlock()
 
 	if repo.state.StateID.ID == "" {
 		return repo.state, pbft.ErrEmptyRepo
@@ -55,5 +58,8 @@ func (repo *StateRepository) Load() (pbft.State, error) {
 }
 
 func (repo *StateRepository) Remove() {
+	repo.Lock()
+	defer repo.Unlock()
+	
 	repo.state = pbft.State{}
 }
