@@ -4,7 +4,7 @@ engine:
   tmppath: .tmp/
   mode: solo
   amqp: amqp://guest:guest@localhost:5672/
-  bootstrapnodeaddress: 127.0.0.1:5555
+  bootstrapnodeaddress: ""
 txpool:
   timeoutms: 1000
   maxtransactionbyte: 1024
@@ -19,10 +19,10 @@ icode:
   repositorypath: empty
 grpcgateway:
   address: 127.0.0.1
-  port: "13579"
+  port: "5000"
 apigateway:
   address: 127.0.0.1
-  port: "4444"
+  port: "4000"
 docker:
   use: false
   volumename: it-chain-default-volume

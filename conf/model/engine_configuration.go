@@ -30,6 +30,7 @@ func NewEngineConfiguration() EngineConfiguration {
 	return EngineConfiguration{
 		LogPath:              "log/it-chain.log",
 		KeyPath:              ".it-chain/",
+		TmpPath:              ".tmp/",
 		Mode:                 "solo",
 		BootstrapNodeAddress: "",
 		Amqp:                 "amqp://guest:guest@localhost:5672/",
