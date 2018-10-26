@@ -19,6 +19,7 @@ package blockchain
 import (
 	"bytes"
 	"errors"
+	"reflect"
 	"time"
 
 	"github.com/it-chain/yggdrasill/common"
@@ -47,34 +48,48 @@ func (t *DefaultValidator) ValidateSeal(seal []byte, comparisonBlock Block) (boo
 
 // ValidateTxSeal 함수는 주어진 Transaction 리스트에 따라 주어진 transaction Seal을 검증함.
 func (t *DefaultValidator) ValidateTxSeal(txSeal [][]byte, txList []Transaction) (bool, error) {
-	leafNodeIndex := 0
-	if len(txList)%2 != 0 {
-		txList = append(txList, txList[len(txList)-1])
-	}
-	for i, n := range txSeal {
-		leftIndex, rightIndex := (i+1)*2-1, (i+1)*2
-		if rightIndex >= len(txSeal) {
-			// Check Leaf Node
-			calculatedHash, error := txList[leafNodeIndex].CalculateSeal()
-			if error != nil {
-				return false, ErrHashCalculationFailed
-			}
 
-			if bytes.Compare(n, calculatedHash) != 0 {
-				return false, nil
-			}
-			leafNodeIndex++
-		} else {
-			// Check Intermediate Node
-			leftNode, rightNode := txSeal[leftIndex], txSeal[rightIndex]
-			calculatedHash := calculateIntermediateNodeHash(leftNode, rightNode)
-			if bytes.Compare(n, calculatedHash) != 0 {
-				return false, nil
-			}
+	if isEmpty(txList) {
+		return true, nil
+	}
+
+	leafNodeList, err := convertToLeafNodeList(txList)
+	if err != nil {
+		return false, err
+	}
+
+	tree, err := buildTree(leafNodeList, leafNodeList)
+	if err != nil {
+		return false, err
+	}
+
+	return reflect.DeepEqual(txSeal, tree), nil
+}
+
+func isEmpty(txList []Transaction) bool {
+	if len(txList) == 0 {
+		return true
+	}
+	return false
+}
+
+func convertToLeafNodeList(txList []Transaction) ([][]byte, error) {
+	leafNodeList := make([][]byte, 0)
+
+	for _, tx := range txList {
+		leafNode, err := tx.CalculateSeal()
+		if err != nil {
+			return nil, err
 		}
+
+		leafNodeList = append(leafNodeList, leafNode)
 	}
 
-	return true, nil
+	if len(leafNodeList)%2 != 0 {
+		leafNodeList = append(leafNodeList, leafNodeList[len(leafNodeList)-1])
+	}
+
+	return leafNodeList, nil
 }
 
 // ValidateTransaction 함수는 주어진 Transaction이 이 txSeal에 올바로 있는지를 확인한다.
@@ -184,6 +199,11 @@ func buildTree(nodeList [][]byte, fullNodeList [][]byte) ([][]byte, error) {
 	intermediateNodeList := make([][]byte, 0)
 	for i := 0; i < len(nodeList); i += 2 {
 		leftIndex, rightIndex := i, i+1
+
+		if i+1 == len(nodeList) {
+			rightIndex = i
+		}
+
 		leftNode, rightNode := nodeList[leftIndex], nodeList[rightIndex]
 
 		intermediateNode := calculateIntermediateNodeHash(leftNode, rightNode)

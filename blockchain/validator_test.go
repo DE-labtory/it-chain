@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/it-chain/engine/blockchain"
+	"github.com/it-chain/engine/blockchain/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -59,28 +60,7 @@ func TestDefaultValidator_BuildAndValidateSeal(t *testing.T) {
 func TestDefaultValidator_BuildAndValidateTxSeal(t *testing.T) {
 	//given
 	validator := blockchain.DefaultValidator{}
-	TxList := []*blockchain.DefaultTransaction{
-		{
-			ID:        "tx01",
-			ICodeID:   "Icode01",
-			PeerID:    "Peer01",
-			Timestamp: time.Now().Round(0),
-			Jsonrpc:   "jsonrpc01",
-			Function:  "function01",
-			Args:      nil,
-			Signature: []byte("Signature"),
-		},
-		{
-			ID:        "tx02",
-			ICodeID:   "Icode02",
-			PeerID:    "Peer02",
-			Timestamp: time.Now().Round(0),
-			Jsonrpc:   "jsonrpc02",
-			Function:  "function02",
-			Args:      nil,
-			Signature: []byte("Signature"),
-		},
-	}
+	TxList := mock.GetRandomTxList()
 
 	ConvertedTxList := blockchain.ConvertTxType(TxList)
 
@@ -96,12 +76,4 @@ func TestDefaultValidator_BuildAndValidateTxSeal(t *testing.T) {
 	//then
 	assert.NoError(t, err)
 	assert.Equal(t, true, result1)
-
-	//when
-	result2, err := validator.ValidateTransaction(txSeal, TxList[0])
-
-	//then
-	assert.NoError(t, err)
-	assert.Equal(t, true, result2)
-
 }
