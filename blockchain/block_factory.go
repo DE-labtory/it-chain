@@ -18,7 +18,6 @@ package blockchain
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
@@ -35,6 +34,15 @@ func CreateGenesisBlock(genesisconfFilePath string) (DefaultBlock, error) {
 	if err != nil {
 		return DefaultBlock{}, ErrSetConfig
 	}
+
+	//build tree
+	tree, err := validator.BuildTree(GenesisBlock.GetTxList())
+	if err != nil {
+		return DefaultBlock{}, err
+	}
+
+	//set tree
+	GenesisBlock.SetTree(tree)
 
 	//build seal
 	Seal, err := validator.BuildSeal(GenesisBlock.Timestamp, GenesisBlock.PrevSeal, GenesisBlock.GetTxSealRoot(), GenesisBlock.Creator)
@@ -53,8 +61,6 @@ func setBlockWithConfig(filePath string, block *DefaultBlock) error {
 	// load
 	jsonFile, err := os.Open(filePath)
 	if err != nil {
-		fmt.Println("kkkkk")
-		fmt.Println(err)
 		return err
 	}
 
@@ -80,21 +86,8 @@ func setBlockWithConfig(filePath string, block *DefaultBlock) error {
 		return err
 	}
 
-	tree := &DefaultTree{
-		Root: &DefaultNode{
-			Left:         nil,
-			Right:        nil,
-			IsLeaf:       true,
-			IsDuplicated: false,
-			TxSeal:       nil,
-			Transaction:  nil,
-		},
-		TxSealRoot: []byte("genesis"),
-	}
-
 	block.SetPrevSeal(make([]byte, 0))
 	block.SetHeight(uint64(GenesisConfig.Height))
-	block.SetTree(tree)
 	block.SetTimestamp(timeStamp)
 	block.SetCreator(GenesisConfig.Creator)
 	block.SetState(Created)

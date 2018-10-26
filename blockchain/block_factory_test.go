@@ -31,8 +31,10 @@ func TestCreateGenesisBlock(t *testing.T) {
 	//given
 	const longForm = "Jan 1, 2006 at 0:00am (MST)"
 	timeStamp, _ := time.Parse(longForm, "Jan 1, 2018 at 0:00am (KST)")
-	tree := &blockchain.DefaultTree{}
-	tree.SetTxSealRoot([]byte("genesis"))
+
+	validator := blockchain.DefaultValidator{}
+	tree, err := validator.BuildTree([]blockchain.Transaction{})
+	assert.NoError(t, err)
 
 	tests := map[string]struct {
 		input struct {
@@ -52,8 +54,8 @@ func TestCreateGenesisBlock(t *testing.T) {
 			output: blockchain.DefaultBlock{
 				PrevSeal:  make([]byte, 0),
 				Height:    uint64(0),
-				TxList:    make([]*blockchain.DefaultTransaction, 0),
-				Tree:      tree,
+				TxList:    []*blockchain.DefaultTransaction{},
+				Tree:      tree.(*blockchain.DefaultTree),
 				Timestamp: timeStamp,
 				Creator:   "junksound",
 				State:     blockchain.Created,
@@ -88,7 +90,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 								  	"Creator":"junksound"
 								}`)
 
-	err := ioutil.WriteFile(GenesisFilePath, GenesisBlockConfigJson, 0644)
+	err = ioutil.WriteFile(GenesisFilePath, GenesisBlockConfigJson, 0644)
 	assert.NoError(t, err)
 
 	for testName, test := range tests {
@@ -180,26 +182,7 @@ func TestCreateProposedBlock(t *testing.T) {
 			err: nil,
 		},
 
-		"fail case1: without transaction": {
-
-			input: struct {
-				prevSeal []byte
-				height   uint64
-				txList   []*blockchain.DefaultTransaction
-				creator  string
-			}{
-				prevSeal: []byte("prevseal"),
-				height:   1,
-				txList:   nil,
-				creator:  "junksound",
-			},
-
-			output: blockchain.DefaultBlock{},
-
-			err: blockchain.ErrEmptyTxList,
-		},
-
-		"fail case2: without prevseal or creator": {
+		"fail case1: without prevseal or creator": {
 
 			input: struct {
 				prevSeal []byte

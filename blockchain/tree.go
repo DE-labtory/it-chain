@@ -50,6 +50,7 @@ type DefaultNode struct {
 }
 
 func (n *DefaultNode) IsLeafNode() bool {
+
 	return n.IsLeaf
 }
 
@@ -63,6 +64,10 @@ func (n *DefaultNode) GetRight() Node {
 
 func (n *DefaultNode) GetLeft() Node {
 	return n.Left
+}
+
+func (n *DefaultNode) GetTxSeal() []byte {
+	return n.TxSeal
 }
 
 func ConvTreeType(tree Tree) *DefaultTree {

@@ -73,5 +73,17 @@ func TestDefaultValidator_BuildTreeAndValidate(t *testing.T) {
 	isValidated, err := validator.ValidateTree(tree)
 	assert.NoError(t, err)
 	assert.Equal(t, true, isValidated)
+}
 
+func TestDefaultValidator_ValidateTree_GenesisBlock(t *testing.T) {
+	validator := blockchain.DefaultValidator{}
+
+	genesisTxList := []blockchain.Transaction{}
+
+	tree, err := validator.BuildTree(genesisTxList)
+	assert.NoError(t, err)
+
+	isValidated, err := validator.ValidateTree(tree)
+	assert.NoError(t, err)
+	assert.Equal(t, true, isValidated)
 }

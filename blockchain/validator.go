@@ -36,6 +36,12 @@ type Validator = common.Validator
 type DefaultValidator struct{}
 
 func (t *DefaultValidator) ValidateTree(tree Tree) (bool, error) {
+
+	root := tree.GetRoot()
+	if root.IsLeafNode() {
+		return validateGenesis(root)
+	}
+
 	calculatedMerkleRoot, err := validateLeaf(tree.GetRoot())
 	if err != nil {
 		return false, err
@@ -45,6 +51,10 @@ func (t *DefaultValidator) ValidateTree(tree Tree) (bool, error) {
 		return true, nil
 	}
 	return false, nil
+}
+
+func validateGenesis(node Node) (bool, error) {
+	return bytes.Equal(node.GetTxSeal(), []byte("genesis")), nil
 }
 
 func validateLeaf(node Node) ([]byte, error) {
@@ -199,8 +209,12 @@ func (t *DefaultValidator) BuildTree(txList []Transaction) (Tree, error) {
 
 //ToDo: legacy code 중 buildTree를 지우면, buildTree로 네이밍 변환
 func buildMerkleTree(txList []*DefaultTransaction) (*DefaultNode, []*DefaultNode, error) {
-	if len(txList) == 0 {
-		return nil, nil, ErrEmptyTxList
+
+	if isEmpty(txList) {
+		return &DefaultNode{
+			IsLeaf: true,
+			TxSeal: []byte("genesis"),
+		}, nil, nil
 	}
 
 	Leafs := []*DefaultNode{}
@@ -234,6 +248,13 @@ func buildMerkleTree(txList []*DefaultTransaction) (*DefaultNode, []*DefaultNode
 
 	return root, Leafs, nil
 
+}
+
+func isEmpty(txList []*DefaultTransaction) bool {
+	if len(txList) == 0 {
+		return true
+	}
+	return false
 }
 
 func buildRoot(nodeList []*DefaultNode) (*DefaultNode, error) {
