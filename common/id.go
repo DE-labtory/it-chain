@@ -19,8 +19,15 @@ package common
 import (
 	"log"
 
+	"errors"
+
 	"github.com/it-chain/bifrost"
-	"github.com/it-chain/heimdall/key"
+	"github.com/it-chain/heimdall"
+	"github.com/it-chain/heimdall/config"
+	"github.com/it-chain/heimdall/hashing"
+	"github.com/it-chain/heimdall/hecdsa"
+	"github.com/it-chain/heimdall/keystore"
+	"github.com/it-chain/iLogger"
 )
 
 func GetNodeID(keyPath string, keyType string) string {
@@ -29,43 +36,96 @@ func GetNodeID(keyPath string, keyType string) string {
 	return bifrost.FromPriKey(pri)
 }
 
-func LoadKeyPair(keyPath string, keyType string) (key.PriKey, key.PubKey) {
+func LoadKeyPair(keyDirPath string, recoverer bifrost.KeyRecoverer) (heimdall.PriKey, heimdall.PubKey) {
 
-	km, err := key.NewKeyManager(keyPath)
-
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	pri, pub, err := km.GetKey()
-
-	if err == nil {
-		return pri, pub
-	}
-
-	pri, pub, err = km.GenerateKey(ConvertToKeyGenOpts(keyType))
+	pri, err := keystore.LoadPriKeyWithoutPwd(keyDirPath, recoverer.(heimdall.KeyRecoverer))
+	pub := pri.(heimdall.PriKey).PublicKey()
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	pri, pub, err = km.GetKey()
-
-	return pri, pub
+	return pri.(heimdall.PriKey), pub
 }
 
-func ConvertToKeyGenOpts(keyType string) key.KeyGenOpts {
+type ECDSASigner struct {
+	keyDirPath string
+	hashOpt    *hashing.HashOpt
+}
 
-	switch keyType {
-	case "RSA1024":
-		return key.RSA1024
-	case "RSA2048":
-		return key.RSA2048
-	case "RSA4096":
-		return key.RSA4096
-	case "ECDSA256":
-		return key.ECDSA256
-	default:
-		return key.RSA1024
+func (signer *ECDSASigner) Sign(message []byte) ([]byte, error) {
+	return hecdsa.SignWithKeyInLocal(signer.keyDirPath, message, signer.hashOpt)
+}
+
+type ECDSAVerifier struct {
+	signerOpt heimdall.SignerOpts
+}
+
+func (verifier *ECDSAVerifier) Verify(peerKey bifrost.Key, signature, message []byte) (bool, error) {
+	return hecdsa.Verify(peerKey.(heimdall.PubKey), signature, message, verifier.signerOpt)
+}
+
+type ECDSAKeyRecoverer struct {
+}
+
+func (rec *ECDSAKeyRecoverer) RecoverKeyFromByte(keyBytes []byte, isPrivate bool) (bifrost.Key, error) {
+	recoverer := &hecdsa.KeyRecoverer{}
+	key, err := recoverer.RecoverKeyFromByte(keyBytes, isPrivate)
+	return key.(bifrost.Key), err
+}
+
+func MakeCrypto(secConf *config.Config, keyDirPath string) (bifrost.Crypto, error) {
+	signer := &ECDSASigner{
+		keyDirPath: keyDirPath,
+		hashOpt:    secConf.HashOpt,
 	}
+
+	var signerOpt heimdall.SignerOpts
+	switch secConf.SigAlgo {
+	case "ECDSA":
+		signerOpt = hecdsa.NewSignerOpts(secConf.HashOpt)
+	case "RSA":
+		iLogger.Errorf(nil, "signature algorithm [%s] not supported", secConf.SigAlgo)
+		return bifrost.Crypto{}, ErrSigAlgoNotSupported
+	default:
+		iLogger.Errorf(nil, "signature algorithm [%s] not supported", secConf.SigAlgo)
+		return bifrost.Crypto{}, ErrSigAlgoNotSupported
+	}
+
+	verifier := &ECDSAVerifier{
+		signerOpt: signerOpt,
+	}
+	keyRecoverer := &ECDSAKeyRecoverer{}
+
+	return bifrost.Crypto{
+		Signer:       signer,
+		Verifier:     verifier,
+		KeyRecoverer: keyRecoverer,
+	}, nil
+
+}
+
+func GenerateAndStoreKeyPair(secConf *config.Config, keyDirPath string) (pri heimdall.PriKey, pub heimdall.PubKey, err error) {
+	switch secConf.SigAlgo {
+	case "ECDSA":
+		pri, err = hecdsa.GenerateKey(secConf.KeyGenOpt)
+		if err != nil {
+			iLogger.Errorf(nil, "key generation error: [%s]", err.Error())
+			return nil, nil, ErrKeyGen
+		}
+		pub = pri.PublicKey()
+	case "RSA":
+		iLogger.Errorf(nil, "signature algorithm [%s] not supported", secConf.SigAlgo)
+		return nil, nil, ErrSigAlgoNotSupported
+	default:
+		iLogger.Errorf(nil, "signature algorithm [%s] not supported", secConf.SigAlgo)
+		return nil, nil, ErrSigAlgoNotSupported
+	}
+
+	err = keystore.StorePriKeyWithoutPwd(pri, keyDirPath)
+	if err != nil {
+		return nil, nil, ErrKeyStore
+	}
+
+	return pri, pub, nil
 }
