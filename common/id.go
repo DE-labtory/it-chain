@@ -30,10 +30,16 @@ import (
 	"github.com/it-chain/iLogger"
 )
 
-func GetNodeID(keyPath string, keyType string) string {
-	pri, _ := LoadKeyPair(keyPath, keyType)
+var ErrSigAlgoNotSupported = errors.New("signature algorithm [%s] not supported")
+var ErrKeyGen = errors.New("key generation error")
+var ErrKeyStore = errors.New("key store error")
 
-	return bifrost.FromPriKey(pri)
+type NodeID = string
+
+func GetNodeID(keyDirPath string, recoverer bifrost.KeyRecoverer) NodeID {
+	pri, _ := LoadKeyPair(keyDirPath, recoverer)
+
+	return pri.(heimdall.Key).ID()
 }
 
 func LoadKeyPair(keyDirPath string, recoverer bifrost.KeyRecoverer) (heimdall.PriKey, heimdall.PubKey) {
