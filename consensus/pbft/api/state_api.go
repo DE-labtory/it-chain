@@ -187,7 +187,7 @@ func (s *StateApi) ReceivePreCommit(msg pbft.PreCommitMsg) error {
 
 func (s *StateApi) checkPrevote(state pbft.State) pbft.State {
 
-	if state.CurrentStage != pbft.PREVOTE_STAGE {
+	if state.CurrentStage != pbft.PREVOTE_STAGE && state.CurrentStage != pbft.PROPOSE_STAGE {
 		iLogger.Debugf(nil, "[PBFT] Already prevoted!")
 		return state
 	}
