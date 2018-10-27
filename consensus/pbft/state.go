@@ -315,10 +315,10 @@ func (s *State) SavePreCommitMsg(precommitMsg *PreCommitMsg) error {
 }
 func (s *State) CheckPrevoteCondition() bool {
 	representativeNum := len(s.Representatives)
-	commitMsgNum := len(s.PrevoteMsgPool.Get())
+	prevoteMsgNum := len(s.PrevoteMsgPool.Get())
 	satisfyNum := representativeNum / 3
 
-	if commitMsgNum >= (satisfyNum + 1) {
+	if prevoteMsgNum >= (satisfyNum + 1) {
 		return true
 	}
 	return false

@@ -17,383 +17,170 @@
 package api_test
 
 import (
+	"math/rand"
+	"strconv"
 	"testing"
+	"time"
+
+	"github.com/it-chain/engine/common/mock"
+	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/engine/consensus/pbft/api"
+	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
+	"github.com/it-chain/engine/consensus/pbft/infra/mem"
+	"github.com/it-chain/iLogger"
+	"github.com/stretchr/testify/assert"
 )
 
-// todo
-func TestNewStateApi(t *testing.T) {
+func TestStateApi_Integration_Test(t *testing.T) {
 
+	tests := map[string]struct {
+		input struct {
+			processList   []string
+			consensusTime int
+		}
+	}{
+		"4 node test": {
+			input: struct {
+				processList   []string
+				consensusTime int
+			}{
+				processList:   generateProcessList(4),
+				consensusTime: 20,
+			},
+		},
+		"8 node test": {
+			input: struct {
+				processList   []string
+				consensusTime int
+			}{
+				processList:   generateProcessList(8),
+				consensusTime: 20,
+			},
+		},
+		"16 node test": {
+			input: struct {
+				processList   []string
+				consensusTime int
+			}{
+				processList:   generateProcessList(16),
+				consensusTime: 20,
+			},
+		},
+	}
+
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+
+		env := SetTestEnvironment(test.input.processList)
+
+		for _, p := range env.ProcessMap {
+			process := *p
+			pRepo := process.Services["ParliamentRepository"].(*mem.ParliamentRepository)
+			p := pRepo.Load()
+			p.SetLeader("1")
+			pRepo.Save(p)
+		}
+
+		stateApi1 := env.ProcessMap["1"].Services["StateApi"].(*api.StateApi)
+		stateRepos := make([]*mem.StateRepository, 0)
+		states := make([]pbft.State, 0)
+
+		for _, p := range test.input.processList {
+			stateRepo := env.ProcessMap[p].Services["StateRepository"].(*mem.StateRepository)
+			tempState, _ := stateRepo.Load()
+			states = append(states, tempState)
+			stateRepos = append(stateRepos, stateRepo)
+		}
+
+		proposedBlock := pbft.ProposedBlock{Seal: []byte{'s', 'd', 'f'}, Body: []byte{'2', '3', '3'}}
+
+		stateApi1.StartConsensus(proposedBlock)
+		time.Sleep(time.Duration(test.input.consensusTime * int(time.Second)))
+
+		for i := 0; i < len(stateRepos)-1; i++ {
+			iLogger.Infof(nil, "SEAL: [%s]", states[i].Block.Seal)
+			assert.Equal(t, states[i].Block.Seal, states[i+1].Block.Seal)
+		}
+
+	}
 }
 
-// todo
-func TestStateApi_StartConsensus(t *testing.T) {
+func SetTestEnvironment(processList []string) struct {
+	ProcessMap      map[string]*mock.Process
+	EventServiceMap map[string]*mock.EventService
+} {
+	networkManager := mock.NewNetworkManager()
 
+	processMap := make(map[string]*mock.Process)
+	eventServiceMap := make(map[string]*mock.EventService)
+
+	for _, id := range processList {
+
+		// setup process
+		process := mock.NewProcess(id)
+		electionService := pbft.NewElectionService(id, 30, pbft.NORMAL, 0)
+		parliamentRepository := mem.NewParliamentRepository()
+		parliament := pbft.NewParliament()
+
+		for _, pid := range processList {
+			parliament.AddRepresentative(pbft.NewRepresentative(pid))
+		}
+
+		parliamentRepository.Save(parliament)
+		stateRepository := mem.NewStateRepository()
+
+		eventService := mock.NewEventService(id, networkManager.Publish)
+
+		randSecond := rand.Intn(10) * int(time.Second)
+		eventService.SetDelayTime(time.Duration(randSecond))
+
+		propagateService := pbft.NewPropagateService(eventService)
+
+		electionApi := api.NewElectionApi(electionService, parliamentRepository, eventService)
+		leaderApi := api.NewParliamentApi(id, parliamentRepository, eventService)
+
+		stateApi := api.NewStateApi(id, propagateService, eventService, parliamentRepository, stateRepository)
+
+		grpcCommandHandler := adapter.NewElectionCommandHandler(leaderApi, electionApi)
+		pbftHandler := adapter.NewPbftMsgHandler(stateApi)
+
+		// register handler to process
+		process.RegisterHandler(grpcCommandHandler.HandleMessageReceive)
+		process.RegisterHandler(pbftHandler.HandleGrpcMsgCommand)
+
+		// register module to process
+		process.Register(electionApi)
+		process.Register(leaderApi)
+		process.Register(electionService)
+		process.Register(stateApi)
+		process.Register(parliamentRepository)
+		process.Register(stateRepository)
+
+		// add process to network manager
+		networkManager.AddProcess(process)
+		processMap[process.Id] = process
+		eventServiceMap[process.Id] = eventService
+	}
+
+	iLogger.Infof(nil, "[consensus] created process: %v", processMap)
+	iLogger.Infof(nil, "[consensus] created event service: %v", eventServiceMap)
+
+	networkManager.Start()
+	return struct {
+		ProcessMap      map[string]*mock.Process
+		EventServiceMap map[string]*mock.EventService
+	}{
+		ProcessMap:      processMap,
+		EventServiceMap: eventServiceMap,
+	}
 }
 
-// todo
-func TestStateApi_AcceptProposal(t *testing.T) {
+func generateProcessList(processNum int) []string {
+	processList := make([]string, 0)
 
+	for i := 0; i < processNum; i++ {
+		processList = append(processList, strconv.Itoa(i+1))
+	}
+
+	return processList
 }
-
-// todo
-func TestStateApi_ReceivePrevote(t *testing.T) {
-
-}
-
-// todo
-func TestStateApi_ReceivePreCommit(t *testing.T) {
-
-}
-
-//var normalBlock = pbft.ProposedBlock{
-//	Seal: []byte{1, 2, 3, 4},
-//	Body: []byte{1, 2, 3, 5},
-//}
-//
-//var errorBlock = pbft.ProposedBlock{
-//	Seal: nil,
-//	Body: nil,
-//}
-//
-//func TestStateApi_StartConsensus2(t *testing.T) {
-//
-//	tests := map[string]struct {
-//		input struct {
-//			block         pbft.ProposedBlock
-//			peerNum       int
-//			isNormalBlock bool
-//			isRepoFull    bool
-//		}
-//		err error
-//	}{
-//		"Case1 : Consensus가 필요하고 Proposed된 Block이 정상인 경우": {
-//			input: struct {
-//				block         pbft.ProposedBlock
-//				peerNum       int
-//				isNormalBlock bool
-//				isRepoFull    bool
-//			}{normalBlock, 5, false, false},
-//			err: nil,
-//		},
-//		"Case2 : Consensus가 필요없는 상황": {
-//			input: struct {
-//				block         pbft.ProposedBlock
-//				peerNum       int
-//				isNormalBlock bool
-//				isRepoFull    bool
-//			}{normalBlock, 1, false, false},
-//			err: api.ConsensusCreateError,
-//		},
-//		"Case3 : Consensus가 필요하고 Proposed된 Block이 정상이며, Repo가 차있는 경우": {
-//			input: struct {
-//				block         pbft.ProposedBlock
-//				peerNum       int
-//				isNormalBlock bool
-//				isRepoFull    bool
-//			}{normalBlock, 5, true, true},
-//			err: pbft.ErrInvalidSave,
-//		},
-//	}
-//
-//	for testName, test := range tests {
-//		t.Logf("running test case %s ", testName)
-//		cApi := setUpApiCondition(test.input.peerNum, test.input.isRepoFull, test.input.isNormalBlock, pbft.IDLE_STAGE)
-//		assert.EqualValues(t, test.err, cApi.StartConsensus(test.input.block))
-//
-//	}
-//}
-//
-//func TestStateApi_StartConsensus_NodeTest(t *testing.T) {
-//	tests := map[string]struct {
-//		input struct {
-//			processList []string
-//		}
-//	}{
-//		"8 node test": {
-//			input: struct{ processList []string }{
-//				processList: []string{"1", "2", "3", "4"},
-//			},
-//		},
-//	}
-//
-//	for testName, test := range tests {
-//		t.Logf("running test case %s", testName)
-//
-//		env := test2.SetTestEnvironment(test.input.processList)
-//
-//		for _, p := range env.ProcessMap {
-//			process := *p
-//			pRepo := process.Services["ParliamentRepository"].(*mem.ParliamentRepository)
-//			p := pRepo.Load()
-//			p.SetLeader("1")
-//			pRepo.Save(p)
-//		}
-//		stateApi1 := env.ProcessMap["1"].Services["StateApi"].(*api.StateApi)
-//		stateRepo1 := env.ProcessMap["1"].Services["StateRepository"].(*mem.StateRepository)
-//		state1, _ := stateRepo1.Load()
-//		stateRepo2 := env.ProcessMap["2"].Services["StateRepository"].(*mem.StateRepository)
-//		state2, _ := stateRepo2.Load()
-//
-//		stateRepo3 := env.ProcessMap["3"].Services["StateRepository"].(*mem.StateRepository)
-//		state3, _ := stateRepo3.Load()
-//
-//		stateRepo4 := env.ProcessMap["4"].Services["StateRepository"].(*mem.StateRepository)
-//		state4, _ := stateRepo4.Load()
-//
-//		stateApi1.StartConsensus(pbft.ProposedBlock{Seal: []byte{'s', 'd', 'f'}, Body: []byte{'2', '3', '3'}})
-//
-//		time.Sleep(5 * time.Second)
-//
-//		iLogger.Infof(nil, "SEAL: [%s]", state1.Block.Seal)
-//		assert.Equal(t, state1.Block.Seal, state2.Block.Seal)
-//		assert.Equal(t, state2.Block.Seal, state3.Block.Seal)
-//		assert.Equal(t, state3.Block.Seal, state4.Block.Seal)
-//	}
-//}
-//
-//func TestStateApi_HandleProposeMsg(t *testing.T) {
-//
-//	var validLeaderProposeMsg = pbft.ProposeMsg{
-//		StateID: pbft.StateID{
-//			ID: "state1",
-//		},
-//		SenderID:       "user0",
-//		Representative: nil,
-//		ProposedBlock: pbft.ProposedBlock{
-//			Seal: make([]byte, 0),
-//			Body: make([]byte, 0),
-//		},
-//	}
-//	var invalidLeaderProposeMsg = pbft.ProposeMsg{
-//		StateID: pbft.StateID{
-//			ID: "state1",
-//		},
-//		SenderID:       "",
-//		Representative: nil,
-//		ProposedBlock:  pbft.ProposedBlock{},
-//	}
-//	tests := map[string]struct {
-//		input struct {
-//			proposeMsg pbft.ProposeMsg
-//			peerNum    int
-//			isRepoFull bool
-//		}
-//		err error
-//	}{
-//		"Case 1 PrePrepareMsg의 Sender id와 Request된 Leader id가 일치하며, repo가 차있는 경우 (Normal Case)": {
-//			input: struct {
-//				proposeMsg pbft.ProposeMsg
-//				peerNum    int
-//				isRepoFull bool
-//			}{validLeaderProposeMsg, 5, false},
-//			err: nil,
-//		},
-//		"Case 2 PrePrepareMsg의 Sender id와 Request된 Leader id가 일치하며, repo가 차있는 경우": {
-//			input: struct {
-//				proposeMsg pbft.ProposeMsg
-//				peerNum    int
-//				isRepoFull bool
-//			}{validLeaderProposeMsg, 5, true},
-//			err: pbft.ErrInvalidSave,
-//		},
-//		"Case 3 PrePrepareMsg의 Sender id와 Request된 Leader id가 일치하지 않을 경우": {
-//			input: struct {
-//				proposeMsg pbft.ProposeMsg
-//				peerNum    int
-//				isRepoFull bool
-//			}{invalidLeaderProposeMsg, 5, false},
-//			err: pbft.InvalidLeaderIdError,
-//		},
-//	}
-//
-//	for testName, test := range tests {
-//		t.Logf("running test case %s ", testName)
-//		cApi := setUpApiCondition(test.input.peerNum, test.input.isRepoFull, true, pbft.PROPOSE_STAGE)
-//		assert.EqualValues(t, test.err, cApi.AcceptProposal(test.input.proposeMsg))
-//
-//	}
-//}
-//
-//func TestStateApi_HandlePrevoteMsg(t *testing.T) {
-//
-//	var validPrevoteMsg = pbft.PrevoteMsg{
-//		StateID:   pbft.StateID{"state"},
-//		SenderID:  "user1",
-//		BlockHash: []byte{1, 2, 3, 5},
-//	}
-//	var invalidPrevoteMsg = pbft.PrevoteMsg{
-//		StateID:   pbft.StateID{"invalidState"},
-//		SenderID:  "user1",
-//		BlockHash: []byte{1, 2, 3, 5},
-//	}
-//
-//	tests := map[string]struct {
-//		input struct {
-//			prevoteMsg pbft.PrevoteMsg
-//			peerNum    int
-//			isRepoFull bool
-//		}
-//		err error
-//	}{
-//		"Case 1 PrepareMsg의 Cid와 repo의 Cid가 같고, repo에 consensus가 저장된경우 (Normal Case)": {
-//			input: struct {
-//				prevoteMsg pbft.PrevoteMsg
-//				peerNum    int
-//				isRepoFull bool
-//			}{validPrevoteMsg, 5, true},
-//			err: nil,
-//		},
-//		"Case 2 PrepareMsg의 Cid와 repo에 저장된 Cid가 다를 경우": {
-//			input: struct {
-//				prevoteMsg pbft.PrevoteMsg
-//				peerNum    int
-//				isRepoFull bool
-//			}{invalidPrevoteMsg, 5, true},
-//			err: pbft.ErrStateIdNotSame,
-//		},
-//		"Case 3 Repo의 저장된 state가 없을경우": {
-//			input: struct {
-//				prevoteMsg pbft.PrevoteMsg
-//				peerNum    int
-//				isRepoFull bool
-//			}{invalidPrevoteMsg, 5, false},
-//			err: pbft.ErrEmptyRepo,
-//		},
-//	}
-//
-//	for testName, test := range tests {
-//		t.Logf("running test case %s ", testName)
-//		cApi := setUpApiCondition(test.input.peerNum, test.input.isRepoFull, true, pbft.IDLE_STAGE)
-//		assert.EqualValues(t, test.err, cApi.ReceivePrevote(test.input.prevoteMsg))
-//	}
-//
-//}
-//
-//func TestStateApi_HandlePreCommitMsg(t *testing.T) {
-//
-//	var validCommitMsg = pbft.PreCommitMsg{
-//		StateID:  pbft.StateID{"state"},
-//		SenderID: "user1",
-//	}
-//	var invalidCommitMsg = pbft.PreCommitMsg{
-//		StateID:  pbft.StateID{"invalidState"},
-//		SenderID: "user2",
-//	}
-//
-//	tests := map[string]struct {
-//		input struct {
-//			commitMsg     pbft.PreCommitMsg
-//			peerNum       int
-//			isRepoFull    bool
-//			isNormalBlock bool
-//		}
-//		err error
-//	}{
-//		"Case 1 repo에 consensus가 있고 repo의 cid와 commitMsg의 cid가 일치하는 경우(Normal Case)": {
-//			input: struct {
-//				commitMsg     pbft.PreCommitMsg
-//				peerNum       int
-//				isRepoFull    bool
-//				isNormalBlock bool
-//			}{validCommitMsg, 5, true, true},
-//			err: nil,
-//		},
-//		"Case 2 repo에 저장된 state의 cid와 commitMsg의 cid가 일치하지 않은 경우": {
-//			input: struct {
-//				commitMsg     pbft.PreCommitMsg
-//				peerNum       int
-//				isRepoFull    bool
-//				isNormalBlock bool
-//			}{invalidCommitMsg, 5, true, true},
-//			err: pbft.ErrStateIdNotSame,
-//		},
-//		"Case 3 repo에 저장된 state가 empty state일때": {
-//			input: struct {
-//				commitMsg     pbft.PreCommitMsg
-//				peerNum       int
-//				isRepoFull    bool
-//				isNormalBlock bool
-//			}{validCommitMsg, 5, false, false},
-//			err: pbft.ErrEmptyRepo,
-//		},
-//	}
-//
-//	for testName, test := range tests {
-//		t.Logf("running test case %s ", testName)
-//		cApi := setUpApiCondition(test.input.peerNum, test.input.isRepoFull, test.input.isNormalBlock, pbft.PREVOTE_STAGE)
-//		assert.EqualValues(t, test.err, cApi.ReceivePreCommit(test.input.commitMsg))
-//	}
-//}
-//
-//func setUpApiCondition(peerNum int, isRepoFull, isNormalBlock bool, stage pbft.Stage) *api.StateApi {
-//	reps := make([]pbft.Representative, 0)
-//	for i := 0; i < peerNum; i++ {
-//		reps = append(reps, pbft.Representative{
-//			ID: "user",
-//		})
-//	}
-//	commitMsgPool := pbft.NewPreCommitMsgPool()
-//
-//	for i := 0; i < peerNum; i++ {
-//		senderStr := "sender"
-//		senderStr += string(i)
-//		commitMsgPool.Save(&pbft.PreCommitMsg{
-//			StateID:  pbft.StateID{"state"},
-//			SenderID: senderStr,
-//		})
-//	}
-//
-//	mockEventService := mock.EventService{}
-//	mockEventService.PublishFunc = func(topic string, event interface{}) error {
-//		return nil
-//	}
-//
-//	propagateService := pbft.NewPropagateService(mockEventService)
-//	parliamentRepository := mem.NewParliamentRepository()
-//	parliament := pbft.NewParliament()
-//	for i := 0; i < peerNum; i++ {
-//		userStr := "user"
-//		userStr += strconv.Itoa(i)
-//		parliament.AddRepresentative(pbft.NewRepresentative(userStr))
-//	}
-//
-//	parliament.SetLeader("user0")
-//	parliamentRepository.Save(parliament)
-//
-//	eventService := mock.EventService{}
-//	eventService.PublishFunc = func(topic string, event interface{}) error {
-//		return nil
-//	}
-//	eventService.ConfirmBlockFunc = func(block pbft.ProposedBlock) error {
-//		return nil
-//	}
-//
-//	repo := mem.NewStateRepository()
-//	if isNormalBlock {
-//		savedConsensus := pbft.State{
-//			StateID:          pbft.StateID{"state"},
-//			Representatives:  reps,
-//			Block:            normalBlock,
-//			CurrentStage:     stage,
-//			PrevoteMsgPool:   pbft.PrevoteMsgPool{},
-//			PreCommitMsgPool: pbft.PreCommitMsgPool{},
-//		}
-//		repo.Save(savedConsensus)
-//	} else {
-//		savedConsensus := pbft.State{
-//			StateID:          pbft.StateID{"state"},
-//			Representatives:  reps,
-//			Block:            errorBlock,
-//			CurrentStage:     stage,
-//			PrevoteMsgPool:   pbft.PrevoteMsgPool{},
-//			PreCommitMsgPool: pbft.PreCommitMsgPool{},
-//		}
-//		repo.Save(savedConsensus)
-//	}
-//	if !isRepoFull {
-//		repo.Remove()
-//	}
-//
-//	cApi := api.NewStateApi("my", propagateService, eventService, parliamentRepository, repo)
-//	return cApi
-//}
