@@ -36,11 +36,11 @@ ignored = ["github.com/mock/handler"]
 
 [[constraint]]
   name = "github.com/it-chain/bifrost"
-  version = "0.1.13"
+  version = "0.2.4"
 
 [[constraint]]
   name = "github.com/it-chain/heimdall"
-  version = "0.1.3"
+  version = "0.2.3"
 
 [[constraint]]
   name = "github.com/it-chain/leveldb-wrapper"
