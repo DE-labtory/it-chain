@@ -102,7 +102,7 @@ func (s *StateApi) AcceptProposal(proposal pbft.ProposeMsg) (returnErr error) {
 	}
 
 	builtState.ToPrevoteStage()
-	logger.Infof(nil, "[PBFT] Prevoted - Stage: [%s]", builtState.CurrentStage)
+	iLogger.Infof(nil, "[PBFT] Prevoted - Stage: [%s]", builtState.CurrentStage)
 
 	defer func() {
 		if err := s.stateRepository.Save(*builtState); err != nil {
@@ -121,14 +121,14 @@ func (s *StateApi) ReceivePrevote(msg pbft.PrevoteMsg) (returnErr error) {
 
 	loadedState, err := s.stateRepository.Load()
 	if err != nil {
-		iLogger.Infof(nil, "[PBFT] Cannot receive Prevote message - Error: [%s]", err)
+		iLogger.Debugf(nil, "[PBFT] Cannot receive Prevote message - Error: [%s]", err)
 		return nil
 	}
 
 	// todo : refact to new function (UpdateMsgPool)
 	for _, poolMsg := range s.tempPrevoteMsgPool.Get() {
 		if err := loadedState.PrevoteMsgPool.Save(&poolMsg); err != nil {
-			iLogger.Errorf(nil, "[PBFT] Saving prevote msg is failed - Error: [%s]", err)
+			iLogger.Debugf(nil, "[PBFT] Saving prevote msg is failed - Error: [%s]", err)
 		}
 	}
 	s.tempPrevoteMsgPool.RemoveAllMsgs()
@@ -157,14 +157,14 @@ func (s *StateApi) ReceivePreCommit(msg pbft.PreCommitMsg) error {
 
 	loadedState, err := s.stateRepository.Load()
 	if err != nil {
-		iLogger.Infof(nil, "[PBFT] Cannot receive PreCommit message - Error: [%s]", err)
+		iLogger.Debugf(nil, "[PBFT] Cannot receive PreCommit message - Error: [%s]", err)
 		return nil
 	}
 
 	// todo : refact to new function (UpdateMsgPool)
 	for _, poolMsg := range s.tempPreCommitMsgPool.Get() {
 		if err := loadedState.SavePreCommitMsg(&poolMsg); err != nil {
-			iLogger.Errorf(nil, "[PBFT] Saving precommit msg is failed - Error: [%s]", err)
+			iLogger.Debugf(nil, "[PBFT] Saving precommit msg is failed - Error: [%s]", err)
 		}
 	}
 	s.tempPreCommitMsgPool.RemoveAllMsgs()
@@ -198,6 +198,7 @@ func (s *StateApi) checkPrevote(state pbft.State) pbft.State {
 		commitMsg := pbft.NewPreCommitMsg(&state, s.publisherID)
 		if err := s.propagateService.BroadcastPreCommitMsg(*commitMsg, receipients); err != nil {
 			iLogger.Errorf(nil, "[PBFT] Broadcating precommit is failed - Error: [%s]", err)
+			return state
 		}
 
 		state.ToPreCommitStage()
