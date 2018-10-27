@@ -18,6 +18,8 @@ package event
 
 import (
 	"time"
+
+	"github.com/it-chain/engine/ivm"
 )
 
 /*
@@ -65,6 +67,7 @@ type BlockCommitted struct {
 	Timestamp time.Time
 	Creator   string
 	State     string
+	WriteSet  []ivm.TransactionWriteList
 }
 
 // event when block is staged to event store

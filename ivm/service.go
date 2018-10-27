@@ -45,9 +45,9 @@ type StateRepository interface {
 }
 
 type Write struct {
-	Key    []byte
-	Value  []byte
-	Delete bool
+	Key       []byte
+	Value     []byte
+	Delete    bool
 	TimeStamp time.Time
 }
 

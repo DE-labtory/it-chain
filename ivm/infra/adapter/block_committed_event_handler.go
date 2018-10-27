@@ -26,12 +26,14 @@ import (
 
 type BlockCommittedEventHandler struct {
 	icodeApi api.ICodeApi
+	stateApi *api.StateApi
 	mutex    *sync.Mutex
 }
 
-func NewBlockCommittedEventHandler(icodeApi api.ICodeApi) *BlockCommittedEventHandler {
+func NewBlockCommittedEventHandler(icodeApi api.ICodeApi, stateApi *api.StateApi) *BlockCommittedEventHandler {
 	return &BlockCommittedEventHandler{
 		icodeApi: icodeApi,
+		stateApi: stateApi,
 		mutex:    &sync.Mutex{},
 	}
 }
@@ -40,7 +42,7 @@ func (b *BlockCommittedEventHandler) HandleBlockCommittedEventHandler(blockCommi
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
 
-	b.icodeApi.ExecuteRequestList(createRequestList(blockCommittedEvent.TxList))
+	b.stateApi.SetWriteSet(blockCommittedEvent.WriteSet)
 }
 
 func createRequestList(transactionList []event.Tx) []ivm.Request {

@@ -21,7 +21,6 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ipfs/go-ipfs-api"
 	"github.com/it-chain/engine/common"
 	"github.com/it-chain/engine/storage"
 )

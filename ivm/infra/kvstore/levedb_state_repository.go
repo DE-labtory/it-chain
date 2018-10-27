@@ -69,7 +69,7 @@ func (lr *LevelDBStateRepository) Get(value []byte) ([]byte, error) {
 	return lr.db.Get(value)
 }
 
-func (lr *LevelDBStateRepository) GetDB() *leveldbwrapper.DB{
+func (lr *LevelDBStateRepository) GetDB() *leveldbwrapper.DB {
 	return lr.db
 }
 
