@@ -27,7 +27,10 @@ import (
 	"github.com/it-chain/engine/common/command"
 	"github.com/it-chain/engine/grpc_gateway"
 	"github.com/it-chain/engine/grpc_gateway/infra"
-	"github.com/it-chain/heimdall/key"
+	"github.com/it-chain/heimdall"
+	"github.com/it-chain/heimdall/hashing"
+	"github.com/it-chain/heimdall/hecdsa"
+	"github.com/it-chain/heimdall/keystore"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,11 +46,11 @@ func (m MockConn) GetID() bifrost.ConnID {
 	return m.ID
 }
 
-func (MockConn) GetIP() string {
-	return "1"
+func (MockConn) GetIP() bifrost.Address {
+	return bifrost.Address{IP: "1"}
 }
 
-func (MockConn) GetPeerKey() key.PubKey {
+func (MockConn) GetPeerKey() bifrost.Key {
 	panic("implement me")
 }
 
@@ -227,40 +230,80 @@ func (m *MockHandler) OnDisconnection(connection grpc_gateway.Connection) {
 	m.OnDisconnectionFunc(connection)
 }
 
-var setupGrpcHostService = func(t *testing.T, ip string, keyPath string, publish func(topic string, data interface{}) error) (*infra.GrpcHostService, func()) {
+type mockECDSASigner struct {
+	keyDirPath string
+	hashOpt    *hashing.HashOpt
+}
 
-	pri, pub := infra.LoadKeyPair(keyPath, "ECDSA256")
+func (signer *mockECDSASigner) Sign(message []byte) ([]byte, error) {
+	return hecdsa.SignWithKeyInLocal(signer.keyDirPath, message, signer.hashOpt)
+}
+
+type mockECDSAVerifier struct {
+	signerOpt heimdall.SignerOpts
+}
+
+func (verifier *mockECDSAVerifier) Verify(peerKey bifrost.Key, signature, message []byte) (bool, error) {
+	return hecdsa.Verify(peerKey.(heimdall.PubKey), signature, message, verifier.signerOpt)
+}
+
+type mockECDSAKeyRecoverer struct {
+}
+
+func (rec *mockECDSAKeyRecoverer) RecoverKeyFromByte(keyBytes []byte, isPrivate bool) (bifrost.Key, error) {
+	recoverer := &hecdsa.KeyRecoverer{}
+	key, err := recoverer.RecoverKeyFromByte(keyBytes, isPrivate)
+	return key.(bifrost.Key), err
+}
+
+var setupGrpcHostService = func(t *testing.T, ip string, keyDirPath string, publish func(topic string, data interface{}) error) (*infra.GrpcHostService, func()) {
+	keyGenOpt, err := hecdsa.NewKeyGenOpt("P-384")
+	assert.NoError(t, err)
+	pri, err := hecdsa.GenerateKey(keyGenOpt)
+	assert.NoError(t, err)
+	pub := pri.PublicKey()
+
+	err = keystore.StorePriKeyWithoutPwd(pri, keyDirPath)
+	assert.NoError(t, err)
+
+	hashOpt, err := hashing.NewHashOpt("SHA384")
+	assert.NoError(t, err)
+
+	signer := &mockECDSASigner{
+		keyDirPath: keyDirPath,
+		hashOpt:    hashOpt,
+	}
+
+	signerOpt := hecdsa.NewSignerOpts(hashOpt)
+	verifier := &mockECDSAVerifier{
+		signerOpt: signerOpt,
+	}
+
+	keyRecoverer := &mockECDSAKeyRecoverer{}
+
+	crypto := bifrost.Crypto{
+		Signer:       signer,
+		Verifier:     verifier,
+		KeyRecoverer: keyRecoverer,
+	}
 
 	hostService := infra.NewGrpcHostService(pri, pub, publish, infra.HostInfo{
 		GrpcGatewayAddress: ip,
-	})
+	}, crypto)
 
 	go hostService.Listen(ip)
 
 	return hostService, func() {
 		hostService.Stop()
 		time.Sleep(3 * time.Second)
-		os.RemoveAll(keyPath)
+		os.RemoveAll(keyDirPath)
 	}
 }
 
 func TestGrpcHostService_Dial(t *testing.T) {
 
 	//given
-	tests := map[string]struct {
-		input  string
-		output string
-		err    error
-	}{
-		"dial success": {
-			input:  "127.0.0.1:7777",
-			output: "127.0.0.1:7777",
-			err:    nil,
-		},
-	}
-
 	var publish = func(topic string, data interface{}) (err error) {
-
 		return nil
 	}
 
@@ -269,6 +312,18 @@ func TestGrpcHostService_Dial(t *testing.T) {
 
 	//times to need to setup server
 	time.Sleep(3 * time.Second)
+
+	tests := map[string]struct {
+		input  string
+		output string
+		err    error
+	}{
+		"dial success": {
+			input:  "127.0.0.1:7777",
+			output: serverHostService.GetHostID(),
+			err:    nil,
+		},
+	}
 
 	handler := &MockHandler{}
 	handler.OnConnectionFunc = func(connection grpc_gateway.Connection) {
@@ -290,7 +345,7 @@ func TestGrpcHostService_Dial(t *testing.T) {
 
 		conn, err := clientHostService.Dial(test.input)
 		assert.Equal(t, err, test.err)
-		assert.Equal(t, conn.GrpcGatewayAddress, test.output)
+		assert.Equal(t, conn.ConnectionID, test.output)
 	}
 }
 
