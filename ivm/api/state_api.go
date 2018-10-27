@@ -16,19 +16,23 @@
 
 package api
 
-import "github.com/it-chain/engine/ivm"
+import (
+	"github.com/it-chain/engine/ivm"
+)
 
 type StateApi struct {
 	stateRepository ivm.StateRepository
 	stateService    *ivm.StateService
 }
 
-func NewStateApi(stateRepository ivm.StateRepository) *StateApi {
+func NewStateApi(stateRepository ivm.StateRepository, stateService *ivm.StateService) *StateApi {
 	return &StateApi{
 		stateRepository: stateRepository,
+		stateService:    stateService,
 	}
 }
 
-func (sa *StateApi) SetWriteSet(txList []ivm.TransactionWriteList) {
-	sa.stateService.Apply(txList)
+func (sa *StateApi) SetWriteSet(txList []ivm.TransactionWriteList) error {
+
+	return sa.stateService.Apply(txList)
 }

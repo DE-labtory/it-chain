@@ -116,8 +116,8 @@
 [[projects]]
   name = "github.com/go-resty/resty"
   packages = ["."]
-  revision = "92a651cff2687ad3083767fb04b6f53d258b546c"
-  version = "v1.10.1"
+  revision = "13ff84ebd5bdfa46a342d9edb869e21560a478f8"
+  version = "v1.10.2"
 
 [[projects]]
   name = "github.com/go-stack/stack"
@@ -458,8 +458,8 @@
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "ad15b42461921f1fb3529b058c6786c6a45d5162"
-  version = "v1.1.1"
+  revision = "bcd833dfe83d3cebad139e4a29ed79cb2318bf95"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/spaolacci/murmur3"
@@ -515,7 +515,7 @@
   branch = "master"
   name = "github.com/streadway/amqp"
   packages = ["."]
-  revision = "70e15c650864f4fc47f5d3c82ea117285480895d"
+  revision = "27835f1a64e97101d95306211f03c0620ffa295d"
 
 [[projects]]
   name = "github.com/stretchr/testify"
@@ -540,7 +540,7 @@
     "leveldb/table",
     "leveldb/util"
   ]
-  revision = "6b91fda63f2e36186f1c9d0e48578defb69c5d43"
+  revision = "f9080354173f192dfc8821931eacf9cfd6819253"
 
 [[projects]]
   name = "github.com/urfave/cli"
@@ -573,8 +573,8 @@
     "internal/digreflect",
     "internal/dot"
   ]
-  revision = "27eb30e15ef3e7f67cd86f2b65c618e3e308c104"
-  version = "v1.5.0"
+  revision = "12c8adaa5e6a24ad02198588082d95582ee16e5b"
+  version = "v1.6.0"
 
 [[projects]]
   name = "go.uber.org/fx"
@@ -584,8 +584,8 @@
     "internal/fxreflect",
     "internal/lifecycle"
   ]
-  revision = "6244a3ed900ddd4deac96447f2c988d4722ad890"
-  version = "v1.7.1"
+  revision = "9c82e1daccdcbd27387a1f044bd3dc6d3f878bf4"
+  version = "v1.8.0"
 
 [[projects]]
   name = "go.uber.org/multierr"
@@ -617,7 +617,7 @@
     "ssh/knownhosts",
     "ssh/terminal"
   ]
-  revision = "4d3f4d9ffa16a13f451c3b2999e9c49e9750bf06"
+  revision = "e4dc69e5b2fd71dcaf8bd5d054eb936deb78d1fa"
 
 [[projects]]
   branch = "master"
@@ -635,7 +635,7 @@
     "publicsuffix",
     "trace"
   ]
-  revision = "c44066c5c816ec500d459a2a324a753f78531ae0"
+  revision = "03003ca0c849e57b6ea29a4bab8d3cb6e4d568fe"
 
 [[projects]]
   branch = "master"
@@ -645,7 +645,7 @@
     "unix",
     "windows"
   ]
-  revision = "7e31e0c00fa05cb5fbf4347b585621d6709e19a4"
+  revision = "66b7b1311ac80bbafcd2daeef9a5e6e2cd1e2399"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -672,7 +672,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "b69ba1387ce2108ac9bc8e8e5e5a46e7d5c72313"
+  revision = "b5d43981345bdb2c233eb4bf3277847b48c6fdc6"
 
 [[projects]]
   name = "google.golang.org/grpc"

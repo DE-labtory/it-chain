@@ -61,11 +61,22 @@ type StateService struct {
 	stateRepository StateRepository
 }
 
-func (s StateService) Apply(transactionWriteList []TransactionWriteList) {
+func NewStateService(stateRepository StateRepository) *StateService {
+	return &StateService{
+		stateRepository: stateRepository,
+	}
+}
+
+func (s StateService) Apply(transactionWriteList []TransactionWriteList) error {
 
 	for _, transactionWrite := range transactionWriteList {
-		s.stateRepository.Apply(transactionWrite.WriteList)
+		if err := s.stateRepository.Apply(transactionWrite.WriteList); err != nil {
+			return err
+		}
+
 	}
+
+	return nil
 }
 
 func (s StateService) Get(key []byte) ([]byte, error) {

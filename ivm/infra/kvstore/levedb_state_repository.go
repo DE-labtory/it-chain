@@ -19,6 +19,8 @@ package kvstore
 import (
 	"sync"
 
+	"os"
+
 	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/iLogger"
 	"github.com/it-chain/leveldb-wrapper"
@@ -31,7 +33,8 @@ type LevelDBStateRepository struct {
 
 func NewLevelDBStateRepository() *LevelDBStateRepository {
 
-	path := "./state-db"
+	path := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/state-db"
+	os.Remove(path)
 	db := leveldbwrapper.CreateNewDB(path)
 	db.Open()
 
@@ -48,6 +51,10 @@ func (lr *LevelDBStateRepository) Apply(writeList []ivm.Write) error {
 	KVs := make(map[string][]byte, 0)
 
 	for _, write := range writeList {
+		if write.Delete {
+			KVs[string(write.Key)] = nil
+
+		}
 		KVs[string(write.Key)] = write.Value
 	}
 

@@ -42,7 +42,8 @@ func (b *BlockCommittedEventHandler) HandleBlockCommittedEventHandler(blockCommi
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
 
-	b.stateApi.SetWriteSet(blockCommittedEvent.WriteSet)
+	b.icodeApi.ExecuteRequestList(createRequestList(blockCommittedEvent.TxList))
+	//b.stateApi.SetWriteSet(blockCommittedEvent.WriteSet)
 }
 
 func createRequestList(transactionList []event.Tx) []ivm.Request {

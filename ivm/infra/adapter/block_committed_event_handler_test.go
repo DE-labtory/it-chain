@@ -27,6 +27,7 @@ import (
 	"github.com/it-chain/engine/ivm/api"
 	"github.com/it-chain/engine/ivm/infra/adapter"
 	"github.com/it-chain/engine/ivm/infra/git"
+	"github.com/it-chain/engine/ivm/infra/kvstore"
 	"github.com/it-chain/engine/ivm/infra/tesseract"
 	"github.com/stretchr/testify/assert"
 )
@@ -78,6 +79,9 @@ func setUp(t *testing.T) (*adapter.BlockCommittedEventHandler, *tesseract.Contai
 	containerService, _ := tesseract.NewContainerService(nil)
 	eventService := common.NewEventService("", "Event")
 	icodeApi := api.NewICodeApi(containerService, storeApi, eventService)
+	stateRepository := kvstore.NewLevelDBStateRepository()
+	stateService := ivm.NewStateService(stateRepository)
+	stateApi := api.NewStateApi(stateRepository, stateService)
 
 	icode := ivm.ICode{
 		ID:             "a1",
@@ -90,7 +94,7 @@ func setUp(t *testing.T) (*adapter.BlockCommittedEventHandler, *tesseract.Contai
 	err := containerService.StartContainer(icode)
 	assert.NoError(t, err)
 
-	blockCommittedEventHandler := adapter.NewBlockCommittedEventHandler(icodeApi)
+	blockCommittedEventHandler := adapter.NewBlockCommittedEventHandler(icodeApi, stateApi)
 
 	return blockCommittedEventHandler, containerService, func() {
 		containerService.StopContainer(icode.ID)

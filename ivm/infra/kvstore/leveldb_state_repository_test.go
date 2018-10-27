@@ -22,14 +22,14 @@ import (
 
 	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/engine/ivm/infra/kvstore"
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewLevelDBStateRepository(t *testing.T) {
 	repo := kvstore.NewLevelDBStateRepository()
 
 	assert.Equal(t, reflect.TypeOf(repo), reflect.TypeOf(&kvstore.LevelDBStateRepository{}))
-
+	repo.Close()
 }
 
 func TestLevelDBStateRepository_Apply(t *testing.T) {
@@ -68,10 +68,10 @@ func TestLevelDBStateRepository_Apply(t *testing.T) {
 		Value: []byte("2"),
 	})
 
-	repo.Apply(writeList)
+	repo2.Apply(writeList)
 	repo2.Close()
-	v3, _ := repo.Get([]byte("1"))
-	v4, _ := repo.Get([]byte("2"))
+	v3, _ := repo2.Get([]byte("1"))
+	v4, _ := repo2.Get([]byte("2"))
 
 	assert.Equal(t, len(v3), 0)
 	assert.Equal(t, len(v4), 0)
@@ -90,6 +90,7 @@ func TestLevelDBStateRepository_Get(t *testing.T) {
 	v, _ := repo.Get([]byte("1"))
 
 	assert.Equal(t, v, []byte("1"))
+	repo.Close()
 
 }
 
@@ -99,5 +100,5 @@ func TestLevelDBStateRepository_Close(t *testing.T) {
 
 	_, err := repo.Get([]byte("1"))
 
-	assert.Equal(t, err != nil, true)
+	assert.NotNil(t, err)
 }
