@@ -26,6 +26,14 @@ import (
 var ErrTransactionDoesNotExist = errors.New("transaction does not exist")
 var ErrEmptyID = errors.New("transaction ID is empty")
 
+
+// TransactionRepository saves all transactions until new block created
+// When the new Block created all transactions are removed from Transaction Repository
+type TransactionRepository struct {
+	TxMap map[txpool.TransactionId]txpool.Transaction
+	sync.RWMutex
+}
+
 func NewTransactionRepository() *TransactionRepository {
 	return &TransactionRepository{
 		TxMap:   make(map[txpool.TransactionId]txpool.Transaction),
@@ -33,11 +41,7 @@ func NewTransactionRepository() *TransactionRepository {
 	}
 }
 
-type TransactionRepository struct {
-	TxMap map[txpool.TransactionId]txpool.Transaction
-	sync.RWMutex
-}
-
+// Function 'Save' saves transaction in the TransactionRepository
 func (m *TransactionRepository) Save(transaction txpool.Transaction) error {
 
 	m.Lock()

@@ -23,22 +23,23 @@ import (
 
 type TransactionApi struct {
 	nodeId                string
-	transactionRepository txpool.TransactionRepository
+	txReository txpool.TransactionRepository
 	leaderRepository      txpool.LeaderRepository
 	transferService       *txpool.TransferService
 	blockProposalService  *txpool.BlockProposalService
 }
 
-func NewTransactionApi(nodeId string, transactionRepository txpool.TransactionRepository, leaderRepository txpool.LeaderRepository, transferService *txpool.TransferService, blockProposalService *txpool.BlockProposalService) *TransactionApi {
+func NewTransactionApi(nodeId string, txReository txpool.TransactionRepository, leaderRepository txpool.LeaderRepository, transferService *txpool.TransferService, blockProposalService *txpool.BlockProposalService) *TransactionApi {
 	return &TransactionApi{
 		nodeId:                nodeId,
-		transactionRepository: transactionRepository,
+		txReository: txReository,
 		leaderRepository:      leaderRepository,
 		transferService:       transferService,
 		blockProposalService:  blockProposalService,
 	}
 }
 
+// CreateTransaction create transaction with input parameter and save it in the transaction repository
 func (t TransactionApi) CreateTransaction(txData txpool.TxData) (txpool.Transaction, error) {
 
 	transaction, err := txpool.CreateTransaction(t.nodeId, txData)
@@ -48,7 +49,7 @@ func (t TransactionApi) CreateTransaction(txData txpool.TxData) (txpool.Transact
 		return txpool.Transaction{}, err
 	}
 
-	err = t.transactionRepository.Save(transaction)
+	err = t.txReository.Save(transaction)
 
 	return transaction, err
 }
@@ -57,7 +58,7 @@ func (t TransactionApi) SaveTransactions(transactions []txpool.Transaction) erro
 
 	for _, tx := range transactions {
 
-		if err := t.transactionRepository.Save(tx); err != nil {
+		if err := t.txReository.Save(tx); err != nil {
 			return err
 		}
 	}
@@ -67,9 +68,10 @@ func (t TransactionApi) SaveTransactions(transactions []txpool.Transaction) erro
 
 func (t TransactionApi) DeleteTransaction(id txpool.TransactionId) {
 
-	t.transactionRepository.Remove(id)
+	t.txReository.Remove(id)
 }
 
+// ProposeBlock sends transactions to Leader node to propose block
 func (t TransactionApi) ProposeBlock(engineMode string) error {
 
 	switch engineMode {

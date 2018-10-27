@@ -44,6 +44,9 @@ type Transaction struct {
 	PeerID    string
 }
 
+// CreateTransaction creates transaction with publisherId which indicate creator's Id
+// and txData which consists of transaction data
+// Transaction Id is a unique key made by Xid
 func CreateTransaction(publisherId string, txData TxData) (Transaction, error) {
 
 	id := xid.New().String()

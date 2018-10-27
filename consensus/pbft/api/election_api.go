@@ -182,6 +182,7 @@ func (e *ElectionApi) EndRaft() {
 }
 
 func (e *ElectionApi) HandleRaftTimeout() error {
+
 	if e.ElectionService.GetState() == pbft.TICKING {
 		e.ElectionService.SetState(pbft.CANDIDATE)
 		e.ElectionService.ResetLeftTime()
@@ -203,11 +204,12 @@ func (e *ElectionApi) HandleRaftTimeout() error {
 	return nil
 }
 
+// Function RequestVote requests Peers received with argument name peerIds
+// which indicates receiver node's PeerId
 func (e *ElectionApi) RequestVote(peerIds []string) error {
 
 	iLogger.Infof(nil, "[PBFT] Request Vote - Peers:[%s]", strings.Join(peerIds, ", "))
-	// 1. create request vote message
-	// 2. send message
+
 	requestVoteMessage := pbft.RequestVoteMessage{
 		Term: e.ElectionService.GetTerm(),
 	}

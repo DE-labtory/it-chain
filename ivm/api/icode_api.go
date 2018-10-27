@@ -39,6 +39,7 @@ func NewICodeApi(containerService ivm.ContainerService, gitService ivm.GitServic
 		EventService:     eventService,
 	}
 }
+
 func (i ICodeApi) DeployFromRawSsh(baseSaveUrl string, gitUrl string, rawSsh []byte, password string) (ivm.ICode, error) {
 	iLogger.Info(nil, fmt.Sprintf("[IVM] Deploying icode - url: [%s]", gitUrl))
 

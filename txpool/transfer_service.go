@@ -23,11 +23,10 @@ import (
 	"github.com/it-chain/iLogger"
 )
 
-type Publisher func(topic string, data interface{}) (err error) //해당 publish함수는 midgard 에서 의존성 주입을 받기 위해 interface로 작성한다.
-//모든 의존성 주입은 컴포넌트.go 에서 이루어짐
+type Publisher func(topic string, data interface{}) (err error)
 
 type TransferService struct {
-	txpoolRepository TransactionRepository
+	txRepository     TransactionRepository
 	leaderRepository LeaderRepository
 	eventService     EventService
 	sync.RWMutex
@@ -35,7 +34,7 @@ type TransferService struct {
 
 func NewTransferService(txpoolRepository TransactionRepository, leaderRepository LeaderRepository, eventService EventService) *TransferService {
 	return &TransferService{
-		txpoolRepository: txpoolRepository,
+		txRepository:     txpoolRepository,
 		leaderRepository: leaderRepository,
 		eventService:     eventService,
 		RWMutex:          sync.RWMutex{},
@@ -47,7 +46,7 @@ func (ts TransferService) SendLeaderTransactions() error {
 	ts.Lock()
 	defer ts.Unlock()
 
-	transactions, err := ts.txpoolRepository.FindAll()
+	transactions, err := ts.txRepository.FindAll()
 	if err != nil {
 		return err
 	}
@@ -79,6 +78,6 @@ func (ts TransferService) SendLeaderTransactions() error {
 
 func (ts TransferService) clearTransactions(transactions []Transaction) {
 	for _, tx := range transactions {
-		ts.txpoolRepository.Remove(tx.ID)
+		ts.txRepository.Remove(tx.ID)
 	}
 }

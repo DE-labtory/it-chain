@@ -22,6 +22,8 @@ import (
 	"github.com/it-chain/engine/txpool"
 )
 
+// LeaderRepository contains information about leader in the Blockchain network
+// The leader in LeaderRepository is used for deciding who receives the transactions
 type LeaderRepository struct {
 	Leader txpool.Leader
 	sync.RWMutex

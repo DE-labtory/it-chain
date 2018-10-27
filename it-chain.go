@@ -30,6 +30,7 @@ import (
 	"github.com/urfave/cli"
 )
 
+// main function of it-chain
 func main() {
 	app := cli.NewApp()
 	app.Name = "it-chain"

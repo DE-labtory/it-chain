@@ -39,6 +39,7 @@ func NewBlockProposalService(txpoolRepository TransactionRepository, eventServic
 
 // todo do not delete transaction immediately
 // todo transaction will be deleted when block are committed
+// ProposeBlock
 func (b BlockProposalService) ProposeBlock() error {
 
 	b.Lock()

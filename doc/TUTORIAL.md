@@ -15,7 +15,9 @@ Requirements
 
 
 
-1. Install Engine
+1. Download Engine
+
+   **Download**
 
    ```shell
    go get github.com/it-chain/engine
