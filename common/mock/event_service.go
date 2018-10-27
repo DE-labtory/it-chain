@@ -40,12 +40,12 @@ func NewEventService(processId string, publishFunc func(processId string, topic 
 
 func (s *EventService) Publish(topic string, event interface{}) error {
 
-	time.Sleep(s.delayTime)
 	if !eventIsStruct(event) {
 		return ErrEventType
 	}
 
 	if reflect.TypeOf(event).Name() == "DeliverGrpc" {
+		time.Sleep(s.delayTime)
 		return s.PublishFunc(s.ProcessId, topic, event)
 	}
 

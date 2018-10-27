@@ -36,7 +36,7 @@ var errorBlock = pbft.ProposedBlock{
 	Body: nil,
 }
 
-func TestStateApi_StartConsensus_State(t *testing.T) {
+func TestStateApi_StartConsensus_CheckState(t *testing.T) {
 
 	tests := map[string]struct {
 		input struct {
@@ -216,13 +216,54 @@ func TestStateApi_Reflect_TemporaryPreCommitMsgPool(t *testing.T) {
 
 }
 
-// todo
+// if PrevoteCondition is satisfied then Change state
 func TestStateApi_checkPrevote(t *testing.T) {
+	stateApi := setUpApiCondition(6, true, true, pbft.PREVOTE_STAGE)
+	state, _ := stateApi.stateRepository.Load()
+	state1 := stateApi.checkPrevote(state)
 
+	// when PrevoteCondition is not satisfied
+	assert.Equal(t, string(pbft.PREVOTE_STAGE), string(state1.CurrentStage))
+
+	prevoteMsgPool := pbft.NewPrevoteMsgPool()
+	for i := 1; i < 6; i++ {
+		senderStr := "user"
+		senderStr += string(i)
+		prevoteMsgPool.Save(&pbft.PrevoteMsg{
+			StateID:   pbft.StateID{"state"},
+			SenderID:  senderStr,
+			BlockHash: []byte{1, 2, 3, 4},
+		})
+	}
+	state.PrevoteMsgPool = prevoteMsgPool
+	state2 := stateApi.checkPrevote(state)
+
+	//when PrevoteCondition is satisfied
+	assert.Equal(t, string(pbft.PRECOMMIT_STAGE), string(state2.CurrentStage))
 }
 
-// todo
+// if PreCommitCondition is satisfied then Change empty state
 func TestStateApi_checkPreCommit(t *testing.T) {
+	stateApi := setUpApiCondition(6, true, true, pbft.PRECOMMIT_STAGE)
+	state, _ := stateApi.stateRepository.Load()
+	state1 := stateApi.checkPreCommit(state)
+
+	assert.Equal(t, string(pbft.PRECOMMIT_STAGE), string(state1.CurrentStage))
+
+	precommitMsgPool := pbft.NewPreCommitMsgPool()
+
+	for i := 1; i < 6; i++ {
+		senderStr := "user"
+		senderStr += string(i)
+		precommitMsgPool.Save(&pbft.PreCommitMsg{
+			StateID:  pbft.StateID{"state"},
+			SenderID: senderStr,
+		})
+	}
+	state.PreCommitMsgPool = precommitMsgPool
+
+	state2 := stateApi.checkPreCommit(state)
+	assert.Equal(t, state2, pbft.State{})
 
 }
 
@@ -231,16 +272,6 @@ func setUpApiCondition(peerNum int, isRepoFull, isNormalBlock bool, stage pbft.S
 	for i := 0; i < peerNum; i++ {
 		reps = append(reps, pbft.Representative{
 			ID: "user",
-		})
-	}
-	commitMsgPool := pbft.NewPreCommitMsgPool()
-
-	for i := 0; i < peerNum; i++ {
-		senderStr := "sender"
-		senderStr += string(i)
-		commitMsgPool.Save(&pbft.PreCommitMsg{
-			StateID:  pbft.StateID{"state"},
-			SenderID: senderStr,
 		})
 	}
 
@@ -295,6 +326,6 @@ func setUpApiCondition(peerNum int, isRepoFull, isNormalBlock bool, stage pbft.S
 		repo.Remove()
 	}
 
-	cApi := NewStateApi("my", propagateService, eventService, parliamentRepository, repo)
+	cApi := NewStateApi("user0", propagateService, eventService, parliamentRepository, repo)
 	return cApi
 }
