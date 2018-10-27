@@ -1,11 +1,14 @@
 package mock
 
-import "github.com/it-chain/engine/consensus/pbft"
+import (
+	"github.com/it-chain/engine/common"
+	"github.com/it-chain/engine/consensus/pbft"
+)
 
 type ParliamentApi struct {
 	AddRepresentativeFunc    func(representativeId string)
 	RemoveRepresentativeFunc func(representativeId string)
-	UpdateLeaderFunc         func(nodeId string) error
+	UpdateLeaderFunc         func(nodeId common.NodeID) error
 	GetLeaderFunc            func() pbft.Leader
 	RequestLeaderFunc        func(connectionId string)
 	DeliverLeaderFunc        func(connectionId string)
@@ -17,7 +20,7 @@ func (p *ParliamentApi) AddRepresentative(representativeId string) {
 func (p *ParliamentApi) RemoveRepresentative(representativeId string) {
 	p.RemoveRepresentativeFunc(representativeId)
 }
-func (p *ParliamentApi) UpdateLeader(nodeId string) error {
+func (p *ParliamentApi) UpdateLeader(nodeId common.NodeID) error {
 	return p.UpdateLeaderFunc(nodeId)
 }
 func (p *ParliamentApi) GetLeader() pbft.Leader {

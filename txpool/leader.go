@@ -16,9 +16,11 @@
 
 package txpool
 
+import "github.com/it-chain/engine/common"
+
 //Aggregate root must implement aggregate interface
 type Leader struct {
-	Id string
+	Id common.NodeID
 }
 
 type LeaderRepository interface {
