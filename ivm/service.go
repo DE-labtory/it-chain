@@ -38,7 +38,7 @@ type EventService interface {
 // State DB
 type StateRepository interface {
 	//Update state DB
-	Apply(writeList []Write)
+	Apply(writeList []Write) error
 
 	//Get state value
 	Get(value []byte) ([]byte, error)
@@ -48,6 +48,7 @@ type Write struct {
 	Key    []byte
 	Value  []byte
 	Delete bool
+	TimeStamp time.Time
 }
 
 type TransactionWriteList struct {
