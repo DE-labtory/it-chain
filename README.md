@@ -43,10 +43,6 @@ How to install it-chain and run simple icode(smartContract) can be found in the 
 - Docker >= 17.12.0
 - Rabbitmq >= 3.7.7
 
-## Implementation Details
-Core implementation decisions can be found in the Project Implementation Details. <br>
-[PROJECT IMPLEMENTATION DETAILS](doc/PROJECT-IMPLEMENTATION-DETAILS.md)
-
 ## Contribution
 Contribution Guide <br>
 [CONTRIBUTION](CONTRIBUTING.md)
