@@ -79,6 +79,6 @@ func TestConstructConsensus(t *testing.T) {
 
 	// then
 	assert.Equal(t, "consensusID", c.StateID.ID)
-	assert.Equal(t, pbft.PROPOSE_STAGE, c.CurrentStage)
+	assert.Equal(t, pbft.IDLE_STAGE, c.CurrentStage)
 	assert.Equal(t, 2, len(c.Representatives))
 }
