@@ -45,7 +45,7 @@ func BuildState(msg ProposeMsg) *State {
 		StateID:          msg.StateID,
 		Representatives:  msg.Representative,
 		Block:            msg.ProposedBlock,
-		CurrentStage:     PROPOSE_STAGE,
+		CurrentStage:     IDLE_STAGE,
 		PrevoteMsgPool:   NewPrevoteMsgPool(),
 		PreCommitMsgPool: NewPreCommitMsgPool(),
 	}
