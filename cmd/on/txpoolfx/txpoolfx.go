@@ -51,11 +51,10 @@ var Module = fx.Options(
 	),
 )
 
-func NewLeaderRepository(config *conf.Configuration) *mem.LeaderRepository {
-	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
+func NewLeaderRepository(config *conf.Configuration, nodeId common.NodeID) *mem.LeaderRepository {
 	repo := mem.NewLeaderRepository()
 	if config.Engine.BootstrapNodeAddress == "" {
-		repo.Set(txpool.Leader{NodeId})
+		repo.Set(txpool.Leader{nodeId})
 	}
 
 	return repo
@@ -69,9 +68,8 @@ func NewTransferService(transactionRepository *mem.TransactionRepository, leader
 	return txpool.NewTransferService(transactionRepository, leaderRepository, eventService)
 }
 
-func NewTxpoolApi(config *conf.Configuration, transactionRepository *mem.TransactionRepository, leaderRepository *mem.LeaderRepository, transferService *txpool.TransferService, blockProposalService *txpool.BlockProposalService) *api.TransactionApi {
-	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
-	return api.NewTransactionApi(NodeId, transactionRepository, leaderRepository, transferService, blockProposalService)
+func NewTxpoolApi(config *conf.Configuration, transactionRepository *mem.TransactionRepository, leaderRepository *mem.LeaderRepository, transferService *txpool.TransferService, blockProposalService *txpool.BlockProposalService, nodeId common.NodeID) *api.TransactionApi {
+	return api.NewTransactionApi(nodeId, transactionRepository, leaderRepository, transferService, blockProposalService)
 }
 
 func NewLeaderEventHandler(leaderRepository *mem.LeaderRepository) *adapter.LeaderEventHandler {
