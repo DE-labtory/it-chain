@@ -29,6 +29,7 @@ import (
 var Module = fx.Options(
 	fx.Provide(
 		NewConfiguration,
+		NewNodeID,
 		NewRpcServer,
 		NewRpcClient,
 		NewPubsubServer,
@@ -42,6 +43,11 @@ var Module = fx.Options(
 
 func NewConfiguration() *conf.Configuration {
 	return conf.GetConfiguration()
+}
+
+func NewNodeID(config *conf.Configuration) common.NodeID {
+	keyRecoverer := &common.ECDSAKeyRecoverer{}
+	return common.GetNodeID(config.Engine.PriKeyPath, keyRecoverer)
 }
 
 func NewRpcServer(config *conf.Configuration) *rpc.Server {
