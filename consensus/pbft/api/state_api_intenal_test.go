@@ -226,6 +226,91 @@ func TestStateApi_checkPreCommit(t *testing.T) {
 
 }
 
+func TestStateApi_updatePrevoteMsgPool(t *testing.T) {
+	// given
+	mockPublisherID := "pid"
+	eventService := mock.EventService{}
+	propagateService := pbft.NewPropagateService(eventService)
+	parliamentRepository := mock.ParliamentRepository{}
+	stateRepository := mem.NewStateRepository()
+
+	stateApi := NewStateApi(mockPublisherID, propagateService, eventService, parliamentRepository, stateRepository)
+
+	stateApi.stateRepository.Save(pbft.State{
+		StateID:         pbft.StateID{"sid"},
+		Representatives: nil,
+		Block: pbft.ProposedBlock{
+			Seal: []byte{'h', 'a', 's', 'h'},
+			Body: []byte{'b', 'o', 'd', 'y'},
+		},
+		CurrentStage:     "",
+		PrevoteMsgPool:   pbft.NewPrevoteMsgPool(),
+		PreCommitMsgPool: pbft.NewPreCommitMsgPool(),
+	})
+
+	msgNum := 2
+	for i := 0; i < msgNum; i++ {
+		msg := pbft.PrevoteMsg{
+			StateID:   pbft.StateID{"sid"},
+			SenderID:  string(i),
+			BlockHash: []byte{'h', 'a', 's', 'h'},
+		}
+		stateApi.tempPrevoteMsgPool.Save(&msg)
+	}
+
+	assert.Equal(t, msgNum, len(stateApi.tempPrevoteMsgPool.Get()))
+
+	// when
+	loadedState, _ := stateApi.stateRepository.Load()
+	loadedState = stateApi.updatePrevoteMsgPool(loadedState)
+
+	// then
+	assert.Equal(t, 0, len(stateApi.tempPrevoteMsgPool.Get()))
+	assert.Equal(t, msgNum, len(loadedState.PrevoteMsgPool.Get()))
+}
+
+func TestStateApi_updatePreCommitMsgPool(t *testing.T) {
+	// given
+	mockPublisherID := "pid"
+	eventService := mock.EventService{}
+	propagateService := pbft.NewPropagateService(eventService)
+	parliamentRepository := mock.ParliamentRepository{}
+	stateRepository := mem.NewStateRepository()
+
+	stateApi := NewStateApi(mockPublisherID, propagateService, eventService, parliamentRepository, stateRepository)
+
+	stateApi.stateRepository.Save(pbft.State{
+		StateID:         pbft.StateID{"sid"},
+		Representatives: nil,
+		Block: pbft.ProposedBlock{
+			Seal: []byte{'h', 'a', 's', 'h'},
+			Body: []byte{'b', 'o', 'd', 'y'},
+		},
+		CurrentStage:     "",
+		PrevoteMsgPool:   pbft.NewPrevoteMsgPool(),
+		PreCommitMsgPool: pbft.NewPreCommitMsgPool(),
+	})
+
+	msgNum := 3
+	for i := 0; i < msgNum; i++ {
+		msg := pbft.PreCommitMsg{
+			StateID:  pbft.StateID{"sid"},
+			SenderID: string(i),
+		}
+		stateApi.tempPreCommitMsgPool.Save(&msg)
+	}
+
+	assert.Equal(t, msgNum, len(stateApi.tempPreCommitMsgPool.Get()))
+
+	// when
+	loadedState, _ := stateApi.stateRepository.Load()
+	loadedState = stateApi.updatePreCommitMsgPool(loadedState)
+
+	// then
+	assert.Equal(t, 0, len(stateApi.tempPreCommitMsgPool.Get()))
+	assert.Equal(t, msgNum, len(loadedState.PreCommitMsgPool.Get()))
+}
+
 func setUpApiCondition(peerNum int, isRepoFull, isNormalBlock bool, stage pbft.Stage) *StateApi {
 	reps := make([]pbft.Representative, 0)
 	for i := 0; i < peerNum; i++ {
