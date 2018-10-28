@@ -34,7 +34,7 @@ func setContainer(t *testing.T) (*tesseract.ContainerService, func()) {
 		return nil, func() {}
 	}
 
-	containerService := tesseract.NewContainerService()
+	containerService, _ := tesseract.NewContainerService(nil)
 
 	icode := ivm.ICode{
 		ID:             "1",
