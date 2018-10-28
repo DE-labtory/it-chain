@@ -27,7 +27,6 @@ import (
 	"github.com/it-chain/engine/cmd/on/ivmfx"
 	"github.com/it-chain/engine/cmd/on/pbftfx"
 	"github.com/it-chain/engine/cmd/on/txpoolfx"
-	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/iLogger"
 	"github.com/urfave/cli"
 	"go.uber.org/fx"
@@ -62,10 +61,10 @@ func clearFolder() {
 		iLogger.Panic(&iLogger.Fields{"err_msg": err.Error()}, "error while clear folder")
 		panic(err)
 	}
-	if err := os.RemoveAll(conf.GetConfiguration().Engine.TmpPath); err != nil {
-		iLogger.Panic(&iLogger.Fields{"err_msg": err.Error()}, "error while clear folder")
-		panic(err)
-	}
+	//if err := os.RemoveAll(conf.GetConfiguration().Engine.TmpPath); err != nil {
+	//	iLogger.Panic(&iLogger.Fields{"err_msg": err.Error()}, "error while clear folder")
+	//	panic(err)
+	//}
 	//RemoveDirectoryFiles()
 }
 
