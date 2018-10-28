@@ -21,6 +21,7 @@ import (
 
 	"github.com/it-chain/engine/common/rabbitmq/pubsub"
 	"github.com/it-chain/engine/common/rabbitmq/rpc"
+	"github.com/it-chain/engine/conf"
 	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/engine/ivm/api"
 	"github.com/it-chain/engine/ivm/infra/adapter"
@@ -52,8 +53,25 @@ func NewGitReposutoryService() ivm.GitService {
 	return git.NewRepositoryService()
 }
 
-func NewContainerService() ivm.ContainerService {
-	return tesseract.NewContainerService()
+func NewContainerService(conf *conf.Configuration) ivm.ContainerService {
+	if conf.Docker.Use {
+		cs, err := tesseract.NewContainerService(&tesseract.ContainerDockerConfig{
+			Subnet:      conf.Docker.NetworkSubnet,
+			VolumeName:  conf.Docker.VolumeName,
+			NetworkName: conf.Docker.NetworkName,
+		})
+		if err != nil {
+			panic(err)
+		}
+		return cs
+	} else {
+		cs, err := tesseract.NewContainerService(nil)
+		if err != nil {
+			panic(err)
+		}
+		return cs
+	}
+
 }
 
 func RegisterRpcHandlers(
