@@ -27,15 +27,18 @@ type ICode struct {
 	Path           string
 	CommitHash     string
 	Version        Version
+	Language       string
+	FolderName     string
 }
 
-func NewICode(id string, repositoryName string, gitUrl string, path string, commitHash string, version string) ICode {
+func NewICode(id string, repositoryName string, folderName string, gitUrl string, path string, commitHash string, version string) ICode {
 
 	return ICode{
 		ID:             id,
 		CommitHash:     commitHash,
 		Path:           path,
 		GitUrl:         gitUrl,
+		FolderName:     folderName,
 		RepositoryName: repositoryName,
 		Version:        version,
 	}
