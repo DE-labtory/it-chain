@@ -17,13 +17,17 @@
 package model
 
 type DockerConfiguration struct {
-	Use        bool
-	VolumeName string
+	Use           bool
+	VolumeName    string
+	NetworkName   string
+	NetworkSubnet string
 }
 
 func NewDockerConfiguration() DockerConfiguration {
 	return DockerConfiguration{
-		Use:        false,
-		VolumeName: "it-chain-default-volume",
+		Use:           false,
+		VolumeName:    "it-chain-default-volume",
+		NetworkName:   "it-chain-default-network",
+		NetworkSubnet: "172.88.1.0/8",
 	}
 }
