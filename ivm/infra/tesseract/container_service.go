@@ -22,6 +22,13 @@ import (
 	"fmt"
 	"sync"
 
+	"path"
+
+	"net"
+	"strconv"
+
+	"strings"
+
 	"github.com/it-chain/engine/ivm"
 	"github.com/it-chain/iLogger"
 	"github.com/it-chain/tesseract"
@@ -34,33 +41,84 @@ var ErrContainerDoesNotExist = errors.New("container does not exist")
 var ErrICodeInfoMapNotEmpty = errors.New("ICode info struct in current container is not empty")
 
 type ICodeInfo struct {
-	container tesseract.Container
-	iCode     ivm.ICode
+	container     tesseract.Container
+	containerIp   string
+	containerPort string
+	iCode         ivm.ICode
 }
 
 type ContainerService struct {
 	sync.RWMutex
 	iCodeInfoMap map[tesseract.ContainerID]ICodeInfo
+	dockerConfig *ContainerDockerConfig
+}
+type ContainerDockerConfig struct {
+	Subnet      string
+	VolumeName  string
+	NetworkName string
 }
 
-func NewContainerService() *ContainerService {
-	return &ContainerService{
-		iCodeInfoMap: make(map[tesseract.ContainerID]ICodeInfo),
-		RWMutex:      sync.RWMutex{},
-	}
+func NewContainerService(config *ContainerDockerConfig) (*ContainerService, error) {
+	containerService := &ContainerService{}
+	containerService.dockerConfig = config
+	containerService.iCodeInfoMap = make(map[tesseract.ContainerID]ICodeInfo)
+	containerService.RWMutex = sync.RWMutex{}
+	return containerService, nil
 }
 
 func (cs ContainerService) StartContainer(icode ivm.ICode) error {
 	iLogger.Info(nil, fmt.Sprintf("[IVM] Starting container - icodeID: [%s]", icode.ID))
 	cs.Lock()
 	defer cs.Unlock()
+	var port string
+	var containerIp string
+	var hostIp string
+	var startCmd []string
+	var mount []string
+	var network *tesseract.Network
+	if cs.dockerConfig != nil {
+		subnetRootIp, err := getSubnetRootIp(cs.dockerConfig.Subnet)
+		hostIp = subnetRootIp + strconv.Itoa(2)
+		if err != nil {
+			return err
+		}
+		availablePort, err := getPort(hostIp, "60000")
+		if err != nil {
+			return err
+		}
+
+		port = availablePort
+		containerIp = subnetRootIp + strconv.Itoa(len(cs.iCodeInfoMap)+3)
+		mount = []string{cs.dockerConfig.VolumeName + ":" + "/go/src"}
+		network = &tesseract.Network{
+			Name: cs.dockerConfig.NetworkName,
+		}
+	} else {
+		availablePort, err := getPort("127.0.0.1", "50000")
+		hostIp = "0.0.0.0"
+		port = availablePort
+		if err != nil {
+			return err
+		}
+		mount = []string{icode.Path + ":" + "/go/src/" + icode.FolderName}
+	}
+	startCmd = []string{"go", "run", path.Join("/go/src", icode.FolderName, "icode.go"), "-p", port}
 
 	conf := tesseract.ContainerConfig{
-		Name:      icode.RepositoryName,
-		Directory: icode.Path,
-		Url:       icode.GitUrl,
+		Language: "go",
+		Name:     icode.ID,
+		ContainerImage: tesseract.ContainerImage{
+			Name: "golang",
+			Tag:  "1.9",
+		},
+		HostIp:      hostIp,
+		Port:        port,
+		ContainerIp: containerIp,
+		StartCmd:    startCmd,
+		Mount:       mount,
+		Network:     network,
 	}
-	container, err := container.Create(conf)
+	createdContainer, err := container.Create(conf)
 
 	if err != nil {
 		return err
@@ -70,7 +128,7 @@ func (cs ContainerService) StartContainer(icode ivm.ICode) error {
 
 	if !ok {
 		iCodeInfo := ICodeInfo{
-			container: container,
+			container: createdContainer,
 			iCode:     icode,
 		}
 
@@ -80,6 +138,24 @@ func (cs ContainerService) StartContainer(icode ivm.ICode) error {
 	}
 
 	return nil
+}
+
+func getPort(findIp string, startPort string) (string, error) {
+	tryToFindPort, err := strconv.Atoi(startPort)
+	if err != nil {
+		return "", err
+	}
+	for {
+		if st, _ := strconv.Atoi(startPort); tryToFindPort-st > 10000 { // 최대 포트검색시도는 10000개
+			return "", errors.New("cant find empty error while 10000")
+		}
+		lis, err := net.Listen("tcp", findIp+":"+strconv.Itoa(tryToFindPort))
+		lis.Close()
+		if err != nil {
+			continue
+		}
+		return strconv.Itoa(tryToFindPort), nil
+	}
 }
 
 func (cs ContainerService) ExecuteRequest(request ivm.Request) (ivm.Result, error) {
@@ -160,4 +236,29 @@ func (cs ContainerService) GetRunningICodeList() []ivm.ICode {
 	}
 
 	return iCodeList
+}
+
+func getSubnetRootIp(subnet string) (string, error) {
+	if !strings.Contains(subnet, "/") {
+		return "", errors.New("is not formatted for subnet")
+	}
+	args := strings.Split(subnet, "/")
+	if len(args) != 2 {
+		return "", errors.New("is not formatted for subnet")
+	}
+	//172.88.x.0/8
+	subnetCount, err := strconv.Atoi(args[1])
+	if err != nil {
+		return "", err
+	}
+	if subnetCount%8 != 0 {
+		return "", errors.New("subnet 비트는 8배수여야함")
+	}
+	subnetCount /= 8
+	dotSplittedIp := strings.Split(args[0], ".")
+	rootIp := ""
+	for i := 0; i < subnetCount; i++ {
+		rootIp = rootIp + dotSplittedIp[i] + "."
+	}
+	return rootIp, nil
 }
