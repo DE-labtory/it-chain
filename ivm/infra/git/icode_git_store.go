@@ -74,7 +74,7 @@ func NewRepositoryService() *RepositoryService {
 }
 
 func (gApi *RepositoryService) CloneFromRawSsh(baseSavePath string, repositoryUrl string, rawSsh []byte, password string) (ivm.ICode, error) {
-	var randomString string = RandStringBytesMaskImprSrc(40)
+	var randomString = RandStringBytesMaskImprSrc(40)
 
 	iLogger.Infof(nil, "[IVM] Cloning Icode - url: [%s]", repositoryUrl)
 
@@ -142,13 +142,13 @@ func (gApi *RepositoryService) CloneFromRawSsh(baseSavePath string, repositoryUr
 		return nil
 	})
 
-	id := name + "_" + lastHeadCommit.Hash.String() + randomString
+	id := name + "_" + commitHash
 
 	//check file already exist
 
 	iLogger.Info(nil, fmt.Sprintf("[IVM] ICode has successfully cloned - url: [%s], icodeID: [%s], version[%s]", repositoryUrl, id, version))
 
-	metaData := ivm.NewICode(id, name, repositoryUrl, baseSavePath+"/"+name+"_"+randomString, commitHash, version)
+	metaData := ivm.NewICode(id, name, name+"_"+randomString, repositoryUrl, baseSavePath+"/"+name+"_"+randomString, commitHash, version)
 	return metaData, nil
 }
 
