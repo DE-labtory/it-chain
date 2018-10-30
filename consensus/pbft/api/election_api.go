@@ -129,17 +129,22 @@ func (e *ElectionApi) isFullyVoted() bool {
 	return false
 }
 
+func (e *ElectionApi) ElectLeader() {
+	parliament := e.parliamentRepository.Load()
+
+	switch parliament.IsNeedConsensus() {
+	case true:
+		e.ElectLeaderWithRaft()
+	case false:
+		e.ElectLeaderWithLargestRepresentativeId()
+	}
+}
+
 //1. Start random timeout
 //2. timed out! alter state to 'candidate'
 //3. while ticking, count down leader stateRepository left time
 //4. Send message having 'RequestVoteProtocol' to other node
 func (e *ElectionApi) ElectLeaderWithRaft() {
-	parliament := e.parliamentRepository.Load()
-	if !parliament.IsNeedConsensus() {
-		e.ElectLeaderWithLargestRepresentativeId()
-		return
-	}
-
 	e.ElectionService.SetState(pbft.TICKING)
 	e.ElectionService.InitLeftTime()
 
