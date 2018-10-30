@@ -35,5 +35,5 @@ func NewLeaderEventHandler(electionApi *api.ElectionApi) *LeaderEventHandler {
 func (l *LeaderEventHandler) HandlerLeaderDeletedEvent(_ event.LeaderDeleted) {
 	iLogger.Infof(nil, "[PBFT] Leader Deleted, Start Elect Leader With RAFT")
 
-	go l.electionApi.ElectLeaderWithRaft()
+	go l.electionApi.ElectLeader()
 }

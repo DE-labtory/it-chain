@@ -163,6 +163,48 @@ func TestElectionApi_RequestVote(t *testing.T) {
 	}
 }
 
+func TestElectionApi_ElectLeader(t *testing.T) {
+	tests := map[string]struct {
+		input struct {
+			processList []string
+		}
+	}{
+		"3 node test (LargestId election)": {
+			input: struct{ processList []string }{
+				processList: []string{"1", "2", "3"},
+			},
+		},
+		"4 node test (Raft election)": {
+			input: struct{ processList []string }{
+				processList: []string{"1", "2", "3", "4"},
+			},
+		},
+	}
+
+	for testName, test := range tests {
+		t.Logf("running test case %s", testName)
+
+		env := test2.SetTestEnvironment(test.input.processList)
+
+		for _, p := range env.ProcessMap {
+			process := *p
+			electionApi := process.Services["ElectionApi"].(*api.ElectionApi)
+			go electionApi.ElectLeader()
+		}
+
+		time.Sleep(5 * time.Second)
+
+		leader1 := env.ProcessMap["1"].Services["ParliamentApi"].(*api.ParliamentApi).GetLeader()
+		leader2 := env.ProcessMap["2"].Services["ParliamentApi"].(*api.ParliamentApi).GetLeader()
+		leader3 := env.ProcessMap["3"].Services["ParliamentApi"].(*api.ParliamentApi).GetLeader()
+
+		assert.Equal(t, leader1, leader2)
+		assert.Equal(t, leader2, leader3)
+		assert.Equal(t, leader3, leader1)
+	}
+
+}
+
 func TestElectionApi_ElectLeaderWithRaft(t *testing.T) {
 	tests := map[string]struct {
 		input struct {
