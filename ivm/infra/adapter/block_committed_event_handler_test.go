@@ -40,7 +40,7 @@ func TestBlockCommittedEventHandler_HandleBlockCommittedEventHandler(t *testing.
 	testBlock := event.BlockCommitted{
 		TxList: []event.Tx{
 			event.Tx{
-				ICodeID:  "1",
+				ICodeID:  "a1",
 				Function: "initA",
 				Args:     []string{},
 			},
@@ -53,7 +53,7 @@ func TestBlockCommittedEventHandler_HandleBlockCommittedEventHandler(t *testing.
 	//then
 	// success case
 	result, err := containerService.ExecuteRequest(ivm.Request{
-		ICodeID:  "1",
+		ICodeID:  "a1",
 		Function: "getA",
 		Type:     "query",
 		Args:     []string{},
@@ -75,15 +75,16 @@ func setUp(t *testing.T) (*adapter.BlockCommittedEventHandler, *tesseract.Contai
 
 	// git generate
 	storeApi := git.NewRepositoryService()
-	containerService := tesseract.NewContainerService()
+	containerService, _ := tesseract.NewContainerService(nil)
 	eventService := common.NewEventService("", "Event")
 	icodeApi := api.NewICodeApi(containerService, storeApi, eventService)
 
 	icode := ivm.ICode{
-		ID:             "1",
+		ID:             "a1",
 		RepositoryName: "test ivm",
 		Path:           GOPATH + "/src/github.com/it-chain/engine/ivm/mock/",
 		GitUrl:         "github.com/mock",
+		FolderName:     "github.com/mock",
 	}
 
 	err := containerService.StartContainer(icode)

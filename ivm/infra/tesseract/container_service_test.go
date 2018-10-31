@@ -26,6 +26,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const testIcodeID = "a1"
+
 func setContainer(t *testing.T) (*tesseract.ContainerService, func()) {
 	GOPATH := os.Getenv("GOPATH")
 
@@ -37,10 +39,11 @@ func setContainer(t *testing.T) (*tesseract.ContainerService, func()) {
 	containerService, _ := tesseract.NewContainerService(nil)
 
 	icode := ivm.ICode{
-		ID:             "1",
+		ID:             testIcodeID,
 		RepositoryName: "test ivm",
 		Path:           GOPATH + "/src/github.com/it-chain/engine/ivm/mock/",
 		GitUrl:         "github.com/mock",
+		FolderName:     "github.com/mock",
 	}
 
 	err := containerService.StartContainer(icode)
@@ -63,7 +66,7 @@ func TestTesseractContainerService_ExecuteRequest(t *testing.T) {
 
 	// success case
 	result, err := cs.ExecuteRequest(ivm.Request{
-		ICodeID:  "1",
+		ICodeID:  testIcodeID,
 		Function: "initA",
 		Type:     "invoke",
 		Args:     []string{},
@@ -73,7 +76,7 @@ func TestTesseractContainerService_ExecuteRequest(t *testing.T) {
 
 	// success case
 	result, err = cs.ExecuteRequest(ivm.Request{
-		ICodeID:  "1",
+		ICodeID:  testIcodeID,
 		Function: "getA",
 		Type:     "query",
 		Args:     []string{},
@@ -85,7 +88,7 @@ func TestTesseractContainerService_ExecuteRequest(t *testing.T) {
 
 	// no corresponding ivm id
 	result, err = cs.ExecuteRequest(ivm.Request{
-		ICodeID:  "2",
+		ICodeID:  "a2",
 		Function: "initA",
 		Type:     "invoke",
 		Args:     []string{},
@@ -94,7 +97,7 @@ func TestTesseractContainerService_ExecuteRequest(t *testing.T) {
 
 	// invalid type
 	result, err = cs.ExecuteRequest(ivm.Request{
-		ICodeID:  "1",
+		ICodeID:  testIcodeID,
 		Function: "initA",
 		Type:     "invoke2",
 		Args:     []string{},
@@ -104,7 +107,7 @@ func TestTesseractContainerService_ExecuteRequest(t *testing.T) {
 
 	// invalid func
 	result, err = cs.ExecuteRequest(ivm.Request{
-		ICodeID:  "1",
+		ICodeID:  testIcodeID,
 		Function: "initAb",
 		Type:     "invoke",
 		Args:     []string{},

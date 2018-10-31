@@ -78,6 +78,7 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 }
 
 func TestICodeGitStoreApi_CloneWithPassword(t *testing.T) {
+	//given)
 	baseTempPath := "./.tmp"
 	sshPathWithPassword := "./id_rsa_pwd"
 	err, teardown := generatePriKeyWithPassword(sshPathWithPassword)
@@ -86,7 +87,6 @@ func TestICodeGitStoreApi_CloneWithPassword(t *testing.T) {
 	os.RemoveAll(baseTempPath)
 	defer os.RemoveAll(baseTempPath)
 
-	//given
 	tests := map[string]struct {
 		InputGitURL string
 		InputPwd    string

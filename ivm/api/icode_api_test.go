@@ -158,7 +158,7 @@ func setUp(t *testing.T) (*api.ICodeApi, *tesseract.ContainerService) {
 
 	// git generate
 	storeApi := git.NewRepositoryService()
-	containerService := tesseract.NewContainerService()
+	containerService, _ := tesseract.NewContainerService(nil)
 	eventService := common.NewEventService("", "Event")
 	icodeApi := api.NewICodeApi(containerService, storeApi, eventService)
 
