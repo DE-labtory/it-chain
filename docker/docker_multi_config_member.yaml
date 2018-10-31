@@ -6,7 +6,7 @@ engine:
   amqp: amqp://guest:guest@localhost:5672/
   bootstrapnodeaddress: "127.0.0.1:5555"
 txpool:
-  timeoutms: 1000
+  timeoutms: 3000
   maxtransactionbyte: 1024
 consensus:
   batchtime: 3

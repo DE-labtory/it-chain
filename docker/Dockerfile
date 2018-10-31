@@ -9,7 +9,7 @@ RUN apt-get update -qq && apt-get install -qqy \
     lxc \
     iptables \
     && rm -rf /var/lib/apt/lists/*
-    
+
 # Install Docker from Docker Inc. repositories.
 RUN curl -sSL https://get.docker.com/ | sh
 
@@ -71,10 +71,7 @@ RUN mkdir /go/src/github.com ;\
 	mkdir /go/src/golang.org ;\
 	mkdir /go/src/github.com/golang
 ADD ./it-chain/ /go/src/github.com/it-chain
-ADD ./google.golang.org/ /go/src/google.golang.org
-ADD ./golang.org /go/src/golang.org
-ADD ./golang /go/src/github.com/golang
-ADD ./entrypoint.sh /entrypoint.sh
+ADD ./it-chain/engine/docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 EXPOSE 4000 5000
 ENTRYPOINT ["sh"]
