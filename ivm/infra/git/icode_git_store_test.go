@@ -68,7 +68,7 @@ func TestICodeGitStoreApi_Clone(t *testing.T) {
 			test.OutputMeta.ID = meta.ID
 			test.OutputMeta.CommitHash = meta.CommitHash
 			test.OutputMeta.Path = meta.Path
-
+			test.OutputMeta.FolderName = meta.FolderName
 		}
 
 		//then
@@ -119,6 +119,7 @@ func TestICodeGitStoreApi_CloneWithPassword(t *testing.T) {
 			test.OutputMeta.ID = meta.ID
 			test.OutputMeta.CommitHash = meta.CommitHash
 			test.OutputMeta.Path = meta.Path
+			test.OutputMeta.FolderName = meta.FolderName
 		}
 
 		//then
@@ -162,7 +163,7 @@ func TestICodeGitStoreApi_CloneWithoutSsh(t *testing.T) {
 			test.OutputMeta.ID = meta.ID
 			test.OutputMeta.CommitHash = meta.CommitHash
 			test.OutputMeta.Path = meta.Path
-
+			test.OutputMeta.FolderName = meta.FolderName
 		}
 
 		//then
@@ -242,7 +243,7 @@ func TestRepositoryService_CloneFromRawSsh(t *testing.T) {
 			test.OutputMeta.ID = meta.ID
 			test.OutputMeta.CommitHash = meta.CommitHash
 			test.OutputMeta.Path = meta.Path
-
+			test.OutputMeta.FolderName = meta.FolderName
 		}
 		//then
 		assert.Equal(t, test.OutputMeta, meta)
