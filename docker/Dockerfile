@@ -65,15 +65,14 @@ ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
-RUN mkdir /go/src/github.com ;\
+RUN mkdir /go/src/github.com ; \
 	mkdir /go/src/github.com/it-chain ;\
-	mkdir /go/src/google.golang.org ;\
-	mkdir /go/src/golang.org ;\
-	mkdir /go/src/github.com/golang
-ADD ./it-chain/ /go/src/github.com/it-chain
-ADD ./google.golang.org/ /go/src/google.golang.org
-ADD ./golang.org /go/src/golang.org
-ADD ./golang /go/src/github.com/golang
+	cd /go/src/github.com/it-chain ;\
+	git clone https://github.com/it-chain/engine ;\
+	go get -u github.com/golang/dep/cmd/dep ;\
+	cd engine ;\
+	/go/bin/dep ensure
+	
 ADD ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 EXPOSE 4000 5000
