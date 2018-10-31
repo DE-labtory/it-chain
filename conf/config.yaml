@@ -18,13 +18,13 @@ peer:
 icode:
   repositorypath: empty
 grpcgateway:
-  address: 172.88.1.2
+  address: 127.0.0.1
   port: "5000"
 apigateway:
-  address: 172.88.1.2
+  address: 127.0.0.1
   port: "4000"
 docker:
-  use: true
+  use: false
   volumename: it-chain-default-volume
   networkname: it-chain-default-network
-  networksubnet: 172.88.1.0/24
+  networksubnet: 172.88.1.0/8
