@@ -1,16 +1,16 @@
 abspath=$PWD
-if [ $1 == "--help" ]; then
-	echo "use this shell script with output port num to assign node"
-	echo "./single_node.sh [api-gateway port] [grpc-gateway port]"
-	echo "example usage ) ./single_node.sh 40000 50000"
-exit 0
-fi
 
 if [ $# -ne 2 ]; then
 	echo "please input two output port number to create node or --help"
 	exit 1
 fi
 
+if [ $1 == "--help" ]; then
+	echo "use this shell script with output port num to assign node"
+	echo "./single_node.sh [api-gateway port] [grpc-gateway port]"
+	echo "example usage ) ./single_node.sh 40000 50000"
+exit 0
+fi
 
 echo "wait for pull it-chain docker image"
 #

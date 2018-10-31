@@ -59,73 +59,30 @@ type ContainerDockerConfig struct {
 }
 
 func NewContainerService(config *ContainerDockerConfig) (*ContainerService, error) {
-	containerService := &ContainerService{}
-	containerService.dockerConfig = config
-	containerService.iCodeInfoMap = make(map[tesseract.ContainerID]ICodeInfo)
-	containerService.RWMutex = sync.RWMutex{}
-	return containerService, nil
+	return &ContainerService{
+		dockerConfig: config,
+		iCodeInfoMap: make(map[tesseract.ContainerID]ICodeInfo),
+		RWMutex:      sync.RWMutex{},
+	}, nil
 }
 
 func (cs ContainerService) StartContainer(icode ivm.ICode) error {
 	iLogger.Info(nil, fmt.Sprintf("[IVM] Starting container - icodeID: [%s]", icode.ID))
+
 	cs.Lock()
 	defer cs.Unlock()
-	var port string
-	var containerIp string
-	var hostIp string
-	var startCmd []string
-	var mount []string
-	var network *tesseract.Network
-	if cs.dockerConfig != nil {
-		subnetRootIp, err := getSubnetRootIp(cs.dockerConfig.Subnet)
-		hostIp = subnetRootIp + strconv.Itoa(2)
-		if err != nil {
-			return err
-		}
-		availablePort, err := getPort(hostIp, "60000")
-		if err != nil {
-			return err
-		}
 
-		port = availablePort
-		containerIp = subnetRootIp + strconv.Itoa(len(cs.iCodeInfoMap)+3)
-		mount = []string{cs.dockerConfig.VolumeName + ":" + "/go/src"}
-		network = &tesseract.Network{
-			Name: cs.dockerConfig.NetworkName,
-		}
-	} else {
-		availablePort, err := getPort("127.0.0.1", "50000")
-		hostIp = "0.0.0.0"
-		port = availablePort
-		if err != nil {
-			return err
-		}
-		mount = []string{icode.Path + ":" + "/go/src/" + icode.FolderName}
+	conf, err := cs.createContainerConfig(icode)
+	if err != nil {
+		return err
 	}
-	startCmd = []string{"go", "run", path.Join("/go/src", icode.FolderName, "icode.go"), "-p", port}
 
-	conf := tesseract.ContainerConfig{
-		Language: "go",
-		Name:     icode.ID,
-		ContainerImage: tesseract.ContainerImage{
-			Name: "golang",
-			Tag:  "1.9",
-		},
-		HostIp:      hostIp,
-		Port:        port,
-		ContainerIp: containerIp,
-		StartCmd:    startCmd,
-		Mount:       mount,
-		Network:     network,
-	}
 	createdContainer, err := container.Create(conf)
-
 	if err != nil {
 		return err
 	}
 
 	_, ok := cs.iCodeInfoMap[icode.ID]
-
 	if !ok {
 		iCodeInfo := ICodeInfo{
 			container: createdContainer,
@@ -138,6 +95,74 @@ func (cs ContainerService) StartContainer(icode ivm.ICode) error {
 	}
 
 	return nil
+}
+
+func (cs ContainerService) createContainerConfig(icode ivm.ICode) (tesseract.ContainerConfig, error) {
+	switch cs.hasDockerConfig() {
+	case true:
+		return cs.createDockerConfig(icode)
+	case false:
+		return cs.createHostMachineConfig(icode)
+	}
+}
+
+func (cs ContainerService) hasDockerConfig() bool {
+	return cs.dockerConfig != nil
+}
+
+func (cs ContainerService) createDockerConfig(icode ivm.ICode) (tesseract.ContainerConfig, error) {
+	subnetRootIp, err := getSubnetRootIp(cs.dockerConfig.Subnet)
+	if err != nil {
+		return tesseract.ContainerConfig{}, err
+	}
+
+	hostIp := subnetRootIp + strconv.Itoa(2)
+
+	port, err := getPort(hostIp, "60000")
+	if err != nil {
+		return tesseract.ContainerConfig{}, err
+	}
+
+	containerIp := subnetRootIp + strconv.Itoa(len(cs.iCodeInfoMap)+3)
+
+	return tesseract.ContainerConfig{
+		Language: "go",
+		Name:     icode.ID,
+		ContainerImage: tesseract.ContainerImage{
+			Name: "golang",
+			Tag:  "1.9",
+		},
+		HostIp:      hostIp,
+		Port:        port,
+		ContainerIp: containerIp,
+		StartCmd:    []string{"go", "run", path.Join("/go/src", icode.FolderName, "icode.go"), "-p", port},
+		Mount:       []string{cs.dockerConfig.VolumeName + ":" + "/go/src"},
+		Network: &tesseract.Network{
+			Name: cs.dockerConfig.NetworkName,
+		},
+	}, nil
+}
+
+func (cs ContainerService) createHostMachineConfig(icode ivm.ICode) (tesseract.ContainerConfig, error) {
+	hostIp := "0.0.0.0"
+
+	port, err := getPort("127.0.0.1", "50000")
+	if err != nil {
+		return tesseract.ContainerConfig{}, err
+	}
+
+	return tesseract.ContainerConfig{
+		Language: "go",
+		Name:     icode.ID,
+		ContainerImage: tesseract.ContainerImage{
+			Name: "golang",
+			Tag:  "1.9",
+		},
+		HostIp:   hostIp,
+		Port:     port,
+		StartCmd: []string{"go", "run", path.Join("/go/src", icode.FolderName, "icode.go"), "-p", port},
+		Mount:    []string{icode.Path + ":" + "/go/src/" + icode.FolderName},
+	}, nil
 }
 
 func getPort(findIp string, startPort string) (string, error) {

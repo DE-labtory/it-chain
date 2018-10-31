@@ -2,9 +2,9 @@ engine:
   logpath: log/it-chain.log
   keypath: .it-chain/
   tmppath: .tmp/
-  mode: pbft
+  mode: solo
   amqp: amqp://guest:guest@localhost:5672/
-  bootstrapnodeaddress: "127.0.0.1:5555"
+  bootstrapnodeaddress: ""
 txpool:
   timeoutms: 1000
   maxtransactionbyte: 1024
@@ -18,13 +18,13 @@ peer:
 icode:
   repositorypath: empty
 grpcgateway:
-  address: a.a.a.a
+  address: 172.88.1.2
   port: "5000"
 apigateway:
-  address: a.a.a.a
+  address: 172.88.1.2
   port: "4000"
 docker:
   use: true
   volumename: it-chain-default-volume
   networkname: it-chain-default-network
-  networksubnet: b.b.b.b/24
+  networksubnet: 172.88.1.0/24
