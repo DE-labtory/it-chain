@@ -104,6 +104,8 @@ func (cs ContainerService) createContainerConfig(icode ivm.ICode) (tesseract.Con
 	case false:
 		return cs.createHostMachineConfig(icode)
 	}
+
+	return tesseract.ContainerConfig{}, nil
 }
 
 func (cs ContainerService) hasDockerConfig() bool {

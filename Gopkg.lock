@@ -310,7 +310,7 @@
   version = "v0.1.1"
 
 [[projects]]
-  digest = "1:cdae19a448f2fa3fcd86ef70b37ad3c9acf4460fed2096b8993c14c3dbd057f6"
+  digest = "1:3909d6097bcc4e64492d6a67f2de7ea4030a75d69a488724d75a4dcecb84e9a1"
   name = "github.com/it-chain/tesseract"
   packages = [
     ".",
@@ -320,8 +320,8 @@
     "rpc",
   ]
   pruneopts = "UT"
-  revision = "155c3ece16c35dfa5e8fa53f1b940eed6749dddb"
-  version = "v0.3.4"
+  revision = "e2793ca10f39bd305e9ad8b9c7495c61c68b17c7"
+  version = "v0.4.0"
 
 [[projects]]
   digest = "1:92a0759cdad65d0ede663774eb9a25c2397c849c618e4f28e3fba09670ccd69e"
