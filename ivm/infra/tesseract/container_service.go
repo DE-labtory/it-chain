@@ -148,7 +148,7 @@ func (cs ContainerService) createDockerConfig(icode ivm.ICode) (tesseract.Contai
 func (cs ContainerService) createHostMachineConfig(icode ivm.ICode) (tesseract.ContainerConfig, error) {
 	hostIp := "0.0.0.0"
 
-	port, err := getPort("127.0.0.1", "50000")
+	port, err := container.GetAvailablePort()
 	if err != nil {
 		return tesseract.ContainerConfig{}, err
 	}
