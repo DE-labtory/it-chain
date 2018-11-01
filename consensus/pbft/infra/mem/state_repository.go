@@ -19,6 +19,7 @@ import (
 	"sync"
 
 	"github.com/it-chain/engine/consensus/pbft"
+	"github.com/it-chain/iLogger"
 )
 
 type StateRepository struct {
@@ -42,6 +43,8 @@ func (repo *StateRepository) Save(state pbft.State) error {
 		repo.state = state
 		return nil
 	}
+	iLogger.Debugf(nil, "[PBFT] Repo state id: %s", id)
+	iLogger.Debugf(nil, "[PBFT] State id to save: %s", state.StateID.ID)
 	return pbft.ErrInvalidSave
 }
 
@@ -49,6 +52,7 @@ func (repo *StateRepository) Load() (pbft.State, error) {
 
 	repo.Lock()
 	defer repo.Unlock()
+
 	if repo.state.StateID.ID == "" {
 		return repo.state, pbft.ErrEmptyRepo
 	}
@@ -60,5 +64,8 @@ func (repo *StateRepository) Remove() {
 
 	repo.Lock()
 	defer repo.Unlock()
-	repo.state = pbft.State{}
+
+	repo.state = pbft.State{
+		StateID: pbft.StateID{ID: ""},
+	}
 }
