@@ -111,7 +111,7 @@ Block)의 값을 세팅할 수 있다. 설정값을 맞춰주지 않으면 네�
 한다고 볼 수 있다. 세팅된 값들을 암호화하여 블록 해시(Block Hash)값을 만들어주면, 제네시스 블록(Genesis Block) 생성이 완료된다. 제네시스 블록(Genesis Block)은 생성된 이후 합의를 거치지 않고
 바로 저장된다.
 
-![Create-GenesisBlock](./doc/images/Create_GenesisBlock.png)
+<p align="center"><img src="./doc/images/Create_GenesisBlock.png" width="500px" height="350px"></p>
 
 한편, 제네시스 블록(Genesis Block)이 아닌 블록(Block)을 생성하는 시점은 TxPool 컴포넌트로부터 블록
 생성 요청을 받았을 때이고, 리더 노드만이 블록(Block)을 생성한다. 즉, 클라이언트(Client)가 it-chain
@@ -124,7 +124,7 @@ Block)의 값을 세팅할 수 있다. 설정값을 맞춰주지 않으면 네�
 암호화하여 블록 해시(Block Hash)값을 만들어주면, 블록(Block) 생성이 완료된다. 블록(Block)은 생성된
 이후 다른 노드들과의 합의를 위해 컨센서스 컴포넌트(Consensus Component)로 전달된다.
 
-![Create-ProposedBlock](./doc/images/Create_ProposedBlock.png)
+<p align="center"><img src="./doc/images/Create_ProposedBlock.png" width="750px" height="420px"></p>
 
 ### 블록(데이터) 저장
 
@@ -157,7 +157,7 @@ It-chain은 블록을 저장하기 위해 구글의 오픈소스 키 벨류 데�
 암호화되어있는 지 확인한다. 트랜잭션들의 해시 값을 새로 만들고, 저장되어 있는 해시 값과 비교한다.
 일련의 검증 과정 후 블록을 DB에 저장하게 된다.
 
-![Process-Of-Saving-Block](./doc/images/Process_Of_Saving_Block.png)
+<p align="center"><img src="./doc/images/Process_Of_Saving_Block.png" width="750px" height="420px"></p>
 
 ### 블록 합의
 
@@ -168,7 +168,7 @@ it-chain에서는 합의 알고리즘으로 PBFT를 사용한다. PBFT는 네트
 있다. 하지만 it-chain은 프라이빗 블록체인(private blockchain) 으로 노드의 수가 많지 않기 때문에 PBFT를
 사용하였다. PBFT 알고리즘의 과정은 다음과 같다.
 
-![PBFT](./doc/images/consensus-PBFT.png)
+<p align="center"><img src="./doc/images/consensus-PBFT.png" width="750px" height="420px"></p>
 
 It-chain 에서는 기존 PBFT 알고리즘과는 다르게 리더만이 블록을 생성하고 제안할 수 있다. 따라서 기존의
 PBFT에 있는 Request, Response 과정이 없다. It-chain의 PBFT 과정은 다음과 같다.
@@ -198,7 +198,7 @@ it-chain의 PBFT 알고리즘에서 모든 블록의 생성은 리더 노드에�
 2. 제일 먼저 타이머가 종료된 노드가 스스로 리더 후보( CANDIDATE) 가 되고 다른 노드들에게
    RequestVoteMessage 를 전달하여 자신에게 투표를 하도록 요청한다.
    
-   ![RequestVoteMessage](./doc/images/RequestVoteMsg.png)
+   <p align="center"><img src="./doc/images/RequestVoteMsg.png" width="500px" height="350px"></p>
 
 3. RequestVoteMessage 를 받은 다른 노드들은 만약 자신의 타이머가 아직 잔여시간이 남았다면
     자신의 타이머를 초기화하고 송신한 노드를 후보자로 정한 뒤 해당 노드에게 VoteMessage 를
@@ -206,14 +206,14 @@ it-chain의 PBFT 알고리즘에서 모든 블록의 생성은 리더 노드에�
     사항은 RequestVoteMessage 를 받은 노드가 이미 투표를 한 노드라면 투표 직전에 자신의 Term
     을 증가시켜 몇회차의 투표에 참여하는 것인지를 명시하는 것이다. 이를 통해 모든 노드는 한번의
     Term 에서 단 한번만 투표에 참여하게 한다.
-
-    ![Vote](./doc/images/Vote.png)
+    
+    <p align="center"><img src="./doc/images/Vote.png" width="500px" height="350px"></p>
 
 4. 만약 1번 과정에서 리더 투표를 요청한 노드가 다른 모든 노드에게 투표를 받으면 해당 노드가
    리더가 되는 것을 선언하고 나머지 노드들에게 UpdateLeaderMessage 를 보냄으로써 자신이
    리더임을 알린다.
-
-    ![UpdateReaderMessage](./doc/images/UpdateReaderMsg.png)
+   
+   <p align="center"><img src="./doc/images/UpdateReaderMsg.png" width="500px" height="350px"></p>
 
 5. 투표에 참여한 노드가 UpdateLeaderMessage 를 받으면 자신이 투표했던 CANDIDATE와
    비교하여 일치하면 리더를 인정하고 노드의 리더를 변경한다.
@@ -238,7 +238,7 @@ Synchronize의 과정은 먼저 네트워크 내 임의의 노드의 블록체�
 필요한 지 점검한다. Synchronize가 필요하다면, 특정 노드가 보유하지 않은 모든 블록을 임의의
 노드로부터 받아와 순서대로 블록체인에 저장하여, 동일한 블록체인을 구축한다.
 
-![Process-Of-Synchronizing](./doc/images/Process_Of_Synchronizing.png)
+<p align="center"><img src="./doc/images/Process_Of_Synchronizing.png" width="550px" height="380px"></p>
 
 Synchronize의 과정 중에 새롭게 합의된 블록이 생성되는 예외적인 상황이 발생할 수 있는데 It-chain은
 이런 예외 상황을 블록 풀(Block Pool)이란 구조를 통해서 해결하였다. Synchronize 중에 리더 노드로부터
@@ -251,7 +251,7 @@ Synchronize의 과정 중에 새롭게 합의된 블록이 생성되는 예외�
 It-chain 에서 ICode를 실행하기 위해서는 먼저 Deploy하는 과정이 필요하다. ICode 는 git을 통해
 Deploy된다. ssh git 프로토콜과 https 를 지원하며 이때 ssh Key를 통해 암호화를 지원한다.
 
-![Deploy](./doc/images/Deploy.png)
+<p align="center"><img src="./doc/images/Deploy.png" width="750px" height="420px"></p>
 
 위 그림은 ICode의 Sequence Diagram이다. ICode가 Deploy되는 순서는 다음과 같다.
 
@@ -268,7 +268,7 @@ It-chain 에서 ICode는 Invoke 와 Query 요청에 의해 IVM을 통해 실행�
 ICode ID, 함수이름, 파라미터 값이 들어있다. Query는 데이터를 조회하는 함수 실행 요청 작업을 말한다.
 Query요청은 Api-gateway 또는 CLI(Command Line Interface)를 통해 요청할 수 있다. 따라서 Invoke는 블록이 합의 되어 추가될때 실행되고, 순서는 아래 그림과 같다.
 
-![Invoke](./doc/images/Invoke.png)
+<p align="center"><img src="./doc/images/Invoke.png" width="550px" height="380px"></p>
 
 1. 블록이합의되어 등록되면 블록내의 트랜젝션을 순차적으로 꺼내온다.
 2. 트랜젝션에 명시된 ICodeID 와 함수이름, 파라미터를 이용하여 IVM에서 실행한다.
@@ -278,7 +278,7 @@ Query요청은 Api-gateway 또는 CLI(Command Line Interface)를 통해 요청�
 Query의 경우 Transaction에 의해 실행되는 것이 아니므로, 블록 합의 시점과 무관하다. 필요에 의해
 Api-gateway 또는 CLI에 의해 실행되며 그 순서는 아래 그림과 같다.
 
-![Query](./doc/images/Query.png)
+<p align="center"><img src="./doc/images/Query.png" width="550px" height="380px"></p>
 
 1. Api-gateway 또는 CLI 에 의해 ICode Query요청을 받는다.
 2. 해당 ICode ID , 함수이름, 파라미터를 이용하여 IVM에서 실행한다.
