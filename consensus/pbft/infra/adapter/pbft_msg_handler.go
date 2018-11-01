@@ -55,11 +55,11 @@ func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) error
 
 		msg := pbft.ProposeMsg{}
 		if err := common.Deserialize(body, &msg); err != nil {
-			iLogger.Errorf(nil, "[PBFT] %s", DeserializingError.Error())
+			iLogger.Debugf(nil, "[PBFT] %s", DeserializingError.Error())
 		}
 
 		if err := p.sApi.AcceptProposal(msg); err != nil {
-			iLogger.Errorf(nil, "[PBFT] %s", err.Error())
+			iLogger.Debugf(nil, "[PBFT] %s", err.Error())
 		}
 
 	case "PrevoteMsgProtocol":
@@ -67,11 +67,11 @@ func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) error
 
 		msg := pbft.PrevoteMsg{}
 		if err := common.Deserialize(body, &msg); err != nil {
-			iLogger.Errorf(nil, "[PBFT] %s", DeserializingError.Error())
+			iLogger.Debugf(nil, "[PBFT] %s", DeserializingError.Error())
 		}
 
 		if err := p.sApi.ReceivePrevote(msg); err != nil {
-			iLogger.Errorf(nil, "[PBFT] %s", err.Error())
+			iLogger.Debugf(nil, "[PBFT] %s", err.Error())
 		}
 
 	case "PreCommitMsgProtocol":
@@ -79,11 +79,11 @@ func (p *PbftMsgHandler) HandleGrpcMsgCommand(command command.ReceiveGrpc) error
 
 		msg := pbft.PreCommitMsg{}
 		if err := common.Deserialize(body, &msg); err != nil {
-			iLogger.Errorf(nil, "[PBFT] %s", DeserializingError.Error())
+			iLogger.Debugf(nil, "[PBFT] %s", DeserializingError.Error())
 		}
 
 		if err := p.sApi.ReceivePreCommit(msg); err != nil {
-			iLogger.Errorf(nil, "[PBFT] %s", err.Error())
+			iLogger.Debugf(nil, "[PBFT] %s", err.Error())
 		}
 
 	default:
