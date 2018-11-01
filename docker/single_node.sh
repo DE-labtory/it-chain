@@ -16,7 +16,7 @@ echo "wait for pull it-chain docker image"
 #
 # docker pull itchain-solo latest version
 #
-#docker pull teamit/itchain:latest
+docker pull teamit/itchain:latest
 
 echo "wait for remove legacy network and volume"
 docker network rm it-chain-default-network # > /dev/null 2>&1
