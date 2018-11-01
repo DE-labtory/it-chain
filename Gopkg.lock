@@ -252,6 +252,7 @@
   version = "v0.1.1"
 
 [[projects]]
+  digest = "1:ce991deca7e031696427c674b19a27b78e1dc846befdc3f4efa343aa0bdc0bb4"
   name = "github.com/it-chain/tesseract"
   packages = [
     ".",
@@ -260,8 +261,10 @@
     "pb",
     "rpc"
   ]
-  revision = "e2793ca10f39bd305e9ad8b9c7495c61c68b17c7"
-  version = "v0.4.0"
+  pruneopts = "UT"
+  revision = "42009954a730be377a90f50ddd71a5f331188892"
+  version = "v0.4.4"
+
 
 [[projects]]
   name = "github.com/it-chain/yggdrasill"
