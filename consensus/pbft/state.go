@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"github.com/rs/xid"
 )
 
 type Stage string
@@ -94,6 +96,7 @@ func (pp ProposeMsg) ToByte() ([]byte, error) {
 }
 
 type PrevoteMsg struct {
+	MsgID     string
 	StateID   StateID
 	SenderID  string
 	BlockHash []byte
@@ -101,6 +104,7 @@ type PrevoteMsg struct {
 
 func NewPrevoteMsg(s *State, senderID string) *PrevoteMsg {
 	return &PrevoteMsg{
+		MsgID:     xid.New().String(),
 		StateID:   s.StateID,
 		SenderID:  senderID,
 		BlockHash: s.Block.Seal,
@@ -116,12 +120,14 @@ func (p PrevoteMsg) ToByte() ([]byte, error) {
 }
 
 type PreCommitMsg struct {
+	MsgID    string
 	StateID  StateID
 	SenderID string
 }
 
 func NewPreCommitMsg(s *State, senderID string) *PreCommitMsg {
 	return &PreCommitMsg{
+		MsgID:    xid.New().String(),
 		StateID:  s.StateID,
 		SenderID: senderID,
 	}
