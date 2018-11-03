@@ -18,6 +18,7 @@ package pbft_test
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/it-chain/engine/consensus/pbft"
@@ -105,6 +106,91 @@ func TestPrevoteMsgPool_RemoveAllMsgs(t *testing.T) {
 	assert.Equal(t, 0, len(pPool.FindAll()))
 }
 
+func TestPrevoteMsgPool_Remove(t *testing.T) {
+	// given
+	pPool := pbft.NewPrevoteMsgPool()
+
+	for i := 1; i < 4; i++ {
+		pMsg := pbft.PrevoteMsg{
+			MsgID:     "m" + strconv.Itoa(i),
+			StateID:   pbft.StateID{"state1"},
+			SenderID:  "sender" + strconv.Itoa(i),
+			BlockHash: []byte{1, 2, 3, 4},
+		}
+		pPool.Save(&pMsg)
+	}
+
+	assert.Equal(t, 3, len(pPool.FindAll()))
+
+	// when : success
+	pPool.Remove("m3")
+
+	// then
+	assert.Equal(t, 2, len(pPool.FindAll()))
+
+	// when : fail
+	pPool.Remove("m4")
+
+	// then
+	assert.Equal(t, 2, len(pPool.FindAll()))
+}
+
+func TestPrevoteMsgPool_FindAll(t *testing.T) {
+	// given
+	pPool := pbft.NewPrevoteMsgPool()
+
+	// when
+	numOfMsg := len(pPool.FindAll())
+
+	// then
+	assert.Equal(t, 0, numOfMsg)
+
+	// given
+	for i := 1; i < 4; i++ {
+		pMsg := pbft.PrevoteMsg{
+			MsgID:     "m" + strconv.Itoa(i),
+			StateID:   pbft.StateID{"state1"},
+			SenderID:  "sender" + strconv.Itoa(i),
+			BlockHash: []byte{1, 2, 3, 4},
+		}
+		pPool.Save(&pMsg)
+	}
+
+	// when
+	result := pPool.FindAll()
+	numOfMsg = len(result)
+
+	// then
+	assert.Equal(t, 3, numOfMsg)
+}
+
+func TestPrevoteMsgPool_FindById(t *testing.T) {
+	// given
+	pPool := pbft.NewPrevoteMsgPool()
+
+	for i := 1; i < 4; i++ {
+		pMsg := pbft.PrevoteMsg{
+			MsgID:     "m" + strconv.Itoa(i),
+			StateID:   pbft.StateID{"state1"},
+			SenderID:  "sender" + strconv.Itoa(i),
+			BlockHash: []byte{1, 2, 3, 4},
+		}
+		pPool.Save(&pMsg)
+	}
+
+	// when : success
+	result := pPool.FindById("m1")
+
+	// then
+	assert.Equal(t, "m1", result.MsgID)
+
+	// when : fail
+	result = pPool.FindById("m4")
+
+	// then
+	assert.Equal(t, "", result.MsgID)
+}
+
 func TestPreCommitMsgPool_Save(t *testing.T) {
 	// given
 	cPool := pbft.NewPreCommitMsgPool()
@@ -166,6 +252,88 @@ func TestPreCommitMsgPool_RemoveAllMsgs(t *testing.T) {
 
 	// then
 	assert.Equal(t, 0, len(cPool.FindAll()))
+}
+
+func TestPreCommitMsgPool_Remove(t *testing.T) {
+	// given
+	pPool := pbft.NewPreCommitMsgPool()
+
+	for i := 1; i < 4; i++ {
+		pMsg := pbft.PreCommitMsg{
+			MsgID:    "m" + strconv.Itoa(i),
+			StateID:  pbft.StateID{"state1"},
+			SenderID: "sender" + strconv.Itoa(i),
+		}
+		pPool.Save(&pMsg)
+	}
+
+	assert.Equal(t, 3, len(pPool.FindAll()))
+
+	// when : success
+	pPool.Remove("m3")
+
+	// then
+	assert.Equal(t, 2, len(pPool.FindAll()))
+
+	// when : fail
+	pPool.Remove("m4")
+
+	// then
+	assert.Equal(t, 2, len(pPool.FindAll()))
+}
+
+func TestPreCommiteMsgPool_FindAll(t *testing.T) {
+	// given
+	pPool := pbft.NewPreCommitMsgPool()
+
+	// when
+	numOfMsg := len(pPool.FindAll())
+
+	// then
+	assert.Equal(t, 0, numOfMsg)
+
+	// given
+	for i := 1; i < 4; i++ {
+		pMsg := pbft.PreCommitMsg{
+			MsgID:    "m" + strconv.Itoa(i),
+			StateID:  pbft.StateID{"state1"},
+			SenderID: "sender" + strconv.Itoa(i),
+		}
+		pPool.Save(&pMsg)
+	}
+
+	// when
+	result := pPool.FindAll()
+	numOfMsg = len(result)
+
+	// then
+	assert.Equal(t, 3, numOfMsg)
+}
+
+func TestPreCommitMsgPool_FindById(t *testing.T) {
+	// given
+	pPool := pbft.NewPreCommitMsgPool()
+
+	for i := 1; i < 4; i++ {
+		pMsg := pbft.PreCommitMsg{
+			MsgID:    "m" + strconv.Itoa(i),
+			StateID:  pbft.StateID{"state1"},
+			SenderID: "sender" + strconv.Itoa(i),
+		}
+		pPool.Save(&pMsg)
+	}
+
+	// when : success
+	result := pPool.FindById("m1")
+
+	// then
+	assert.Equal(t, "m1", result.MsgID)
+
+	// when : fail
+	result = pPool.FindById("m4")
+
+	// then
+	assert.Equal(t, "", result.MsgID)
 }
 
 func TestState_GetReceipients(t *testing.T) {
