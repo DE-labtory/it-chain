@@ -150,12 +150,14 @@ func TestStateApi_Reflect_TemporaryPrevoteMsgPool(t *testing.T) {
 	}
 
 	var tempPrevoteMsg = pbft.PrevoteMsg{
+		MsgID:     "m1",
 		StateID:   pbft.StateID{"state"},
 		SenderID:  "user1",
 		BlockHash: []byte{1, 2, 3, 5},
 	}
 
 	var tempPrevoteMsg2 = pbft.PrevoteMsg{
+		MsgID:     "m2",
 		StateID:   pbft.StateID{"state"},
 		SenderID:  "user2",
 		BlockHash: []byte{1, 2, 3, 5},
@@ -167,13 +169,13 @@ func TestStateApi_Reflect_TemporaryPrevoteMsgPool(t *testing.T) {
 
 	stateApi.ReceivePrevote(tempPrevoteMsg)
 
-	assert.Equal(t, 1, len(stateApi.tempPrevoteMsgPool.Get()))
+	assert.Equal(t, 1, len(stateApi.tempPrevoteMsgPool.FindAll()))
 
 	stateApi.AcceptProposal(tempProposeMsg)
 	stateApi.ReceivePrevote(tempPrevoteMsg2)
 
 	state, _ := stateApi.stateRepository.Load()
-	assert.Equal(t, 2, len(state.PrevoteMsgPool.Get()))
+	assert.Equal(t, 2, len(state.PrevoteMsgPool.FindAll()))
 
 }
 
@@ -193,11 +195,13 @@ func TestStateApi_Reflect_TemporaryPreCommitMsgPool(t *testing.T) {
 	}
 
 	var tempPreCommitMsg = pbft.PreCommitMsg{
+		MsgID:    "m1",
 		StateID:  pbft.StateID{"state"},
 		SenderID: "user1",
 	}
 
 	var tempPreCommitMsg2 = pbft.PreCommitMsg{
+		MsgID:    "m2",
 		StateID:  pbft.StateID{"state"},
 		SenderID: "user2",
 	}
@@ -207,12 +211,12 @@ func TestStateApi_Reflect_TemporaryPreCommitMsgPool(t *testing.T) {
 	stateApi.stateRepository.Remove()
 
 	stateApi.ReceivePreCommit(tempPreCommitMsg)
-	assert.Equal(t, 1, len(stateApi.tempPreCommitMsgPool.Get()))
+	assert.Equal(t, 1, len(stateApi.tempPreCommitMsgPool.FindAll()))
 
 	stateApi.AcceptProposal(tempProposeMsg)
 	stateApi.ReceivePreCommit(tempPreCommitMsg2)
 	state, _ := stateApi.stateRepository.Load()
-	assert.Equal(t, 2, len(state.PreCommitMsgPool.Get()))
+	assert.Equal(t, 2, len(state.PreCommitMsgPool.FindAll()))
 
 }
 
@@ -230,6 +234,7 @@ func TestStateApi_checkPrevote(t *testing.T) {
 		senderStr := "user"
 		senderStr += string(i)
 		prevoteMsgPool.Save(&pbft.PrevoteMsg{
+			MsgID:     "m" + string(i),
 			StateID:   pbft.StateID{"state"},
 			SenderID:  senderStr,
 			BlockHash: []byte{1, 2, 3, 4},
@@ -256,6 +261,7 @@ func TestStateApi_checkPreCommit(t *testing.T) {
 		senderStr := "user"
 		senderStr += string(i)
 		precommitMsgPool.Save(&pbft.PreCommitMsg{
+			MsgID:    "m" + string(i),
 			StateID:  pbft.StateID{"state"},
 			SenderID: senderStr,
 		})
@@ -292,6 +298,7 @@ func TestStateApi_updatePrevoteMsgPool(t *testing.T) {
 	msgNum := 2
 	for i := 0; i < msgNum; i++ {
 		msg := pbft.PrevoteMsg{
+			MsgID:     "m" + string(i),
 			StateID:   pbft.StateID{"sid"},
 			SenderID:  string(i),
 			BlockHash: []byte{'h', 'a', 's', 'h'},
@@ -299,15 +306,15 @@ func TestStateApi_updatePrevoteMsgPool(t *testing.T) {
 		stateApi.tempPrevoteMsgPool.Save(&msg)
 	}
 
-	assert.Equal(t, msgNum, len(stateApi.tempPrevoteMsgPool.Get()))
+	assert.Equal(t, msgNum, len(stateApi.tempPrevoteMsgPool.FindAll()))
 
 	// when
 	loadedState, _ := stateApi.stateRepository.Load()
 	loadedState = stateApi.updatePrevoteMsgPool(loadedState)
 
 	// then
-	assert.Equal(t, 0, len(stateApi.tempPrevoteMsgPool.Get()))
-	assert.Equal(t, msgNum, len(loadedState.PrevoteMsgPool.Get()))
+	assert.Equal(t, 0, len(stateApi.tempPrevoteMsgPool.FindAll()))
+	assert.Equal(t, msgNum, len(loadedState.PrevoteMsgPool.FindAll()))
 }
 
 func TestStateApi_updatePreCommitMsgPool(t *testing.T) {
@@ -335,21 +342,22 @@ func TestStateApi_updatePreCommitMsgPool(t *testing.T) {
 	msgNum := 3
 	for i := 0; i < msgNum; i++ {
 		msg := pbft.PreCommitMsg{
+			MsgID:    "m" + string(i),
 			StateID:  pbft.StateID{"sid"},
 			SenderID: string(i),
 		}
 		stateApi.tempPreCommitMsgPool.Save(&msg)
 	}
 
-	assert.Equal(t, msgNum, len(stateApi.tempPreCommitMsgPool.Get()))
+	assert.Equal(t, msgNum, len(stateApi.tempPreCommitMsgPool.FindAll()))
 
 	// when
 	loadedState, _ := stateApi.stateRepository.Load()
 	loadedState = stateApi.updatePreCommitMsgPool(loadedState)
 
 	// then
-	assert.Equal(t, 0, len(stateApi.tempPreCommitMsgPool.Get()))
-	assert.Equal(t, msgNum, len(loadedState.PreCommitMsgPool.Get()))
+	assert.Equal(t, 0, len(stateApi.tempPreCommitMsgPool.FindAll()))
+	assert.Equal(t, msgNum, len(loadedState.PreCommitMsgPool.FindAll()))
 }
 
 func setUpApiCondition(peerNum int, isRepoFull, isNormalBlock bool, stage pbft.Stage) *StateApi {
