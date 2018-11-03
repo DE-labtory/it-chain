@@ -252,7 +252,6 @@
   version = "v0.1.1"
 
 [[projects]]
-  digest = "1:ce991deca7e031696427c674b19a27b78e1dc846befdc3f4efa343aa0bdc0bb4"
   name = "github.com/it-chain/tesseract"
   packages = [
     ".",
@@ -261,10 +260,8 @@
     "pb",
     "rpc"
   ]
-  pruneopts = "UT"
   revision = "42009954a730be377a90f50ddd71a5f331188892"
   version = "v0.4.4"
-
 
 [[projects]]
   name = "github.com/it-chain/yggdrasill"
@@ -786,6 +783,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "553d242fc508c70523b2188c3a8d1d76486329a3e1455a27de852ba075c8e371"
+  inputs-digest = "166bf3d67e8774a122af9ee5741a61504a10bcc0e469610ae61eb0d695507b0a"
   solver-name = "gps-cdcl"
   solver-version = 1
