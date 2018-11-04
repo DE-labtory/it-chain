@@ -58,19 +58,19 @@ func LoadKeyPair(sigAlgo, keyDirPath string) (heimdall.PriKey, heimdall.PubKey) 
 
 type ECDSASigner struct {
 	keyDirPath string
-	hashOpt    *hashing.HashOpt
+	opt        heimdall.SignerOpts
 }
 
 func (signer *ECDSASigner) Sign(message []byte) ([]byte, error) {
-	return hecdsa.SignWithKeyInLocal(signer.keyDirPath, message, signer.hashOpt)
+	return hecdsa.SignWithKeyInLocal(signer.keyDirPath, message, signer.opt)
 }
 
 type ECDSAVerifier struct {
-	signerOpt heimdall.SignerOpts
+	opt heimdall.SignerOpts
 }
 
 func (verifier *ECDSAVerifier) Verify(peerKey bifrost.Key, signature, message []byte) (bool, error) {
-	return hecdsa.Verify(peerKey.(heimdall.PubKey), signature, message, verifier.signerOpt)
+	return hecdsa.Verify(peerKey.(heimdall.PubKey), signature, message, verifier.opt)
 }
 
 type ECDSAKeyRecoverer struct {
@@ -83,10 +83,6 @@ func (rec *ECDSAKeyRecoverer) RecoverKeyFromByte(keyBytes []byte, isPrivate bool
 }
 
 func MakeCrypto(secConf *config.Config, keyDirPath string) (bifrost.Crypto, error) {
-	signer := &ECDSASigner{
-		keyDirPath: keyDirPath,
-		hashOpt:    secConf.HashOpt,
-	}
 
 	var signerOpt heimdall.SignerOpts
 	switch secConf.SigAlgo {
@@ -100,8 +96,13 @@ func MakeCrypto(secConf *config.Config, keyDirPath string) (bifrost.Crypto, erro
 		return bifrost.Crypto{}, ErrSigAlgoNotSupported
 	}
 
+	signer := &ECDSASigner{
+		keyDirPath: keyDirPath,
+		opt:        signerOpt,
+	}
+
 	verifier := &ECDSAVerifier{
-		signerOpt: signerOpt,
+		opt: signerOpt,
 	}
 	keyRecoverer := &ECDSAKeyRecoverer{}
 
