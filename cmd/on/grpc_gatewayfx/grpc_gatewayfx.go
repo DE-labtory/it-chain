@@ -57,10 +57,7 @@ func NewGrpcHostService(conf *conf.Configuration, publisher *pubsub.TopicPublish
 		panic(err)
 	}
 
-	priKey, pubKey, err := common.GenerateAndStoreKeyPair(secConf, conf.Engine.PriKeyPath)
-	if err != nil {
-		panic(err)
-	}
+	priKey, pubKey := common.LoadKeyPair(conf.Engine.SigAlgo, conf.Engine.PriKeyPath)
 
 	// priKey, pubKey := infra.LoadKeyPair(conf.Engine.KeyPath, "ECDSA256")
 	hostService := infra.NewGrpcHostService(priKey, pubKey, publisher.Publish, infra.HostInfo{

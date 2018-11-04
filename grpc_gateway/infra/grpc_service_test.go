@@ -30,7 +30,6 @@ import (
 	"github.com/it-chain/heimdall"
 	"github.com/it-chain/heimdall/hashing"
 	"github.com/it-chain/heimdall/hecdsa"
-	"github.com/it-chain/heimdall/keystore"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -232,19 +231,19 @@ func (m *MockHandler) OnDisconnection(connection grpc_gateway.Connection) {
 
 type mockECDSASigner struct {
 	keyDirPath string
-	hashOpt    *hashing.HashOpt
+	opt        heimdall.SignerOpts
 }
 
 func (signer *mockECDSASigner) Sign(message []byte) ([]byte, error) {
-	return hecdsa.SignWithKeyInLocal(signer.keyDirPath, message, signer.hashOpt)
+	return hecdsa.SignWithKeyInLocal(signer.keyDirPath, message, signer.opt)
 }
 
 type mockECDSAVerifier struct {
-	signerOpt heimdall.SignerOpts
+	opt heimdall.SignerOpts
 }
 
 func (verifier *mockECDSAVerifier) Verify(peerKey bifrost.Key, signature, message []byte) (bool, error) {
-	return hecdsa.Verify(peerKey.(heimdall.PubKey), signature, message, verifier.signerOpt)
+	return hecdsa.Verify(peerKey.(heimdall.PubKey), signature, message, verifier.opt)
 }
 
 type mockECDSAKeyRecoverer struct {
@@ -263,20 +262,20 @@ var setupGrpcHostService = func(t *testing.T, ip string, keyDirPath string, publ
 	assert.NoError(t, err)
 	pub := pri.PublicKey()
 
-	err = keystore.StorePriKeyWithoutPwd(pri, keyDirPath)
+	err = hecdsa.StorePriKeyWithoutPwd(pri, keyDirPath)
 	assert.NoError(t, err)
 
 	hashOpt, err := hashing.NewHashOpt("SHA384")
+	signerOpt := hecdsa.NewSignerOpts(hashOpt)
 	assert.NoError(t, err)
 
 	signer := &mockECDSASigner{
 		keyDirPath: keyDirPath,
-		hashOpt:    hashOpt,
+		opt:        signerOpt,
 	}
 
-	signerOpt := hecdsa.NewSignerOpts(hashOpt)
 	verifier := &mockECDSAVerifier{
-		signerOpt: signerOpt,
+		opt: signerOpt,
 	}
 
 	keyRecoverer := &mockECDSAKeyRecoverer{}

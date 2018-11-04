@@ -89,10 +89,10 @@ func MakeCrypto(secConf *config.Config, keyDirPath string) (bifrost.Crypto, erro
 	case "ECDSA":
 		signerOpt = hecdsa.NewSignerOpts(secConf.HashOpt)
 	case "RSA":
-		iLogger.Errorf(nil, "signature algorithm [%s] not supported", secConf.SigAlgo)
+		iLogger.Errorf(nil, "[Heimdall] Signature algorithm [%s] not supported", secConf.SigAlgo)
 		return bifrost.Crypto{}, ErrSigAlgoNotSupported
 	default:
-		iLogger.Errorf(nil, "signature algorithm [%s] not supported", secConf.SigAlgo)
+		iLogger.Errorf(nil, "[Heimdall] Signature algorithm [%s] not supported", secConf.SigAlgo)
 		return bifrost.Crypto{}, ErrSigAlgoNotSupported
 	}
 
@@ -119,21 +119,22 @@ func GenerateAndStoreKeyPair(secConf *config.Config, keyDirPath string) (pri hei
 	case "ECDSA":
 		pri, err = hecdsa.GenerateKey(secConf.KeyGenOpt)
 		if err != nil {
-			iLogger.Errorf(nil, "key generation error: [%s]", err.Error())
+			iLogger.Errorf(nil, "[Heimdall] Key generation error: [%s]", err.Error())
 			return nil, nil, ErrKeyGen
 		}
 		pub = pri.PublicKey()
+
+		err = hecdsa.StorePriKeyWithoutPwd(pri, keyDirPath)
+		if err != nil {
+			iLogger.Errorf(nil, "%s", err)
+			return nil, nil, ErrKeyStore
+		}
 	case "RSA":
-		iLogger.Errorf(nil, "signature algorithm [%s] not supported", secConf.SigAlgo)
+		iLogger.Errorf(nil, "[Heimdall] Signature algorithm [%s] not supported", secConf.SigAlgo)
 		return nil, nil, ErrSigAlgoNotSupported
 	default:
-		iLogger.Errorf(nil, "signature algorithm [%s] not supported", secConf.SigAlgo)
+		iLogger.Errorf(nil, "[Heimdall] Signature algorithm [%s] not supported", secConf.SigAlgo)
 		return nil, nil, ErrSigAlgoNotSupported
-	}
-
-	err = keystore.StorePriKeyWithoutPwd(pri, keyDirPath)
-	if err != nil {
-		return nil, nil, ErrKeyStore
 	}
 
 	return pri, pub, nil
