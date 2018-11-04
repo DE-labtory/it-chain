@@ -24,9 +24,7 @@ import (
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/heimdall"
 	"github.com/it-chain/heimdall/config"
-	"github.com/it-chain/heimdall/hashing"
 	"github.com/it-chain/heimdall/hecdsa"
-	"github.com/it-chain/heimdall/keystore"
 	"github.com/it-chain/iLogger"
 )
 
@@ -36,22 +34,26 @@ var ErrKeyStore = errors.New("key store error")
 
 type NodeID = string
 
-func GetNodeID(keyDirPath string, recoverer bifrost.KeyRecoverer) NodeID {
-	pri, _ := LoadKeyPair(keyDirPath, recoverer)
+func GetNodeID(sigAlgo, keyDirPath string) NodeID {
+	pri, _ := LoadKeyPair(sigAlgo, keyDirPath)
 
 	return pri.(heimdall.Key).ID()
 }
 
-func LoadKeyPair(keyDirPath string, recoverer bifrost.KeyRecoverer) (heimdall.PriKey, heimdall.PubKey) {
+func LoadKeyPair(sigAlgo, keyDirPath string) (heimdall.PriKey, heimdall.PubKey) {
+	switch sigAlgo {
+	case "ECDSA":
+		pri, err := hecdsa.LoadPriKeyWithoutPwd(keyDirPath)
+		pub := pri.(heimdall.PriKey).PublicKey()
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 
-	pri, err := keystore.LoadPriKeyWithoutPwd(keyDirPath, recoverer.(heimdall.KeyRecoverer))
-	pub := pri.(heimdall.PriKey).PublicKey()
-
-	if err != nil {
-		log.Fatal(err.Error())
+		return pri.(heimdall.PriKey), pub
 	}
 
-	return pri.(heimdall.PriKey), pub
+	iLogger.Error(nil, "[Heimdall] Input signing algorithm is not supported")
+	return nil, nil
 }
 
 type ECDSASigner struct {
