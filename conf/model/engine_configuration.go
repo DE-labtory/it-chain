@@ -19,6 +19,7 @@ package model
 // it-chain의 공통적이고 중요한 설정을 담는 구조체이다.
 type EngineConfiguration struct {
 	SecLv                int
+	SigAlgo              string
 	LogPath              string
 	KeyPath              string
 	TmpPath              string
@@ -31,6 +32,7 @@ type EngineConfiguration struct {
 func NewEngineConfiguration() EngineConfiguration {
 	return EngineConfiguration{
 		SecLv:                192,
+		SigAlgo:              "ECDSA",
 		LogPath:              "log/it-chain.log",
 		TmpPath:              ".tmp/",
 		PriKeyPath:           "keystore/private_key",
