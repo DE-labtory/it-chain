@@ -26,6 +26,7 @@ import (
 	"github.com/DE-labtory/engine/grpc_gateway/api"
 	"github.com/DE-labtory/engine/grpc_gateway/infra"
 	"github.com/DE-labtory/engine/grpc_gateway/infra/adapter"
+	"github.com/DE-labtory/heimdall/config"
 	"github.com/DE-labtory/iLogger"
 	"go.uber.org/fx"
 )
@@ -46,11 +47,23 @@ var Module = fx.Options(
 )
 
 func NewGrpcHostService(conf *conf.Configuration, publisher *pubsub.TopicPublisher) *infra.GrpcHostService {
-	priKey, pubKey := infra.LoadKeyPair(conf.Engine.KeyPath, "ECDSA256")
+	secConf, err := config.NewSimpleConfig(conf.Engine.SecLv)
+	if err != nil {
+		panic(err)
+	}
+
+	crypto, err := common.MakeCrypto(secConf, conf.Engine.PriKeyPath)
+	if err != nil {
+		panic(err)
+	}
+
+	priKey, pubKey := common.LoadKeyPair(conf.Engine.SigAlgo, conf.Engine.PriKeyPath)
+
+	// priKey, pubKey := infra.LoadKeyPair(conf.Engine.KeyPath, "ECDSA256")
 	hostService := infra.NewGrpcHostService(priKey, pubKey, publisher.Publish, infra.HostInfo{
 		ApiGatewayAddress:  conf.ApiGateway.Address + ":" + conf.ApiGateway.Port,
 		GrpcGatewayAddress: conf.GrpcGateway.Address + ":" + conf.GrpcGateway.Port,
-	})
+	}, crypto)
 	return hostService
 }
 

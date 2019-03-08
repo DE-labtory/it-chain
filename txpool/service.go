@@ -16,6 +16,8 @@
 
 package txpool
 
+import "github.com/it-chain/engine/common"
+
 const SendTransactionsToLeader = "SendTransactionsToLeaderProtocol"
 
 type TxpoolQueryService interface {
@@ -32,7 +34,7 @@ func filter(vs []Transaction, f func(Transaction) bool) []Transaction {
 	return vsf
 }
 
-func IsLeader(nodeId string, leader Leader) bool {
+func IsLeader(nodeId common.NodeID, leader Leader) bool {
 	if nodeId != leader.Id {
 		return false
 	}

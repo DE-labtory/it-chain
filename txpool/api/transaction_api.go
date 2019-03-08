@@ -19,17 +19,18 @@ package api
 import (
 	"github.com/DE-labtory/engine/txpool"
 	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/engine/common"
 )
 
 type TransactionApi struct {
-	nodeId                string
+	nodeId                common.NodeID
 	transactionRepository txpool.TransactionRepository
 	leaderRepository      txpool.LeaderRepository
 	transferService       *txpool.TransferService
 	blockProposalService  *txpool.BlockProposalService
 }
 
-func NewTransactionApi(nodeId string, transactionRepository txpool.TransactionRepository, leaderRepository txpool.LeaderRepository, transferService *txpool.TransferService, blockProposalService *txpool.BlockProposalService) *TransactionApi {
+func NewTransactionApi(nodeId common.NodeID, transactionRepository txpool.TransactionRepository, leaderRepository txpool.LeaderRepository, transferService *txpool.TransferService, blockProposalService *txpool.BlockProposalService) *TransactionApi {
 	return &TransactionApi{
 		nodeId:                nodeId,
 		transactionRepository: transactionRepository,

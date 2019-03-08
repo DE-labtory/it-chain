@@ -93,7 +93,7 @@ func NewICodeRepository() *api_gateway.LevelDbICodeRepository {
 	return api_gateway.NewLevelDbMetaRepository(icodeDB)
 }
 
-func NewPeerRepository(config *conf.Configuration) *api_gateway.PeerRepository {
+func NewPeerRepository(config *conf.Configuration, nodeId common.NodeID) *api_gateway.PeerRepository {
 
 	var role api_gateway.Role
 	if config.Engine.BootstrapNodeAddress == "" {
@@ -102,10 +102,9 @@ func NewPeerRepository(config *conf.Configuration) *api_gateway.PeerRepository {
 		role = api_gateway.Member
 	}
 
-	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
 	peerRepository := api_gateway.NewPeerRepository()
 	peerRepository.Save(api_gateway.Peer{
-		ID:                 NodeId,
+		ID:                 nodeId,
 		Role:               role,
 		GrpcGatewayAddress: config.GrpcGateway.Address + ":" + config.GrpcGateway.Port,
 		ApiGatewayAddress:  config.ApiGateway.Address + ":" + config.ApiGateway.Port,

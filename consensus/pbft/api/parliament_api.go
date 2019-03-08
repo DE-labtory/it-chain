@@ -30,12 +30,12 @@ var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 var ErrNoMatchingPeerWithIpAddress = errors.New("no matching peer with ip address")
 
 type ParliamentApi struct {
-	nodeId               string
+	nodeId               common.NodeID
 	parliamentRepository pbft.ParliamentRepository
 	eventService         common.EventService
 }
 
-func NewParliamentApi(nodeId string, parliamentRepository pbft.ParliamentRepository, eventService common.EventService) *ParliamentApi {
+func NewParliamentApi(nodeId common.NodeID, parliamentRepository pbft.ParliamentRepository, eventService common.EventService) *ParliamentApi {
 
 	return &ParliamentApi{
 		nodeId:               nodeId,
@@ -67,7 +67,7 @@ func (p *ParliamentApi) RemoveRepresentative(representativeId string) {
 	p.parliamentRepository.Save(parliament)
 }
 
-func (p *ParliamentApi) UpdateLeader(nodeId string) error {
+func (p *ParliamentApi) UpdateLeader(nodeId common.NodeID) error {
 	//1. loop peer list and find specific address
 	//2. update specific peer as leader
 

@@ -61,7 +61,7 @@ func TestLeaderCommandHandler_HandleMessageReceive_LeaderDeliveryProtocol(t *tes
 
 	// given
 	parliamentApi := &mock.ParliamentApi{}
-	parliamentApi.UpdateLeaderFunc = func(nodeId string) error {
+	parliamentApi.UpdateLeaderFunc = func(nodeId common.NodeID) error {
 		// then
 		assert.Equal(t, leaderDeliveryMsg.Leader.LeaderId, nodeId)
 		return nil

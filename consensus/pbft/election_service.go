@@ -19,6 +19,7 @@ package pbft
 import (
 	"sync"
 
+	"github.com/DE-labtory/engine/common"
 	"github.com/DE-labtory/sdk/logger"
 )
 
@@ -31,7 +32,7 @@ const (
 type ElectionState string
 
 type ElectionService struct {
-	NodeId    string
+	NodeId    common.NodeID
 	candidate Representative // candidate peer to be leader later
 	leftTime  int            //left time in millisecond
 	state     ElectionState
