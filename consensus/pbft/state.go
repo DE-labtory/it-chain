@@ -19,7 +19,8 @@ package pbft
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+
+	"github.com/rs/xid"
 )
 
 type Stage string
@@ -94,6 +95,7 @@ func (pp ProposeMsg) ToByte() ([]byte, error) {
 }
 
 type PrevoteMsg struct {
+	MsgID     string
 	StateID   StateID
 	SenderID  string
 	BlockHash []byte
@@ -101,6 +103,7 @@ type PrevoteMsg struct {
 
 func NewPrevoteMsg(s *State, senderID string) *PrevoteMsg {
 	return &PrevoteMsg{
+		MsgID:     xid.New().String(),
 		StateID:   s.StateID,
 		SenderID:  senderID,
 		BlockHash: s.Block.Seal,
@@ -116,12 +119,14 @@ func (p PrevoteMsg) ToByte() ([]byte, error) {
 }
 
 type PreCommitMsg struct {
+	MsgID    string
 	StateID  StateID
 	SenderID string
 }
 
 func NewPreCommitMsg(s *State, senderID string) *PreCommitMsg {
 	return &PreCommitMsg{
+		MsgID:    xid.New().String(),
 		StateID:  s.StateID,
 		SenderID: senderID,
 	}
@@ -136,12 +141,12 @@ func (c PreCommitMsg) ToByte() ([]byte, error) {
 }
 
 type PrevoteMsgPool struct {
-	messages []PrevoteMsg
+	messages map[string]PrevoteMsg
 }
 
 func NewPrevoteMsgPool() PrevoteMsgPool {
 	return PrevoteMsgPool{
-		messages: make([]PrevoteMsg, 0),
+		messages: make(map[string]PrevoteMsg),
 	}
 }
 
@@ -151,10 +156,8 @@ func (p *PrevoteMsgPool) Save(prevoteMsg *PrevoteMsg) error {
 	}
 
 	senderID := prevoteMsg.SenderID
-	index := p.findIndexOfPrevoteMsg(senderID)
-
-	if index != -1 {
-		return errors.New(fmt.Sprintf("Already exist member [%s]", senderID))
+	if p.checkSenderExisting(senderID) {
+		return errors.New("Already exist member [" + senderID + "]")
 	}
 
 	blockHash := prevoteMsg.BlockHash
@@ -163,36 +166,50 @@ func (p *PrevoteMsgPool) Save(prevoteMsg *PrevoteMsg) error {
 		return ErrBlockHashNil
 	}
 
-	p.messages = append(p.messages, *prevoteMsg)
-
+	id := prevoteMsg.MsgID
+	p.messages[id] = *prevoteMsg
 	return nil
 }
 
 func (p *PrevoteMsgPool) RemoveAllMsgs() {
-	p.messages = make([]PrevoteMsg, 0)
+	p.messages = make(map[string]PrevoteMsg)
 }
 
-func (p *PrevoteMsgPool) Get() []PrevoteMsg {
-	return p.messages
+func (p *PrevoteMsgPool) Remove(msgID string) {
+	delete(p.messages, msgID)
 }
 
-func (p *PrevoteMsgPool) findIndexOfPrevoteMsg(senderID string) int {
-	for i, msg := range p.messages {
+func (p *PrevoteMsgPool) FindAll() []PrevoteMsg {
+	mList := make([]PrevoteMsg, 0)
+
+	for _, msg := range p.messages {
+		mList = append(mList, msg)
+	}
+
+	return mList
+}
+
+func (p *PrevoteMsgPool) FindById(msgID string) PrevoteMsg {
+	return p.messages[msgID]
+}
+
+func (p *PrevoteMsgPool) checkSenderExisting(senderID string) bool {
+	for _, msg := range p.messages {
 		if msg.SenderID == senderID {
-			return i
+			return true
 		}
 	}
 
-	return -1
+	return false
 }
 
 type PreCommitMsgPool struct {
-	messages []PreCommitMsg
+	messages map[string]PreCommitMsg
 }
 
 func NewPreCommitMsgPool() PreCommitMsgPool {
 	return PreCommitMsgPool{
-		messages: make([]PreCommitMsg, 0),
+		messages: make(map[string]PreCommitMsg),
 	}
 }
 
@@ -202,33 +219,45 @@ func (c *PreCommitMsgPool) Save(precommitMsg *PreCommitMsg) error {
 	}
 
 	senderID := precommitMsg.SenderID
-	index := c.findIndexOfPreCommitMsg(senderID)
-
-	if index != -1 {
-		return errors.New(fmt.Sprintf("Already exist member [%s]", senderID))
+	if c.checkSenderExisting(senderID) {
+		return errors.New("Already exist member [" + senderID + "]")
 	}
 
-	c.messages = append(c.messages, *precommitMsg)
-
+	id := precommitMsg.MsgID
+	c.messages[id] = *precommitMsg
 	return nil
 }
 
 func (c *PreCommitMsgPool) RemoveAllMsgs() {
-	c.messages = make([]PreCommitMsg, 0)
+	c.messages = make(map[string]PreCommitMsg)
 }
 
-func (c *PreCommitMsgPool) Get() []PreCommitMsg {
-	return c.messages
+func (c *PreCommitMsgPool) Remove(msgID string) {
+	delete(c.messages, msgID)
 }
 
-func (c *PreCommitMsgPool) findIndexOfPreCommitMsg(senderID string) int {
-	for i, msg := range c.messages {
+func (c *PreCommitMsgPool) FindAll() []PreCommitMsg {
+	mList := make([]PreCommitMsg, 0)
+
+	for _, msg := range c.messages {
+		mList = append(mList, msg)
+	}
+
+	return mList
+}
+
+func (c *PreCommitMsgPool) FindById(msgID string) PreCommitMsg {
+	return c.messages[msgID]
+}
+
+func (c *PreCommitMsgPool) checkSenderExisting(senderID string) bool {
+	for _, msg := range c.messages {
 		if msg.SenderID == senderID {
-			return i
+			return true
 		}
 	}
 
-	return -1
+	return false
 }
 
 type StateID struct {
@@ -315,7 +344,7 @@ func (s *State) SavePreCommitMsg(precommitMsg *PreCommitMsg) error {
 }
 func (s *State) CheckPrevoteCondition() bool {
 	representativeNum := len(s.Representatives)
-	prevoteMsgNum := len(s.PrevoteMsgPool.Get())
+	prevoteMsgNum := len(s.PrevoteMsgPool.FindAll())
 	satisfyNum := representativeNum / 3
 
 	if prevoteMsgNum >= (satisfyNum + 1) {
@@ -325,7 +354,7 @@ func (s *State) CheckPrevoteCondition() bool {
 }
 func (s *State) CheckPreCommitCondition() bool {
 	representativeNum := len(s.Representatives)
-	commitMsgNum := len(s.PreCommitMsgPool.Get())
+	commitMsgNum := len(s.PreCommitMsgPool.FindAll())
 	satisfyNum := representativeNum / 3
 
 	if commitMsgNum >= (satisfyNum + 1) {

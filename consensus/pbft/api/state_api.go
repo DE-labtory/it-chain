@@ -220,23 +220,27 @@ func (s *StateApi) checkPreCommit(state pbft.State) pbft.State {
 }
 
 func (s *StateApi) updatePrevoteMsgPool(loadedState pbft.State) pbft.State {
-	for _, poolMsg := range s.tempPrevoteMsgPool.Get() {
-		if err := loadedState.PrevoteMsgPool.Save(&poolMsg); err != nil {
+	for _, poolMsg := range s.tempPrevoteMsgPool.FindAll() {
+		if err := loadedState.SavePrevoteMsg(&poolMsg); err != nil {
 			iLogger.Debugf(nil, "[PBFT] Saving prevote msg is failed - Error: [%s]", err)
+			continue
 		}
+
+		s.tempPrevoteMsgPool.Remove(poolMsg.MsgID)
 	}
-	s.tempPrevoteMsgPool.RemoveAllMsgs()
 
 	return loadedState
 }
 
 func (s *StateApi) updatePreCommitMsgPool(loadedState pbft.State) pbft.State {
-	for _, poolMsg := range s.tempPreCommitMsgPool.Get() {
-		if err := loadedState.PreCommitMsgPool.Save(&poolMsg); err != nil {
+	for _, poolMsg := range s.tempPreCommitMsgPool.FindAll() {
+		if err := loadedState.SavePreCommitMsg(&poolMsg); err != nil {
 			iLogger.Debugf(nil, "[PBFT] Saving precommit msg is failed - Error: [%s]", err)
+			continue
 		}
+
+		s.tempPreCommitMsgPool.Remove(poolMsg.MsgID)
 	}
-	s.tempPreCommitMsgPool.RemoveAllMsgs()
 
 	return loadedState
 }

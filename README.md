@@ -18,7 +18,7 @@ Lightweight Customizable Chain For All
 
 The it-chain is an easily modifiable block chain that can fit into any domain. To make it easier to customize, we have divided the it-chain into several independent components and minimized dependencies between them.
 
-**The project is for study, not for production.**
+**It should not be used in production at this time.**
 
 ## Architecture of `it-chain`
 ![](./doc/images/it-chain-logical-view-architecture-r5.png)
