@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/it-chain/engine/common/mock"
-	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/engine/consensus/pbft/api"
-	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
-	"github.com/it-chain/engine/consensus/pbft/infra/mem"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/engine/common/mock"
+	"github.com/DE-labtory/engine/consensus/pbft"
+	"github.com/DE-labtory/engine/consensus/pbft/api"
+	"github.com/DE-labtory/engine/consensus/pbft/infra/adapter"
+	"github.com/DE-labtory/engine/consensus/pbft/infra/mem"
+	"github.com/DE-labtory/iLogger"
 	"github.com/stretchr/testify/assert"
 )
 

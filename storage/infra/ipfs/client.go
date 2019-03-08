@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import (
 	"os"
 
 	"github.com/ipfs/go-ipfs-api"
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/storage"
+	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/engine/storage"
 )
 
 const TMP_FOLDER = "./ipfs-tmp/"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/ivm"
+	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/engine/ivm"
 	"github.com/stretchr/testify/assert"
 )
 

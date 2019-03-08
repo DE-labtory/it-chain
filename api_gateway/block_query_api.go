@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/common/event"
-	leveldbwrapper "github.com/it-chain/leveldb-wrapper"
-	"github.com/it-chain/yggdrasill"
+	"github.com/DE-labtory/engine/blockchain"
+	"github.com/DE-labtory/engine/common/event"
+	leveldbwrapper "github.com/DE-labtory/leveldb-wrapper"
+	"github.com/DE-labtory/yggdrasill"
 )
 
 var ErrGetCommittedBlock = errors.New("Error in getting commited block")

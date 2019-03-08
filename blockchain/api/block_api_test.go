@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/blockchain/api"
-	"github.com/it-chain/engine/blockchain/infra/mem"
-	"github.com/it-chain/engine/blockchain/test/mock"
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/engine/blockchain"
+	"github.com/DE-labtory/engine/blockchain/api"
+	"github.com/DE-labtory/engine/blockchain/infra/mem"
+	"github.com/DE-labtory/engine/blockchain/test/mock"
+	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
 	"github.com/stretchr/testify/assert"
 )
 

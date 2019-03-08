@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/ivm"
-	"github.com/it-chain/iLogger"
-	"github.com/it-chain/leveldb-wrapper"
+	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/engine/ivm"
+	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/leveldb-wrapper"
 )
 
 type ICodeQueryApi struct {

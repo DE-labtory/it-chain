@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/it-chain/engine/cmd/connection"
-	"github.com/it-chain/engine/cmd/ivm"
-	"github.com/it-chain/engine/cmd/on"
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/engine/cmd/connection"
+	"github.com/DE-labtory/engine/cmd/ivm"
+	"github.com/DE-labtory/engine/cmd/on"
+	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/engine/conf"
+	"github.com/DE-labtory/iLogger"
 	"github.com/urfave/cli"
 )
 

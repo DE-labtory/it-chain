@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package connection
 
 import (
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/engine/common/command"
+	"github.com/DE-labtory/engine/common/rabbitmq/rpc"
+	"github.com/DE-labtory/engine/conf"
+	"github.com/DE-labtory/iLogger"
 	"github.com/urfave/cli"
 )
 

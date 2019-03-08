@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ package ivmfx
 import (
 	"context"
 
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/ivm"
-	"github.com/it-chain/engine/ivm/api"
-	"github.com/it-chain/engine/ivm/infra/adapter"
-	"github.com/it-chain/engine/ivm/infra/git"
-	"github.com/it-chain/engine/ivm/infra/tesseract"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/engine/common/rabbitmq/rpc"
+	"github.com/DE-labtory/engine/conf"
+	"github.com/DE-labtory/engine/ivm"
+	"github.com/DE-labtory/engine/ivm/api"
+	"github.com/DE-labtory/engine/ivm/infra/adapter"
+	"github.com/DE-labtory/engine/ivm/infra/git"
+	"github.com/DE-labtory/engine/ivm/infra/tesseract"
+	"github.com/DE-labtory/iLogger"
 	"go.uber.org/fx"
 )
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ func TestHasValid(t *testing.T) {
 
 func TestGetConfiguration(t *testing.T) {
 
-	path := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/conf"
+	path := os.Getenv("GOPATH") + "/src/github.com/DE-labtory/engine/conf"
 	confFilename := "/config-test.yaml"
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.Mkdir(path, os.ModePerm)

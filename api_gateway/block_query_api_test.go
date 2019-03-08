@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/it-chain/engine/api_gateway"
-	"github.com/it-chain/engine/api_gateway/test/mock"
-	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/common/event"
+	"github.com/DE-labtory/engine/api_gateway"
+	"github.com/DE-labtory/engine/api_gateway/test/mock"
+	"github.com/DE-labtory/engine/blockchain"
+	"github.com/DE-labtory/engine/common/event"
 	"github.com/stretchr/testify/assert"
 )
 

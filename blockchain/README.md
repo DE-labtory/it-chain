@@ -22,7 +22,7 @@ Blockchain Component는 **block 생성 • 저장 • 조회**, **blockchain 동
 
 ## Key Concepts <a name = "Key Concepts"></a>
 
-it-chain은 Blockchain Component를 customize 할 수 있도록 block 저장 및 조회를 [yggdrasill](https://github.com/it-chain/yggdrasill)에 위임한다. Blockchain Component는 yggdrasill에서 정의한 interface에 맞게 구조체를 구현한다면 yggdrasill에 block을 저장, 조회할 수 있다. yggdraill에 연속적으로 저장된 block들이 blockchain이다.
+it-chain은 Blockchain Component를 customize 할 수 있도록 block 저장 및 조회를 [yggdrasill](https://github.com/DE-labtory/yggdrasill)에 위임한다. Blockchain Component는 yggdrasill에서 정의한 interface에 맞게 구조체를 구현한다면 yggdrasill에 block을 저장, 조회할 수 있다. yggdraill에 연속적으로 저장된 block들이 blockchain이다.
 
 
 

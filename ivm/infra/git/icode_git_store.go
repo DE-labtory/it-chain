@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/it-chain/engine/ivm"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/engine/ivm"
+	"github.com/DE-labtory/iLogger"
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
@@ -166,7 +166,7 @@ func (gApi *RepositoryService) Clone(baseSavePath string, repositoryUrl string, 
 	return gApi.CloneFromRawSsh(baseSavePath, repositoryUrl, bytes, password)
 }
 
-// transfer github.com/it-chain/engine to
+// transfer github.com/DE-labtory/engine to
 // is ssh (git@github.com:it-chain/engine.git) or is not ssh (https://github.com/it-chain/engine.git)
 func toGitUrl(repositoryUrl string, protocolType string) (string, error) {
 	const postfix = ".git"

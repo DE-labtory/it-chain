@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package infra
 import (
 	"log"
 
-	"github.com/it-chain/heimdall/key"
+	"github.com/DE-labtory/heimdall/key"
 )
 
 func LoadKeyPair(keyPath string, keyType string) (key.PriKey, key.PubKey) {

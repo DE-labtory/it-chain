@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package api
 import (
 	"fmt"
 
-	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/blockchain/infra/mem"
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/engine/blockchain"
+	"github.com/DE-labtory/engine/blockchain/infra/mem"
+	"github.com/DE-labtory/engine/common/command"
+	"github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/iLogger"
 )
 
 type BlockApi struct {

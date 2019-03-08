@@ -1,6 +1,6 @@
 package mock
 
-import "github.com/it-chain/engine/consensus/pbft"
+import "github.com/DE-labtory/engine/consensus/pbft"
 
 type ParliamentApi struct {
 	AddRepresentativeFunc    func(representativeId string)

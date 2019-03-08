@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package txpool
 import (
 	"sync"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/iLogger"
 )
 
 type Publisher func(topic string, data interface{}) (err error) //해당 publish함수는 midgard 에서 의존성 주입을 받기 위해 interface로 작성한다.

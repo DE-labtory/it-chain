@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package adapter
 
 import (
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/consensus/pbft/api"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/engine/consensus/pbft/api"
+	"github.com/DE-labtory/iLogger"
 )
 
 type ConnectionEventHandler struct {

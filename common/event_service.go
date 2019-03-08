@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
 )
 
 var ErrEventType = errors.New("Error type of event is not struct")

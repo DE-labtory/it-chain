@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package mock
 
-import "github.com/it-chain/midgard"
+import "github.com/DE-labtory/midgard"
 
 type EventRepository struct {
 	LoadFunc  func(aggregate midgard.Aggregate, aggregateID string) error

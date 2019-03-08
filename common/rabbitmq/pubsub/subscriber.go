@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package pubsub
 import (
 	"encoding/json"
 
-	"github.com/it-chain/engine/common/rabbitmq"
-	"github.com/it-chain/sdk/logger"
+	"github.com/DE-labtory/engine/common/rabbitmq"
+	"github.com/DE-labtory/sdk/logger"
 	"github.com/rs/xid"
 )
 

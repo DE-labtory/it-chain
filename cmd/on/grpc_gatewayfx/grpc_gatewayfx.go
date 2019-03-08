@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ package grpc_gatewayfx
 import (
 	"context"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/grpc_gateway/api"
-	"github.com/it-chain/engine/grpc_gateway/infra"
-	"github.com/it-chain/engine/grpc_gateway/infra/adapter"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/engine/common/rabbitmq/rpc"
+	"github.com/DE-labtory/engine/conf"
+	"github.com/DE-labtory/engine/grpc_gateway/api"
+	"github.com/DE-labtory/engine/grpc_gateway/infra"
+	"github.com/DE-labtory/engine/grpc_gateway/infra/adapter"
+	"github.com/DE-labtory/iLogger"
 	"go.uber.org/fx"
 )
 

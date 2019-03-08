@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package txpool
 import (
 	"sync"
 
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/engine/common/command"
+	"github.com/DE-labtory/iLogger"
 )
 
 type BlockProposalService struct {

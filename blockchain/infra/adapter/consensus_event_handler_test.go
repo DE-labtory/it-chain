@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/blockchain/infra/adapter"
-	"github.com/it-chain/engine/blockchain/infra/mem"
-	"github.com/it-chain/engine/blockchain/test/mock"
-	"github.com/it-chain/engine/common"
-	event2 "github.com/it-chain/engine/common/event"
+	"github.com/DE-labtory/engine/blockchain"
+	"github.com/DE-labtory/engine/blockchain/infra/adapter"
+	"github.com/DE-labtory/engine/blockchain/infra/mem"
+	"github.com/DE-labtory/engine/blockchain/test/mock"
+	"github.com/DE-labtory/engine/common"
+	event2 "github.com/DE-labtory/engine/common/event"
 	"github.com/magiconair/properties/assert"
 )
 

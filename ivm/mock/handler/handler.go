@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,13 @@
 package handler
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
 
-	"github.com/it-chain/sdk"
-	"github.com/it-chain/sdk/logger"
-	"github.com/it-chain/sdk/pb"
+	"github.com/DE-labtory/sdk"
+	"github.com/DE-labtory/sdk/logger"
+	"github.com/DE-labtory/sdk/pb"
 )
 
 type HandlerExample struct {
@@ -84,21 +83,10 @@ func handleQuery(request *pb.Request, cell *sdk.Cell) *pb.Response {
 	switch request.FunctionName {
 	case "getA":
 		b, err := cell.GetData("A")
-
 		if err != nil {
 			return responseError(request, err)
 		}
-
-		result := make(map[string]string)
-		result["A"] = string(b)
-
-		d, err := json.Marshal(result)
-
-		if err != nil {
-			return responseError(request, err)
-		}
-
-		return responseSuccess(request, d)
+		return responseSuccess(request, b)
 
 	default:
 		err := errors.New("unknown query method")

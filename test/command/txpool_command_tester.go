@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/txpool"
+	"github.com/DE-labtory/engine/common/command"
+	"github.com/DE-labtory/engine/common/rabbitmq/rpc"
+	"github.com/DE-labtory/engine/conf"
+	"github.com/DE-labtory/engine/txpool"
 	"github.com/rs/xid"
 )
 

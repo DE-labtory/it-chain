@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package api
 import (
 	"errors"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/engine/consensus/pbft"
+	"github.com/DE-labtory/iLogger"
 )
 
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")

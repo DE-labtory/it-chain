@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/grpc_gateway"
-	"github.com/it-chain/engine/grpc_gateway/infra"
-	"github.com/it-chain/heimdall/key"
+	"github.com/DE-labtory/bifrost"
+	"github.com/DE-labtory/bifrost/pb"
+	"github.com/DE-labtory/engine/common/command"
+	"github.com/DE-labtory/engine/grpc_gateway"
+	"github.com/DE-labtory/engine/grpc_gateway/infra"
+	"github.com/DE-labtory/heimdall/key"
 	"github.com/stretchr/testify/assert"
 )
 

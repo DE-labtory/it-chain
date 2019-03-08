@@ -30,7 +30,7 @@ sleep 2
 
 docker run -d -p $1:4000 -p $2:5000 --net it-chain-default-network -v it-chain-default-volume:/go/src/github.com/it-chain/engine/.tmp \
 -v /var/run/docker.sock:/var/run/docker.sock --ip 172.88.1.2 \
--v $abspath/docker_solo_config.yaml:/go/src/github.com/it-chain/engine/conf/config.yaml teamit/itchain:latest
+-v $abspath/docker_solo_config.yaml:/go/src/github.com/DE-labtory/engine/conf/config.yaml teamit/itchain:latest
 
 echo "finish create node!"
 echo "node1 - api-gateway : $1, grpc-gateway : $2"

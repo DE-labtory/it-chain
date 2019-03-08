@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package commonfx
 import (
 	"context"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/engine/conf"
+	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/engine/common/rabbitmq/rpc"
+	"github.com/DE-labtory/engine/conf"
 	"go.uber.org/fx"
 )
 

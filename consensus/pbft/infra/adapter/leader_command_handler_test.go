@@ -4,11 +4,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
-	"github.com/it-chain/engine/consensus/pbft/test/mock"
+	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/engine/common/command"
+	"github.com/DE-labtory/engine/consensus/pbft"
+	"github.com/DE-labtory/engine/consensus/pbft/infra/adapter"
+	"github.com/DE-labtory/engine/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 

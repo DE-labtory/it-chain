@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/client"
-	"github.com/it-chain/bifrost/server"
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/grpc_gateway"
-	"github.com/it-chain/heimdall/key"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/bifrost"
+	"github.com/DE-labtory/bifrost/client"
+	"github.com/DE-labtory/bifrost/server"
+	"github.com/DE-labtory/engine/common/command"
+	"github.com/DE-labtory/engine/grpc_gateway"
+	"github.com/DE-labtory/heimdall/key"
+	"github.com/DE-labtory/iLogger"
 )
 
 var ErrConnAlreadyExist = errors.New("connection is already exist")

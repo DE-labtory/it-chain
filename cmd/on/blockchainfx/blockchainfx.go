@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ import (
 	"context"
 	"os"
 
-	"github.com/it-chain/engine/api_gateway"
-	"github.com/it-chain/engine/blockchain/api"
-	"github.com/it-chain/engine/blockchain/infra/adapter"
-	"github.com/it-chain/engine/blockchain/infra/mem"
-	"github.com/it-chain/engine/blockchain/infra/repo"
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/engine/api_gateway"
+	"github.com/DE-labtory/engine/blockchain/api"
+	"github.com/DE-labtory/engine/blockchain/infra/adapter"
+	"github.com/DE-labtory/engine/blockchain/infra/mem"
+	"github.com/DE-labtory/engine/blockchain/infra/repo"
+	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/engine/conf"
+	"github.com/DE-labtory/iLogger"
 	"go.uber.org/fx"
 )
 

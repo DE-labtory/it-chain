@@ -1,7 +1,7 @@
 // +build ignore
 
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,16 @@
  *
  */
 
-// should not modify this file
-// this file will be used as just test
-
 package main
 
 import (
-	"fmt"
+	"icode_1/handler"
 	"os"
 	"strconv"
 
-	"github.com/it-chain/sdk"
-	"github.com/it-chain/sdk/logger"
+	"github.com/DE-labtory/sdk"
+	"github.com/DE-labtory/sdk/logger"
 	"github.com/jessevdk/go-flags"
-	"github.com/mock/handler"
 )
 
 var opts struct {
@@ -39,7 +35,7 @@ var opts struct {
 
 func main() {
 
-	logger.EnableFileLogger(true, "./icode.log")
+	logger.EnableFileLogger(true, "./log/icode.log")
 	parser := flags.NewParser(&opts, flags.Default)
 
 	_, err := parser.Parse()
@@ -49,7 +45,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("port : " + strconv.Itoa(opts.Port))
+	logger.Info(nil, "port : "+strconv.Itoa(opts.Port))
 
 	exHandler := &handler.HandlerExample{}
 	ibox := sdk.NewIBox(opts.Port)

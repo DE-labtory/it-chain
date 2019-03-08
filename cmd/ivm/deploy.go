@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ package ivm
 import (
 	"log"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/ivm"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/engine/common/command"
+	"github.com/DE-labtory/engine/common/rabbitmq/rpc"
+	"github.com/DE-labtory/engine/conf"
+	"github.com/DE-labtory/engine/ivm"
+	"github.com/DE-labtory/iLogger"
 	"github.com/urfave/cli"
 )
 
