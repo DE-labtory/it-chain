@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/DE-labtory/engine/cmd/on/api-gatewayfx"
+	api_gatewayfx "github.com/DE-labtory/engine/cmd/on/api-gatewayfx"
 	"github.com/DE-labtory/engine/cmd/on/blockchainfx"
 	"github.com/DE-labtory/engine/cmd/on/commonfx"
 	"github.com/DE-labtory/engine/cmd/on/grpc_gatewayfx"

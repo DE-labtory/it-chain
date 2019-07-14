@@ -24,7 +24,7 @@ import (
 	"github.com/DE-labtory/engine/common/event"
 	"github.com/DE-labtory/engine/ivm"
 	"github.com/DE-labtory/iLogger"
-	"github.com/DE-labtory/leveldb-wrapper"
+	leveldbwrapper "github.com/DE-labtory/leveldb-wrapper"
 )
 
 type ICodeQueryApi struct {

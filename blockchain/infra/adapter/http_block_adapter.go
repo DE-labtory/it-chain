@@ -21,8 +21,8 @@ import (
 	"errors"
 	"strconv"
 
-	"gopkg.in/resty.v1"
 	"github.com/DE-labtory/engine/blockchain"
+	"gopkg.in/resty.v1"
 )
 
 var ErrGetBlockFromPeer = errors.New("Error when getting block from other peer")

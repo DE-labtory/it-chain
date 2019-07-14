@@ -2,6 +2,7 @@ module github.com/DE-labtory/engine
 
 require (
 	github.com/DE-labtory/bifrost v1.0.0
+	github.com/DE-labtory/heimdall v1.0.0
 	github.com/DE-labtory/iLogger v1.0.0
 	github.com/DE-labtory/leveldb-wrapper v0.0.0-20190307144420-061fb8638c2d
 	github.com/DE-labtory/midgard v0.0.4

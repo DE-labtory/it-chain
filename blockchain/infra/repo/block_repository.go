@@ -20,7 +20,7 @@ import (
 	"sync"
 
 	"github.com/DE-labtory/engine/blockchain"
-	"github.com/DE-labtory/leveldb-wrapper"
+	leveldbwrapper "github.com/DE-labtory/leveldb-wrapper"
 	"github.com/DE-labtory/yggdrasill"
 )
 

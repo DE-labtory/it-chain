@@ -19,8 +19,8 @@ package mem
 import (
 	"sync"
 
-	"github.com/gogo/protobuf/sortkeys"
 	"github.com/DE-labtory/engine/blockchain"
+	"github.com/gogo/protobuf/sortkeys"
 )
 
 type BlockPool struct {

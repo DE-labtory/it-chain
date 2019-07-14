@@ -21,9 +21,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ipfs/go-ipfs-api"
 	"github.com/DE-labtory/engine/common"
 	"github.com/DE-labtory/engine/storage"
+	shell "github.com/ipfs/go-ipfs-api"
 )
 
 const TMP_FOLDER = "./ipfs-tmp/"

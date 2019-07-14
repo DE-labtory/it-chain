@@ -19,8 +19,8 @@ package api_gateway
 import (
 	"context"
 
-	"github.com/go-kit/kit/endpoint"
 	"github.com/DE-labtory/iLogger"
+	"github.com/go-kit/kit/endpoint"
 	"github.com/pkg/errors"
 )
 
