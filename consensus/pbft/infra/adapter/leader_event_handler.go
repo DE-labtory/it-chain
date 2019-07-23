@@ -17,8 +17,8 @@
 package adapter
 
 import (
-	"github.com/DE-labtory/engine/common/event"
-	"github.com/DE-labtory/engine/consensus/pbft/api"
+	"github.com/DE-labtory/it-chain/common/event"
+	"github.com/DE-labtory/it-chain/consensus/pbft/api"
 	"github.com/DE-labtory/iLogger"
 )
 

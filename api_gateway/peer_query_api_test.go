@@ -19,8 +19,8 @@ package api_gateway_test
 import (
 	"testing"
 
-	"github.com/DE-labtory/engine/api_gateway"
-	"github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/it-chain/api_gateway"
+	"github.com/DE-labtory/it-chain/common/event"
 	"github.com/stretchr/testify/assert"
 )
 

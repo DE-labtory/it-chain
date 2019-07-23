@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DE-labtory/engine/blockchain"
+	"github.com/DE-labtory/it-chain/blockchain"
 	"github.com/stretchr/testify/assert"
 )
 

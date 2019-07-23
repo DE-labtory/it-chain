@@ -15,7 +15,7 @@
  */
 package mock
 
-import "github.com/DE-labtory/engine/blockchain"
+import "github.com/DE-labtory/it-chain/blockchain"
 
 type BlockQueryService struct {
 	GetStagedBlockByHeightFunc   func(height blockchain.BlockHeight) (blockchain.DefaultBlock, error)

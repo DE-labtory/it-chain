@@ -21,7 +21,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/DE-labtory/engine/storage/infra/ipfs"
+	"github.com/DE-labtory/it-chain/storage/infra/ipfs"
 	"github.com/stretchr/testify/assert"
 )
 

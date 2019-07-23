@@ -21,11 +21,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/DE-labtory/engine/cmd/connection"
-	"github.com/DE-labtory/engine/cmd/ivm"
-	"github.com/DE-labtory/engine/cmd/on"
-	"github.com/DE-labtory/engine/common"
-	"github.com/DE-labtory/engine/conf"
+	"github.com/DE-labtory/it-chain/cmd/connection"
+	"github.com/DE-labtory/it-chain/cmd/ivm"
+	"github.com/DE-labtory/it-chain/cmd/on"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/conf"
 	"github.com/DE-labtory/iLogger"
 	"github.com/urfave/cli"
 )

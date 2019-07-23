@@ -21,8 +21,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/DE-labtory/engine/common/command"
-	"github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/common/event"
 	ygg "github.com/DE-labtory/yggdrasill/common"
 )
 

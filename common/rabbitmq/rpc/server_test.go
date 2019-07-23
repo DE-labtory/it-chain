@@ -19,7 +19,7 @@ package rpc_test
 import (
 	"testing"
 
-	"github.com/DE-labtory/engine/common/rabbitmq/rpc"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
 	"github.com/stretchr/testify/assert"
 )
 

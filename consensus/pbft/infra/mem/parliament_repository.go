@@ -19,7 +19,7 @@ package mem
 import (
 	"sync"
 
-	"github.com/DE-labtory/engine/consensus/pbft"
+	"github.com/DE-labtory/it-chain/consensus/pbft"
 )
 
 type ParliamentRepository struct {

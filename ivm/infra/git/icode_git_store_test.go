@@ -24,8 +24,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/DE-labtory/engine/ivm"
-	"github.com/DE-labtory/engine/ivm/infra/git"
+	"github.com/DE-labtory/it-chain/ivm"
+	"github.com/DE-labtory/it-chain/ivm/infra/git"
 	"github.com/stretchr/testify/assert"
 )
 

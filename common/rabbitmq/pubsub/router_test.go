@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
 	"github.com/DE-labtory/midgard"
 	"github.com/stretchr/testify/assert"
 )

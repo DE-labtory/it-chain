@@ -19,7 +19,7 @@ package pbft
 import (
 	"sync"
 
-	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/it-chain/common"
 	"github.com/DE-labtory/sdk/logger"
 )
 

@@ -20,8 +20,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/DE-labtory/engine/api_gateway"
-	"github.com/DE-labtory/engine/blockchain"
+	"github.com/DE-labtory/it-chain/api_gateway"
+	"github.com/DE-labtory/it-chain/blockchain"
 )
 
 type PeerQueryApi interface {

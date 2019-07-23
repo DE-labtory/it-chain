@@ -16,7 +16,7 @@
 
 package mock
 
-import "github.com/DE-labtory/engine/grpc_gateway"
+import "github.com/DE-labtory/it-chain/grpc_gateway"
 
 type GrpcMessageHandlerApi struct {
 	HandleRequestPeerListFunc func(connectionID string)

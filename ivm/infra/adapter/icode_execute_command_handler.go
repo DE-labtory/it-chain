@@ -17,10 +17,10 @@
 package adapter
 
 import (
-	"github.com/DE-labtory/engine/common/command"
-	"github.com/DE-labtory/engine/common/rabbitmq/rpc"
-	"github.com/DE-labtory/engine/ivm"
-	"github.com/DE-labtory/engine/ivm/api"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
+	"github.com/DE-labtory/it-chain/ivm"
+	"github.com/DE-labtory/it-chain/ivm/api"
 )
 
 type IcodeExecuteCommandHandler struct {

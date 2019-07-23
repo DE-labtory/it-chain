@@ -17,9 +17,9 @@
 package adapter
 
 import (
-	"github.com/DE-labtory/engine/blockchain"
-	"github.com/DE-labtory/engine/common"
-	"github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/it-chain/blockchain"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/event"
 	"github.com/DE-labtory/sdk/logger"
 )
 

@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/DE-labtory/engine/common/command"
-	"github.com/DE-labtory/engine/common/rabbitmq/rpc"
-	"github.com/DE-labtory/engine/ivm"
-	"github.com/DE-labtory/engine/ivm/api"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
+	"github.com/DE-labtory/it-chain/ivm"
+	"github.com/DE-labtory/it-chain/ivm/api"
 	"github.com/DE-labtory/iLogger"
 )
 
@@ -38,7 +38,7 @@ func NewDeployCommandHandler(icodeApi api.ICodeApi) *DeployCommandHandler {
 }
 
 func (d *DeployCommandHandler) HandleDeployCommand(deployCommand command.Deploy) (ivm.ICode, rpc.Error) {
-	savePath := os.Getenv("GOPATH") + "/src/github.com/DE-labtory/engine/.tmp/"
+	savePath := os.Getenv("GOPATH") + "/src/github.com/DE-labtory/it-chain/.tmp/"
 
 	if deployCommand.SshPath != "" {
 		icode, err := d.icodeApi.Deploy(savePath, deployCommand.Url, deployCommand.SshPath, deployCommand.Password)

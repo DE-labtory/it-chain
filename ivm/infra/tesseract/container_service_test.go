@@ -21,8 +21,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/DE-labtory/engine/ivm"
-	"github.com/DE-labtory/engine/ivm/infra/tesseract"
+	"github.com/DE-labtory/it-chain/ivm"
+	"github.com/DE-labtory/it-chain/ivm/infra/tesseract"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -41,7 +41,7 @@ func setContainer(t *testing.T) (*tesseract.ContainerService, func()) {
 	icode := ivm.ICode{
 		ID:             testIcodeID,
 		RepositoryName: "test ivm",
-		Path:           GOPATH + "/src/github.com/DE-labtory/engine/ivm/mock/",
+		Path:           GOPATH + "/src/github.com/DE-labtory/it-chain/ivm/mock/",
 		GitUrl:         "github.com/mock",
 		FolderName:     "github.com/mock",
 	}

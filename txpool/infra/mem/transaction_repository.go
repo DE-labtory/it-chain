@@ -20,7 +20,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/DE-labtory/engine/txpool"
+	"github.com/DE-labtory/it-chain/txpool"
 )
 
 var ErrTransactionDoesNotExist = errors.New("transaction does not exist")

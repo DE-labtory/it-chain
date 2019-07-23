@@ -19,9 +19,9 @@ package api
 import (
 	"encoding/json"
 
-	"github.com/DE-labtory/engine/common"
-	"github.com/DE-labtory/engine/common/event"
-	"github.com/DE-labtory/engine/grpc_gateway"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/event"
+	"github.com/DE-labtory/it-chain/grpc_gateway"
 	"github.com/DE-labtory/iLogger"
 )
 

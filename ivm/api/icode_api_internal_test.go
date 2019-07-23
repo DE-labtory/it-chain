@@ -19,7 +19,7 @@ package api
 import (
 	"testing"
 
-	"github.com/DE-labtory/engine/ivm"
+	"github.com/DE-labtory/it-chain/ivm"
 	"github.com/magiconair/properties/assert"
 )
 
@@ -27,7 +27,7 @@ func Test_createMetaCreatedEvent(t *testing.T) {
 
 	icode := ivm.ICode{
 		ID:             "1",
-		GitUrl:         "https://github.com/DE-labtory/engine",
+		GitUrl:         "https://github.com/DE-labtory/it-chain",
 		RepositoryName: "jun",
 		CommitHash:     "hduh48183",
 		Path:           "1",

@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DE-labtory/engine/common/rabbitmq/rpc"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
 	"github.com/DE-labtory/midgard"
 	"github.com/stretchr/testify/assert"
 )

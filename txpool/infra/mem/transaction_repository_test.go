@@ -20,8 +20,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/DE-labtory/engine/txpool"
-	"github.com/DE-labtory/engine/txpool/infra/mem"
+	"github.com/DE-labtory/it-chain/txpool"
+	"github.com/DE-labtory/it-chain/txpool/infra/mem"
 	"github.com/stretchr/testify/assert"
 )
 

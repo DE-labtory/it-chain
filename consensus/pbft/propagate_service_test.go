@@ -20,8 +20,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/DE-labtory/engine/consensus/pbft"
-	"github.com/DE-labtory/engine/consensus/pbft/test/mock"
+	"github.com/DE-labtory/it-chain/consensus/pbft"
+	"github.com/DE-labtory/it-chain/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 

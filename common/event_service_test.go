@@ -20,8 +20,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/DE-labtory/engine/common"
-	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
 	"github.com/stretchr/testify/assert"
 )
 

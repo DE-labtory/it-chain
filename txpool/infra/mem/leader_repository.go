@@ -19,7 +19,7 @@ package mem
 import (
 	"sync"
 
-	"github.com/DE-labtory/engine/txpool"
+	"github.com/DE-labtory/it-chain/txpool"
 )
 
 type LeaderRepository struct {

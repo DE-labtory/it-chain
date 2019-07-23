@@ -19,7 +19,7 @@ package api
 import (
 	"strings"
 
-	"github.com/DE-labtory/engine/grpc_gateway"
+	"github.com/DE-labtory/it-chain/grpc_gateway"
 	"github.com/DE-labtory/iLogger"
 )
 

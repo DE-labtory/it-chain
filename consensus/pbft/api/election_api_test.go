@@ -20,11 +20,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DE-labtory/engine/consensus/pbft"
-	"github.com/DE-labtory/engine/consensus/pbft/api"
-	"github.com/DE-labtory/engine/consensus/pbft/infra/mem"
-	test2 "github.com/DE-labtory/engine/consensus/pbft/test"
-	"github.com/DE-labtory/engine/consensus/pbft/test/mock"
+	"github.com/DE-labtory/it-chain/consensus/pbft"
+	"github.com/DE-labtory/it-chain/consensus/pbft/api"
+	"github.com/DE-labtory/it-chain/consensus/pbft/infra/mem"
+	test2 "github.com/DE-labtory/it-chain/consensus/pbft/test"
+	"github.com/DE-labtory/it-chain/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 

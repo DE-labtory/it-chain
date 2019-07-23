@@ -23,8 +23,8 @@ import (
 	"github.com/DE-labtory/bifrost"
 	"github.com/DE-labtory/bifrost/client"
 	"github.com/DE-labtory/bifrost/server"
-	"github.com/DE-labtory/engine/common/command"
-	"github.com/DE-labtory/engine/grpc_gateway"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/grpc_gateway"
 	"github.com/DE-labtory/heimdall"
 	"github.com/DE-labtory/iLogger"
 )

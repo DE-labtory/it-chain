@@ -19,10 +19,10 @@ package adapter_test
 import (
 	"testing"
 
-	"github.com/DE-labtory/engine/api_gateway"
-	"github.com/DE-labtory/engine/blockchain"
-	"github.com/DE-labtory/engine/blockchain/infra/adapter"
-	"github.com/DE-labtory/engine/blockchain/test/mock"
+	"github.com/DE-labtory/it-chain/api_gateway"
+	"github.com/DE-labtory/it-chain/blockchain"
+	"github.com/DE-labtory/it-chain/blockchain/infra/adapter"
+	"github.com/DE-labtory/it-chain/blockchain/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 

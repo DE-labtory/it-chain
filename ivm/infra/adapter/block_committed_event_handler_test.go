@@ -21,13 +21,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/DE-labtory/engine/common"
-	"github.com/DE-labtory/engine/common/event"
-	"github.com/DE-labtory/engine/ivm"
-	"github.com/DE-labtory/engine/ivm/api"
-	"github.com/DE-labtory/engine/ivm/infra/adapter"
-	"github.com/DE-labtory/engine/ivm/infra/git"
-	"github.com/DE-labtory/engine/ivm/infra/tesseract"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/event"
+	"github.com/DE-labtory/it-chain/ivm"
+	"github.com/DE-labtory/it-chain/ivm/api"
+	"github.com/DE-labtory/it-chain/ivm/infra/adapter"
+	"github.com/DE-labtory/it-chain/ivm/infra/git"
+	"github.com/DE-labtory/it-chain/ivm/infra/tesseract"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -82,7 +82,7 @@ func setUp(t *testing.T) (*adapter.BlockCommittedEventHandler, *tesseract.Contai
 	icode := ivm.ICode{
 		ID:             "a1",
 		RepositoryName: "test ivm",
-		Path:           GOPATH + "/src/github.com/DE-labtory/engine/ivm/mock/",
+		Path:           GOPATH + "/src/github.com/DE-labtory/it-chain/ivm/mock/",
 		GitUrl:         "github.com/mock",
 		FolderName:     "github.com/mock",
 	}

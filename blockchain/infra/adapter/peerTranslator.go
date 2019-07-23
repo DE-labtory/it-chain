@@ -17,8 +17,8 @@
 package adapter
 
 import (
-	"github.com/DE-labtory/engine/api_gateway"
-	"github.com/DE-labtory/engine/blockchain"
+	"github.com/DE-labtory/it-chain/api_gateway"
+	"github.com/DE-labtory/it-chain/blockchain"
 )
 
 func toPeerFromConnection(peer api_gateway.Peer) blockchain.Peer {

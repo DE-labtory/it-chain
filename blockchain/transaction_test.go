@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DE-labtory/engine/blockchain"
-	"github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/it-chain/blockchain"
+	"github.com/DE-labtory/it-chain/common/event"
 	"github.com/stretchr/testify/assert"
 )
 

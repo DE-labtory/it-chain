@@ -19,9 +19,9 @@ package adapter
 import (
 	"sync"
 
-	"github.com/DE-labtory/engine/common/event"
-	"github.com/DE-labtory/engine/ivm"
-	"github.com/DE-labtory/engine/ivm/api"
+	"github.com/DE-labtory/it-chain/common/event"
+	"github.com/DE-labtory/it-chain/ivm"
+	"github.com/DE-labtory/it-chain/ivm/api"
 )
 
 type BlockCommittedEventHandler struct {

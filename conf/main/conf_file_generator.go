@@ -23,8 +23,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/DE-labtory/engine/conf"
-	"github.com/DE-labtory/engine/conf/model"
+	"github.com/DE-labtory/it-chain/conf"
+	"github.com/DE-labtory/it-chain/conf/model"
 	yaml "gopkg.in/yaml.v2"
 )
 

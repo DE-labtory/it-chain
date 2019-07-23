@@ -19,7 +19,7 @@ package pubsub
 import (
 	"encoding/json"
 
-	"github.com/DE-labtory/engine/common/rabbitmq"
+	"github.com/DE-labtory/it-chain/common/rabbitmq"
 	"github.com/DE-labtory/sdk/logger"
 	"github.com/rs/xid"
 )

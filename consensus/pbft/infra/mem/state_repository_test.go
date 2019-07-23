@@ -18,8 +18,8 @@ package mem_test
 import (
 	"testing"
 
-	"github.com/DE-labtory/engine/consensus/pbft"
-	"github.com/DE-labtory/engine/consensus/pbft/infra/mem"
+	"github.com/DE-labtory/it-chain/consensus/pbft"
+	"github.com/DE-labtory/it-chain/consensus/pbft/infra/mem"
 	"github.com/stretchr/testify/assert"
 )
 

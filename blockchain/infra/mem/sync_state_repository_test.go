@@ -18,8 +18,8 @@ package mem_test
 import (
 	"testing"
 
-	"github.com/DE-labtory/engine/blockchain"
-	"github.com/DE-labtory/engine/blockchain/infra/mem"
+	"github.com/DE-labtory/it-chain/blockchain"
+	"github.com/DE-labtory/it-chain/blockchain/infra/mem"
 	"github.com/magiconair/properties/assert"
 )
 

@@ -20,7 +20,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/it-chain/common/event"
 	"github.com/DE-labtory/iLogger"
 )
 

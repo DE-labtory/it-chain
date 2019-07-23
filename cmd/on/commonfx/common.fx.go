@@ -19,10 +19,10 @@ package commonfx
 import (
 	"context"
 
-	"github.com/DE-labtory/engine/common"
-	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
-	"github.com/DE-labtory/engine/common/rabbitmq/rpc"
-	"github.com/DE-labtory/engine/conf"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
+	"github.com/DE-labtory/it-chain/conf"
 	"github.com/DE-labtory/heimdall"
 	"github.com/DE-labtory/heimdall/config"
 	"github.com/DE-labtory/iLogger"

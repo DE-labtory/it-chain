@@ -19,8 +19,8 @@ package command
 import (
 	"time"
 
-	"github.com/DE-labtory/engine/grpc_gateway"
-	"github.com/DE-labtory/engine/ivm"
+	"github.com/DE-labtory/it-chain/grpc_gateway"
+	"github.com/DE-labtory/it-chain/ivm"
 )
 
 /*

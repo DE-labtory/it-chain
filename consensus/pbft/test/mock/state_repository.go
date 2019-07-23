@@ -16,7 +16,7 @@
 
 package mock
 
-import "github.com/DE-labtory/engine/consensus/pbft"
+import "github.com/DE-labtory/it-chain/consensus/pbft"
 
 type StateRepository struct {
 	SaveFunc   func(state pbft.State) error

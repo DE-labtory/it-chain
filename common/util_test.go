@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/it-chain/common"
 	"github.com/stretchr/testify/assert"
 )
 

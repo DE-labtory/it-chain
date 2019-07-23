@@ -21,10 +21,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/DE-labtory/engine/common/command"
-	"github.com/DE-labtory/engine/grpc_gateway"
-	"github.com/DE-labtory/engine/grpc_gateway/infra/adapter"
-	"github.com/DE-labtory/engine/grpc_gateway/mock"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/grpc_gateway"
+	"github.com/DE-labtory/it-chain/grpc_gateway/infra/adapter"
+	"github.com/DE-labtory/it-chain/grpc_gateway/mock"
 	"github.com/magiconair/properties/assert"
 )
 

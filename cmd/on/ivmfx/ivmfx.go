@@ -19,14 +19,14 @@ package ivmfx
 import (
 	"context"
 
-	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
-	"github.com/DE-labtory/engine/common/rabbitmq/rpc"
-	"github.com/DE-labtory/engine/conf"
-	"github.com/DE-labtory/engine/ivm"
-	"github.com/DE-labtory/engine/ivm/api"
-	"github.com/DE-labtory/engine/ivm/infra/adapter"
-	"github.com/DE-labtory/engine/ivm/infra/git"
-	"github.com/DE-labtory/engine/ivm/infra/tesseract"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
+	"github.com/DE-labtory/it-chain/conf"
+	"github.com/DE-labtory/it-chain/ivm"
+	"github.com/DE-labtory/it-chain/ivm/api"
+	"github.com/DE-labtory/it-chain/ivm/infra/adapter"
+	"github.com/DE-labtory/it-chain/ivm/infra/git"
+	"github.com/DE-labtory/it-chain/ivm/infra/tesseract"
 	"github.com/DE-labtory/iLogger"
 	"go.uber.org/fx"
 )

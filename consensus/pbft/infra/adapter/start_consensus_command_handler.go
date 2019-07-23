@@ -17,10 +17,10 @@
 package adapter
 
 import (
-	"github.com/DE-labtory/engine/common"
-	"github.com/DE-labtory/engine/common/command"
-	"github.com/DE-labtory/engine/consensus/pbft"
-	"github.com/DE-labtory/engine/consensus/pbft/api"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/consensus/pbft"
+	"github.com/DE-labtory/it-chain/consensus/pbft/api"
 	"github.com/DE-labtory/iLogger"
 	"github.com/pkg/errors"
 )

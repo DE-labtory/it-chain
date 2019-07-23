@@ -21,10 +21,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DE-labtory/engine/common"
-	"github.com/DE-labtory/engine/common/event"
-	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
-	"github.com/DE-labtory/engine/ivm"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/event"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/ivm"
 	"github.com/stretchr/testify/assert"
 )
 

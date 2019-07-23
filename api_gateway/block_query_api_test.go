@@ -20,10 +20,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/DE-labtory/engine/api_gateway"
-	"github.com/DE-labtory/engine/api_gateway/test/mock"
-	"github.com/DE-labtory/engine/blockchain"
-	"github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/it-chain/api_gateway"
+	"github.com/DE-labtory/it-chain/api_gateway/test/mock"
+	"github.com/DE-labtory/it-chain/blockchain"
+	"github.com/DE-labtory/it-chain/common/event"
 	"github.com/stretchr/testify/assert"
 )
 

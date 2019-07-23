@@ -19,7 +19,7 @@ package pbft
 import (
 	"errors"
 
-	"github.com/DE-labtory/engine/common"
+	"github.com/DE-labtory/it-chain/common"
 )
 
 var ErrStateIdEmpty = errors.New("State ID is empty")

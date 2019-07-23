@@ -24,7 +24,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/DE-labtory/engine/common/rabbitmq"
+	"github.com/DE-labtory/it-chain/common/rabbitmq"
 	"github.com/streadway/amqp"
 )
 

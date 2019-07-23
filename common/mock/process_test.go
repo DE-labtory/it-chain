@@ -19,8 +19,8 @@ package mock_test
 import (
 	"testing"
 
-	"github.com/DE-labtory/engine/common/command"
-	"github.com/DE-labtory/engine/common/mock"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/common/mock"
 	"github.com/magiconair/properties/assert"
 )
 

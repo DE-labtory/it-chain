@@ -33,7 +33,7 @@ func TestHasValid(t *testing.T) {
 
 func TestGetConfiguration(t *testing.T) {
 
-	path := os.Getenv("GOPATH") + "/src/github.com/DE-labtory/engine/conf"
+	path := os.Getenv("GOPATH") + "/src/github.com/DE-labtory/it-chain/conf"
 	confFilename := "/config-test.yaml"
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.Mkdir(path, os.ModePerm)

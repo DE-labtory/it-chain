@@ -16,7 +16,7 @@
 
 package mock
 
-import "github.com/DE-labtory/engine/grpc_gateway"
+import "github.com/DE-labtory/it-chain/grpc_gateway"
 
 type GrpcService struct {
 	DialFunc                func(address string) (grpc_gateway.Connection, error)

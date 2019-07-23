@@ -16,7 +16,7 @@
 
 package mock
 
-import "github.com/DE-labtory/engine/common/command"
+import "github.com/DE-labtory/it-chain/common/command"
 
 type GrpcCall func(processId string, queue string, params interface{}, callback interface{}) error
 

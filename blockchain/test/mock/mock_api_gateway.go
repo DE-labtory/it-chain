@@ -16,7 +16,7 @@
 
 package mock
 
-import "github.com/DE-labtory/engine/api_gateway"
+import "github.com/DE-labtory/it-chain/api_gateway"
 
 type PeerQueryApi struct {
 	GetAllPeerListFunc  func() []api_gateway.Peer

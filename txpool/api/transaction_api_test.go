@@ -20,13 +20,13 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/DE-labtory/engine/common"
-	"github.com/DE-labtory/engine/common/command"
-	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
-	"github.com/DE-labtory/engine/txpool"
-	"github.com/DE-labtory/engine/txpool/api"
-	"github.com/DE-labtory/engine/txpool/infra/mem"
-	"github.com/DE-labtory/engine/txpool/test/mock"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/txpool"
+	"github.com/DE-labtory/it-chain/txpool/api"
+	"github.com/DE-labtory/it-chain/txpool/infra/mem"
+	"github.com/DE-labtory/it-chain/txpool/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 

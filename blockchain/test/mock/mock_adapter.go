@@ -16,7 +16,7 @@
 
 package mock
 
-import "github.com/DE-labtory/engine/blockchain"
+import "github.com/DE-labtory/it-chain/blockchain"
 
 type BlockAdapter struct {
 	GetLastBlockFromPeerFunc     func(peer blockchain.Peer) (blockchain.DefaultBlock, error)

@@ -19,7 +19,7 @@ package pbft_test
 import (
 	"testing"
 
-	"github.com/DE-labtory/engine/consensus/pbft"
+	"github.com/DE-labtory/it-chain/consensus/pbft"
 	"github.com/stretchr/testify/assert"
 )
 

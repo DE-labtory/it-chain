@@ -20,12 +20,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DE-labtory/engine/blockchain"
-	"github.com/DE-labtory/engine/blockchain/infra/adapter"
-	"github.com/DE-labtory/engine/blockchain/infra/mem"
-	"github.com/DE-labtory/engine/blockchain/test/mock"
-	"github.com/DE-labtory/engine/common"
-	event2 "github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/it-chain/blockchain"
+	"github.com/DE-labtory/it-chain/blockchain/infra/adapter"
+	"github.com/DE-labtory/it-chain/blockchain/infra/mem"
+	"github.com/DE-labtory/it-chain/blockchain/test/mock"
+	"github.com/DE-labtory/it-chain/common"
+	event2 "github.com/DE-labtory/it-chain/common/event"
 	"github.com/magiconair/properties/assert"
 )
 

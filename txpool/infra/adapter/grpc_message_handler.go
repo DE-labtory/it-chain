@@ -17,9 +17,9 @@
 package adapter
 
 import (
-	"github.com/DE-labtory/engine/common"
-	"github.com/DE-labtory/engine/common/command"
-	"github.com/DE-labtory/engine/txpool"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/txpool"
 	"github.com/DE-labtory/iLogger"
 )
 

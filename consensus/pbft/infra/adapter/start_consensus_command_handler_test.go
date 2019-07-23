@@ -19,8 +19,8 @@ package adapter_test
 import (
 	"testing"
 
-	"github.com/DE-labtory/engine/consensus/pbft"
-	"github.com/DE-labtory/engine/consensus/pbft/infra/adapter"
+	"github.com/DE-labtory/it-chain/consensus/pbft"
+	"github.com/DE-labtory/it-chain/consensus/pbft/infra/adapter"
 )
 
 func TestStartConsensusCommandHandler_HandleStartConsensusCommand(t *testing.T) {

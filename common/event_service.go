@@ -23,7 +23,7 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/DE-labtory/engine/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
 )
 
 var ErrEventType = errors.New("Error type of event is not struct")

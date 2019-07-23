@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/DE-labtory/engine/ivm"
+	"github.com/DE-labtory/it-chain/ivm"
 	"github.com/DE-labtory/iLogger"
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
@@ -166,8 +166,8 @@ func (gApi *RepositoryService) Clone(baseSavePath string, repositoryUrl string, 
 	return gApi.CloneFromRawSsh(baseSavePath, repositoryUrl, bytes, password)
 }
 
-// transfer github.com/DE-labtory/engine to
-// is ssh (git@github.com:it-chain/engine.git) or is not ssh (https://github.com/it-chain/engine.git)
+// transfer github.com/DE-labtory/it-chain to
+// is ssh (git@github.com:DE-labtory/it-chain.git) or is not ssh (https://github.com/DE-labtory/it-chain.git)
 func toGitUrl(repositoryUrl string, protocolType string) (string, error) {
 	const postfix = ".git"
 

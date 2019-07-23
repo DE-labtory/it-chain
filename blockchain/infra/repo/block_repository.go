@@ -19,7 +19,7 @@ package repo
 import (
 	"sync"
 
-	"github.com/DE-labtory/engine/blockchain"
+	"github.com/DE-labtory/it-chain/blockchain"
 	leveldbwrapper "github.com/DE-labtory/leveldb-wrapper"
 	"github.com/DE-labtory/yggdrasill"
 )

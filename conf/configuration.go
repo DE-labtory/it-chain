@@ -20,7 +20,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/DE-labtory/engine/conf/model"
+	"github.com/DE-labtory/it-chain/conf/model"
 	"github.com/spf13/viper" //viper는 go 어플리케이션의 각종 설정을 담당하는 lib이다.
 )
 
@@ -31,7 +31,7 @@ var instance = &Configuration{}
 // once.Do(func(){}) 로 호출하여 사용하도록 한다.
 var once sync.Once
 
-var confPath = os.Getenv("GOPATH") + "/src/github.com/DE-labtory/engine/conf/config.yaml"
+var confPath = os.Getenv("GOPATH") + "/src/github.com/DE-labtory/it-chain/conf/config.yaml"
 
 // it-chain 에 필요한 각종 설정을 저장하는 구조체이다.
 type Configuration struct {

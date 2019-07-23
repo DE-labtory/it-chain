@@ -20,8 +20,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/DE-labtory/engine/grpc_gateway/api"
-	"github.com/DE-labtory/engine/grpc_gateway/mock"
+	"github.com/DE-labtory/it-chain/grpc_gateway/api"
+	"github.com/DE-labtory/it-chain/grpc_gateway/mock"
 	"github.com/stretchr/testify/assert"
 )
 

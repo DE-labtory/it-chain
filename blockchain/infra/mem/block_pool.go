@@ -19,7 +19,7 @@ package mem
 import (
 	"sync"
 
-	"github.com/DE-labtory/engine/blockchain"
+	"github.com/DE-labtory/it-chain/blockchain"
 	"github.com/gogo/protobuf/sortkeys"
 )
 

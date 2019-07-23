@@ -19,10 +19,10 @@ package api
 import (
 	"fmt"
 
-	"github.com/DE-labtory/engine/blockchain"
-	"github.com/DE-labtory/engine/blockchain/infra/mem"
-	"github.com/DE-labtory/engine/common/command"
-	"github.com/DE-labtory/engine/common/event"
+	"github.com/DE-labtory/it-chain/blockchain"
+	"github.com/DE-labtory/it-chain/blockchain/infra/mem"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/common/event"
 	"github.com/DE-labtory/iLogger"
 )
 
