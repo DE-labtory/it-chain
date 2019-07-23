@@ -6,7 +6,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-go test -p 1 ./...
+go test -p 1 -v -mod=vendor ./...
 
 if [ $? -ne 0 ]; then
   echo "go test fail" >&2
