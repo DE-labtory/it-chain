@@ -17,7 +17,7 @@
 
 ### CLA
 
-To get started, <a href="https://www.clahub.com/agreements/it-chain/engine">sign the Contributor License Agreement</a>.
+To get started, <a href="https://www.clahub.com/agreements/DE-labtory/it-chain">sign the Contributor License Agreement</a>.
 
 
 ### Tip
