@@ -27,4 +27,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# remove
+rm total.out cover.out
 exit 0
