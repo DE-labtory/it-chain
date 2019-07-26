@@ -19,8 +19,8 @@ package api
 import (
 	"strings"
 
-	"github.com/DE-labtory/it-chain/grpc_gateway"
 	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/grpc_gateway"
 )
 
 type MessageApi struct {

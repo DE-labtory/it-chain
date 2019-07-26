@@ -19,8 +19,8 @@ package txpool
 import (
 	"sync"
 
-	"github.com/DE-labtory/it-chain/common/command"
 	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/common/command"
 )
 
 type BlockProposalService struct {

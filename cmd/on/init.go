@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/DE-labtory/iLogger"
 	api_gatewayfx "github.com/DE-labtory/it-chain/cmd/on/api-gatewayfx"
 	"github.com/DE-labtory/it-chain/cmd/on/blockchainfx"
 	"github.com/DE-labtory/it-chain/cmd/on/commonfx"
@@ -27,7 +28,6 @@ import (
 	"github.com/DE-labtory/it-chain/cmd/on/ivmfx"
 	"github.com/DE-labtory/it-chain/cmd/on/pbftfx"
 	"github.com/DE-labtory/it-chain/cmd/on/txpoolfx"
-	"github.com/DE-labtory/iLogger"
 	"github.com/urfave/cli"
 	"go.uber.org/fx"
 )

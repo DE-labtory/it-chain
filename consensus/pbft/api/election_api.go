@@ -20,10 +20,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/common"
 	"github.com/DE-labtory/it-chain/common/event"
 	"github.com/DE-labtory/it-chain/consensus/pbft"
-	"github.com/DE-labtory/iLogger"
 )
 
 type ElectionApi struct {

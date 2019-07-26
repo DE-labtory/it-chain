@@ -19,6 +19,8 @@ package grpc_gatewayfx
 import (
 	"context"
 
+	"github.com/DE-labtory/heimdall/config"
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/common"
 	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
 	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
@@ -26,8 +28,6 @@ import (
 	"github.com/DE-labtory/it-chain/grpc_gateway/api"
 	"github.com/DE-labtory/it-chain/grpc_gateway/infra"
 	"github.com/DE-labtory/it-chain/grpc_gateway/infra/adapter"
-	"github.com/DE-labtory/heimdall/config"
-	"github.com/DE-labtory/iLogger"
 	"go.uber.org/fx"
 )
 

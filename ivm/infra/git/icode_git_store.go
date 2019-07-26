@@ -24,8 +24,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/DE-labtory/it-chain/ivm"
 	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/ivm"
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"

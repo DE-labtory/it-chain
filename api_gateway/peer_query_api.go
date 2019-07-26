@@ -20,8 +20,8 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/DE-labtory/it-chain/common/event"
 	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/common/event"
 )
 
 var ErrPeerExists = errors.New("peer already exists")

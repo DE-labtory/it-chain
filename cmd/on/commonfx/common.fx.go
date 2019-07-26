@@ -19,13 +19,13 @@ package commonfx
 import (
 	"context"
 
+	"github.com/DE-labtory/heimdall"
+	"github.com/DE-labtory/heimdall/config"
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/common"
 	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
 	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
 	"github.com/DE-labtory/it-chain/conf"
-	"github.com/DE-labtory/heimdall"
-	"github.com/DE-labtory/heimdall/config"
-	"github.com/DE-labtory/iLogger"
 	"go.uber.org/fx"
 )
 

@@ -19,10 +19,10 @@ package adapter
 import (
 	"errors"
 
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/common"
 	"github.com/DE-labtory/it-chain/common/command"
 	"github.com/DE-labtory/it-chain/consensus/pbft"
-	"github.com/DE-labtory/iLogger"
 )
 
 var DeserializingError = errors.New("Message deserializing is failed.")

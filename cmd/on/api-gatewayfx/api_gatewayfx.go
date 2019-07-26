@@ -21,11 +21,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/api_gateway"
 	"github.com/DE-labtory/it-chain/common"
 	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
 	"github.com/DE-labtory/it-chain/conf"
-	"github.com/DE-labtory/iLogger"
 	kitlog "github.com/go-kit/kit/log"
 	"go.uber.org/fx"
 )

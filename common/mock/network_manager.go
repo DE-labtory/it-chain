@@ -21,8 +21,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/DE-labtory/it-chain/common/command"
 	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/common/command"
 )
 
 //network manager builds environment for communication between multiple nodes in network

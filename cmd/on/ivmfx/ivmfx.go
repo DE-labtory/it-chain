@@ -19,6 +19,7 @@ package ivmfx
 import (
 	"context"
 
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
 	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
 	"github.com/DE-labtory/it-chain/conf"
@@ -27,7 +28,6 @@ import (
 	"github.com/DE-labtory/it-chain/ivm/infra/adapter"
 	"github.com/DE-labtory/it-chain/ivm/infra/git"
 	"github.com/DE-labtory/it-chain/ivm/infra/tesseract"
-	"github.com/DE-labtory/iLogger"
 	"go.uber.org/fx"
 )
 

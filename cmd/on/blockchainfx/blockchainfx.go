@@ -20,6 +20,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/api_gateway"
 	"github.com/DE-labtory/it-chain/blockchain/api"
 	"github.com/DE-labtory/it-chain/blockchain/infra/adapter"
@@ -28,7 +29,6 @@ import (
 	"github.com/DE-labtory/it-chain/common"
 	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
 	"github.com/DE-labtory/it-chain/conf"
-	"github.com/DE-labtory/iLogger"
 	"go.uber.org/fx"
 )
 

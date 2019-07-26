@@ -17,6 +17,7 @@
 package pbftfx
 
 import (
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/common"
 	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
 	"github.com/DE-labtory/it-chain/conf"
@@ -24,7 +25,6 @@ import (
 	"github.com/DE-labtory/it-chain/consensus/pbft/api"
 	"github.com/DE-labtory/it-chain/consensus/pbft/infra/adapter"
 	"github.com/DE-labtory/it-chain/consensus/pbft/infra/mem"
-	"github.com/DE-labtory/iLogger"
 	"go.uber.org/fx"
 )
 

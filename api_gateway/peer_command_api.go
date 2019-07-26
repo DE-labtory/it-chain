@@ -17,11 +17,11 @@
 package api_gateway
 
 import (
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/common/command"
 	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
 	"github.com/DE-labtory/it-chain/conf"
 	"github.com/DE-labtory/it-chain/grpc_gateway"
-	"github.com/DE-labtory/iLogger"
 	"github.com/pkg/errors"
 )
 

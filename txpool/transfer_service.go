@@ -19,8 +19,8 @@ package txpool
 import (
 	"sync"
 
-	"github.com/DE-labtory/it-chain/common"
 	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/common"
 )
 
 type Publisher func(topic string, data interface{}) (err error) //해당 publish함수는 midgard 에서 의존성 주입을 받기 위해 interface로 작성한다.

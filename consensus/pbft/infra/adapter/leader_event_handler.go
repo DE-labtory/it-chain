@@ -17,9 +17,9 @@
 package adapter
 
 import (
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/common/event"
 	"github.com/DE-labtory/it-chain/consensus/pbft/api"
-	"github.com/DE-labtory/iLogger"
 )
 
 type LeaderEventHandler struct {

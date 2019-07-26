@@ -19,10 +19,10 @@ package api
 import (
 	"errors"
 
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/common"
 	"github.com/DE-labtory/it-chain/common/event"
 	"github.com/DE-labtory/it-chain/consensus/pbft"
-	"github.com/DE-labtory/iLogger"
 )
 
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")

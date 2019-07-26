@@ -29,8 +29,8 @@ import (
 
 	"strings"
 
-	"github.com/DE-labtory/it-chain/ivm"
 	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/ivm"
 	"github.com/DE-labtory/tesseract"
 	"github.com/DE-labtory/tesseract/container"
 	"github.com/DE-labtory/tesseract/pb"

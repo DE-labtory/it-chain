@@ -20,6 +20,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/common"
 	"github.com/DE-labtory/it-chain/common/batch"
 	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
@@ -29,7 +30,6 @@ import (
 	"github.com/DE-labtory/it-chain/txpool/api"
 	"github.com/DE-labtory/it-chain/txpool/infra/adapter"
 	"github.com/DE-labtory/it-chain/txpool/infra/mem"
-	"github.com/DE-labtory/iLogger"
 	"go.uber.org/fx"
 )
 

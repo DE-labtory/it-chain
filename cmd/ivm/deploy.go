@@ -19,12 +19,12 @@ package ivm
 import (
 	"log"
 
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/common"
 	"github.com/DE-labtory/it-chain/common/command"
 	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
 	"github.com/DE-labtory/it-chain/conf"
 	"github.com/DE-labtory/it-chain/ivm"
-	"github.com/DE-labtory/iLogger"
 	"github.com/urfave/cli"
 )
 

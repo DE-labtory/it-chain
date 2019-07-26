@@ -19,10 +19,10 @@ package api
 import (
 	"encoding/json"
 
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/common"
 	"github.com/DE-labtory/it-chain/common/event"
 	"github.com/DE-labtory/it-chain/grpc_gateway"
-	"github.com/DE-labtory/iLogger"
 )
 
 type ConnectionApi struct {

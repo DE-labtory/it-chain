@@ -24,12 +24,12 @@ import (
 
 	"github.com/DE-labtory/bifrost"
 	"github.com/DE-labtory/bifrost/pb"
-	"github.com/DE-labtory/it-chain/common/command"
-	"github.com/DE-labtory/it-chain/grpc_gateway"
-	"github.com/DE-labtory/it-chain/grpc_gateway/infra"
 	"github.com/DE-labtory/heimdall"
 	"github.com/DE-labtory/heimdall/hashing"
 	"github.com/DE-labtory/heimdall/hecdsa"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/grpc_gateway"
+	"github.com/DE-labtory/it-chain/grpc_gateway/infra"
 	"github.com/stretchr/testify/assert"
 )
 

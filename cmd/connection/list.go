@@ -19,10 +19,10 @@ package connection
 import (
 	"fmt"
 
+	"github.com/DE-labtory/iLogger"
 	"github.com/DE-labtory/it-chain/common/command"
 	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
 	"github.com/DE-labtory/it-chain/conf"
-	"github.com/DE-labtory/iLogger"
 	"github.com/urfave/cli"
 )
 
