@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/it-chain/engine/grpc_gateway/api"
-	"github.com/it-chain/engine/grpc_gateway/mock"
+	"github.com/DE-labtory/it-chain/grpc_gateway/api"
+	"github.com/DE-labtory/it-chain/grpc_gateway/mock"
 	"github.com/stretchr/testify/assert"
 )
 

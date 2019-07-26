@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/txpool"
-	"github.com/it-chain/engine/txpool/api"
-	"github.com/it-chain/engine/txpool/infra/mem"
-	"github.com/it-chain/engine/txpool/test/mock"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/txpool"
+	"github.com/DE-labtory/it-chain/txpool/api"
+	"github.com/DE-labtory/it-chain/txpool/infra/mem"
+	"github.com/DE-labtory/it-chain/txpool/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 

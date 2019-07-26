@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,11 @@ import (
 
 	"strings"
 
-	"github.com/it-chain/engine/ivm"
-	"github.com/it-chain/iLogger"
-	"github.com/it-chain/tesseract"
-	"github.com/it-chain/tesseract/container"
-	"github.com/it-chain/tesseract/pb"
+	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/ivm"
+	"github.com/DE-labtory/tesseract"
+	"github.com/DE-labtory/tesseract/container"
+	"github.com/DE-labtory/tesseract/pb"
 	"github.com/rs/xid"
 )
 

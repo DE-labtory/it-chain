@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ package pbft
 import (
 	"sync"
 
-	"github.com/it-chain/sdk/logger"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/sdk/logger"
 )
 
 const (
@@ -31,7 +32,7 @@ const (
 type ElectionState string
 
 type ElectionService struct {
-	NodeId    string
+	NodeId    common.NodeID
 	candidate Representative // candidate peer to be leader later
 	leftTime  int            //left time in millisecond
 	state     ElectionState

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/client"
-	"github.com/it-chain/bifrost/server"
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/grpc_gateway"
-	"github.com/it-chain/heimdall/key"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/bifrost"
+	"github.com/DE-labtory/bifrost/client"
+	"github.com/DE-labtory/bifrost/server"
+	"github.com/DE-labtory/heimdall"
+	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/grpc_gateway"
 )
 
 var ErrConnAlreadyExist = errors.New("connection is already exist")
@@ -51,18 +51,19 @@ type GrpcHostService struct {
 	metaData          map[string]string
 	bifrostServer     *server.Server
 	publish           Publish
-	priKey            key.PriKey
-	pubKey            key.PubKey
+	priKey            heimdall.PriKey
+	pubKey            heimdall.PubKey
 	connectionHandler ConnectionHandler
+	crypto            bifrost.Crypto
 }
 
-func NewGrpcHostService(priKey key.PriKey, pubKey key.PubKey, publish Publish, hostInfo HostInfo) *GrpcHostService {
+func NewGrpcHostService(priKey heimdall.PriKey, pubKey heimdall.PubKey, publish Publish, hostInfo HostInfo, crypto bifrost.Crypto) *GrpcHostService {
 
 	metaData := make(map[string]string, 0)
 	metaData["GrpcGatewayAddress"] = hostInfo.GrpcGatewayAddress
 	metaData["ApiGatewayAddress"] = hostInfo.ApiGatewayAddress
 
-	s := server.New(bifrost.KeyOpts{PriKey: priKey, PubKey: pubKey}, metaData)
+	s := server.New(bifrost.KeyOpts{PriKey: priKey.(bifrost.Key), PubKey: pubKey.(bifrost.Key)}, crypto, metaData)
 
 	grpcHostService := &GrpcHostService{
 		connStore:     NewMemConnectionStore(),
@@ -71,6 +72,7 @@ func NewGrpcHostService(priKey key.PriKey, pubKey key.PubKey, publish Publish, h
 		metaData:      metaData,
 		priKey:        priKey,
 		pubKey:        pubKey,
+		crypto:        crypto,
 	}
 
 	s.OnConnection(grpcHostService.onConnection)
@@ -80,7 +82,7 @@ func NewGrpcHostService(priKey key.PriKey, pubKey key.PubKey, publish Publish, h
 }
 
 func (g *GrpcHostService) GetHostID() string {
-	return bifrost.FromPriKey(g.priKey)
+	return g.priKey.ID()
 }
 
 func (g *GrpcHostService) SetHandler(connectionHandler ConnectionHandler) {
@@ -88,7 +90,6 @@ func (g *GrpcHostService) SetHandler(connectionHandler ConnectionHandler) {
 }
 
 func (g *GrpcHostService) Dial(address string) (grpc_gateway.Connection, error) {
-
 	connection, err := client.Dial(g.buildDialOption(address))
 
 	if err != nil {
@@ -211,12 +212,11 @@ func (g *GrpcHostService) IsConnectionExist(connectionID string) bool {
 	return true
 }
 
-func (g GrpcHostService) buildDialOption(ConnectionID string) (string, client.ClientOpts, client.GrpcOpts, map[string]string) {
+func (g GrpcHostService) buildDialOption(address string) (string, map[string]string, client.ClientOpts, client.GrpcOpts, bifrost.Crypto) {
 
 	clientOpt := client.ClientOpts{
-		Ip:     ConnectionID,
-		PriKey: g.priKey,
-		PubKey: g.pubKey,
+		Ip:     address,
+		PubKey: g.pubKey.(bifrost.Key),
 	}
 
 	grpcOpt := client.GrpcOpts{
@@ -224,7 +224,7 @@ func (g GrpcHostService) buildDialOption(ConnectionID string) (string, client.Cl
 		Creds:      nil,
 	}
 
-	return ConnectionID, clientOpt, grpcOpt, g.metaData
+	return address, g.metaData, clientOpt, grpcOpt, g.crypto
 }
 
 func (s *GrpcHostService) Listen(ip string) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/it-chain/yggdrasill/common"
+	"github.com/DE-labtory/yggdrasill/common"
 )
 
 // ErrHashCalculationFailed 변수는 Hash 계산 중 발생한 에러를 정의한다.

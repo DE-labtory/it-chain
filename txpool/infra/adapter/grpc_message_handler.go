@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package adapter
 
 import (
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/txpool"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/txpool"
 )
 
 type transactionApiForSave interface {

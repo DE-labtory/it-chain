@@ -22,6 +22,7 @@ sample/db/test/*
 
 # key
 .keys
+/keystore
 
 # ledger
 .ledger

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/it-chain/engine/txpool"
-	"github.com/it-chain/engine/txpool/infra/mem"
+	"github.com/DE-labtory/it-chain/txpool"
+	"github.com/DE-labtory/it-chain/txpool/infra/mem"
 	"github.com/stretchr/testify/assert"
 )
 

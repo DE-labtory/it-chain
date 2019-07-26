@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,12 @@ package model
 
 // it-chain의 공통적이고 중요한 설정을 담는 구조체이다.
 type EngineConfiguration struct {
+	SecLv                int
+	SigAlgo              string
 	LogPath              string
 	KeyPath              string
 	TmpPath              string
+	PriKeyPath           string
 	Mode                 string
 	Amqp                 string
 	BootstrapNodeAddress string
@@ -28,9 +31,12 @@ type EngineConfiguration struct {
 
 func NewEngineConfiguration() EngineConfiguration {
 	return EngineConfiguration{
+		SecLv:                192,
+		SigAlgo:              "ECDSA",
 		LogPath:              "log/it-chain.log",
-		KeyPath:              ".it-chain/",
 		TmpPath:              ".tmp/",
+		PriKeyPath:           "keystore/private_key",
+		KeyPath:              "keystore/peer_keys",
 		Mode:                 "solo",
 		BootstrapNodeAddress: "",
 		Amqp:                 "amqp://guest:guest@localhost:5672/",

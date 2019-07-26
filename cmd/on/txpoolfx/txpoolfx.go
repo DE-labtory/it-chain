@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,16 @@ import (
 	"context"
 	"time"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/batch"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/txpool"
-	"github.com/it-chain/engine/txpool/api"
-	"github.com/it-chain/engine/txpool/infra/adapter"
-	"github.com/it-chain/engine/txpool/infra/mem"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/batch"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
+	"github.com/DE-labtory/it-chain/conf"
+	"github.com/DE-labtory/it-chain/txpool"
+	"github.com/DE-labtory/it-chain/txpool/api"
+	"github.com/DE-labtory/it-chain/txpool/infra/adapter"
+	"github.com/DE-labtory/it-chain/txpool/infra/mem"
 	"go.uber.org/fx"
 )
 
@@ -51,11 +51,10 @@ var Module = fx.Options(
 	),
 )
 
-func NewLeaderRepository(config *conf.Configuration) *mem.LeaderRepository {
-	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
+func NewLeaderRepository(config *conf.Configuration, nodeId common.NodeID) *mem.LeaderRepository {
 	repo := mem.NewLeaderRepository()
 	if config.Engine.BootstrapNodeAddress == "" {
-		repo.Set(txpool.Leader{NodeId})
+		repo.Set(txpool.Leader{nodeId})
 	}
 
 	return repo
@@ -69,9 +68,8 @@ func NewTransferService(transactionRepository *mem.TransactionRepository, leader
 	return txpool.NewTransferService(transactionRepository, leaderRepository, eventService)
 }
 
-func NewTxpoolApi(config *conf.Configuration, transactionRepository *mem.TransactionRepository, leaderRepository *mem.LeaderRepository, transferService *txpool.TransferService, blockProposalService *txpool.BlockProposalService) *api.TransactionApi {
-	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
-	return api.NewTransactionApi(NodeId, transactionRepository, leaderRepository, transferService, blockProposalService)
+func NewTxpoolApi(config *conf.Configuration, transactionRepository *mem.TransactionRepository, leaderRepository *mem.LeaderRepository, transferService *txpool.TransferService, blockProposalService *txpool.BlockProposalService, nodeId common.NodeID) *api.TransactionApi {
+	return api.NewTransactionApi(nodeId, transactionRepository, leaderRepository, transferService, blockProposalService)
 }
 
 func NewLeaderEventHandler(leaderRepository *mem.LeaderRepository) *adapter.LeaderEventHandler {

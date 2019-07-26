@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,17 @@ import (
 	"os"
 	"testing"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/ivm"
-	"github.com/it-chain/engine/ivm/api"
-	"github.com/it-chain/engine/ivm/infra/git"
-	"github.com/it-chain/engine/ivm/infra/tesseract"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/ivm"
+	"github.com/DE-labtory/it-chain/ivm/api"
+	"github.com/DE-labtory/it-chain/ivm/infra/git"
+	"github.com/DE-labtory/it-chain/ivm/infra/tesseract"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestICodeApi_Deploy(t *testing.T) {
 
-	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/.tmp/"
+	savePath := os.Getenv("GOPATH") + "/src/github.com/DE-labtory/it-chain/.tmp/"
 	defer os.RemoveAll(savePath)
 
 	sshPath := "./id_rsa"
@@ -53,7 +53,7 @@ func TestICodeApi_Deploy(t *testing.T) {
 }
 
 func TestICodeApi_UnDeploy(t *testing.T) {
-	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/.tmp/"
+	savePath := os.Getenv("GOPATH") + "/src/github.com/DE-labtory/it-chain/.tmp/"
 	defer os.RemoveAll(savePath)
 
 	sshPath := "./id_rsa"
@@ -72,7 +72,7 @@ func TestICodeApi_UnDeploy(t *testing.T) {
 }
 
 func TestICodeApi_ExecuteRequest(t *testing.T) {
-	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/.tmp/"
+	savePath := os.Getenv("GOPATH") + "/src/github.com/DE-labtory/it-chain/.tmp/"
 	defer os.RemoveAll(savePath)
 
 	sshPath := "./id_rsa"
@@ -96,7 +96,7 @@ func TestICodeApi_ExecuteRequest(t *testing.T) {
 }
 
 func TestICodeApi_ExecuteRequestList(t *testing.T) {
-	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/.tmp/"
+	savePath := os.Getenv("GOPATH") + "/src/github.com/DE-labtory/it-chain/.tmp/"
 	defer os.RemoveAll(savePath)
 
 	sshPath := "./id_rsa"
@@ -130,7 +130,7 @@ func TestICodeApi_ExecuteRequestList(t *testing.T) {
 }
 
 func TestICodeApi_GetRunningICodeIDList(t *testing.T) {
-	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/.tmp/"
+	savePath := os.Getenv("GOPATH") + "/src/github.com/DE-labtory/it-chain/.tmp/"
 	defer os.RemoveAll(savePath)
 
 	sshPath := "./id_rsa"

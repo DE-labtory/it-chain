@@ -4,11 +4,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
-	"github.com/it-chain/engine/consensus/pbft/test/mock"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/consensus/pbft"
+	"github.com/DE-labtory/it-chain/consensus/pbft/infra/adapter"
+	"github.com/DE-labtory/it-chain/consensus/pbft/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -61,7 +61,7 @@ func TestLeaderCommandHandler_HandleMessageReceive_LeaderDeliveryProtocol(t *tes
 
 	// given
 	parliamentApi := &mock.ParliamentApi{}
-	parliamentApi.UpdateLeaderFunc = func(nodeId string) error {
+	parliamentApi.UpdateLeaderFunc = func(nodeId common.NodeID) error {
 		// then
 		assert.Equal(t, leaderDeliveryMsg.Leader.LeaderId, nodeId)
 		return nil

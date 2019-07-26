@@ -1,6 +1,6 @@
 ## Contribution 방법
 
-0.  https://github.com/it-chain/engine 을 `fork`하기
+0.  https://github.com/DE-labtory/it-chain을 `fork`하기
 1.  작업 할 내용 이슈에 등록하기 or 이슈에 이미 등록된 작업 선택 (작업중인 이슈에 댓글로 표시)
 2.  이슈로 등록된 작업 수행
 3.  수행한 작업의 문서, 단위 테스트 필수로 작성하기
@@ -17,7 +17,7 @@
 
 ### CLA
 
-To get started, <a href="https://www.clahub.com/agreements/it-chain/engine">sign the Contributor License Agreement</a>.
+To get started, <a href="https://www.clahub.com/agreements/DE-labtory/it-chain">sign the Contributor License Agreement</a>.
 
 
 ### Tip

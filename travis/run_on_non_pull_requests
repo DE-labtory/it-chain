@@ -6,14 +6,14 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-go test -p 1 ./...
+go test -p 1 -v -mod=vendor ./...
 
 if [ $? -ne 0 ]; then
   echo "go test fail" >&2
   exit 1
 fi
 
-go test -p 1 ./... -covermode=count -coverprofile=coverage.out
+go test -p 1 -v -mod=vendor ./... -covermode=count -coverprofile=coverage.out
 
 if [ $? -ne 0 ]; then
   echo "go test coverage fail" >&2
@@ -27,4 +27,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# remove
+rm total.out cover.out
 exit 0

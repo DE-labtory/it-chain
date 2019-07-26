@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/it-chain/engine/cmd/on/api-gatewayfx"
-	"github.com/it-chain/engine/cmd/on/blockchainfx"
-	"github.com/it-chain/engine/cmd/on/commonfx"
-	"github.com/it-chain/engine/cmd/on/grpc_gatewayfx"
-	"github.com/it-chain/engine/cmd/on/ivmfx"
-	"github.com/it-chain/engine/cmd/on/pbftfx"
-	"github.com/it-chain/engine/cmd/on/txpoolfx"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/iLogger"
+	api_gatewayfx "github.com/DE-labtory/it-chain/cmd/on/api-gatewayfx"
+	"github.com/DE-labtory/it-chain/cmd/on/blockchainfx"
+	"github.com/DE-labtory/it-chain/cmd/on/commonfx"
+	"github.com/DE-labtory/it-chain/cmd/on/grpc_gatewayfx"
+	"github.com/DE-labtory/it-chain/cmd/on/ivmfx"
+	"github.com/DE-labtory/it-chain/cmd/on/pbftfx"
+	"github.com/DE-labtory/it-chain/cmd/on/txpoolfx"
 	"github.com/urfave/cli"
 	"go.uber.org/fx"
 )

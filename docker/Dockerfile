@@ -66,11 +66,11 @@ ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 RUN mkdir /go/src/github.com ; \
-	mkdir /go/src/github.com/it-chain ;\
-	cd /go/src/github.com/it-chain ;\
-	git clone https://github.com/it-chain/engine ;\
+	mkdir /go/src/github.com/DE-labtory ;\
+	cd /go/src/github.com/DE-labtory ;\
+	git clone https://github.com/DE-labtory/it-chain ;\
 	go get -u github.com/golang/dep/cmd/dep ;\
-	cd engine ;\
+	cd it-chain ;\
 	/go/bin/dep ensure
 	
 ADD ./entrypoint.sh /entrypoint.sh

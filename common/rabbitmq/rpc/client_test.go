@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/midgard"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
+	"github.com/DE-labtory/midgard"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -1,7 +1,10 @@
 engine:
+  seclv: 192
+  sigalgo: ECDSA
   logpath: log/it-chain.log
-  keypath: .it-chain/
+  keypath: ./keystore/peer_keys
   tmppath: .tmp/
+  prikeypath: ./keystore/private_key
   mode: solo
   amqp: amqp://guest:guest@localhost:5672/
   bootstrapnodeaddress: ""

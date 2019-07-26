@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/it-chain/engine/ivm"
-	"github.com/it-chain/engine/ivm/infra/tesseract"
+	"github.com/DE-labtory/it-chain/ivm"
+	"github.com/DE-labtory/it-chain/ivm/infra/tesseract"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -41,7 +41,7 @@ func setContainer(t *testing.T) (*tesseract.ContainerService, func()) {
 	icode := ivm.ICode{
 		ID:             testIcodeID,
 		RepositoryName: "test ivm",
-		Path:           GOPATH + "/src/github.com/it-chain/engine/ivm/mock/",
+		Path:           GOPATH + "/src/github.com/DE-labtory/it-chain/ivm/mock/",
 		GitUrl:         "github.com/mock",
 		FolderName:     "github.com/mock",
 	}

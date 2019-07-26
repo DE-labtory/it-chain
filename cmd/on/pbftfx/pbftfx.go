@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@
 package pbftfx
 
 import (
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/engine/consensus/pbft/api"
-	"github.com/it-chain/engine/consensus/pbft/infra/adapter"
-	"github.com/it-chain/engine/consensus/pbft/infra/mem"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/conf"
+	"github.com/DE-labtory/it-chain/consensus/pbft"
+	"github.com/DE-labtory/it-chain/consensus/pbft/api"
+	"github.com/DE-labtory/it-chain/consensus/pbft/infra/adapter"
+	"github.com/DE-labtory/it-chain/consensus/pbft/infra/mem"
 	"go.uber.org/fx"
 )
 
@@ -49,19 +49,16 @@ var Module = fx.Options(
 	),
 )
 
-func NewElectionService(config *conf.Configuration) *pbft.ElectionService {
-	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
-	return pbft.NewElectionService(NodeId, 30, pbft.NORMAL, 0)
+func NewElectionService(config *conf.Configuration, nodeId common.NodeID) *pbft.ElectionService {
+	return pbft.NewElectionService(nodeId, 30, pbft.NORMAL, 0)
 }
 
-func NewParliamentRepository(config *conf.Configuration) *mem.ParliamentRepository {
-
-	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
+func NewParliamentRepository(config *conf.Configuration, nodeId common.NodeID) *mem.ParliamentRepository {
 	parliament := pbft.NewParliament()
-	parliament.AddRepresentative(pbft.NewRepresentative(NodeId))
+	parliament.AddRepresentative(pbft.NewRepresentative(nodeId))
 
 	if config.Engine.BootstrapNodeAddress == "" {
-		parliament.SetLeader(NodeId)
+		parliament.SetLeader(nodeId)
 	}
 
 	return mem.NewParliamentRepositoryWithParliament(parliament)
@@ -71,19 +68,16 @@ func NewPropagateService(service common.EventService) *pbft.PropagateService {
 	return pbft.NewPropagateService(service)
 }
 
-func NewStateApi(config *conf.Configuration, propagateService *pbft.PropagateService, service common.EventService, paliamentrepository *mem.ParliamentRepository, stateRepository *mem.StateRepository) *api.StateApi {
-	PublisherId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
-
-	return api.NewStateApi(PublisherId, propagateService, service, paliamentrepository, stateRepository)
+func NewStateApi(config *conf.Configuration, propagateService *pbft.PropagateService, service common.EventService, paliamentrepository *mem.ParliamentRepository, stateRepository *mem.StateRepository, publisherId common.NodeID) *api.StateApi {
+	return api.NewStateApi(publisherId, propagateService, service, paliamentrepository, stateRepository)
 }
 
 func NewElectionApi(electionService *pbft.ElectionService, parliamentRepository *mem.ParliamentRepository, eventService common.EventService) *api.ElectionApi {
 	return api.NewElectionApi(electionService, parliamentRepository, eventService)
 }
 
-func NewParliamentApi(config *conf.Configuration, parliamentRepository *mem.ParliamentRepository, eventService common.EventService) *api.ParliamentApi {
-	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
-	return api.NewParliamentApi(NodeId, parliamentRepository, eventService)
+func NewParliamentApi(config *conf.Configuration, parliamentRepository *mem.ParliamentRepository, eventService common.EventService, nodeId common.NodeID) *api.ParliamentApi {
+	return api.NewParliamentApi(nodeId, parliamentRepository, eventService)
 }
 
 func NewNewLeaderCommandHandler(parliamentApi *api.ParliamentApi) *adapter.LeaderCommandHandler {

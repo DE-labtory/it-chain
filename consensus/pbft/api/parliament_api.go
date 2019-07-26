@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package api
 import (
 	"errors"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/event"
+	"github.com/DE-labtory/it-chain/consensus/pbft"
 )
 
 var ErrEmptyLeaderId = errors.New("empty leader id proposed")
@@ -30,12 +30,12 @@ var ErrEmptyConnectionId = errors.New("empty connection id proposed")
 var ErrNoMatchingPeerWithIpAddress = errors.New("no matching peer with ip address")
 
 type ParliamentApi struct {
-	nodeId               string
+	nodeId               common.NodeID
 	parliamentRepository pbft.ParliamentRepository
 	eventService         common.EventService
 }
 
-func NewParliamentApi(nodeId string, parliamentRepository pbft.ParliamentRepository, eventService common.EventService) *ParliamentApi {
+func NewParliamentApi(nodeId common.NodeID, parliamentRepository pbft.ParliamentRepository, eventService common.EventService) *ParliamentApi {
 
 	return &ParliamentApi{
 		nodeId:               nodeId,
@@ -67,7 +67,7 @@ func (p *ParliamentApi) RemoveRepresentative(representativeId string) {
 	p.parliamentRepository.Save(parliament)
 }
 
-func (p *ParliamentApi) UpdateLeader(nodeId string) error {
+func (p *ParliamentApi) UpdateLeader(nodeId common.NodeID) error {
 	//1. loop peer list and find specific address
 	//2. update specific peer as leader
 

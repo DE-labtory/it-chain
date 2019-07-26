@@ -13,7 +13,7 @@ USAGE:
 ## GLOBAL OPTIONS
 - --config value : explicit set config file 
 ```
-[root@it-chain engine]# it-chain --config explicit_config_file.yaml
+[root@it-chain it-chain]# it-chain --config explicit_config_file.yaml
 
         ___  _________               ________  ___  ___  ________  ___  ________
         |\  \|\___   ___\            |\   ____\|\  \|\  \|\   __  \|\  \|\   ___  \
@@ -27,13 +27,13 @@ USAGE:
 
 - --debug : set debug mode
 ```
-[root@it-chain engine]# it-chain --debug
+[root@it-chain it-chain]# it-chain --debug
 DEBU[2018-09-29T20:53:28+09:00] You can see debug log because you called global options debug.
 ```
 
 - --help, -h : show help
 ```
-[root@it-chain engine]# it-chain -h
+[root@it-chain it-chain]# it-chain -h
 NAME:
    it-chain - A new cli application
 
@@ -59,14 +59,14 @@ GLOBAL OPTIONS:
 ```
 - --version, -v : show version
 ```
-[root@it-chain engine]# it-chain -v
+[root@it-chain it-chain]# it-chain -v
 it-chain version 0.1.1
 ```
 
 ## COMMANDS - ivm
 - command option
 ```
-[root@it-chain engine]# it-chain i
+[root@it-chain it-chain]# it-chain i
 NAME:
    it-chain ivm - options for ivm
 
@@ -86,38 +86,38 @@ OPTIONS:
   - deploy : ivm deploy
     - with ssh/password
     ```
-    [root@it-chain engine]# it-chain ivm deploy github.com/nesticat/learn-icode ~/.ssh/id_rsa passwd
+    [root@it-chain it-chain]# it-chain ivm deploy github.com/nesticat/learn-icode ~/.ssh/id_rsa passwd
     INFO[2018-09-27T21:02:08+09:00] [Cmd] deploying icode...
     INFO[2018-09-27T21:02:08+09:00] [Cmd] This may take a few minutes
     ...
     ```
     - without ssh/password
     ```
-    [root@it-chain engine]# it-chain ivm deploy github.com/nesticat/learn-icode ~/.ssh/id_rsa
+    [root@it-chain it-chain]# it-chain ivm deploy github.com/nesticat/learn-icode ~/.ssh/id_rsa
     INFO[2018-09-27T21:00:32+09:00] [Cmd] deploying icode...
     INFO[2018-09-27T21:00:32+09:00] [Cmd] This may take a few minutes
     ...
     ```
   - undeploy : ivm undeploy with icode-id
   ```  
-  [root@it-chain engine]# it-chain ivm undeploy bemcj4e5apva4tp7e400
+  [root@it-chain it-chain]# it-chain ivm undeploy bemcj4e5apva4tp7e400
   2018/09/27 21:15:48 [bemcj4e5apva4tp7e400] icode has undeployed
   ```  
   - invoke : ivm invoke with icode-id, function-name and arguments
   ```
-  [root@it-chain engine]# it-chain ivm invoke bemcj4e5apva4tp7e400 initA
+  [root@it-chain it-chain]# it-chain ivm invoke bemcj4e5apva4tp7e400 initA
   INFO[2018-09-27T21:19:55+09:00] [Cmd] Invoke icode - icodeID: [bemcj4e5apva4tp7e400]
   INFO[2018-09-27T21:19:55+09:00] [Cmd] Transactions are created - ID: [bemclqu5apva4g8550kg]
   ```
   - query : ivm query with icode-id, function-name and arguments
   ```
-  [root@it-chain engine]# it-chain ivm query bemcj4e5apva4tp7e400 getA
+  [root@it-chain it-chain]# it-chain ivm query bemcj4e5apva4tp7e400 getA
   INFO[2018-09-27T21:21:44+09:00] [Cmd] Querying icode - icodeID: [bemcj4e5apva4tp7e400], func: [getA]
   INFO[2018-09-27T21:21:44+09:00] [CMD] Querying result - key: [A], value: [1]
   ```
   - list : show ivm list
   ```
-  [root@it-chain engine]# it-chain ivm list
+  [root@it-chain it-chain]# it-chain ivm list
   Index    ID                      Version         GitUrl
   [0]      [bemcj4e5apva4tp7e400]  [v1.1]          [github.com/nesticat/learn-icode]
   ```
@@ -125,7 +125,7 @@ OPTIONS:
 ## COMMANDS - connection
 - command option
 ```
-[root@it-chain engine]# it-chain connection
+[root@it-chain it-chain]# it-chain connection
 NAME:
    it-chain connection - options for connection
 
@@ -142,19 +142,19 @@ OPTIONS:
 ```
   - dial : connection with node-ip
   ```
-  [root@it-chain engine]# it-chain connection dial 192.168.56.230:5000
+  [root@it-chain it-chain]# it-chain connection dial 192.168.56.230:5000
   INFO[2018-09-28T09:32:14+09:00] [Cmd] Creating connection - Address: [192.168.56.230:5000]
   INFO[2018-09-28T09:32:14+09:00] [Cmd] Connection created - gRPC-Address: [192.168.56.230:5000], Id:[B69aLYLeVCeLFTih5fDpuZVkYh4AF78ejZBTcEfkBbz2]
   ```
   - list : show connection list
   ```
-  [root@it-chain engine]# it-chain connection list
+  [root@it-chain it-chain]# it-chain connection list
   Index    ID                                              gRPC-Address    Api-Address
   [0]      [B69aLYLeVCeLFTih5fDpuZVkYh4AF78ejZBTcEfkBbz2]  [192.168.56.230:5000]   [192.168.56.230:4000]
   ```
   - join : connection with node-ip-of-the-network
   ```
-  [root@sykwon engine]# it-chain connection join 192.168.56.230:5000
+  [root@sykwon it-chain]# it-chain connection join 192.168.56.230:5000
   INFO[2018-09-28T09:56:34+09:00] [Cmd] Joining network - Address: [192.168.56.230:5000]
   INFO[2018-09-28T09:56:34+09:00] [Cmd] Successfully request to join network
   ```

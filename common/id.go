@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,53 +19,123 @@ package common
 import (
 	"log"
 
-	"github.com/it-chain/bifrost"
-	"github.com/it-chain/heimdall/key"
+	"errors"
+
+	"github.com/DE-labtory/bifrost"
+	"github.com/DE-labtory/heimdall"
+	"github.com/DE-labtory/heimdall/config"
+	"github.com/DE-labtory/heimdall/hecdsa"
+	"github.com/DE-labtory/iLogger"
 )
 
-func GetNodeID(keyPath string, keyType string) string {
-	pri, _ := LoadKeyPair(keyPath, keyType)
+var ErrSigAlgoNotSupported = errors.New("signature algorithm [%s] not supported")
+var ErrKeyGen = errors.New("key generation error")
+var ErrKeyStore = errors.New("key store error")
 
-	return bifrost.FromPriKey(pri)
+type NodeID = string
+
+func GetNodeID(sigAlgo, keyDirPath string) NodeID {
+	pri, _ := LoadKeyPair(sigAlgo, keyDirPath)
+
+	return pri.(heimdall.Key).ID()
 }
 
-func LoadKeyPair(keyPath string, keyType string) (key.PriKey, key.PubKey) {
+func LoadKeyPair(sigAlgo, keyDirPath string) (heimdall.PriKey, heimdall.PubKey) {
+	switch sigAlgo {
+	case "ECDSA":
+		pri, err := hecdsa.LoadPriKeyWithoutPwd(keyDirPath)
+		pub := pri.(heimdall.PriKey).PublicKey()
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 
-	km, err := key.NewKeyManager(keyPath)
-
-	if err != nil {
-		log.Fatal(err.Error())
+		return pri.(heimdall.PriKey), pub
 	}
 
-	pri, pub, err := km.GetKey()
-
-	if err == nil {
-		return pri, pub
-	}
-
-	pri, pub, err = km.GenerateKey(ConvertToKeyGenOpts(keyType))
-
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	pri, pub, err = km.GetKey()
-
-	return pri, pub
+	iLogger.Error(nil, "[Heimdall] Input signing algorithm is not supported")
+	return nil, nil
 }
 
-func ConvertToKeyGenOpts(keyType string) key.KeyGenOpts {
+type ECDSASigner struct {
+	keyDirPath string
+	opt        heimdall.SignerOpts
+}
 
-	switch keyType {
-	case "RSA1024":
-		return key.RSA1024
-	case "RSA2048":
-		return key.RSA2048
-	case "RSA4096":
-		return key.RSA4096
-	case "ECDSA256":
-		return key.ECDSA256
+func (signer *ECDSASigner) Sign(message []byte) ([]byte, error) {
+	return hecdsa.SignWithKeyInLocal(signer.keyDirPath, message, signer.opt)
+}
+
+type ECDSAVerifier struct {
+	opt heimdall.SignerOpts
+}
+
+func (verifier *ECDSAVerifier) Verify(peerKey bifrost.Key, signature, message []byte) (bool, error) {
+	return hecdsa.Verify(peerKey.(heimdall.PubKey), signature, message, verifier.opt)
+}
+
+type ECDSAKeyRecoverer struct {
+}
+
+func (rec *ECDSAKeyRecoverer) RecoverKeyFromByte(keyBytes []byte, isPrivate bool) (bifrost.Key, error) {
+	recoverer := &hecdsa.KeyRecoverer{}
+	key, err := recoverer.RecoverKeyFromByte(keyBytes, isPrivate)
+	return key.(bifrost.Key), err
+}
+
+func MakeCrypto(secConf *config.Config, keyDirPath string) (bifrost.Crypto, error) {
+
+	var signerOpt heimdall.SignerOpts
+	switch secConf.SigAlgo {
+	case "ECDSA":
+		signerOpt = hecdsa.NewSignerOpts(secConf.HashOpt)
+	case "RSA":
+		iLogger.Errorf(nil, "[Heimdall] Signature algorithm [%s] not supported", secConf.SigAlgo)
+		return bifrost.Crypto{}, ErrSigAlgoNotSupported
 	default:
-		return key.RSA1024
+		iLogger.Errorf(nil, "[Heimdall] Signature algorithm [%s] not supported", secConf.SigAlgo)
+		return bifrost.Crypto{}, ErrSigAlgoNotSupported
 	}
+
+	signer := &ECDSASigner{
+		keyDirPath: keyDirPath,
+		opt:        signerOpt,
+	}
+
+	verifier := &ECDSAVerifier{
+		opt: signerOpt,
+	}
+	keyRecoverer := &ECDSAKeyRecoverer{}
+
+	return bifrost.Crypto{
+		Signer:       signer,
+		Verifier:     verifier,
+		KeyRecoverer: keyRecoverer,
+	}, nil
+
+}
+
+func GenerateAndStoreKeyPair(secConf *config.Config, keyDirPath string) (pri heimdall.PriKey, pub heimdall.PubKey, err error) {
+	switch secConf.SigAlgo {
+	case "ECDSA":
+		pri, err = hecdsa.GenerateKey(secConf.KeyGenOpt)
+		if err != nil {
+			iLogger.Errorf(nil, "[Heimdall] Key generation error: [%s]", err.Error())
+			return nil, nil, ErrKeyGen
+		}
+		pub = pri.PublicKey()
+
+		err = hecdsa.StorePriKeyWithoutPwd(pri, keyDirPath)
+		if err != nil {
+			iLogger.Errorf(nil, "%s", err)
+			return nil, nil, ErrKeyStore
+		}
+	case "RSA":
+		iLogger.Errorf(nil, "[Heimdall] Signature algorithm [%s] not supported", secConf.SigAlgo)
+		return nil, nil, ErrSigAlgoNotSupported
+	default:
+		iLogger.Errorf(nil, "[Heimdall] Signature algorithm [%s] not supported", secConf.SigAlgo)
+		return nil, nil, ErrSigAlgoNotSupported
+	}
+
+	return pri, pub, nil
 }

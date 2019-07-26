@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package adapter_test
 import (
 	"testing"
 
-	"github.com/it-chain/engine/api_gateway"
-	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/blockchain/infra/adapter"
-	"github.com/it-chain/engine/blockchain/test/mock"
+	"github.com/DE-labtory/it-chain/api_gateway"
+	"github.com/DE-labtory/it-chain/blockchain"
+	"github.com/DE-labtory/it-chain/blockchain/infra/adapter"
+	"github.com/DE-labtory/it-chain/blockchain/test/mock"
 	"github.com/stretchr/testify/assert"
 )
 

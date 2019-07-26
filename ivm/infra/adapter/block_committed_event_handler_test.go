@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/engine/ivm"
-	"github.com/it-chain/engine/ivm/api"
-	"github.com/it-chain/engine/ivm/infra/adapter"
-	"github.com/it-chain/engine/ivm/infra/git"
-	"github.com/it-chain/engine/ivm/infra/tesseract"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/event"
+	"github.com/DE-labtory/it-chain/ivm"
+	"github.com/DE-labtory/it-chain/ivm/api"
+	"github.com/DE-labtory/it-chain/ivm/infra/adapter"
+	"github.com/DE-labtory/it-chain/ivm/infra/git"
+	"github.com/DE-labtory/it-chain/ivm/infra/tesseract"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -82,7 +82,7 @@ func setUp(t *testing.T) (*adapter.BlockCommittedEventHandler, *tesseract.Contai
 	icode := ivm.ICode{
 		ID:             "a1",
 		RepositoryName: "test ivm",
-		Path:           GOPATH + "/src/github.com/it-chain/engine/ivm/mock/",
+		Path:           GOPATH + "/src/github.com/DE-labtory/it-chain/ivm/mock/",
 		GitUrl:         "github.com/mock",
 		FolderName:     "github.com/mock",
 	}

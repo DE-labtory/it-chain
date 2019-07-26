@@ -3,9 +3,9 @@ package mock
 import (
 	"time"
 
-	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/common/event"
-	"github.com/it-chain/yggdrasill/common"
+	"github.com/DE-labtory/it-chain/blockchain"
+	"github.com/DE-labtory/it-chain/common/event"
+	"github.com/DE-labtory/yggdrasill/common"
 )
 
 func GetNewBlock(prevSeal []byte, height uint64) *blockchain.DefaultBlock {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ import (
 	"context"
 	"os"
 
-	"github.com/it-chain/engine/api_gateway"
-	"github.com/it-chain/engine/blockchain/api"
-	"github.com/it-chain/engine/blockchain/infra/adapter"
-	"github.com/it-chain/engine/blockchain/infra/mem"
-	"github.com/it-chain/engine/blockchain/infra/repo"
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/api_gateway"
+	"github.com/DE-labtory/it-chain/blockchain/api"
+	"github.com/DE-labtory/it-chain/blockchain/infra/adapter"
+	"github.com/DE-labtory/it-chain/blockchain/infra/mem"
+	"github.com/DE-labtory/it-chain/blockchain/infra/repo"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/conf"
 	"go.uber.org/fx"
 )
 
@@ -72,15 +72,12 @@ func NewSyncStateRepository() *mem.SyncStateRepository {
 	return mem.NewSyncStateRepository()
 }
 
-func NewBlockApi(config *conf.Configuration, blockRepository *repo.BlockRepository, blockPool *mem.BlockPool, service common.EventService) (*api.BlockApi, error) {
-
-	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
-	return api.NewBlockApi(NodeId, blockRepository, service, blockPool)
+func NewBlockApi(config *conf.Configuration, blockRepository *repo.BlockRepository, blockPool *mem.BlockPool, service common.EventService, nodeId common.NodeID) (*api.BlockApi, error) {
+	return api.NewBlockApi(nodeId, blockRepository, service, blockPool)
 }
 
-func NewSyncApi(config *conf.Configuration, blockRepository *repo.BlockRepository, syncStateRepository *mem.SyncStateRepository, eventService common.EventService, queryService *adapter.QuerySerivce, blockPool *mem.BlockPool) (*api.SyncApi, error) {
-	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
-	api, err := api.NewSyncApi(NodeId, blockRepository, syncStateRepository, eventService, queryService, blockPool)
+func NewSyncApi(config *conf.Configuration, blockRepository *repo.BlockRepository, syncStateRepository *mem.SyncStateRepository, eventService common.EventService, queryService *adapter.QuerySerivce, blockPool *mem.BlockPool, nodeId common.NodeID) (*api.SyncApi, error) {
+	api, err := api.NewSyncApi(nodeId, blockRepository, syncStateRepository, eventService, queryService, blockPool)
 	return &api, err
 }
 

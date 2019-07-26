@@ -30,11 +30,11 @@ config 모델을 생성/변경 후 개발 환경에 맞는 스크립트 파일�
 
 Linux/Unix(Mac OS)
 
-     user:~/go/src/github.com/it-chain/engine/conf$ sh generate_conf.sh
+     user:~/go/src/github.com/DE-labtory/it-chain/conf$ sh generate_conf.sh
 
 Windows
 
-    c:/~~~/go/src/github.com/it-chain/engine/conf> generate_conf.bat
+    c:/~~~/go/src/github.com/DE-labtory/it-chain/conf> generate_conf.bat
     또는
     generate_conf.bat 을 클릭하여 실행
 
@@ -44,7 +44,7 @@ Windows
 
 GetConfiguration 함수를 호출하여 config 데이터를 불러올 수 있다.
 
-    import "github.com/it-chain/engine/conf"
+    import "github.com/DE-labtory/it-chain/conf"
 
     func foo(){
         config = conf.GetConfiguration()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/it-chain/engine/blockchain"
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/yggdrasill/common"
+	"github.com/DE-labtory/it-chain/blockchain"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/yggdrasill/common"
 	"github.com/rs/xid"
 )
 

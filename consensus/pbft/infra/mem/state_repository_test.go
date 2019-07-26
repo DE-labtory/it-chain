@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package mem_test
 import (
 	"testing"
 
-	"github.com/it-chain/engine/consensus/pbft"
-	"github.com/it-chain/engine/consensus/pbft/infra/mem"
+	"github.com/DE-labtory/it-chain/consensus/pbft"
+	"github.com/DE-labtory/it-chain/consensus/pbft/infra/mem"
 	"github.com/stretchr/testify/assert"
 )
 

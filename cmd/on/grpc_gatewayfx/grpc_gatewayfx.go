@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,15 @@ package grpc_gatewayfx
 import (
 	"context"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/engine/grpc_gateway/api"
-	"github.com/it-chain/engine/grpc_gateway/infra"
-	"github.com/it-chain/engine/grpc_gateway/infra/adapter"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/heimdall/config"
+	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
+	"github.com/DE-labtory/it-chain/conf"
+	"github.com/DE-labtory/it-chain/grpc_gateway/api"
+	"github.com/DE-labtory/it-chain/grpc_gateway/infra"
+	"github.com/DE-labtory/it-chain/grpc_gateway/infra/adapter"
 	"go.uber.org/fx"
 )
 
@@ -46,11 +47,23 @@ var Module = fx.Options(
 )
 
 func NewGrpcHostService(conf *conf.Configuration, publisher *pubsub.TopicPublisher) *infra.GrpcHostService {
-	priKey, pubKey := infra.LoadKeyPair(conf.Engine.KeyPath, "ECDSA256")
+	secConf, err := config.NewSimpleConfig(conf.Engine.SecLv)
+	if err != nil {
+		panic(err)
+	}
+
+	crypto, err := common.MakeCrypto(secConf, conf.Engine.PriKeyPath)
+	if err != nil {
+		panic(err)
+	}
+
+	priKey, pubKey := common.LoadKeyPair(conf.Engine.SigAlgo, conf.Engine.PriKeyPath)
+
+	// priKey, pubKey := infra.LoadKeyPair(conf.Engine.KeyPath, "ECDSA256")
 	hostService := infra.NewGrpcHostService(priKey, pubKey, publisher.Publish, infra.HostInfo{
 		ApiGatewayAddress:  conf.ApiGateway.Address + ":" + conf.ApiGateway.Port,
 		GrpcGatewayAddress: conf.GrpcGateway.Address + ":" + conf.GrpcGateway.Port,
-	})
+	}, crypto)
 	return hostService
 }
 

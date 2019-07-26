@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,22 @@ package commonfx
 import (
 	"context"
 
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/engine/conf"
+	"github.com/DE-labtory/heimdall"
+	"github.com/DE-labtory/heimdall/config"
+	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
+	"github.com/DE-labtory/it-chain/conf"
 	"go.uber.org/fx"
 )
 
 var Module = fx.Options(
 	fx.Provide(
 		NewConfiguration,
+		NewSecConfig,
+		NewKeyPair,
+		NewNodeID,
 		NewRpcServer,
 		NewRpcClient,
 		NewPubsubServer,
@@ -42,6 +48,30 @@ var Module = fx.Options(
 
 func NewConfiguration() *conf.Configuration {
 	return conf.GetConfiguration()
+}
+
+func NewSecConfig(conf *conf.Configuration) *config.Config {
+	secConf, err := config.NewSimpleConfig(conf.Engine.SecLv)
+	if err != nil {
+		panic(err)
+	}
+	return secConf
+}
+
+//[INFO] This function is temporary, will be removed when mock certs and keys added with cert related functions
+//NewKeyPair generates key pair by configuration
+func NewKeyPair(conf *conf.Configuration, secConf *config.Config) (*heimdall.PriKey, *heimdall.PubKey) {
+	pri, pub, err := common.GenerateAndStoreKeyPair(secConf, conf.Engine.PriKeyPath)
+	if err != nil {
+		iLogger.Errorf(nil, "%s", err)
+		panic(err)
+	}
+
+	return &pri, &pub
+}
+
+func NewNodeID(config *conf.Configuration, secConf *config.Config, pubKey *heimdall.PubKey) common.NodeID {
+	return common.GetNodeID(secConf.SigAlgo, config.Engine.PriKeyPath)
 }
 
 func NewRpcServer(config *conf.Configuration) *rpc.Server {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package pbft
 import (
 	"errors"
 
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/iLogger"
 )
 
 var ErrRepresentativeDoesNotExist = errors.New("Representative does not exist")

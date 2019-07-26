@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,20 @@
 package api
 
 import (
-	"github.com/it-chain/engine/txpool"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/txpool"
 )
 
 type TransactionApi struct {
-	nodeId                string
+	nodeId                common.NodeID
 	transactionRepository txpool.TransactionRepository
 	leaderRepository      txpool.LeaderRepository
 	transferService       *txpool.TransferService
 	blockProposalService  *txpool.BlockProposalService
 }
 
-func NewTransactionApi(nodeId string, transactionRepository txpool.TransactionRepository, leaderRepository txpool.LeaderRepository, transferService *txpool.TransferService, blockProposalService *txpool.BlockProposalService) *TransactionApi {
+func NewTransactionApi(nodeId common.NodeID, transactionRepository txpool.TransactionRepository, leaderRepository txpool.LeaderRepository, transferService *txpool.TransferService, blockProposalService *txpool.BlockProposalService) *TransactionApi {
 	return &TransactionApi{
 		nodeId:                nodeId,
 		transactionRepository: transactionRepository,

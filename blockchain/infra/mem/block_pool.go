@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package mem
 import (
 	"sync"
 
+	"github.com/DE-labtory/it-chain/blockchain"
 	"github.com/gogo/protobuf/sortkeys"
-	"github.com/it-chain/engine/blockchain"
 )
 
 type BlockPool struct {

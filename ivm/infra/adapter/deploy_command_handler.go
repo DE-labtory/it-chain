@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/rabbitmq/rpc"
-	"github.com/it-chain/engine/ivm"
-	"github.com/it-chain/engine/ivm/api"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/rpc"
+	"github.com/DE-labtory/it-chain/ivm"
+	"github.com/DE-labtory/it-chain/ivm/api"
 )
 
 type DeployCommandHandler struct {
@@ -38,7 +38,7 @@ func NewDeployCommandHandler(icodeApi api.ICodeApi) *DeployCommandHandler {
 }
 
 func (d *DeployCommandHandler) HandleDeployCommand(deployCommand command.Deploy) (ivm.ICode, rpc.Error) {
-	savePath := os.Getenv("GOPATH") + "/src/github.com/it-chain/engine/.tmp/"
+	savePath := os.Getenv("GOPATH") + "/src/github.com/DE-labtory/it-chain/.tmp/"
 
 	if deployCommand.SshPath != "" {
 		icode, err := d.icodeApi.Deploy(savePath, deployCommand.Url, deployCommand.SshPath, deployCommand.Password)

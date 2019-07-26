@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/DE-labtory/iLogger"
+	"github.com/DE-labtory/it-chain/api_gateway"
+	"github.com/DE-labtory/it-chain/common"
+	"github.com/DE-labtory/it-chain/common/rabbitmq/pubsub"
+	"github.com/DE-labtory/it-chain/conf"
 	kitlog "github.com/go-kit/kit/log"
-	"github.com/it-chain/engine/api_gateway"
-	"github.com/it-chain/engine/common"
-	"github.com/it-chain/engine/common/rabbitmq/pubsub"
-	"github.com/it-chain/engine/conf"
-	"github.com/it-chain/iLogger"
 	"go.uber.org/fx"
 )
 
@@ -93,7 +93,7 @@ func NewICodeRepository() *api_gateway.LevelDbICodeRepository {
 	return api_gateway.NewLevelDbMetaRepository(icodeDB)
 }
 
-func NewPeerRepository(config *conf.Configuration) *api_gateway.PeerRepository {
+func NewPeerRepository(config *conf.Configuration, nodeId common.NodeID) *api_gateway.PeerRepository {
 
 	var role api_gateway.Role
 	if config.Engine.BootstrapNodeAddress == "" {
@@ -102,10 +102,9 @@ func NewPeerRepository(config *conf.Configuration) *api_gateway.PeerRepository {
 		role = api_gateway.Member
 	}
 
-	NodeId := common.GetNodeID(config.Engine.KeyPath, "ECDSA256")
 	peerRepository := api_gateway.NewPeerRepository()
 	peerRepository.Save(api_gateway.Peer{
-		ID:                 NodeId,
+		ID:                 nodeId,
 		Role:               role,
 		GrpcGatewayAddress: config.GrpcGateway.Address + ":" + config.GrpcGateway.Port,
 		ApiGatewayAddress:  config.ApiGateway.Address + ":" + config.ApiGateway.Port,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package txpool
+
+import "github.com/DE-labtory/it-chain/common"
 
 const SendTransactionsToLeader = "SendTransactionsToLeaderProtocol"
 
@@ -32,7 +34,7 @@ func filter(vs []Transaction, f func(Transaction) bool) []Transaction {
 	return vsf
 }
 
-func IsLeader(nodeId string, leader Leader) bool {
+func IsLeader(nodeId common.NodeID, leader Leader) bool {
 	if nodeId != leader.Id {
 		return false
 	}

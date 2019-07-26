@@ -15,16 +15,16 @@ Requirements
 
 
 
-1. Install Engine
+1. Install it-chain
 
    ```shell
-   go get github.com/it-chain/engine
+   go get github.com/DE-labtory/it-chain
    ```
 
-2. Move to engine folder
+2. Move to it-chain folder
 
    ```shell
-   cd $GOPATH/src/github.com/it-chain/engine
+   cd $GOPATH/src/github.com/DE-labtory/it-chain
    ```
 
 3. Install dependencies
@@ -33,7 +33,7 @@ Requirements
    dep ensure
    ```
 
-4. Run engine
+4. Run it-chain
 
    **Make sure to run rabbitmq and docker before run it-chain**
 

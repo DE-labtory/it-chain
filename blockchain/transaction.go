@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/it-chain/engine/common/command"
-	"github.com/it-chain/engine/common/event"
-	ygg "github.com/it-chain/yggdrasill/common"
+	"github.com/DE-labtory/it-chain/common/command"
+	"github.com/DE-labtory/it-chain/common/event"
+	ygg "github.com/DE-labtory/yggdrasill/common"
 )
 
 // Status 변수는 Transaction의 상태를 Unconfirmed, Confirmed, Unknown 중 하나로 표현함.

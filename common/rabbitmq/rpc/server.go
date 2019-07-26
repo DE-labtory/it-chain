@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/it-chain/engine/common/rabbitmq"
+	"github.com/DE-labtory/it-chain/common/rabbitmq"
 	"github.com/streadway/amqp"
 )
 

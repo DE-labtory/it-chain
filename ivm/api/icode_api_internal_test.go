@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package api
 import (
 	"testing"
 
-	"github.com/it-chain/engine/ivm"
+	"github.com/DE-labtory/it-chain/ivm"
 	"github.com/magiconair/properties/assert"
 )
 
@@ -27,7 +27,7 @@ func Test_createMetaCreatedEvent(t *testing.T) {
 
 	icode := ivm.ICode{
 		ID:             "1",
-		GitUrl:         "https://github.com/it-chain/engine",
+		GitUrl:         "https://github.com/DE-labtory/it-chain",
 		RepositoryName: "jun",
 		CommitHash:     "hduh48183",
 		Path:           "1",

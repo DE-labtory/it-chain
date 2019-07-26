@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/it-chain/engine/ivm"
-	"github.com/it-chain/engine/ivm/infra/git"
+	"github.com/DE-labtory/it-chain/ivm"
+	"github.com/DE-labtory/it-chain/ivm/infra/git"
 	"github.com/stretchr/testify/assert"
 )
 
